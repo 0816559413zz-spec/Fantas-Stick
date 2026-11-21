@@ -364,10 +364,10 @@ SGV3:280 sgClearView:281 sgFileBuild:284 sgViewBuild:290 SGVZR:310 sgBarrier:313
 §354 HUD
 sgTop:355 sgHud:357
 
-## js/28-fcs-castle.js (232) — FCS castle dressing (user 2026-11-20: keep the FCS layout, make it look like a real warm-…
-FCSC:9 fcsCastleMat:10 fcsBannerTex:34 fcsGlowTex:44 fcsCastle:46 fcsCastleTick:171
-§173 room pieces: look (js/02-room-*.js view(K,V)) — V = shared builder, m…
-fcsRoomsView:174 fcsDecoFile:176 fcsDecoKit:189 MB_STYLE:226 fileStyleScene:227
+## js/28-fcs-castle.js (242) — FCS castle dressing (user 2026-11-20: keep the FCS layout, make it look like a real warm-…
+FCSC:9 fcsCastleMat:10 fcsBannerTex:34 fcsGlowTex:44 fcsCastle:46 fcsCastleDressing:154 fcsCastleTick:175
+§177 room pieces: look (js/02-room-*.js view(K,V)) — V = shared builder, m…
+fcsRoomsView:178 fcsDecoFile:180 fcsDecoKit:195 MB_STYLE:236 fileStyleScene:237
 
 ## js/28-fcs-forest.js (259) — 
 FF:7 FF_X1:8 FF_NS:9 ffGroundTex:11 ffParts:33 fcsForest:40 ffMerge:123 ffDetail:131 fcsRuin:158 ffSkyMat:201 ffMist:229 ffMistFrame:246 fcsForestTick:248 FFC:259
@@ -889,4 +889,4 @@ _dvPanel:95 _dvBtn:98 _dvBody:100 _dvHead:100 devUiApply:102 devFreeMouse:110 de
 §130 rows
 dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:193 devUiAct:200
 
-(111 files, 32813 lines)
+(111 files, 32823 lines)

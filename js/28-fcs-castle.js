@@ -145,28 +145,32 @@ function fcsCastle(){
   for(const k in G){if(!G[k].length)continue;const geo=mergeGeometries(G[k].map(g=>g.index?g.toNonIndexed():g),false);G[k].forEach(g=>g.dispose());if(!geo)continue;
     const m=new THREE.Mesh(geo,mats[k]);m.castShadow=k!=='slit'&&k!=='lit';m.receiveShadow=true;addW(m);meshes.push(m);}
   bx.dispose();
-  // ---------- banners (red = defenders' castle) + torches + flags
+  // ---------- banners (red = defenders' castle) + torches + flags (shared with Map Builder decor: fcsCastleDressing)
+  FCSC.torch=[];fcsCastleDressing(FCSC.n,mats.wood,mats.iron);
+  FCSC.n={};
+  return {towers:towers.length,faces:faces.length,meshes:meshes.length};
+}
+// banners / flags / wall torches / post flames: n = {banner:[[x,z,b,dx,dy]], flag:[[x,y,z]], torch:[[x,z,b,dx,dy]], post:[[x,z,y]]} (world m)
+function fcsCastleDressing(n,wood,iron){const WH=FCS_WH[1],R=mulberry(434343),mats={wood,iron};
   const bt=fcsBannerTex(),bm=new THREE.MeshStandardMaterial({map:bt,side:THREE.DoubleSide,roughness:0.85});
   bm.onBeforeCompile=sh=>{sh.uniforms.uT=FCSC.uT;sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nuniform float uT;')
     .replace('#include <begin_vertex>','#include <begin_vertex>\nfloat dn=1.-uv.y;transformed.z+=sin(uT*1.6+uv.x*1.5+position.y*0.37)*0.16*dn*dn;');};
   bm.customProgramCacheKey=()=>'fcsBanner';
   const bg=new THREE.PlaneGeometry(1.5,3.8,2,8);bg.translate(0,-1.9,0);
-  for(const [x,z,b,dx,dy] of FCSC.n.banner||[]){const m=new THREE.Mesh(bg,bm);m.position.set(x+dx*0.06,b+WH-0.15,z+dy*0.06);m.rotation.y=Math.atan2(dx,dy);m.castShadow=true;addW(m);
+  for(const [x,z,b,dx,dy] of n.banner||[]){const m=new THREE.Mesh(bg,bm);m.position.set(x+dx*0.06,b+WH-0.15,z+dy*0.06);m.rotation.y=Math.atan2(dx,dy);m.castShadow=true;addW(m);
     const rod=new THREE.Mesh(sGeo(THREE.CylinderGeometry,0.05,0.05,1.8,5),mats.iron);rod.rotation.z=Math.PI/2;rod.rotation.y=Math.atan2(dx,dy)+Math.PI/2;rod.position.set(x+dx*0.1,b+WH-0.1,z+dy*0.1);addW(rod);}
   const fg=new THREE.PlaneGeometry(2.2,1.3,6,2);fg.translate(1.1,0,0);
   const fm=new THREE.MeshStandardMaterial({color:'#9a1c20',side:THREE.DoubleSide,roughness:0.8});
   fm.onBeforeCompile=sh=>{sh.uniforms.uT=FCSC.uT;sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nuniform float uT;')
     .replace('#include <begin_vertex>','#include <begin_vertex>\ntransformed.z+=sin(uT*3.+uv.x*5.)*0.4*uv.x;');};
   fm.customProgramCacheKey=()=>'fcsFlag';
-  for(const [x,y,z] of FCSC.n.flag||[]){const m=new THREE.Mesh(fg,fm);m.position.set(x,y,z);m.rotation.y=-0.6;addW(m);}
-  const gt=fcsGlowTex();FCSC.torch=[];
-  for(const [x,z,b,dx,dy] of FCSC.n.torch||[]){const s=new THREE.Mesh(sGeo(THREE.CylinderGeometry,0.07,0.05,0.6,6),mats.wood);s.position.set(x+dx*0.25,b+2.55,z+dy*0.25);s.rotation.x=dy*0.5;s.rotation.z=-dx*0.5;addW(s);
+  for(const [x,y,z] of n.flag||[]){const m=new THREE.Mesh(fg,fm);m.position.set(x,y,z);m.rotation.y=-0.6;addW(m);}
+  const gt=fcsGlowTex();
+  for(const [x,z,b,dx,dy] of n.torch||[]){const s=new THREE.Mesh(sGeo(THREE.CylinderGeometry,0.07,0.05,0.6,6),mats.wood);s.position.set(x+dx*0.25,b+2.55,z+dy*0.25);s.rotation.x=dy*0.5;s.rotation.z=-dx*0.5;addW(s);
     const fl=new THREE.Sprite(new THREE.SpriteMaterial({map:gt,color:'#ffb060',blending:THREE.AdditiveBlending,depthWrite:false,transparent:true}));
     fl.position.set(x+dx*0.42,b+3.0,z+dy*0.42);fl.scale.set(1.3,1.6,1);fl.userData.ph=R()*9;addW(fl);FCSC.torch.push(fl);}
-  for(const [x,z,y] of FCSC.n.post||[]){const fl=new THREE.Sprite(new THREE.SpriteMaterial({map:gt,color:'#ffb060',blending:THREE.AdditiveBlending,depthWrite:false,transparent:true}));
+  for(const [x,z,y] of n.post||[]){const fl=new THREE.Sprite(new THREE.SpriteMaterial({map:gt,color:'#ffb060',blending:THREE.AdditiveBlending,depthWrite:false,transparent:true}));
     fl.position.set(x,y,z);fl.scale.set(1.3,1.6,1);fl.userData.ph=R()*9;addW(fl);FCSC.torch.push(fl);}
-  FCSC.n={};
-  return {towers:towers.length,faces:faces.length,meshes:meshes.length};
 }
 function fcsCastleTick(){const t=performance.now()/1000;FCSC.uT.value=t;
   for(const f of FCSC.torch){const k=0.85+0.12*Math.sin(t*13+f.userData.ph)+0.08*Math.sin(t*23.7+f.userData.ph*2);f.scale.set(1.25*k,1.6*k,1);}}
@@ -178,7 +182,9 @@ function fcsDecoFile(list){
   for(const o of list)try{const x=tx(o.x),z=tz(o.y),y=GY(o.x,o.y)+(o.h||0),k=o.k||'stone';
     if(o.t==='box')V.box(k,x,y,z,o.sx||1,o.sy||1,o.sz||1);
     else if(o.t==='cyl')V.cyl(k,x,y,z,o.rt!=null?o.rt:(o.sx||1)/2,o.rb!=null?o.rb:(o.sx||1)/2,o.sy||1,o.seg);
-    else if(o.t==='cone')V.cone(k,x,y,z,o.r!=null?o.r:(o.sx||1)/2,o.sy||1,o.seg);
+    else if(o.t==='cone')V.cone(k,x,y,z,o.r!=null?o.r:(o.sx||1)/2,o.sy||1,o.seg,{open:o.open,ry:o.ry,ssx:o.ssx,ssz:o.ssz});
+    else if(o.t==='banner'||o.t==='torch')V[o.t](x,GY(o.x,o.y)+(o.h||0),z,Math.sin(o.a||0),Math.cos(o.a||0));
+    else if(o.t==='flag'||o.t==='post')V[o.t](x,y,z);
     else if(o.t==='roof')V.roof(x,y,z,o.sx||10,o.sz||8,o.sy||4,o.a||0);
     else if(o.t==='flame')V.light(x,y,z);
     else if(o.t==='cloth')V.cloth(x,y,z,o.sx||2,o.sy||4,o.a||0,o.c||'#7a1418');
@@ -187,7 +193,7 @@ function fcsDecoFile(list){
   D.done();
 }
 function fcsDecoKit(){
-  const G={},add=(k,g)=>(G[k]=G[k]||[]).push(g),bx=new THREE.BoxGeometry(1,1,1),lights=[],sprites=[],cloths=[];
+  const G={},add=(k,g)=>(G[k]=G[k]||[]).push(g),bx=new THREE.BoxGeometry(1,1,1),lights=[],sprites=[],cloths=[],dn={};
   const V={
     box:(k,x,y,z,sx,sy,sz)=>{const g=bx.clone();g.scale(sx,sy,sz);g.translate(x,y,z);add(k,g);},
     cyl:(k,x,y,z,rt,rb,h,seg)=>{const g=new THREE.CylinderGeometry(rt,rb,h,seg||8);g.translate(x,y,z);add(k,g);},
@@ -195,7 +201,9 @@ function fcsDecoKit(){
       const g=new THREE.ExtrudeGeometry(s,{depth:w+1.2,bevelEnabled:false});g.translate(0,0,-(w+1.2)/2);g.rotateY(Math.PI/2+rot);g.translate(cx,y,cz);add('roof',g);
       const gs=new THREE.Shape();gs.moveTo(-d/2,0);gs.lineTo(0,h-0.4);gs.lineTo(d/2,0);gs.lineTo(-d/2,0);   // stone gable ends
       for(const e of [-1,1]){const gg=new THREE.ExtrudeGeometry(gs,{depth:1.2,bevelEnabled:false}),ex=e*(w/2-0.6);gg.translate(0,0,-0.6);gg.rotateY(Math.PI/2+rot);gg.translate(cx+ex*Math.cos(rot),y,cz-ex*Math.sin(rot));add('stone',gg);}},
-    cone:(k,x,y,z,r,h,seg)=>{const g=new THREE.ConeGeometry(r,h,seg||8);g.translate(x,y,z);add(k,g);},
+    cone:(k,x,y,z,r,h,seg,o)=>{const g=new THREE.ConeGeometry(r,h,seg||8,1,!!(o&&o.open));if(o&&o.ry)g.rotateY(o.ry);if(o&&(o.ssx||o.ssz))g.scale(o.ssx||1,1,o.ssz||1);g.translate(x,y,z);add(k,g);},
+    banner:(x,b,z,dx,dy)=>(dn.banner=dn.banner||[]).push([x,z,b,dx,dy]),torch:(x,b,z,dx,dy)=>(dn.torch=dn.torch||[]).push([x,z,b,dx,dy]),
+    flag:(x,y,z)=>(dn.flag=dn.flag||[]).push([x,y,z]),post:(x,y,z)=>(dn.post=dn.post||[]).push([x,z,y]),
     light:(x,y,z)=>{sprites.push([x,y,z]);},
     cloth:(x,y,z,w,h,a,col)=>cloths.push([x,y,z,w,h,a,col]),
     shield:(x,y,z,a)=>{const g=new THREE.CylinderGeometry(0.75,0.75,0.12,14);g.rotateX(Math.PI/2);g.rotateY(a);g.translate(x,y,z);add('carpet',g);const b=new THREE.SphereGeometry(0.2,8,6);b.translate(x,y,z);add('iron',b);},
@@ -208,6 +216,7 @@ function fcsDecoKit(){
     roof:new THREE.MeshStandardMaterial({color:'#5d6470',roughness:0.75,flatShading:true,side:THREE.DoubleSide}),
     lit:new THREE.MeshStandardMaterial({color:'#2a1a0a',emissive:'#ffc77a',emissiveIntensity:0.55}),
     wood:new THREE.MeshStandardMaterial({color:'#5a3f28',roughness:0.85}),iron:new THREE.MeshStandardMaterial({color:'#2b2a2a',roughness:0.5,metalness:0.7}),
+    roof2:new THREE.MeshStandardMaterial({color:'#8c4a32',roughness:0.8,flatShading:true,side:THREE.DoubleSide}),lit2:new THREE.MeshStandardMaterial({color:'#2a1a0a',emissive:'#ffb15a',emissiveIntensity:1.6}),   // castle roofs / windows (fcsCastle)
     carpet:new THREE.MeshStandardMaterial({color:'#7a1a20',roughness:1}),floor:fcsCastleMat('f','#b4a68e',{fr:1.3,fc:1.0,moss:0.35}),slit:new THREE.MeshBasicMaterial({color:'#17120e'})};
   for(const k in G){const geo=mergeGeometries(G[k].map(g=>g.index?g.toNonIndexed():g),false);G[k].forEach(g=>g.dispose());if(!geo)continue;
     const m=new THREE.Mesh(geo,mats[k]||mats.stone);m.castShadow=k!=='lit'&&k!=='carpet'&&k!=='floor';m.receiveShadow=true;addW(m);}
@@ -220,6 +229,7 @@ function fcsDecoKit(){
     const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.rotation.y=a;o.castShadow=true;addW(o);
     const gb=new THREE.Mesh(sGeo(THREE.BoxGeometry,w+0.2,0.12,0.12),new THREE.MeshStandardMaterial({color:'#c9a24a',metalness:0.6,roughness:0.4}));gb.position.set(x,y,z);gb.rotation.y=a;addW(gb);}
   for(const [x,y,z] of lights){const L=new THREE.PointLight('#ffb36a',FCSC.pl,46,1.4);L.position.set(x,y,z);addW(L);}
+  if(Object.keys(dn).length)fcsCastleDressing(dn,mats.wood,mats.iron);
   }};
 }
 // Map Builder style presets on .glb meshes (userData.style, MAP-STANDARD §1.5): castle ashlar shader for walls/shapes, castle floor for floors

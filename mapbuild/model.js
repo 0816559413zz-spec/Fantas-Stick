@@ -64,12 +64,14 @@ export const isRP = t => t.startsWith('rp_');
 // decor drawn by the game (MAP-STANDARD round 4): the same builder the code rooms use (js/28-fcs-castle.js fcsDecoKit) — no collision,
 // not in the .glb. k = material key: stone/dark (castle ashlar), roof, lit (glowing window), wood, iron, carpet, slit (dark opening)
 // y = lift of the shape centre above the ground (roof/cloth: base/top) • rot = yaw (roof ridge, cloth/shield facing)
-export const DECO_MAT = [['stone', 'หินปราสาท'], ['dark', 'หินเข้ม'], ['roof', 'หลังคา'], ['lit', 'หน้าต่างมีไฟ'], ['wood', 'ไม้'], ['iron', 'เหล็ก'], ['carpet', 'พรมแดง'], ['slit', 'ช่องมืด'], ['floor', 'พื้นหินปราสาท']];
-export const DECO_COL = { stone: '#c2b298', dark: '#8f8270', roof: '#5d6470', lit: '#ffc77a', wood: '#5a3f28', iron: '#2b2a2a', carpet: '#7a1a20', slit: '#17120e', floor: '#b4a68e' };
+export const DECO_MAT = [['stone', 'หินปราสาท'], ['dark', 'หินเข้ม'], ['roof', 'หลังคา'], ['lit', 'หน้าต่างมีไฟ'], ['wood', 'ไม้'], ['iron', 'เหล็ก'], ['carpet', 'พรมแดง'], ['slit', 'ช่องมืด'], ['floor', 'พื้นหินปราสาท'], ['roof2', 'หลังคาแดง (ปราสาท)'], ['lit2', 'หน้าต่างไฟสว่าง (ปราสาท)']];
+export const DECO_COL = { stone: '#c2b298', dark: '#8f8270', roof: '#5d6470', lit: '#ffc77a', wood: '#5a3f28', iron: '#2b2a2a', carpet: '#7a1a20', slit: '#17120e', floor: '#b4a68e', roof2: '#8c4a32', lit2: '#ffb15a' };
 Object.assign(OBJ, {
   dc_box: { n: 'กล่องตกแต่ง', cat: 'deco', c: '#c2b298' }, dc_cyl: { n: 'ทรงกระบอกตกแต่ง', cat: 'deco', c: '#c2b298' }, dc_cone: { n: 'กรวย/ยอดหอ', cat: 'deco', c: '#5d6470' },
   dc_roof: { n: 'หลังคาจั่ว', cat: 'deco', c: '#5d6470' }, dc_flame: { n: 'เปลวไฟ (คบ/เทียน)', cat: 'deco', c: '#ffb060' }, dc_cloth: { n: 'ผ้าแขวน/ธง', cat: 'deco', c: '#7a1418' },
   dc_shield: { n: 'โล่ประดับผนัง', cat: 'deco', c: '#7a1a20' }, dc_chand: { n: 'โคมระย้า (มีแสง)', cat: 'deco', c: '#ffb36a' },
+  dc_banner: { n: 'ธงแขวนผนังปราสาท', cat: 'deco', c: '#9a1c20' }, dc_torch: { n: 'คบไฟผนัง', cat: 'deco', c: '#ffb060' },
+  dc_flag: { n: 'ธงยอดหอ', cat: 'deco', c: '#9a1c20' }, dc_post: { n: 'เปลวไฟบนเสา', cat: 'deco', c: '#ffb060' },
 });
 export const isDeco = t => t.startsWith('dc_');
 // game systems bound by tag, not by map name (MAP-STANDARD §1.7)
@@ -251,7 +253,7 @@ export function gameData(M, dim) {
     else if (o.t === 'sgA' || o.t === 'sgB') sg.sp[o.t === 'sgA' ? 'A' : 'B'][o.ph || 1] = { x: X, y: Y };
     else if (o.t === 'phase') { const q = rect(o), k = (o.ph || 1) - 1; (sg.phases[k] = sg.phases[k] || []).push({ x1: q.x0, y1: q.y0, x2: q.x1, y2: q.y1 }); }
     else if (o.t === 'ceil') ceil.push(Object.assign(rect(o), { h: r2(o.y == null ? 21 : o.y) }, o.zmax != null ? { zmax: r2(o.zmax) } : {}));
-    else if (isDeco(o.t)) deco.push(Object.assign({ t: o.t.slice(3), x: X, y: Y, h: r2(o.y || 0) }, ...['k', 'sx', 'sy', 'sz', 'rt', 'rb', 'r', 'seg', 's', 'c'].filter(q => o[q] != null).map(q => ({ [q]: o[q] })), rot ? { a: +rot.toFixed(4) } : {}));
+    else if (isDeco(o.t)) deco.push(Object.assign({ t: o.t.slice(3), x: X, y: Y, h: r2(o.y || 0) }, ...['k', 'sx', 'sy', 'sz', 'rt', 'rb', 'r', 'seg', 's', 'c', 'open', 'ry', 'ssx', 'ssz'].filter(q => o[q] != null).map(q => ({ [q]: o[q] })), rot ? { a: +rot.toFixed(4) } : {}));
     else if (isRP(o.t)) rprops.push(Object.assign({ k: o.t.slice(3), x: X, y: Y, a: +(-rot).toFixed(3) }, o.L ? { L: r1(o.L * PX) } : {}, o.y ? { z0: r2(o.y) } : {}));
     else if (o.t === 'spawn' || o.t === 'spawnR' || o.t === 'spawnB') { const s = { x: X, y: Y, a: +Math.atan2(Math.cos(rot), Math.sin(rot)).toFixed(3) }; if (o.t !== 'spawn') s.t = o.t === 'spawnR' ? 1 : 0; spawns.push(s); }
     else if (o.t === 'espawn') espawn.push({ x: X, y: Y });
@@ -334,8 +336,9 @@ export function check(M, G) {
   }
   for (const q of G.ceil) if (q.zmax == null && q.h < 20) add('warn', 'เพดานสูง ' + q.h + ' (ห้องมีหลังคาควร ≥ 20 ให้ตัวบินเล่นได้ • ใต้ชั้นลอยให้ใส่ "ใช้กับคนที่ต่ำกว่า")', [(q.x0 + q.x1) / 2 / PX, (q.y0 + q.y1) / 2 / PX]);
   if (c.lights > 12) add('warn', 'ไฟ ' + c.lights + ' ดวง (แนะนำไม่เกิน 12)');
-  if (c.obs > 2000) add('err', 'ที่ชน ' + c.obs + ' วง — หนักเกิน (ไม่ควรเกิน 2000): ลดกำแพงบางยาว ๆ หรือทำให้หนาขึ้น');
-  else if (c.obs > 1200) add('warn', 'ที่ชน ' + c.obs + ' วง (เริ่มหนัก — กำแพงยิ่งบางยิ่งใช้วงเยอะ)');
+  const obsLim = Math.max(2000, Math.round(M.W * M.H * 0.035)), obsWarn = Math.round(obsLim * 0.6);   // budget scales with map area (spatial grid keeps cost local)
+  if (c.obs > obsLim) add('err', 'ที่ชน ' + c.obs + ' วง — หนักเกิน (ไม่ควรเกิน ' + obsLim + '): ลดกำแพงบางยาว ๆ หรือทำให้หนาขึ้น');
+  else if (c.obs > obsWarn) add('warn', 'ที่ชน ' + c.obs + ' วง (เริ่มหนัก — กำแพงยิ่งบางยิ่งใช้วงเยอะ)');
   else add('ok', 'ที่ชน ' + c.obs + ' วง');
   if (c.props > 0 && M.objs.filter(o => o.t === 'pchest').length > 2) add('warn', 'หีบสมบัติเกิน 2 ใบ');
   let lo = 1e9, hi = -1e9; for (const h of M.hg) { if (h < lo) lo = h; if (h > hi) hi = h; }
@@ -379,7 +382,7 @@ export function roomExpand(M, inst, R) {
   const walls = R.walls.map(w => tag(Object.assign({}, w, { pts: w.pts.map(p => P(p[0], p[1])) }, w.base != null ? { base: +(w.base + g0).toFixed(2) } : {}), 'w'));
   const floors = R.floors.map(f => { const [x, z] = P(f.x, f.z); return tag(Object.assign({}, f, { x, z, rot: (f.rot || 0) + rot, y: +(f.y + g0).toFixed(2) }, f.y2 != null ? { y2: +(f.y2 + g0).toFixed(2) } : {}), 'f'); });
   const swap = o => (o.t === 'phase' || o.t === 'ceil' || o.t === 'dc_box') && Math.abs(s) > 0.5;   // axis-aligned boxes: swap sizes on 90°/270°
-  const objs = R.objs.map(o => { const [x, z] = P(o.x, o.z); return tag(Object.assign({}, o, { x, z, rot: o.t === 'phase' || o.t === 'ceil' || o.t === 'dc_box' ? 0 : (o.rot || 0) + rot }, swap(o) ? { sx: o.sz, sz: o.sx } : {}), 'o'); });
+  const objs = R.objs.map(o => { const [x, z] = P(o.x, o.z); return tag(Object.assign({}, o, { x, z, rot: o.t === 'phase' || o.t === 'ceil' || o.t === 'dc_box' ? 0 : (o.rot || 0) + rot }, swap(o) ? { sx: o.sz, sz: o.sx } : {}, o.t === 'dc_cone' && (o.ssx || o.ssz) && Math.abs(s) > 0.5 ? { ssx: o.ssz, ssz: o.ssx } : {}), 'o'); });
   const parts = (R.parts || []).map(p => { const [x, z] = P(p.x, p.z); return tag(Object.assign({}, p, { x, z, rot: (p.rot || 0) + rot }, p.base != null ? { base: +(p.base + g0).toFixed(2) } : {}), 'p'); });
   return { walls, floors, objs, parts };
 }

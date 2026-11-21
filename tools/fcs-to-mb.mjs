@@ -1,15 +1,11 @@
-// Converts the game's First Castle Strike map (fcs) into a Map Builder draft: maps/build/fcs-draft.json
-// Run: node tools/fcs-to-mb.mjs   → open mapbuild.html?id=fcs-draft (python tools/serve.py)
-//   Rooms are written as prefab files (maps/build/room-<id>.json) AND unpacked into fcs-draft (one file, every piece editable —
-//   user 2026-11-21). --prefab = keep them as linked room instances instead.
-// Draft only: for looking at / sketching on the real map in 3D. Siege mode still plays js/02-fcs*.js —
-// do NOT press "⬆ ส่งเข้าเกม" expecting it to replace fcs (it would become a separate map 'fcs-draft').
-// Source = the same genFcs() the game runs (js/02-fcs-data.js + rooms js/02-fcs-rooms.js + js/02-room-*.js + js/02-fcs.js),
-// so terrain, walls, fences, breakable walls/gate, trees/crates/pillars, extra forest trees/rocks, castle ruins, the L bridge,
-// room pieces (walls with door gaps + lintels, columns, gallery floors, ceilings, breakable props) and the siege markers
-// (cores, per-phase spawns, phase areas) match the game.
-// Not carried over (code-only visuals, MAP-STANDARD round 4 = style presets): castle/room look (js/28-fcs-build.js,
-// js/28-fcs-castle.js), forest ground paint / fog (js/28-fcs-forest.js), rubble piles, bridge arches.
+// Converts the game's map First Castle Strike / Cliff Side Castle (code map fcs) into ONE Map Builder file: maps/build/fcs-file.json
+// Run: node tools/fcs-to-mb.mjs   → open mapbuild.html?id=fcs-file (python tools/serve.py) • export → game map 'fcs-file' (siege)
+//   Rooms are also written as prefab files (maps/build/room-<id>.json) and unpacked into fcs-file (--prefab = keep linked instances).
+// Source = the same code the game runs: genFcs (js/02-fcs-data.js + rooms js/02-fcs-rooms.js + js/02-room-*.js + js/02-fcs.js) for
+// terrain, collision, floors, siege markers; fcsCastle (js/28-fcs-castle.js) + room view() replayed with recorders for the look
+// → game-drawn decor dc_* (castle wall bodies, battlements, towers, roofs, slits, windows, banners, torches, flags, terraces).
+// Not carried over yet: forest ground paint / zone fog (js/28-fcs-forest.js), castle floor shader on the ground, rubble piles,
+// bridge arches + eggshell shell (js/12-fcs-bridge.js) → see guides/MAP-STANDARD.md.
 import fs from 'fs';
 import vm from 'vm';
 import * as MD from '../mapbuild/model.js';
@@ -33,8 +29,8 @@ const F = OUT.fcs, T = OUT.terr, PX = MD.PX, m = v => v / PX;   // game px → m
 
 // ---------- map + terrain ----------
 const W = Math.round(m(OUT.W)), H = Math.round(m(OUT.H));
-const M = MD.newMap({ id: 'fcs-draft', name: 'FCS ร่าง (จากเกม)', W, H, surf: 3 });
-M.desc = 'ร่างจากแผนที่ First Castle Strike ในเกม (tools/fcs-to-mb.mjs) — ไว้ดู/ดราฟ ยังไม่ใช่แผนที่ที่โหมดบุกปราสาทใช้ (MAP-STANDARD รอบ 2–6)';
+const M = MD.newMap({ id: 'fcs-file', name: 'Cliff Side Castle (ไฟล์ Map Builder)', W, H, surf: 3 });
+M.desc = 'แผนที่บุกปราสาท Cliff Side Castle แปลงจากโค้ด (tools/fcs-to-mb.mjs) — ไฟล์เดียว แก้ได้ทุกจุด (MAP-STANDARD รอบ 5)';
 M.modes = ['siege']; M.sky = 'day'; M.autoProps = 0; M.random = 0; M.style = 'castle-stone'; M.fog = ['#c9d6e2', 500, 1600];   // big map: push fog out so the whole map reads
 const { nx, ny } = M;
 const tc = T.c;   // terrain lattice spacing (px)
@@ -59,8 +55,8 @@ const nid = () => id++;
 const C4 = m(CC);   // one Map Editor cell in metres (4.5)
 
 // ---------- grid walls (1 solid, 2 low cover) ----------
-const wc = (x, y) => x < 0 || y < 0 || x >= D.w || y >= D.h ? 0 : at(D.W, x, y);
-const WSTYLE = { 1: { c: '#77736c', m: 'stone' }, 2: { c: '#8a8478', m: 'stone' } };
+const wc = (x, y) => x < 0 || y < 0 || x >= D.w || y >= D.h || sb.fcsCut(x, y) ? 0 : at(D.W, x, y);   // room pieces own their rect (like genFcs)
+const WSTYLE = { 1: { c: '#77736c', m: 'stone', vis: 0 }, 2: { c: '#8a8478', m: 'stone' } };   // solid walls: look = castle decor (fcsCastle), collision here
 const used = new Set();
 for (const v of [1, 2]) {
   for (let y = 0; y < D.h; y++) for (let x = 0; x < D.w; x++) {   // horizontal runs (2+ cells)
@@ -184,12 +180,54 @@ if (B) {
   for (const [x1, y1, x2, y2] of B.par) M.walls.push({ id: nid(), pts: [[m(x1), m(y1)], [m(x2), m(y2)]], th: 0.5, h: 1.2, base: B.DH, c: '#8a8478', m: 'stone', closed: 0, curve: 0, brk: 0 });
   for (const s of B.spans.slice(1)) {   // one pier at the start of each span except the first
     const x = m(s.x1), z = m(s.y1), along = Math.abs(s.x2 - s.x1) > Math.abs(s.y2 - s.y1), g = MD.gh(M, x, z);
-    obj({ t: 'box', x, z, sx: along ? 1.6 : m(B.HW * 2), sy: Math.max(0.5, B.DH - 0.6 - g), sz: along ? m(B.HW * 2) : 1.6, c: '#77736c' });
+    obj({ col: 0, t: 'box', x, z, sx: along ? 1.6 : m(B.HW * 2), sy: Math.max(0.5, B.DH - 0.6 - g), sz: along ? m(B.HW * 2) : 1.6, c: '#77736c' });
   }
+}
+
+// ---------- bridge collision: the game's own circles (piers, corner block, ramp side walls) as collision-only cylinders ----------
+const colCyl = (o, top) => obj({ t: 'cyl', vis: 0, cs: 1, x: +m(o.x).toFixed(3), z: +m(o.y).toFixed(3), sx: +(m(o.r) * 2).toFixed(3), sz: +(m(o.r) * 2).toFixed(3), sy: +Math.max(0.2, top).toFixed(2), c: '#7d7870' });
+for (const o of OUT.obs) if (o.k === 'fbr') colCyl(o, (o.top != null ? o.top : o.hgt) - terrH(o.x, o.y));
+
+// ---------- raised terraces ('tc'): walkable top + stair ramp (floors), edge / ramp-side collision (game circles) ----------
+const flPieces = f => {   // a TERR floor grid → straight planar pieces along the axis it slopes on (flat = one piece)
+  const T2 = (i, j) => f.top[j * f.nx + i], vx = Math.abs(T2(f.nx - 1, f.ny >> 1) - T2(0, f.ny >> 1)), vz = Math.abs(T2(f.nx >> 1, f.ny - 1) - T2(f.nx >> 1, 0)), alongX = vx >= vz;
+  const N = alongX ? f.nx : f.ny, top = k => alongX ? T2(k, f.ny >> 1) : T2(f.nx >> 1, k), out = [];
+  let i0 = 0;
+  while (i0 < N - 1) { const sl = top(i0 + 1) - top(i0); let i1 = i0 + 1; while (i1 < N - 1 && Math.abs(top(i1 + 1) - top(i1) - sl) < 0.02) i1++; out.push([i0, i1, top(i0), top(i1)]); i0 = i1; }
+  return out.map(([a, b, y0, y1]) => { const x0 = m(f.x0 + (alongX ? a : 0) * tc), x1 = m(f.x0 + (alongX ? b : f.nx - 1) * tc), z0 = m(f.y0 + (alongX ? 0 : a) * tc), z1 = m(f.y0 + (alongX ? f.ny - 1 : b) * tc);
+    return alongX ? { x: (x0 + x1) / 2, z: (z0 + z1) / 2, w: z1 - z0, d: x1 - x0, rot: Math.PI / 2, y: +y0.toFixed(2), y2: +y1.toFixed(2) } : { x: (x0 + x1) / 2, z: (z0 + z1) / 2, w: x1 - x0, d: z1 - z0, rot: 0, y: +y0.toFixed(2), y2: +y1.toFixed(2) }; });
+};
+for (const f of T.fl) if (f.k === 'terr') for (const q of flPieces(f)) M.floors.push(Object.assign({ id: nid(), th: 0.6, c: '#8a8478', vis: 0 }, q));   // look = castle decor
+for (const q of F.props) if (q[0] === 'tc') { const [, X0, Y0, X1, Y1, , , , , Lp] = q, pad = Lp + 30;
+  for (const o of OUT.obs) if (o.k === 'fcr' && o.x > X0 - pad && o.x < X1 + pad && o.y > Y0 - pad && o.y < Y1 + pad) colCyl(o, o.hgt); }
+
+// ---------- castle look: replay fcsCastle (js/28-fcs-castle.js) with a recording THREE → game-drawn decor dc_* ----------
+{
+  const cs = fs.readFileSync('js/28-fcs-castle.js', 'utf8'), a = cs.indexOf('function fcsCastle(){'), b = cs.indexOf('// ---------- merge + add', a);
+  class Geo { constructor(t, a) { this.t = t; this.a = a; this.ops = []; } clone() { const g = new Geo(this.t, this.a); g.ops = this.ops.slice(); return g; } scale(...v) { this.ops.push(['s', ...v]); return this; } translate(...v) { this.ops.push(['t', ...v]); return this; } rotateY(v) { this.ops.push(['ry', v]); return this; } rotateX(v) { this.ops.push(['rx', v]); return this; } rotateZ(v) { this.ops.push(['rz', v]); return this; } dispose() { } }
+  sb.THREE = { BoxGeometry: class extends Geo { constructor(...a) { super('box', a); } }, ConeGeometry: class extends Geo { constructor(...a) { super('cone', a); } }, CylinderGeometry: class extends Geo { constructor(...a) { super('cyl', a); } } };
+  sb.GYpx = (x, y) => terrH(x, y);
+  vm.runInContext('const MAPS={fcs:OUT};const S3=1/20,FCSC={n:{}};const tx=p=>p/20,tz=p=>p/20;function GY(x,y){return GYpx(x,y);}' + cs.slice(a, b) + 'return {G,n:FCSC.n};}\nglobalThis.CASTLE=fcsCastle();', sb);
+  const KMAP = { stone: 'stone', dark: 'dark', roof: 'roof2', slit: 'slit', lit: 'lit2', wood: 'wood', iron: 'iron' }, gnd = (x, z) => terrH(x * PX, z * PX), r3 = v => +v.toFixed(3);
+  let nd = 0;
+  for (const k in sb.CASTLE.G) for (const g of sb.CASTLE.G[k]) {
+    const t = g.ops.filter(o => o[0] === 't').reduce((p, o) => [p[0] + o[1], p[1] + o[2], p[2] + o[3]], [0, 0, 0]), sc = g.ops.find(o => o[0] === 's'), ry = g.ops.find(o => o[0] === 'ry');
+    const base = { k: KMAP[k] || 'stone', x: r3(t[0]), z: r3(t[2]), y: r3(t[1] - gnd(t[0], t[2])), castle: 1 };
+    if (g.t === 'box') obj(Object.assign({ t: 'dc_box' }, base, { sx: r3(sc ? sc[1] : 1), sy: r3(sc ? sc[2] : 1), sz: r3(sc ? sc[3] : 1) }));
+    else if (g.t === 'cyl') obj(Object.assign({ t: 'dc_cyl' }, base, { rt: g.a[0], rb: g.a[1], sy: g.a[2], seg: g.a[3] || 8 }));
+    else if (g.t === 'cone') obj(Object.assign({ t: 'dc_cone' }, base, { r: r3(g.a[0]), sy: r3(g.a[1]), seg: g.a[2] || 8 }, g.a[4] ? { open: 1 } : {}, ry ? { ry: r3(ry[1]) } : {}, sc ? { ssx: r3(sc[1]), ssz: r3(sc[3]) } : {}));
+    nd++;
+  }
+  const N = sb.CASTLE.n;
+  for (const [x, z, bb, dx, dy] of N.banner || []) obj({ t: 'dc_banner', x: r3(x), z: r3(z), y: r3(bb - gnd(x, z)), rot: r3(Math.atan2(dx, dy)), castle: 1 });
+  for (const [x, z, bb, dx, dy] of N.torch || []) obj({ t: 'dc_torch', x: r3(x), z: r3(z), y: r3(bb - gnd(x, z)), rot: r3(Math.atan2(dx, dy)), castle: 1 });
+  for (const [x, y, z] of N.flag || []) obj({ t: 'dc_flag', x: r3(x), z: r3(z), y: r3(y - gnd(x, z)), castle: 1 });
+  for (const [x, z, y] of N.post || []) obj({ t: 'dc_post', x: r3(x), z: r3(z), y: r3(y - gnd(x, z)), castle: 1 });
+  console.log('castle decor', nd, 'shapes +', ['banner', 'torch', 'flag', 'post'].map(k => (N[k] || []).length).join('/'));
 }
 
 M.seq = id;
 fs.mkdirSync('maps/build', { recursive: true });
-fs.writeFileSync('maps/build/fcs-draft.json', JSON.stringify(MD.pack(M)));
+fs.writeFileSync('maps/build/fcs-file.json', JSON.stringify(MD.pack(M)));
 for (const R of roomMaps) fs.writeFileSync('maps/build/' + R.id + '.json', JSON.stringify(MD.pack(R)));
-console.log(`fcs-draft: ${W}x${H} m, grid ${nx}x${ny}, walls ${M.walls.length}, floors ${M.floors.length}, objs ${M.objs.length}, rooms ${roomMaps.map(R => R.id + ' (' + R.walls.length + ' walls, ' + R.floors.length + ' floors, ' + R.objs.length + ' objs)').join(', ')}`);
+console.log(`fcs-file: ${W}x${H} m, grid ${nx}x${ny}, walls ${M.walls.length}, floors ${M.floors.length}, objs ${M.objs.length}, rooms ${roomMaps.map(R => R.id + ' (' + R.walls.length + ' walls, ' + R.floors.length + ' floors, ' + R.objs.length + ' objs)').join(', ')}`);
