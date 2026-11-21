@@ -245,7 +245,7 @@ function damage(t,amt,srcId,kind,noFlash=false){
     t.hp-=amt;
     emit({k:'hit',x:t.x,y:t.y,h:cH(t)+vR(t)+0.4,n:Math.round(amt),nf:noFlash?1:undefined,e:t.id,s:srcId||undefined,ns:src&&src.baHit?1:undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,a:(kind==='aoe'||kind==='zone')?1:undefined});
     if(src){gainUlt(src,amt);lifesteal(src,amt);src.dmgDealt+=amt;}
-    if(t.hp<=0){t.dead=true;t.lastHit=srcId;if(src)src.kills++;emit({k:'die',x:t.x,y:t.y,h:cH(t),c:EDEF[t.type].col,t:t.type});}
+    if(t.hp<=0){t.dead=true;t.lastHit=srcId;if(src){src.kills++;darkKill(src);}emit({k:'die',x:t.x,y:t.y,h:cH(t),c:EDEF[t.type].col,t:t.type});}
     return;
   }
   if(!t.alive||t.downed)return;
@@ -301,7 +301,7 @@ function playerDown(t,srcId){
   if(G.mode==='br')emit({k:'brout',x:t.x,y:t.y});
   const k=G.players[srcId]||G.players[t.lastHit];
   if(k&&k!==t&&['ffa','tdm','quid'].includes(G.mode))t.respawn=7.5;   // กล้องตอนตาย 3+4 วิ + จอดำ แล้วค่อยเกิด (js/58)
-  if(k&&k!==t){k.kills++;if(G.mode==='tdm')G.teamScore[k.team]++;feed(`${k.name} ⚡ ${t.name}`);}
+  if(k&&k!==t){k.kills++;darkKill(k);if(G.mode==='tdm')G.teamScore[k.team]++;feed(`${k.name} ⚡ ${t.name}`);}
   else feed(`💀 ${t.name}`);
   if(G.mode==='ffa')ffaKill(k&&k!==t?k:null,t);   // ฆ่าต่อเนื่อง/ค่าหัว/แก้แค้น/assist/ขวดดรอป (js/54)
   emit({k:'die',x:t.x,y:t.y,h:t.z+1,c:t.color,id:t.id,ki:k&&k!==t?k.id:''});   // id/ki = กล้องตอนตาย (js/58)

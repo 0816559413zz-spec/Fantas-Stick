@@ -628,7 +628,11 @@ function darknessCharacter(o,p,viewer,now){
     o.darkFlowStrike=null;
   }
   const poseBA=o.darkGear.visible&&gear.visible&&!planting&&!(state?.[3]>0)&&baseClock>0;
-  o.darkScythe.liveHandPose(o,poseBA?baseClock:0,poseBA?o.darkBAFrom:null);
+  const ownAim=poseBA&&p.id===NET.myId&&Number.isFinite(INPUT.ah)&&INPUT.ax>=0;
+  const dx=ownAim?INPUT.ax-p.x:0,dy=ownAim?INPUT.ay-p.y:0;
+  const gazePitch=ownAim?clamp(Math.atan2(INPUT.ah-(p.z||0)-1.78,Math.hypot(dx,dy)*S3),-.32,.32):0;
+  const gazeYaw=ownAim?clamp(angDiff(Math.atan2(dx,dy),o.g.rotation.y),-.65,.65):0;
+  o.darkScythe.liveHandPose(o,poseBA?baseClock:0,poseBA?o.darkBAFrom:null,gazePitch,gazeYaw);
   const disc=o.darkDisc;
   if(shield>0){o.darkShieldAt=now;o.darkShieldSpin=shield;o.darkShieldPitch=state[6]||0;}
   const brake=(now-(o.darkShieldAt??-Infinity))/1000;
@@ -863,7 +867,22 @@ function darknessEfx(ev){
   if(z==='darkbahit'){
     const root=darkViewRoot(ev,'Darkness BA impact');
     const cut=stScytheHitCut(root,new THREE.Vector3(),ev.ghost);
-    darkViewTemp(root,.32,t=>cut(t,-(ev.side??(ev.ghost?1:-1))));
+    darkViewTemp(root,ev.ghost?.42:.32,t=>cut(t,-(ev.side??(ev.ghost?1:-1))));
+    if(ev.followUp){
+      const spectral=darkViewRoot(ev,'Darkness BA spectral scythe');
+      const target=PM3.get(ev.target)||EM3.get(ev.target);
+      const center=new THREE.Vector3(),ghost=stDarkBAGhost(spectral,-(ev.side??-1));
+      const height=target?spectral.position.y-target.g.getWorldPosition(center).y:0;
+      center.set(0,0,0);
+      darkViewTemp(spectral,.50,t=>{
+        if(target&&t<=.15){
+          target.g.getWorldPosition(center);
+          center.y+=height;
+          spectral.worldToLocal(center);
+        }
+        ghost(t,center);
+      });
+    }
     return true;
   }
   if(z==='darkward'){

@@ -219,9 +219,10 @@ function rigBind(o,inst){
   }).filter(Boolean);
 }
 function rigStd(o){for(const k of o.rig){if(k.al)continue;const r=k.c.rotation;r.y=0;if(k.leg)r.z=0;k.sx=r.x;k.sz=r.z;}}
-function rigSync(o,dt){
+function rigSync(o,dt,upperOnly=false){
   const qbi=o.b.getWorldQuaternion(_rq).invert();
   for(const k of o.rig){
+    if(upperOnly&&k.leg)continue;
     if(!k.al){const dev=Math.abs(k.c.rotation.x-k.sx)+Math.abs(k.c.rotation.z-k.sz);k.w=dev>0.02?Math.min(1,k.w+dt*12):Math.max(0,k.w-dt*6);}
     if(k.w>0){
       const pB=_rq2.copy(qbi).multiply(k.bone.parent.getWorldQuaternion(_rq3)).invert();

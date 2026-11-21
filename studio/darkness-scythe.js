@@ -60,14 +60,34 @@ function stScySpineOpacity(v,profile){
   return alpha;
 }
 
-function stScytheHitCut(root,base,ghost=false){const g=new THREE.Group();g.name='Scythe BA hit slash';g.position.copy(base);g.scale.setScalar(ghost?0.6:0.8);root.add(g);   // ชัดเท่ากันทั้งคู่ ต่างแค่ขนาด
+function stScytheHitCut(root,base,ghost=false){const g=new THREE.Group();g.name=ghost?'Scythe BA marked follow-up cut':'Scythe BA hit slash';g.position.copy(base);g.scale.setScalar(ghost?1.02:0.8);root.add(g);
     const sides=[-1,1].map(dir=>{const sub=new THREE.Group();g.add(sub);
-      const P=ghost?[[-0.55*dir,1.45,0.25],[0.0,0.1,0.3],[0.6*dir,-1.35,0.22]]:[[1.8*dir,0.55,0.23],[0.1*dir,0.05,0.28],[-1.85*dir,-0.4,0.21]];
-      return {sub,outer:stDarkCut(sub,P,0.26,0x101019,ghost?13:11),white:stDarkCut(sub,P,0.17,0xf7f8fc,ghost?14:12)};});
-    const cameraFacing=new THREE.Vector3(),life=.30;g.traverse(o=>{if(o.material){o.material.depthTest=false;}});   // รอยฟันลอยออกมาหน้าตัวเป้า ไม่จมเข้าตัว (ผู้ใช้ 2026-11-19)
+      const P=ghost?[[-1.05*dir,1.63,0.25],[-.22*dir,0.06,0.3],[1.36*dir,-1.39,0.22]]:[[1.8*dir,0.55,0.23],[0.1*dir,0.05,0.28],[-1.85*dir,-0.4,0.21]];
+      return {sub,outer:stDarkCut(sub,P,ghost?.32:.26,0x101019,ghost?13:11),
+        white:stDarkCut(sub,P,ghost?.12:.17,ghost?0xc9abe9:0xf7f8fc,ghost?14:12)};});
+    const cameraFacing=new THREE.Vector3(),life=ghost?.40:.30;g.traverse(o=>{if(o.material){o.material.depthTest=false;}});
     return (age,from)=>{g.visible=age>=0&&age<life;if(!g.visible)return;
       cameraFacing.copy(cam.position);root.worldToLocal(cameraFacing);cameraFacing.sub(base);cameraFacing.y=0;cameraFacing.normalize();g.position.copy(base).addScaledVector(cameraFacing,0.55+1.1*age);g.lookAt(cam.position);
       for(const sd of sides){const on=(from>0)===(sides.indexOf(sd)===1);sd.sub.visible=on;if(!on)continue;sd.outer(age,life,0.45);sd.white(age,life,0.45);}};}
+
+function stDarkBAGhost(root,side){
+  const pivot=new THREE.Group(),scythe=modelOr('dark_scythe',null);
+  pivot.scale.setScalar(1.18);pivot.add(scythe);root.add(pivot);
+  const ink=new THREE.MeshBasicMaterial({color:0x50366a,transparent:true,depthWrite:false,toneMapped:false,side:THREE.DoubleSide});
+  const bladeCenter=new THREE.Vector3(.70,2.05,0).multiplyScalar(pivot.scale.x),offset=new THREE.Vector3();
+  let dressed=false;
+  return (age,center)=>{
+    if(!dressed&&scythe.children.length){
+      dressed=true;
+      scythe.traverse(part=>{if(part.isMesh){part.material=ink;part.renderOrder=10;part.castShadow=false;}});
+    }
+    const coil=stDarkEase(0,.13,age),cut=stDarkEase(.10,.225,age),release=stDarkEase(.25,.50,age);
+    ink.opacity=.94*stDarkEase(0,.055,age)*(1-release);
+    pivot.rotation.set(lerp(-.41,.27,cut),side*lerp(-.26,.87,cut),side*lerp(-.91-.27*coil,.94,cut));
+    pivot.position.copy(center).add(offset.set(side*lerp(1.94,-1.78,cut),lerp(1.88,-.41,cut),lerp(.68,.26,cut)));
+    pivot.position.sub(offset.copy(bladeCenter).applyQuaternion(pivot.quaternion));
+  };
+}
 
 function stChargedSlashFlakes(root,bladePt,poseAt,scale,start,duration,rnd){
   const count=72,rows=7,stride=rows*2;
@@ -408,9 +428,24 @@ function stCreateScythePreview(root,args,lifetime){
       if(!caster.fa){const bn=caster.g.getObjectByName('forearm_R'),hd=caster.g.getObjectByName('hand_R');if(bn&&hd){caster.fa={bn,rest:bn.quaternion.clone()};caster.g.updateWorldMatrix(true,true);hd.attach(tipBall);}}   // ปลายคทาติดมือโมเดล (ตามศอกที่งอ)
       if(caster.fa)caster.fa.bn.quaternion.copy(caster.fa.rest).multiply(_qb.setFromAxisAngle(new THREE.Vector3(1,0,0),-H.bd));}
     return H;};
-  let liveModel,forearm,priorForearm;
-  const beforeBend=new THREE.Quaternion(),afterBend=new THREE.Quaternion();
+  let liveModel,forearm,spine,head;
+  const overlays=Array.from({length:3},()=>({bone:null,base:new THREE.Quaternion(),posed:new THREE.Quaternion()}));
+  const spineTurn=new THREE.Quaternion(),bodyWorld=new THREE.Quaternion(),boneParent=new THREE.Quaternion();
+  const headWorld=new THREE.Quaternion(),headRest=new THREE.Quaternion(),aimWorld=new THREE.Quaternion();
+  let headRestReady=false;
+  const spineEuler=new THREE.Euler(0,0,0,'YXZ');
   const limbWeights=[];
+  function resetLiveHandPose(){
+    for(const layer of overlays){
+      if(layer.bone?.quaternion.equals(layer.posed))layer.bone.quaternion.copy(layer.base);
+      layer.bone=null;
+    }
+  }
+  function saveBonePose(index,bone){
+    const layer=overlays[index];
+    layer.bone=bone;layer.base.copy(bone.quaternion);
+    return layer.posed;
+  }
   function liveBodyPose(T,side){
     const u=T-SW0,cut=WU+SWP;
     const easeIn=ez(0,.14,u);
@@ -420,51 +455,65 @@ function stCreateScythePreview(root,args,lifetime){
       drive:ez(.202,cut-.013,u)*settle,carry:ez(.285,cut+.062,u)*settle,
       brace:ez(.30,cut+.025,u)*(1-.72*ez(cut+.07,cut+.41,u))*settle};
   }
-  function liveHandPose(actor,T,previous){
-    if(priorForearm&&forearm.quaternion.equals(afterBend))forearm.quaternion.copy(beforeBend);
-    priorForearm=false;
+  function liveHandPose(actor,T,previous,aimPitch=0,aimYaw=0){
+    resetLiveHandPose();
     const u=T-SW0,handoff=previous?1-ez(.045,WU*.82,u):0;
     const current=liveBodyPose(T,args.baSide??-1);
     const old=handoff>0?liveBodyPose(previous.clock,previous.side):null;
     const mixPose=key=>lerp(current[key],old?.[key]??0,handoff);
     const weight=current.weight+(1-current.weight)*(old?.weight??0)*handoff;
-    if(weight<=0||!actor.armR)return;
-    const side=current.side,load=mixPose('load'),drive=mixPose('drive'),carry=mixPose('carry'),brace=mixPose('brace');
-    actor.b.rotation.y+=lerp(side*(-.83*current.load+.62*current.drive+.29*current.carry),
-      old?old.side*(-.83*old.load+.62*old.drive+.29*old.carry):0,handoff);
-    actor.b.rotation.x+=.13*load+.24*brace;
-    const twist=lerp(side*(.16*current.load-.22*current.carry),old?old.side*(.16*old.load-.22*old.carry):0,handoff);
-    actor.b.rotation.z+=twist;
-    const planted=clamp(1-(actor.vsp||0)/9,0,1);
-    actor.b.position.x+=twist*.80*planted;
-    actor.b.position.y-=(.12*load+.12*brace)*planted;
-    actor.b.position.z+=(-.08*load+.16*drive)*planted;
-    actor.armL.rotation.x-=.50*load+.96*drive-.28*carry;
-    actor.armL.rotation.z+=.28*load+.50*carry;
-    for(let i=0;i<2;i++){
-      const step=P=>(i===(P.side>0?0:1)?.26*P.load+.29*P.carry:-.13*P.load-.35*P.brace);
-      actor.legs[i].rotation.x+=lerp(step(current),old?step(old):0,handoff)*planted;
-      actor.legs[i].rotation.z+=(i===0?-1:1)*.10*weight*planted;
-    }
-    const H=handState(T,side,old?handState(previous.clock,previous.side):null);
-    actor.armR.quaternion.slerp(orientHand(H,actor.b.quaternion,handTurn),weight);
-    if(!actor.rig)return;
-    // This runs after locomotion sync. Apply transient offsets without changing its blend state.
-    for(const [i,limb] of actor.rig.entries()){
-      limbWeights[i]=limb.w;
-      if(!limb.al)limb.w=1;
-    }
-    rigSync(actor,0);
-    for(const [i,limb] of actor.rig.entries())limb.w=limbWeights[i];
     if(liveModel!==actor.fileModel){
       liveModel=actor.fileModel;
       forearm=liveModel?.getObjectByName('forearm_R');
+      spine=liveModel?.getObjectByName('spine');
+      head=liveModel?.getObjectByName('head');
+      headRestReady=false;
     }
+    if(head&&(weight>0||!headRestReady)){
+      actor.g.getWorldQuaternion(aimWorld);
+      head.getWorldQuaternion(headWorld);
+      if(!headRestReady){
+        headRest.copy(aimWorld).invert().multiply(headWorld);
+        headRestReady=true;
+      }
+    }
+    if(weight<=0||!actor.armR)return;
+    const side=current.side,load=mixPose('load'),drive=mixPose('drive'),carry=mixPose('carry'),brace=mixPose('brace');
+    const turn=lerp(side*(-.83*current.load+.62*current.drive+.29*current.carry),
+      old?old.side*(-.83*old.load+.62*old.drive+.29*old.carry):0,handoff);
+    const twist=lerp(side*(.16*current.load-.22*current.carry),old?old.side*(.16*old.load-.22*old.carry):0,handoff);
+    actor.armL.rotation.x-=.50*load+.96*drive-.28*carry;
+    actor.armL.rotation.z+=.28*load+.50*carry;
+    const H=handState(T,side,old?handState(previous.clock,previous.side):null);
+    actor.armR.quaternion.slerp(orientHand(H,actor.b.quaternion,handTurn),weight);
+    if(!actor.rig)return;
+    actor.b.getWorldQuaternion(bodyWorld);
+    if(spine){
+      const posed=saveBonePose(0,spine);
+      spine.parent.getWorldQuaternion(boneParent).invert().multiply(bodyWorld);
+      spineTurn.setFromEuler(spineEuler.set(.13*load+.24*brace,turn,twist));
+      spine.quaternion.premultiply(spineTurn.premultiply(boneParent).multiply(boneParent.invert()));
+      posed.copy(spine.quaternion);
+    }
+    if(head){
+      const posed=saveBonePose(1,head);
+      // Hold the gaze in aim space while the torso twists underneath it.
+      spineTurn.setFromEuler(spineEuler.set(-aimPitch,aimYaw,0));
+      headWorld.slerp(aimWorld.multiply(spineTurn).multiply(headRest),weight);
+      head.quaternion.copy(head.parent.getWorldQuaternion(boneParent).invert().multiply(headWorld));
+      posed.copy(head.quaternion);
+    }
+    // This runs after locomotion sync. Apply transient offsets without changing its blend state.
+    for(const [i,limb] of actor.rig.entries()){
+      limbWeights[i]=limb.w;
+      if(!limb.al&&!limb.leg)limb.w=1;
+    }
+    rigSync(actor,0,true);
+    for(const [i,limb] of actor.rig.entries())limb.w=limbWeights[i];
     if(forearm){
-      beforeBend.copy(forearm.quaternion);
+      const posed=saveBonePose(2,forearm);
       forearm.rotateX(-H.bd*weight);
-      afterBend.copy(forearm.quaternion);
-      priorForearm=true;
+      posed.copy(forearm.quaternion);
     }
   }
   const tipAt=(T,out)=>{poseCaster(T);
@@ -901,5 +950,5 @@ function stCreateScythePreview(root,args,lifetime){
     ink.onBeforeRender=()=>update();
     update();
   }
-  return {pivot,blade:scy,model:holder,update,liveHandPose};
+  return {pivot,blade:scy,model:holder,update,liveHandPose,resetLiveHandPose};
 }

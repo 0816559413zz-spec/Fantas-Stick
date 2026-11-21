@@ -2,7 +2,7 @@
 const DARKP=PATHS.length;
 PATHS.push({id:'darkness',n:'สายความมืด',ic:'🌑',col:'#5e4a74',
   d:'ติดตราเงาแล้วพุ่งเข้าโจมตีด้วยเคียว',
-  combo:'ติดตรา → ไล่ตาม → Night Waltz → ฟันเคียว • เป้ามีตราตายจะเข้า Flow'});
+  combo:'ติดตรา → ไล่ตาม → Night Waltz → ฟันเคียว • ฆ่าศัตรูเพื่อเข้า Flow'});
 const DARK_V={mark:8,markPrep:.58,waltzForm:.73,flow:6,dashCd:8,shieldTime:3,shieldRadius:40,shieldLock:5,shieldPrep:.45};
 const DARK_BA={range:175,powerRange:210,arc:150,near:25,height:1.25};
 const DARK_CHASE_FLOW={wind:.095,hit:.255,exit:.335,end:.72,damage:20};
@@ -77,8 +77,12 @@ function darkReveal(p){p.darkReveal=G.time+.65;}
 function darkQueue(p,delay,run){darkState(p).actions.push({at:G.time+delay,run});}
 function darkGainFlow(p){
   const d=darkState(p);
+  if(d.flow===G.time+DARK_V.flow)return;
   d.flow=G.time+DARK_V.flow;
   darkEvent(p,'darkflow');
+}
+function darkKill(p){
+  if(p?.pathIdx===DARKP&&darkAlive(p))darkGainFlow(p);
 }
 function darkTick(p,dt){
   const d=darkState(p);
@@ -91,7 +95,7 @@ function darkTick(p,dt){
   for(const [target,end] of d.marks){
     if(!darkAlive(target)){
       if(end>=G.time){
-        darkGainFlow(p);
+        if(target.lastHit!==p.id)darkGainFlow(p);
         healT(p,target.lastHit===p.id?50:25);
         darkClearCooldown(p,'darkmark');
         darkClearCooldown(p,'darkchase');
@@ -194,8 +198,9 @@ function darkBasic(p,inp,dt,setCd){
   darkQueue(p,(wind+sweep*.5**(1/2.2))/rate,()=>{
     for(const t of darkBATargets(p,origin,aim,empowered?DARK_BA.powerRange:DARK_BA.range)){
       const amount=empowered?18:12;
-      aoeHit(p,t,amount,hit=>darkEvent(p,'darkbahit',{x:hit.x,y:hit.y,h:cH(hit),target:hit.id,empowered,side}));
-      if(d.marks.has(t)&&darkAlive(t))darkQueue(p,.15,()=>{
+      aoeHit(p,t,amount,hit=>darkEvent(p,'darkbahit',{x:hit.x,y:hit.y,h:cH(hit),target:hit.id,empowered,side,
+        a:aim.a,followUp:darkAlive(hit)&&d.marks.get(hit)>G.time||undefined}));
+      if(d.marks.get(t)>G.time&&darkAlive(t))darkQueue(p,.15,()=>{
         if(darkAlive(t))aoeHit(p,t,empowered?18:13,hit=>darkEvent(p,'darkbahit',{x:hit.x,y:hit.y,h:cH(hit),target:hit.id,ghost:true,side:-side}));
       });
     }

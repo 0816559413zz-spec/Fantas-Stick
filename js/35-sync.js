@@ -207,6 +207,7 @@ function syncPlayers(P,mode,now,dt){
     g.position.set(x,o.zs,z);
     {const A=broomHead(o,p,dt);g.rotation.y=Math.atan2(Math.cos(A),Math.sin(A));}   // บิน = หันตามไม้กวาด (js/69)
     const v=localVel(o,x,z,dt,g.rotation.y);
+    o.darkScythe?.resetLiveHandPose();
     if(!p.al){const l=LGV.st.get(p.id);if(l)lgClear(l);if(o.natureWhipView)natureWhipView(o,null);if(ragTick(o,p,v,dt,now))ragHideDead(o,p,now);continue;}   // ตาย = ragdoll ค้างจนเกิดใหม่ (js/48)
     o.hitT=Math.max(0,(o.hitT||0)-dt);
     o.b.position.set(0,0,0);o.b.rotation.set(0,0,0);   // one-frame pose offsets must not build up (body drifted back / stayed tilted)
