@@ -211,6 +211,7 @@ const PRIM = {
 };
 const primGeo = {}; const pg = k => primGeo[k] || (primGeo[k] = PRIM[k]());
 const isKit = o => o.t.startsWith('kit:'), kitId = o => o.t.slice(4), isPrim = o => OBJ[o.t] && OBJ[o.t].cat === 'prim';
+const tiltOk = o => !!o && !!o.t && (isKit(o) || isPrim(o) || o.t === 'poly');   // visual objects that may tilt (rx/rz, look only: game collision stays the rot footprint)
 const isVisual = o => isKit(o) || isPrim(o);   // exported into the .glb (everything else is a marker the game fills in itself)
 function dim(o) {   // footprint for collision (model.js objCircles)
   if (isPrim(o)) { const sx = o.sx || 1, sz = o.sz || 1, round = o.t === 'cyl' || o.t === 'ball' || o.t === 'cone'; return { ex: sx / 2, ez: sz / 2, h: (o.sy || 1) * (o.t === 'ball' ? 0.84 : 1), col: o.col == null ? 1 : o.col, brk: 0, m: o.m || 'stone', cs: round ? 0.92 : 1 }; }
@@ -305,6 +306,7 @@ function objMesh(o) {
   else { g = new THREE.Group(); g.add(new THREE.Mesh(pg('box'), helpMat('#f06a6a', 0.6))); }
   const lift = o.t === 'ring' ? Math.max(1, o.y || 6) : o.t === 'light' ? (o.y == null ? 2.2 : o.y) : o.t === 'ceil' ? (o.y == null ? 21 : o.y) : (o.y || 0);
   g.position.set(o.x, MD.gh(M, o.x, o.z) + lift, o.z); g.rotation.y = o.t === 'phase' || o.t === 'ceil' || o.t === 'dc_box' ? 0 : o.rot || 0;   // areas + decor boxes are axis-aligned in the game
+  if (tiltOk(o) && (o.rx || o.rz)) g.rotation.set(o.rx || 0, o.rot || 0, o.rz || 0, 'YXZ');   // yaw first, then tilt
   if (o.vis === 0) ghostify(g);
   if (!show.area) g.traverse(m => { if (m.userData.area) m.visible = false; });
   g.userData.ref = refOfItem(o, 'obj'); g.name = 'obj_' + o.id;
@@ -673,10 +675,12 @@ function placeGizmo() {
   const k = sel.k, b = selBox && selBox.box;
   const px = k === 'wall' ? it.pts.reduce((s, p) => s + p[0], 0) / it.pts.length : it.x, pz = k === 'wall' ? it.pts.reduce((s, p) => s + p[1], 0) / it.pts.length : it.z;
   gAnchor.position.set(px, b && !b.isEmpty() ? (b.min.y + b.max.y) / 2 : MD.gh(M, px, pz), pz);
-  gAnchor.quaternion.setFromAxisAngle(THREE.Object3D.DEFAULT_UP, gmode === 'translate' || k === 'wall' || flatRot(it) ? 0 : it.rot || 0); gAnchor.scale.set(1, 1, 1);
+  const tilt = k === 'obj' && tiltOk(it) && gmode !== 'translate';
+  if (tilt) gAnchor.quaternion.setFromEuler(new THREE.Euler(it.rx || 0, it.rot || 0, it.rz || 0, 'YXZ'));
+  else gAnchor.quaternion.setFromAxisAngle(THREE.Object3D.DEFAULT_UP, gmode === 'translate' || k === 'wall' || flatRot(it) ? 0 : it.rot || 0); gAnchor.scale.set(1, 1, 1);
   const sk = gScaleKind(k, it);
   if (gmode === 'translate') { tc.showX = tc.showZ = true; tc.showY = k !== 'room'; }
-  else if (gmode === 'rotate') { tc.showX = tc.showZ = false; tc.showY = !flatRot(it); }
+  else if (gmode === 'rotate') { tc.showX = tc.showZ = tilt; tc.showY = !flatRot(it); }
   else { tc.showX = tc.showZ = !!sk && sk !== 'u' && sk !== 'cp' && sk !== 'L'; tc.showY = !!sk && sk !== 'xz' && sk !== 'L'; if (sk === 'u' || sk === 'cp' || sk === 'L') tc.showX = tc.showY = tc.showZ = true; }
   if (!tc.showX && !tc.showY && !tc.showZ) { tc.detach(); need(); return; }
   tc.setMode(gmode); tc.setSpace(gmode === 'translate' ? 'world' : 'local');
@@ -701,6 +705,8 @@ tc.addEventListener('objectChange', () => {
   } else if (gmode === 'rotate') {
     let a = yawOf(gAnchor.quaternion) - z.r0; a = Math.atan2(Math.sin(a), Math.cos(a));
     if (k === 'wall') { const cx = z.p.x, cz = z.p.z, c = Math.cos(a), sn = Math.sin(a); it.pts = s.pts.map(p => { const x = p[0] - cx, q = p[1] - cz; return [r2(cx + x * c + q * sn), r2(cz - x * sn + q * c)]; }); }
+    else if (k === 'obj' && tiltOk(it)) { const e = new THREE.Euler().setFromQuaternion(gAnchor.quaternion, 'YXZ'), w = v => { v = Math.atan2(Math.sin(v), Math.cos(v)); return Math.abs(v) < 1e-3 ? 0 : +v.toFixed(4); };
+      const r = w(e.y); it.rot = r < 0 ? +(r + 6.2832).toFixed(4) : r; it.rx = w(e.x); it.rz = w(e.z); if (!it.rx) delete it.rx; if (!it.rz) delete it.rz; }
     else { const r = ((s.rot || 0) + a) % 6.2832; it.rot = +(r < 0 ? r + 6.2832 : r).toFixed(4); }
   } else {
     const S = gAnchor.scale, f = [S.x, S.y, S.z].reduce((m, v) => Math.abs(Math.log(Math.max(v, 1e-3))) > Math.abs(Math.log(Math.max(m, 1e-3))) ? v : m, 1), sk = gScaleKind(k, it), mn = v => Math.max(0.05, v);
@@ -992,6 +998,7 @@ function renderSide() {
     else if (sel.k === 'obj') { const D = OBJ[it.t], a = isKit(it) && KIT.byId.get(kitId(it)), d = dim(it);
       box.append(section((D ? D.n : a ? a.name : it.t), true,
         fld('Position X', it, 'x'), fld('Position Z', it, 'z'), it.t === 'light' || it.t === 'ring' || MD.isDeco(it.t) ? fld('Height Above Ground', it, 'y') : fld('Height Above Ground', it, 'y', { min: 0 }), fld('Rotation (deg)', it, 'rot', { deg: 1 }),
+        tiltOk(it) ? fld('Tilt X (deg)', it, 'rx', { deg: 1, ph: '0' }) : null, tiltOk(it) ? fld('Tilt Z (deg)', it, 'rz', { deg: 1, ph: '0' }) : null,
         isKit(it) ? fld('Scale (×)', it, 's', { min: 0.05 }) : null,
         isPrim(it) || it.t === 'house' ? fld(it.t === 'house' ? 'Width (×)' : 'Width', it, 'sx', { min: 0.1 }) : null, isPrim(it) ? fld('Height', it, 'sy', { min: 0.1 }) : null, isPrim(it) || it.t === 'house' ? fld(it.t === 'house' ? 'Depth (×)' : 'Depth', it, 'sz', { min: 0.1 }) : null,
         isPrim(it) ? fld('Color', it, 'c', { type: 'color' }) : null, isPrim(it) ? fld('Emissive', it, 'glow', { type: 'checkbox' }) : null,

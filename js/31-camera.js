@@ -28,17 +28,37 @@ function placeKey(a){
   if((me.cd[i+1]||0)>0)return false;
   PLACE.slot=i;return true;
 }
+// ring + disc rebuilt every frame so they drape over the ground, upper floors and standable props (groundH) instead of one flat circle
+const PLN=96,PLR=6;
+function placeGeos(){
+  const ring=new THREE.BufferGeometry(),ri=[];for(let i=0;i<PLN;i++){const a=i*2,b=((i+1)%PLN)*2;ri.push(a,b,a+1,b,b+1,a+1);}
+  ring.setAttribute('position',new THREE.BufferAttribute(new Float32Array(PLN*6),3));ring.setIndex(ri);
+  const disc=new THREE.BufferGeometry(),di=[];for(let i=0;i<PLN;i++){const n=(i+1)%PLN;di.push(0,1+n,1+i);for(let r=1;r<PLR;r++){const a=1+(r-1)*PLN+i,b=1+(r-1)*PLN+n,c=1+r*PLN+i,d=1+r*PLN+n;di.push(a,b,c,b,d,c);}}
+  disc.setAttribute('position',new THREE.BufferAttribute(new Float32Array((1+PLR*PLN)*3),3));disc.setIndex(di);
+  for(const g of [ring,disc])g.boundingSphere=new THREE.Sphere(new THREE.Vector3(),1e5);
+  return {ring,disc};
+}
 function updatePlaceGhost(me){
   if(PLACE.slot<0||!me.al){if(PLACE.g)PLACE.g.visible=false;if(!me.al)PLACE.slot=-1;return;}
   const S=SPELL_LIST[getKit(NET.myId).ids[PLACE.slot]],D=S&&PLACE_SP[S.id];if(!D){PLACE.slot=-1;return;}
   if(!PLACE.g){const g=new THREE.Group(),m=new THREE.MeshBasicMaterial({color:hdr('#5ff0ff',1.4),transparent:true,opacity:0.85,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
-    g.add(new THREE.Mesh(_iceEdge,m));const d=new THREE.Mesh(_iceDisc,new THREE.MeshBasicMaterial({color:'#3fd8ff',transparent:true,opacity:0.12,depthWrite:false}));g.add(d);
-    for(let i=0;i<28;i++){const a=i/28*Math.PI*2,f=new THREE.Mesh(new THREE.ConeGeometry(0.035,0.12,5),m);f.position.set(Math.cos(a),0.06,Math.sin(a));f.userData.a=a;g.add(f);}
+    const G2=placeGeos();PLACE.geo=G2;g.add(new THREE.Mesh(G2.ring,m));g.add(new THREE.Mesh(G2.disc,new THREE.MeshBasicMaterial({color:'#3fd8ff',transparent:true,opacity:0.12,depthWrite:false,side:THREE.DoubleSide})));
+    g.children.forEach(c=>c.frustumCulled=false);
+    for(let i=0;i<28;i++){const a=i/28*Math.PI*2,f=new THREE.Mesh(new THREE.ConeGeometry(0.035,0.12,5),m);f.userData.a=a;g.add(f);}
     scene.add(g);PLACE.g=g;}
-  let gx=INPUT.gx,gy=INPUT.gy;if(!(gx>=0)){gx=me.x+Math.cos(yaw)*D.range*0.75;gy=me.y+Math.sin(yaw)*D.range*0.75;}
-  const dx=gx-me.x,dy=gy-me.y,d=Math.hypot(dx,dy)||1,k=Math.min(1,D.range/d);gx=me.x+dx*k;gy=me.y+dy*k;
-  const g=PLACE.g;g.visible=true;g.position.set(tx(gx),0.05+GY(gx,gy),tz(gy));g.scale.set(D.r*S3,D.r*S3*(1+0.1*Math.sin(performance.now()/150)),D.r*S3);
-  g.children.forEach(c=>{if(c.userData.a!==undefined)c.scale.y=1+0.6*Math.abs(Math.sin(performance.now()/120+c.userData.a*3));});
+  let gx=INPUT.gx,gy=INPUT.gy,hit=gx>=0;if(!hit){gx=me.x+Math.cos(yaw)*D.range*0.75;gy=me.y+Math.sin(yaw)*D.range*0.75;}
+  const dx=gx-me.x,dy=gy-me.y,d=Math.hypot(dx,dy)||1,k=Math.min(1,D.range/d);if(k<1)hit=false;gx=me.x+dx*k;gy=me.y+dy*k;
+  const g=PLACE.g,now=performance.now();g.visible=true;
+  // reference height (world): where the crosshair hit, else the caster's feet • each point = surface below that (+1 m, so it climbs kerbs and low props)
+  const ref=hit&&INPUT.gw!=null?INPUT.gw:GY(me.x,me.y)+(me.z||0);
+  const surf=(x,y)=>{const t=GY(x,y);return t+groundH(x,y,Math.max(0,ref-t+1))+0.06;};
+  const R=D.r*(1+0.04*Math.sin(now/150)),rp=PLACE.geo.ring.attributes.position.array,dp=PLACE.geo.disc.attributes.position.array;
+  for(let i=0;i<PLN;i++){const a=i/PLN*Math.PI*2,c=Math.cos(a),s=Math.sin(a);
+    for(const [j,rr] of [[0,R*0.955],[1,R]]){const x=gx+c*rr,y=gy+s*rr,o=(i*2+j)*3;rp[o]=tx(x);rp[o+1]=surf(x,y);rp[o+2]=tz(y);}
+    for(let r=1;r<=PLR;r++){const rr=R*r/PLR,x=gx+c*rr,y=gy+s*rr,o=(1+(r-1)*PLN+i)*3;dp[o]=tx(x);dp[o+1]=surf(x,y)-0.01;dp[o+2]=tz(y);}}
+  dp[0]=tx(gx);dp[1]=surf(gx,gy)-0.01;dp[2]=tz(gy);
+  PLACE.geo.ring.attributes.position.needsUpdate=true;PLACE.geo.disc.attributes.position.needsUpdate=true;
+  g.children.forEach(f=>{if(f.userData.a===undefined)return;const a=f.userData.a,x=gx+Math.cos(a)*R,y=gy+Math.sin(a)*R;f.position.set(tx(x),surf(x,y)+0.06,tz(y));f.scale.setScalar(D.r*S3);f.scale.y=D.r*S3*(1+0.6*Math.abs(Math.sin(now/120+a*3)));});
 }
 // เล็งตามเป้ากลางจอ: ยิงเส้นจากกล้องผ่านกลางจอ หาสิ่งแรกที่เส้นชน (ศัตรู/ผู้เล่น/สิ่งกีดขวาง) แล้วส่งจุดนั้นเป็นเป้า (ax/ay) + ความสูง (ah)
 // กล้องอยู่ข้างไหล่ขวา ถ้าเล็งจุดไกลตายตัว เป้าใกล้ๆ จะเบี้ยวซ้าย/สูงต่ำผิด — ต้องเล็งไปที่จุดชนจริง
@@ -80,7 +100,7 @@ function aimFromCrosshair(me,P,E){
   INPUT.ax=X*20+MW/2;INPUT.ay=Z*20+MH/2;INPUT.ah=Y-gm;   // ความสูงเล็ง นับจากพื้นใต้ตัวเรา (ระบบเกมใช้ความสูงจากพื้น)
   // จุดที่เป้ากลางจอชนพื้น (ใช้กับคาถาวางพื้น / หน้าไม้ของร่างยักษ์)
   const tgG=TERR?rayTerr(o,_aimD,0,90):1e9;
-  if(TERR&&tgG<90){INPUT.gx=(o.x+_aimD.x*tgG)*20+MW/2;INPUT.gy=(o.z+_aimD.z*tgG)*20+MH/2;}
+  INPUT.gw=null;if(TERR&&tgG<90){INPUT.gx=(o.x+_aimD.x*tgG)*20+MW/2;INPUT.gy=(o.z+_aimD.z*tgG)*20+MH/2;INPUT.gw=o.y+_aimD.y*tgG;}
   else if(!TERR&&_aimD.y<-0.01){const t=Math.min((o.y-0.05)/-_aimD.y,tw<60?tw:1e9);INPUT.gx=(o.x+_aimD.x*t)*20+MW/2;INPUT.gy=(o.z+_aimD.z*t)*20+MH/2;}else{INPUT.gx=INPUT.gy=-1;}   // จุดบนพื้น ไม่เลยผนังที่เส้นเล็งชนก่อน
 }
 let AIMZ=0,WBY=null;

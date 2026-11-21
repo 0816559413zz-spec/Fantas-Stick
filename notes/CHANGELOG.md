@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-21 Fixes: black flicker on raised walkways (Map Builder deco used the same castle material as .glb walls and was coplanar: own material copies + polygonOffset); skill placement ring now drapes over ground, upper floors and standable props instead of a flat disc; Map Builder visual objects can tilt (rx/rz, gizmo X/Z rings, Tilt X/Z fields; collision unchanged); file siege maps use a 30 px bot nav grid so bots path around pillars and cylinders.
+
 - 2026-11-21 Darkness release (protocol v105): BA lingers for about 0.9 seconds after the cut, with a brief hold before the fade. Includes the 150° BA, grounded shield, and Nightfall recovery.
 
 - 2026-11-21 Darkness: unmarked Nightfall carries the uppercut's movement and rotation into one continuous return to the live hover pose.

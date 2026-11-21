@@ -247,6 +247,6 @@ function sgFromFile(M,d,id){
   const phases=(S.phases||[]).map(L=>(L||[]).map(q=>({x1:q.x1,y1:q.y1,x2:q.x2,y2:q.y2})));
   const fences=((d.sys&&d.sys.fence)||[]).map(q=>[q[0],q[1],q[2],q[3]]);
   M.fcs={sp,cores,bw,props:[],fences,bridge:null,phases,n:Math.min(cores.length,phases.length)};
-  M.navTerr=1;M.navC=M.navC||90;
+  M.navTerr=1;M.navC=M.navC||30;   // 30 px (1.5 m): at 90 px, pillars/cylinders/fence posts fell between cell centres and bots walked into them
   return sgAttach(M);
 }

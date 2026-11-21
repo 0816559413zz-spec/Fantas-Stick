@@ -212,12 +212,14 @@ function fcsDecoKit(){
       for(let i=0;i<8;i++){const a=i/8*Math.PI*2;sprites.push([x+Math.cos(a)*2.2,y+0.35,z+Math.sin(a)*2.2,0.8]);}lights.push([x,y-0.5,z]);}
   };
   return {V,done(){
-  const mats={stone:fcsCastleMat('s','#c2b298'),dark:fcsCastleMat('d','#8f8270',{row:0.32,blk:0.9,moss:0.3}),
+  // own copies (key ~) with polygonOffset: deco tops sit coplanar with .glb walls/floors (walkways) and z-fought black
+  const mats={stone:fcsCastleMat('s~','#c2b298'),dark:fcsCastleMat('d~','#8f8270',{row:0.32,blk:0.9,moss:0.3}),
     roof:new THREE.MeshStandardMaterial({color:'#5d6470',roughness:0.75,flatShading:true,side:THREE.DoubleSide}),
     lit:new THREE.MeshStandardMaterial({color:'#2a1a0a',emissive:'#ffc77a',emissiveIntensity:0.55}),
     wood:new THREE.MeshStandardMaterial({color:'#5a3f28',roughness:0.85}),iron:new THREE.MeshStandardMaterial({color:'#2b2a2a',roughness:0.5,metalness:0.7}),
     roof2:new THREE.MeshStandardMaterial({color:'#8c4a32',roughness:0.8,flatShading:true,side:THREE.DoubleSide}),lit2:new THREE.MeshStandardMaterial({color:'#2a1a0a',emissive:'#ffb15a',emissiveIntensity:1.6}),   // castle roofs / windows (fcsCastle)
-    carpet:new THREE.MeshStandardMaterial({color:'#7a1a20',roughness:1}),floor:fcsCastleMat('f','#b4a68e',{fr:1.3,fc:1.0,moss:0.35}),slit:new THREE.MeshBasicMaterial({color:'#17120e'})};
+    carpet:new THREE.MeshStandardMaterial({color:'#7a1a20',roughness:1}),floor:fcsCastleMat('f~','#b4a68e',{fr:1.3,fc:1.0,moss:0.35}),slit:new THREE.MeshBasicMaterial({color:'#17120e'})};
+  for(const k in mats){const m=mats[k];m.polygonOffset=true;m.polygonOffsetFactor=-1;m.polygonOffsetUnits=-2;}
   for(const k in G){const geo=mergeGeometries(G[k].map(g=>g.index?g.toNonIndexed():g),false);G[k].forEach(g=>g.dispose());if(!geo)continue;
     const m=new THREE.Mesh(geo,mats[k]||mats.stone);m.castShadow=k!=='lit'&&k!=='carpet'&&k!=='floor';m.receiveShadow=true;addW(m);}
   bx.dispose();
