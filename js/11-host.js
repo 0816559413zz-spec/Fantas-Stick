@@ -306,7 +306,7 @@ function updatePlayer(p,dt,acting){
         p.dark.ultUntil=p.dark.ultBiteUntil=p.dark.ultCamUntil=0;
       }
       p.dark.waltz=null;p.dark.waltzUntil=0;
-      p.dark.actions.length=0;p.dark.dashStart=null;p.dark.chase=null;p.dark.longUntil=0;p.dark.chaseUntil=0;
+      p.dark.actions.length=0;p.dark.dashStart=null;p.dark.chase=null;p.dark.longUntil=0;p.dark.chaseUntil=0;p.dark.chaseBAUntil=0;
       if(p.pathIdx===DARKP)p.dash=0;
     }
     darkTick(p,dt);
@@ -363,7 +363,8 @@ function updatePlayer(p,dt,acting){
   const mawBrace=p.dark?.ultUntil>G.time&&p.dark.ultReleaseAt<=G.time;
   if(!canAct||p.root>0||p.dchgOn||p.cryo>0||mawBrace||p.dark?.waltzUntil>G.time){mx=my=0;}
   else if(p.fear>0){const fa=Math.atan2(p.y-p.fearY,p.x-p.fearX);mx=Math.cos(fa);my=Math.sin(fa);}
-  const spd=(p.fly?(p.wfo?W_FW.fastSpd:PLAY.fly)*p.buffs.spd:PLAY.walk*p.buffs.spd*(p.shieldOn&&p.pathIdx!==WATERP?PLAY.shSlow:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.wdr||p.wfw||p.wgs?windSpd(p):1)*(p.wsk||p.wab||p.wmsT>0?waterSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?RAIL.v.slow:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0))*(p.lgBeam?LTV.baMove:1)*(darkFlow(p)?1.25:1);
+  const shieldSlows=p.shieldOn&&p.pathIdx!==WATERP&&p.pathIdx!==DARKP;
+  const spd=(p.fly?(p.wfo?W_FW.fastSpd:PLAY.fly)*p.buffs.spd:PLAY.walk*p.buffs.spd*(shieldSlows?PLAY.shSlow:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.wdr||p.wfw||p.wgs?windSpd(p):1)*(p.wsk||p.wab||p.wmsT>0?waterSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?RAIL.v.slow:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0))*(p.lgBeam?LTV.baMove:1)*(darkFlow(p)?1.25:1);
   p.wSpd=(p.dash>0||p.slideT>0||p.slip>0||!canAct||p.root>0||p.dchgOn||p.cryo>0||p.fear>0||p.gh||p.fly)?0:Math.round(spd);   // ความเร็วเดินตอนนี้ → ลูกข่ายใช้ทำนายตัวเอง (0 = อย่าทำนาย)
   if(p.natureHook&&!canAct)p.natureHook=null;
   if(p.natureHook&&natureHookMove(p,dt)){p.wSpd=0;p.vx=p.vy=0;}

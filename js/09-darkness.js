@@ -3,8 +3,8 @@ const DARKP=PATHS.length;
 PATHS.push({id:'darkness',n:'สายความมืด',ic:'🌑',col:'#5e4a74',
   d:'ติดตราเงาแล้วพุ่งเข้าโจมตีด้วยเคียว',
   combo:'ติดตรา → ไล่ตาม → Night Waltz → ฟันเคียว • เป้ามีตราตายจะเข้า Flow'});
-const DARK_V={mark:8,markPrep:.58,waltzForm:.73,flow:6,dashCd:8,shieldTime:3,shieldRadius:50,shieldLock:5,shieldPrep:.45};
-const DARK_BA={range:175,powerRange:210,arc:120};
+const DARK_V={mark:8,markPrep:.58,waltzForm:.73,flow:6,dashCd:8,shieldTime:3,shieldRadius:40,shieldLock:5,shieldPrep:.45};
+const DARK_BA={range:175,powerRange:210,arc:150};
 const DARK_CHASE_FLOW={wind:.095,hit:.255,exit:.335,end:.72,damage:20};
 const DARK_MAW={release:.73,walkAgain:1.69,bite:1.8,cameraEnd:2.48};
 const DARK_VEIL_PULL_CLEAR=1.8;
@@ -94,9 +94,6 @@ function darkShieldTick(p,want,dt){
   d.shield=Math.min(d.shield,cap);
   if(want&&!d.shieldReady&&d.shield>0){
     if(d.shieldStart==null){d.shieldStart=G.time;darkEvent(p,'darkshield');}
-    const ground=groundH(p.x,p.y,p.z),u=clamp((G.time-d.shieldStart)/LTV.baRise,0,1);
-    p.z=ground+LTV.baFloat*u*u*u*(u*(u*6-15)+10);
-    p.vz=0;
     p.shieldOn=G.time-d.shieldStart>=DARK_V.shieldPrep;
     if(p.shieldOn){
       d.shield=Math.max(0,d.shield-dt);
@@ -152,8 +149,9 @@ function darkDash(p,inp,pr,dt,setCd){
   return true;
 }
 function darkBasic(p,inp,dt,setCd){
-  if(!inp.fire||p.cd.basic>0||p.sil>0||p.dark?.shieldStart!=null||p.dark?.veilPullUntil>G.time)return;
+  if((!inp.fire&&!(p.dark?.chaseBAUntil>G.time))||p.cd.basic>0||p.sil>0||p.dark?.shieldStart!=null||p.dark?.veilPullUntil>G.time)return;
   const d=darkState(p),empowered=d.empower>G.time;
+  d.chaseBAUntil=0;
   const side=d.baSide??-1;
   d.baSide=-side;
   d.empower=0;
@@ -216,6 +214,7 @@ const DARK_CHASE=defSpell(DARKP,{id:'darkchase',n:'Nightfall',ic:'➶',role:'mob
   cast(p,S){
     const d=darkState(p),aim=darkAim(p);
     const target=darkCone(p,aim,S.v.range,46).find(t=>d.marks.has(t));
+    d.chaseBAUntil=0;
     darkReveal(p);
     if(!target){
       p.dash=.2;p.dashSp=S.v.dash/.2;p.dashX=Math.cos(aim.a);p.dashY=Math.sin(aim.a);
@@ -360,8 +359,10 @@ function darkMoveChase(p){
   const t=G.time-at,F=chase.flow?DARK_CHASE_FLOW:DARK_CHASE_T;
   if(!chase.contact&&(!darkAlive(target)||(t>=(chase.flow?F.hit:F.arrival)&&Math.hypot(p.x-target.x,p.y-target.y)>300))){
     darkEvent(p,'darkchasecancel');
-    p.dark.chase=null;p.dark.chaseUntil=G.time;return false;
+    p.dark.chase=null;p.dark.chaseUntil=G.time;p.dark.chaseBAUntil=0;return false;
   }
+  const usableAt=chase.flow?F.exit:F.end;
+  if(p.inp?.fire&&t>=usableAt-.18)p.dark.chaseBAUntil=at+usableAt+.16;
   if(chase.flow){
     const contact=chase.contact??{x:target.x,y:target.y,h:cH(target)};
     const s=clamp((t-F.wind)/(F.hit-F.wind),0,1);

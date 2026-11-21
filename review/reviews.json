@@ -1,6 +1,51 @@
 {
- "next": 121,
+ "next": 124,
  "items": [
+  {
+   "id": 123,
+   "title": "Darkness คืนเคียวหลัง Nightfall ไม่มีตรา",
+   "text": "เคียวไหลและหมุนต่อจากแรงงัดเป็นโค้งเดียวจนถึงท่าลอยข้างตัว กด BA แทรกได้ระหว่างทาง",
+   "kind": "Animation",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_nightfall_plain_recovery_smooth_tdm.gif"
+   ]
+  },
+  {
+   "id": 122,
+   "title": "Darkness ต่อ BA หลัง Nightfall และเดินขณะบล็อก",
+   "text": "คลิก BA ช่วงท้าย Nightfall เพื่อฟันต่อทันทีที่พุ่งจบ ปล่อยไว้ให้เคียวควงคืนท่า โล่ 80 หน่วย เดินบนพื้นตามปกติ",
+   "kind": "Animation / Gameplay",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_nightfall_marked_buffered_into_ba_tdm.gif",
+    "/shots/motion_nightfall_flow_buffered_into_ba_tdm.gif",
+    "/shots/motion_nightfall_plain_recovery_tdm.gif",
+    "/shots/motion_darkness_shield_grounded_tdm.gif"
+   ]
+  },
+  {
+   "id": 121,
+   "title": "Darkness BA กวาด 150° และหางเฟดช้าลง",
+   "text": "ฟันทั้งสองฝั่งข้างละ 75° จากแนวเล็ง หางคมและหางด้ามค่อย ๆ จางหลังฟัน",
+   "kind": "Animation / Gameplay",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-21",
+   "updated": "2026-11-21",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_ba_150_tdm.gif"
+   ]
+  },
   {
    "id": 120,
    "title": "Darkness เทสต์คอมโบ Team PvP",

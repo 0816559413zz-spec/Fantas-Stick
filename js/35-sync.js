@@ -211,7 +211,7 @@ function syncPlayers(P,mode,now,dt){
     o.hitT=Math.max(0,(o.hitT||0)-dt);
     o.b.position.set(0,0,0);o.b.rotation.set(0,0,0);   // one-frame pose offsets must not build up (body drifted back / stayed tilted)
     if(o.darkGear?.visible)o.armR.rotation.y=0;   // BA wand twist is applied fresh each frame
-    const hoverPose=(!!p.lt?.[0]&&!!p.lt[4]||p.dk?.[3]>0)&&!p.fl&&!p.dn;
+    const hoverPose=!!p.lt?.[0]&&!!p.lt[4]&&!p.fl&&!p.dn;
     if(o.anim)animTick(o,{down:!!p.dn,fly:!!p.fl,sp:hoverPose||p.wn&&p.wn[5]>=1?0:v.sp,castT:o.castT,hitT:o.hitT},dt,p.id===NET.myId?1:animLod(g));
     if(!o.fileModel)updateCloth(o.cloak,v.lvx,v.lvz,v.sp*(p.fl?1.4:1),now,dt);   // มีโมเดลไฟล์ = ผ้าคลุมโค้ดซ่อนอยู่ (ผ้าจริงคือ js/49)
     o.bsp=v.sp;broomView(o,p,dt,now);o.cocoon.visible=!!p.rt;   // ไม้กวาด: เอียงเลี้ยว + อนิเมชันเรียก/เก็บ (js/69)

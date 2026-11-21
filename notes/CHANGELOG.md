@@ -1,5 +1,11 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-21 Darkness: unmarked Nightfall carries the uppercut's movement and rotation into one continuous return to the live hover pose.
+
+- 2026-11-21 Darkness: buffer a BA pressed near the end of marked or Flow Nightfall and blend into the slash as soon as the dash releases control. The shield uses an 80-unit diameter and allows normal grounded walking.
+
+- 2026-11-21 Darkness: BA now sweeps and hits across a centered 150° arc. The blade and shaft trails fade more slowly after the cut.
+
 - 2026-11-21 Map Builder Unity-style UI in English: toolbar with Hand/Move/Rotate/Scale (Q/W/E/R) and a centred Play button, Hierarchy (tree of walls, upper floors, breakable panel groups, objects by category, castle pieces, rooms; search, click to select, double-click to frame) and Tool Settings on the left, Scene with a view toolbar and a floating tool strip, Inspector on the right. All UI text and asset library names are English. Wall tool key W → K, item rotate Q/E → , and . ; right-drag + WASD flies the camera.
 
 - 2026-11-21 Map Builder gizmo: the selected item shows drag handles — move arrows (green = height), a rotate ring and size boxes along the item's own axes (panel length/height/thickness, prim sizes, floor width/length, wall spread/height, kit/castle uniform). Bar at the top right of the view or keys 1/2/3, 0 hides. One undo step per drag.

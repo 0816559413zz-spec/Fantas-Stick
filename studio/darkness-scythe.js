@@ -481,9 +481,11 @@ function stCreateScythePreview(root,args,lifetime){
           return {tk,edge:tk<=1?bladePt(tk,.45):[tipX+ttx*e,tipY+tty*e],spine:bladePt(tk,0)};
         });
         const sampleTrail=args.trailPose??baPose;
+        // Let the cast finish at full speed, then advance the trail's fade more slowly.
+        const trailTime=args.liveBA&&baActive?swing-.35*Math.max(0,swing-SW0-WU-SWP):swing;
         let trailActive=false;
         for(let j=0;j<HH;j++){
-          const sample=sampleTrail(swing-j*.014);
+          const sample=sampleTrail(trailTime-j*.014);
           const saved=trailSamples[j];
           saved.pos.copy(sample.pos);saved.QB.copy(sample.QB);
           saved.act=sample.act;saved.shaft=sample.shaft;
