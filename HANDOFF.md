@@ -1011,6 +1011,7 @@ Phase 1 (maps from Blender files) is done — `notes/systems.md` §5e. Work in t
 (Minimap done 2026-10-17.) Vents/secret passages for Voldemort, task mini-games, 3-player Voldemort mode, more bosses (basilisk), more maps (Hogsmeade, Great Hall), cosmetics, ranked/MMR, mobile controls.
 
 ## 11. Changelog
+- 2026-11-22 — **Map Builder Hierarchy groups:** user folders (`grp` on any item, `M.groups` order); Ctrl+G group / Ctrl+Shift+G ungroup, click folder = select all, double-click = rename (empty = dissolve), Inspector → Group. Editor-only, game ignores it. See guides/MAP-BUILDER.md.
 - 2026-11-22 — **Courtyard prefabs:** `tools/yard-prefabs.mjs` writes 5 open yard rooms (`maps/build/room-yard-{market,training,garden,smithy,camp}.json`) for Place → Room Prefabs; edit the script and re-run to change them.
 - 2026-11-22 — **Indoor Light Zone (Map Builder obj `lz`):** rect + Height Above Ground (roof) + strength → `data.lz` → `MAPS[id].lz`; js/28-fcs-hall.js `hallZones` (fcs* maps with no zone fall back to the Great Hall rect), mood = deepest zone, beams for windows inside any zone. Guide: MAP-BUILDER.md.
 - 2026-11-22 — **Great Hall light follows the sun:** shafts only through hall windows the map sun (-LDIR) shines into, along the real sun direction; Map Builder glass wall panels (PNL mat glass) count as windows (wide ones split into beams); 'lit' windows get a plain pale glass pane (stained glass removed, user).

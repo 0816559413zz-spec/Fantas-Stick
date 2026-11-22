@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-22 Map Builder: Hierarchy groups. Select items and press Ctrl+G to put them in a named folder at the top of the Hierarchy; click a folder to select everything in it, double-click to rename, Ctrl+Shift+G or the Inspector Group field to move items out. Groups only organise the editor and do not change the game.
 - 2026-11-22 Five courtyard prefabs for the castle yards (Map Builder → Place → Room Prefabs): Market (stalls with coloured awnings, well, carts), Training Yard (sparring ring, straw dummies, archery targets, weapon racks), Fountain Garden (fountain, paved cross paths, hedges, trees, flowers, benches), Smithy & Stable (forge shed with glowing forge and chimney, stable stalls with hay), Soldier Camp (tents around a campfire, supplies, racks). Each keeps a clear middle lane for the siege and puts cover near the edges.
 - 2026-11-22 Darkness BA: held the scythe tip longer on contact and let the shaft rock briefly around it before the follow-through.
 

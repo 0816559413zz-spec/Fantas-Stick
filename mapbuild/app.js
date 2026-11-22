@@ -415,7 +415,7 @@ const nid = () => (M.seq = (M.seq || 1) + 1);
 const snapV = v => opt.snap ? Math.round(v / opt.snap) * opt.snap : +v.toFixed(2);
 
 // ================= undo =================
-const META = ['walls', 'floors', 'objs', 'parts', 'rooms', 'name', 'desc', 'sky', 'style', 'fog', 'music', 'weather', 'fx', 'modes', 'random', 'autoProps', 'skirt', 'seq'];
+const META = ['walls', 'floors', 'objs', 'parts', 'rooms', 'groups', 'name', 'desc', 'sky', 'style', 'fog', 'music', 'weather', 'fx', 'modes', 'random', 'autoProps', 'skirt', 'seq'];
 function snap(kind) { if (kind === 'b') return { isBd: 1, bd: BD.bdClone(M.bd) }; const e = {}; if (kind !== 'o') { e.hg = M.hg.slice(); e.sf = M.sf.slice(); e.W = M.W; e.H = M.H; } if (kind !== 't') { const o = {}; for (const k of META) o[k] = M[k]; e.js = JSON.stringify(o); } return e; }
 function pushUndo(kind) { undo.push(snap(kind)); if (undo.length > 40) undo.shift(); redo = []; }
 function restore(e) {
@@ -940,8 +940,28 @@ function hName(k, it) {
   return (OBJ[it.t] ? OBJ[it.t].n : it.t) + (it.t === 'pn_wall' ? ' ' + it.id : '');
 }
 function hKeys(k, it) {   // groups that must be open to show this item
+  if (it.grp) return ['u/' + it.grp];
   if (k === 'wall') return ['walls']; if (k === 'floor') return ['floors']; if (k === 'part') return ['parts']; if (k === 'room') return ['rooms'];
   if (it.t === 'pn_wall') return ['pnl', 'pnl/' + (it.g == null || it.g === '' ? '–' : it.g)]; return ['objs', 'objs/' + catOf(it)];
+}
+// ================= user groups (Hierarchy folders): item.grp = name • M.groups = order (keeps empty groups) • editor only, the game ignores them =================
+let hRen = null;   // group name being renamed inline in the Hierarchy
+const allItems = () => Object.entries(KEYS).flatMap(([k, key]) => (M[key] || []).map(it => [k, it]));
+function grpList() { const L = (M.groups || []).slice(); for (const [, it] of allItems()) if (it.grp && !L.includes(it.grp)) L.push(it.grp); return L; }
+const grpItems = g => allItems().filter(([, it]) => it.grp === g).map(([k, it]) => ({ k, id: it.id }));
+function grpSelect(g, add) { const L = grpItems(g); if (!L.length) return; const S = add ? selAll() : []; for (const r of L) if (!S.some(q => sameRef(q, r))) S.push(r); sel = S.pop(); msel = S; renderSide(); updSel(); need(); }
+function grpSet(g, S = selAll()) {   // put the items in group g ('' = take them out of their group)
+  if (!S.length) { stat('Select something first (Shift+click to pick several)', 'warn'); return false; }
+  pushUndo('o'); for (const r of S) { const it = find(r); if (!it) continue; if (g) it.grp = g; else delete it.grp; }
+  if (g) { M.groups = grpList(); if (!M.groups.includes(g)) M.groups.push(g); hOpen.add('u/' + g); }
+  renderSide(); changed(); return true;
+}
+function grpNew() { const L = grpList(); let i = L.length + 1; while (L.includes('Group ' + i)) i++; const g = 'Group ' + i; if (grpSet(g)) { hRen = g; renderHier(); } }
+function grpRename(g, n) {   // '' = dissolve (items go back to their normal place)
+  n = (n || '').trim(); if (n === g) return; pushUndo('o');
+  for (const [, it] of allItems()) if (it.grp === g) { if (n) it.grp = n; else delete it.grp; }
+  const L = grpList().filter(x => x !== n); M.groups = n ? L.map(x => x === g ? n : x) : L.filter(x => x !== g); if (n) hOpen.add('u/' + n);
+  renderSide(); changed();
 }
 function hierSel() { const it = find(sel); if (it) for (const k of hKeys(sel.k, it)) hOpen.add(k); renderHier(); }
 function renderHier() {
@@ -960,14 +980,27 @@ function renderHier() {
   };
   box.append(el('div', { class: 'hrow root' + (sel ? '' : ' on'), style: pad(0), onclick: () => { sel = null; renderSide(); updSel(); } }, el('span', { class: 'harr' }, '◆'), M.name || M.id || 'Untitled'));
   box.append(el('div', { class: 'hrow', style: pad(1), title: 'Terrain: use the Sculpt / Paint tools • click = map settings in the Inspector', onclick: () => { sel = null; renderSide(); updSel(); } }, el('span', { class: 'hic' }, '⛰'), 'Terrain ' + M.W + ' × ' + M.H));
-  group(1, 'walls', 'Walls', M.walls.map(w => ['wall', w]));
-  group(1, 'floors', 'Upper Floors', M.floors.map(f => ['floor', f]));
+  const ug = new Map(grpList().map(g => [g, []])), ng = it => !it.grp;
+  for (const [k, it] of allItems()) if (it.grp) ug.get(it.grp).push([k, it]);
+  for (const [g, L] of ug) {   // user folders: arrow = open/close • name = select all • double-click name = rename
+    const key = 'u/' + g, hit = L.filter(([k, it]) => match(hName(k, it))); if (q && !hit.length && !match(g)) continue;
+    const open = hOpen.has(key) || (!!q && hit.length > 0), on = L.length > 0 && L.every(([k, it]) => isSel({ k, id: it.id }));
+    if (hRen === g) { const inp = el('input', { class: 'tl-in', value: g, style: 'flex:1;padding:0 4px;font-size:12px' }); let done = 0; const fin = ok => { if (done) return; done = 1; hRen = null; if (ok) grpRename(g, inp.value); else renderHier(); };
+      inp.onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') fin(1); else if (e.key === 'Escape') fin(0); }; inp.onblur = () => fin(1);
+      box.append(el('div', { class: 'hrow hgrp', style: pad(1) }, el('span', { class: 'harr' }, '▾'), inp)); setTimeout(() => { inp.focus(); inp.select(); }); }
+    else box.append(el('div', { class: 'hrow hgrp hug' + (on ? ' on' : ''), style: pad(1), title: 'Click = select the whole group (Shift = add) • double-click = rename (empty name = ungroup) • Ctrl+G = group the selection • Ctrl+Shift+G = ungroup it',
+        onclick: e => { if (e.target.classList.contains('harr')) { open ? hOpen.delete(key) : hOpen.add(key); renderHier(); return; } grpSelect(g, e.shiftKey || e.ctrlKey || e.metaKey); }, ondblclick: e => { if (e.target.classList.contains('harr')) return; hRen = g; renderHier(); } },
+      el('span', { class: 'harr' }, open ? '▾' : '▸'), el('span', { class: 'hic' }, '📁'), g, el('span', { class: 'hcnt' }, String(L.length))));
+    if (open) { let n = 0; for (const [k, it] of q ? hit : L) { if (n >= 300) break; n += leaf(2, k, it); } if (!L.length) box.append(el('div', { class: 'hrow hdim', style: pad(2) }, '(empty — select items + Ctrl+G or use Group in the Inspector)')); }
+  }
+  group(1, 'walls', 'Walls', M.walls.filter(ng).map(w => ['wall', w]));
+  group(1, 'floors', 'Upper Floors', M.floors.filter(ng).map(f => ['floor', f]));
   const pg = new Map(), oc = new Map();
-  for (const o of M.objs) { if (o.t === 'pn_wall') { const g = o.g == null || o.g === '' ? '–' : o.g; if (!pg.has(g)) pg.set(g, []); pg.get(g).push(['obj', o]); } else { const c = catOf(o); if (!oc.has(c)) oc.set(c, []); oc.get(c).push(['obj', o]); } }
+  for (const o of M.objs) { if (o.grp) continue; if (o.t === 'pn_wall') { const g = o.g == null || o.g === '' ? '–' : o.g; if (!pg.has(g)) pg.set(g, []); pg.get(g).push(['obj', o]); } else { const c = catOf(o); if (!oc.has(c)) oc.set(c, []); oc.get(c).push(['obj', o]); } }
   group(1, 'pnl', 'Breakable Panels', [], [...pg].sort((a, b) => String(a[0]).localeCompare(String(b[0]))).map(([g, L]) => [g, 'Group ' + g, L]));
   group(1, 'objs', 'Objects', [], [...oc].map(([c, L]) => [c, catName(c), L]));
-  group(1, 'parts', 'Castle', M.parts.map(p => ['part', p]));
-  group(1, 'rooms', 'Rooms', (M.rooms || []).map(r => ['room', r]));
+  group(1, 'parts', 'Castle', M.parts.filter(ng).map(p => ['part', p]));
+  group(1, 'rooms', 'Rooms', (M.rooms || []).filter(ng).map(r => ['room', r]));
   box.scrollTop = top; const on = box.querySelector('.hrow.on:not(.root)'); if (on && (on.offsetTop < box.scrollTop || on.offsetTop > box.scrollTop + box.clientHeight - 20)) on.scrollIntoView({ block: 'nearest' });
 }
 
@@ -981,6 +1014,7 @@ addEventListener('keydown', e => {
   if ((e.ctrlKey || e.metaKey) && k === 'z') { e.preventDefault(); e.shiftKey ? doRedo() : doUndo(); return; }
   if ((e.ctrlKey || e.metaKey) && k === 'y') { e.preventDefault(); doRedo(); return; }
   if ((e.ctrlKey || e.metaKey) && k === 'd') { e.preventDefault(); dupSel(); return; }
+  if ((e.ctrlKey || e.metaKey) && k === 'g') { e.preventDefault(); if (e.shiftKey) grpSet(''); else grpNew(); return; }   // group / ungroup the selection
   if (e.ctrlKey || e.metaKey) return;
   if (k === 'q' || k === 'w' || k === 'e' || k === 'r' || (k === 't' && !e.shiftKey)) { setGizmo({ q: 'hand', w: 'translate', e: 'rotate', r: 'scale', t: 'resize' }[k]); return; }   // Unity transform tools
   const T = TOOLS.find(t => t[3] === k); if (T) { setTool(T[0]); return; }
@@ -1266,6 +1300,11 @@ function renderSide() {
       el('div', { class: 'seg' }, el('button', { class: 'tl-btn', title: 'Bring the start end down to touch the ground there', onclick: () => editSel(f => { const c = MD.floorCorners(f); f.y = +MD.gh(M, (c[0][0] + c[1][0]) / 2, (c[0][1] + c[1][1]) / 2).toFixed(2); }) }, 'Start Touches Ground'), el('button', { class: 'tl-btn', onclick: () => editSel(f => { f.y2 = f.y; }) }, 'Make Level')),
       el('p', { class: 'note' }, 'Clearance below ' + (Math.min(it.y, it.y2 == null ? it.y : it.y2) - (it.th || 0.4) - MD.gh(M, it.x, it.z)).toFixed(1) + ' (need ≥ 2.8 to walk under)'), btns));
   }
+  if (it) { const S = selAll(), dl = el('datalist', { id: 'grpdl' }, ...grpList().map(g => el('option', { value: g }))), cur = it.grp || '';
+    const inp = el('input', { class: 'tl-in', value: cur, placeholder: '(none)', onchange: e => grpSet(e.target.value.trim(), S) }); inp.setAttribute('list', 'grpdl');
+    box.append(section('Group' + (S.length > 1 ? ' — ' + S.length + ' selected' : ''), true, el('div', { class: 'row' }, el('label', null, 'Hierarchy group'), inp, dl),
+      el('div', { class: 'seg' }, el('button', { class: 'tl-btn', title: 'Ctrl+G', onclick: grpNew }, 'New Group'), cur ? el('button', { class: 'tl-btn', title: 'Ctrl+Shift+G', onclick: () => grpSet('', S) }, 'Ungroup') : null, cur ? el('button', { class: 'tl-btn', onclick: () => grpSelect(cur) }, 'Select Group') : null),
+      el('p', { class: 'note' }, 'Folders in the Hierarchy only (the game ignores them) • type a name to move the selection into that group'))); }
   const mset = (k, o) => fld(o.label, M, k, Object.assign({ after: () => { applySky(); changed(); renderList(); } }, o));
   box.append(section('Map', !it,
     mset('name', { label: 'Name', type: 'text' }), mset('desc', { label: 'Description', type: 'text' }),
