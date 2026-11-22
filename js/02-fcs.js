@@ -224,7 +224,7 @@ function sgClamp(o,r,A){
   return o.x!==x||o.y!==y;
 }
 function sgInArea(x,y,ph){return sgArea(ph).rects.some(q=>x>=q.x1&&x<=q.x2&&y>=q.y1&&y<=q.y2);}
-MAPS.fcs=Object.assign({name:'🏰 Cliff Side Castle',d:'แผนที่โหมดบุกปราสาท (แบบ Basic) — บุก 3 เฟส ทำลายแกนทีละจุด',build:'fcs',only:'siege',navTerr:1,navC:FCS_C},genFcs());
+MAPS.fcs=Object.assign({name:'🏰 Cliff Side Castle (แบบเก่า)',d:'แผนที่โหมดบุกปราสาท (แบบ Basic) — บุก 3 เฟส ทำลายแกนทีละจุด',build:'fcs',only:'siege',navTerr:1,navC:FCS_C},genFcs());
 // play area per phase + spawns of the current phase (teamPts / placeAll / respawn use them through fmap) • t 0 = attackers 1 = defenders
 function sgAttach(M){
   M.areas={get siege(){return SGTR>0&&SGPH>1?sgAreaT(SGPH):sgArea(SGPH);}};

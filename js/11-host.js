@@ -119,7 +119,7 @@ function hostStart(){
   const sgOk=id=>!!(id&&MAPS[id]&&MAPS[id].fcs&&mapOkFor(id,'siege'));   // siege-capable: code fcs or a Map Builder map with data.siege
   if(PLAYMAP&&MAPS[PLAYMAP]&&(G.mode!=='siege'||sgOk(PLAYMAP)))G.map=PLAYMAP;   // ทดลองเล่นจาก Map Builder (ห้องฝึกก็ใช้แผนที่นี้)
   else if(G.mode==='siege'&&sgOk(G.mapPick))G.map=G.mapPick;   // siege on a picked Map Builder siege map
-  else if(MD.map&&(G.mode==='siege'||!(G.mode!=='train'&&MAPS[G.mapPick]&&MAPS[G.mapPick].allModes)))G.map=MD.map;   // บุกปราสาท = แผนที่ของโหมดเสมอ   // โหมดที่มีแผนที่ประจำ: เลือกแผนที่ allModes (เมือง) แทนได้
+  else if(MD.map&&(G.mode==='siege'||!(G.mode!=='train'&&MAPS[G.mapPick]&&MAPS[G.mapPick].allModes)))G.map=G.mode==='siege'&&sgOk(MD.mapF)?MD.mapF:MD.map;   // siege: Map Builder castle (fcs-file, MAP-STANDARD round 6) when loaded, else code fcs • บุกปราสาท = แผนที่ของโหมดเสมอ   // โหมดที่มีแผนที่ประจำ: เลือกแผนที่ allModes (เมือง) แทนได้
   else if(G.mapPick&&MAPS[G.mapPick]&&!MAP_OFF.has(G.mapPick))G.map=G.mapPick;
   else{let ks=RANDOM_MAPS.filter(k=>k!==G.lastMap&&MAPS[k]&&mapOkFor(k,G.mode));if(!ks.length)ks=['castle'];G.map=ks[Math.floor(Math.random()*ks.length)];}
   G.lastMap=G.map;
