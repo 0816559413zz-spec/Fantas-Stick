@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-22 Five courtyard prefabs for the castle yards (Map Builder → Place → Room Prefabs): Market (stalls with coloured awnings, well, carts), Training Yard (sparring ring, straw dummies, archery targets, weapon racks), Fountain Garden (fountain, paved cross paths, hedges, trees, flowers, benches), Smithy & Stable (forge shed with glowing forge and chimney, stable stalls with hay), Soldier Camp (tents around a campfire, supplies, racks). Each keeps a clear middle lane for the siege and puts cover near the edges.
 - 2026-11-22 Darkness BA: held the scythe tip longer on contact and let the shaft rock briefly around it before the follow-through.
 
 - 2026-11-22 Melee contact: held the weapon pose for the first 42 ms, let the blade creep before release, and added local hit audio on confirmed contact. The standard resistance beat lasts 140 ms and the Frost weapon completes its visual follow-through.

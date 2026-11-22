@@ -78,6 +78,7 @@ Tool: ศูนย์รวม Tool → **Map Builder** • โค้ด: `mapbu
 - โค้ด: `model.js` `roomExpand` / `flatRooms` / `withRooms` (ส่งออก = แผนที่ + ห้องที่แตกแล้ว ใช้ท่อเดิม) • `app.js` `loadRooms` (`/api/mb?id=room-…`), `RX` = ของในห้องที่แตกแล้ว
 - **เกม:** `rprops` → ที่ชน + กลุ่มพังได้ (`roomsFromFile` js/02-fcs-rooms.js, ต่อท้าย `fm.brk`) + หน้าตาจริง (`fcsPropsBuild` js/28-fcs-props.js) • `sys.stonewall` (แนวตรงแกน X/Z) → รอยแตก/ไหม้เมื่อโดนสกิล (`roomWallEnv`) • เพดาน `ceil`
 - ตัวอย่าง: `node tools/fcs-to-mb.mjs` เขียน `room-greathall` (ห้องโถงใหญ่จากโค้ด) + วางใน `fcs-file` • `node tools/room-sample.mjs` → `room-demo` (ห้องโถงกลางทุ่ง ส่งเข้าเกมแล้ว: `index.html?nosw&playmap=room-demo`)
+- **ลานสำเร็จ 5 แบบ** (`node tools/yard-prefabs.mjs`, 2026-11-22): `room-yard-market` ตลาด • `room-yard-training` ลานฝึก • `room-yard-garden` สวนน้ำพุ • `room-yard-smithy` โรงตีเหล็ก+คอกม้า • `room-yard-camp` ค่ายทหาร — ไม่มีกำแพง วางในลานที่มีกำแพงแล้ว ทางกลางโล่งไว้ให้บุก ของกำบังอยู่ริม
 - ยังไม่มี: หน้าตาห้องแบบเกม (พรม ธง เตาผิง หลังคา พื้นหิน = รอบ 4 สไตล์), ประตูเป็นจุดต่อ/ดูดติดกัน, สีพื้นของห้องไม่ถูกทาลงพื้นแผนที่
 
 ## แผนที่ไฟล์เดียว + หน้าตาแบบเกม — MAP-STANDARD รอบ 4 (2026-11-21)
