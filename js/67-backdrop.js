@@ -87,6 +87,7 @@ function bdTree(kind){const parts=[],put=(geo,col,y)=>{geo=geo.toNonIndexed();ge
   for(const q of parts){P.set(q.attributes.position.array,o*3);C.set(q.attributes.color.array,o*3);o+=q.attributes.position.count;q.dispose();}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('color',new THREE.BufferAttribute(C,3));g.computeVertexNormals();return g;}
 function buildBackdrop(id){const B=BACKDROP&&BACKDROP[id];if(!B)return;
+  if(B.coast){const cg=bdCoast(id,B);world.add(cg);return cg;}   // sea cliffs (js/67-coast)
   const g=new THREE.Group();g.name='backdrop';const hx=MW/2*S3+20,hz=MH/2*S3+17,sd=B.seed||1,low=QUAL.mode==='low';
   const L2=new THREE.Vector2(LDIR.x,LDIR.z).normalize(),C=k=>new THREE.Color(k);
   // 1) เนินใกล้: ต่อจากขอบพื้น สูงขึ้นเรื่อย ๆ ไปข้างนอก (แสงจริง + หมอกฉาก → เข้ากับแผนที่)

@@ -247,8 +247,8 @@ function ffMistFrame(){if(FF.mist)FF.mist.visible=FF.mistW===world&&!!world.pare
 // หมอก/แสงเฉพาะในป่า: ผสมตามตำแหน่งกล้อง (เรียกทุกเฟรมจาก sgSync)
 function fcsForestTick(){
   const cx=(cam.position.x/S3+MW/2)/FCS_C,k=1-clamp((cx-(FF_X1-8))/9,0,1);
-  if(FF.sky){const U=FF.sky.material.uniforms;U.uK.value=k*k*(3-2*k);U.uT.value=performance.now()/1000;if(scene.fog)U.uFog.value.copy(scene.fog.color);
-    U.uSun.value.copy(SKYB.sun).normalize();FF.sky.position.copy(cam.position);if(SKY.day)SKY.sun.visible=k<0.6;}
+  if(FF.sky){const U=FF.sky.material.uniforms;U.uK.value=FF.ovc?1:k*k*(3-2*k);U.uT.value=performance.now()/1000;if(scene.fog)U.uFog.value.copy(scene.fog.color);   // FF.ovc = whole map overcast (js/67-coast)
+    U.uSun.value.copy(SKYB.sun).normalize();FF.sky.position.copy(cam.position);if(SKY.day)SKY.sun.visible=k<0.6&&!FF.ovc;}
   if(k<=0.001){if(FF.on&&FF.base){const B=FF.base;scene.fog.color.copy(B.fc);scene.fog.near=B.fn;scene.fog.far=B.ff;hemi.color.copy(B.hc);hemi.groundColor.copy(B.hg);hemi.intensity=B.hi;moonL.color.copy(B.mc);moonL.intensity=B.mi;}FF.on=false;FF.base=null;return;}
   if(!FF.base)FF.base={fc:scene.fog.color.clone(),fn:scene.fog.near,ff:scene.fog.far,hc:hemi.color.clone(),hg:hemi.groundColor.clone(),hi:hemi.intensity,mc:moonL.color.clone(),mi:moonL.intensity};
   FF.on=true;const B=FF.base,s=k*k*(3-2*k);

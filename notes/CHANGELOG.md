@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-22 Cliff Side Castle backdrop: the castle now sits on a headland with 40 m sea cliffs (rock strata, grass lip, boulders at the foot), sea stacks, far cliff headlands and fields to the west behind the attackers. The sea moves (swells, foam breaking on the rocks, whitecaps) and fades into an overcast grey sky and fog. New `js/67-coast.js`; a backdrop entry can now give `coast` (shape) and `look` (sky/fog/light), applied by `backdropLook` each time the map is built.
+
 - 2026-11-22 Performance round 3: Nature Thorn Line draws its 48 spikes as one tube mesh + one thorn set (`TubeSet` js/68-nature-fx): render calls in a Thorn Line frame 281 -> 93, same picture. Objects sharing a material that is still compiling now wait with the first one (js/51 `SHR.sib`) instead of drawing and blocking.
 
 - 2026-11-22 Darkness: Night Waltz and marked or Flow Nightfall block damage during their orb form. The normal launch and body-form portions stay vulnerable.

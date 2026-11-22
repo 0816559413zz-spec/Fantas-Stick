@@ -33,6 +33,7 @@ function buildWorld(id){
     batchStatic(world,new Set([RUNE,CRYSTAL,SNITCH,FIREFLIES&&FIREFLIES.pts,...CANDLES.map(c=>c.g),...BANNERS.map(b=>b.m)].filter(Boolean)));
     setTimeout(prewarmShaders,0);
   }
+  if(typeof backdropLook==='function')backdropLook(id);   // per-map sky/fog/light from BACKDROP[id].look (js/67-coast) — cached maps too
   gl.shadowMap.needsUpdate=true;
   const ext=Math.max(MW,MH)*S3/2+12;
   Object.assign(moonL.shadow.camera,{left:-ext,right:ext,top:ext,bottom:-ext,near:1,far:400});
