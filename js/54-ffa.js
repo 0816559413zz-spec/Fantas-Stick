@@ -17,7 +17,7 @@ function ffaInit(){
 // แท่นขวดเลือด: กลางแผนที่ (ใหญ่) + 4 มุม (ขยับเข้าหากลางทีละนิดจนไม่ชนกำแพง/สิ่งของ) • เริ่มเกมมีขวดพร้อมทุกแท่น
 // ที่ว่างพอวางแท่น: ไม่ทับสิ่งกีดขวาง/ของ (เช็กระยะเอง — collideWorld ข้ามจุดที่ตรงกลางวัตถุพอดี) + ไม่ถูกดันออก (กำแพง/บ้าน)
 function potSpotOk(x,y){const r=40;
-  if(OBS.some(c=>c.bi===undefined&&Math.hypot(x-c.x,y-c.y)<c.r+r))return false;
+  if(OBS.some(c=>c.bi===undefined&&Math.sqrt(obsD2(c,x,y))<c.r+r))return false;
   if(PROPON&&PROPS.some(c=>c.st!==1&&Math.hypot(x-c.x,y-c.y)<c.r+r))return false;
   const pr={x:x+0.3,y:y+0.3,z:0};try{collideWorld(pr,r,0);}catch(e){}return Math.hypot(pr.x-x-0.3,pr.y-y-0.3)<=2;}
 function potSpots(){

@@ -206,12 +206,12 @@ G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 fr
 §222 ลูปหลักฝั่งโฮสต์
 hostTick:223 angDiff:240 cH:242 vR:243 updatePlayer:245 hitProp:448 damagePropsIn:455 nearUseProp:456 useProp:457
 
-## js/12-buildings.js (435) — environment damage / rays / collision shared by breakable things
+## js/12-buildings.js (441) — environment damage / rays / collision shared by breakable things
 BLDON:4 bldMoundH:5 damageEnv:7 bldRay:16 aimClip:21 aimLineH:29 aimRay3:30 projEl:57 bldPush:62 updateBldg:68
 §69 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
 BRKDEF:73 BRK_M:73 BRK_MCOL:73 BRK:74 genBrk:75 brkApply:82 brkStage:87 hitBrk:88 damageBrkIn:96 brkSnap:102 brkParse:103
 §104 ตารางช่อง (spatial grid) สำหรับแมพใหญ่: หาเฉพาะของใกล้ ๆ แทนวนทุกชิ้น…
-SG:107 sgObs:108 sgProps:108 sgGrid:109 sgNear:116 _sgCR:121 _sgCW:121 _sgCB:121 _sgCO:121 _sgPO:121 _sgPB:121 _sgPP:121 _sgM:121 _sgE:121 _sgA:121 _cwLast:123 collideWorld:124 shoot:164 eShoot:192 foesOf:199 breakShield:207 ULT_RATE:214 ultActive:215 gainUlt:216 lifesteal:217 impactProjectile:219 damage:220 playerDown:293 killProj:316 explode:327 hitTarget:339 hitProjectileTarget:343 updateProjectiles:360 projStep:368
+SG:107 OCX:109 OCY:109 obsD2:110 obsEach:111 obsBox:112 sgObs:113 sgProps:113 sgGrid:114 sgNear:121 _sgCR:126 _sgCW:126 _sgCB:126 _sgCO:126 _sgPO:126 _sgPB:126 _sgPP:126 _sgM:126 _sgE:126 _sgA:126 _cwLast:128 collideWorld:129 shoot:170 eShoot:198 foesOf:205 breakShield:213 ULT_RATE:220 ultActive:221 gainUlt:222 lifesteal:223 impactProjectile:225 damage:226 playerDown:299 killProj:322 explode:333 hitTarget:345 hitProjectileTarget:349 updateProjectiles:366 projStep:374
 
 ## js/12-city-dmg.js (270) — เมืองพังได้ (designs/city-bot-battle.md ขั้น 4) — ข้อมูลที่ทุกเครื่อง…
 CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:16 cityOn:17 cityLayout:19 cityReset:29 cityApplyBox:45 cityApplyItem:46 cityHex:47 cityMark:48 cityRampSync:49 cityPanelAt:51 cityHitPanel:56 cityTowerStart:70 cityTowerStrip:76 cityTowerFall:80 cityHitItem:91 cityHitObs:100 _sgCD:105 cityDamageIn:107 cityTick:118 _sgCM:129 cityMoundH:130 cityMounds:140
@@ -245,7 +245,7 @@ showName:208 showBot:209 stillBot:210 trShowCmd:225 aiBot:249 trBotCmd:325
 §334 บอทในห้องรอ (ผู้ใช้ 2026-10-31 "สร้างห้องเล่นกับบอทได้")
 BOT_MODES:338 lobbyBots:339 lobbyBotAdd:340 lobbyBotFill:349 lobbyBotCmd:354 lobbyBotsStart:359 botDebug:361
 
-## js/15-botnav.js (156) — บอทหาทาง (designs/city-bot-battle.md ขั้น 5) — ฝั่งโฮสต์ • เปิดเฉพาะแมพที่มีของขวางเยอะ (…
+## js/15-botnav.js (156) — 
 NAV_MAPS:14 NAV_EYE:14 NAV:15 navOn:17 navSig:18 navEnsure:26 navBuild:32 navCell:55 navWalk:56 navRay:58 navFree:63 NAV_BRK:70 navBrkPen:71 navPath:79 _navFoe:97 botThink:100 botNav:110
 
 ## js/15-botplay.js (324) — 
@@ -623,7 +623,7 @@ ESM:935 eSmooth:936 ESF:939 eShieldFx:940 eChips:945 eShieldSegs:948 eShieldNum:
 ## js/48-ragdoll.js (409) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 _ragFw:41 ragBones:42 ragBasis:49 ragTargets:57 ragStart:63 ragBack:96 ragFloor:97 ragStep:98 ragPose:163 ragWrite:178 ragRestore:190 ragEnd:194 ragTick:196 ragHideDead:240 clearDeathFades:249 deathSlashSplit:257 deathDissolve:310 deathVisualSync:385
 
-## js/49-cloth.js (188) — ผ้าคลุมจริง (cloth sim) — เฉพาะตัวละครของเราเอง • ภาพบนเครื่องตัวเองล้วน ไม่แตะ sim / hit…
+## js/49-cloth.js (188) — 
 CLOTH:10 CL_ROWS:26 CL_NC:26 CL_GAP:26 CL_IN:26 _clV:27 _clA:27 _clB:27 clPinK:29 clBind:31 cloakPanelGrid:33 cloakBodyIndices:47 stormCape:56 clothSetup:94 clTargets:123 clReset:127 clCapsule:131 _clO:135 clWorld:136 clWorldHit:144 clStep:149 clDraw:162 clothTick:169
 
 ## js/50-grass.js (405) — 
@@ -897,7 +897,7 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-## js/77-dev.js (299) — Dev Mode: ทดสอบแมพ/สกิลในแมตช์จริง (ผู้ใช้ 2026-11-18)
+## js/77-dev.js (300) — Dev Mode: ทดสอบแมพ/สกิลในแมตช์จริง (ผู้ใช้ 2026-11-18)
 DEV:5 devOn:9 devOff:10 devSoloOk:11 devHold:12 devBroomOk:13 dvMe:14 devSave:15
 §16 hook จากโฮสต์: เรียกต้น hostTick (คืน dt ที่ปรับแล้ว • -1 = หยุดโลก)
 devDt:17 devTick:22 devGod:31 devFreeze:32
@@ -912,7 +912,7 @@ DEVD_R:212 devBrkFix:213 devPnlFix:214 devPropFix:218 devSkinFix:219 devDestroy:
 §258 ภาพซ้อนไว้ดูแมพ: กล่องชน (OBS) + วงเขตยึด/จุดเกิดปลอดภัย
 _dvCyl:259 _dvMat:260 devOverlay:261
 §281 2D overlay map: spawn zones + capture zones + players (click = warp)
-_dvMap:282 devMapDraw:286
+_dvMap:282 _dvY:286 devMapDraw:287
 
 ## js/78-dev-ui.js (243) — Dev Mode UI (user 2026-11-20): one floating window, many small column…
 §10 orbit camera
@@ -924,4 +924,4 @@ _dvPanel:95 _dvBtn:98 _dvBody:100 _dvHead:100 devUiApply:102 devFreeMouse:110 de
 §130 rows
 dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:193 devUiAct:200
 
-(115 files, 34304 lines)
+(115 files, 34311 lines)

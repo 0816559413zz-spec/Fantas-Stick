@@ -274,6 +274,31 @@ function chunkCircles(M, w, R) {   // collision: a chain of circles along the pi
   return out;
 }
 
+// Capsule colliders: consecutive circles of a straight run (same r / height / group, collinear, touching) → one obs with
+// x,y = centre, hx,hy = half axis (px), r = radius. The game measures distance to the axis (obsD2, js/12-buildings).
+// Fences (fcf: burn per section), floating pieces of other kinds and tagged colliders stay circles.
+const CAP_KEYS = new Set(['x', 'y', 'r', 'hgt', 'k', 'bot', 'b']);
+function mergeCaps(obs) {
+  const out = [], same = (a, b) => a.k === b.k && a.r === b.r && a.b === b.b && Math.abs(a.hgt - b.hgt) < 0.25 && (a.bot == null) === (b.bot == null) && (a.bot == null || Math.abs(a.bot - b.bot) < 0.25);
+  let run = null;   // {a: first circle, e: last circle, L: [circles]}
+  const flush = () => { if (!run) return; const L = run.L, a = L[0], e = L[L.length - 1];
+    if (L.length < 3) { out.push(...L); run = null; return; }
+    const o = Object.assign({}, a, { x: r1((a.x + e.x) / 2), y: r1((a.y + e.y) / 2), hx: r1((e.x - a.x) / 2), hy: r1((e.y - a.y) / 2), hgt: Math.max(...L.map(q => q.hgt)) });
+    if (a.bot != null) o.bot = Math.min(...L.map(q => q.bot)); out.push(o); run = null; };
+  for (const c of obs) {
+    const ok = c.k !== 'fcf' && Object.keys(c).every(k => CAP_KEYS.has(k));
+    if (!ok) { flush(); out.push(c); continue; }
+    if (run) { const a = run.L[0], e = run.L[run.L.length - 1], dx = c.x - e.x, dy = c.y - e.y, d = Math.hypot(dx, dy);
+      let line = d > 0.5 && d <= c.r * 2.3 && same(a, c);   // wall chains ≈ r·1.15 apart, box chains ≈ r·2.1
+      if (line && run.L.length > 1) { const ux = e.x - a.x, uy = e.y - a.y, ul = Math.hypot(ux, uy) || 1; line = Math.abs((c.x - a.x) * uy - (c.y - a.y) * ux) / ul < Math.max(1, c.r * 0.08) && (dx * ux + dy * uy) > 0; }
+      if (line) { run.L.push(c); continue; }
+      flush(); }
+    run = { L: [c] };
+  }
+  flush(); obs.length = 0; obs.push(...out);
+}
+export const capD2 = (q, x, y) => { const hx = q.hx || 0, hy = q.hy || 0, l = hx * hx + hy * hy, t = l ? clamp(((x - q.x) * hx + (y - q.y) * hy) / l, -1, 1) : 0; return (x - q.x - hx * t) ** 2 + (y - q.y - hy * t) ** 2; };
+
 // ---------- floors (upper level: bridges, platforms, ramps) ----------
 // f = {id, x, z (centre), w, d, rot, y (top height at the −d end), y2 (top at the +d end; = y when flat), th, c, steps}
 export function floorTop(f, x, z) {   // top height at a map point, NaN outside
@@ -390,6 +415,7 @@ export function gameData(M, dim) {
     for (let j = 0; j < ez; j++) for (let i = 0; i < ex; i++) { const gi = Math.min(nx - 1, (x0 + i) * 2), gj = Math.min(ny - 1, (z0 + j) * 2); if (M.sf[gj * nx + gi] === +si) { const k = j * ex + i; bits[k >> 3] |= 1 << (k & 7); } }
     env.push({ k: kind, name: 'env_' + kind + '_mb', c: PX, x0: x0 * PX, y0: z0 * PX, nx: ex, ny: ez, m: b64e(bits) });
   }
+  mergeCaps(obs);   // chains of wall circles → one capsule each (hx/hy)
   const data = { fmt: 1, id: M.id, name: M.name, desc: M.desc || '', sky: M.sky || 'day', fog: M.fog || null, modes: M.modes && M.modes.length ? M.modes : null, random: M.random ? 1 : 0,
     weather: M.weather || '', music: M.music || '', W: M.W * PX, H: M.H * PX, c: C * PX, nx, ny, g: i16b64(g), fl, obs, spawns, espawn, rings, tasks, houses, lights, env, brk, fx: M.fx || [], mb: 1 };
   if (props.length || !M.autoProps) data.props = props;
@@ -450,9 +476,9 @@ export function check(M, G) {
         let fl = 0; for (let k = 0; k < p.nc * p.nr; k++) if (!S.seen[p.base + k]) fl++;
         if (fl) add('warn', 'Floating breakable panel ' + fl + ' cells (nothing reaching the ground — set "Group" to match the panel below/beside) will fall on the group’s first hit', [p.o.x, p.o.z]); } } }
   const obsLim = Math.max(2000, Math.round(M.W * M.H * 0.035)), obsWarn = Math.round(obsLim * 0.6);   // budget scales with map area (spatial grid keeps cost local)
-  if (c.obs > obsLim) add('err', 'Colliders ' + c.obs + ' circles — too heavy (limit ' + obsLim + '): cut down long thin walls or make them thicker');
-  else if (c.obs > obsWarn) add('warn', 'Colliders ' + c.obs + ' circles (getting heavy — thinner walls use more circles)');
-  else add('ok', 'Colliders ' + c.obs + ' circles');
+  if (c.obs > obsLim) add('err', 'Colliders ' + c.obs + ' colliders — too heavy (limit ' + obsLim + '): cut down long thin walls or make them thicker');
+  else if (c.obs > obsWarn) add('warn', 'Colliders ' + c.obs + ' (getting heavy)');
+  else add('ok', 'Colliders ' + c.obs + ' (straight walls = 1 box each)');
   if (c.props > 0 && M.objs.filter(o => o.t === 'pchest').length > 2) add('warn', 'More than 2 treasure chests');
   let lo = 1e9, hi = -1e9; for (const h of M.hg) { if (h < lo) lo = h; if (h > hi) hi = h; }
   if (lo < -5 || hi > 20) add('warn', 'Ground level ' + lo.toFixed(1) + ' to ' + hi.toFixed(1) + ' (camera/minimap set for about −5 to +20)');
@@ -461,7 +487,7 @@ export function check(M, G) {
   M.objs.filter(o => /^spawn/.test(o.t)).forEach((o, n) => {
     const i = clamp(Math.round(o.x / C), 0, M.nx - 1), j = clamp(Math.round(o.z / C), 0, M.ny - 1);
     if (slopeAt(M, i, j) > TSLOPE) add('warn', 'Spawn point on a steep slope', [o.x, o.z]);
-    if (obs.some(q => q.bot == null && Math.hypot(q.x - o.x * PX, q.y - o.z * PX) < q.r + 1.5 * PX)) add('warn', 'Spawn point too close to colliders (keep radius 4 clear)', [o.x, o.z]);
+    if (obs.some(q => q.bot == null && Math.sqrt(capD2(q, o.x * PX, o.z * PX)) < q.r + 1.5 * PX)) add('warn', 'Spawn point too close to colliders (keep radius 4 clear)', [o.x, o.z]);
   });
   // floors: walk-under headroom
   for (const f of M.floors) { const g = gh(M, f.x, f.z), gap = Math.min(f.y, f.y2 == null ? f.y : f.y2) - (f.th || 0.4) - g;
@@ -470,8 +496,8 @@ export function check(M, G) {
   const sp = M.objs.filter(o => /^spawn/.test(o.t)), FL = M.floors;   // castle part floors (walkways, gate tops) are left out: the check is ground-level only
   if (sp.length > 1) {
     const w = Math.floor(M.W), h = Math.floor(M.H), blk = new Uint8Array(w * h), seen = new Uint8Array(w * h);
-    for (const q of obs) { if (q.bot != null || q.hgt < 0.6) continue; const cx = q.x / PX, cz = q.y / PX, R = q.r / PX + PR * 0.6;
-      for (let j = Math.max(0, Math.floor(cz - R)); j <= Math.min(h - 1, Math.ceil(cz + R)); j++) for (let i = Math.max(0, Math.floor(cx - R)); i <= Math.min(w - 1, Math.ceil(cx + R)); i++) if (Math.hypot(i + 0.5 - cx, j + 0.5 - cz) < R) blk[j * w + i] = 1; }
+    for (const q of obs) { if (q.bot != null || q.hgt < 0.6) continue; const cx = q.x / PX, cz = q.y / PX, R = q.r / PX + PR * 0.6, ex = Math.abs(q.hx || 0) / PX, ez = Math.abs(q.hy || 0) / PX;
+      for (let j = Math.max(0, Math.floor(cz - ez - R)); j <= Math.min(h - 1, Math.ceil(cz + ez + R)); j++) for (let i = Math.max(0, Math.floor(cx - ex - R)); i <= Math.min(w - 1, Math.ceil(cx + ex + R)); i++) if (Math.sqrt(capD2(q, (i + 0.5) * PX, (j + 0.5) * PX)) / PX < R) blk[j * w + i] = 1; }
     const cell = o => clamp(Math.floor(o.z), 0, h - 1) * w + clamp(Math.floor(o.x), 0, w - 1), H = k => surfTop(M, (k % w) + 0.5, ((k / w) | 0) + 0.5, null, FL);
     const st = [cell(sp[0])]; seen[st[0]] = 1;
     while (st.length) { const k = st.pop(), x = k % w, y = (k / w) | 0, hk = H(k);

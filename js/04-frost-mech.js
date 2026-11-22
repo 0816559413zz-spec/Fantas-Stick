@@ -105,7 +105,7 @@ function frostWavePitch(p){const i=p.inp;if(!i||p.bot||typeof i.ah!=='number')re
 // คลื่นกลางอากาศชนของแข็ง (เนิน/หิน/บ้าน/กำแพงเวทศัตรู/ตึก) = แตกตรงนั้น — เงื่อนไขเดียวกับลำน้ำ (waterBeamStop)
 function frostWaveSolid(w){const x=w.x,y=w.y,hh=w.h;
   if(TERR&&terrSolid(x,y,hh))return true;
-  for(const o of sgNear(sgObs(),x,y,8,_sgPO))if(o.bi===undefined&&!(o.bot!==undefined&&hh<o.bot)&&(o.top!==undefined?terrT(x,y)+hh<o.top:hh<o.hgt)&&(x-o.x)**2+(y-o.y)**2<(o.r+8)**2)return true;
+  for(const o of sgNear(sgObs(),x,y,8,_sgPO))if(o.bi===undefined&&!(o.bot!==undefined&&hh<o.bot)&&(o.top!==undefined?terrT(x,y)+hh<o.top:hh<o.hgt)&&obsD2(o,x,y)<(o.r+8)**2)return true;
   if(PNL.length&&pnlSolidAt(x,y,hh))return true;   // breakable panels / houses
   for(const q of G.walls)if(w.team!==q.team&&hh<q.hgt&&(x-q.x)**2+(y-q.y)**2<(q.r+8)**2)return true;
   return citySolidAt(x,y,hh);}

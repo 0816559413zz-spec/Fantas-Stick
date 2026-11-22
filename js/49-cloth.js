@@ -135,7 +135,7 @@ function clCapsule(P,Q,i,a,b,rad){const ax=a.x,ay=a.y,az=a.z,bx=b.x-ax,by=b.y-ay
 const _clO={x:0,y:0};
 function clWorld(cx,cy){const R=140,c=[],b=[],s=[],near=q=>Math.abs(q.x-cx)<R+q.r&&Math.abs(q.y-cy)<R+q.r;
   if(PROPON)for(const q of PROPS)if(q.st!==1&&near(q))c.push([q.x,q.y,q.r,q.hgt,0]);
-  for(const q of OBS)if(q.bi===undefined&&near(q))c.push(q.top!==undefined?[q.x,q.y,q.r,q.top,1]:[q.x,q.y,q.r,q.hgt,0]);
+  for(const q of OBS)if(q.bi===undefined&&(q.hx===undefined?near(q):Math.abs(q.x-cx)<R+q.r+Math.abs(q.hx)&&Math.abs(q.y-cy)<R+q.r+Math.abs(q.hy)))obsEach(q,(x,y)=>c.push(q.top!==undefined?[x,y,q.r,q.top,1]:[x,y,q.r,q.hgt,0]));
   if(G&&G.walls)for(const q of G.walls)if(near(q))c.push([q.x,q.y,q.r,q.hgt,0]);
   if(G&&G.eso){for(const w of G.eso)if(!w.dead&&w.k!=='mound'&&w.k!=='dom')s.push([w.x1,w.y1,w.x2,w.y2,w.r,w.hgt]);}
   else for(const o of EV.es.values())if(o.k===0||o.k===1)s.push([o.x1,o.y1,o.x2,o.y2,o.k?35:18,o.k?9:6]);

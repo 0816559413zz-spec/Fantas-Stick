@@ -3236,6 +3236,25 @@
    ],
    "feedback": "",
    "reply": "แก้แล้ว: หลังคา Roof collision ตันลงถึงยอดผนัง สกิลทะลุไม่ได้ ตัวบินไม่ตกเข้าบ้าน • หอคอยหลังคาพีระมิดมี collision แล้ว • หลังคาดำหาย • หญ้ากลับมา (shader หญ้าพังจากโค้ดอีก session) • แผนที่ที่มีบ้านอยู่แล้ว กด ⬆ ส่งเข้าเกมใหม่อีกครั้ง"
+  },
+  {
+   "id": 152,
+   "title": "การชนแบบกล่อง + ภูเขาวัดตกแต่ง (โซนแดง fcs-file)",
+   "text": "กำแพงตรงชนเป็นกล่องเดียว (ไม่ใช่วงกลมเรียง) วงชน fcs-file 2,767 → ~1,040 • โซนแดงเป็นฉาก: กำแพงเมืองหอกลม เนินหิน บ้านซ้อน โบสถ์ยอดแหลมบนยอด เข้าไม่ได้ (กำแพงล่องหนสูง 80 ม.) • ดู: เปิดเกมแผนที่ Cliff Side Castle แล้วมองไปทางเหนือ/ตะวันออก หรือ Map Builder → fcs-file (เปิด Colliders ดูกล่อง)",
+   "kind": "Map",
+   "who": "Abbey mount",
+   "status": "wait",
+   "created": "2026-11-22T20:00:00",
+   "updated": "2026-11-22T20:00:00",
+   "imgs": [],
+   "links": [
+    "/index.html?nosw&playmap=fcs-file",
+    "/mapbuild.html?id=fcs-file",
+    "/shots/abbey_preview_castle.png",
+    "/shots/abbey_preview_high.png"
+   ],
+   "feedback": "",
+   "reply": ""
   }
  ]
 }

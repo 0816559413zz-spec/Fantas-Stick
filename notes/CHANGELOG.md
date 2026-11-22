@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-22 Straight walls now collide as one smooth box each instead of a row of round posts (the castle map went from about 2,800 colliders to about 1,000). The north-east part of the castle map is now scenery: a rocky mount with a walled village and an abbey with a tall spire, sealed off by invisible walls.
 - 2026-11-22 Fixed: grass blades were missing everywhere (a shader used a reserved word). House roofs with Roof collision now block skills and catch fliers instead of letting them fall in, the tower house's pyramid roof has collision too, and the dark patches on roofs are gone (re-export maps that already use houses).
 - 2026-11-22 Performance: randomized grass patches with four blade profiles and fewer instances. Replaced Meadow's baked tufts with fewer clumps in three shapes, reduced Castle Strike ground clutter and coastline detail, culled backdrop pines in tiles, and drew its high-quality shadows at half frequency when clean. Reduced shared decorative combat particle budgets.
 

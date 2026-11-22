@@ -14,7 +14,7 @@ function botWallBehind(p,tg,dist){
   for(let k=60;k<=dist;k+=40){const x=tg.x+c*k,y=tg.y+s*k;
     if(x<40||y<40||x>MW-40||y>MH-40)return true;
     if(typeof navOn==='function'&&navOn()&&!navWalk(x,y))return true;
-    for(const o of OBS)if(!o.bi&&o.hgt>1.5&&(o.x-x)**2+(o.y-y)**2<(o.r+10)**2)return true;
+    for(const o of OBS)if(!o.bi&&o.hgt>1.5&&obsD2(o,x,y)<(o.r+10)**2)return true;
     for(const w of (G.wwl||[]))if(w.owner===p.id&&!w.dead&&(w.x-x)**2+(w.y-y)**2<120*120)return true;
     for(const w of (G.eso||[]))if(w.owner===p.id&&!w.dead&&w.x1!==undefined&&(((w.x1+w.x2)/2-x)**2+((w.y1+w.y2)/2-y)**2)<150*150)return true;}
   return false;

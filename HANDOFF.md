@@ -1,5 +1,7 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
+**การชนแบบกล่อง + ภูเขาวัดตกแต่ง (2026-11-22, รีวิว #152):** วงชนเรียงเส้นตรงรวมเป็นกล่องหัวมน (`hx,hy`, `mergeCaps` → `obsD2/obsCP/obsEach` js/12-buildings) fcs-file 2,767 → ~1,040 ชิ้น • โซนแดง fcs-file = ฉาก `kit:abbey/mount` (`assets/src/abbey_build.py` + `tools/abbey-place.mjs`) กันเข้าด้วยกล่องล่องหนสูง 80 ม. • ไฟล์แผนที่ fcs-file ที่แก้ยังไม่ commit (มีงานผู้ใช้ค้าง)
+
 **หลังคาบ้านกันสกิล + หญ้ากลับมา (2026-11-22, รีวิว #151):** Roof collision = แผ่นหลังคาตันลงถึงยอดผนัง (floor `yb`) กันสกิล/ตัวบินตกทะลุ, ปิรามิดหอคอยเป็นแผ่นซ้อนขั้น • หลังคาดำ = พื้นสำรองของ buildFileMap ถูก `batchStatic(world)` รวมออกไปจึงไม่ถูกลบ → กันด้วย `world.userData.fb` • หญ้าหาย = ตัวแปร GLSL ชื่อ `patch` (คำสงวน) ทำ shader หญ้าคอมไพล์ไม่ผ่าน → เปลี่ยนเป็น `grPt` (ตรวจ shader: `gl.getContext().getProgramParameter(prog,LINK_STATUS)`)
 
 **ลดภาระฉากและ VFX (2026-11-22):** หญ้าขึ้นเป็นหย่อมจากสุ่มแบบ seed คงที่ ผสมใบ 4 ทรง และเปลี่ยนกอหญ้าใน Meadow เป็นกอเบา 3 แบบ ลดของประดับป่า Castle Strike ลดรายละเอียดสนฉากหลัง หน้าผา และทะเล เงา High ของ Castle Strike อัปเดตทุก 2 เฟรมหรือทันทีเมื่อฉากแจ้งว่าเงาเปลี่ยน ลดปริมาณอนุภาคตกแต่งทั่วเกมผ่านงบร่วม ดูผลวัดใน `guides/OPTIMIZE.md`

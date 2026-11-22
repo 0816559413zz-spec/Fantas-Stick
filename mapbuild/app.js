@@ -370,7 +370,9 @@ function buildCol() {
   if (!show.col || !M) return;
   const obs = gameData().data.obs; if (!obs.length) return;
   const im = new THREE.InstancedMesh(new THREE.CylinderGeometry(1, 1, 1, 14, 1, true), new THREE.MeshBasicMaterial({ color: 0xff5a4a, transparent: true, opacity: 0.38, depthWrite: false, side: THREE.DoubleSide }), obs.length), m4 = new THREE.Matrix4();
-  obs.forEach((o, i) => { const x = o.x / MD.PX, z = o.y / MD.PX, r = o.r / MD.PX, g = MD.gh(M, x, z), b = o.bot || 0, h = o.hgt - b; im.setMatrixAt(i, m4.makeScale(r, h, r).setPosition(x, g + b + h / 2, z)); });
+  const q = new THREE.Quaternion(), Y = new THREE.Vector3(0, 1, 0), P = new THREE.Vector3(), S = new THREE.Vector3();
+  obs.forEach((o, i) => { const x = o.x / MD.PX, z = o.y / MD.PX, r = o.r / MD.PX, g = MD.gh(M, x, z), b = o.bot || 0, h = o.hgt - b, L = o.hx == null ? 0 : Math.hypot(o.hx, o.hy) / MD.PX;   // capsule (straight wall) = stretched along its axis
+    q.setFromAxisAngle(Y, o.hx == null ? 0 : -Math.atan2(o.hy, o.hx)); im.setMatrixAt(i, m4.compose(P.set(x, g + b + h / 2, z), q, S.set(r + L, h, r))); });
   gCol.add(im); need();
 }
 

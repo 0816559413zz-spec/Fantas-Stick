@@ -65,7 +65,7 @@ function natureTrace(a,b,ha,hb,team,allWalls=false){
     const x=lerp(a.x,b.x,t),y=lerp(a.y,b.y,t),ground=terrT(x,y),worldY=lerp(ay,by,t),h=worldY-ground;
     if(terrSolid(x,y,h))return {x,y,h,t};
     for(const o of obstacles)if(o.bi===undefined&&h>=(o.bot??0)&&(o.top!==undefined?worldY<o.top:h<o.hgt)
-      &&(x-o.x)**2+(y-o.y)**2<o.r**2)return {x,y,h,t};
+      &&obsD2(o,x,y)<o.r**2)return {x,y,h,t};
     for(const w of G.walls)if(w.hp>0&&(allWalls||w.team!==team)&&natureWallContains(w,x,y,h))return {x,y,h,t};
     for(const w of G.eso||[])if(!w.dead&&w.k!=='dom'&&(allWalls||w.team!==team)&&h<w.hgt&&eSegD(x,y,w).d<w.r)return {x,y,h,t};
     for(const w of G.wwl||[])if(!w.dead&&(allWalls||w.team!==team)&&h<5.8&&wSeg(w,x,y).d<w.r)return {x,y,h,t};

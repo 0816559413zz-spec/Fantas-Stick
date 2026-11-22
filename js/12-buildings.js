@@ -96,7 +96,7 @@ function hitBrk(g,dmg,ox,oy){
 function damageBrkIn(x,y,rad,dmg,h){
   if(!PROPON||!BRK.length)return;h=h||0;const R=rad/20;
   for(const g of BRK){if(g.st>=3||!g.cs.length)continue;
-    let d=1e9;for(const o of g.cs)d=Math.min(d,Math.max(0,Math.hypot(o.x-x,o.y-y)-o.r));
+    let d=1e9;for(const o of g.cs)d=Math.min(d,Math.max(0,Math.sqrt(obsD2(o,x,y))-o.r));
     if(d>rad)continue;const z0=g.d.z0||0,dm=Math.hypot(d/20,h<z0?z0-h:Math.max(0,h-z0-g.d.h));if(dm<R)hitBrk(g,dmg*(1-0.7*dm/R),x,y);}   // z0 = raised base (bridge parapet)
 }
 function brkSnap(){return PROPON&&BRK.some(g=>g.st)?BRK.map(g=>g.st).join(''):'';}
@@ -105,7 +105,12 @@ function brkParse(s){s=s||'';for(const g of BRK){const st=+(s[g.i]||0);if(st!==g
 // ช่องละ SG.c px • สร้างใหม่เองเมื่อรายการ/ขนาดแผนที่เปลี่ยน (ของในรายการต้องไม่ย้ายที่ — OBS / PROPS / PNL ไม่ย้าย)
 // sgNear(ตาราง,x,y,รัศมี,out) = ของทุกชิ้นที่กรอบแตะวงนั้น (ไม่ซ้ำ) ใส่ลง out • แต่ละจุดเรียกใช้ out ของตัวเอง (กันทับกันตอนเรียกซ้อน)
 const SG={c:400,s:0,m:new Map()};
-const sgObs=()=>sgGrid('o',OBS,c=>[c.x-c.r,c.y-c.r,c.x+c.r,c.y+c.r]),sgProps=()=>sgGrid('p',PROPS,c=>[c.x-c.r,c.y-c.r,c.x+c.r,c.y+c.r]);
+// capsule colliders (Map Builder straight walls): hx,hy = half axis px → distance is measured to the axis • plain circles have none
+let OCX=0,OCY=0;function obsCP(o,x,y){const hx=o.hx;if(hx===undefined){OCX=o.x;OCY=o.y;return;}const hy=o.hy,t=clamp(((x-o.x)*hx+(y-o.y)*hy)/(hx*hx+hy*hy||1),-1,1);OCX=o.x+hx*t;OCY=o.y+hy*t;}
+function obsD2(o,x,y){obsCP(o,x,y);return (x-OCX)**2+(y-OCY)**2;}
+function obsEach(o,fn){if(o.hx===undefined){fn(o.x,o.y);return;}const L=Math.hypot(o.hx,o.hy)*2,n=Math.max(1,Math.ceil(L/(o.r*1.15)));for(let i=0;i<=n;i++){const t=i/n*2-1;fn(o.x+o.hx*t,o.y+o.hy*t);}}   // circles along a capsule (cheap consumers)
+const obsBox=c=>c.hx===undefined?[c.x-c.r,c.y-c.r,c.x+c.r,c.y+c.r]:[c.x-Math.abs(c.hx)-c.r,c.y-Math.abs(c.hy)-c.r,c.x+Math.abs(c.hx)+c.r,c.y+Math.abs(c.hy)+c.r];
+const sgObs=()=>sgGrid('o',OBS,obsBox),sgProps=()=>sgGrid('p',PROPS,c=>[c.x-c.r,c.y-c.r,c.x+c.r,c.y+c.r]);
 function sgGrid(key,list,box){
   let g=SG.m.get(key);if(g&&g.list===list&&g.n===list.length&&g.mw===MW&&g.mh===MH)return g;
   const c=SG.c,nx=Math.ceil(MW/c)+1,ny=Math.ceil(MH/c)+1,cells=Array.from({length:nx*ny},()=>[]);
@@ -136,9 +141,10 @@ function collideWorld(o,r,z){
   const za=TERR?terrT(o.x,o.y)+z:z;
   for(const c of sgNear(sgObs(),o.x,o.y,r,_sgCO)){
     if((c.top!==undefined?c.top<=za:c.hgt<=z)||c.bi!==undefined||(c.bot!==undefined&&z+1.9<=c.bot))continue;   // bot = วงที่ลอยเริ่มสูงจากพื้น (ส่วนทึบบนตึกกลวง)
-    if(Math.abs(o.x-c.x)>c.r+r||Math.abs(o.y-c.y)>c.r+r)continue;
-    const dx=o.x-c.x,dy=o.y-c.y,d=Math.hypot(dx,dy),m=c.r+r;
-    if(d<m&&d>0.001){o.x=c.x+dx/d*m;o.y=c.y+dy/d*m;sol++;}
+    obsCP(c,o.x,o.y);const cx=OCX,cy=OCY;
+    if(Math.abs(o.x-cx)>c.r+r||Math.abs(o.y-cy)>c.r+r)continue;
+    const dx=o.x-cx,dy=o.y-cy,d=Math.hypot(dx,dy),m=c.r+r;
+    if(d<m&&d>0.001){o.x=cx+dx/d*m;o.y=cy+dy/d*m;sol++;}
   }
   if(G&&G.walls)for(const c of G.walls){
     if(c.wood){sol+=natureWallPush(c,o,r,z,_cwLast.get(o));continue;}
@@ -379,7 +385,7 @@ function projStep(pr,dt,ps){
     if(pr.life<=0||pr.x<20||pr.x>MW-20||pr.y<20||pr.y>MH-20||pr.h>40){killProj(pr);return;}
     if(pr.h<0.05||(TERR&&terrSolid(pr.x,pr.y,pr.h))||(PNL.length&&pr.h<bldMoundH(pr.x,pr.y))){pr.h=Math.max(pr.h,0.1);killProj(pr);return;}   // + ชนเนินซากบ้าน
     let hp=false;
-    for(const c of sgNear(sgObs(),pr.x,pr.y,pr.r,_sgPO))if(c.bi===undefined&&!(c.bot!==undefined&&pr.h<c.bot)&&(c.top!==undefined?terrT(pr.x,pr.y)+pr.h<c.top:pr.h<c.hgt)&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hp=true;if(c.cb!==undefined||c.ci!==undefined)cityHitObs(c,pr);if(c.sgw!==undefined)sgWallHit(c,pr);if(c.efs!==undefined)efsProj(c,pr);break;}
+    for(const c of sgNear(sgObs(),pr.x,pr.y,pr.r,_sgPO))if(c.bi===undefined&&!(c.bot!==undefined&&pr.h<c.bot)&&(c.top!==undefined?terrT(pr.x,pr.y)+pr.h<c.top:pr.h<c.hgt)&&obsD2(c,pr.x,pr.y)<(c.r+pr.r)**2){hp=true;if(c.cb!==undefined||c.ci!==undefined)cityHitObs(c,pr);if(c.sgw!==undefined)sgWallHit(c,pr);if(c.efs!==undefined)efsProj(c,pr);break;}
     if(!hp&&PROPON)for(const c of sgNear(sgProps(),pr.x,pr.y,pr.r,_sgPP))if(c.st!==1&&pr.h<c.hgt&&(pr.x-c.x)**2+(pr.y-c.y)**2<(c.r+pr.r)**2){hitProp(c,pr.dmg||5,pr.owner);hp=true;break;}
     if(!hp)for(const w of G.walls)if(w.hp>0&&pr.team!==w.team&&natureWallContains(w,pr.x,pr.y,pr.h,pr.r)){
       if(w.wood)natureWallDamage(w,pr.dmg||5,pr.x,pr.y,pr.owner,projEl(pr));else w.hp-=pr.dmg||5;

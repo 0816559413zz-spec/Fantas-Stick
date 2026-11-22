@@ -116,7 +116,7 @@ function ragStep(o,R,dt){
     if(d>0.8){const k=(d-0.8)/d*(1-Math.exp(-4*dt));for(const q of P){q.x+=ex*k;q.z+=ez*k;}}
   }
   const nearO=[];const sx0=P[0].x*20+MW/2,sy0=P[0].z*20+MH/2;
-  for(const ob of OBS)if(Math.abs(ob.x-sx0)<ob.r+70&&Math.abs(ob.y-sy0)<ob.r+70)nearO.push(ob);
+  for(const ob of OBS)if(Math.abs(ob.x-sx0)<ob.r+70+Math.abs(ob.hx||0)&&Math.abs(ob.y-sy0)<ob.r+70+Math.abs(ob.hy||0))nearO.push(ob);
   for(let it=0;it<RAG.IT;it++){
     for(let s=0;s<RAGS.length;s++){
       const [a,b,st]=RAGS[s],pa=P[a],pb=P[b];
@@ -146,7 +146,7 @@ function ragStep(o,R,dt){
         for(const ob of nearO){
           const top=ob.top!==undefined?ob.top:ragFloor(tx(ob.x),tz(ob.y))+(ob.hgt||9);
           if(q.y>top)continue;
-          const ddx=qx-ob.x,ddy=qy-ob.y,dd=Math.hypot(ddx,ddy),rr=ob.r+r*20;
+          obsCP(ob,qx,qy);const ddx=qx-OCX,ddy=qy-OCY,dd=Math.hypot(ddx,ddy),rr=ob.r+r*20;
           if(dd<rr&&dd>1e-3){const k=(rr-dd)/dd/20;q.x+=ddx*k;q.z+=ddy*k;}
         }
       }
