@@ -2,6 +2,7 @@
 
 - 2026-11-22 Performance: randomized grass patches with four blade profiles and fewer instances. Replaced Meadow's baked tufts with fewer clumps in three shapes, reduced Castle Strike ground clutter and coastline detail, culled backdrop pines in tiles, and drew its high-quality shadows at half frequency when clean. Reduced shared decorative combat particle budgets.
 
+- 2026-11-22 Houses can be made unbreakable: tick Unbreakable on a placed house, or select an unpacked house's group and tick Unbreakable in its Group section.
 - 2026-11-22 Breakable panels: a burning door or window no longer shakes the camera endlessly after it breaks. Houses: new 'Roof collision' option on a placed house lets players stand on its roof (not the tower).
 - 2026-11-22 Five English stone house prefabs for maps (Place → Room Prefabs: cottage, manor, triple-gable house, tower house, lean-to for castle walls). Roofs, corner piers, chimneys, dormers, porches, bay windows and ivy come from a Blender model and stay standing; the stone walls, windows, door and gables are breakable. Unpacking a house gives it its own Hierarchy group.
 - 2026-11-22 Map Builder: Hierarchy groups. Select items and press Ctrl+G to put them in a named folder at the top of the Hierarchy; click a folder to select everything in it, double-click to rename, Ctrl+Shift+G or the Inspector Group field to move items out. Groups only organise the editor and do not change the game.

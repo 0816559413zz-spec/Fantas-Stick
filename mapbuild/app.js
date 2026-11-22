@@ -1253,6 +1253,7 @@ function renderSide() {
       box.append(section('Room (prefab) — ' + (R ? R.name : it.ref), true,
         fld('Room', it, 'ref', { type: 'select', items: rooms.map(m => [m.id, m.name]), after: () => loadRooms().then(() => { syncAll(); renderSide(); changed(); }) }),
         fld('Position X (room centre)', it, 'x'), fld('Position Z (room centre)', it, 'z'), fld('Rotation (deg, steps of 90)', it, 'rot', { deg: 1, step: 90 }),
+        R && R.objs.some(o => o.t === 'pn_wall') ? fld('Unbreakable (breakable walls of this room become solid)', it, 'nbk', { type: 'checkbox', set: v => { if (v) it.nbk = 1; else delete it.nbk; }, after: () => { syncAll(); renderSide(); changed(); } }) : null,
         R && R.floors.some(f => f.rf) ? fld('Roof collision (players can stand on the roof)', it, 'rfc', { type: 'checkbox', set: v => { if (v) it.rfc = 1; else delete it.rfc; }, after: () => { syncAll(); renderSide(); changed(); } }) : null,
         el('div', { class: 'seg' }, el('button', { class: 'tl-btn', onclick: () => { location.href = 'mapbuild.html?id=' + encodeURIComponent(it.ref); } }, 'Open This Room'),
           el('button', { class: 'tl-btn', title: 'Copy the room’s contents into this map, every piece editable (no longer linked to the room file) • ground under the room is flattened + painted like the room', onclick: () => { if (!R) return; pushUndo('a'); MD.roomUnpack(M, it, R); sel = null; buildTerrain(); syncAll(); renderSide(); changed(); } }, 'Unpack Room into Map')),
@@ -1305,7 +1306,10 @@ function renderSide() {
     const inp = el('input', { class: 'tl-in', value: cur, placeholder: '(none)', onchange: e => grpSet(e.target.value.trim(), S) }); inp.setAttribute('list', 'grpdl');
     box.append(section('Group' + (S.length > 1 ? ' — ' + S.length + ' selected' : ''), true, el('div', { class: 'row' }, el('label', null, 'Hierarchy group'), inp, dl),
       el('div', { class: 'seg' }, el('button', { class: 'tl-btn', title: 'Ctrl+G', onclick: grpNew }, 'New Group'), cur ? el('button', { class: 'tl-btn', title: 'Ctrl+Shift+G', onclick: () => grpSet('', S) }, 'Ungroup') : null, cur ? el('button', { class: 'tl-btn', onclick: () => grpSelect(cur) }, 'Select Group') : null),
-      el('p', { class: 'note' }, 'Folders in the Hierarchy only (the game ignores them) • type a name to move the selection into that group'))); }
+      el('p', { class: 'note' }, 'Folders in the Hierarchy only (the game ignores them) • type a name to move the selection into that group')));
+    const PW = S.map(find).filter(o => o && o.t === 'pn_wall');   // whole house / group at once (same as a panel's Unbreakable)
+    if (PW.length > 1) { const all = PW.every(o => o.nb), cb = el('input', { type: 'checkbox', checked: all, onchange: () => { pushUndo('o'); for (const o of PW) { if (cb.checked) o.nb = 1; else delete o.nb; syncObj(o); } renderSide(); changed(); } });
+      box.lastChild.append(el('label', { class: 'chk', title: 'Breakable panels in the selection become one solid piece each (same as Unbreakable on a single panel)' }, cb, 'Unbreakable — ' + PW.length + ' breakable panels in the selection' + (all || !PW.some(o => o.nb) ? '' : ' (some)'))); } }
   const mset = (k, o) => fld(o.label, M, k, Object.assign({ after: () => { applySky(); changed(); renderList(); } }, o));
   box.append(section('Map', !it,
     mset('name', { label: 'Name', type: 'text' }), mset('desc', { label: 'Description', type: 'text' }),

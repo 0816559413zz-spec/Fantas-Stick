@@ -496,7 +496,8 @@ export function roomExpand(M, inst, R) {
   const floors = R.floors.filter(f => !f.rf || inst.rfc).map(f => {   // rf = roof collision slab (house prefabs): only when the instance ticks 'Roof collision'
     const [x, z] = P(f.x, f.z); return tag(Object.assign({}, f, { x, z, rot: (f.rot || 0) + rot, y: +(f.y + g0).toFixed(2) }, f.y2 != null ? { y2: +(f.y2 + g0).toFixed(2) } : {}), 'f'); });
   const swap = o => (o.t === 'phase' || o.t === 'ceil' || o.t === 'lz' || o.t === 'dc_box') && Math.abs(s) > 0.5;   // axis-aligned boxes: swap sizes on 90°/270°
-  const objs = R.objs.map(o => { const [x, z] = P(o.x, o.z); return tag(Object.assign({}, o, { x, z, rot: o.t === 'phase' || o.t === 'ceil' || o.t === 'lz' || o.t === 'dc_box' ? 0 : (o.rot || 0) + rot }, swap(o) ? { sx: o.sz, sz: o.sx } : {}, o.t === 'dc_cone' && (o.ssx || o.ssz) && Math.abs(s) > 0.5 ? { ssx: o.ssz, ssz: o.ssx } : {}), 'o'); });
+  const objs = R.objs.map(o => { const [x, z] = P(o.x, o.z); return tag(Object.assign({}, o, { x, z, rot: o.t === 'phase' || o.t === 'ceil' || o.t === 'lz' || o.t === 'dc_box' ? 0 : (o.rot || 0) + rot }, swap(o) ? { sx: o.sz, sz: o.sx } : {}, inst.nbk && o.t === 'pn_wall' ? { nb: 1 } : {},   // nbk = instance set Unbreakable
+      o.t === 'dc_cone' && (o.ssx || o.ssz) && Math.abs(s) > 0.5 ? { ssx: o.ssz, ssz: o.ssx } : {}), 'o'); });
   const parts = (R.parts || []).map(p => { const [x, z] = P(p.x, p.z); return tag(Object.assign({}, p, { x, z, rot: (p.rot || 0) + rot }, p.base != null ? { base: +(p.base + g0).toFixed(2) } : {}), 'p'); });
   return { walls, floors, objs, parts };
 }

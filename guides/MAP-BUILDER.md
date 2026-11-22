@@ -118,6 +118,7 @@ Tool: ศูนย์รวม Tool → **Map Builder** • โค้ด: `mapbu
 ## บ้านหินทรงอังกฤษ (room-house-*) — 2026-11-22
 - 5 แบบ: `cottage` (กระท่อม dormer 2) • `manor` (คฤหาสน์ 2 ชั้น จั่วหน้า 2 bay window) • `gables` (จั่วหน้า 3 ลูก) • `tower` (หอ 3 ชั้น หลังคาปิรามิด) • `leanto` (เพิงพิงกำแพง หลังคาลาดเดียว — หันด้านหลังสูงชิดกำแพงปราสาท)
 - แต่ละบ้าน = โครง Blender `kit:manor/<id>` (หลังคาหินชนวน เสามุม ปล่องไฟ dormer ระเบียงไม้ bay window ไม้เลื้อย — ไม่พัง, ไม่มีชน) + `pn_wall` หิน (ผนัง ช่องหน้าต่าง/ประตู กระจก `litwin` ประตูไม้ จั่วสามเหลี่ยม — พังได้, กลุ่ม pn `H<id>`) + `box` ชนล่องหนที่เสา/ปล่องไฟ/bay/เสาระเบียง • ทุกชิ้นมี `grp` = ชื่อบ้าน → แตกห้องแล้วได้ 1 กลุ่ม (ชื่อซ้ำ = เติมเลข)
+- **Unbreakable (ตัวเลือก):** ห้องที่วางไว้ → ติ๊ก "Unbreakable" (`inst.nbk` → pn_wall ทุกแผ่นของห้องได้ `nb:1`) • บ้านที่แตกแล้ว → คลิกโฟลเดอร์กลุ่ม (เลือกทั้งหลัง) → Inspector ส่วน Group ติ๊ก "Unbreakable — N breakable panels" (ใช้กับการเลือกหลายชิ้นใดก็ได้)
 - **หลังคามี Collision (ตัวเลือก):** เลือกห้อง (room instance) → Inspector ติ๊ก "Roof collision" (`inst.rfc`) → ใช้แผ่นพื้นล่องหนบนหลังคา (`floors[].rf:1`, `vis:0`, `sol:0`) ให้ยืนบนหลังคาได้ • ปิด = ไม่มี • แตกห้องตอนติ๊กอยู่ = ได้แผ่นพื้นติดมาด้วย (ลบเองได้) • มี: gable / จั่วหน้า / lean-to • tower (ปิรามิด) ไม่มี
 - แก้: `assets/src/manor_spec.json` (ขนาด หลังคา หน้าต่าง ปล่องไฟ ไม้เลื้อย) → รัน Blender `assets/src/manor_build.py` (ได้ `assets/mapkit/manor.glb` + `manor.info.json` = bbox ที่ prefab ใช้ชดเชยการจัดกึ่งกลางของ kit) → `node tools/manor-prefabs.mjs` (เขียน prefab + ลงทะเบียน kit.json)
 
