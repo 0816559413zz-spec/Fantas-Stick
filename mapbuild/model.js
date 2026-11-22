@@ -510,7 +510,11 @@ export function flatRooms(M, RM) {
 export function roomUnpack(M, inst, R) {
   const X = roomExpand(M, inst, R), g0 = gh(M, inst.x, inst.z);
   let seq = M.seq || 1;
-  for (const k of ['walls', 'floors', 'objs', 'parts']) for (const o of X[k]) { delete o.room; delete o.rref; o.id = ++seq; (M[k] = M[k] || []).push(o); }
+  // Hierarchy groups from the room (item.grp): each unpack gets its own name ("Stone Manor", "Stone Manor 2", …)
+  const used = new Set(M.groups || []); for (const k of ['walls', 'floors', 'objs', 'parts', 'rooms']) for (const o of M[k] || []) if (o.grp) used.add(o.grp);
+  const ren = new Map(); for (const k of ['walls', 'floors', 'objs', 'parts']) for (const o of X[k]) if (o.grp && !ren.has(o.grp)) { let n = o.grp, i = 2; while (used.has(n)) n = o.grp + ' ' + i++; used.add(n); ren.set(o.grp, n); }
+  if (ren.size) M.groups = [...(M.groups || []), ...ren.values()];
+  for (const k of ['walls', 'floors', 'objs', 'parts']) for (const o of X[k]) { delete o.room; delete o.rref; if (o.grp) o.grp = ren.get(o.grp); o.id = ++seq; (M[k] = M[k] || []).push(o); }
   const rot = Math.round((inst.rot || 0) / (Math.PI / 2)) * (Math.PI / 2), c = Math.cos(rot), s = Math.sin(rot);
   for (let j = 0; j < M.ny; j++) for (let i = 0; i < M.nx; i++) {
     const dx = i * C - inst.x, dz = j * C - inst.z, rx = dx * c - dz * s + R.W / 2, rz = dx * s + dz * c + R.H / 2;

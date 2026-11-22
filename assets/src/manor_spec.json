@@ -1,0 +1,47 @@
+{
+  "_about": "Stone manor houses (user 2026-11-22, ref: English stone manor). Shared by assets/src/manor_build.py (Blender frame = roof, corner piers, chimneys, dormers, porch, bay, ivy -> assets/mapkit/manor.glb node mn_<id>) and tools/manor-prefabs.mjs (breakable pn_wall walls + glass + door -> maps/build/room-house-<id>.json). Metres, house local: x right, y up, z front (+z = front door side). Walls sit between corner piers. open: [u (0..1 along the wall, left->right seen from outside), storey, kind w|d]. Storey height SH.",
+  "SH": 3.0, "T": 0.4, "P": 0.75,
+  "houses": [
+    { "id": "cottage", "name": "Stone Cottage", "w": 9, "d": 6, "wh": 4.2,
+      "roof": { "t": "gable", "pitch": 52 },
+      "dormers": [0.28, 0.72],
+      "chim": [ { "k": "breast", "side": "r", "u": 0.5 } ],
+      "porch": 0.5,
+      "ivy": [ ["pier", "fl", 1.0], ["chim", 0, 0.8] ],
+      "open": { "f": [[0.2, 0, "w"], [0.5, 0, "d"], [0.8, 0, "w"]], "b": [[0.3, 0, "w"], [0.7, 0, "w"]], "l": [[0.5, 0, "w"]], "r": [] } },
+
+    { "id": "manor", "name": "Stone Manor", "w": 14, "d": 8, "wh": 6.4,
+      "roof": { "t": "gable", "pitch": 50 },
+      "xg": [ { "u": 0.22, "w": 4.2 }, { "u": 0.78, "w": 4.2 } ],
+      "chim": [ { "k": "breast", "side": "l", "u": 0.5 }, { "k": "breast", "side": "r", "u": 0.5 } ],
+      "porch": 0.5, "bay": { "u": 0.22, "w": 2.8 },
+      "ivy": [ ["pier", "fl", 1.0], ["pier", "fr", 0.6], ["chim", 0, 1.0], ["bay", 0, 0.7] ],
+      "open": { "f": [[0.22, 1, "w"], [0.5, 0, "d"], [0.5, 1, "w"], [0.78, 0, "w"], [0.78, 1, "w"]],
+                "b": [[0.2, 0, "w"], [0.5, 0, "w"], [0.8, 0, "w"], [0.2, 1, "w"], [0.5, 1, "w"], [0.8, 1, "w"]],
+                "l": [[0.25, 0, "w"], [0.75, 1, "w"]], "r": [[0.25, 0, "w"], [0.75, 1, "w"]] } },
+
+    { "id": "gables", "name": "Triple-Gable House", "w": 15, "d": 6.5, "wh": 5.6,
+      "roof": { "t": "gable", "pitch": 50 },
+      "xg": [ { "u": 0.17, "w": 3.6 }, { "u": 0.5, "w": 3.6 }, { "u": 0.83, "w": 3.6 } ],
+      "chim": [ { "k": "ridge", "u": 0.335 }, { "k": "ridge", "u": 0.665 } ],
+      "porch": 0.5,
+      "ivy": [ ["pier", "fr", 1.0], ["pier", "bl", 0.7] ],
+      "open": { "f": [[0.17, 0, "w"], [0.17, 1, "w"], [0.5, 0, "d"], [0.5, 1, "w"], [0.83, 0, "w"], [0.83, 1, "w"]],
+                "b": [[0.25, 0, "w"], [0.5, 1, "w"], [0.75, 0, "w"]], "l": [[0.5, 1, "w"]], "r": [[0.5, 0, "w"]] } },
+
+    { "id": "tower", "name": "Tower House", "w": 6.5, "d": 6.5, "wh": 9.2,
+      "roof": { "t": "pyr", "pitch": 58 },
+      "chim": [ { "k": "breast", "side": "r", "u": 0.5 } ],
+      "ivy": [ ["pier", "fl", 1.0], ["pier", "bl", 0.8], ["chim", 0, 0.6] ],
+      "open": { "f": [[0.5, 0, "d"], [0.5, 1, "w"], [0.5, 2, "w"]], "b": [[0.5, 0, "w"], [0.5, 2, "w"]],
+                "l": [[0.5, 1, "w"], [0.5, 2, "w"]], "r": [[0.5, 1, "w"]] } },
+
+    { "id": "leanto", "name": "Wall Lean-to House", "w": 10, "d": 5, "wh": 3.6, "wb": 6.0,
+      "roof": { "t": "shed" },
+      "dormers": [0.5],
+      "chim": [ { "k": "ridge", "u": 0.82 } ],
+      "porch": 0.3,
+      "ivy": [ ["pier", "fr", 1.0], ["pier", "fl", 0.5] ],
+      "open": { "f": [[0.3, 0, "d"], [0.62, 0, "w"], [0.86, 0, "w"]], "b": [], "l": [[0.5, 0, "w"]], "r": [] } }
+  ]
+}

@@ -321,7 +321,7 @@ function objMesh(o) {
   let g;
   if (o.t === 'poly') { g = new THREE.Group(); const m = new THREE.Mesh(polyGeo(o), mat(o.c || '#8a8478', { name: 'prim' })); m.castShadow = m.receiveShadow = true; m.userData.own = 1; g.add(m); }
   else if (isPrim(o)) { g = new THREE.Group(); const m = new THREE.Mesh(pg(o.t), mat(o.c || '#8a8478', { name: o.glow ? 'glow' : 'prim', emit: o.glow })); m.castShadow = !o.glow; m.receiveShadow = true; g.add(m); g.scale.set(o.sx || 1, o.sy || 1, o.sz || 1); }
-  else if (isKit(o)) { const t = tplNow(kitId(o)); if (t) { g = t.obj.clone(true); g.scale.setScalar(o.s || 1); } else { g = new THREE.Group(); g.add(new THREE.Mesh(pg('box'), helpMat('#666', 0.5))); kitTpl(kitId(o)).then(tt => { if (tt && M.objs.includes(o)) syncObj(o); }); } }
+  else if (isKit(o)) { const t = tplNow(kitId(o)); if (t) { g = t.obj.clone(true); g.scale.setScalar(o.s || 1); } else { g = new THREE.Group(); g.add(new THREE.Mesh(pg('box'), helpMat('#666', 0.5))); kitTpl(kitId(o)).then(tt => { if (tt && (M.objs.includes(o) || RX.objs.includes(o))) syncObj(o); }); } }   // room objs (RX) too
   else if (OBJ[o.t]) { g = markerMesh(o); if (o.t === 'house') g.scale.set(o.sx || 1, 1, o.sz || 1); }
   else { g = new THREE.Group(); g.add(new THREE.Mesh(pg('box'), helpMat('#f06a6a', 0.6))); }
   const lift = o.t === 'ring' ? Math.max(1, o.y || 6) : o.t === 'light' ? (o.y == null ? 2.2 : o.y) : o.t === 'ceil' ? (o.y == null ? 21 : o.y) : o.t === 'lz' ? (o.y == null ? 22 : o.y) : (o.y || 0);
