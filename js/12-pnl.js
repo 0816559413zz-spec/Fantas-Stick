@@ -153,8 +153,13 @@ function pnPileAt(p,x,y){const ph=pnPileCols(p);if(!ph)return 0;const [u,v]=pnLo
   const f=clamp((u+p.hl)/p.cw-0.5,0,p.nc-1),i=Math.floor(f),t=f-i,hc=ph[i]+(ph[Math.min(p.nc-1,i+1)]-ph[i])*t,eu=Math.max(0,Math.abs(u)-p.hl)/S;if(eu>=1)return 0;
   const sm=e=>1-e*e*(3-2*e),av=Math.abs(v),mid=av<p.ht?0.55+0.45*av/p.ht:1;return hc*mid*sm(w)*sm(eu);}   // lower right under the wall line (holes stay passable)
 // standing on top of an upright panel (wall top, or a solid cell under a hole): height above terrain, only tops at/below z+0.5 (jump up onto it)
+// tilted panels (roofs) and lying panels (floors, tl 90°): the upper face over a solid cell is ground → break the cell = fall through
 function pnlTopH(x,y,z){if(!PNL.length)return 0;const t=pnGT(x,y),a=t+(z||0)+0.5;let g=0;
-  for(const p of sgNear(sgPnl(),x,y,0,_sgPN3)){if(p.tl)continue;const [u,v]=pnLoc(p,x,y);if(Math.abs(v)>p.ht+2||Math.abs(u)>p.hl)continue;
+  for(const p of sgNear(sgPnl(),x,y,0,_sgPN3)){
+    if(p.tl){const V2=p.V[2];if(Math.abs(V2)<0.34)continue;   // steeper than ~70°: no footing
+      const top=p.zb+((V2>0?p.ht:-p.ht)-(x-p.x)*p.V[0]-(y-p.y)*p.V[1])/(V2*20);   // upper face height on this vertical line (m)
+      if(top>a||top-t<=g)continue;const [u,w]=pnL3(p,x,y,top);if(Math.abs(u)>p.hl)continue;
+      if(pnSolid(p,pnCellUW(p,u,w)))g=top-t;continue;}const [u,v]=pnLoc(p,x,y);if(Math.abs(v)>p.ht+2||Math.abs(u)>p.hl)continue;
     const col=clamp(Math.floor((u+p.hl)/p.cw),0,p.nc-1);
     for(let r=p.nr-1;r>=0;r--){const k=r*p.nc+col;if(!pnSolid(p,k)||(r+1<p.nr&&pnSolid(p,k+p.nc)))continue;const top=p.zb+(r+1)*p.chh;if(top<=a){if(top-t>g)g=top-t;break;}}}
   return g;}

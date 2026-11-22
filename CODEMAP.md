@@ -224,10 +224,10 @@ EFSV:9 EFS:10 efsLv:11 efsBuild:12 efsBreak:28 efsRepair:29 efsDist:30 efsHeat:3
 ## js/12-fcs-bridge.js (113) — 
 BSKV:10 BSKN:11 bskBuild:14 bskGround:38 bskOutline:40 bskSegs:53 bskInPoly:63 bskCut:65 bskStage:70 bskSetSt:71 bskHit:75 bskEnv:84 bskSnap:93 bskParse:97 bskRepair:104 bskExport:106
 
-## js/12-pnl.js (215) — Breakable panels (แผ่นพัง) — Map Builder pn_wall → data.pnl (guides/D…
-PNDEF:13 PN_BODY:16 PN_CH:17 PNL:18 PNG:18 pnGT:19 sgPnl:20 _sgPN:21 _sgPN2:21 _sgPN3:21 pnlGen:22 pnLoc:34 pnWorld:35 pnCU:36 pnL3:38 pnP3:40 pnCellPos:41 pnCellUW:42 pnSolid:43 pnMark:44 pnlLinks:46 pnlSupport:64 pnEmit:72 pnBreakAll:76 pnStage:77 pnlHit:79 pnDmgCell:93 pnHitFx:98 pnlEnv:100 pnSeg:110 pnlRay:117 pnlSolidAt:122 pnlProj:125 pnlCollide:131 pnPileCols:148 pnPileAt:152 pnlTopH:156 pnlMoundH:161 pnlTick:163 pnlSnap:169 pnlParse:174
-§180 old houses → panel groups (same footprint as BLDDEF: walls wh m, gabl…
-PN_HOUSE:183 pnHouse:184 pnlHouseConv:212
+## js/12-pnl.js (220) — Breakable panels (แผ่นพัง) — Map Builder pn_wall → data.pnl (guides/D…
+PNDEF:13 PN_BODY:16 PN_CH:17 PNL:18 PNG:18 pnGT:19 sgPnl:20 _sgPN:21 _sgPN2:21 _sgPN3:21 pnlGen:22 pnLoc:34 pnWorld:35 pnCU:36 pnL3:38 pnP3:40 pnCellPos:41 pnCellUW:42 pnSolid:43 pnMark:44 pnlLinks:46 pnlSupport:64 pnEmit:72 pnBreakAll:76 pnStage:77 pnlHit:79 pnDmgCell:93 pnHitFx:98 pnlEnv:100 pnSeg:110 pnlRay:117 pnlSolidAt:122 pnlProj:125 pnlCollide:131 pnPileCols:148 pnPileAt:152 pnlTopH:157 pnlMoundH:166 pnlTick:168 pnlSnap:174 pnlParse:179
+§185 old houses → panel groups (same footprint as BLDDEF: walls wh m, gabl…
+PN_HOUSE:188 pnHouse:189 pnlHouseConv:217
 
 ## js/13-enemies.js (171) — ศัตรู (โหมด Co-op)
 spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
@@ -924,4 +924,4 @@ _dvPanel:95 _dvBtn:98 _dvBody:100 _dvHead:100 devUiApply:102 devFreeMouse:110 de
 §130 rows
 dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:193 devUiAct:200
 
-(115 files, 34311 lines)
+(115 files, 34316 lines)

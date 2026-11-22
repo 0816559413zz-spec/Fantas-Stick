@@ -759,9 +759,29 @@ cv.addEventListener('pointerdown', e => {
       else if (g && was && opt.dragMove !== 0) {   // drag only an item that was already selected (first click = select only) • Drag Move off = gizmo only
         drag = { k: 'move', gx: g.x, gz: g.z, moved: 0, group: selAll().map(q => { const it = find(q); return { k: q.k, it, o: it && q.k === 'wall' ? it.pts.map(v => v.slice()) : it ? [it.x, it.z] : null }; }).filter(q => q.it) }; }
       if (!same) renderSide(); updSel(); }
-    else if (!(e.shiftKey || e.ctrlKey || e.metaKey)) { sel = null; msel = []; renderSide(); updSel(); }
+    else { const add = e.shiftKey || e.ctrlKey || e.metaKey; if (!add) { sel = null; msel = []; renderSide(); updSel(); } drag = { k: 'box', x0: e.clientX, y0: e.clientY, add }; }   // empty space: drag = box select
   }
 });
+// box (marquee) select: drag on empty space in the Select tool • Shift/Ctrl = add to the selection • an item counts when its centre (a wall: any point) is inside
+const boxEl = document.body.appendChild(Object.assign(document.createElement('div'), { className: 'mb-box' }));
+boxEl.style.cssText = 'position:fixed;display:none;pointer-events:none;z-index:50;border:1px solid #5aa0ff;background:rgba(90,160,255,.12)';
+function boxRect(d, e) { return [Math.min(d.x0, e.clientX), Math.min(d.y0, e.clientY), Math.max(d.x0, e.clientX), Math.max(d.y0, e.clientY)]; }
+function boxDraw(d, e) { const [x0, y0, x1, y1] = boxRect(d, e); if (x1 - x0 < 4 && y1 - y0 < 4) { boxEl.style.display = 'none'; return; }
+  Object.assign(boxEl.style, { display: 'block', left: x0 + 'px', top: y0 + 'px', width: (x1 - x0) + 'px', height: (y1 - y0) + 'px' }); }
+function boxEnd(d, e) {
+  boxEl.style.display = 'none'; const [x0, y0, x1, y1] = boxRect(d, e); if (x1 - x0 < 4 && y1 - y0 < 4) return;
+  const r = cv.getBoundingClientRect(), inBox = (x, y, z) => { v3.set(x - M.W / 2, y, z - M.H / 2).project(camera); if (v3.z > 1 || v3.z < -1) return false;
+    const sx = (v3.x + 1) / 2 * r.width + r.left, sy = (1 - v3.y) / 2 * r.height + r.top; return sx >= x0 && sx <= x1 && sy >= y0 && sy <= y1; };
+  const hits = [];
+  for (const [k, key] of Object.entries(KEYS)) for (const it of M[key] || []) {
+    const ok = k === 'wall' ? (it.pts || []).some(p => inBox(p[0], (it.base != null ? it.base : MD.gh(M, p[0], p[1])) + (it.h || 0) / 2, p[1]))
+      : it.x != null && it.z != null && inBox(it.x, k === 'floor' ? (it.y || 0) : MD.gh(M, it.x, it.z) + (it.y || 0), it.z);
+    if (ok) hits.push({ k, id: it.id }); }
+  const all = d.add ? selAll().map(q => ({ k: q.k, id: q.id })) : [];
+  for (const h of hits) if (!all.some(q => sameRef(q, h))) all.push(h);
+  if (!all.length) return;
+  sel = all[all.length - 1]; msel = all.slice(0, -1); renderSide(); updSel();
+}
 cv.addEventListener('pointermove', e => {
   if (drag && (drag.k === 'orbit' || drag.k === 'pan')) {
     const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY;
@@ -781,6 +801,7 @@ cv.addEventListener('pointermove', e => {
     updSel(); }
   else if (drag && drag.k === 'fpt') { setRay(e); const g = groundHit(); if (!g) return; if (!drag.moved) { pushUndo('o'); drag.moved = 1; } drag.it.pts[drag.i] = toLocal(drag.it, clamp(snapC(g.x), 0, M.W), clamp(snapC(g.z), 0, M.H)); syncPart(drag.it); }
   else if (drag && drag.k === 'pt') { setRay(e); const g = groundHit(); if (!g) return; if (!drag.moved) { pushUndo('o'); drag.moved = 1; } drag.w.pts[drag.i] = [clamp(snapV(g.x), 0, M.W), clamp(snapV(g.z), 0, M.H)]; syncWalls(); updSel(); }
+  else if (drag && drag.k === 'box') boxDraw(drag, e);
   else if (drag && drag.k === 'ramp' && hover) drawLine([[drag.a.x, drag.a.z], [hover.x, hover.z]]);
   else if (drag && drag.k === 'floor' && hover) { const p = [[drag.a.x, drag.a.z], [hover.x, hover.z]]; drawLine(p); }
   else if ((tool === 'wall' || tool === 'pnl') && draft && hover) drawLine([...draft.pts, [hover.x, hover.z]]);
@@ -790,6 +811,7 @@ cv.addEventListener('pointermove', e => {
 cv.addEventListener('pointerup', e => {
   if (drag && drag.k === 'ramp') { if (hover && Math.hypot(hover.x - drag.a.x, hover.z - drag.a.z) > 1) { pushUndo('t'); applyRamp(drag.a, hover, opt.rad * 2); afterTerrain(); } drawLine(null); }
   else if (drag && drag.k === 'floor') { makeFloor(drag.a, hover || drag.a); drawLine(null); }
+  else if (drag && drag.k === 'box') boxEnd(drag, e);
   else if (drag && (drag.k === 'move' || drag.k === 'pt' || drag.k === 'fpt') && drag.moved) { changed(); colDirty(); renderSide(); }
   if (stroke && stroke.k === 'bd') { bdTreesBuild(); changed(); stroke = null; }
   if (stroke) { if (stroke.k !== 'scatter' && stroke.moved) afterTerrain(); else if (stroke.k === 'scatter') { changed(); colDirty(); } stroke = null; }
