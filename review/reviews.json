@@ -1,6 +1,134 @@
 {
- "next": 142,
+ "next": 150,
  "items": [
+  {
+   "id": 148,
+   "title": "เคียวรับแรงตรงปลายคม",
+   "text": "เคียวค้างปลายคมแล้วด้ามโยกรับแรงก่อนฟันผ่าน เป้าวาบขาวเมื่อโดนจริง ซ้ายวืด ขวาโดน",
+   "kind": "VFX",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-22",
+   "updated": "2026-11-22",
+   "imgs": [],
+   "links": [
+    "/shots/motion_combat_scythe_contact_brace.gif"
+   ]
+  },
+  {
+   "id": 147,
+   "title": "จังหวะคมสะดุดตอนชนเป้า",
+   "text": "ค้างคมช่วงแรกแล้วค่อยฝืนผ่านเป้า รวมแรงต้าน 140 ms มีเสียงกระแทกเมื่อโดนจริง GIF เทียบซ้ายวืด ขวาโดน",
+   "kind": "VFX",
+   "who": "Combat",
+   "status": "wait",
+   "created": "2026-11-22",
+   "updated": "2026-11-22",
+   "imgs": [],
+   "links": [
+    "/shots/motion_combat_contact_resistance_v4.gif",
+    "/shots/motion_combat_scythe_resistance_v4.gif"
+   ]
+  },
+  {
+   "id": 146,
+   "title": "แรงต้านคมจากกล้องผู้เล่น",
+   "text": "ยืดช่วงหน่วงเป็น 110 ms เกลี่ยให้เร่งผ่านเป้า และเพิ่มแรงสะท้อนกล้องเล็กน้อย ซ้ายวืด ขวาโดน ทั้งคู่ความเร็วจริง",
+   "kind": "VFX",
+   "who": "Combat",
+   "status": "wait",
+   "created": "2026-11-22",
+   "updated": "2026-11-22",
+   "imgs": [],
+   "links": [
+    "/shots/motion_combat_contact_resistance_v3.gif",
+    "/shots/motion_combat_scythe_resistance_v3.gif"
+   ]
+  },
+  {
+   "id": 145,
+   "title": "เพิ่มแรงต้านตอนคมฟันโดน",
+   "text": "ยืดช่วงหน่วงจาก 60 เป็น 90 ms คมยังขยับอยู่แล้วค่อยเร่งผ่าน ทั้งสอง GIF เป็นความเร็วจริง ซ้ายวืด ขวาโดน",
+   "kind": "VFX",
+   "who": "Combat",
+   "status": "wait",
+   "created": "2026-11-22",
+   "updated": "2026-11-22",
+   "imgs": [],
+   "links": [
+    "/shots/motion_combat_contact_resistance_v2.gif",
+    "/shots/motion_combat_scythe_resistance_v2.gif"
+   ]
+  },
+  {
+   "id": 144,
+   "title": "คมหน่วงตอนฟันโดน",
+   "text": "ซ้ายฟันวืด ขวาฟันโดน ถ่ายพร้อมกันในมุมเดียวกัน ดูช่วงที่ตัวเป้าวาบขาวแล้วคมค่อยเร่งผ่าน",
+   "kind": "VFX",
+   "who": "Combat",
+   "status": "wait",
+   "created": "2026-11-22",
+   "updated": "2026-11-22",
+   "imgs": [],
+   "links": [
+    "/shots/motion_combat_contact_compare.gif",
+    "/shots/motion_combat_contact_compare_slow.gif",
+    "/shots/motion_combat_scythe_compare.gif",
+    "/shots/motion_combat_nature_dash_ba.gif",
+    "/shots/motion_combat_nightfall_contact.gif"
+   ]
+  },
+  {
+   "id": 143,
+   "title": "จังหวะปะทะ กล้อง และบั๊กข้ามคลาส",
+   "text": "ดูช่วงวาบแล้วกระเด็น จังหวะคมโดนและกล้องเปิดตอนปล่อย รวมคลิปแก้ Wind, Aqua Cage, Long Dash, Stonebreaker, Nature และ Radiance",
+   "kind": "VFX",
+   "who": "Combat",
+   "status": "wait",
+   "created": "2026-11-22",
+   "updated": "2026-11-22",
+   "imgs": [],
+   "links": [
+    "/shots/motion_combat_blade_finish.gif",
+    "/shots/motion_combat_whip_finish.gif",
+    "/shots/motion_combat_wind_shield.gif",
+    "/shots/motion_combat_aqua_cage.gif",
+    "/shots/motion_combat_dark_dash.gif",
+    "/shots/motion_combat_stonebreaker_wall.gif",
+    "/shots/motion_combat_sword_contact.gif",
+    "/shots/motion_combat_nature_ba.gif",
+    "/shots/motion_combat_radiance_camera.gif"
+   ]
+  },
+  {
+   "id": 142,
+   "title": "ลด VFX ซ้อนในไฟต์ทุกสาย",
+   "text": "ลดอนุภาค หมอก และแฟลชในแมตช์ เห็นวงเตือนและขอบเขตของสกิลหลักเหมือนเดิม",
+   "kind": "VFX",
+   "who": "Combat",
+   "status": "wait",
+   "created": "2026-11-22",
+   "updated": "2026-11-22",
+   "imgs": [
+    "/shots/combat_vfx_full_64.jpg",
+    "/shots/combat_vfx_clear_64.jpg"
+   ],
+   "links": []
+  },
+  {
+   "id": 149,
+   "title": "อาวุธและเอฟเฟกต์สลายตอนตาย",
+   "text": "เคียว ไม้กายสิทธิ์ และเอฟเฟกต์ของผู้ร่ายลอยและค่อย ๆ จางหลังตัวละครล้ม",
+   "kind": "VFX",
+   "who": "Combat",
+   "status": "wait",
+   "created": "2026-11-22",
+   "updated": "2026-11-22",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_death_fade_tdm.gif"
+   ]
+  },
   {
    "id": 140,
    "title": "ลดงาน VFX เคียว Darkness และ Shard Storm",

@@ -20,11 +20,11 @@ function waterCharacterPose(o,p,dt,now){
   if(o.wmb!==undefined&&waterMoonPose(o,p,dt))return;
   const A=p.wt;
   if(!A||!p.al||p.dn||p.fl||p.st){o.wBeamPose=null;return;}
-  if(A[10]||o.cageToss>0){
-    const charge=clamp(A[10]/100||0,0,1),toss=o.cageToss>0?1-o.cageToss/0.32:0;
+  if(A[10]||A[11]||o.cageToss>0){
+    const charge=A[11]?1:clamp(A[10]/100||0,0,1),toss=o.cageToss>0?1-o.cageToss/0.32:0;
     o.cageToss=Math.max(0,(o.cageToss||0)-dt);
     const pose=[lerp(-0.65,-1.9,_cs(Math.min(1,toss*4))),lerp(-1.15,-0.12,toss),lerp(0.65,-0.35,toss),0.1,-0.8,0.4,0.05,0];
-    characterStance(o,pose,null,A[10]?Math.min(1,charge*7):1-_cs(toss));return;
+    characterStance(o,pose,null,A[10]||A[11]?Math.min(1,charge*7):1-_cs(toss));return;
   }
   let s=o.wBeamPose;
   if(A[7]){

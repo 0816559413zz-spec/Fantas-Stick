@@ -18,24 +18,29 @@ const PARTS=[],TEXTS=[];let shakeA=0;
 // (k>1 = เฟรมช้า → เพิ่มให้ได้ถึง VFXB.up เท่า เฉพาะกราฟิกสูง/อัตโนมัติที่ยังไม่ลดระดับ) • นอก render (อีเวนต์ fx จาก snapshot) k = 1 เสมอ
 // เอฟเฟกต์ครั้งเดียว: burst ≥ 6 ชิ้น และ later() ไม่ถูกหาร • ชั้นเสริม (ประกาย/ฝุ่นแสง/หมอกบาง ๆ) เช็ก vfxExtra() ก่อนสร้าง
 const VFXB={k:1,on:false,up:1,cap:8000,mul:1,stat:{in:0,kept:0}};
+const combatFxParams=new URLSearchParams(location.search);
+const FULL_COMBAT_VFX=combatFxParams.has('fullvfx')||combatFxParams.has('studio');
+const combatVfxReduced=()=>screen==='game'&&!FULL_COMBAT_VFX;
 const _apush=Array.prototype.push;
 PARTS.push=function(){
-  const k=VFXB.k;
+  const k=VFXB.k,reduced=combatVfxReduced();
   for(let i=0;i<arguments.length;i++){const p=arguments[i];VFXB.stat.in++;
     if(k<1){if(Math.random()>=k)continue;}
+    if(reduced){const duration=p.smoke?.55:.70;p.life*=duration;p.max=(p.max||p.life/duration)*duration;}
     _apush.call(this,p);VFXB.stat.kept++;
     if(k>1&&Math.random()<k-1){const q=Object.assign({},p);q.x+=rnd(-3,3);q.y+=rnd(-3,3);q.life*=rnd(0.6,1);_apush.call(this,q);VFXB.stat.kept++;}}
   return this.length;};
 function vfxQual(){const m=QUAL.mode,cs=qualCS();return cs>=2?{mul:0.35,cap:1200,up:1}:cs?{mul:0.5,cap:2500,up:1}:m==='high'?{mul:1,cap:8000,up:2}:QUAL.lvl>=1||QUAL.scale<0.8?{mul:0.7,cap:5000,up:1}:{mul:1,cap:8000,up:1.5};}
 // เรียกต้น render ในเกม: ตั้งตัวคูณการปล่อยของเฟรมนี้
 function vfxBegin(dt){const q=vfxQual();VFXB.cap=q.cap;VFXB.mul=q.mul;VFXB.up=q.up;
-  const fill=PARTS.length/q.cap,soft=fill<0.6?1:Math.max(0.12,(1-fill)/0.4);
-  VFXB.k=Math.min(q.up,dt*60)*q.mul*soft;VFXB.on=true;}
+  if(combatVfxReduced()){VFXB.cap=Math.min(VFXB.cap,3000);VFXB.mul*=.50;VFXB.up=1;}
+  const fill=PARTS.length/VFXB.cap,soft=fill<0.6?1:Math.max(0.12,(1-fill)/0.4);
+  VFXB.k=Math.min(VFXB.up,dt*60)*VFXB.mul*soft;VFXB.on=true;}
 function vfxEnd(){VFXB.k=1;VFXB.on=false;}
 // ทำส่วนที่เป็น "ครั้งเดียว" ภายใน render โดยไม่โดนหาร
 function vfxOnce(fn){const k=VFXB.k;VFXB.k=1;try{fn();}finally{VFXB.k=k;}}
 // ชั้นเสริมสวยงาม — ข้ามเมื่อกราฟิกประหยัด หรืออัตโนมัติลดระดับแล้ว
-function vfxExtra(){return VFXB.mul>=1;}
+function vfxExtra(){return !combatVfxReduced()&&VFXB.mul>=1;}
 const PCOL={nature_thorn: PDEF.nature_thorn.col,nature_pea: PDEF.nature_pea.col,bolt:'#ffe27a',fire:'#ff6a2a',stun:'#5ad1ff',pull:'#c77dff',ebolt:'#7dff6a',web:'#e8e8f0',ice:'#9fe8ff',zap:'#fff27a',vine:'#6fd57f',dart:'#b6e86a',hex:'#b57dff',ember:'#ff9a4a',spike:'#d8f4ff',pb0:'#ff8a3a',pb1:'#9fe8ff',pb2:'#fff27a',pb3:'#8ef07a',pb4:'#b57dff',pb5:'#ff9ad5',spark:'#ffb347',pfire:'#ff6a2a',pfireb:'#ff5a1a',icicle:'#bfeaff',iceboulder:'#9fe0ff'};
 
 function setScreen(s){
@@ -145,6 +150,7 @@ function myPos(){const v=VIEW.cur;return v?v.P.find(p=>p.id===NET.myId):null;}
 const SMOKE_K=0.4;let _bskD=0;
 function burst(x,y,col,n,sp,life,size,o){
   o=o||{};
+  if(!_bskD&&combatVfxReduced()&&n>=6&&!o.hit)n=Math.max(3,Math.round(n*(o.smoke?.34:.46)));
   if(o.smoke&&!_bskD){const m=n*SMOKE_K;n=Math.floor(m)+(Math.random()<m%1?1:0);if(n<=0)return;}
   if(n>=6&&VFXB.k!==1){const k=VFXB.k;VFXB.k=1;_bskD++;try{burst(x,y,col,n,sp,life,size,o);}finally{VFXB.k=k;_bskD--;}return;}   // burst ใหญ่ = เอฟเฟกต์ครั้งเดียว ไม่หาร
   for(let i=0;i<n;i++){
@@ -159,6 +165,27 @@ function smoke(x,y,h,n,col,life,size,sp){burst(x,y,col||'#3a3640',n,sp||60,life|
 function ring(x,y,col,r,life,h){SHAPES_Q.push({k:'ring',x,y,h:h!==undefined?h:0.15,col,s1:r*S3,life});}
 function floatText(x,y,t,col,size,h){TEXTS.push({x:x+rnd(-8,8),y,h,t:String(t),col,size:size||16,life:0.9,max:0.9});}
 function shake(a){if(!SET.shake)return;shakeA=Math.max(shakeA,a);}
+function weaponContactAge(age,at,resistance=.140,hold=.042){
+  const elapsed=age-at;
+  if(elapsed<=0)return age;
+  const ramp=.025,speed=.09;
+  const drift=Math.max(0,elapsed-hold)*speed;
+  if(elapsed<resistance)return at+drift;
+  const release=elapsed-resistance;
+  const heldTravel=(resistance-hold)*speed;
+  if(release<ramp){
+    const u=release/ramp;
+    return at+heldTravel+ramp*(speed*u+(1-speed)*(u**3-.5*u**4));
+  }
+  const recover=clamp((release-ramp)/.145,0,1);
+  const lag=resistance-heldTravel+(1-speed)*ramp*.5;
+  return age-lag*(1-recover*recover*(3-2*recover));
+}
+function weaponImpactAge(record,age,contact,previous,resistance,hold){
+  if(!record)return age;
+  record.anchor??=Math.max(contact,Math.min(age,previous??contact));
+  return weaponContactAge(age,record.anchor,resistance,hold);
+}
 function wandPos(ev){if(ev.tipd)return [ev.x,ev.y];const a=ev.a||0;return [ev.x+Math.cos(a)*24-Math.sin(a)*6,ev.y+Math.sin(a)*24+Math.cos(a)*6];}
 
 function impactFX(x,y,t,onTarget,H){
@@ -256,20 +283,24 @@ function updateIceFloors(dt){
     if(v.age>=v.t){scene.remove(v.g);v.mats.forEach(([m])=>m.dispose());ICEV.splice(i,1);}
   }
 }
-// โดนตี: ตัวละครกระพริบขาวแว้บเดียว (สลับวัสดุเป็นสีขาวชั่วคราว ~3 เฟรม แล้วคืนของเดิม)
+// One short body flash per impact. Damage ticks cannot keep extending it.
 let FLASHM=null;
 const FLASHING=new Set();
-function flashModel(o){
+function flashModel(o,duration=.042){
   if(!o||!o.g)return;
   o.hitT=0.25;
-  if(o.flashT>0){o.flashT=0.1;return;}
-  if(!FLASHM){FLASHM=new THREE.MeshBasicMaterial({color:hdr('#ffffff',1.7)});FLASHM.userData.keep=true;}
-  o.flashT=0.1;o.flashSaved=[];
-  o.g.traverse(m=>{if(m.isMesh&&!m.isInstancedMesh&&m.material&&!Array.isArray(m.material)&&!m.material.transparent){o.flashSaved.push([m,m.material]);m.material=FLASHM;}});
+  if(o.flashT>0){if(duration>o.flashT&&duration>.042){o.flashT=duration;o.flashFresh=true;}return;}
+  if(!FLASHM){FLASHM=new THREE.MeshBasicMaterial({color:hdr('#ffffff',1.15)});FLASHM.userData.keep=true;}
+  o.flashT=duration;o.flashFresh=true;o.flashSaved=[];
+  (o.fileModel||o.b||o.g).traverse(m=>{
+    if(!m.isMesh||m.isInstancedMesh||!m.material||m.layers.mask>>>0===0x80000000||m.material.transparent)return;
+    if(Array.isArray(m.material)&&m.material.some(mat=>mat.transparent))return;
+    o.flashSaved.push([m,m.material]);m.material=FLASHM;
+  });
   FLASHING.add(o);
 }
-function endFlash(o){if(!o.flashSaved)return;for(const [m,mat] of o.flashSaved)m.material=mat;o.flashSaved=null;o.flashT=0;FLASHING.delete(o);}
-function tickFlash(dt){for(const o of FLASHING){o.flashT-=dt;if(o.flashT<=0)endFlash(o);}}
+function endFlash(o){if(!o.flashSaved)return;for(const [m,mat] of o.flashSaved)if(m.material===FLASHM)m.material=mat;o.flashSaved=null;o.flashT=0;o.flashFresh=false;FLASHING.delete(o);}
+function tickFlash(dt){for(const o of FLASHING){if(o.flashFresh){o.flashFresh=false;continue;}o.flashT-=dt;if(o.flashT<=0)endFlash(o);}}
 // ร่างผี: สลับเป็นวัสดุโปร่งแสง (ไม่แก้วัสดุเดิม เพราะวัสดุใช้ร่วมกันหลายตัวละคร) — วัสดุที่แชร์ได้ผีแบบแชร์ด้วย
 const GHOSTM=new WeakMap(),SOLIDM=new WeakMap();
 function ghostOf(mat){
@@ -286,4 +317,8 @@ function setGhost(o,on){
     else if(SOLIDM.has(m)){const gm=m.material;m.material=SOLIDM.get(m);SOLIDM.delete(m);if(!gm.userData.keep)gm.dispose();}
   });
 }
-function hitSparks(x,y,h,n){const k=Math.min(2,0.6+(n||5)/25);burst(x,y,'#ffffff',Math.round(8*k),260,0.22,2.4,{h,g:5,sh:2,c2:'#ffb060'});burst(x,y,'#ffd9a0',Math.round(5*k),160,0.3,2.6,{h,g:4,sh:1,vr:4,c2:'#ff8a3a'});FX.flashSprite(x,y,h,'#ffffff',0.2,1.1*k,0.08,1.6);}
+function hitSparks(x,y,h,n,a){
+  const heavy=n>=35,offset=a===undefined?0:5;
+  burst(x-Math.cos(a||0)*offset,y-Math.sin(a||0)*offset,'#fff2d2',heavy?8:5,heavy?215:150,.22,heavy?2.8:2.3,
+    {h:Math.max(.2,h),a,spread:.75,vh:[.15,2.8],g:5,sh:2,c2:'#ff9c56',hit:true});
+}

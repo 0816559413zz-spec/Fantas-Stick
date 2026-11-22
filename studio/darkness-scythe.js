@@ -658,7 +658,7 @@ function stCreateScythePreview(root,args,lifetime){
   const trailFadeAt=trailHoldAt+.30*ST_DARK_LIVE_BA.rate;
   const trailEnd=cutEnd+.12+(HH-1)*trailStep;
   const trailSamples=Array.from({length:HH},()=>({pos:new THREE.Vector3(),QB:new THREE.Quaternion(),act:0,shaft:true}));
-  const groundTip=new THREE.Vector3();
+  const groundTip=new THREE.Vector3(),braceTip=new THREE.Vector3(),braceWorld=new THREE.Vector3();
   function groundBlade(space,pos,q,contact){
     const [x,y]=bladePt(1,.45);
     groundTip.set(x*S,y*S,0).applyQuaternion(q).add(pos);
@@ -695,6 +695,13 @@ function stCreateScythePreview(root,args,lifetime){
         pivot.quaternion.copy(Qi).slerp(P.QB,P.w);
       }
       pivot.position.lerp(P.pos,P.w);}
+      if(args.liveBA&&args.contactBrace>0&&stScyLines){
+        const [x,y]=bladePt(1,.45);
+        braceTip.set(x*S,y*S,0).multiply(pivot.scale);
+        braceWorld.copy(braceTip).applyQuaternion(pivot.quaternion);
+        pivot.rotateZ(-.14*(args.baSide??1)*args.contactBrace);
+        pivot.position.add(braceWorld.sub(braceTip.applyQuaternion(pivot.quaternion)));
+      }
       if(args.groundBA&&stScyLines&&swing>=SW0+WU&&swing<cutEnd+HOLD)groundBlade(root,pivot.position,pivot.quaternion,swing>=groundCueAt);
       const me=standaloneBA&&typeof PM3!=='undefined'&&PM3.get(NET.myId);if(me&&me.b){me.b.userData.scyY??=me.b.rotation.y;me.b.rotation.y=me.b.userData.scyY+P.tw;}   // ตัวบิดตามแรงเหวี่ยง
 

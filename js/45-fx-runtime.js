@@ -111,7 +111,7 @@ function updateFx(dt){fxMPUpdate(dt);if(!FXR.inst.length)return;
     I.kids=I.kids.filter(c=>FXR.inst.includes(c));if(I.kids.length)alive=true;
     if(!alive){FXR.inst.splice(i,1);}}}
 // ---------- สร้างชั้น ----------
-function fxN(I,n){return Math.max(0,Math.round(n*I.cnt*I.k*Math.min(2,I.s)*(I.far?0.5:1)));}
+function fxN(I,n){return Math.max(0,Math.round(n*I.cnt*I.k*Math.min(2,I.s)*(I.far?0.5:1)*(combatVfxReduced()?.48:1)));}
 function fxSpawn(S,I,w){const L=S.d,g=k=>fxG(L,k),V=(k,q)=>fxV(g(k),I,q||0),C=k=>fxCol(g(k),I);
   switch(L.t){
     case 'flash':case 'halo':vfxOnce(()=>FX.flashSprite(w[0],w[1],w[2],C('col'),V('size0')*I.s,V('size')*Math.min(1.5,I.s),S.life,g('k')*Math.min(1.3,I.k)));S.oneshot=1;break;
@@ -148,12 +148,12 @@ function fxSpawn(S,I,w){const L=S.d,g=k=>fxG(L,k),V=(k,q)=>fxV(g(k),I,q||0),C=k=
 // ชั้นแบบยิงครั้งเดียว (helper ของเกมจัดการอายุเอง) — ถือว่ามีชีวิตจนครบ life เพื่อให้ไทม์ไลน์/ตัวนับตรง
 function fxTick(S,I,k,dt){const L=S.d;if(S.oneshot)return;const g=q=>fxG(L,q),V=(q)=>fxV(g(q),I,k);
   switch(L.t){
-    case 'light':{const w=fxPos(I,S,k);LREQ.push({x:tx(w[0]),y:w[2],z:tz(w[1]),col:fxCol(g('col'),I),int:V('int')*I.k,dist:V('dist')*Math.sqrt(I.s)});break;}
+    case 'light':{const w=fxPos(I,S,k),clarity=combatVfxReduced()?.62:1;LREQ.push({x:tx(w[0]),y:w[2],z:tz(w[1]),col:fxCol(g('col'),I),int:V('int')*I.k*clarity,dist:V('dist')*Math.sqrt(I.s)});break;}
     case 'emit':{const rate=V('rate')*(L.look==='smoke'?SMOKE_K:1);if(rate>0){S.acc+=rate*dt*I.cnt*I.k*(I.far?0.5:1);const n=Math.floor(S.acc);if(n>0){S.acc-=n;const w=fxPos(I,S,k),kq=VFXB.k;VFXB.k=VFXB.on?VFXB.mul:1;try{fxEmit(S,I,n,w,k);}finally{VFXB.k=kq;}}}break;}
     case 'mesh':fxMeshTick(S,I,k,dt);break;
     case 'warp':fxWarpTick(S,I,k,g,V);break;
     case 'vol':fxVolTick(S,I,k,g,V);break;
-    case 'firevol':{const u=S.obj.userData.u,w=fxPos(I,S,k);fxPlace(S.obj,I,S,w,fxV(g('yaw'),I,k)*FXDEG);u.uH.value=Math.max(0.01,fxV(g('hgt'),I,k));u.uDis.value=fxV(g('dis'),I,k);u.uInt.value=fxV(g('int'),I,k)*I.k;break;}
+    case 'firevol':{const u=S.obj.userData.u,w=fxPos(I,S,k);fxPlace(S.obj,I,S,w,fxV(g('yaw'),I,k)*FXDEG);u.uH.value=Math.max(0.01,fxV(g('hgt'),I,k));u.uDis.value=fxV(g('dis'),I,k);u.uInt.value=fxV(g('int'),I,k)*I.k*(combatVfxReduced()?.66:1);break;}
     case 'trail':fxTrailTick(S,I,k);break;
     case 'bolt':{const r=g('rate');if(r>0){S.acc+=r*dt;while(S.acc>=1){S.acc-=1;fxBolt(S,I,fxPos(I,S,k));}}break;}
   }}

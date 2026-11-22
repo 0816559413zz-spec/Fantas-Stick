@@ -99,14 +99,14 @@ function skillPose(o,p,dt,now){
   const R=o.armR.rotation,L=o.armL.rotation,c=o.cpb||(o.cpb=[R.x,R.z,o.b.rotation.y,0,L.x,L.z,0,0]);
   const rest=_caR;rest[0]=R.x;rest[1]=R.z;rest[2]=o.b.rotation.y;rest[3]=0;rest[4]=L.x;rest[5]=L.z;rest[6]=0;rest[7]=0;
   if(o.caT<=dt)for(let i=0;i<8;i++)c[i]=rest[i];
-  const w=Math.min(1,u/0.06)*(u<0.75?1:1-_cs((u-0.75)/0.25));   // เข้าท่าเร็ว จบแล้วคืนท่านุ่ม ๆ
+  const w=_cs(Math.min(1,u/0.06))*(u<0.76?1:1-_cs((u-0.76)/0.24));
   let j=0;while(j<A.k.length-1&&u>A.k[j][0])j++;
   const K=A.k[j],P=j?A.k[j-1]:null,u0=P?P[0]:0,f=Math.min(1,(u-u0)/Math.max(0.001,K[0]-u0)),e=K[9]==='o'?_cb(f):_cs(f);
   for(let i=0;i<8;i++){const a=lerp(P?P[i+1]:rest[i],K[i+1],e);_caT[i]=lerp(rest[i],rest[i]+(a-rest[i])*AMP_S[i],w);}
   _caT[0]=Math.max(-3.35,_caT[0]);_caT[4]=Math.max(-3.35,_caT[4]);
   if(A.ci&&u>A.ci[0]&&u<A.ci[1]){const q=(u-A.ci[0])/(A.ci[1]-A.ci[0])*Math.PI*2;_caT[0]+=0.32*Math.sin(q)*w;_caT[1]+=0.32*(Math.cos(q)-1)*w;}   // วนไม้เป็นวง
   if(A.tm&&u>A.tm[0]&&u<A.tm[1]){const tr=(Math.sin(now/23)+Math.sin(now/37))*0.03*w;_caT[0]+=tr;_caT[4]+=tr;_caT[3]+=tr*0.3;}   // เกร็งสั่น (ออกแรง)
-  const r=Math.min(1,dt*30);for(let i=0;i<8;i++)c[i]+=(_caT[i]-c[i])*r;
+  const r=1-Math.exp(-dt*(K[9]==='o'?60:34));for(let i=0;i<8;i++)c[i]+=(_caT[i]-c[i])*r;
   R.x=c[0];R.z=c[1];o.b.rotation.y=c[2];o.b.rotation.x+=c[3];L.x=c[4];L.z=c[5];o.b.rotation.z=c[6];o.b.position.y+=c[7];
   if(A.two&&(!Array.isArray(A.two)||u>=A.two[0]&&u<=A.two[1]))wandTwoHand(o,w);   // ท่าสองมือ: ปล่อยมือได้เมื่อพ้นช่วงจับไม้
   const ks=A.k[0][0],st=A.st*w*(u<ks?0:Math.min(1,(u-ks)/0.15));
@@ -159,23 +159,23 @@ function castPose0(o,p,v,dt,now){
   if(!(o.cpT>0)){if(o.bz){o.b.rotation.z=0;o.bz=0;}c[0]=R.x;c[1]=R.z;c[2]=o.b.rotation.y;c[3]=0;c[4]=L.x;c[5]=L.z;if(o.ctr){trailStop(o.ctr);o.ctr=null;}return;}
   o.cpT-=dt;const k=1-Math.max(0,o.cpT)/CPOSE_T,K=CPOSE[o.cpS|0]||CPOSE[0];
   // host ปล่อยลูกเวททันทีที่กด → ง้างสั้นมาก (0.06 วิ) แล้วฟาดทันที (0.1 วิ) ให้ลูกเวทออกตอนไม้ฟาด • ตามแรงยาว
-  const k0=0.15,k1=0.42,w=Math.min(1,k/0.05)*(k<0.6?1:1-_cs((k-0.6)/0.4));
+  const k0=0.10,k1=0.30,hold=0.42,w=Math.min(1,k/0.04)*(k<0.62?1:1-_cs((k-0.62)/0.38));
   const T=_cpT,rest=_cpR;rest[0]=R.x;rest[1]=R.z;rest[2]=o.b.rotation.y;rest[3]=0;rest[4]=L.x;rest[5]=L.z;
   for(let i=0;i<6;i++){let a;
     if(k<k0)a=lerp(rest[i],K[0][i],_ce(k/k0));
     else if(k<k1)a=lerp(K[0][i],K[1][i],_cb((k-k0)/(k1-k0)));
-    else a=lerp(K[1][i],K[2][i],_ce((k-k1)/(1-k1)));
+    else a=lerp(K[1][i],K[2][i],_cs(clamp((k-hold)/(1-hold),0,1)));
     a=rest[i]+(a-rest[i])*AMP_B[i];T[i]=lerp(rest[i],a,w);}
   T[0]=Math.max(-3.35,T[0]);T[4]=Math.max(-3.35,T[4]);
   if((o.cpS|0)===1){if(k<k1){const u=k/k1*Math.PI*2;T[0]+=0.3*Math.sin(u)*w;T[1]+=0.3*(Math.cos(u)-1)*w;}}   // วนข้อมือเป็นวงแล้วสะบัด
-  const r=Math.min(1,dt*32);for(let i=0;i<6;i++)c[i]+=(T[i]-c[i])*r;   // ลื่นเวลาร่ายรัว ๆ (ท่าใหม่เริ่มก่อนท่าเก่าจบ)
+  const r=1-Math.exp(-dt*(k>=k0&&k<hold?65:31));for(let i=0;i<6;i++)c[i]+=(T[i]-c[i])*r;
   R.x=c[0];R.z=c[1];o.b.rotation.y=c[2];o.b.rotation.x+=c[3];L.x=c[4];L.z=c[5];
   if((o.cpS|0)===3)wandTwoHand(o,w);   // ลูกไฟชาร์จ: ดันด้วยไม้สองมือ
   {const bell=k<k0?0:Math.sin(Math.min(1,(k-k0)/(1-k0))*Math.PI)*w;o.b.position.y-=0.08*bell;o.b.rotation.z=(CP_BEND[o.cpS|0]||0)*bell;o.bz=1;}   // ทิ้งน้ำหนักตัวลงตอนฟาด + เอียงตามแรง
   const st=CP_STEP[o.cpS|0]*w*(k<k0?0:k<k1?_cs((k-k0)/(k1-k0)):1);
   if(st>0.01&&v.sp<0.6){o.legs[1].rotation.x=-0.42*st;o.legs[0].rotation.x=0.3*st;}
   // หางแสงบาง ๆ จากปลายไม้ตอนฟาด
-  if(k>0.08&&k<0.55){if(!o.ctr){const col=CPCOL[getKit(p.id).path]||'#ffffff';o.ctr=trailNew({col:'#ffffff',col2:col,w:0.05,life:0.16,k:1.3});}
+  if(k>=k0&&k<k1+.06){if(!o.ctr){const col=CPCOL[getKit(p.id).path]||'#ffffff';o.ctr=trailNew({col:'#ffffff',col2:col,w:0.05,life:0.16,k:1.3});}
     o.tip.updateWorldMatrix(true,false);o.tip.getWorldPosition(_tv1);trailPoint(o.ctr,_tv1.x,_tv1.y,_tv1.z);}
   else if(o.ctr){trailStop(o.ctr);o.ctr=null;}
 }
@@ -183,6 +183,15 @@ function clearCharacterCast(o){
   o.caN=null;o.cpT=0;o.castT=0;o.cgd=0;o.gw=0;o.bz=1;o.wBeamPose=null;o.wnPose=null;
   if(o.ctr){trailStop(o.ctr);o.ctr=null;}
   if(o.wWings){const d=o.wWings.userData;d.ul=d.fk=-1;}
+}
+function hitRecoilPose(o,dt){
+  if(o.recoilT===undefined)return;
+  const t=o.recoilT=Math.min(.19,o.recoilT+dt);
+  if(t>=.19){o.recoilT=undefined;return;}
+  const a=o.recoilAngle===undefined?-Math.PI/2:o.recoilAngle+o.g.rotation.y;
+  const w=o.recoilPower*(t<.032?_cs(t/.032):1-_cs((t-.032)/.158));
+  o.b.rotation.x+=Math.sin(a)*w;
+  o.b.rotation.z-=Math.cos(a)*w;
 }
 function syncPlayers(P,mode,now,dt){
   const seen=new Set(),myP=P.find(q=>q.id===NET.myId),meGhost=!!(myP&&myP.gh);
@@ -193,8 +202,11 @@ function syncPlayers(P,mode,now,dt){
     const posePath=getKit(p.id).path;
     // ทำก่อนทางแยกคนตาย: ช่วง ragdoll ไม่เดินนาฬิกาท่าร่าย มิฉะนั้นจะเล่นท่าเดิมต่อเมื่อเกิดใหม่
     if(!p.al||p.dn||o.posePath!==undefined&&o.posePath!==posePath||p.st&&!o.poseStunned)clearCharacterCast(o);
+    if(!p.al||p.dn)o.recoilT=undefined;
+    if(!p.al&&!(o.deathImpact&&o.flashT>0))endFlash(o);
     o.posePath=posePath;o.poseStunned=!!p.st;
     const g=o.g;
+    deathVisualSync(o,p,g.visible);
     g.visible=p.al&&!(p.iv&&!p.ds&&!(p.fr&&(p.fr[3]&2))&&Math.floor(now/80)%2===0);
     // ผี (หาลอร์ดโวลเดอมอร์): คนเป็นมองไม่เห็นผี / ผีเห็นกันเป็นเงาจางๆ
     if(p.gh&&!meGhost){g.visible=false;const l=LGV.st.get(p.id);if(l)lgClear(l);continue;}
@@ -235,7 +247,7 @@ function syncPlayers(P,mode,now,dt){
       const wfly=hoverPose||p.wn&&p.wn[5]>=1;if(!wfly)o.walk+=dt*v.sp*0.8;   // บิน Featherwing: ไม่ก้าวขา ไม่มีเสียงเท้า
       const sw=wfly?0:Math.sin(o.walk)*Math.min(1,v.sp/5);
       if(p.dn){o.b.rotation.x=-1.4;o.b.position.y=0.4;}
-      else{o.b.rotation.x=p.ds?0.4:Math.min(0.12,v.sp*0.01);o.b.position.y=wfly?0:Math.abs(Math.cos(o.walk))*0.05*Math.min(1,v.sp/5);}
+      else{o.b.rotation.x=p.ds?0.4:wfly?0:Math.min(0.12,v.sp*0.01);o.b.position.y=wfly?0:Math.abs(Math.cos(o.walk))*0.05*Math.min(1,v.sp/5);}
       o.legs[0].rotation.x=sw*0.75;o.legs[1].rotation.x=-sw*0.75;
       o.legs[0].rotation.z=o.legs[1].rotation.z=0;
       o.armL.rotation.x=-sw*0.55;o.armL.rotation.z=0.15;
@@ -277,9 +289,13 @@ function syncPlayers(P,mode,now,dt){
     natHookPose(o);natEmpPose(o);   // Nature Dash / thorn line poses must run before rigSync or the rigged arm never sees them
     const domeKnee=stormDomePose(o,p,pz,now);
     const whip=p.nt?.[0];
-    const activeWhip=whip&&!p.dn&&!p.fl&&!whip[4]?{start:whip[0],age:whip[1],side:whip[2],angle:whip[3]}:null;   // empowered swings draw their own effect (js/68-nature-view)
+    const whipImpact=o.weaponContact?.kind==='whip'&&o.weaponContact.swing===whip?.[0]?o.weaponContact:null;
+    const activeWhip=whip&&!p.dn&&!p.fl&&!whip[4]?{start:whip[0],
+      age:weaponImpactAge(whipImpact,whip[1],NATURE_WHIP.impact,o.whipStart===whip[0]?o.whipRawAge:0),side:whip[2],angle:whip[3]}:null;
+    if(whip){o.whipStart=whip[0];o.whipRawAge=whip[1];}
     if(activeWhip)natureWhipPose(o,activeWhip);
     else if(o.natureWhipView?.vine.visible)o.armR.rotation.y=0;
+    hitRecoilPose(o,dt);
     lightHeadPose(o);
     if(o.rig){rigSync(o,dt);windForearm(o);stormBowForearm(o);earthFistForearm(o);natForearmR(o);if(domeKnee)dpKnees(o,0,domeKnee);}
     if(activeWhip||o.natureWhipView)natureWhipView(o,activeWhip);

@@ -38,6 +38,7 @@ const RAGMIN=[[12,14,0.55,12,13],[16,18,0.55,16,17],[4,6,0.35,4,5],[8,10,0.35,8,
 // ข้อพับทางเดียว: [ต้น, ข้อ, ปลาย, ฐานลำตัว 'L'/'U', ทิศ (+1 = ข้อพับไปหน้า เช่นเข่าดันไปหน้า, -1 = ข้อศอกพับไปหลัง)]
 const RAGHINGE=[[12,13,14,'L',1],[16,17,18,'L',1],[4,5,6,'U',-1],[8,9,10,'U',-1]];
 const _rv1=new THREE.Vector3(),_rv2=new THREE.Vector3(),_rv3=new THREE.Vector3(),_rqa=new THREE.Quaternion(),_rqb=new THREE.Quaternion(),_rm=new THREE.Matrix4();
+const _ragFw=new THREE.Vector3();
 function ragBones(o){
   if(o.ragB!==undefined)return o.ragB;
   const inst=o.fileModel;if(!inst)return null;
@@ -76,12 +77,19 @@ function ragStart(o,p,mode,now){
   // ความเร็วเริ่ม = ความเร็วตัว + แรงผลักออกจากทิศที่โดนตี (ส่วนบนโดนมากสุด → ล้มหงาย/คว่ำตามทิศ)
   const bv=new THREE.Vector3(o.svx||0,0,o.svz||0);if(bv.length()>30)bv.setLength(30);
   const h=o.lhit&&now-o.lhit.t<1500?o.lhit:null;
+  const fatal=mode==='dead'?o.deathImpact:null;
   let dx=0,dz=0;
-  if(h&&h.sx!==undefined){dx=p.x-h.sx;dz=p.y-h.sy;}else if(bv.lengthSq()>1){dx=bv.x;dz=bv.z;}else{dx=-fw.x;dz=-fw.z;}
+  if(Number.isFinite(fatal?.angle)){dx=Math.cos(fatal.angle);dz=Math.sin(fatal.angle);}
+  else if(h&&h.sx!==undefined){dx=p.x-h.sx;dz=p.y-h.sy;}else if(bv.lengthSq()>1){dx=bv.x;dz=bv.z;}else{dx=-fw.x;dz=-fw.z;}
   const dl=Math.hypot(dx,dz)||1;dx/=dl;dz/=dl;
   const UP=[0.35,1,1,1.1,1,1,1,1,1,1,1,1,0.1,0.05,0,0,0.1,0.05,0,0];
-  const push=mode==='knock'?0:RAG.PUSH*(0.85+Math.random()*0.3);
-  R.V=R.P.map((_,i)=>new THREE.Vector3(bv.x*(mode==='knock'&&UP[i]>0.5?RAG.KNOCK_LEAD:1)+dx*push*UP[i]+rnd(-0.4,0.4),(mode==='knock'?0:1.2*UP[i])+rnd(-0.2,0.2),bv.z*(mode==='knock'&&UP[i]>0.5?RAG.KNOCK_LEAD:1)+dz*push*UP[i]+rnd(-0.4,0.4)));
+  const push=mode==='knock'?0:fatal?clamp(5+(fatal.power||0)*.12,6.5,12):RAG.PUSH*(0.85+Math.random()*0.3);
+  if(fatal)bv.multiplyScalar(.18);
+  R.V=R.P.map((_,i)=>{
+    const weight=fatal?.weapon==='whip'?lerp(.62,1,UP[i]):fatal?lerp(.72,1,UP[i]):UP[i];
+    const lead=mode==='knock'&&UP[i]>.5?RAG.KNOCK_LEAD:1;
+    return new THREE.Vector3(bv.x*lead+dx*push*weight+rnd(-.4,.4),mode==='knock'?0:fatal?lerp(2.9,4.9,UP[i]):1.2*UP[i]+rnd(-.2,.2),bv.z*lead+dz*push*weight+rnd(-.4,.4));
+  });
   o.rag=R;
 }
 // ช่วงกลับท่าปกติ: จำท่าล่าสุด (world) แล้วค่อยๆ หมุนเข้าหาท่าจาก animation
@@ -123,7 +131,7 @@ function ragStep(o,R,dt){
     }
     // ข้อพับทางเดียว: ถ้าข้อ (เข่า/ศอก) ไปผิดฝั่งของเส้นต้น-ปลาย → ดันกลับ
     for(const [a,j,c,k,sg] of RAGHINGE){
-      const fw=_rv3.copy(R.F[k]).applyQuaternion(ragBasis(P,k,_rqb));
+      const fw=_ragFw.copy(R.F[k]).applyQuaternion(ragBasis(P,k,_rqb));
       _rv1.addVectors(P[a],P[c]).multiplyScalar(0.5);_rv2.subVectors(P[j],_rv1);
       const side=_rv2.dot(fw)*sg;
       if(side<0){P[j].addScaledVector(fw,-side*sg*0.6);P[a].addScaledVector(fw,side*sg*0.2);P[c].addScaledVector(fw,side*sg*0.2);}
@@ -147,7 +155,7 @@ function ragStep(o,R,dt){
   if(sinkK)for(const q of P)q.y-=dt*1.2;
   // ความเร็วจากการเลื่อนจริง + แรงเสียดทานตอนแตะพื้น
   for(let i=0;i<P.length;i++){
-    V[i].subVectors(P[i],prev[i]).divideScalar(Math.max(dt,1e-4));
+    V[i].subVectors(P[i],prev[i]).divideScalar(dt).clampLength(0,22);
     if(!sinkK&&P[i].y<=ragFloor(P[i].x,P[i].z)+RAGJ[i][2]+0.02){const f=Math.exp(-14*dt);V[i].x*=f;V[i].z*=f;if(V[i].y<0)V[i].y=0;}
   }
 }
@@ -188,6 +196,15 @@ function ragEnd(o){if(o.rag)ragRestore(o.rag);o.rag=null;}
 function ragTick(o,p,v,dt,now){
   if(!o.fileModel||p.gh){if(o.rag)ragEnd(o);return false;}
   const dead=!p.al,down=!!p.dn;
+  if(dead&&o.deathImpact){
+    const I=o.deathImpact;
+    if(o.flashT>0){o.g.visible=true;return true;}
+    if(!I.played){
+      I.played=true;ragEnd(o);o.ragWasAl=true;
+      if(I.weapon==='frost'||I.weapon==='scythe')I.split=deathSlashSplit(o,I);
+    }
+    if(I.split){o.g.visible=false;return true;}
+  }
   let R=o.rag;
   // เริ่ม
   if(!R){
@@ -214,7 +231,8 @@ function ragTick(o,p,v,dt,now){
     if(w>=1){ragEnd(o);return false;}
     return true;
   }
-  ragStep(o,R,dt);ragPose(R);ragWrite(R,R.WQ,R.P[0]);
+  if(dt>0)ragStep(o,R,dt);
+  ragPose(R);ragWrite(R,R.WQ,R.P[0]);
   if(R.mode==='dead')o.g.visible=R.t<=RAG.SINK[0]+RAG.SINK[1];
   return true;
 }
@@ -224,4 +242,168 @@ function ragHideDead(o,p,now){
   if(o.fsh)o.fsh.visible=false;
   o.tip.scale.setScalar(0.001);
   statusFX(o,0,p.x,p.y,o.zs||0,2.2,now);
+}
+
+// Map initialization may call cleanup before the first match.
+var deathFades;
+function clearDeathFades(){
+  if(!deathFades?.size)return;
+  for(let i=FIREV.length-1;i>=0;i--){
+    const v=FIREV[i];
+    if(!deathFades.has(v.g))continue;
+    v.fn(v,1);FIREV.splice(i,1);
+  }
+}
+function deathSlashSplit(o,hit){
+  const source=o.fileModel,cloner=MODELS.lib?.SU,hips=ragBones(o)?.hips;
+  if(!source||!cloner||!hips)return false;
+  o.g.updateMatrixWorld(true);
+  const seam=hips.getWorldPosition(new THREE.Vector3()),base=o.g.position;
+  const angle=hit.angle??(-o.g.rotation.y-Math.PI*.5),dx=Math.cos(angle),dz=Math.sin(angle);
+  const axis=new THREE.Vector3(dz,0,-dx),root=new THREE.Group(),materials=new Set(),skeletons=new Set();
+  root.name='Slash defeat pieces';gl.localClippingEnabled=true;
+  const pieces=[true,false].map(upper=>{
+    const group=new THREE.Group(),model=cloner.clone(source),cache=new Map();
+    const pivot=new THREE.Vector3(seam.x,upper?seam.y:base.y,seam.z);
+    group.position.copy(pivot);root.add(group);group.add(model);
+    source.matrixWorld.decompose(model.position,model.quaternion,model.scale);model.position.sub(pivot);
+    const normal=new THREE.Vector3(0,upper?1:-1,0),edge=new THREE.Vector3(0,seam.y-pivot.y,0),plane=new THREE.Plane();
+    model.traverse(part=>{
+      if(!part.isMesh)return;
+      if(/^wand_/.test(part.name)){part.visible=false;return;}
+      if(part.isSkinnedMesh)skeletons.add(part.skeleton);
+      const clip=original=>{
+        if(cache.has(original))return cache.get(original);
+        const m=original.clone();m.onBeforeCompile=original.onBeforeCompile;m.customProgramCacheKey=original.customProgramCacheKey;
+        m.clippingPlanes=[plane];m.transparent=true;m.depthWrite=false;m.forceSinglePass=true;
+        materials.add(m);cache.set(original,m);return m;
+      };
+      part.material=Array.isArray(part.material)?part.material.map(clip):clip(part.material);
+      part.castShadow=false;part.frustumCulled=false;
+    });
+    return {upper,group,pivot,normal,edge,plane};
+  });
+  (deathFades??=new Set()).add(root);
+  fireTemp(root,[],1.25,(_v,k)=>{
+    if(k>=1){root.removeFromParent();root.clear();for(const m of materials)m.dispose();for(const s of skeletons)s.dispose();deathFades.delete(root);return;}
+    const t=k*1.25,u=clamp(t/.69,0,1),s=1-(1-u)**2,fall=_cs(clamp((t-.13)/.45,0,1));
+    for(const P of pieces){
+      const Q=P.group;Q.position.copy(P.pivot);
+      if(P.upper){
+        Q.position.x+=dx*3.7*s-dz*.58*Math.sin(Math.PI*u);
+        Q.position.z+=dz*3.7*s+dx*.58*Math.sin(Math.PI*u);
+        const floor=TW(Q.position.x,Q.position.z);
+        Q.position.y=Math.max(floor+.25,lerp(P.pivot.y,floor+.34,_cs(u))+1.25*Math.sin(Math.PI*u));
+        Q.quaternion.setFromAxisAngle(axis,1.65*s);
+      }else{
+        Q.position.x+=dx*.44*fall;Q.position.z+=dz*.44*fall;
+        Q.quaternion.setFromAxisAngle(axis,1.42*fall);
+      }
+      Q.updateMatrixWorld(true);
+      P.plane.setFromNormalAndCoplanarPoint(P.normal,P.edge).applyMatrix4(Q.matrixWorld);
+    }
+    const opacity=1-_cs(clamp((t-.79)/.46,0,1));
+    for(const m of materials)m.opacity=opacity;
+  });
+  return true;
+}
+function deathDissolve(sources){
+  const root=new THREE.Group(),materials=new Map(),geometries=new Map(),seen=new Set();
+  root.name='Player death dissolve';
+  const fade={value:1};
+  for(const source of sources){
+    if(!source)continue;
+    source.updateWorldMatrix(true,true);
+    source.traverseVisible(part=>{
+      if(seen.has(part)||!part.material||!part.layers.test(cam.layers)||part.isSkinnedMesh||
+        !(part.isMesh||part.isSprite||part.isPoints||part.isLine))return;
+      if(part.isInstancedMesh&&!part.count||part.geometry?.isInstancedBufferGeometry&&!part.geometry.instanceCount)return;
+      const list=Array.isArray(part.material)?part.material:[part.material];
+      if(list.every(m=>!m.visible||m.opacity<=0))return;
+      seen.add(part);
+      let copy;
+      if(part.isInstancedMesh){
+        copy=new THREE.InstancedMesh(part.geometry,part.material,part.count);
+        copy.instanceMatrix.copy(part.instanceMatrix);
+        if(part.instanceColor)copy.instanceColor=part.instanceColor.clone();
+      }else if(part.isSprite){
+        copy=new THREE.Sprite();copy.center.copy(part.center);
+      }else if(part.isPoints)copy=new THREE.Points();
+      else if(part.isLine)copy=part.isLineSegments?new THREE.LineSegments():new THREE.Line();
+      else copy=new THREE.Mesh();
+      if(!part.isSprite)copy.geometry=part.geometry;
+      if(!part.isSprite&&part.geometry&&!part.geometry.userData.keep){
+        if(!geometries.has(part.geometry))geometries.set(part.geometry,part.geometry.clone());
+        copy.geometry=geometries.get(part.geometry);
+      }
+      const mapped=list.map(sourceMaterial=>{
+        if(!materials.has(sourceMaterial)){
+          const material=sourceMaterial.clone();
+          material.transparent=true;material.depthWrite=false;material.forceSinglePass=true;
+          if(material.isShaderMaterial){
+            for(const [key,uniform] of Object.entries(sourceMaterial.uniforms))if(uniform.value?.isTexture)material.uniforms[key].value=uniform.value;
+            material.uniforms.deathFade=fade;
+            material.fragmentShader=`uniform float deathFade;
+              #define main deathSource
+              ${material.fragmentShader}
+              #undef main
+              void main(){
+                deathSource();
+                gl_FragColor.a*=deathFade;
+              }`;
+          }else{
+            material.onBeforeCompile=sourceMaterial.onBeforeCompile;
+            const key=sourceMaterial.customProgramCacheKey();
+            material.customProgramCacheKey=()=>key;
+          }
+          materials.set(sourceMaterial,{material,opacity:sourceMaterial.opacity});
+        }
+        return materials.get(sourceMaterial).material;
+      });
+      copy.material=Array.isArray(part.material)?mapped:mapped[0];
+      copy.name=part.name;
+      part.matrixWorld.decompose(copy.position,copy.quaternion,copy.scale);
+      copy.matrixAutoUpdate=true;copy.castShadow=false;copy.frustumCulled=false;copy.renderOrder=part.renderOrder;
+      root.add(copy);
+    });
+  }
+  if(!root.children.length)return;
+  (deathFades??=new Set()).add(root);
+  fireTemp(root,[],.62,(_v,k)=>{
+    if(k>=1){
+      for(const {material} of materials.values())material.dispose();
+      for(const geometry of geometries.values())geometry.dispose();
+      for(const part of root.children)if(part.isInstancedMesh)part.dispose();
+      root.clear();root.removeFromParent();deathFades.delete(root);return;
+    }
+    const left=1-k*k*(3-2*k);
+    root.position.y=.18*k;
+    fade.value=left;
+    for(const {material,opacity} of materials.values())if(!material.isShaderMaterial)material.opacity=opacity*left;
+  });
+}
+function deathVisualSync(o,p,wasVisible){
+  const down=!p.al||p.dn;
+  if(!down){
+    if(o.deathHidden){
+      for(const [obj,visible] of o.deathHidden)obj.visible=visible;
+      o.deathHidden=null;
+      o.deathImpact=null;
+    }
+    return;
+  }
+  if(o.deathHidden)return;
+  const attachments=[o.wandG,o.tip,o.darkGear,o.shield,o.fsh,o.fshR,o.fw?.g,o.fwLk,o.wShell,
+    ...(o.fwx||[]).map(weapon=>weapon.g)];
+  o.fileModel?.traverse(part=>{if(/^wand_\d+$/.test(part.name))attachments.push(part);});
+  const light=LGV.st.get(p.id),lightObjects=light?lgBaseObjects(light):[];
+  const bound=FXR.inst.filter(fx=>fx.o.follow===p.id||fx===o.darkUltFx);
+  const owned=darkDeathRoots(p.id);
+  deathDissolve([...(wasVisible?attachments:[]),o.natureWhipView?.vine,...owned,...lightObjects,...bound.flatMap(fx=>fx.L.map(layer=>layer.obj))]);
+  o.deathHidden=attachments.filter(Boolean).map(obj=>[obj,obj.visible]);
+  for(const [obj] of o.deathHidden)obj.visible=false;
+  o.darkDown=true;
+  darkDeathClear(o,owned);
+  for(const fx of bound)fxKill(fx);
+  if(light)lgClear(light);
 }

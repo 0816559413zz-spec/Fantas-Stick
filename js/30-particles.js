@@ -246,11 +246,17 @@ const discGeo=new THREE.CircleGeometry(1,40);discGeo.rotateX(-Math.PI/2);
 const decalTex=texCanvas(128,128,(g)=>{const r=g.createRadialGradient(64,64,10,64,64,64);r.addColorStop(0,'rgba(0,0,0,1)');r.addColorStop(0.6,'rgba(10,6,4,0.7)');r.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=r;g.fillRect(0,0,128,128);},false);
 const FX={
   flashSprite(x,y,h,col,s0,s1,life,k){
+    if(combatVfxReduced()){
+      s0*=.77;s1*=.77;life*=.66;k=(k||2)*.59;
+    }
     const m=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:hdr(col,k||2),blending:THREE.AdditiveBlending,depthWrite:false,transparent:true}));
     m.position.set(tx(x),h+GY(x,y),tz(y));m.scale.setScalar(s0);scene.add(m);
     SHAPES.push({m,life,max:life,s0,s1,op:1,sprite:true});
   },
-  flashLight(x,y,h,col,int,dist,life){FLASHL.push({x:tx(x),y:h,z:tz(y),col,int,dist,life,max:life});},
+  flashLight(x,y,h,col,int,dist,life){
+    if(combatVfxReduced()){int*=.50;dist*=.78;life*=.65;}
+    FLASHL.push({x:tx(x),y:h,z:tz(y),col,int,dist,life,max:life});
+  },
   bolt(x1,y1,h1,x2,y2,h2,life,col){
     const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(10*3),3));
     const line=new THREE.Line(geo,new THREE.LineBasicMaterial({color:hdr(col||'#bff4ff',col?1.2:3),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));

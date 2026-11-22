@@ -68,10 +68,6 @@ function darkBATargets(p,origin,aim,range){
 function darkMoveHeading(inp,fallback){
   return inp.mx||inp.my?Math.atan2(inp.my,inp.mx):fallback;
 }
-function darkDashKeys(inp){
-  const forward=(inp.u?1:0)-(inp.d?1:0),side=(inp.r?1:0)-(inp.l?1:0);
-  return forward||side?Math.atan2(side,forward):null;
-}
 function darkClearCooldown(p,spell){
   const index=p.kitIds.indexOf(spell);
   if(index>=0)p.cd[SLOTK[index]]=0;
@@ -121,9 +117,9 @@ function darkTick(p,dt){
   d.actions=d.actions.filter(a=>a.at>G.time);
   darkWaveTick(p,d,dt);
   if(d.longUntil>G.time){
-    const current=Math.atan2(p.dashY,p.dashX),keys=darkDashKeys(p.inp||{});
-    const heading=keys===null?current:d.longAxis+keys;
-    const turn=lerpAng(current,heading,1-Math.exp(-14*dt));
+    const current=Math.atan2(p.dashY,p.dashX);
+    const heading=darkMoveHeading(p.inp||{},current);
+    const turn=lerpAng(current,heading,1-Math.exp(-24*dt));
     p.dashX=Math.cos(turn);p.dashY=Math.sin(turn);
   }
   if(d.veil&&d.veil.end<=G.time)d.veil=null;
@@ -182,7 +178,7 @@ function darkDash(p,inp,pr,dt,setCd){
   p.dash=duration;p.dashSp=(long?500:120)/duration;
   p.dashX=Math.cos(heading);p.dashY=Math.sin(heading);
   setCd('basic',0);
-  if(long){d.longUntil=G.time+duration;d.longAxis=heading-(darkDashKeys(inp)??0);}
+  if(long)d.longUntil=G.time+duration;
   else d.empower=G.time+3;
   darkEvent(p,long?'darkdashlong':'darkdashquick',{duration,a:heading});
   return true;
@@ -210,9 +206,9 @@ function darkBasic(p,inp,dt,setCd){
     for(const t of darkBATargets(p,origin,aim,empowered?DARK_BA.powerRange:DARK_BA.range)){
       const amount=empowered?18:12;
       aoeHit(p,t,amount,hit=>darkEvent(p,'darkbahit',{x:hit.x,y:hit.y,h:cH(hit),target:hit.id,empowered,side,
-        a:aim.a,followUp:darkAlive(hit)&&d.marks.get(hit)>G.time||undefined}));
+        a:aim.a,followUp:darkAlive(hit)&&d.marks.get(hit)>G.time||undefined}),false,{weapon:'scythe',angle:aim.a+side*.78});
       if(d.marks.get(t)>G.time&&darkAlive(t))darkQueue(p,.15,()=>{
-        if(darkAlive(t))aoeHit(p,t,empowered?18:13,hit=>darkEvent(p,'darkbahit',{x:hit.x,y:hit.y,h:cH(hit),target:hit.id,ghost:true,side:-side}));
+        if(darkAlive(t))aoeHit(p,t,empowered?18:13,hit=>darkEvent(p,'darkbahit',{x:hit.x,y:hit.y,h:cH(hit),target:hit.id,ghost:true,side:-side}),false,{weapon:'scythe',angle:aim.a-side*.78});
       });
     }
   });
@@ -273,7 +269,7 @@ const DARK_CHASE=defSpell(DARKP,{id:'darkchase',n:'Nightfall',ic:'➶',role:'mob
         const origin=plain.landing??p;
         for(const t of darkCone(origin,aim,115,100)){
           if(natureTrace(origin,t,origin.z+1.1,cH(t),p.team,true))continue;
-          aoeHit(origin,t,S.v.dmg,hit=>{if(!hit.isE&&!hit.isM){hit.fly=false;hit.vz=22*S.v.lift/2;hit.stun=Math.max(hit.stun,S.v.lift);}});
+          aoeHit(origin,t,S.v.dmg,hit=>{if(!hit.isE&&!hit.isM){hit.fly=false;hit.vz=22*S.v.lift/2;hit.stun=Math.max(hit.stun,S.v.lift);}},false,{weapon:'scythe',angle:aim.a,chase:1});
         }
       });
       return;
@@ -289,7 +285,7 @@ const DARK_CHASE=defSpell(DARKP,{id:'darkchase',n:'Nightfall',ic:'➶',role:'mob
         const chase=d.chase;
         if(chase?.target!==target||!darkAlive(target)||Math.hypot(p.x-target.x,p.y-target.y)>300)return;
         chase.contact={x:target.x,y:target.y,h:cH(target)};
-        aoeHit(p,target,F.damage,hit=>darkEvent(p,'darkchaseflowhit',{x:hit.x,y:hit.y,h:cH(hit),target:hit.id,a}));
+        aoeHit(p,target,F.damage,hit=>darkEvent(p,'darkchaseflowhit',{x:hit.x,y:hit.y,h:cH(hit),target:hit.id,a}),false,{weapon:'scythe',angle:a,chase:2});
       });
       return;
     }
@@ -304,7 +300,7 @@ const DARK_CHASE=defSpell(DARKP,{id:'darkchase',n:'Nightfall',ic:'➶',role:'mob
       if(d.chase?.target!==target||!darkAlive(target)||Math.hypot(p.x-target.x,p.y-target.y)>300)return;
       const last=index===2;
       darkEvent(p,'darkchasehit',{x:target.x,y:target.y,h:cH(target),target:target.id,last});
-      aoeHit(p,target,last?15:5,t=>{if(last&&!t.isE&&!t.isM){t.fly=false;t.vz=Math.min(t.vz,-9);}},!last);
+      aoeHit(p,target,last?15:5,t=>{if(last&&!t.isE&&!t.isM){t.fly=false;t.vz=Math.min(t.vz,-9);}},!last,{weapon:'scythe',angle:a+(last?0:index===0?.84:-.84),chase:index+3});
     });
   }});
 function darkMoveWaltz(p){

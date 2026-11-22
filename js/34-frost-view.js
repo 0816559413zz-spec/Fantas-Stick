@@ -117,14 +117,21 @@ function frostFX(o,p,pz,now,dt){
   else if(o.axe&&o.axe.scale.x!==1)o.axe.scale.setScalar(1);
   // ---- ท่า: อาวุธลอยฟันเอง + มือขวาร่ายไม้ตามจังหวะ (host ตีทันทีตอนกด / จังหวะ 3 ตีหลัง 0.32 วิ — ภาพฟันจริงอยู่ในช่วงนั้น) ----
   if(o.swN===undefined)o.swN=F[1];
-  if(F[1]!==o.swN){o.swN=F[1];o.swC=F[2];o.swLen=o.swC===2?0.69:ff?0.48:0.40;o.swT=o.swLen;o.fwK0=0;}
+  if(F[1]!==o.swN){o.swN=F[1];o.swC=F[2];o.swLen=o.swC===2?0.69:ff?0.48:0.40;o.swT=o.swLen;o.fwK0=0;o.fwRawAge=0;}
   const SWT=o.swLen||0.40;
-  if(o.swT>0)o.swT-=dt;
+  if(o.swT>0){
+    const hit=o.weaponContact;
+    const contact=hit?.kind==='frost'&&hit.swing===o.swN?hit:null;
+    const age=o.fwRawAge+dt;
+    o.swT=Math.max(0,SWT-weaponImpactAge(contact,age,frostContactTime(o.swC,ff),o.fwRawAge));
+    o.fwRawAge=age;
+  }
   // (เดิม: อัลติเพิ่งเปิด = กวาดฟันรัว 0.4 วิ ตอนพุ่ง — เอาออก 2026-11-14 ไม่มีพุ่งแล้ว)
   const fa=o.fa||(o.fa={ax:-1.05,az:0.15,by:0,bx:0}),P=FWP;
   fwIdle(P,now,ff,o.fwSeed||(o.fwSeed=rnd(0,6)));o.fwSub=0;
   if(false){}   // (เดิม: กวาดฟันตอนพุ่งอัลติ — เอาออกแล้ว)
-  else if(fwOn&&o.swT>0){const k=clamp(1-o.swT/SWT,0,1);fwSwing(P,o.swC,ff,k);if(P.strike){o.fwSub=1;o.fwKs=[o.fwK0||0,k];}o.fwK0=k;}
+  else if(fwOn&&o.swT>0){const k=clamp(1-o.swT/SWT,0,1);
+    fwSwing(P,o.swC,ff,k);if(P.strike){o.fwSub=1;o.fwKs=[o.fwK0||0,k];}o.fwK0=k;}
   // Glacier Rend โหมดประชิด (ผู้ใช้ 2026-11-06): ไม่ชาร์จ • เอาอาวุธลงล่าง ค้างนิดเดียว (nearWind) แล้วฟันงัดขึ้น คลื่นพุ่งตอนงัด
   if(fwOn&&(flags&32)){fwChop(P,2.35,ff);P.rate=26;P.strike=false;o.fwSub=0;P.ax=-0.3;P.az=-0.1;P.tx=0.3;P.ty=0.25;}
   let ax=P.ax,az=P.az,by=P.ty,bx=P.tx;

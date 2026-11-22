@@ -1,5 +1,17 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-22 Darkness BA: held the scythe tip longer on contact and let the shaft rock briefly around it before the follow-through.
+
+- 2026-11-22 Melee contact: held the weapon pose for the first 42 ms, let the blade creep before release, and added local hit audio on confirmed contact. The standard resistance beat lasts 140 ms and the Frost weapon completes its visual follow-through.
+
+- 2026-11-22 Melee contact: extended standard blade resistance to 110 ms and slightly increased the attacker's camera response. Flow Nightfall uses a 90 ms blade beat within its shorter attack window.
+
+- 2026-11-22 Melee contact: extended the resistance beat from 60 to 90 ms with continuous blade motion and a smooth acceleration out.
+
+- 2026-11-22 Melee contact: gave blades and the whip a visible 60 ms resistance beat followed by accelerated follow-through. Nightfall slows the weapon without slowing orb movement.
+
+- 2026-11-22 Combat motion: fatal hits briefly flash before launching the character. Sword and scythe finishers split the rig with a clean cartoon cut. Confirmed melee hits slow weapon follow-through and nudge the attacker's camera. Major cast cameras ease in on the charge and open on release. Fixed Wind Shield aim, Aqua Cage carry, Darkness Long Dash steering, Stonebreaker's knockback collision, and Radiance beam arm pitch. Simplified the empowered Nature whip and thorn line.
+
 - 2026-11-22 Map Builder: new Indoor Light Zone (Place → Room / Breakables). Draw a box over a room, set its roof height and strength: in the game the camera inside gets the dim cool indoor light, and glass / lit windows inside that face the sun get sun beams. Several zones per map. fcs maps with no zone keep the Great Hall as before.
 
 - 2026-11-22 Great Hall light round 2 (user: light should follow the map sun, one plain glass colour, light only from the sun side): beams now come only through windows facing the sun, along the sun direction of the map, including the big glass wall windows from Map Builder; the other windows are plain pale glass with no beam.
@@ -15,6 +27,12 @@
 - 2026-11-22 Cliff Side Castle backdrop: the castle now sits on a headland with 40 m sea cliffs (rock strata, grass lip, boulders at the foot), sea stacks, far cliff headlands and fields to the west behind the attackers. The sea moves (swells, foam breaking on the rocks, whitecaps) and fades into an overcast grey sky and fog. New `js/67-coast.js`; a backdrop entry can now give `coast` (shape) and `look` (sky/fog/light), applied by `backdropLook` each time the map is built.
 
 - 2026-11-22 Performance round 3: Nature Thorn Line draws its 48 spikes as one tube mesh + one thorn set (`TubeSet` js/68-nature-fx): render calls in a Thorn Line frame 281 -> 93, same picture. Objects sharing a material that is still compiling now wait with the first one (js/51 `SHR.sib`) instead of drawing and blocking.
+
+- 2026-11-22 Combat feel: shortened the shared body flash, added directional recoil on direct hits and concentrated the hit sparks. Reduced the density and lifetime of shared combat effects and gave common wand casts a quicker release and smoother follow-through.
+
+- 2026-11-22 Combat readability: reduced particles, secondary fog, bloom and screen flashes across all classes in live matches. Core skill visuals and warning layers keep their timing.
+
+- 2026-11-22 Combat visuals: held weapons and caster-bound effects leave a short rising dissolve on defeat instead of popping out with the player.
 
 - 2026-11-22 Darkness: Night Waltz and marked or Flow Nightfall block damage during their orb form. The normal launch and body-form portions stay vulnerable.
 

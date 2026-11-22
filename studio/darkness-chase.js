@@ -195,7 +195,14 @@ function stDarkMarkedChase(root,args){
   ferrule.position.y=-.69;wand.add(ferrule);
 
   let trailOpacity=1;
+  const impactTimes=[firstHit,secondHit,slashHit];
+  function bladeClock(t){
+    if(!live?.contacts)return t;
+    for(let i=0;i<impactTimes.length;i++)if(live.contacts[i])t=weaponContactAge(t,impactTimes[i]);
+    return t;
+  }
   function bladeAt(t){
+    t=bladeClock(t);
     const segment=keys.findIndex((_,i)=>i===keys.length-2||t<=keys[i+1].t);
     const a=keys[segment],b=keys[segment+1],u=clamp((t-a.t)/(b.t-a.t),0,1);
     const progress=(segment+u)/(keys.length-1);
@@ -244,13 +251,14 @@ function stDarkMarkedChase(root,args){
     scythe.pivot.scale.setScalar(pose.size);
     // Hold the arc in place after impact, then fade it as a whole.
     scythe.update(t,0,0,Math.min(t,land));
-    const first=(1-.69*ease(.08,.255,t))*(1-ease(firstEnd,firstGone,t));
-    const second=.31*ease(secondStart,secondStart+.064,t)*(1-ease(secondEnd,secondGone,t));
-    const slam=ease(windStart,windStart+.19,t)*(1-ease(groundFade,groundGone,t));
-    const approach=lerp(1,.86,ease(.08,.255,t));
-    const firstLive=approach*(1-ease(firstEnd,firstGone,t));
-    const between=.34*ease(firstEnd,firstGone,t)*(1-ease(secondStart-.067,secondStart,t));
-    const secondLive=.91*ease(secondStart-.085,secondStart-.005,t)*(1-ease(secondEnd,secondGone,t));
+    const b=bladeClock(t);
+    const first=(1-.69*ease(.08,.255,b))*(1-ease(firstEnd,firstGone,b));
+    const second=.31*ease(secondStart,secondStart+.064,b)*(1-ease(secondEnd,secondGone,b));
+    const slam=ease(windStart,windStart+.19,b)*(1-ease(groundFade,groundGone,b));
+    const approach=lerp(1,.86,ease(.08,.255,b));
+    const firstLive=approach*(1-ease(firstEnd,firstGone,b));
+    const between=.34*ease(firstEnd,firstGone,b)*(1-ease(secondStart-.067,secondStart,b));
+    const secondLive=.91*ease(secondStart-.085,secondStart-.005,b)*(1-ease(secondEnd,secondGone,b));
     const oldOpacity=live?clamp(firstLive+between+secondLive+slam,0,1):first+second+slam;
     fadeBlade(oldOpacity);scythe.pivot.visible=oldOpacity>.003;
     const spawn=ease(spawnAt,spawnAt+.24,t);
@@ -384,6 +392,7 @@ function stDarkUnmarkedChase(root,live){
   const sample={pos:new THREE.Vector3(),QB:new THREE.Quaternion(),act:0,shaft:false};
   const landingOffset=new THREE.Vector3(),approachPoint=new THREE.Vector3();
   function bladeAt(t){
+    if(live?.contacts?.[0])t=weaponContactAge(t,hit);
     if(t<swing){
       const drag=ease(stop-.083,swing,t);
       pathAt(distanceAt(t-.028*(1-drag)),approachPoint);

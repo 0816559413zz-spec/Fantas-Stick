@@ -7,6 +7,7 @@ PATHS[1].vn={icicleDmg:'แท่งน้ำแข็ง (ไกล) • ดา
   slideT:'ไถลน้ำแข็ง (พุ่ง) • นาน (วิ)',slideCd:'ไถลน้ำแข็ง • คูลดาวน์ (วิ)',slowMax:'สลอว์สะสมสูงสุด (%)',slowT:'สลอว์อยู่นาน (วิ)',slowPath:'ยืนบนทางน้ำแข็ง • สลอว์ (%)',ripT:'Parry • จังหวะ 3 พร้อมใช้ (วิ)'};
 SPELLS.iceboulder={id:'iceboulder',hit(pr,t){}};
 const FROST_SWING3_HIT=0.36;
+const frostContactTime=(combo,axe)=>combo===2?FROST_SWING3_HIT:axe?.226:.16;
 function frostShieldPitch(p){
   const i=p.inp,dist=Math.hypot(i?.ax-p.x,i?.ay-p.y);
   const pitch=dist>1&&Number.isFinite(i.ah)?Math.atan2((i.ah-p.z-1.2)*20,dist):i?.ap||0;
@@ -19,14 +20,14 @@ function frostBoom(pr){
   damageEnv(pr.x,pr.y,V.r,V.env,pr.owner,'ice',pr.h);
 }
 // ฟันโดนทุกคนในกรวยหน้า (arc = ครึ่งมุม) จากจุด ox,oy
-function meleeHit(p,ox,oy,range,dmg,arc,fn){
+function meleeHit(p,ox,oy,range,dmg,arc,fn,impact){
   let n=0;const ph=p.z+1;
   for(const t of foesOf(p.team)){
     const dx=t.x-ox,dy=t.y-oy,d=Math.hypot(dx,dy);
     if(d>range+(t.r||PR))continue;
     if(d>14&&Math.abs(angDiff(Math.atan2(dy,dx),p.ang))>arc)continue;
     if(!aimLineH(p,ph,t,2.8))continue;
-    if(aoeHit(p,t,dmg,fn))n++;
+    if(aoeHit(p,t,dmg,fn,false,impact))n++;
   }
   return n;
 }
@@ -48,16 +49,23 @@ function frostBasic(p,inp,dt,setCd){
   let ci=p.cmbT>0?(p.cmbN|0):0;if(p.ripT>0){ci=2;p.ripT=0;}
   const FV=FROSTF.v,D=ff?[FV.a1,FV.a2,FV.a3]:[FROSTV.c1,FROSTV.c2,FROSTV.c3],R=ff?FV.axeR:FROSTV.meleeR;
   if(ci===2){p.slam3={t:FROST_SWING3_HIT,R,dm:D[2],ff};}
-  else{meleeHit(p,p.x,p.y,R,D[ci],1.0);
-  if(p.mirror>0)for(const s of [-1,1]){const q=mirrorPos(p,s);meleeHit(p,q.x,q.y,R,D[ci]*MIRROR.v.clone,1.0);}}
+  else p.frostCut={t:frostContactTime(ci,ff),range:R,dmg:D[ci],side:ci===1?-1:1};
   p.cmbN=(ci+1)%3;p.cmbT=1;p.swN=((p.swN|0)+1)%250;p.swC=ci;
   emit({k:'efx',z:'swing',x:p.x,y:p.y,h:p.z+1.1,a:Math.round(p.ang*100)/100,c:ci,ax:ff?1:0,r:R,id:p.id,m:p.mirror>0?1:0});
   setCd('basic',ci===2?FROSTV.swing3Cd:p.shieldOn?FROSTV.swingShCd:ff?FV.axeCd:FROSTV.swingCd);
 }
+function frostCutTick(p,dt){
+  const q=p.frostCut;if(!q)return;
+  if(p.pathIdx!==1||p.fmode===1||p.cryo>0||p.stun>0||p.downed||!p.alive){p.frostCut=null;return;}
+  if((q.t-=dt)>0)return;
+  p.frostCut=null;
+  meleeHit(p,p.x,p.y,q.range,q.dmg,1.0,null,{weapon:'frost',angle:p.ang+q.side*.72});
+  if(p.mirror>0)for(const s of [-1,1]){const m=mirrorPos(p,s);meleeHit(p,m.x,m.y,q.range,q.dmg*MIRROR.v.clone,1.0);}
+}
 // จังหวะ 3: ง้างแล้วฟาดลงพื้นตรงหน้า (ดาเมจออกหลังง้าง 0.32 วิ) + ระเบิดน้ำแข็ง
 function frostSlam3(p){
   const q=p.slam3;p.slam3=null;if(!q||!p.alive||p.downed)return;
-  const n=meleeHit(p,p.x,p.y,q.R,q.dm,1.0);
+  const n=meleeHit(p,p.x,p.y,q.R,q.dm,1.0,null,{weapon:'frost',angle:p.ang});
   if(n>0)healT(p,p.mirror>0?(q.ff?MIRROR.v.healAxe:MIRROR.v.heal):(q.ff?FROSTF.v.heal3:FROSTV.heal3));
   if(p.mirror>0)for(const s of [-1,1]){const m=mirrorPos(p,s);meleeHit(p,m.x,m.y,q.R,q.dm*MIRROR.v.clone,1.0);}
   const fx=p.x+Math.cos(p.ang)*q.R*0.6,fy=p.y+Math.sin(p.ang)*q.R*0.6;

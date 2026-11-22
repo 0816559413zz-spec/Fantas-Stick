@@ -277,6 +277,8 @@ Two more runs with everything (incl. the sliced warm compile): 41.8 fps, p99 59 
 
 ## Benchmarks
 
+- 2026-11-22, combat readability A/B in Team PvP at 1000×560. All 11 classes cast the same 31 skills in an 80-frame test. The default combat presentation reduced median active particles from 2,650 to 1,220 and peak particles from 3,740 to 1,776. Median frame draw calls were 472 versus 461. Shard Storm's landing warning and active edge and Night Waltz's boundary rendered in both runs. `?fullvfx` keeps the original effects for comparison. This fixture measures effect load, not live match FPS.
+
 - 2026-11-22, local Team PvP before/after against `f9cb5d40`. Counting render submissions in the Darkness scythe subtree across the same BA sequence, the peak went from 87 to 72 on High and from 72 to 48 on Low. Trail embers and spin spray now draw in at most two batches per pass, with their spawn poses reused through the swing. Reduced detail halves decorative ink and drop counts, while the blade trail, tip flecks and scythe flame sheet still render. Radiance Shard Storm showed five orbiting shards on High and three on Low. Both ground meshes showed in both modes. These figures isolate the changed effects and do not estimate total match FPS.
 
 - 2026-11-20, Radiance in Training. Five identical bursts of Empower bolts, Sanctum crystal transfers and Shard Storm explosions previously left six more GPU geometries after each burst. Reusing the unit beam cylinder and disposing the spent explosion column held the count at 218 across five bursts. Repeat with `tools/headless.js --game --js tools/bench-radiance-recast.js`.

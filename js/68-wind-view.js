@@ -96,7 +96,7 @@ function windForearm(o){const w=o.faW||0;if(w<=0.002)return;o.faW=0;if(o.faB===u
 function windFX(o,p,pz,now,dt){
   const A=p.wn;
   if(A&&!WV.shPre){WV.shPre=1;fxMeshLoad('wind_wall_shell');window.WD?.fx?.load?.('wind/shield_fly');}   // โหลดโมเดลโล่ล่วงหน้า ไม่งั้นยกโล่ครั้งแรกไม่เห็นโล่ทั้งครั้ง
-  if(!A){if(o.wWings)o.wWings.visible=false;const s=WV.st.get(p.id);if(s){for(const k of ['wing','guard'])if(s[k]){fxKill(s[k]);s[k]=null;}}return;}
+  if(!A){if(o.wWings)o.wWings.visible=false;if(o.wShell)o.wShell.visible=false;const s=WV.st.get(p.id);if(s){for(const k of ['wing','guard'])if(s[k]){fxKill(s[k]);s[k]=null;}}return;}
   const s=wvState(p.id),alive=p.al&&!p.dn,guard=alive&&p.sh&&o.wbc===undefined,h=o.zs||0;
   // ปีกติดหลังตลอดเวลา (ท่ากางเกือบนิ่ง) — ซ่อนตอนยกโล่ (ปีกห่อแทน)
   const big=A[5]>=1||A[7]>=1;   // Featherwing บินอยู่: ปีกใหญ่ 1.6 เท่า (ผู้ใช้)
@@ -112,7 +112,9 @@ function windFX(o,p,pz,now,dt){
   // โล่ลม (ผู้ใช้ 2026-11-15): เปลือกโค้งหน้าตัว ขอบชัด + เส้นลมไหลเป็นระเบียบ ให้รู้ชัดว่ากางโล่
   if(guard){if(!o.wShell){const m=windShellMat();o.wShell=new THREE.Mesh(new THREE.SphereGeometry(1,40,24,Math.PI*0.08,Math.PI*0.84,Math.PI*0.08,Math.PI*0.62),m);o.wShell.renderOrder=4;o.g.add(o.wShell);}
     o.wShell.visible=true;o.wShell.position.set(0,1.15,0.15);o.wShell.scale.set(1.55,1.45,1.55);o.wShell.material.uniforms.uT.value=performance.now()/1000;
-    const air=A[5]>=1,lim=air?1.5:.6;o.wShell.rotation.x=clamp(A[12]||0,-lim,lim)*0.6;}
+    const inp=p.id===NET.myId?INPUT:null,pt=inp?windShieldPitch(p,inp):A[12]||0;
+    const a=inp&&Number.isFinite(inp.ax)&&Number.isFinite(inp.ay)?Math.atan2(inp.ay-p.y,inp.ax-p.x):p.a;
+    o.wShell.rotation.set(-pt,Math.PI/2-a-o.g.rotation.y,0,'YXZ');}
   else if(o.wShell)o.wShell.visible=false;   // ห่อปีกยาว 9.5 วิ → ตัดทิ้งทันทีตอนลดโล่
   if(p.id===NET.myId)wvAimGhost(p,A,h);
   // ยิงขนนก: ชี้ไม้ไปข้างหน้าค้าง + หันตัวเปิดทางให้ปีกที่ยิง (ปีกซ้ายยิง = หันขวา) ค้างแป๊บ ไม่ยิงต่อค่อยกลับ

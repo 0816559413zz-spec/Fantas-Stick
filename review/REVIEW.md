@@ -3,6 +3,86 @@
 > เขียนอัตโนมัติจาก `review.html` (ผ่าน `tools/serve.py`) — อย่าแก้ไฟล์นี้ตรง ๆ, แก้ `review/reviews.json` แล้วรัน `python tools/serve.py --review-md`.
 > **Claude:** ทำเฉพาะหัวข้อสถานะ **✏️ ขอแก้** — อ่านความเห็นผู้ใช้ (`ความเห็นผู้ใช้`) + เปิดรูปด้วย Read → แก้ → ตั้ง `status:"wait"` + เขียน `reply` (ไทยสั้น ๆ ว่าแก้อะไร) เพื่อส่งกลับให้ผู้ใช้รีวิวใหม่. อย่าตั้ง `ok` เอง (ผู้ใช้เป็นคนกดผ่าน). งานที่ **⏳ รอ** = รอผู้ใช้ ไม่ต้องทำอะไร
 
+## #149 อาวุธและเอฟเฟกต์สลายตอนตาย
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Combat
+
+**วิธีดู / อะไรรอรีวิว:**
+เคียว ไม้กายสิทธิ์ และเอฟเฟกต์ของผู้ร่ายลอยและค่อย ๆ จางหลังตัวละครล้ม
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_death_fade_tdm.gif`
+
+## #148 เคียวรับแรงตรงปลายคม
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+เคียวค้างปลายคมแล้วด้ามโยกรับแรงก่อนฟันผ่าน เป้าวาบขาวเมื่อโดนจริง ซ้ายวืด ขวาโดน
+
+- ลิงก์/ไฟล์: `/shots/motion_combat_scythe_contact_brace.gif`
+
+## #147 จังหวะคมสะดุดตอนชนเป้า
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Combat
+
+**วิธีดู / อะไรรอรีวิว:**
+ค้างคมช่วงแรกแล้วค่อยฝืนผ่านเป้า รวมแรงต้าน 140 ms มีเสียงกระแทกเมื่อโดนจริง GIF เทียบซ้ายวืด ขวาโดน
+
+- ลิงก์/ไฟล์: `/shots/motion_combat_contact_resistance_v4.gif`
+- ลิงก์/ไฟล์: `/shots/motion_combat_scythe_resistance_v4.gif`
+
+## #146 แรงต้านคมจากกล้องผู้เล่น
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Combat
+
+**วิธีดู / อะไรรอรีวิว:**
+ยืดช่วงหน่วงเป็น 110 ms เกลี่ยให้เร่งผ่านเป้า และเพิ่มแรงสะท้อนกล้องเล็กน้อย ซ้ายวืด ขวาโดน ทั้งคู่ความเร็วจริง
+
+- ลิงก์/ไฟล์: `/shots/motion_combat_contact_resistance_v3.gif`
+- ลิงก์/ไฟล์: `/shots/motion_combat_scythe_resistance_v3.gif`
+
+## #145 เพิ่มแรงต้านตอนคมฟันโดน
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Combat
+
+**วิธีดู / อะไรรอรีวิว:**
+ยืดช่วงหน่วงจาก 60 เป็น 90 ms คมยังขยับอยู่แล้วค่อยเร่งผ่าน ทั้งสอง GIF เป็นความเร็วจริง ซ้ายวืด ขวาโดน
+
+- ลิงก์/ไฟล์: `/shots/motion_combat_contact_resistance_v2.gif`
+- ลิงก์/ไฟล์: `/shots/motion_combat_scythe_resistance_v2.gif`
+
+## #144 คมหน่วงตอนฟันโดน
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Combat
+
+**วิธีดู / อะไรรอรีวิว:**
+ซ้ายฟันวืด ขวาฟันโดน ถ่ายพร้อมกันในมุมเดียวกัน ดูช่วงที่ตัวเป้าวาบขาวแล้วคมค่อยเร่งผ่าน
+
+- ลิงก์/ไฟล์: `/shots/motion_combat_contact_compare.gif`
+- ลิงก์/ไฟล์: `/shots/motion_combat_contact_compare_slow.gif`
+- ลิงก์/ไฟล์: `/shots/motion_combat_scythe_compare.gif`
+- ลิงก์/ไฟล์: `/shots/motion_combat_nature_dash_ba.gif`
+- ลิงก์/ไฟล์: `/shots/motion_combat_nightfall_contact.gif`
+
+## #143 จังหวะปะทะ กล้อง และบั๊กข้ามคลาส
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Combat
+
+**วิธีดู / อะไรรอรีวิว:**
+ดูช่วงวาบแล้วกระเด็น จังหวะคมโดนและกล้องเปิดตอนปล่อย รวมคลิปแก้ Wind, Aqua Cage, Long Dash, Stonebreaker, Nature และ Radiance
+
+- ลิงก์/ไฟล์: `/shots/motion_combat_blade_finish.gif`
+- ลิงก์/ไฟล์: `/shots/motion_combat_whip_finish.gif`
+- ลิงก์/ไฟล์: `/shots/motion_combat_wind_shield.gif`
+- ลิงก์/ไฟล์: `/shots/motion_combat_aqua_cage.gif`
+- ลิงก์/ไฟล์: `/shots/motion_combat_dark_dash.gif`
+- ลิงก์/ไฟล์: `/shots/motion_combat_stonebreaker_wall.gif`
+- ลิงก์/ไฟล์: `/shots/motion_combat_sword_contact.gif`
+- ลิงก์/ไฟล์: `/shots/motion_combat_nature_ba.gif`
+- ลิงก์/ไฟล์: `/shots/motion_combat_radiance_camera.gif`
+
+## #142 ลด VFX ซ้อนในไฟต์ทุกสาย
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Combat
+
+**วิธีดู / อะไรรอรีวิว:**
+ลดอนุภาค หมอก และแฟลชในแมตช์ เห็นวงเตือนและขอบเขตของสกิลหลักเหมือนเดิม
+
+- รูป: `/shots/combat_vfx_full_64.jpg`
+- รูป: `/shots/combat_vfx_clear_64.jpg`
+
 ## #141 Great Hall · กระจกสี + ลำแสง + โทนแสงในห้องโถง
 - สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Map • สาย/ส่วน: Great Hall
 

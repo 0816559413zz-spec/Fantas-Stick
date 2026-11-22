@@ -204,6 +204,7 @@ function lightShieldEv(ev,kind){const S=ev.id!=null&&LGV.st.get(ev.id);if(!S||!(
   const now=LGV.now||performance.now();if(kind==='hit'){S.hitT=now;fxPlay('light/shield_hit',{x:ev.x,y:ev.y,h:ev.h||1.2,a:S.shA,aimPitch:S.shPitch,aim:false});}
   else{S.brkReq=now;S.brk=now;S.shOn0=0;fxPlay('light/shield_break',{x:ev.x,y:ev.y,h:ev.h||1.2,a:S.shA,aimPitch:S.shPitch,aim:false});}return true;}
 const LGPOSE={body:1.45,head:-1.3,ax:-0.1,az:-1.5};   // ท่า BA: หมุนตัว / หัวกลับ / แขนขวา (x,z) — ปรับได้
+const _lgLeanBase=new THREE.Quaternion(),_lgLeanUndo=new THREE.Quaternion();
 let _lgGlass=null,_lgCore=null,_lgGeo=null,_lgEdge=null,_lgEdgeM=null;
 // คริสตัล (ผู้ใช้ 2026-11-16 ออกแบบใหม่): แก้วทองทึบขึ้นเห็นชัด + ขอบเส้นสว่าง + แกนนีออนเหลืองกลางชิ้น
 function lgCrystalMesh(scale=1){
@@ -1349,13 +1350,16 @@ function lightFX(o,p,pz,now,dt,velocity){
       const side=clamp((velocity?.lvx||0)*.055,-.23,.23)*k,forward=clamp((velocity?.lvz||0)*.065,-.23,.23)*k;
       S.leanX=lerp(S.leanX||0,forward,1-Math.exp(-12*dt));
       S.leanZ=lerp(S.leanZ||0,-side,1-Math.exp(-12*dt));
+      o.b.rotation.y+=LP.body*k;
+      _lgLeanBase.copy(o.b.quaternion);
       o.b.rotation.x+=S.leanX;o.b.rotation.z+=S.leanZ;
       if(o.legs){
         o.legs[0].rotation.x=lerp(o.legs[0].rotation.x,.14,k);
         o.legs[1].rotation.x=lerp(o.legs[1].rotation.x,-.08,k);
       }
-      o.b.rotation.y+=LP.body*k;if(o.armR){o.armR.rotation.x=lerp(o.armR.rotation.x,LP.ax,k);o.armR.rotation.z=lerp(o.armR.rotation.z,LP.az-bp,k);
-        const ht=(L[16]||0)/100,hs=ht*ht*0.11*k;if(hs>0.002){const t=now;o.armR.rotation.x+=hs*(Math.sin(t/21)+0.6*Math.sin(t/13.7));o.armR.rotation.z+=hs*(Math.sin(t/17.3)+0.6*Math.sin(t/29));}}   // ไม้สั่นตามความร้อน (ผู้ใช้ 2026-11-17)
+      if(o.armR){o.armR.rotation.x=lerp(o.armR.rotation.x,LP.ax,k);o.armR.rotation.z=lerp(o.armR.rotation.z,LP.az-bp,k);
+        const ht=(L[16]||0)/100,hs=ht*ht*0.11*k;if(hs>0.002){const t=now;o.armR.rotation.x+=hs*(Math.sin(t/21)+0.6*Math.sin(t/13.7));o.armR.rotation.z+=hs*(Math.sin(t/17.3)+0.6*Math.sin(t/29));}
+        o.armR.quaternion.premultiply(_lgLeanUndo.copy(o.b.quaternion).invert().multiply(_lgLeanBase));}
       o.b.updateWorldMatrix(true,true);}
     o.lgHeadYaw=k>0.01?LGPOSE.head*k:0;}
   if(o.tip){o.tip.getWorldPosition(_lgW);}else _lgW.copy(o.g.position).add(new THREE.Vector3(0,1.4,0));

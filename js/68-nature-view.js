@@ -558,11 +558,11 @@ function natEmpPose(o){const E=o.natEmpC;if(!E)return;E.t+=1/60;const t=E.t,e=na
     o.b.rotation.x+=(.3*ch*(1-up)-.2*up)*w;o.b.position.y-=.16*ch*(1-up)*w;o.legs[0].rotation.x+=-.4*ch*(1-up)*w;o.legs[1].rotation.x+=.34*ch*(1-up)*w;}
 }
 function natBigSlam(ev){const F=natFx(),{V3,Tube,Thorns,thornsAlong,M,T,dirt,leaves,sparks}=F,o=ev.id!=null?PM3.get(ev.id):null;if(o)o.natEmpC={k:'slam',t:0};
-  const ca=Math.cos(ev.a),sa=Math.sin(ev.a),D=ev.d||Math.min(ev.r,200),gx=ev.x+ca*D,gy=ev.y+sa*D,end=natWorld(gx,gy,groundH(gx,gy,ev.h)),vine=Tube(34,8,M.bark),th=Thorns(80,1.7),dark=new T.Color('#2a4519'),lite=new T.Color('#6d9a3c');let hit=false;
+  const ca=Math.cos(ev.a),sa=Math.sin(ev.a),D=ev.d||Math.min(ev.r,200),gx=ev.x+ca*D,gy=ev.y+sa*D,end=natWorld(gx,gy,groundH(gx,gy,ev.h)),vine=Tube(34,8,M.bark),th=Thorns(14,.65),dark=new T.Color('#2a4519'),lite=new T.Color('#84a64e');let hit=false;
   F.clip(.9,t=>{const tip=o?o.tip.getWorldPosition(V3()):natWorld(ev.x,ev.y,ev.h+2),grow=natOut(natPhase(t,0,.2)),fall=natPhase(t,.24,.34),back=natEase(natPhase(t,.55,.9)),top=tip.clone().add(V3(-ca*.6,4.6*grow,-sa*.6)),P=[];
     for(let i=0;i<34;i++){const u=i/33,arc=tip.clone().lerp(top,Math.sin(u*Math.PI*.5)).add(V3(0,Math.sin(u*Math.PI)*.8,0)),hitP=tip.clone().lerp(end,u);hitP.y+=Math.sin(u*Math.PI)*2.2*(1-fall);P.push(arc.lerp(hitP,natEase(fall)).lerp(tip,back));}
-    vine.visible=th.visible=grow>.02&&back<.98;if(vine.visible){const rad=u=>(.17*(1-u)+.05)*(1-back*.8);vine.set(P,rad,(u,c)=>c.copy(dark).lerp(lite,u*.4));th.put(thornsAlong(P,rad,2,1.4*(1-back)));}
-    if(!hit&&fall>=1){hit=true;F.O.y=end.y;dirt(end,30,5.2,{size:1.5,spread:1.4});leaves(end,18,4);sparks(end,24,4.6,'#eaffa0','#5fa83a',{dir:V3(0,2,0)});natShock(end,'#a8d86a',7,.5);if(ev.id===NET.myId)shake(12);snd('boom',{x:gx,y:gy,vol:.8});}},()=>{F.drop(vine);F.drop(th);});}
+    vine.visible=th.visible=grow>.02&&back<.98;if(vine.visible){const rad=u=>(.13*(1-u)+.035)*(1-back*.8);vine.set(P,rad,(u,c)=>c.copy(dark).lerp(lite,u*.68));th.put(thornsAlong(P,rad,7,.5*(1-back)).slice(0,14));}
+    if(!hit&&fall>=1){hit=true;F.O.y=end.y;dirt(end,12,4.2,{size:1.1,spread:1.1});leaves(end,8,3,{life:.34});sparks(end,8,3.6,'#eaffa0','#5fa83a',{dir:V3(0,2,0),life:.25});natShock(end,'#a8d86a',5,.28,.5);if(ev.id===NET.myId)shake(2);snd('boom',{x:gx,y:gy,vol:.75});}},()=>{F.drop(vine);F.drop(th);});}
 // World tree roots: a pulsing ground mark first, then whip-style roots burst up from it.
 function natRootWarn(ev){const F=natFx(),{T}=F,P=natWorld(ev.x,ev.y,ev.h),R=ev.r*S3,g=new T.Group();F.add(g);g.position.set(P.x,P.y+.06,P.z);
   const mk=(a,b,c,o)=>{const m=new T.Mesh(new T.RingGeometry(a,b,40),new T.MeshBasicMaterial({color:c,transparent:true,opacity:o,depthWrite:false,side:T.DoubleSide}));m.rotation.x=-Math.PI/2;g.add(m);return m;};
@@ -578,17 +578,17 @@ function natThornLine(ev){const F=natFx(),{V3,T,M,TubeSet,Thorns,thornsAlong,dir
   // Whip-style thorns: bark tubes dark at the root, light green toward a bright tip, hooked thorns along them.
   const dark=new T.Color('#19371a'),mid=new T.Color('#4f7f30'),tipC=new T.Color('#b6ff63');
   // all 48 spikes share one tube mesh + one thorn set (was 48 + 48 objects = ~190 render calls incl. shadow, 2026-11-22)
-  const N=16,TS=TubeSet(N*3,12,7,M.bark),TH=Thorns(N*3*16,1.05,null,true);TS.castShadow=TH.castShadow=true;let thD=false;
+  const N=10,TS=TubeSet(N,12,7,M.bark),TH=Thorns(N*3,.55,null,true);TS.castShadow=TH.castShadow=true;let thD=false;
   const spike=(H,R,bend,ang)=>({tube:TS.part(line.length),th:null,H,R,bend,ang});
-  const setSpike=(q,base,k)=>{const P=[],ax=Math.cos(q.ang),az=Math.sin(q.ang),tw=q.tw||0;for(let i=0;i<12;i++){const u=i/11,h=q.H*u*k,b=q.H*Math.tan(q.tilt||.8)*u*k+q.bend*.1*u*u*k,w=Math.sin(u*5+tw)*.07*u;P.push(V3(base.x+ax*b-az*w,base.y+h,base.z+az*b+ax*w));}const rad=u=>Math.max(.004,q.R*((1-u)**1.7)*(1+.16*Math.sin(u*31+tw))*Math.max(.05,k));q.tube.set(P,rad,(u,c)=>c.copy(dark).lerp(mid,Math.min(1,u*1.5)).lerp(tipC,Math.max(0,u-.74)*2.8).multiplyScalar(.82+.22*Math.sin(u*38+tw)));q.th=thornsAlong(P,rad,3,.95*k,2.1).slice(0,16);thD=true;};
+  const setSpike=(q,base,k)=>{const P=[],ax=Math.cos(q.ang),az=Math.sin(q.ang),tw=q.tw||0;for(let i=0;i<12;i++){const u=i/11,h=q.H*Math.sin(u*Math.PI*.78)*k,b=q.H*.73*u*k+q.bend*u*u*k,w=Math.sin(u*5+tw)*.04*u;P.push(V3(base.x+ax*b-az*w,base.y+h,base.z+az*b+ax*w));}const rad=u=>Math.max(.008,q.R*((1-u)**1.28)*Math.max(.05,k));q.tube.set(P,rad,(u,c)=>c.copy(dark).lerp(mid,Math.min(1,u*1.5)).lerp(tipC,Math.max(0,u-.65)*1.7));q.th=thornsAlong(P,rad,5,.42*k,1.3).slice(0,3);thD=true;};
   const ca=Math.cos(ev.a),sa=Math.sin(ev.a),line=[];
-  for(let i=0;i<N;i++){const d=40+i*(ev.r-40)/(N-1),side=(i%2?1:-1)*(8+Math.random()*14),x=ev.x+ca*d-sa*side,y=ev.y+sa*d+ca*side,base=natWorld(x,y,groundH(x,y,ev.h)),at=.34+i*.018,sz=.75+.5*Math.sin(Math.PI*i/(N-1));
-    for(let c=0;c<3;c++){const main=c===0,lean=ev.a+(c===1?.55:c===2?-.55:0)+(Math.random()-.5)*.25,q=spike((main?3+Math.random()*1.2:1.5+Math.random()*.8)*sz,(main?.28:.16)*sz,(main?1.3:1)+(Math.random()-.3)*.3,lean);q.hook=main?.16:.08;q.tw=Math.random()*6;q.base=main?base:base.clone().add(V3(Math.cos(lean)*.22,0,Math.sin(lean)*.22));q.at=at+c*.025;q.done=c>0;q.vis=false;line.push(q);}}
-  F.clip(2.4,t=>{   // หนามค้างนานขึ้นก่อนหาย (ผู้ใช้ 2026-11-15)
-    for(const q of line){const a=t-q.at;if(a<0)continue;const k2=natOut(natPhase(a,0,.1))*(1-natEase(natPhase(a,1.5,1.9))),v=k2>.01;if(v!==q.vis){q.vis=v;thD=true;if(!v){q.tube.show(false);q.lk=null;}}if(v&&q.lk!==k2){q.lk=k2;setSpike(q,q.base,k2);}   // fully grown spikes do not move: rebuild only while k2 changes (48 tubes, 2026-11-22)
-      if(!q.done){q.done=true;F.O.y=q.base.y;dirt(q.base.clone(),7,3.2,{spread:.5});leaves(q.base.clone().add(V3(0,.5,0)),3,2.2);sparks(q.base.clone().add(V3(0,.6,0)),4,2.6,'#eaffa0','#5fa83a');}}
+  for(let i=0;i<N;i++){const d=40+i*(ev.r-40)/(N-1),side=Math.sin(i*1.3)*10,x=ev.x+ca*d-sa*side,y=ev.y+sa*d+ca*side,sz=.7+.35*Math.sin(Math.PI*i/(N-1));
+    const q=spike((1.65+Math.random()*.38)*sz,.22*sz,.27,ev.a+side*.018);q.tw=i;q.base=natWorld(x,y,groundH(x,y,ev.h));q.at=.34+i*.028;q.vis=false;line.push(q);}
+  F.clip(1.35,t=>{
+    for(const q of line){const a=t-q.at;if(a<0)continue;const k2=natOut(natPhase(a,0,.10))*(1-natEase(natPhase(a,.43,.72))),v=k2>.01;if(v!==q.vis){q.vis=v;thD=true;if(!v){q.tube.show(false);q.lk=null;}}if(v&&q.lk!==k2){q.lk=k2;setSpike(q,q.base,k2);}
+      if(!q.done){q.done=true;F.O.y=q.base.y;dirt(q.base.clone(),3,2.7,{spread:.4});leaves(q.base.clone().add(V3(0,.4,0)),2,2.2,{life:.28});}}
     TS.flush();if(thD){thD=false;const L=[];for(const q of line)if(q.vis&&q.th)for(const x of q.th)L.push(x);TH.put(L);}
-    if(t>=.34&&t-1/60<.34){snd('boom',{x:ev.x,y:ev.y,vol:.6});if(ev.id===NET.myId)shake(8);}},
+    if(t>=.34&&t-1/60<.34){snd('boom',{x:ev.x,y:ev.y,vol:.6});if(ev.id===NET.myId)shake(1.35);}},
     ()=>{F.drop(TS);F.drop(TH);});}
 function natRest(o,dt){const R=o.natRel;if(!R)return;R.t+=dt;const f=Math.min(1,dt*14);for(const k of o.rig||[]){if(k.c!==o.armR&&k.c!==o.armL)continue;const r=k.c.rotation;r.x=lerp(r.x,k.sx,f);r.y=lerp(r.y,0,f);r.z=lerp(r.z,k.sz,f);}if(!o.rig){o.armR.rotation.set(lerp(o.armR.rotation.x,-.18,f),0,lerp(o.armR.rotation.z,.12,f));o.armL.rotation.set(lerp(o.armL.rotation.x,-.12,f),0,lerp(o.armL.rotation.z,-.12,f));}if(R.t>.4)o.natRel=null;}
 // Hooking an enemy, played as one motion (user 2026-11-14):

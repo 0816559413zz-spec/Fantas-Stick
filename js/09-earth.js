@@ -29,9 +29,22 @@ function eNoStand(p){emit({k:'efx',z:'enostand',x:p.x,y:p.y,h:p.z+2.2,id:p.id});
 function eSegD(x,y,w){const dx=w.x2-w.x1,dy=w.y2-w.y1,L=dx*dx+dy*dy;let t=L?((x-w.x1)*dx+(y-w.y1)*dy)/L:0;t=Math.max(0,Math.min(1,t));const qx=w.x1+dx*t,qy=w.y1+dy*t;return {d:Math.hypot(x-qx,y-qy),qx,qy};}
 function eAdd(o){const w=Object.assign({id:++G.zid,hgt:7,hp:1e9,maxHp:1e9},o);(G.eso||(G.eso=[])).push(w);return w;}
 // ชนสิ่งก่อสร้างสายดิน (เรียกจาก collideWorld) • คืนจำนวนครั้งที่ชนของแข็ง (รวมเนิน v2) ไว้ทำคอมโบ Stonebreaker
-function eCollide(o,r,z){let n=0;if(!G||!G.eso)return 0;
+function eCollide(o,r,z,prev){let n=0;if(!G||!G.eso)return 0;
   for(const w of G.eso){if(w.hgt<=z||w.dead||w.k==='mound')continue;if(o.eRamp&&w.owner===o.eRamp&&w.k!=='dom')continue;   // เนินเดินข้ามได้ (เป็นพื้นสูงใน groundH)
-    const s=eSegD(o.x,o.y,w),m=w.r+r;if(s.d>=m)continue;
+    const m=w.r+r;
+    if(o.sbk>0&&prev&&eSegD(prev.x,prev.y,w).d>=m-1e-5){
+      const dx=o.x-prev.x,dy=o.y-prev.y,steps=Math.min(96,Math.ceil(Math.hypot(dx,dy)/Math.max(2,m*.2)));
+      let hit=false;
+      for(let i=1;i<=steps;i++){
+        const f=i/steps;
+        if(eSegD(prev.x+f*dx,prev.y+f*dy,w).d>=m)continue;
+        let lo=(i-1)/steps,hi=f;
+        for(let j=0;j<10;j++){const t=(lo+hi)/2;if(eSegD(prev.x+t*dx,prev.y+t*dy,w).d<m)hi=t;else lo=t;}
+        o.x=prev.x+lo*dx;o.y=prev.y+lo*dy;n++;hit=true;break;
+      }
+      if(hit)continue;
+    }
+    const s=eSegD(o.x,o.y,w);if(s.d>=m)continue;
     if(s.d>0.001){o.x=s.qx+(o.x-s.qx)/s.d*m;o.y=s.qy+(o.y-s.qy)/s.d*m;}else{const a=Math.atan2(w.y2-w.y1,w.x2-w.x1)+Math.PI/2;o.x=s.qx+Math.cos(a)*m;o.y=s.qy+Math.sin(a)*m;}
     n++;}
   return n;}
@@ -292,7 +305,8 @@ function updateEarth(dt){
     G.edust=G.edust.filter(d=>d.t>0);}
   for(const t of foesOf(-99)){if(t.mudT>0)t.mudT-=dt;
     if(t.sbk>0){t.sbk-=dt;if((t.solN|0)>(t.sbkN|0)&&Math.hypot(t.vx||0,t.vy||0)>120){t.sbk=0;const o=G.players[t.sbkSrc];
-      if(o){o.baHit=0;damage(t,STONEB.v.wallDmg,o.id,'proj');}addStun(t,STONEB.v.wallStun);emit({k:'efx',z:'esbwall',x:Math.round(t.x),y:Math.round(t.y),h:cH(t)});}}}
+      const angle=Math.atan2(t.vy,t.vx);t.vx=t.vy=0;
+      if(o){o.baHit=0;damage(t,STONEB.v.wallDmg,o.id,'proj',false,{angle});}addStun(t,STONEB.v.wallStun);emit({k:'efx',z:'esbwall',x:Math.round(t.x),y:Math.round(t.y),h:cH(t)});}}}
 }
 // สำหรับ snapshot
 // Wrath: ea[3] = 1 เลือกจุด, 2 ปาเสา, 3 ชาร์จ, 4 ดันขึ้น; ea[13] เวลาและพิกัดสำหรับท่า Stand

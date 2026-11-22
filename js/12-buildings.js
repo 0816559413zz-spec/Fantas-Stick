@@ -147,7 +147,7 @@ function collideWorld(o,r,z){
     const dx=o.x-c.x,dy=o.y-c.y,d=Math.hypot(dx,dy),m=c.r+r;
     if(d<m&&d>0.001){o.x=c.x+dx/d*m;o.y=c.y+dy/d*m;}
   }
-  sol+=eCollide(o,r,z);   // สิ่งก่อสร้างสายดิน
+  sol+=eCollide(o,r,z,_cwLast.get(o));   // สิ่งก่อสร้างสายดิน
   sol+=windCollide(o,r,z);   // กำแพงลมสายลม: กันศัตรูเดินผ่าน
   sol+=pnlCollide(o,r,z);   // breakable panels (js/12-pnl)
   sol+=cityCollideIn(o,r,z);   // ผนังตึกกลวงในเมือง ทีละแผ่นทีละชั้น (js/12-city-dmg)
@@ -216,10 +216,15 @@ function ultActive(p){return p.colos>0||p.god>0||!!p.wr||p.mirror>0||!!p.lgUlt||
 function gainUlt(p,v){if(ultActive(p))return;p.ult=Math.min(100,p.ult+v*0.5*ULT_RATE*p.buffs.ult);}
 function lifesteal(p,amt){if(p.buffs.life&&p.alive&&!p.downed)healT(p,amt*p.buffs.life);}
 
-function damage(t,amt,srcId,kind,noFlash=false){
+let impactProjectile=null;
+function damage(t,amt,srcId,kind,noFlash=false,impact){
   if(G.mode==='train'&&G.tr&&G.tr.god&&G.players[t.id]===t)return;   // ห้องฝึก: อมตะ
   if(devGod(t)||darkOrbImmune(t))return;
   const src=srcId!=null?G.players[srcId]:null;
+  const melee=impact?.weapon;
+  const swing=melee==='frost'?src?.swN:melee==='whip'?src?.natureWhip?.start:undefined;
+  const flight=kind==='proj'&&impactProjectile?.owner===srcId?impactProjectile:null;
+  const force=Number.isFinite(impact?.angle)?impact.angle:flight&&Math.hypot(flight.vx,flight.vy)>1?Math.atan2(flight.vy,flight.vx):undefined;
   if(src&&src!==t&&kind!=='burn'&&kind!=='zone')darkReveal(src);
   if(src&&kind!=='burn')amt*=src.buffs.dmg;
   if(src&&src.fheat>0&&kind!=='burn')amt*=pyroHeatDmg(src);
@@ -233,7 +238,7 @@ function damage(t,amt,srcId,kind,noFlash=false){
     if(t.dead)return;
     if(t.frz>0)amt*=1.15;
     if(t.mrk>0&&kind!=='burn')amt*=1.12;
-    t.hp-=amt;emit({k:'hit',x:t.x,y:t.y,h:(t.h||0)+1.4,n:Math.round(amt),nf:noFlash?1:undefined,mn:t.id,s:srcId||undefined,ns:src&&src.baHit?1:undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,a:(kind==='aoe'||kind==='zone')?1:undefined});
+    t.hp-=amt;emit({k:'hit',x:t.x,y:t.y,h:(t.h||0)+1.4,n:Math.round(amt),nf:noFlash?1:undefined,mn:t.id,s:srcId||undefined,m:melee,ms:swing,mc:impact?.chase,ns:src&&src.baHit?1:undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,a:(kind==='aoe'||kind==='zone')?1:undefined});
     if(src&&src.alive)gainUlt(src,amt*0.3);
     if(t.hp<=0){t.dead=true;emit({k:'die',x:t.x,y:t.y,h:(t.h||0)+0.8,c:'#9fd0ff',t:'min'});}
     return;
@@ -243,7 +248,7 @@ function damage(t,amt,srcId,kind,noFlash=false){
     if(t.frz>0)amt*=1.15;
     if(t.mrk>0&&kind!=='burn')amt*=1.12;
     t.hp-=amt;
-    emit({k:'hit',x:t.x,y:t.y,h:cH(t)+vR(t)+0.4,n:Math.round(amt),nf:noFlash?1:undefined,e:t.id,s:srcId||undefined,ns:src&&src.baHit?1:undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,a:(kind==='aoe'||kind==='zone')?1:undefined});
+    emit({k:'hit',x:t.x,y:t.y,h:cH(t)+vR(t)+0.4,n:Math.round(amt),nf:noFlash?1:undefined,e:t.id,s:srcId||undefined,m:melee,ms:swing,mc:impact?.chase,ns:src&&src.baHit?1:undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,a:(kind==='aoe'||kind==='zone')?1:undefined});
     if(src){gainUlt(src,amt);lifesteal(src,amt);src.dmgDealt+=amt;}
     if(t.hp<=0){t.dead=true;t.lastHit=srcId;if(src){src.kills++;darkKill(src);}emit({k:'die',x:t.x,y:t.y,h:cH(t),c:EDEF[t.type].col,t:t.type});}
     return;
@@ -282,12 +287,13 @@ function damage(t,amt,srcId,kind,noFlash=false){
   if(G.mode==='ffa')ffaDmgLog(t,srcId,real,kind);   // assist + จอตอนตาย (js/54)
   if(src&&src!==t){gainUlt(src,amt*0.7);lifesteal(src,amt);src.dmgDealt+=amt;}
   gainUlt(t,amt*0.25);
-  emit({k:'hit',x:t.x,y:t.y,h:t.z+2.4,n:Math.round(amt),nf:noFlash?1:undefined,id:t.id,s:srcId||undefined,ns:src&&src.baHit?1:undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,sx:src&&src!==t?Math.round(src.x):undefined,sy:src&&src!==t?Math.round(src.y):undefined,a:(kind==='aoe'||kind==='zone')?1:undefined});
+  emit({k:'hit',x:t.x,y:t.y,h:t.z+2.4,n:Math.round(amt),nf:noFlash?1:undefined,id:t.id,s:srcId||undefined,m:melee,ms:swing,mc:impact?.chase,ns:src&&src.baHit?1:undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,sx:src&&src!==t?Math.round(src.x):undefined,sy:src&&src!==t?Math.round(src.y):undefined,a:(kind==='aoe'||kind==='zone')?1:undefined,dir:(t.hp<=0||melee)?force:undefined,quietKill:t.hp<=0&&kind==='zone'?1:undefined});
   if(t.hp<=0){t.hp=0;playerDown(t,srcId);}
 }
 function playerDown(t,srcId){
   lightReleaseAlly(t);
   t.shieldOn=false;t.burn=0;t.fly=false;
+  t.frostCut=null;
   t.stS=null;t.sdome=null;t.rail=null;t.stStaff=0;t.slnT=0;t.beam=0;t.sdHit=null;earthReset(t);windReset(t);waterReset(t);natureReset(t);lightReset(t,true);darkReset(t);if(t.god>0){t.god=0;t.xhp=0;}
   // ท่าที่ง้าง/ค้างอยู่ตอนล้ม: ไม่งั้นคนล้ม (co-op) ยังปล่อยท่าได้ หรือท่าค้างไว้แล้วออกเองทันทีที่ถูกชุบ
   t.dfall=null;t.snapT=0;t.grT=0;t.slam=false;t.slam3=null;t.dchgOn=false;t.dchg=0;t.chg=0;t.dash=0;t.dashSp=0;t.trail=null;
@@ -331,6 +337,10 @@ function explode(pr){
   }
 }
 function hitTarget(pr,t){
+  const previous=impactProjectile;impactProjectile=pr;
+  try{hitProjectileTarget(pr,t);}finally{impactProjectile=previous;}
+}
+function hitProjectileTarget(pr,t){
   if(pr.type==='nature_pea')return; // The splash applies damage once, including to the direct target.
   if(pr.sp&&SPELLS[pr.sp]&&SPELLS[pr.sp].hit){SPELLS[pr.sp].hit(pr,t);if(!pr.noImpact&&pr.type!=='fire'&&pr.type!=='wbl')emit({k:'imp',x:t.x,y:t.y,h:pr.h,t:pr.type});return;}
   damage(t,pr.dmg,pr.owner,'proj',pr.noImpact);
@@ -358,7 +368,10 @@ function updateProjectiles(dt){
 function projStep(pr,dt,ps){
   if(pr.bz)windCurveStep(pr,dt);
   if(pr.kc)pyroKindleCurve(pr,dt);   // Kindle side fireballs   // ขนนกสายลม: วิ่งตามเส้นโค้ง
-    if(pr.type==='wcage')waterCageSteer(pr,dt);
+    if(pr.type==='wcage'){
+      waterCageSteer(pr,dt);
+      if(pr.cageWait>0){pr.life-=dt;return;}
+    }
     if(pr.dead)return;
     const prevX=pr.x,prevY=pr.y,prevH=pr.h;
     {const t0=TERR?terrT(pr.x,pr.y):0;pr.x+=pr.vx*dt;pr.y+=pr.vy*dt;pr.h+=pr.vh*dt;if(TERR)pr.h-=terrT(pr.x,pr.y)-t0;}pr.life-=dt;

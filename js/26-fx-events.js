@@ -69,15 +69,35 @@ function fx(ev,raw){   // raw = ภาพเดิมในโค้ดเท่
     case 'boom':explosionFX(ev.x,ev.y,H);if(near){snd('boom',ev);shake(7);}break;
     case 'hit':{
       const mine=ev.id===NET.myId;
-      if(ev.id!==undefined){const po=PM3.get(ev.id);if(po)po.lhit={sx:ev.sx,sy:ev.sy,t:performance.now()};}   // ทิศที่โดนตี → ragdoll (js/48)
+      const now=performance.now(),player=ev.id!==undefined?PM3.get(ev.id):null;
+      if(player)player.lhit={sx:ev.sx,sy:ev.sy,t:now};   // Death and knockback use the last confirmed hit direction.
+      const dx=ev.x-ev.sx,dy=ev.y-ev.sy,angle=ev.dir??(Math.hypot(dx,dy)>1?Math.atan2(dy,dx):undefined);
+      if(player&&ev.kl&&!ev.b&&!ev.quietKill){
+        player.deathImpact={angle,weapon:ev.m,power:ev.n,t:now};
+        flashModel(player,.096);
+      }
+      if(ev.m&&ev.s!==undefined){
+        const attacker=PM3.get(ev.s);
+        if(ev.mc===2&&attacker?.darkFlowStrike)attacker.darkFlowStrike.resisted=true;
+        else if(ev.mc&&attacker?.darkChaseFx)attacker.darkChaseFx.contacts[Math.max(0,ev.mc-3)]=true;
+        else if(!ev.mc&&attacker&&(attacker.weaponContact?.kind!==ev.m||attacker.weaponContact.swing!==ev.ms))attacker.weaponContact={kind:ev.m,swing:ev.ms};
+        if(ev.s===NET.myId){
+          combatCameraImpact(ev.kl?1:.62);
+          snd('hit',{vol:ev.kl?.82:.61});
+        }
+      }
       if(!ev.b){
-        const o=ev.id!==undefined?PM3.get(ev.id):ev.e!==undefined?EM3.get(ev.e):ev.mn!==undefined?MM3.get(ev.mn):null;
+        const o=player||(ev.e!==undefined?EM3.get(ev.e):ev.mn!==undefined?MM3.get(ev.mn):null);
         if(ev.nf){if(o)o.hitT=0.25;}
-        else{flashModel(o);hitSparks(ev.x,ev.y,H-0.6,ev.n);}
+        else if(!o||now-(o.impactAt??-Infinity)>=110){
+          if(o){o.impactAt=now;flashModel(o,ev.m?.056:.042);}
+          if(player){player.recoilT=0;player.recoilPower=ev.n>=35?.17:.10;player.recoilAngle=angle;}
+          hitSparks(ev.x,ev.y,H-0.6,ev.n,angle);
+        }
       }
       if(SET.dmg||mine){if(ev.b)floatText(ev.x,ev.y,ev.n,'#ff9a4a',12,H-0.3);else floatText(ev.x,ev.y,ev.n,mine?'#ff6b6b':ev.s===NET.myId?'#ffe27a':'#ffffff',ev.s===NET.myId?18:16,H);}
       if(mine&&!ev.b){shake(5);snd('hurt');if(ev.sx!==undefined)DIRI.push({a:Math.atan2(ev.sy-myPos().y,ev.sx-myPos().x),t:1});}
-      if(ev.s===NET.myId&&!mine&&!ev.b){if(ev.n>=10&&!ev.ns)shake(Math.min(6,ev.n/6));if(ev.n>=15&&!ev.a)hitStop(ev.n>=40||ev.kl?0.08:0.055);}   // AoE/zone (a=1) ไม่หยุดภาพ
+      if(ev.s===NET.myId&&!mine&&!ev.b&&!ev.m){if(ev.n>=10&&!ev.ns)shake(Math.min(6,ev.n/6));if(ev.n>=15&&!ev.a&&!ev.kl)hitStop(ev.n>=40?0.08:0.055);}
       if(ev.s===NET.myId&&!mine&&!ev.b&&SET.hitm){HITM.t=HITM.max=ev.kl?0.7:0.45;HITM.at=performance.now();HITM.kill=!!ev.kl;if(ev.kl)snd('kill');}
       break;}
     case 'parry':
@@ -99,6 +119,10 @@ function fx(ev,raw){   // raw = ภาพเดิมในโค้ดเท่
       floatText(ev.x,ev.y,'โล่แตก!','#7ff6ff',18,H+1.2);snd('break',ev);
       break;
     case 'die':
+      if(ev.id!==undefined&&PM3.get(ev.id)?.deathImpact){
+        if(near)snd('die',ev);
+        break;
+      }
       burst(ev.x,ev.y,ev.c||'#fff',40,300,0.8,3,{h:H,g:5});
       smoke(ev.x,ev.y,Math.max(0.4,H-0.6),12,'#302a38',1.6,8,90);
       burst(ev.x,ev.y,'#dfe8ff',22,40,1.8,2.4,{h:H,vh:[1,3],g:-1.2});

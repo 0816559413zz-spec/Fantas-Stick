@@ -12,7 +12,8 @@ function natureEmpHit(p,swing){const hit=[],c=Math.cos(swing.angle),s=Math.sin(s
     if(swing.emp==='slam'){if(d>NATURE_WHIP.range+1e-7||!aimLineH(p,p.z+1.1,t,3.2))continue;if(d>1e-7&&Math.abs(angDiff(Math.atan2(dy,dx),swing.angle))>NATURE_WHIP.halfArc+1e-7)continue;}
     else{const f=dx*c+dy*s,l=-dx*s+dy*c;if(f<0||f>NAT_LINE.len+(t.r||PR)||Math.abs(l)>NAT_LINE.w+(t.r||PR)||!aimLineH(p,p.z+1.1,t,3.2))continue;}
     if(natureTrace(p,t,p.z+1.1,cH(t),p.team))continue;
-    if(aoeHit(p,t,swing.emp==='slam'?NAT_SLAM.dmg:NAT_LINE.dmg,null)){hit.push(t);emit({k:'efx',z:'nature_whip_hit',x:t.x,y:t.y,h:cH(t)});}}}
+    const slam=swing.emp==='slam';
+    if(aoeHit(p,t,slam?NAT_SLAM.dmg:NAT_LINE.dmg,null,false,slam?{weapon:'whip',angle:swing.angle}:undefined)){hit.push(t);emit({k:'efx',z:'nature_whip_hit',x:t.x,y:t.y,h:cH(t)});}}}
   finally{p.baHit=0;}
   if(hit.length)natureSendSpore(p,hit[0]);}
 function natureWhipHit(p,swing){
@@ -26,7 +27,7 @@ function natureWhipHit(p,swing){
       if(distance>NATURE_WHIP.range+1e-7||!aimLineH(p,p.z+1.1,target,2.8))continue;
       if(distance>1e-7&&Math.abs(angDiff(Math.atan2(dy,dx),swing.angle))>NATURE_WHIP.halfArc+1e-7)continue;
       if(natureTrace(p,target,p.z+1.1,cH(target),p.team))continue;
-      if(aoeHit(p,target,NATURE_WHIP.damage)){
+      if(aoeHit(p,target,NATURE_WHIP.damage,null,false,{weapon:'whip',angle:swing.angle+swing.side*.62})){
         hit.push(target);
         emit({k:'efx',z:'nature_whip_hit',x:target.x,y:target.y,h:cH(target)});
       }

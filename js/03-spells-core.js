@@ -56,7 +56,7 @@ function cleanKit(s){return parseKit(parseKit(s).str).str;}
 function setKit(p,str){const old=p.pathIdx;p.fmode=0;p.orbs=0;p.orbBlk=0;p.kit=cleanKit(str);const k=parseKit(p.kit);p.pathIdx=k.path;p.kitIds=k.ids.map(i=>SPELL_LIST[i].id);p.ultId=SPELL_LIST[k.ult].id;
   if(old!==undefined&&old!==p.pathIdx&&G&&G.ph!=='lobby')pathReset(p);}
 // เปลี่ยนสายกลางเกม (เมนูทดลอง): ล้างท่าค้างของสายเก่า — ไม่งั้นค้างลอยฟ้า (Wrath) / เดินไม่ได้ (Railgun/Auger) / ร่างเทพค้าง
-function pathReset(p){p.fheat=0;clearStatus(p);earthReset(p);windReset(p);waterReset(p);natureReset(p);lightReset(p,true);darkReset(p);Object.assign(p,{stS:null,stCd:0,god:0,clQ:null,cEmp:0,cEmpT:0,clT:0,xhp:0,sdome:null,rail:null,slnT:0,sorb:null,beam:0,sdHit:null,slam:false,slam3:null,chg:0,dash:0,dashSp:0,trail:null,fpath:null,shieldOn:false});}
+function pathReset(p){p.fheat=0;clearStatus(p);earthReset(p);windReset(p);waterReset(p);natureReset(p);lightReset(p,true);darkReset(p);Object.assign(p,{stS:null,stCd:0,god:0,clQ:null,cEmp:0,cEmpT:0,clT:0,xhp:0,sdome:null,rail:null,slnT:0,sorb:null,beam:0,sdHit:null,slam:false,slam3:null,frostCut:null,chg:0,dash:0,dashSp:0,trail:null,fpath:null,shieldOn:false});}
 
 // ---------- สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู) ----------
 const isBig=t=>t.isE&&(t.type==='troll'||t.type==='queen'||(EDEF[t.type]&&EDEF[t.type].boss));
@@ -165,10 +165,10 @@ function shieldFaces(t,x,y,z){
     return Math.abs(angDiff(Math.atan2(y-t.y,x-t.x),t.ang))<=A;}
   return true;
 }
-function aoeHit(p,t,dmg,fn,noFlash=false){
+function aoeHit(p,t,dmg,fn,noFlash=false,impact){
   if(darkOrbImmune(t))return false;
   const blocked=!t.isE&&(shieldFaces(t,p.x,p.y,p.z!=null?p.z+1.2:null)||t.inv>0);
-  damage(t,dmg,p.id,'aoe',noFlash);
+  damage(t,dmg,p.id,'aoe',noFlash,impact);
   if(!blocked&&fn)fn(t);
   return !blocked;
 }

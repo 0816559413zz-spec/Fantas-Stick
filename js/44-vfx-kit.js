@@ -20,7 +20,8 @@ function trailLayer(){if(_trL)return _trL;
   fxMat(m);const mesh=new THREE.Mesh(g,m);mesh.frustumCulled=false;mesh.renderOrder=5;g.userData.keep=m.userData.keep=true;
   _trL={g,mesh};return _trL;}
 function trailNew(o){o=o||{};if(TRAILS.length>=TRMAX){const old=TRAILS.find(t=>t.stop)||TRAILS[0];TRAILS.splice(TRAILS.indexOf(old),1);}
-  const h={pts:[],c1:hdr(o.col||'#bfeaff',o.k||1.6),c2:hdr(o.col2||o.col||'#5ab8ff',(o.k||1.6)*0.7),w:o.w||0.3,life:o.life||0.25,sweep:!!o.sweep,stop:false};TRAILS.push(h);return h;}
+  const reduced=combatVfxReduced(),life=(o.life||0.25)*(reduced?.73:1),brightness=(o.k||1.6)*(reduced?.8:1);
+  const h={pts:[],c1:hdr(o.col||'#bfeaff',brightness),c2:hdr(o.col2||o.col||'#5ab8ff',brightness*0.7),w:o.w||0.3,life,sweep:!!o.sweep,stop:false};TRAILS.push(h);return h;}
 function trailPoint(h,X,Y,Z,X2,Y2,Z2,wk){if(!h||h.stop)return;const P=h.pts,last=P[P.length-1];
   if(last&&Math.abs(last.x-X)+Math.abs(last.y-Y)+Math.abs(last.z-Z)<0.03&&!h.sweep){last.age=0;return;}
   P.push({x:X,y:Y,z:Z,x2:X2,y2:Y2,z2:Z2,wk:wk===undefined?1:wk,age:0});if(P.length>TRPTS)P.shift();}
@@ -172,11 +173,12 @@ function efxAug(ev){const A=EFXAUG[ev.z];if(!A)return;const H=ev.h!==undefined?e
   let name=A[0];
   if(ev.g&&name.startsWith('storm_'))name='stormCyan'+name.slice(5);
   if(ev.g&&ev.z==='dfdive')name='stormCyan_charge';
-  if(name&&VFXAUG_ON)playFx(name,ev.x,ev.y,H,{s:A[1]});
+  if(name&&VFXAUG_ON&&!combatVfxReduced())playFx(name,ev.x,ev.y,H,{s:A[1]});
   if(A[2]&&ev.id!==undefined&&ev.id===NET.myId&&ev.x!==undefined){screenRadial(ev.x,ev.y,H,1,0.55);screenFlash(ULTCOL[ev.z]||palOf(name.split('_')[0]).main,0.04,0.3);}}
 // เหตุการณ์ทั่วไป: เรียกจาก fx(ev) ทุก event
 let VFXAUG_ON=true;   // ปิดชั่วคราวเพื่อเทียบกับภาพเดิม (WD.vfxAug(false))
 function fxAug(ev,H){if(!VFXAUG_ON&&ev.k!=='hit')return;
+  if(combatVfxReduced()&&ev.k!=='efx'&&ev.k!=='hit')return;
   switch(ev.k){
     case 'efx':efxAug(ev);break;
     case 'cast':if(ev.x!==undefined){const [wx,wy]=wandPos(ev);playFx(pjPal(ev.t)+'_pop',wx,wy,H,{s:0.6,col:PCOL[ev.t]});}break;
@@ -218,14 +220,17 @@ function bfAfter(ev,H){if(!BF.on||ev.x===undefined||isNaN(ev.x))return;
   else return;
   if(!BF_EL[el])return;
   if(h<=Math.max(0.6,s)){   // รอยบนหญ้า/พื้นทั้งแมตช์ (js/50) + รอยภาพ + เศษโปรย เฉพาะที่โดนใกล้พื้น (ตีโดนตัวกลางอากาศ = ไม่มีรอย) — ทาทุกครั้ง ไม่ติดกันซ้อน/ระยะของ bfPlay
-    grassScar(x,y,el,s);bfMark(x,y,el,s);const R=16+36*s;
-    if(el==='earth')bfScatter(x,y,R,3+7*s*s,'rock',0.7+0.4*s);
-    else if(el==='fire'&&s>=0.9)bfScatter(x,y,R,4*s,'char',0.8);
-    else if(el==='ice')bfScatter(x,y,R,2+4*s,'ice',0.6+0.4*s);
-    else if(el==='storm'&&s>=0.9)bfScatter(x,y,R*0.6,2*s,'char',0.6);}
+    grassScar(x,y,el,s);bfMark(x,y,el,s);
+    if(!combatVfxReduced()){
+      const R=16+36*s;
+      if(el==='earth')bfScatter(x,y,R,3+7*s*s,'rock',0.7+0.4*s);
+      else if(el==='fire'&&s>=0.9)bfScatter(x,y,R,4*s,'char',0.8);
+      else if(el==='ice')bfScatter(x,y,R,2+4*s,'ice',0.6+0.4*s);
+      else if(el==='storm'&&s>=0.9)bfScatter(x,y,R*0.6,2*s,'char',0.6);
+    }}
   bfPlay('bf_'+el+(h>2.5?'_air':''),el,x,y,h,s,el==='storm'&&ev.g?'stormCyan':undefined);}
 // กันซ้อนถี่: จุดเดียวกัน (ช่อง 40 px) ธาตุเดียวกัน เล่นได้ทุก 0.25 วิ • ไกลกว่า ~80 ม. ไม่เล่น
-function bfPlay(name,el,x,y,h,s,pal){if(!nearMe(x,y,1600))return;
+function bfPlay(name,el,x,y,h,s,pal){if(combatVfxReduced()||!nearMe(x,y,1600))return;
   const k=name+'|'+Math.round(x/40)+'|'+Math.round(y/40),t=performance.now(),o=BF.last.get(k);if(o&&t-o<250)return;
   BF.last.set(k,t);if(BF.last.size>400)BF.last.clear();
   fxPlay('env/'+name,{x,y,h,s,pal});}
@@ -373,8 +378,8 @@ const SCR={fl:[],rad:null,chr:0,hurt:0,imp:null};
 // Impact frame (อนิเมะ): ภาพกลับขาว-ดำ + เส้นพุ่งออกจากจุด (wx,wy,wh) รวม 0.34 วิ — กลับ (0–40%) → วาบขาว (40–54%) → กลับอีกที (54–90%) → คืนภาพ
 // เรียกจากเหตุการณ์ของท่า (เช่น Eye of Heaven js/68) เฉพาะกับคนที่ควรเห็น • amt 0–1 ความแรง
 function impactFrame(amt,wx,wy,wh,T,id){SCR.imp={a:Math.max(0,Math.min(1,amt||1)),t:0,max:T||0.34,x:tx(wx),y:wh+GY(wx,wy),z:tz(wy),id};}   // id = ติดตามตัวละคร แบ่ง 3 เฟรมต้น/กลาง/ปลาย ไม่มีช่วงกลับภาพ
-function screenFlash(col,amt,life){if(QUAL.mode==='low')return;SCR.fl.push({c:new THREE.Color(col),a:amt,t:life,max:life});}
-function screenRadial(x,y,h,amt,life){if(QUAL.mode==='low')return;SCR.rad={x:tx(x),y:h+GY(x,y),z:tz(y),a:amt,t:life,max:life};}
+function screenFlash(col,amt,life){if(QUAL.mode==='low')return;if(combatVfxReduced()){amt*=.55;life*=.68;}SCR.fl.push({c:new THREE.Color(col),a:amt,t:life,max:life});}
+function screenRadial(x,y,h,amt,life){if(QUAL.mode==='low')return;if(combatVfxReduced()){amt*=.55;life*=.68;}SCR.rad={x:tx(x),y:h+GY(x,y),z:tz(y),a:amt,t:life,max:life};}
 function screenKick(amt){SCR.chr=Math.max(SCR.chr,amt);}
 function screenHurt(amt){SCR.hurt=Math.max(SCR.hurt,amt);}
 const _scv=new THREE.Vector3();
@@ -389,6 +394,11 @@ function updateScreenFx(dt){
     else{if(I.id!=null){const o=PM3.get(I.id);if(o){I.x=o.g.position.x;I.y=o.g.position.y+1.2;I.z=o.g.position.z;}}_scv.set(I.x,I.y,I.z).project(cam);if(_scv.z<1)GRADEU.uCtr.value.set(clamp(_scv.x*0.5+0.5,0,1),clamp(_scv.y*0.5+0.5,0,1));
       GRADEU.uImpM.value=I.id!=null?1:0;if(I.id!=null)GRADEU.uImp.value=I.a;else{const on=u<0.4||(u>0.54&&u<0.9);GRADEU.uImp.value=on?I.a:0;}
       if(I.id==null&&u>=0.4&&u<=0.54){const k=I.a*0.55*(1-Math.abs(u-0.47)/0.07);F.r+=k;F.g+=k;F.b+=k;}}}
+  if(combatVfxReduced()){
+    const strongest=Math.max(F.r,F.g,F.b,.001);
+    F.multiplyScalar(Math.min(.50,.16/strongest));
+    GRADEU.uRad.value*=.54;GRADEU.uImp.value*=.52;
+  }
   SCR.chr=Math.max(0,SCR.chr-dt*3);GRADEU.uChr.value=SCR.chr;
   SCR.hurt=Math.max(0,SCR.hurt-dt*1.8);GRADEU.uHurt.value=SCR.hurt*0.55;
 }

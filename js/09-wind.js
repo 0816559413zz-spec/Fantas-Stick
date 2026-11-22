@@ -540,7 +540,11 @@ function windUltSweep(p,U,x0,y0,h0,x1,y1,h1){const dx=x1-x0,dy=y1-y0,dh=(h1-h0)*
 function windFloatZ(p,dt){const gh=groundH(p.x,p.y,p.z);p.z+=(gh+(p.wfz||2.2)-p.z)*Math.min(1,4*dt);p.vz=0;}
 
 // สำหรับ snapshot: [เกจ, ดูดลม, ชาร์จ Windup, (เลิกใช้), ชาร์จระเบิดปีก, บิน(1)/ร่อน, (เลิกใช้), 1=หมุนขึ้น 2=บิน, ด้านหมุน, 1=ชาร์จอัลติ 2=พุ่ง]
-function windSnapP(p){if(!wOn(p))return undefined;return [Math.floor(p.wg||0),p.wchg?1:0,p.wwc|0,p.wwAim?1:0,p.wsb?1:0,p.wfw&&p.wfw.ph!=='glide'?1:windGliding(p)?2:0,p.wdr?(p.wdr.ph==='chg'?1:2):0,p.wfw?(p.wfw.ph==='spin'?1:p.wfw.ph==='focus'?2:0):0,p.wfw&&p.wfw.ph==='spin'?p.wfw.side:0,p.wult?(p.wult.ph==='chg'?1:2):0,p.wsc|0,p.wse?1:0,Math.round(clamp(p.inp?.ap||0,-1.5,1.5)*100)/100,Math.round((p.wsr||0)/W_VX.sCh*100),windOrbStance(p)?p.wbAmmo|0:0];}
+function windShieldPitch(p,i=p.inp){
+  const d=Math.hypot(i?.ax-p.x,i?.ay-p.y)*S3;
+  return clamp(d>.05&&Number.isFinite(i?.ah)?Math.atan2(i.ah-(p.z||0)-1.2,d):(i?.ap||0),-1.5,1.5);
+}
+function windSnapP(p){if(!wOn(p))return undefined;return [Math.floor(p.wg||0),p.wchg?1:0,p.wwc|0,p.wwAim?1:0,p.wsb?1:0,p.wfw&&p.wfw.ph!=='glide'?1:windGliding(p)?2:0,p.wdr?(p.wdr.ph==='chg'?1:2):0,p.wfw?(p.wfw.ph==='spin'?1:p.wfw.ph==='focus'?2:0):0,p.wfw&&p.wfw.ph==='spin'?p.wfw.side:0,p.wult?(p.wult.ph==='chg'?1:2):0,p.wsc|0,p.wse?1:0,Math.round((p.shieldOn?windShieldPitch(p):clamp(p.inp?.ap||0,-1.5,1.5))*100)/100,Math.round((p.wsr||0)/W_VX.sCh*100),windOrbStance(p)?p.wbAmmo|0:0];}
 function windSnapW(){const o={};if(G.wwl&&G.wwl.length)o.WW=G.wwl.map(w=>[w.id,Math.round(w.x),Math.round(w.y),Math.round(w.a*100)/100,w.L,Math.round(w.t*10)/10,w.mv>0?1:0,w.team,w.owner]);
   if(G.wvh&&G.wvh.length)o.WO=G.wvh.filter(v=>v.on).map(v=>[v.id,Math.round(v.x),Math.round(v.y)]);return o;}
 
@@ -587,9 +591,9 @@ const W_UL=defSpell(WINDP,{id:'eyeofheaven',v:{chg:0.9,ifr:0.0133,impPre:0.05,im
 
 // ท่าพื้นฐาน + โล่ + Dash ของสาย (PBASIC ต้องอยู่ช่องเดียวกับลำดับใน PATHS)
 PBASIC.push({id:'b_wind',type:'wblade',n:'ขนนกลม',d:'กดค้าง = ยิงขนนกจากปีกสลับซ้าย-ขวา ตรงเข้าจุดเล็ง (ช่วยเล็งนิดหน่อย) 5 ดาเมจ ทุก 0.50 วิ ระยะ 600 ความเร็ว 1500 • โดน = คูล Featherwing ลด 0.5 วิ • (เดิม) กดค้าง (เกจยังไม่เต็ม) = ดูดลมรอบตัว +8%/วิ • เกจเต็ม = กดโจมตีปกติค้าง 0.3 วิ แล้วยิงลมกรวยกว้างต่อเนื่อง 17 ม. นาน 2.6 วิ (ปล่อยปุ่ม = หยุด เกจที่เหลือเก็บไว้) 5 ดาเมจ/0.25 วิ ผลักศัตรูเบา ๆ ตัวเราเดินช้าลง',
-  shd:'โล่ปีกห่อตัว: กันรอบตัว 360° รับได้ 75 • โดนตีแต่ละครั้ง +10% เกจ • เกจเต็มระหว่างยกโล่ + คลิกซ้าย = ชาร์จปีกแล้วระเบิดรอบตัว รัศมี 200 ผลัก 250 สตัน 0.8 วิ 20 ดาเมจ',
+  shd:'โล่ลมด้านหน้า: เล็งตามเคอร์เซอร์ได้ทั้งแนวนอนและแนวตั้ง รับได้ 75 • โดนตีแต่ละครั้ง +10% เกจ • เกจเต็มระหว่างยกโล่ + คลิกซ้าย = ชาร์จปีกแล้วระเบิดรอบตัว รัศมี 200 ผลัก 250 สตัน 0.8 วิ 20 ดาเมจ',
   dsd:'Dash ถอยหลังผลัก (Shift): ผลักศัตรูข้างหน้า 250 ตัวเราดีดถอยหลัง 300 ลอยกลางอากาศ (ใช้สกิลกลางอากาศได้) • ศัตรูที่โดนผลักชนกำแพง = 20 ดาเมจ + สตัน • คูลดาวน์ 8 วิ',
-  get shMul(){return 100/WNV.shHp;},shieldSwing:true,front:true,frontA:80*Math.PI/180,aim3d:t=>!!t.wfw,   // บิน/ร่อน Featherwing = โล่หันตามเป้าเล็ง 3 มิติ ขึ้น-ลงได้เกือบรอบ (ตรงกับภาพ wn[5]>=1 และมุมกล้องตอนบิน)
+  get shMul(){return 100/WNV.shHp;},shieldSwing:true,front:true,frontA:80*Math.PI/180,aim3d:()=>true,shieldPitch:windShieldPitch,
   
   hit(pr,t){if(pr.type==='wpush'){windPushHit(pr,t);return;}if(pr.type==='wbl'){windBladeHit(pr,t);return;}if(pr.type==='wball'||pr.type==='wplume'||pr.type==='wshp')return;damage(t,pr.dmg,pr.owner,'proj');const o=G.players[pr.owner];pr.wbT=t;if(o){wGain(o,WNV.baGain);if(pr.type==='wblade'){const k=windSlotOf(o,'featherwing');if(k&&o.cd[k]>0&&!(o.wfw&&o.wfw.ph!=='glide'))o.cd[k]=Math.max(0,o.cd[k]-WNV.baFwCut);}}},   // ขนนกโดน = Featherwing คูลลด 0.5 วิ • ลูกบอลลม (Focus): ผลักเบา ๆ ไม่เพิ่มเกจ
   onBlock(p){wGain(p,WNV.shGain);},

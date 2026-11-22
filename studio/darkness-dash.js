@@ -393,7 +393,7 @@ function stDarkSecondaryBurst(parent,x,z,index){
   group.position.set(x,1.13,z);
   group.scale.setScalar(.68);
   parent.add(group);
-  const middle=[.01,.13,-.09][(index-1)%3];
+  const middle=[.01,.13,-.09][(index+2)%3];
   const path=[[-1.78*direction,middle+.99,.23],[-.10*direction,middle+.39,.28],
     [1.86*direction,middle-.71,.21]];
   const whiteOuter=stDarkCut(group,path,.255,0x101019,11);

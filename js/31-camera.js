@@ -182,6 +182,36 @@ function camObsK(me,F,x,y,z){
     if(hit){k=Math.max(0.12,(i-1)/N-0.02);break;}}
   return k;
 }
+const combatCam={key:'',cast:0,release:1,weight:0,draw:0,impact:1,power:0};
+function combatCameraImpact(power){
+  if(!SET.shake||combatCam.impact<.12)return;
+  combatCam.impact=0;combatCam.power=power;
+}
+function combatCameraCharge(me){
+  const actor=PM3.get(me.id),lightPhase=me.lt?.[14]?.[0];
+  if(lightPhase===1||lightPhase===3)return 1;
+  if(me.dk?.[10]>DARK_MAW.cameraEnd-DARK_MAW.release)return .9;
+  if(actor?.novaT>0)return .85;
+  if(me.wn?.[9]===1||me.ea?.[3]===3||me.df?.[0]===1)return .85;
+  if(me.sm?.[3]&16||me.wt?.[5]===1||me.wt?.[7]&&me.wt[3]===null)return .75;
+  if(actor?.darkDashFx?.hold&&actor.darkDashFx.launchAt===null&&!actor.darkDashFx.cancelled)return .62;
+  if(actor?.darkMarkCast&&!actor.darkMarkCast.live.launch||me.dk?.[12]>0&&me.dk[12]<DARK_WALTZ_ORB.start)return .58;
+  if(me.ea?.[2]>0||me.kd>0&&me.hv||me.wt?.[10]>0||me.lt?.[4]<0)return .45;
+  return 0;
+}
+function combatCameraFrame(me,dt,key){
+  const C=combatCam;
+  if(C.key!==key||!me.al||me.dn){C.key=key;C.cast=C.weight=C.draw=0;C.release=C.impact=1;}
+  if(me.id!==NET.myId||!me.al||me.dn||!SET.shake)return 0;
+  const charge=combatCameraCharge(me);
+  if(charge){C.cast+=dt;C.weight=charge;C.release=1;C.draw=_cs(clamp((C.cast-.055)/.36,0,1));}
+  else if(C.cast>0){C.release=0;C.cast=0;}
+  C.release=Math.min(1,C.release+dt/.64);
+  const castMotion=charge?-C.draw:C.release<.23?lerp(-C.draw,.82*C.draw,_cs(C.release/.23)):.82*C.draw*(1-_cs((C.release-.23)/.77));
+  C.impact=Math.min(1,C.impact+dt/.22);
+  const pulse=C.impact<.18?_cs(C.impact/.18):1-_cs((C.impact-.18)/.82);
+  return C.weight*castMotion+pulse*C.power*.43;
+}
 function updateCamera(me,dt){
   const lightStep=LGV.st.get(me.id)?.step;
   if(lightStep&&(LGV.now-lightStep.t0)/1000<LGSH.stepOut+LGSH.stepHide){
@@ -191,7 +221,8 @@ function updateCamera(me,dt){
   // (เดิม: กล้องหมุนช้าตามลำ Abyssal Beam — ผู้ใช้ 2026-11-15 ไม่ชิน → กล้องหมุนตามเมาส์ปกติ ลำค่อยตามไปเอง)
   WBY=me.wt&&me.wt[7]&&me.al?yaw:null;
   AIMZ+=(((me.kd>0&&me.hv)?.35:0)-AIMZ)*Math.min(1,dt*10);if(AIMZ<0.001)AIMZ=0;
-  {const fv=SET.fov*(1-0.25*AIMZ)+WTLF.fov;if(Math.abs(cam.fov-fv)>0.01){cam.fov=fv;cam.updateProjectionMatrix();}}
+  const key=builtKey+'|'+me.id,motion=combatCameraFrame(me,dt,key);
+  {const fv=SET.fov*(1-0.25*AIMZ)+WTLF.fov+motion*2.15;if(Math.abs(cam.fov-fv)>0.01){cam.fov=fv;cam.updateProjectionMatrix();}}
   let px=tx(me.x),pz=tz(me.y);
   if(me.wn&&me.wn[5]&&me.al){const T=CAM_TRACK,k=1-Math.exp(-16*dt);if(T.fk!==builtKey+'|'+me.id||Math.hypot(px-T.fx,pz-T.fz)>6){T.fx=px;T.fz=pz;T.fk=builtKey+'|'+me.id;}else{T.fx+=(px-T.fx)*k;T.fz+=(pz-T.fz)*k;}px=T.fx;pz=T.fz;}else CAM_TRACK.fk='';   // flight: the view follows a smoothed point, so snapshot or prediction jitter does not shake the screen
   const chase=me.id===NET.myId&&me.al?me.dk?.[11]:null;
@@ -200,13 +231,13 @@ function updateCamera(me,dt){
     if(t>(flow?DARK_CHASE_FLOW.hit-.045:.67))yaw=lerpAng(yaw,Math.atan2(y-me.y,x-me.x),1-Math.exp(-(flow?20:12)*dt));
   }
   const fx=Math.cos(yaw),fz=Math.sin(yaw),rx=-fz,rz=fx;
-  const target=cameraFrame(me),key=builtKey+'|'+me.id,ground=GY(me.x,me.y)+(me.z||0),cut=!CAM_TRACK.has||CAM_TRACK.key!==key;
+  const target=cameraFrame(me),ground=GY(me.x,me.y)+(me.z||0),cut=!CAM_TRACK.has||CAM_TRACK.key!==key;
   const fast=target===CAM_FRAMES.waterDragon||target===CAM_FRAMES.radianceStrike||target===CAM_FRAMES.darknessMaw;
   const blend=cut?1:1-Math.exp(-(fast?14:8)*dt);
   for(const k of ['dist','h','side','lift'])CAM_FRAME[k]=lerp(CAM_FRAME[k],target[k]||0,blend);
   const dist=CAM_FRAME.dist*(1-0.15*AIMZ),cp=Math.cos(pitch),sp=Math.sin(pitch);
   const side=CAM_FRAME.side*dist*Math.tan(cam.fov*Math.PI/360)*cam.aspect;
-  const focus=_camFocus.set(px+rx*side,ground+CAM_FRAME.h,pz+rz*side);
+  const focus=_camFocus.set(px+rx*side,ground+CAM_FRAME.h+motion*.27,pz+rz*side);
   // กล้องอยู่หลังผู้เล่น: ถ้าหลังชนขอบแผนที่ ให้ "ร่นกล้องเข้าหาตัว + ยกสูงขึ้น" แทนการบีบพิกัดทีละแกน (เดิมกล้องไปทับหัวตัวละคร)
   // กล้องล้ำเข้าไปในตัวกำแพงได้ (กำแพงหนา ~1.6 หน่วย ฝั่งหลังกำแพงโปร่ง มองทะลุเห็นตัวละคร) เกินกว่านั้นให้ร่นกล้องเข้าหาตัว
   const cfg=MAPCAM[MAPID]||MAPCAM.castle,hx=MW*S3/2,hz=MH*S3/2,bx=hx-1.2+cfg.m,bz=hz-1.2+cfg.m,ox=-fx*dist*cp,oz=-fz*dist*cp;
