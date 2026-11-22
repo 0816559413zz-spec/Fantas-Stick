@@ -279,7 +279,7 @@ function chunkCircles(M, w, R) {   // collision: a chain of circles along the pi
 // Fences (fcf: burn per section), floating pieces of other kinds and tagged colliders stay circles.
 const CAP_KEYS = new Set(['x', 'y', 'r', 'hgt', 'k', 'bot', 'b']);
 function mergeCaps(obs) {
-  const out = [], same = (a, b) => a.k === b.k && a.r === b.r && a.b === b.b && Math.abs(a.hgt - b.hgt) < 0.25 && (a.bot == null) === (b.bot == null) && (a.bot == null || Math.abs(a.bot - b.bot) < 0.25);
+  const out = [], same = (a, b) => a.k === b.k && a.r === b.r && a.b === b.b && Math.abs(a.hgt - b.hgt) < Math.max(0.25, Math.min(a.hgt, b.hgt) * 0.05) && (a.bot == null) === (b.bot == null) && (a.bot == null || Math.abs(a.bot - b.bot) < 0.25);
   let run = null;   // {a: first circle, e: last circle, L: [circles]}
   const flush = () => { if (!run) return; const L = run.L, a = L[0], e = L[L.length - 1];
     if (L.length < 3) { out.push(...L); run = null; return; }

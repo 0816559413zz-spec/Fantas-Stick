@@ -198,6 +198,6 @@
   {"id":"manor/gables","name":"Triple-Gable House (frame) · Manor","cat":"build","src":"mapkit/manor.glb","node":"mn_gables","col":0,"brk":0,"ns":0,"v":1795348205169},
   {"id":"manor/tower","name":"Tower House (frame) · Manor","cat":"build","src":"mapkit/manor.glb","node":"mn_tower","col":0,"brk":0,"ns":0,"v":1795348205169},
   {"id":"manor/leanto","name":"Wall Lean-to House (frame) · Manor","cat":"build","src":"mapkit/manor.glb","node":"mn_leanto","col":0,"brk":0,"ns":0,"v":1795348205169},
-  {"id":"abbey/mount","name":"Abbey Mount (decor) · Castle","cat":"build","src":"mapkit/abbey.glb","node":"ab_mount","col":0,"brk":0,"ns":0,"v":1795351525101}
+  {"id":"abbey/mount","name":"Abbey Mount (decor) · Castle","cat":"build","src":"mapkit/abbey.glb","node":"ab_mount","col":0,"brk":0,"ns":0,"v":1795353331360}
  ]
 }
