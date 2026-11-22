@@ -574,19 +574,22 @@ function natRootUp(ev){const F=natFx(),{V3,T,M,Tube,Thorns,thornsAlong,dirt,leav
   F.clip(1.1,t=>{const k=natOut(natPhase(t,0,.12))*(1-natEase(natPhase(t,.6,1.05)));for(const q of roots){q.tube.visible=q.th.visible=k>.01;if(!q.tube.visible||q.lk===k)continue;q.lk=k;const P=[],ax=Math.cos(q.a),az=Math.sin(q.a);for(let i=0;i<12;i++){const u=i/11,h=q.H*u*k,b=q.H*.55*u*u*k,w=Math.sin(u*5+q.tw)*.08*u;P.push(V3(q.x+ax*b-az*w,B.y+h,q.z+az*b+ax*w));}const rad=u=>Math.max(.004,q.R*((1-u)**1.5)*Math.max(.05,k));q.tube.set(P,rad,(u,c)=>c.copy(dark).lerp(mid,Math.min(1,u*1.4)).lerp(tipC,Math.max(0,u-.78)*3));q.th.put(thornsAlong(P,rad,3,.9*k,2.1));}},
     ()=>{for(const q of roots){F.drop(q.tube);F.drop(q.th);}});
   snd('boom',{x:ev.x,y:ev.y,vol:.4});}
-function natThornLine(ev){const F=natFx(),{V3,T,M,Tube,Thorns,thornsAlong,dirt,leaves,sparks}=F,o=ev.id!=null?PM3.get(ev.id):null;if(o)o.natEmpC={k:'line',t:0};
+function natThornLine(ev){const F=natFx(),{V3,T,M,TubeSet,Thorns,thornsAlong,dirt,leaves,sparks}=F,o=ev.id!=null?PM3.get(ev.id):null;if(o)o.natEmpC={k:'line',t:0};
   // Whip-style thorns: bark tubes dark at the root, light green toward a bright tip, hooked thorns along them.
   const dark=new T.Color('#19371a'),mid=new T.Color('#4f7f30'),tipC=new T.Color('#b6ff63');
-  const spike=(H,R,bend,ang)=>{const tube=Tube(12,7,M.bark),th=Thorns(16,1.05,null,true);tube.castShadow=th.castShadow=true;return {tube,th,H,R,bend,ang};};
-  const setSpike=(q,base,k)=>{const P=[],ax=Math.cos(q.ang),az=Math.sin(q.ang),tw=q.tw||0;for(let i=0;i<12;i++){const u=i/11,h=q.H*u*k,b=q.H*Math.tan(q.tilt||.8)*u*k+q.bend*.1*u*u*k,w=Math.sin(u*5+tw)*.07*u;P.push(V3(base.x+ax*b-az*w,base.y+h,base.z+az*b+ax*w));}const rad=u=>Math.max(.004,q.R*((1-u)**1.7)*(1+.16*Math.sin(u*31+tw))*Math.max(.05,k));q.tube.set(P,rad,(u,c)=>c.copy(dark).lerp(mid,Math.min(1,u*1.5)).lerp(tipC,Math.max(0,u-.74)*2.8).multiplyScalar(.82+.22*Math.sin(u*38+tw)));q.th.put(thornsAlong(P,rad,3,.95*k,2.1));};
-  const N=16,ca=Math.cos(ev.a),sa=Math.sin(ev.a),line=[];
+  // all 48 spikes share one tube mesh + one thorn set (was 48 + 48 objects = ~190 render calls incl. shadow, 2026-11-22)
+  const N=16,TS=TubeSet(N*3,12,7,M.bark),TH=Thorns(N*3*16,1.05,null,true);TS.castShadow=TH.castShadow=true;let thD=false;
+  const spike=(H,R,bend,ang)=>({tube:TS.part(line.length),th:null,H,R,bend,ang});
+  const setSpike=(q,base,k)=>{const P=[],ax=Math.cos(q.ang),az=Math.sin(q.ang),tw=q.tw||0;for(let i=0;i<12;i++){const u=i/11,h=q.H*u*k,b=q.H*Math.tan(q.tilt||.8)*u*k+q.bend*.1*u*u*k,w=Math.sin(u*5+tw)*.07*u;P.push(V3(base.x+ax*b-az*w,base.y+h,base.z+az*b+ax*w));}const rad=u=>Math.max(.004,q.R*((1-u)**1.7)*(1+.16*Math.sin(u*31+tw))*Math.max(.05,k));q.tube.set(P,rad,(u,c)=>c.copy(dark).lerp(mid,Math.min(1,u*1.5)).lerp(tipC,Math.max(0,u-.74)*2.8).multiplyScalar(.82+.22*Math.sin(u*38+tw)));q.th=thornsAlong(P,rad,3,.95*k,2.1).slice(0,16);thD=true;};
+  const ca=Math.cos(ev.a),sa=Math.sin(ev.a),line=[];
   for(let i=0;i<N;i++){const d=40+i*(ev.r-40)/(N-1),side=(i%2?1:-1)*(8+Math.random()*14),x=ev.x+ca*d-sa*side,y=ev.y+sa*d+ca*side,base=natWorld(x,y,groundH(x,y,ev.h)),at=.34+i*.018,sz=.75+.5*Math.sin(Math.PI*i/(N-1));
-    for(let c=0;c<3;c++){const main=c===0,lean=ev.a+(c===1?.55:c===2?-.55:0)+(Math.random()-.5)*.25,q=spike((main?3+Math.random()*1.2:1.5+Math.random()*.8)*sz,(main?.28:.16)*sz,(main?1.3:1)+(Math.random()-.3)*.3,lean);q.hook=main?.16:.08;q.tw=Math.random()*6;q.base=main?base:base.clone().add(V3(Math.cos(lean)*.22,0,Math.sin(lean)*.22));q.at=at+c*.025;q.done=c>0;q.tube.visible=q.th.visible=false;line.push(q);}}
+    for(let c=0;c<3;c++){const main=c===0,lean=ev.a+(c===1?.55:c===2?-.55:0)+(Math.random()-.5)*.25,q=spike((main?3+Math.random()*1.2:1.5+Math.random()*.8)*sz,(main?.28:.16)*sz,(main?1.3:1)+(Math.random()-.3)*.3,lean);q.hook=main?.16:.08;q.tw=Math.random()*6;q.base=main?base:base.clone().add(V3(Math.cos(lean)*.22,0,Math.sin(lean)*.22));q.at=at+c*.025;q.done=c>0;q.vis=false;line.push(q);}}
   F.clip(2.4,t=>{   // หนามค้างนานขึ้นก่อนหาย (ผู้ใช้ 2026-11-15)
-    for(const q of line){const a=t-q.at;if(a<0)continue;const k2=natOut(natPhase(a,0,.1))*(1-natEase(natPhase(a,1.5,1.9)));q.tube.visible=q.th.visible=k2>.01;if(q.tube.visible&&q.lk!==k2){q.lk=k2;setSpike(q,q.base,k2);}   // fully grown spikes do not move: rebuild only while k2 changes (48 tubes, 2026-11-22)
+    for(const q of line){const a=t-q.at;if(a<0)continue;const k2=natOut(natPhase(a,0,.1))*(1-natEase(natPhase(a,1.5,1.9))),v=k2>.01;if(v!==q.vis){q.vis=v;thD=true;if(!v){q.tube.show(false);q.lk=null;}}if(v&&q.lk!==k2){q.lk=k2;setSpike(q,q.base,k2);}   // fully grown spikes do not move: rebuild only while k2 changes (48 tubes, 2026-11-22)
       if(!q.done){q.done=true;F.O.y=q.base.y;dirt(q.base.clone(),7,3.2,{spread:.5});leaves(q.base.clone().add(V3(0,.5,0)),3,2.2);sparks(q.base.clone().add(V3(0,.6,0)),4,2.6,'#eaffa0','#5fa83a');}}
+    TS.flush();if(thD){thD=false;const L=[];for(const q of line)if(q.vis&&q.th)for(const x of q.th)L.push(x);TH.put(L);}
     if(t>=.34&&t-1/60<.34){snd('boom',{x:ev.x,y:ev.y,vol:.6});if(ev.id===NET.myId)shake(8);}},
-    ()=>{for(const q of line){F.drop(q.tube);F.drop(q.th);}});}
+    ()=>{F.drop(TS);F.drop(TH);});}
 function natRest(o,dt){const R=o.natRel;if(!R)return;R.t+=dt;const f=Math.min(1,dt*14);for(const k of o.rig||[]){if(k.c!==o.armR&&k.c!==o.armL)continue;const r=k.c.rotation;r.x=lerp(r.x,k.sx,f);r.y=lerp(r.y,0,f);r.z=lerp(r.z,k.sz,f);}if(!o.rig){o.armR.rotation.set(lerp(o.armR.rotation.x,-.18,f),0,lerp(o.armR.rotation.z,.12,f));o.armL.rotation.set(lerp(o.armL.rotation.x,-.12,f),0,lerp(o.armL.rotation.z,-.12,f));}if(R.t>.4)o.natRel=null;}
 // Hooking an enemy, played as one motion (user 2026-11-14):
 // 1 wind-up: wand lifts back over the right shoulder • 2 throw: the arm snaps forward and stays aimed at the enemy, wand in line with the vine

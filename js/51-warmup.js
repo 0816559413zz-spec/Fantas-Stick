@@ -225,7 +225,7 @@ function gameWarmFree(dt){
 // A new material that reuses an existing shader is ready at once and never hidden. `?noshready` = old path.
 // isReady() = getProgramParameter = a synchronous round trip to the GPU process: never asked for a shader that already existed, and at
 // most once per frame, only after SHR_MIN ms (most links finish by then).
-const SHR={seen:new Set(),on:!/[?&]noshready/.test(location.search),q:[],retry:new Map(),pend:new Map(),wait:[],hid:[],list:[],rdy:new WeakSet(),polled:false,
+const SHR={sib:[],seen:new Set(),on:!/[?&]noshready/.test(location.search),q:[],retry:new Map(),pend:new Map(),wait:[],hid:[],list:[],rdy:new WeakSet(),polled:false,
   fake:{traverse(f){for(const o of SHR.list)f(o);},traverseVisible(){}},lit:new Map()},SHR_MIN=60,SHR_MAX=1500;
 // compile() takes the lights from the scene it is given (a full traverse, ~0.25 ms in a fight): a stand-in with the scene's fog/environment
 // and its light list (refreshed every 2 s; visibility checked live) gives the same program key
@@ -246,7 +246,7 @@ function imzPre(){if(!IMZ.on)return;if(--IMZ.scan<=0){IMZ.scan=120;for(const r o
 function imzPost(){const H=IMZ.hid;if(!H.length)return;for(let i=0;i<H.length;i++)H[i].visible=true;H.length=0;}
 function shrRoot(o){while(o.parent)o=o.parent;return o;}
 function shrCollect(o){const m=o.material;
-  if(m){for(const x of Array.isArray(m)?m:[m]){if(!x||x.userData.shr===1||SHR.pend.has(x))continue;
+  if(m){for(const x of Array.isArray(m)?m:[m]){if(!x||x.userData.shr===1)continue;if(SHR.pend.has(x)){SHR.sib.push(o);continue;}   // another object already compiling this material: it waits too
     if(gl.properties.get(x).currentProgram!==undefined){x.userData.shr=1;continue;}
     if(o.isMesh)flatMark(x,o.geometry);SHR.pend.set(x,{t:0,pg:null});if(SHR.list[SHR.list.length-1]!==o)SHR.list.push(o);}}
   const c=o.children;for(let i=0;i<c.length;i++)shrCollect(c[i]);}
@@ -273,6 +273,7 @@ function shReadyPre(){
           w=true;}
         if(w)SHR.wait.push(o);});
       SHR.list.length=0;}}
+  if(SHR.sib.length){for(const o of SHR.sib){if(SHR.wait.includes(o))continue;for(const m of [].concat(o.material)){const e=m&&SHR.pend.get(m);if(e&&e.pg){SHR.wait.push(o);break;}}}SHR.sib.length=0;}
   if(SHR.wait.length){let j=0;for(const o of SHR.wait){let w=false;for(const m of [].concat(o.material))if(m&&shrPending(m,now))w=true;
       if(!w)continue;SHR.wait[j++]=o;if(o.visible){o.visible=false;SHR.hid.push(o);}}SHR.wait.length=j;}}
 function shReadyPost(){imzPost();if(!SHR.hid.length)return;for(const o of SHR.hid)o.visible=true;SHR.hid.length=0;}

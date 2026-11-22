@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-22 Performance round 3: Nature Thorn Line draws its 48 spikes as one tube mesh + one thorn set (`TubeSet` js/68-nature-fx): render calls in a Thorn Line frame 281 -> 93, same picture. Objects sharing a material that is still compiling now wait with the first one (js/51 `SHR.sib`) instead of drawing and blocking.
+
 - 2026-11-22 Darkness: Night Waltz and marked or Flow Nightfall block damage during their orb form. The normal launch and body-form portions stay vulnerable.
 
 - 2026-11-22 Darkness: Long Dash blocks direct, area, and damage-over-time damage through its orb form and the brief transition back to the caster.

@@ -50,6 +50,26 @@ function Tube(n,sides,mat,p){
         nrm[o]=nr.x*ca+bn.x*sa;nrm[o+1]=nr.y*ca+bn.y*sa;nrm[o+2]=nr.z*ca+bn.z*sa;}}
     g.attributes.position.needsUpdate=true;g.attributes.color.needsUpdate=true;g.attributes.normal.needsUpdate=true;g.computeBoundingSphere();};
   return m;}
+// K tubes (n rings × sides) in ONE mesh = one draw (+1 shadow) instead of K. part(i).set() = same vertices Tube.set() writes;
+// part(i).show(false) collapses that tube to a point. Call flush() once per frame after writing.
+function TubeSet(K,n,sides,mat,p){
+  const g=new T.BufferGeometry(),R=n*(sides+1),V=K*R,pos=new Float32Array(V*3),col=new Float32Array(V*3),nrm=new Float32Array(V*3),idx=[];
+  for(let t=0;t<K;t++)for(let i=0;i<n-1;i++)for(let j=0;j<sides;j++){const a=t*R+i*(sides+1)+j,b=a+sides+1;idx.push(a,b,a+1,a+1,b,b+1);}
+  g.setAttribute('position',new T.BufferAttribute(pos,3));g.setAttribute('color',new T.BufferAttribute(col,3));g.setAttribute('normal',new T.BufferAttribute(nrm,3));g.setIndex(idx);
+  const m=mesh(g,mat,p);m.receiveShadow=true;m.visible=false;
+  const tg=V3(),nr=V3(),bn=V3(),up=V3(0,1,0),ax=V3(1,0,0),c=new T.Color(),on=new Uint8Array(K);let dirty=false;
+  m.part=t=>({set(pts,rad,colFn){const k=pts.length,B=t*R;on[t]=1;dirty=true;
+      for(let i=0;i<n;i++){const ii=Math.min(i,k-1),P=pts[ii];
+        tg.copy(pts[Math.min(ii+1,k-1)]).sub(pts[Math.max(ii-1,0)]);if(tg.lengthSq()<1e-9)tg.set(0,0,1);tg.normalize();
+        nr.crossVectors(tg,Math.abs(tg.y)>.92?ax:up).normalize();bn.crossVectors(nr,tg).normalize();
+        const r=i<k?rad(ii/(k-1||1),ii):0;colFn(ii/(k-1||1),c);
+        for(let j=0;j<=sides;j++){const a=j/sides*Math.PI*2,o=(B+i*(sides+1)+j)*3,ca=Math.cos(a),sa=Math.sin(a),cs=ca*r,sn=sa*r;
+          pos[o]=P.x+nr.x*cs+bn.x*sn;pos[o+1]=P.y+nr.y*cs+bn.y*sn;pos[o+2]=P.z+nr.z*cs+bn.z*sn;col[o]=c.r;col[o+1]=c.g;col[o+2]=c.b;
+          nrm[o]=nr.x*ca+bn.x*sa;nrm[o+1]=nr.y*ca+bn.y*sa;nrm[o+2]=nr.z*ca+bn.z*sa;}}},
+    show(v){if(!!on[t]===!!v)return;on[t]=v?1:0;dirty=true;if(v)return;const B=t*R*3,x=pos[B],y=pos[B+1],z=pos[B+2];for(let o=B;o<B+R*3;o+=3){pos[o]=x;pos[o+1]=y;pos[o+2]=z;}}});
+  m.flush=()=>{if(!dirty)return;dirty=false;let any=false;for(let t=0;t<K;t++)if(on[t]){any=true;break;}m.visible=any;
+    g.attributes.position.needsUpdate=true;g.attributes.color.needsUpdate=true;g.attributes.normal.needsUpdate=true;if(any)g.computeBoundingSphere();};
+  return m;}
 function V3(x=0,y=0,z=0){return new T.Vector3(x,y,z);}
 // หนามตามหลอด (InstancedMesh)
 function Thorns(max,size=1,p,hooked=false){
@@ -170,6 +190,6 @@ const CLIPS=[];
 function tick(dt){for(const p of POOLS)p.upd(dt);for(let i=CLIPS.length-1;i>=0;i--){const c=CLIPS[i];c.t+=dt;if(c.t>=c.dur||c.fn(c.t,dt)===false){CLIPS.splice(i,1);c.end&&c.end();}}}
 function clip(dur,fn,end){CLIPS.push({t:0,dur,fn,end});fn(0,0);}
 function drop(o){S.remove(o);const i=ALL.indexOf(o);if(i>=0)ALL.splice(i,1);o.geometry&&o.geometry.dispose();if(o.material&&!(o.material.userData&&o.material.userData.keep))o.material.dispose();}
-return {Whip,WHIP_N,SPK,T,O,M,ALL,V3,rnd,ADD,STD,add,mesh,glow,ring,GLOWT,GLOWG,GLOWP,GLOWV,Tube,Thorns,thornsAlong,TrailRibbon,leaves,sparks,dirt,puff,chips,POOLS,tick,clip,drop};
+return {Whip,WHIP_N,SPK,T,O,M,ALL,V3,rnd,ADD,STD,add,mesh,glow,ring,GLOWT,GLOWG,GLOWP,GLOWV,Tube,TubeSet,Thorns,thornsAlong,TrailRibbon,leaves,sparks,dirt,puff,chips,POOLS,tick,clip,drop};
 }
 const natFx=()=>_natFx||(_natFx=natFxMake());
