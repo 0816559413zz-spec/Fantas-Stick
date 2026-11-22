@@ -13,18 +13,18 @@ CITY_MID:140 CITY_C2:140 cityModeData:141 mapArea:157 AREA:158 areaClamp:160
 ## js/02-citytest.js (28) — แมพทดสอบเมืองใหญ่ (กล่องเทา) — ใช้วัดความลื่นของเครื่องยนต์ก่อนสร้างเ…
 CITY_N:4 CITY_B:4 CITY_ROAD:4 genCityTest:5 cityTestProps:19
 
-## js/02-data.js (389) — ค่าคงที่ของเกม
+## js/02-data.js (390) — 
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
 §73 Test Place (ห้องฝึก): พื้นโล่งไม่มีสิ่งกีดขวาง
 TEST_W:75 TEST_H:75 TEST_C:75 TEST_VIL:75 TEST_GW:77 TEST_Z:78 TEST_ST:85 TEST_PH:86 testWalls:88 testDummySpots:90 testFences:92 genTest:105 testProps:120 trZone:133 trBotPad:134 trFixSpots:136 trShow:138 genGreatHall:139 MAPS:147 MAP_OFF:160 PLAYMAP:161 RANDOM_MAPS:162 MAPID:163 MW:163 MH:163 OBS:163 setMapVars:164
 §165 แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets…
-FMAPS:168 b64i16:169 regFileMap:170 loadMapData:187 loadAllMapData:195 mapReady:198 mapOkFor:199
-§200 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
-PROPDEF:204 PROP_OFF_MODES:211 PROP_USE:213 PROPS:214 PROPON:214 genProps:215
-§235 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
-HOUSES:237 HAIRC:242 HAIRSTY:244 WOODC:247 WOODN:248 WCOREC:249 WCOREN:250 WANDSTY:251 WANDN:256 WANDNN:271 EYEC:272 SKINC:273 CLOAKC:274 TIESTY:275 LOOKK:276 LOOKN:276 lookStr:277 parseLook:278 randLook:279 LOOKS:280 LOOKP:280 KITS:280 getKit:281 getLook:282 CREST_SH:283 CREST_PAT:284 starPts:289 CREST_ANI:291 crestSVG:297 houseColor:305 TEAMC:306 TEAMN:306 NOBROOM:308 ROOM_MAX:310 MODES:311 hostModeEnabled:323 PLAY:325 PDEF:326 EDEF:353 POOLS:366 CDK:376 BUFFS:379 BRAR:388 rollRar:389
+FMAPS:168 b64i16:169 regFileMap:170 loadMapData:188 loadAllMapData:196 mapReady:199 mapOkFor:200
+§201 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
+PROPDEF:205 PROP_OFF_MODES:212 PROP_USE:214 PROPS:215 PROPON:215 genProps:216
+§236 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
+HOUSES:238 HAIRC:243 HAIRSTY:245 WOODC:248 WOODN:249 WCOREC:250 WCOREN:251 WANDSTY:252 WANDN:257 WANDNN:272 EYEC:273 SKINC:274 CLOAKC:275 TIESTY:276 LOOKK:277 LOOKN:277 lookStr:278 parseLook:279 randLook:280 LOOKS:281 LOOKP:281 KITS:281 getKit:282 getLook:283 CREST_SH:284 CREST_PAT:285 starPts:290 CREST_ANI:292 crestSVG:298 houseColor:306 TEAMC:307 TEAMN:307 NOBROOM:309 ROOM_MAX:311 MODES:312 hostModeEnabled:324 PLAY:326 PDEF:327 EDEF:354 POOLS:367 CDK:377 BUFFS:380 BRAR:389 rollRar:390
 
 ## js/02-fcs-data.js (3) — 
 FCS_DATA:3
@@ -380,16 +380,16 @@ fcsRoomsView:178 fcsDecoFile:180 fcsDecoKit:195 MB_STYLE:238 _poOn:239 fileStyle
 ## js/28-fcs-forest.js (259) — ป่าสนหมอก ในแผนที่ First Castle Strike (เฟส 1 = ช่อง x 0–28 ของ Map Editor) — ทำตามรูปอ้า…
 FF:7 FF_X1:8 FF_NS:9 ffGroundTex:11 ffParts:33 fcsForest:40 ffMerge:123 ffDetail:131 fcsRuin:158 ffSkyMat:201 ffMist:229 ffMistFrame:246 fcsForestTick:248 FFC:259
 
-## js/28-fcs-hall.js (93) — 
-HALL:11 hallWinRec:14 hallRect:16
-§17 textures: pane = plain pale glass in a pointed arch (stone corners) •…
-hallTex:18
-§27 windows in the hall: {c centre, n inward normal, t along (viewer's ri…
-hallWindows:28
-§34 build (called once per world build, after the room view / file deco f…
-hallBuild:35 hallEnv:81
-§83 mood: blend by how far the camera is inside the hall rect (3 m soft e…
-hallPre:84 hallPost:92
+## js/28-fcs-hall.js (98) — 
+HALL:12 hallWinRec:16 hallZones:18
+§21 textures: pane = plain pale glass in a pointed arch (stone corners) •…
+hallTex:22
+§31 windows in the hall: {c centre, n inward normal, t along (viewer's ri…
+hallWindows:32
+§38 build (called once per world build, after the room view / file deco f…
+hallBuild:39 hallEnv:85
+§87 mood: blend by how far the camera is inside the hall rect (3 m soft e…
+hallPre:88 hallPost:97
 
 ## js/28-fcs-props.js (156) — FCS room props — look + destruction (user 2026-11-20). Gameplay side: RPK / roomProp in j…
 FRP:11 FRP_PV:12 FRP_PB:13 frpMat:16
@@ -924,4 +924,4 @@ _dvPanel:95 _dvBtn:98 _dvBody:100 _dvHead:100 devUiApply:102 devFreeMouse:110 de
 §130 rows
 dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:193 devUiAct:200
 
-(115 files, 33837 lines)
+(115 files, 33843 lines)

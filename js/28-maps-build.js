@@ -29,7 +29,7 @@ function buildWorld(id){
     builtMap=id;builtKey=wkey(id);HALL.win=[];CANDLESYS=null;TORCHES=[];CANDLES=[];FIREFLIES=null;CRYSTAL=null;RUNE=null;SNITCH=null;BANNERS=[];SNOW=null;
     if(FM)buildFileMap(id);else if(id==='forest')buildForest();else if(id==='pitch')buildPitch();else if(id==='hogsmeade')buildHogsmeade();else if(id==='greathall')buildGreatHall();else if(id==='meadow')buildMeadow();else if(id==='lake')buildLake();else if(id==='ruins')buildRuins();else if(id==='test')buildTest();else if(MAPS[id]&&MAPS[id].build==='city')buildCity();else if(MAPS[id]&&MAPS[id].build==='fcs')buildFcs();else buildCastle();
     if(!FM&&PNL.length)try{pnlBuild();}catch(e){console.error('pnlBuild',e);}   // breakable panels / houses on code maps (file maps: buildFileMap)
-    if(/^fcs/.test(id)&&HALL.win.length)try{hallBuild();}catch(e){console.error('hallBuild',e);}   // Great Hall glass + light shafts (js/28-fcs-hall.js)
+    try{hallBuild(id);}catch(e){console.error('hallBuild',e);}   // indoor light zones: sun beams + indoor mood (js/28-fcs-hall.js)
     buildBackdrop(id);   // ฉากหลังนอกพื้นที่เล่น (js/67, เฉพาะแผนที่ที่มีใน BACKDROP)
     batchStatic(world,new Set([RUNE,CRYSTAL,SNITCH,FIREFLIES&&FIREFLIES.pts,...CANDLES.map(c=>c.g),...BANNERS.map(b=>b.m)].filter(Boolean)));
     setTimeout(prewarmShaders,0);

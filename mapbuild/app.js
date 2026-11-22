@@ -282,6 +282,7 @@ function markerMesh(o) {
   if (o.t === 'sgA' || o.t === 'sgB') { add(new THREE.CylinderGeometry(4, 4, 0.1, 28), helpMat(c, 0.35), 0, 0.06, 0); add(new THREE.CylinderGeometry(0.08, 0.08, 2.6, 6), helpMat(c), 0, 1.3, 0); const l = labelSprite((o.t === 'sgA' ? 'Atk ' : 'Def ') + (o.ph || 1), c); l.position.y = 3.2; g.add(l); return g; }
   if (o.t === 'phase') { areaMesh(o, g, c, 0.15); const l = labelSprite('Phase ' + (o.ph || 1), c); l.position.y = 2.6; g.add(l); return g; }
   if (o.t === 'ceil') { areaMesh(o, g, c, 0); return g; }
+  if (o.t === 'lz') { areaMesh(o, g, c, 0); const l = labelSprite('Indoor light', c); l.position.y = 1.4; g.add(l); return g; }   // drawn at its Top height
   if (D.rp) { const R = MD.RPK[D.rp], L = R.L ? Math.max(0.3, o.L || 4) : R.w, w = R.L ? R.w : R.w; const lk = rpLook(o, D.rp); if (lk) { g.add(lk); return g; }
     const b = add(new THREE.BoxGeometry(L, R.h, w), mat(R.col ? c : '#b89a76'), 0, R.h / 2, 0); b.castShadow = true; return g; }
   if (/^spawn|espawn|task/.test(o.t)) { add(new THREE.CylinderGeometry(0.9, 0.9, 0.12, 20), helpMat(c, 0.75), 0, 0.08, 0); add(new THREE.CylinderGeometry(0.06, 0.06, 2.1, 6), helpMat(c), 0, 1.05, 0);
@@ -323,8 +324,8 @@ function objMesh(o) {
   else if (isKit(o)) { const t = tplNow(kitId(o)); if (t) { g = t.obj.clone(true); g.scale.setScalar(o.s || 1); } else { g = new THREE.Group(); g.add(new THREE.Mesh(pg('box'), helpMat('#666', 0.5))); kitTpl(kitId(o)).then(tt => { if (tt && M.objs.includes(o)) syncObj(o); }); } }
   else if (OBJ[o.t]) { g = markerMesh(o); if (o.t === 'house') g.scale.set(o.sx || 1, 1, o.sz || 1); }
   else { g = new THREE.Group(); g.add(new THREE.Mesh(pg('box'), helpMat('#f06a6a', 0.6))); }
-  const lift = o.t === 'ring' ? Math.max(1, o.y || 6) : o.t === 'light' ? (o.y == null ? 2.2 : o.y) : o.t === 'ceil' ? (o.y == null ? 21 : o.y) : (o.y || 0);
-  g.position.set(o.x, MD.gh(M, o.x, o.z) + lift, o.z); g.rotation.y = o.t === 'phase' || o.t === 'ceil' || o.t === 'dc_box' ? 0 : o.rot || 0;   // areas + decor boxes are axis-aligned in the game
+  const lift = o.t === 'ring' ? Math.max(1, o.y || 6) : o.t === 'light' ? (o.y == null ? 2.2 : o.y) : o.t === 'ceil' ? (o.y == null ? 21 : o.y) : o.t === 'lz' ? (o.y == null ? 22 : o.y) : (o.y || 0);
+  g.position.set(o.x, MD.gh(M, o.x, o.z) + lift, o.z); g.rotation.y = o.t === 'phase' || o.t === 'ceil' || o.t === 'lz' || o.t === 'dc_box' ? 0 : o.rot || 0;   // areas + decor boxes are axis-aligned in the game
   if (tiltOk(o) && (o.rx || o.rz)) g.rotation.set(o.rx || 0, o.rot || 0, o.rz || 0, 'YXZ');   // yaw first, then tilt
   if (o.vis === 0) ghostify(g);
   if (!show.area) g.traverse(m => { if (m.userData.area) m.visible = false; });
@@ -657,6 +658,7 @@ function protoObj(x, z) {
   else if (t === 'sgA' || t === 'sgB') o.ph = 1;
   else if (t === 'phase') Object.assign(o, { ph: 1, sx: 40, sz: 40, rot: 0 });
   else if (t === 'ceil') Object.assign(o, { sx: 20, sz: 20, y: 21, rot: 0 });
+  else if (t === 'lz') Object.assign(o, { sx: 30, sz: 20, y: 22, k: 1, rot: 0 });
   else if (MD.isRP(t) && MD.RPK[t.slice(3)].L) o.L = 4;
   else if (MD.isDeco(t)) Object.assign(o, { box: { k: 'stone', sx: 2, sy: 2, sz: 2, y: 1, rot: 0 }, cyl: { k: 'stone', rt: 1, rb: 1, sy: 4, seg: 12, y: 2 }, cone: { k: 'roof', r: 2, sy: 3, seg: 8, y: 1.5 },
     roof: { sx: 12, sz: 8, sy: 4, y: 6 }, flame: { y: 2.5 }, cloth: { sx: 2, sy: 4, c: '#7a1418', y: 6 }, shield: { y: 3 }, chand: { y: 12 } }[t.slice(3)] || {});
@@ -668,7 +670,7 @@ function updHover(e) { setRay(e); if (tool === 'bd') { hover = bdHit(); return; 
 function placeObj(h, extra) {
   if (opt.obj.startsWith('room:')) { const r = { id: nid(), ref: opt.obj.slice(5), x: snapV(h.x), z: snapV(h.z), rot: Math.round(ghostRot / (Math.PI / 2)) * (Math.PI / 2) };
     M.rooms.push(r); sel = { k: 'room', id: r.id }; loadRooms().then(() => { syncRooms(); renderSide(); }); return r; }
-  const o = protoObj(snapV(h.x), snapV(h.z)); o.id = nid(); if (o.t !== 'light' && o.t !== 'ring' && o.t !== 'ceil' && !MD.isDeco(o.t)) o.y = +(Math.max(0, h.y - MD.gh(M, o.x, o.z))).toFixed(2); Object.assign(o, extra || {});
+  const o = protoObj(snapV(h.x), snapV(h.z)); o.id = nid(); if (o.t !== 'light' && o.t !== 'ring' && o.t !== 'ceil' && o.t !== 'lz' && !MD.isDeco(o.t)) o.y = +(Math.max(0, h.y - MD.gh(M, o.x, o.z))).toFixed(2); Object.assign(o, extra || {});
   M.objs.push(o); syncObj(o); return o;
 }
 // castle parts: proto at the hover point (grid snap + port snap to other parts), then place
@@ -848,12 +850,12 @@ const isVisualType = t => t.startsWith('kit:') || (OBJ[t] && OBJ[t].cat === 'pri
 let gmode = 'translate', gz = null;   // 'hand' | 'translate' | 'rotate' | 'scale'
 const yawOf = q => 2 * Math.atan2(q.y, q.w), r2 = v => +v.toFixed(2), r3 = v => +v.toFixed(3);
 const sns = v => { const st = opt.snap ? opt.snap / 2 : 0; return st ? Math.max(st, +(Math.round(v / st) * st).toFixed(3)) : r2(v); };   // gizmo sizes snap to half the grid step
-const flatRot = it => it.t === 'phase' || it.t === 'ceil' || it.t === 'dc_box';   // axis-aligned in the game
+const flatRot = it => it.t === 'phase' || it.t === 'ceil' || it.t === 'lz' || it.t === 'dc_box';   // axis-aligned in the game
 const isDeco = it => OBJ[it.t] && OBJ[it.t].cat === 'deco';
 function gScaleKind(k, it) {   // how [3] size maps onto this item: 'u' uniform s, 'p' panel L/sy/T, 'L' length, 'xyz' / 'xz' sizes, 'f' floor, 'w' wall, 'fp' free shape, 'cp' castle part, null = none
   if (k === 'room') return null; if (k === 'wall') return 'w'; if (k === 'floor') return 'f'; if (k === 'part') return it.pts ? 'fp' : 'cp';
   if (isKit(it) || it.t === 'core') return 'u'; if (it.t === 'pn_wall') return 'p'; if (MD.isRP(it.t) && it.L) return 'L';
-  if (isPrim(it) || isDeco(it)) return 'xyz'; if (it.t === 'house' || it.t === 'phase' || it.t === 'ceil') return 'xz'; return null;
+  if (isPrim(it) || isDeco(it)) return 'xyz'; if (it.t === 'house' || it.t === 'phase' || it.t === 'ceil' || it.t === 'lz') return 'xz'; return null;
 }
 function placeGizmo() {
   if (gz) return; const it = tool === 'select' && gmode !== 'hand' && sel && sel.pt == null ? find(sel) : null;
@@ -886,13 +888,13 @@ tc.addEventListener('objectChange', () => {
     const dx = gAnchor.position.x - z.p.x, dy = gAnchor.position.y - z.p.y, dz = gAnchor.position.z - z.p.z, up = Math.abs(dy) > 0.004;
     if (k === 'wall') { it.pts = s.pts.map(p => [r2(clamp(p[0] + dx, 0, M.W)), r2(clamp(p[1] + dz, 0, M.H))]); if (up) it.base = r2((s.base != null ? s.base : MD.gh(M, s.pts[0][0], s.pts[0][1])) + dy); }
     else { it.x = r2(clamp(s.x + dx, 0, M.W)); it.z = r2(clamp(s.z + dz, 0, M.H));
-      if (up && k === 'obj') it.y = r2((s.y != null ? s.y : it.t === 'ring' ? 6 : it.t === 'light' ? 2.2 : it.t === 'ceil' ? 21 : 0) + dy);   // may go below 0 = sunk into the ground
+      if (up && k === 'obj') it.y = r2((s.y != null ? s.y : it.t === 'ring' ? 6 : it.t === 'light' ? 2.2 : it.t === 'ceil' ? 21 : it.t === 'lz' ? 22 : 0) + dy);   // may go below 0 = sunk into the ground
       else if (up && k === 'part') it.base = r2((s.base != null ? s.base : MD.gh(M, s.x, s.z)) + dy);
       else if (up && k === 'floor') { it.y = r2(s.y + dy); it.y2 = r2((s.y2 == null ? s.y : s.y2) + dy); } }
     for (const q of z.ms) { const o = q.it, c = q.s;   // other selected items follow the same move
       if (q.k === 'wall') { o.pts = c.pts.map(p => [r2(clamp(p[0] + dx, 0, M.W)), r2(clamp(p[1] + dz, 0, M.H))]); if (up) o.base = r2((c.base != null ? c.base : MD.gh(M, c.pts[0][0], c.pts[0][1])) + dy); }
       else { o.x = r2(clamp(c.x + dx, 0, M.W)); o.z = r2(clamp(c.z + dz, 0, M.H));
-        if (up && q.k === 'obj') o.y = r2((c.y != null ? c.y : o.t === 'ring' ? 6 : o.t === 'light' ? 2.2 : o.t === 'ceil' ? 21 : 0) + dy);
+        if (up && q.k === 'obj') o.y = r2((c.y != null ? c.y : o.t === 'ring' ? 6 : o.t === 'light' ? 2.2 : o.t === 'ceil' ? 21 : o.t === 'lz' ? 22 : 0) + dy);
         else if (up && q.k === 'part') o.base = r2((c.base != null ? c.base : MD.gh(M, c.x, c.z)) + dy);
         else if (up && q.k === 'floor') { o.y = r2(c.y + dy); o.y2 = r2((c.y2 == null ? c.y : c.y2) + dy); } }
       syncKind(q.k, o); }
@@ -1013,10 +1015,10 @@ function dupSel() {   // copies stay exactly where the originals are (move them 
   for (const q of selAll()) { const it = find(q); if (!it) continue; const c = JSON.parse(JSON.stringify(it)); c.id = nid(); M[KEYS[q.k]].push(c); out.push({ k: q.k, id: c.id }); }
   sel = out[0] || null; msel = out.slice(1); syncAll(); renderSide(); changed(); }
 function rotSel(a) { if (!find(sel)) return; if (sel.k === 'room') { editSel(it => { it.rot = +((((it.rot || 0) + Math.sign(a) * Math.PI / 2) % 6.2832 + 6.2832) % 6.2832).toFixed(4); }); return; } editSel(it => { if (it.pts && sel.k === 'wall') { const cx = it.pts.reduce((s, p) => s + p[0], 0) / it.pts.length, cz = it.pts.reduce((s, p) => s + p[1], 0) / it.pts.length, c = Math.cos(a), s = Math.sin(a); it.pts = it.pts.map(p => { const x = p[0] - cx, z = p[1] - cz; return [+(cx + x * c + z * s).toFixed(2), +(cz - x * s + z * c).toFixed(2)]; }); } else it.rot = +(((it.rot || 0) + a) % 6.2832).toFixed(4); }); }
-function scaleSel(k) { if (!find(sel)) return; editSel(it => { if (sel.k === 'obj') { if (isKit(it)) it.s = +((it.s || 1) * k).toFixed(2); else if (isPrim(it) || it.t === 'house' || it.t === 'phase' || it.t === 'ceil') { it.sx = +((it.sx || 1) * k).toFixed(2); it.sz = +((it.sz || 1) * k).toFixed(2); if (isPrim(it)) it.sy = +((it.sy || 1) * k).toFixed(2); } else if (it.t === 'core') it.s = +((it.s || 4) * k).toFixed(2); else if ((MD.isRP(it.t) || it.t === 'pn_wall') && it.L) it.L = +(it.L * k).toFixed(2); } else if (sel.k === 'part' && it.pts) { it.pts = it.pts.map(q => [+(q[0] * k).toFixed(3), +(q[1] * k).toFixed(3)]); it.h = +clamp(it.h * k, 0.5, 40).toFixed(2); } else if (sel.k === 'part') { const D = MD.PART[it.k], q = D.main, mn = D.p[q][1], mx = D.p[q][2]; it[q] = +clamp(it[q] * k, mn, mx).toFixed(2); } else if (sel.k === 'floor') { it.w = +(it.w * k).toFixed(2); it.d = +(it.d * k).toFixed(2); } else it.h = +(it.h * k).toFixed(2); }); }
+function scaleSel(k) { if (!find(sel)) return; editSel(it => { if (sel.k === 'obj') { if (isKit(it)) it.s = +((it.s || 1) * k).toFixed(2); else if (isPrim(it) || it.t === 'house' || it.t === 'phase' || it.t === 'ceil' || it.t === 'lz') { it.sx = +((it.sx || 1) * k).toFixed(2); it.sz = +((it.sz || 1) * k).toFixed(2); if (isPrim(it)) it.sy = +((it.sy || 1) * k).toFixed(2); } else if (it.t === 'core') it.s = +((it.s || 4) * k).toFixed(2); else if ((MD.isRP(it.t) || it.t === 'pn_wall') && it.L) it.L = +(it.L * k).toFixed(2); } else if (sel.k === 'part' && it.pts) { it.pts = it.pts.map(q => [+(q[0] * k).toFixed(3), +(q[1] * k).toFixed(3)]); it.h = +clamp(it.h * k, 0.5, 40).toFixed(2); } else if (sel.k === 'part') { const D = MD.PART[it.k], q = D.main, mn = D.p[q][1], mx = D.p[q][2]; it[q] = +clamp(it[q] * k, mn, mx).toFixed(2); } else if (sel.k === 'floor') { it.w = +(it.w * k).toFixed(2); it.d = +(it.d * k).toFixed(2); } else it.h = +(it.h * k).toFixed(2); }); }
 function snapGround() {   // End: move the selection so its lowest point meets the LOWEST ground under its footprint (sinks into slopes, no gap below)
   const it = find(sel), b = selBox && selBox.box; if (!it || !b || b.isEmpty() || sel.k === 'floor' || sel.k === 'room') return;
-  if (sel.k === 'obj' && (it.t === 'ring' || it.t === 'light' || it.t === 'ceil' || it.t === 'phase')) return;
+  if (sel.k === 'obj' && (it.t === 'ring' || it.t === 'light' || it.t === 'ceil' || it.t === 'lz' || it.t === 'phase')) return;
   const d = sel.k === 'obj' ? (it.t === 'pn_wall' ? { ex: (it.L || 4) / 2, ez: (it.T || 0.3) / 2 } : dim(it)) : null, pts = [];
   if (d && !it.rx && !it.rz && !it.tl) { const c = Math.cos(it.rot || 0), sn = Math.sin(it.rot || 0);   // true (rotated) footprint
     for (let i = 0; i <= 6; i++) for (let j = 0; j <= 6; j++) { const lx = (i / 3 - 1) * d.ex, lz = (j / 3 - 1) * d.ez; pts.push([it.x + lx * c + lz * sn, it.z - lx * sn + lz * c]); } }
@@ -1231,7 +1233,8 @@ function renderSide() {
         ...(MD.isDeco(it.t) ? decoFields(it) : []), ...(it.t === 'pn_wall' ? pnFields(it) : []),
         it.t === 'core' ? fld('Core Number (order)', it, 'n', { min: 1, step: 1 }) : null, it.t === 'core' ? fld('Core Size', it, 's', { min: 1 }) : null,
         it.t === 'sgA' || it.t === 'sgB' || it.t === 'phase' ? fld('Phase', it, 'ph', { min: 1, step: 1 }) : null,
-        it.t === 'phase' || it.t === 'ceil' ? fld('Width (X)', it, 'sx', { min: 1 }) : null, it.t === 'phase' || it.t === 'ceil' ? fld('Length (Z)', it, 'sz', { min: 1 }) : null,
+        it.t === 'phase' || it.t === 'ceil' || it.t === 'lz' ? fld('Width (X)', it, 'sx', { min: 1 }) : null, it.t === 'phase' || it.t === 'ceil' || it.t === 'lz' ? fld('Length (Z)', it, 'sz', { min: 1 }) : null,
+        it.t === 'lz' ? fld('Indoor strength (0-1)', it, 'k', { get: () => it.k == null ? 1 : it.k, min: 0, max: 1, step: 0.05 }) : null,
         it.t === 'ceil' ? fld('Only for players lower than (m)', it, 'zmax', { nullable: 1, ph: 'everyone', min: 0 }) : null,
         MD.isRP(it.t) && MD.RPK[it.t.slice(3)].L ? fld('Length', it, 'L', { min: 0.3 }) : null,
         it.t === 'light' ? fld('Light Color', it, 'c', { type: 'color' }) : null, it.t === 'light' ? fld('Intensity', it, 'int', { min: 0 }) : null, it.t === 'light' ? fld('Range', it, 'dist', { min: 1 }) : null,

@@ -109,6 +109,11 @@ Tool: ศูนย์รวม Tool → **Map Builder** • โค้ด: `mapbu
 - Preset (`bdGen`): coast (แหลมหน้าผาแบบ fcs), island, valley, plains, lake, flat • แปรง: Raise/Lower/Smooth/Flatten/Set Height/Noise/Paint/Trees • Sea Stack คลิก = เพิ่ม, Shift+คลิก = ลบ
 - แผนที่โค้ด `fcs` ยังใช้ฉากหลังหน้าผาแบบโค้ด (`BACKDROP.fcs.coast`) • `fcs-file` ใช้แบบโค้ดจนกว่าจะสร้าง Backdrop ใน Map Builder แล้วส่งเข้าเกม
 
+## Indoor Light Zone (โซนแสงในห้อง) — Place → Room / Breakables, 2026-11-22
+- วัตถุ `lz` = สี่เหลี่ยม (ไม่หมุน) ขยายด้วย gizmo Resize (T) หรือช่อง Width/Length • **Height Above Ground** = ความสูงหลังคา (กล้องสูงกว่านี้ = นอกห้อง) • **Indoor strength** 0-1
+- ส่งเข้าเกมเป็น `data.lz` [{x0,y0,x1,y1 px, top m, k}] → `MAPS[id].lz` → `js/28-fcs-hall.js`: กล้องอยู่ในโซน = แสงในห้อง (IBL/ฟ้า/แดดลด, โทนเย็น) • หน้าต่าง `lit` และแผ่นกระจก (pn_wall mat glass) ในโซนที่หันรับแดดได้ลำแสงตามทิศพระอาทิตย์ของแมพ
+- แมพ fcs* ที่ยังไม่มีโซนเลย ใช้ห้องโถงใหญ่ (HALL.rect) แทน • วางโซนอย่างน้อย 1 อัน = ใช้เฉพาะโซนที่วาง
+
 ## ข้อจำกัดตอนนี้
 - 2026-11-22: **💧 Pick (ตัวดูดสี)** ข้างช่องสีทุกช่อง (แผง Wall/Castle/Primitive + Inspector) และในแผง Paint / Backdrop Paint / Backdrop Set Height → คลิกบนแผนที่ = เอาสี/ผิวพื้น/ความสูงตรงนั้น (ของ → สีของชิ้นนั้น, พื้นแผนที่ → ผิว SURF, Backdrop → ผิว BSURF; ข้ามชุดสีใช้สีใกล้สุด) • **Alt+คลิก** ในเครื่องมือ Paint/Backdrop/Wall/Castle/Place(Primitive) = ดูดเลย • Esc ยกเลิก
 - 2026-11-22: Prop ห้อง (`rp_*`) ใน editor แสดงหน้าตาจริงเหมือนในเกม (ใช้ `frpBuild` จาก `js/28-fcs-props.js`) เห็นชนิดและทิศที่หมุน • เส้น Cell ของกำแพงพังแสดงทั้งสองด้าน

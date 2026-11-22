@@ -1,5 +1,6 @@
 // =====================================================================
-//  Great Hall mood (fcs + fcs-file) — user 2026-11-22 "make the hall look like ref 2" (items 1+2)
+//  Indoor light zones (Map Builder 'Indoor Light Zone' → MAPS[id].lz; fcs maps without zones = Great Hall rect)
+//  user 2026-11-22: hall like ref 2, then 'let me mark which rooms go dark'
 //  1) camera inside the hall rect → cooler/darker ambient + IBL + split-tone grade (set just before the render,
 //     put back right after, so BFA / forest blends never see it)
 //  2) hall windows: 'lit' boxes (fcsDecoKit V.box → HALL.win) get a plain pale glass pane; glass wall panels
@@ -8,12 +9,15 @@
 //     User 2026-11-22: one plain glass colour (no stained glass), light only from the sun side.
 //     Panes = 1 mesh, shafts = 1, floor patches = 1, dust = 1 points.
 // =====================================================================
-var HALL={win:[],tex:null,rect:[38,35,63,49],BW:3.5,   // BW = max beam width (m): wide windows split into beams
+var HALL={win:[],tex:null,rect:[38,35,63,49],   // rect = Great Hall cells (fallback zone on fcs maps)
+  BW:3.5,   // BW = max beam width (m): wide windows split into beams
   C:{hemi:new THREE.Color('#97a8cc'),gnd:new THREE.Color('#2e2822'),fog:new THREE.Color('#465161')},sv:null,k:0,tk:0,
   M:{hi:0.12,mi:0.6,ex:0.02,fn:6,ff:150,lo:new THREE.Vector3(0.8,0.92,1.15),hi2:new THREE.Vector3(1.06,1,0.9),con:0.14,vig:0.14,env:0.7}};   // inside: hemi / sun / exposure cut (0-1), fog near/far (m)
 function hallWinRec(x,y,z,sx,sy,sz){if(sy>=5&&Math.min(sx,sz)<=0.6)HALL.win.push([x,y,z,sx,sy,sz]);}
-// world-space hall rect (m) from its cells
-function hallRect(){const r=HALL.rect,C=FCS_C;return{x0:tx(r[0]*C),x1:tx((r[2]+1)*C),z0:tz(r[1]*C),z1:tz((r[3]+1)*C)};}
+// indoor zones (world m): Map Builder 'Indoor Light Zone' objects (MAPS[id].lz, px) • fcs maps without any → the Great Hall cells (HALL.rect)
+function hallZones(id){const L=MAPS[id]&&MAPS[id].lz;
+  if(L&&L.length)return L.map(q=>({x0:tx(q.x0),x1:tx(q.x1),z0:tz(q.y0),z1:tz(q.y1),top:GY((q.x0+q.x1)/2,(q.y0+q.y1)/2)+q.top,k:clamp(q.k,0,1)}));
+  if(!/^fcs/.test(id))return[];const r=HALL.rect,C=FCS_C;return[{x0:tx(r[0]*C),x1:tx((r[2]+1)*C),z0:tz(r[1]*C),z1:tz((r[3]+1)*C),top:22,k:1}];}
 // ---- textures: pane = plain pale glass in a pointed arch (stone corners) • patch = soft-edged light
 function hallTex(){if(HALL.tex)return HALL.tex;
   const w=128,h=256,cv=document.createElement('canvas');cv.width=w;cv.height=h;const g=cv.getContext('2d');
@@ -25,14 +29,14 @@ function hallTex(){if(HALL.tex)return HALL.tex;
   const flr=new THREE.CanvasTexture(c2);flr.userData.keep=true;
   return HALL.tex={pane,flr};}
 // ---- windows in the hall: {c centre, n inward normal, t along (viewer's right), w, h, fy floor, pane}
-function hallWindows(R){const cx=(R.x0+R.x1)/2,cz=(R.z0+R.z1)/2,inR=(x,z)=>x>R.x0-2&&x<R.x1+2&&z>R.z0-2&&z<R.z1+2,out=[];
+function hallWindows(Z){const zAt=(x,z)=>Z.find(R=>x>R.x0-2&&x<R.x1+2&&z>R.z0-2&&z<R.z1+2),out=[];let cx=0,cz=0;const inR=(x,z)=>{const R=zAt(x,z);if(R){cx=(R.x0+R.x1)/2;cz=(R.z0+R.z1)/2;}return !!R;};
   for(const [x,y,z,sx,sy,sz] of HALL.win){if(!inR(x,z))continue;const ax=sx<sz,n=ax?[cx>x?1:-1,0,0]:[0,0,cz>z?1:-1],th=ax?sx:sz;
     out.push({c:[x+n[0]*(th/2+0.12),y,z+n[2]*(th/2+0.12)],n,t:[n[2],0,-n[0]],w:ax?sz:sx,h:sy,fy:y-13.5,pane:1});}   // 'lit' windows sit 13.5 m above the floor
   if(typeof PNL!=='undefined')for(const p of PNL){if(p.mat!=='glass'||Math.abs(p.tl||0)>0.05)continue;const x=tx(p.x),z=tz(p.y);if(!inR(x,z))continue;
     let n=[-p.s,0,p.c];if(n[0]*(cx-x)+n[2]*(cz-z)<0)n=n.map(q=>-q);out.push({c:[x,p.zb+p.H/2,z],n,t:[n[2],0,-n[0]],w:p.hl*2*S3,h:p.H,fy:p.zb-((p.d&&p.d.z0)||0),pane:0});}
   return out;}
 // ---- build (called once per world build, after the room view / file deco filled HALL.win)
-function hallBuild(){const R=hallRect(),list=hallWindows(R);HALL.win=[];if(!list.length)return;
+function hallBuild(id){const Z=hallZones(id),list=Z.length?hallWindows(Z):[];HALL.win=[];if(!Z.length)return;
   const T=hallTex(),pp=[],pu=[],sp=[],su=[],sn=[],fp=[],fu=[],dA=[],dD=[],dO=[],dR=[],low=QUAL.mode==='low';
   const quad=(P,U,a,b,c,d,ua,ub,uc,ud)=>{P.push(...a,...b,...c,...a,...c,...d);U.push(...ua,...ub,...uc,...ua,...uc,...ud);};
   const v3=(a,b,s)=>[a[0]+b[0]*s,a[1]+b[1]*s,a[2]+b[2]*s],UP=[0,1,0];
@@ -75,15 +79,16 @@ function hallBuild(){const R=hallRect(),list=hallWindows(R);HALL.win=[];if(!list
         'gl_PointSize=uS*(.5+aR.y)/-mv.z;vA=(1.-s*.6)*smoothstep(0.,.08,s)*smoothstep(.97,.85,s)*(.55+.45*sin(uT*1.3+aR.x*40.))*smoothstep(1.,4.,-mv.z);}',
       fragmentShader:'uniform float uI;varying float vA;void main(){float d=length(gl_PointCoord-.5);gl_FragColor=vec4(vec3(1.,.9,.72)*vA*uI*.9*smoothstep(.5,0.,d),1.);}'}));
     dust.frustumCulled=false;dust.renderOrder=6;addW(dust);}
-  world.userData.hall={R,uT,uI,n:list.length,beams:nb};
+  world.userData.hall={Z,uT,uI,n:list.length,beams:nb};
 }
 // dimmer/cooler copy of the current Look env (js/74) — level 1..4
 function hallEnv(lv){if(typeof LOOK==='undefined'||LOOK.off||!LOOK.cur||!scene.environment)return null;const P=LOOK.P[LOOK.cur],f=lv/4,M=HALL.M,n='_hall'+lv,L=(a,b)=>a+(b-a)*f;
   LOOK.P[n]=Object.assign({},P,{env:P.env*(1-M.env*f),tr:L(P.tr,0.8),tg:L(P.tg,0.9),tb:L(P.tb,1.12)});return lookEnvFor(n).texture;}
 // ---- mood: blend by how far the camera is inside the hall rect (3 m soft edge)
 function hallPre(dt){const H=world&&world.userData.hall;HALL.sv=null;if(!H||screen!=='game')return;
-  H.uT.value=performance.now()/1000;const R=H.R,p=cam.position,m=Math.min(p.x-R.x0,R.x1-p.x,p.z-R.z0,R.z1-p.z,22-p.y);
-  HALL.tk=clamp((m+1)/4,0,1);HALL.k+=(HALL.tk-HALL.k)*Math.min(1,(dt||0.016)*3);const s=HALL.k*HALL.k*(3-2*HALL.k);if(s<0.003)return;
+  H.uT.value=performance.now()/1000;const p=cam.position;let tk=0;
+  for(const R of H.Z){const m=Math.min(p.x-R.x0,R.x1-p.x,p.z-R.z0,R.z1-p.z,R.top-p.y);tk=Math.max(tk,clamp((m+1)/4,0,1)*R.k);}   // deepest zone wins
+  HALL.tk=tk;HALL.k+=(HALL.tk-HALL.k)*Math.min(1,(dt||0.016)*3);const s=HALL.k*HALL.k*(3-2*HALL.k);if(s<0.003)return;
   const F=scene.fog,C=HALL.C;HALL.sv={hc:hemi.color.clone(),hg:hemi.groundColor.clone(),hi:hemi.intensity,mi:moonL.intensity,ex:gl.toneMappingExposure,fc:F&&F.color.clone(),fn:F&&F.near,ff:F&&F.far,lo:GRADEU.uLo.value.clone(),hi2:GRADEU.uHi.value.clone(),con:GRADEU.uCon.value,vig:GRADEU.uVig.value};
   hemi.color.lerp(C.hemi,s);hemi.groundColor.lerp(C.gnd,s);const M=HALL.M;hemi.intensity*=1-M.hi*s;moonL.intensity*=1-M.mi*s;gl.toneMappingExposure*=1-M.ex*s;
   GRADEU.uLo.value.lerp(M.lo,s);GRADEU.uHi.value.lerp(M.hi2,s);GRADEU.uCon.value*=1+M.con*s;GRADEU.uVig.value+=M.vig*s;   // cool shadows, warm highlights

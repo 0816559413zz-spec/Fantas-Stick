@@ -175,6 +175,7 @@ function regFileMap(id,e,d){
   MAPS[id]={name:d.name||id,d:d.desc||'',W:d.W,H:d.H,obs,terr,fm:{file:e.file,v:e.v||0,sky:d.sky||'night',fog:d.fog||null,music:d.music||'',modes:d.modes||null,
     spawns:d.spawns||[],props:d.props,espawn:d.espawn||[],rings:d.rings||[],tasks:d.tasks||[],lights:d.lights||[],env:d.env||[],weather:d.weather||'',fx:d.fx||[],brk:d.brk||[],look:d.look||'',lt:d.lt||null,bd:d.bd||null}};   // bd = Map Builder backdrop (js/67-coast bdGridSrc)   // look = ชื่อพรีเซ็ต Look (js/74) • lt = แสง/ฟ้าเฉพาะแมพ (js/28 buildFileMap: hemi/sun/sky)
   MAPS[id].deco=d.deco||null;   // decor drawn by the game (fcsDecoFile js/28-fcs-castle.js)
+  if(d.lz)MAPS[id].lz=d.lz.map(q=>({x0:q.x0,y0:q.y0,x1:q.x1,y1:q.y1,top:q.top==null?22:q.top,k:q.k==null?1:q.k}));   // indoor light zones (js/28-fcs-hall.js)
   if(d.ceil)MAPS[id].ceil=d.ceil.map(q=>({x0:q.x0,y0:q.y0,x1:q.x1,y1:q.y1,h:q.h,zmax:q.zmax==null?Infinity:q.zmax}));   // room ceilings (fcsCeilAt)
   if(d.pnl)MAPS[id].pnl=d.pnl;   // breakable panels (js/12-pnl)
   roomsFromFile(MAPS[id],d,id);   // breakable room props + stone wall faces (js/02-fcs-rooms.js) — MAP-STANDARD round 3

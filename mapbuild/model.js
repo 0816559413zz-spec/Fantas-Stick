@@ -52,6 +52,7 @@ export const OBJ = {
   phase: { n: 'Phase Play Area', cat: 'mode', c: '#f2d45e', note: 'rectangle (no rotation) • several per phase allowed' },
   // room helpers
   ceil: { n: 'Ceiling', cat: 'room', c: '#c77dff', note: 'keeps players/fliers/camera below the ceiling • roofed rooms ≥ 20 high' },
+  lz: { n: 'Indoor Light Zone', cat: 'room', c: '#7fb0ff', note: 'camera inside = dim cool indoor light • glass / lit windows inside get sun beams • Height Above Ground = roof (camera above it = outdoor)' },
 };
 // breakable room props — mirror of RPK in js/02-fcs-rooms.js (keep in sync) • col = collision radius px (0 = walk through), h m
 // L = has a length (tables, benches, rails) • w = editor proxy width (m) • look is drawn by the game (js/28-fcs-props.js frpBuild)
@@ -341,13 +342,14 @@ export function gameData(M, dim) {
       const g = gh(M, x, z), h = top - 0.15 - g; if (h === h && h < 1e9 && h > TSTEP) put({ x, z, r, hgt: h }, null, { k: 'flr' }); }
   }
   const spawns = [], espawn = [], rings = [], tasks = [], props = [], houses = [], lights = [];
-  const sg = { cores: [], sp: { A: {}, B: {} }, phases: [], bw: [] }, ceil = [], rprops = [], deco = [], pnl = [];
+  const sg = { cores: [], sp: { A: {}, B: {} }, phases: [], bw: [] }, ceil = [], lz = [], rprops = [], deco = [], pnl = [];
   const rect = o => { const w = (o.sx || 1) * PX, d = (o.sz || 1) * PX; return { x0: r1(o.x * PX - w / 2), y0: r1(o.z * PX - d / 2), x1: r1(o.x * PX + w / 2), y1: r1(o.z * PX + d / 2) }; };
   for (const o of allObjs) {
     const X = r1(o.x * PX), Y = r1(o.z * PX), rot = o.rot || 0;
     if (o.t === 'core') sg.cores.push({ n: o.n || sg.cores.length + 1, x: X, y: Y, s: r1((o.s || 4) * PX) });
     else if (o.t === 'sgA' || o.t === 'sgB') sg.sp[o.t === 'sgA' ? 'A' : 'B'][o.ph || 1] = { x: X, y: Y };
     else if (o.t === 'phase') { const q = rect(o), k = (o.ph || 1) - 1; (sg.phases[k] = sg.phases[k] || []).push({ x1: q.x0, y1: q.y0, x2: q.x1, y2: q.y1 }); }
+    else if (o.t === 'lz') lz.push(Object.assign(rect(o), { top: r2(o.y == null ? 22 : o.y), k: r2(o.k == null ? 1 : o.k) }));   // indoor light zone (js/28-fcs-hall.js)
     else if (o.t === 'ceil') ceil.push(Object.assign(rect(o), { h: r2(o.y == null ? 21 : o.y) }, o.zmax != null ? { zmax: r2(o.zmax) } : {}));
     else if (isDeco(o.t)) { deco.push(Object.assign({ t: o.t.slice(3), x: X, y: Y, h: r2(o.y || 0) }, ...['k', 'sx', 'sy', 'sz', 'rt', 'rb', 'r', 'seg', 's', 'c', 'open', 'ry', 'ssx', 'ssz'].filter(q => o[q] != null).map(q => ({ [q]: o[q] })), rot ? { a: +rot.toFixed(4) } : {}));
     if (isDeco(o.t) && o.col) { const d = dim(o); if (d && d.col) for (const c of objCircles(M, o, d)) put(c, null); } }   // decor box/cylinder with Collides ticked
@@ -400,6 +402,7 @@ export function gameData(M, dim) {
   if (pnl.length) data.pnl = pnl;
   if (sg.cores.length || sg.bw.length || sg.phases.length || Object.keys(sg.sp.A).length || Object.keys(sg.sp.B).length) data.siege = sg;
   if (ceil.length) data.ceil = ceil;
+  if (lz.length) data.lz = lz;
   if (rprops.length) data.rprops = rprops;
   if (Object.keys(sys).length) data.sys = sys;
   return { data, brkOf, counts: { obs: obs.length, brk: brk.length, spawns: spawns.filter(s => s.t == null).length, red: spawns.filter(s => s.t === 1).length, blue: spawns.filter(s => s.t === 0).length,
@@ -491,8 +494,8 @@ export function roomExpand(M, inst, R) {
   const tag = (o, k) => Object.assign(o, { id: 'r' + inst.id + k + o.id, room: inst.id, rref: inst.ref });
   const walls = R.walls.map(w => tag(Object.assign({}, w, { pts: w.pts.map(p => P(p[0], p[1])) }, w.base != null ? { base: +(w.base + g0).toFixed(2) } : {}), 'w'));
   const floors = R.floors.map(f => { const [x, z] = P(f.x, f.z); return tag(Object.assign({}, f, { x, z, rot: (f.rot || 0) + rot, y: +(f.y + g0).toFixed(2) }, f.y2 != null ? { y2: +(f.y2 + g0).toFixed(2) } : {}), 'f'); });
-  const swap = o => (o.t === 'phase' || o.t === 'ceil' || o.t === 'dc_box') && Math.abs(s) > 0.5;   // axis-aligned boxes: swap sizes on 90°/270°
-  const objs = R.objs.map(o => { const [x, z] = P(o.x, o.z); return tag(Object.assign({}, o, { x, z, rot: o.t === 'phase' || o.t === 'ceil' || o.t === 'dc_box' ? 0 : (o.rot || 0) + rot }, swap(o) ? { sx: o.sz, sz: o.sx } : {}, o.t === 'dc_cone' && (o.ssx || o.ssz) && Math.abs(s) > 0.5 ? { ssx: o.ssz, ssz: o.ssx } : {}), 'o'); });
+  const swap = o => (o.t === 'phase' || o.t === 'ceil' || o.t === 'lz' || o.t === 'dc_box') && Math.abs(s) > 0.5;   // axis-aligned boxes: swap sizes on 90°/270°
+  const objs = R.objs.map(o => { const [x, z] = P(o.x, o.z); return tag(Object.assign({}, o, { x, z, rot: o.t === 'phase' || o.t === 'ceil' || o.t === 'lz' || o.t === 'dc_box' ? 0 : (o.rot || 0) + rot }, swap(o) ? { sx: o.sz, sz: o.sx } : {}, o.t === 'dc_cone' && (o.ssx || o.ssz) && Math.abs(s) > 0.5 ? { ssx: o.ssz, ssz: o.ssx } : {}), 'o'); });
   const parts = (R.parts || []).map(p => { const [x, z] = P(p.x, p.z); return tag(Object.assign({}, p, { x, z, rot: (p.rot || 0) + rot }, p.base != null ? { base: +(p.base + g0).toFixed(2) } : {}), 'p'); });
   return { walls, floors, objs, parts };
 }

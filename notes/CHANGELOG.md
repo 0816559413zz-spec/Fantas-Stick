@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-22 Map Builder: new Indoor Light Zone (Place → Room / Breakables). Draw a box over a room, set its roof height and strength: in the game the camera inside gets the dim cool indoor light, and glass / lit windows inside that face the sun get sun beams. Several zones per map. fcs maps with no zone keep the Great Hall as before.
+
 - 2026-11-22 Great Hall light round 2 (user: light should follow the map sun, one plain glass colour, light only from the sun side): beams now come only through windows facing the sun, along the sun direction of the map, including the big glass wall windows from Map Builder; the other windows are plain pale glass with no beam.
 
 - 2026-11-22 Great Hall look (user: make the hall look like the reference, items 1+2): the hall windows are now pointed stained-glass panes (4 designs) that glow, with slanted light shafts, slow dust motes and coloured light patches on the floor. Inside the hall the light turns cool (dimmer cool sky light, blue-grey shadows, warm highlights) so the windows and the warm chandeliers stand out. Works on fcs and fcs-file (any 'lit' window inside the hall).
