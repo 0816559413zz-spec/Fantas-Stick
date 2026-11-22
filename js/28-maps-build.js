@@ -31,7 +31,7 @@ function buildWorld(id){
     if(!FM&&PNL.length)try{pnlBuild();}catch(e){console.error('pnlBuild',e);}   // breakable panels / houses on code maps (file maps: buildFileMap)
     try{hallBuild(id);}catch(e){console.error('hallBuild',e);}   // indoor light zones: sun beams + indoor mood (js/28-fcs-hall.js)
     buildBackdrop(id);   // ฉากหลังนอกพื้นที่เล่น (js/67, เฉพาะแผนที่ที่มีใน BACKDROP)
-    batchStatic(world,new Set([RUNE,CRYSTAL,SNITCH,FIREFLIES&&FIREFLIES.pts,...CANDLES.map(c=>c.g),...BANNERS.map(b=>b.m)].filter(Boolean)));
+    batchStatic(world,new Set([world.userData.fb,RUNE,CRYSTAL,SNITCH,FIREFLIES&&FIREFLIES.pts,...CANDLES.map(c=>c.g),...BANNERS.map(b=>b.m)].filter(Boolean)));
     setTimeout(prewarmShaders,0);
   }
   if(typeof backdropLook==='function')backdropLook(id);   // per-map sky/fog/light from BACKDROP[id].look (js/67-coast) — cached maps too
@@ -525,7 +525,7 @@ function buildFileMap(id){
     if(LT.sky){SKY.mesh.material.map=null;SKY.mesh.material.color.set(LT.sky);SKY.mesh.material.needsUpdate=true;SKY.sun.visible=false;}
     if(LT.exp)gl.toneMappingExposure=LT.exp;
   }
-  const W=world,fb=addW(new THREE.Group());
+  const W=world,fb=addW(new THREE.Group());W.userData.fb=fb;   // fallback ground: kept out of batchStatic(world), else its merged floors outlive W.remove(fb) (black z-fight on roofs)
   if(T){
     const tex=t=>{t=t.clone();t.repeat.set(1,1);t.needsUpdate=true;return t;};
     const gm=grLive(new THREE.MeshStandardMaterial({map:tex(grassTex(night?'#3d5a3a':'#4f8a38',11,1)),roughness:0.95,flatShading:false}));

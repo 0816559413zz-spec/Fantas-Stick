@@ -313,7 +313,7 @@ export function gameData(M, dim) {
     const cs = floorCorners(f), x0 = Math.floor(Math.min(...cs.map(c => c[0])) / C) * C, z0 = Math.floor(Math.min(...cs.map(c => c[1])) / C) * C;
     const fx = Math.round((Math.ceil(Math.max(...cs.map(c => c[0])) / C) * C - x0) / C) + 1, fy = Math.round((Math.ceil(Math.max(...cs.map(c => c[1])) / C) * C - z0) / C) + 1;
     const top = new Int16Array(fx * fy), bot = new Int16Array(fx * fy); let any = 0;
-    for (let j = 0; j < fy; j++) for (let i = 0; i < fx; i++) { const t = floorTop(f, x0 + i * C, z0 + j * C); top[j * fx + i] = cm(t); bot[j * fx + i] = cm(t - (f.th || 0.4)); if (t === t) any++; }
+    for (let j = 0; j < fy; j++) for (let i = 0; i < fx; i++) { const t = floorTop(f, x0 + i * C, z0 + j * C); top[j * fx + i] = cm(t); bot[j * fx + i] = cm(Math.min(t - (f.th || 0.4), f.yb != null ? f.yb : Infinity)); if (t === t) any++; }
     if (any) fl.push({ x0: r1(x0 * PX), y0: r1(z0 * PX), nx: fx, ny: fy, top: i16b64(top), bot: i16b64(bot) });
   }
   // collision + breakable groups
@@ -494,7 +494,7 @@ export function roomExpand(M, inst, R) {
   const tag = (o, k) => Object.assign(o, { id: 'r' + inst.id + k + o.id, room: inst.id, rref: inst.ref });
   const walls = R.walls.map(w => tag(Object.assign({}, w, { pts: w.pts.map(p => P(p[0], p[1])) }, w.base != null ? { base: +(w.base + g0).toFixed(2) } : {}), 'w'));
   const floors = R.floors.filter(f => !f.rf || inst.rfc).map(f => {   // rf = roof collision slab (house prefabs): only when the instance ticks 'Roof collision'
-    const [x, z] = P(f.x, f.z); return tag(Object.assign({}, f, { x, z, rot: (f.rot || 0) + rot, y: +(f.y + g0).toFixed(2) }, f.y2 != null ? { y2: +(f.y2 + g0).toFixed(2) } : {}), 'f'); });
+    const [x, z] = P(f.x, f.z); return tag(Object.assign({}, f, { x, z, rot: (f.rot || 0) + rot, y: +(f.y + g0).toFixed(2) }, f.y2 != null ? { y2: +(f.y2 + g0).toFixed(2) } : {}, f.yb != null ? { yb: +(f.yb + g0).toFixed(2) } : {}), 'f'); });
   const swap = o => (o.t === 'phase' || o.t === 'ceil' || o.t === 'lz' || o.t === 'dc_box') && Math.abs(s) > 0.5;   // axis-aligned boxes: swap sizes on 90°/270°
   const objs = R.objs.map(o => { const [x, z] = P(o.x, o.z); return tag(Object.assign({}, o, { x, z, rot: o.t === 'phase' || o.t === 'ceil' || o.t === 'lz' || o.t === 'dc_box' ? 0 : (o.rot || 0) + rot }, swap(o) ? { sx: o.sz, sz: o.sx } : {}, inst.nbk && o.t === 'pn_wall' ? { nb: 1 } : {},   // nbk = instance set Unbreakable
       o.t === 'dc_cone' && (o.ssx || o.ssz) && Math.abs(s) > 0.5 ? { ssx: o.ssz, ssz: o.ssx } : {}), 'o'); });

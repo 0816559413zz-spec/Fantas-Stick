@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-22 Fixed: grass blades were missing everywhere (a shader used a reserved word). House roofs with Roof collision now block skills and catch fliers instead of letting them fall in, the tower house's pyramid roof has collision too, and the dark patches on roofs are gone (re-export maps that already use houses).
 - 2026-11-22 Performance: randomized grass patches with four blade profiles and fewer instances. Replaced Meadow's baked tufts with fewer clumps in three shapes, reduced Castle Strike ground clutter and coastline detail, culled backdrop pines in tiles, and drew its high-quality shadows at half frequency when clean. Reduced shared decorative combat particle budgets.
 
 - 2026-11-22 Houses can be made unbreakable: tick Unbreakable on a placed house, or select an unpacked house's group and tick Unbreakable in its Group section.

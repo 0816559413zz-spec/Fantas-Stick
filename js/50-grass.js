@@ -203,8 +203,9 @@ const GR_BEGIN=
   'vec2 ci=floor(wp/0.9);vec2 ch=grH2(ci);vec2 cc=(ci+0.2+0.6*ch)*0.9;vec2 tc=(wp-cc)*0.78;wp=cc+tc;float cd=length(tc);'+
   'vec2 muv=(wp-uGrMap.xy)/uGrMap.zw;vec4 gm=texture2D(uGround,muv);'+
   'float meadow=sin(wp.x*0.48+1.7*sin(wp.y*0.39))*sin(wp.y*0.52+1.3*sin(wp.x*0.29));'+
-  'float patch=0.30+0.70*smoothstep(-0.68,0.40,meadow);'+
-  'float ok=step(0.0,muv.x)*step(muv.x,1.0)*step(0.0,muv.y)*step(muv.y,1.0)*step(aOff.z,(gm.a*1.15-0.15)*patch);'+
+  'float grPt=0.30+0.70*smoothstep(-0.68,0.40,meadow);'+   // not 'patch' (reserved word in GLSL ES 3 → whole grass shader failed)
+  
+  'float ok=step(0.0,muv.x)*step(muv.x,1.0)*step(0.0,muv.y)*step(muv.y,1.0)*step(aOff.z,(gm.a*1.15-0.15)*grPt);'+
   'float d=length(wp-c);float fade=1.0-smoothstep(S*0.3,S*0.48,d);'+
   // ใบที่ไม่ขึ้น (นอกผืน/ไม่มีหญ้า) = ยุบเป็นจุดเดียว ข้ามลูปลม/รอยทั้งหมด (ประหยัดการ์ดจอ)
   'if(ok*fade<0.001){transformed=vec3(wp.x,-1000.0,wp.y);vGC=vec3(0.0);vMk=vec2(0.0);vTr=0.0;vFl=vec4(0.0);vHu=vec2(0.0);vFi=0.0;}else{'+
