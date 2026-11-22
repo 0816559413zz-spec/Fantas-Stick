@@ -267,12 +267,13 @@ function stDarkMarkedChase(root,args){
     const convert=ease(.08,launch,t);
     ballFx?.(t);
     const entryFade=1-ease(.145,launch+.015,t),returnFade=ease(returnBody-.026,returnBody+.14,t);
+    const bodyVisible=t<DARK_CHASE_T.orbStart||t>=DARK_CHASE_T.orbEnd;
     if(!live){
-      caster.g.visible=!scytheOnly&&(entryFade>.01||returnFade>.01);
+      caster.g.visible=!scytheOnly&&bodyVisible;
       if(t<arrival)caster.g.position.set(0,0,0);
       else caster.g.position.set(returnPoint.x,hoverHeight,returnPoint.z);
       caster.ring.visible=t<arrival||hoverHeight<.03;
-    }else caster.b.visible=entryFade>.01||returnFade>.01;
+    }else caster.b.visible=bodyVisible;
     bodyTint(t<arrival?convert:1-returnFade,t<arrival?entryFade:returnFade);
     wand.visible=!live&&t>=returnBody-.025;
     const raise=ease(returnBody-.035,wandDown-.042,t);

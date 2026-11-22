@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-22 Darkness: Night Waltz and marked or Flow Nightfall block damage during their orb form. The normal launch and body-form portions stay vulnerable.
+
 - 2026-11-22 Darkness: Long Dash blocks direct, area, and damage-over-time damage through its orb form and the brief transition back to the caster.
 
 - 2026-11-22 Performance round 2: empty InstancedMesh pools (count 0, ~90 per TDM frame) are hidden while rendering (`imzPre` js/51, `?noimz` = old): empty render calls 87 -> 17 per frame, frozen-frame CPU 28.9 -> 27.9 ms. Measured that the game is CPU-bound (GPU wait 2.5 ms of 26) and nothing else is over 1 ms on its own; notes in OPTIMIZE section U.

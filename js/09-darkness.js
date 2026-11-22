@@ -6,12 +6,20 @@ PATHS.push({id:'darkness',n:'สายความมืด',ic:'🌑',col:'#5e4
 const DARK_V={mark:8,markPrep:.58,waltzForm:.73,flow:6,dashCd:8,shieldTime:3,shieldRadius:40,shieldLock:5,shieldPrep:.45};
 const DARK_BA={range:175,powerRange:210,arc:150,near:25,height:1.25};
 const DARK_LONG_DASH={travel:2.105,reappear:.045};
-const DARK_CHASE_FLOW={wind:.095,hit:.255,exit:.335,end:.72,damage:20};
+const DARK_CHASE_FLOW={wind:.095,hit:.255,exit:.335,end:.72,damage:20,orbStart:.040,orbEnd:.405};
 const DARK_MAW={release:.73,walkAgain:1.69,bite:1.8,cameraEnd:2.48};
 const DARK_VEIL_PULL_CLEAR=1.8;
-const DARK_CHASE_T={launch:.25,arrival:.80,reappear:1.72,wandDown:1.955,land:2.17,end:2.29,hits:[.89,1.245,2.127]};
+const DARK_CHASE_T={launch:.25,arrival:.80,reappear:1.72,wandDown:1.955,land:2.17,end:2.29,hits:[.89,1.245,2.127],orbStart:.258,orbEnd:1.704};
+const DARK_WALTZ_ORB={start:.307,returnTime:.075};
 const darkFlow=p=>p.dark?.flow>G.time;
-const darkDashImmune=p=>p.pathIdx===DARKP&&p.dark?.longUntil>0&&G.time<p.dark.longUntil+DARK_LONG_DASH.reappear;
+function darkOrbImmune(p){
+  const d=p.dark;
+  if(p.pathIdx!==DARKP||!d)return false;
+  if(d.longUntil>0&&G.time<d.longUntil+DARK_LONG_DASH.reappear)return true;
+  if(d.waltzUntil>0&&G.time<d.waltzUntil+DARK_WALTZ_ORB.returnTime&&
+    (!d.waltz||G.time-d.waltz.at>=DARK_WALTZ_ORB.start))return true;
+  return !!d.chaseOrb&&G.time>=d.chaseOrb[0]&&G.time<d.chaseOrb[1];
+}
 const darkAlive=t=>!t.dead&&t.alive!==false&&!t.downed;
 function darkReset(p){p.dark=null;p.darkReveal=0;p.darkDrain=0;}
 function darkState(p){return p.dark??={marks:new Map(),charges:[],actions:[],waves:[],shield:DARK_V.shieldTime};}
@@ -182,6 +190,7 @@ function darkDash(p,inp,pr,dt,setCd){
 function darkBasic(p,inp,dt,setCd){
   if((!inp.fire&&!(p.dark?.chaseBAUntil>G.time))||p.cd.basic>0||p.sil>0||p.dark?.shieldStart!=null||p.dark?.veilPullUntil>G.time)return;
   const d=darkState(p),empowered=d.empower>G.time;
+  d.chaseOrb=null;
   d.chaseBAUntil=0;
   const side=d.baSide??-1;
   d.baSide=-side;
@@ -253,6 +262,7 @@ const DARK_CHASE=defSpell(DARKP,{id:'darkchase',n:'Nightfall',ic:'➶',role:'mob
     const d=darkState(p),aim=darkAim(p);
     const target=darkCone(p,aim,S.v.range,46).find(t=>d.marks.has(t));
     d.chaseBAUntil=0;
+    d.chaseOrb=null;
     darkReveal(p);
     if(!target){
       p.dash=.2;p.dashSp=S.v.dash/.2;p.dashX=Math.cos(aim.a);p.dashY=Math.sin(aim.a);
@@ -272,6 +282,7 @@ const DARK_CHASE=defSpell(DARKP,{id:'darkchase',n:'Nightfall',ic:'➶',role:'mob
     if(darkFlow(p)){
       const F=DARK_CHASE_FLOW,a=Math.atan2(dy,dx);
       d.chase={start,target,a,at:G.time,flow:true};
+      d.chaseOrb=[G.time+F.orbStart,G.time+F.orbEnd];
       d.chaseUntil=G.time+F.end;
       darkEvent(p,'darkchaseflow',{a,x2:target.x,y2:target.y,h2:cH(target),target:target.id,duration:F.hit-F.wind});
       darkQueue(p,F.hit,()=>{
@@ -286,6 +297,7 @@ const DARK_CHASE=defSpell(DARKP,{id:'darkchase',n:'Nightfall',ic:'➶',role:'mob
     const timings=DARK_CHASE_T,returnPoint=new THREE.Vector3(.55,3.06,distance+2.25);
     const route=stDarkChaseRoute(returnPoint,distance,timings.launch,timings.arrival,timings.reappear);
     d.chase={start,target,at:G.time,a,distance,returnPoint,route,point:new THREE.Vector3(),tx:target.x,ty:target.y};
+    d.chaseOrb=[G.time+timings.orbStart,G.time+timings.orbEnd];
     d.chaseUntil=G.time+timings.end;
     darkEvent(p,'darkchasemarked',{a,x2:target.x,y2:target.y,h2:cH(target),target:target.id,distance});
     for(const [index,delay] of timings.hits.entries())darkQueue(p,delay,()=>{
@@ -397,7 +409,7 @@ function darkMoveChase(p){
   const t=G.time-at,F=chase.flow?DARK_CHASE_FLOW:DARK_CHASE_T;
   if(!chase.contact&&(!darkAlive(target)||(t>=(chase.flow?F.hit:F.arrival)&&Math.hypot(p.x-target.x,p.y-target.y)>300))){
     darkEvent(p,'darkchasecancel');
-    p.dark.chase=null;p.dark.chaseUntil=G.time;p.dark.chaseBAUntil=0;return false;
+    p.dark.chase=null;p.dark.chaseOrb=null;p.dark.chaseUntil=G.time;p.dark.chaseBAUntil=0;return false;
   }
   const usableAt=chase.flow?F.exit:F.end;
   if(p.inp?.fire&&t>=usableAt-.18)p.dark.chaseBAUntil=at+usableAt+.16;

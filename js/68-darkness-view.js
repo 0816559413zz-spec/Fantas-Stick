@@ -537,7 +537,7 @@ function darknessCharacter(o,p,viewer,now){
   if(o.darkDashFx?.cancelled||p.dn){if(o.darkDashFx)o.darkDashFx.cancelled=true;o.b.visible=true;}
   const waltz=o.darkWaltzCast,waltzAge=waltz?(state?.[12]??(now-waltz.at)/1000):-Infinity;
   const landing=waltz?.cancelAt??waltz?.land??0;
-  const waltzHidden=waltzAge>=.307&&waltzAge<landing+.075;
+  const waltzHidden=waltz?.cancelAt==null&&waltzAge>=DARK_WALTZ_ORB.start&&waltzAge<landing+DARK_WALTZ_ORB.returnTime;
   const waltzTint=stDarkEase(.105,.30,waltzAge)*(1-stDarkEase(landing,landing+.15,waltzAge));
   darkIdleWeaponPose(now,gear.position,gear.rotation);
   const veil=o.darkVeilCast,t=veil?(now-veil.at)/1000:Infinity;
@@ -596,7 +596,7 @@ function darknessCharacter(o,p,viewer,now){
   const flowStrike=o.darkFlowStrike,flowAge=flowStrike?(now-flowStrike.at)/1000:-Infinity;
   const F=DARK_CHASE_FLOW;
   const flowOrb=stDarkEase(.035,F.wind,flowAge)*(1-stDarkEase(F.exit-.035,F.exit+.11,flowAge));
-  const flowReturnAt=F.exit+.07;
+  const flowReturnAt=F.orbEnd;
   if(flowStrike&&flowAge>=0&&flowAge<flowReturnAt&&!basic&&!planting){
     const ready=stDarkEase(.02,F.wind,flowAge);
     const slash=stDarkEase(F.hit-.052,F.hit+.066,flowAge);
@@ -660,7 +660,7 @@ function darknessCharacter(o,p,viewer,now){
   o.darkRenderAt=now;
   o.darkDashFx?.update(now);
   const rolling=state?.[5]===1&&!o.darkDashFx?.hold;
-  const ball=rolling||flowOrb>.018;
+  const ball=rolling||flowAge>=F.orbStart&&flowAge<F.orbEnd;
   o.darkOrb.visible=ball;
   o.darkOrb.scale.setScalar(rolling?1:.74*flowOrb);
   if(waltzTint>0&&!o.darkDashFx){

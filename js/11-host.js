@@ -298,15 +298,15 @@ function updatePlayer(p,dt,acting){
   if(p.pathIdx===DARKP){
     if(!canAct&&p.dark){
       if(p.dark.dashStart!=null||p.dark.longUntil>G.time)darkEvent(p,'darkdashcancel');
-      if(p.dark.chase)darkEvent(p,'darkchasecancel');
+      if(p.dark.chase||p.dark.chaseOrb?.[1]>G.time)darkEvent(p,'darkchasecancel');
       if(p.dark.plainDash){darkEvent(p,'darkchasecancel');p.dark.plainDash=null;}
-      if(p.dark.waltz)darkEvent(p,'darkwaltzcancel');
+      if(p.dark.waltz||p.dark.waltzUntil>0&&p.dark.waltzUntil+DARK_WALTZ_ORB.returnTime>G.time)darkEvent(p,'darkwaltzcancel');
       if(p.dark.ultBiteUntil>G.time){
         darkEvent(p,'darkriftcancel');
         p.dark.ultUntil=p.dark.ultBiteUntil=p.dark.ultCamUntil=0;
       }
       p.dark.waltz=null;p.dark.waltzUntil=0;
-      p.dark.actions.length=0;p.dark.dashStart=null;p.dark.chase=null;p.dark.longUntil=0;p.dark.chaseUntil=0;p.dark.chaseBAUntil=0;
+      p.dark.actions.length=0;p.dark.dashStart=null;p.dark.chase=null;p.dark.chaseOrb=null;p.dark.longUntil=0;p.dark.chaseUntil=0;p.dark.chaseBAUntil=0;
       if(p.pathIdx===DARKP)p.dash=0;
     }
     darkTick(p,dt);

@@ -166,7 +166,7 @@ function shieldFaces(t,x,y,z){
   return true;
 }
 function aoeHit(p,t,dmg,fn,noFlash=false){
-  if(darkDashImmune(t))return false;
+  if(darkOrbImmune(t))return false;
   const blocked=!t.isE&&(shieldFaces(t,p.x,p.y,p.z!=null?p.z+1.2:null)||t.inv>0);
   damage(t,dmg,p.id,'aoe',noFlash);
   if(!blocked&&fn)fn(t);

@@ -84,8 +84,8 @@ GODL:232
 §234 ลูกสายฟ้าโดม: รวมไฟที่พื้น → ทะยานขึ้น → เล็ง → ฟาดไม้ยิงและค้างชี้เป…
 SDOME_POSE:235 stormDomeCost:236 stormDomeDash:237 stormDomeCharge:238 stormDomeTick:239 stormDomeFire:270 stormDomeSlam:277 updateStorm:282
 
-## js/09-darkness.js (455) —
-DARKP:2 DARK_V:6 DARK_BA:7 DARK_LONG_DASH:8 DARK_CHASE_FLOW:9 DARK_MAW:10 DARK_VEIL_PULL_CLEAR:11 DARK_CHASE_T:12 darkFlow:13 darkDashImmune:14 darkAlive:15 darkReset:16 darkState:17 darkEvent:18 darkAim:21 darkTarget:28 darkCone:32 darkBAFloor:39 darkBATargets:43 darkMoveHeading:60 darkDashKeys:63 darkClearCooldown:67 darkMark:71 darkReveal:78 darkQueue:79 darkGainFlow:80 darkKill:86 darkTick:89 darkShieldTick:123 darkShieldCrossAt:140 darkShieldCross:149 darkBeamStop:150 darkDash:159 darkBasic:182 DARK_MARK:211 darkWaveTick:228 DARK_CHASE:250 darkMoveWaltz:298 DARK_WALTZ:323 DARK_WARD:345 DARK_VEIL:360 DARK_ULT:368 darkUltBite:383 darkMoveChase:393 darkSnap:433 darkMarked:452
+## js/09-darkness.js (467) —
+DARKP:2 DARK_V:6 DARK_BA:7 DARK_LONG_DASH:8 DARK_CHASE_FLOW:9 DARK_MAW:10 DARK_VEIL_PULL_CLEAR:11 DARK_CHASE_T:12 DARK_WALTZ_ORB:13 darkFlow:14 darkOrbImmune:15 darkAlive:23 darkReset:24 darkState:25 darkEvent:26 darkAim:29 darkTarget:36 darkCone:40 darkBAFloor:47 darkBATargets:51 darkMoveHeading:68 darkDashKeys:71 darkClearCooldown:75 darkMark:79 darkReveal:86 darkQueue:87 darkGainFlow:88 darkKill:94 darkTick:97 darkShieldTick:131 darkShieldCrossAt:148 darkShieldCross:157 darkBeamStop:158 darkDash:167 darkBasic:190 DARK_MARK:220 darkWaveTick:237 DARK_CHASE:259 darkMoveWaltz:310 DARK_WALTZ:335 DARK_WARD:357 DARK_VEIL:372 DARK_ULT:380 darkUltBite:395 darkMoveChase:405 darkSnap:445 darkMarked:464
 
 ## js/09-earth.js (323) — 
 EARTH:9 ERV:12
@@ -899,4 +899,4 @@ _dvPanel:95 _dvBtn:98 _dvBody:100 _dvHead:100 devUiApply:102 devFreeMouse:110 de
 §130 rows
 dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:193 devUiAct:200
 
-(113 files, 33446 lines)
+(113 files, 33458 lines)
