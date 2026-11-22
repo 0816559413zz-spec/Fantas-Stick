@@ -234,9 +234,16 @@ function shrLights(sc,now){let L=SHR.lit.get(sc);
     if(!L){L={t:now,a,px:{get fog(){return sc.fog;},get environment(){return sc.environment;},get background(){return sc.background;},isScene:true,
       traverseVisible(f){for(const l of L.a){let v=l;while(v&&v.visible)v=v.parent;if(!v)f(l);}}}};SHR.lit.set(sc,L);}else{L.a=a;L.t=now;}}
   return L.px;}
+const IMZ={on:!/[?&]noimz/.test(location.search),set:new Set(),hid:[],scan:0};
 {const add0=THREE.Object3D.prototype.add;THREE.Object3D.prototype.add=function(o){
   if(SHR.on){for(let i=0;i<arguments.length;i++){const a=arguments[i];if(a&&a!==this&&a.isObject3D)SHR.q.push(a);}}
+  if(IMZ.on){for(let i=0;i<arguments.length;i++){const a=arguments[i];if(a&&a.isInstancedMesh)IMZ.set.add(a);}}
   return add0.apply(this,arguments);};}
+// Empty instanced pools (count 0: FX pools, debris, marks — ~90 in a TDM fight) still cost program + uniforms + buffers per pass
+// in three r160 (no early-out). Hidden for the frame while empty, restored after render. ?noimz = old.
+function imzPre(){if(!IMZ.on)return;if(--IMZ.scan<=0){IMZ.scan=120;for(const r of [scene,fxScene])r.traverse(o=>{if(o.isInstancedMesh)IMZ.set.add(o);});}   // also pools built before this file / added via children.push
+  for(const im of IMZ.set){if(!im.parent){IMZ.set.delete(im);continue;}if(im.count===0&&im.visible){im.visible=false;IMZ.hid.push(im);}}}
+function imzPost(){const H=IMZ.hid;if(!H.length)return;for(let i=0;i<H.length;i++)H[i].visible=true;H.length=0;}
 function shrRoot(o){while(o.parent)o=o.parent;return o;}
 function shrCollect(o){const m=o.material;
   if(m){for(const x of Array.isArray(m)?m:[m]){if(!x||x.userData.shr===1||SHR.pend.has(x))continue;
@@ -249,7 +256,7 @@ function shrPending(m,now){const e=SHR.pend.get(m);if(!e)return false;
   if(!SHR.polled&&now-e.t>=SHR_MIN){SHR.polled=true;if(e.pg.isReady()){SHR.rdy.add(e.pg);SHR.pend.delete(m);m.userData.shr=1;return false;}}
   return true;}
 function shReadyPre(){
-  shReadyPost();if(!SHR.on||!SHR.ext){SHR.q.length=0;return;}
+  shReadyPost();imzPre();if(!SHR.on||!SHR.ext){SHR.q.length=0;return;}
   const now=performance.now();SHR.polled=false;
   if(SHR.q.length){const Q=SHR.q;SHR.q=[];SHR.seen.clear();const per=new Map();
     for(const o of Q){const r=shrRoot(o);
@@ -268,9 +275,9 @@ function shReadyPre(){
       SHR.list.length=0;}}
   if(SHR.wait.length){let j=0;for(const o of SHR.wait){let w=false;for(const m of [].concat(o.material))if(m&&shrPending(m,now))w=true;
       if(!w)continue;SHR.wait[j++]=o;if(o.visible){o.visible=false;SHR.hid.push(o);}}SHR.wait.length=j;}}
-function shReadyPost(){if(!SHR.hid.length)return;for(const o of SHR.hid)o.visible=true;SHR.hid.length=0;}
+function shReadyPost(){imzPost();if(!SHR.hid.length)return;for(const o of SHR.hid)o.visible=true;SHR.hid.length=0;}
 SHR.ext=!!gl.getContext().getExtension('KHR_parallel_shader_compile');
-if(window.WD)window.WD.SHR=SHR;
+if(window.WD){window.WD.SHR=SHR;window.WD.IMZ=IMZ;}
 if(window.WD)window.WD.warm=WARM;
 if(window.WD)window.WD.gwarm=GWARM;
 if(window.WD)window.WD.WARM=WARM;
