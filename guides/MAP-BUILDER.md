@@ -110,6 +110,7 @@ Tool: ศูนย์รวม Tool → **Map Builder** • โค้ด: `mapbu
 - แผนที่โค้ด `fcs` ยังใช้ฉากหลังหน้าผาแบบโค้ด (`BACKDROP.fcs.coast`) • `fcs-file` ใช้แบบโค้ดจนกว่าจะสร้าง Backdrop ใน Map Builder แล้วส่งเข้าเกม
 
 ## ข้อจำกัดตอนนี้
+- 2026-11-22: **💧 Pick (ตัวดูดสี)** ข้างช่องสีทุกช่อง (แผง Wall/Castle/Primitive + Inspector) และในแผง Paint / Backdrop Paint / Backdrop Set Height → คลิกบนแผนที่ = เอาสี/ผิวพื้น/ความสูงตรงนั้น (ของ → สีของชิ้นนั้น, พื้นแผนที่ → ผิว SURF, Backdrop → ผิว BSURF; ข้ามชุดสีใช้สีใกล้สุด) • **Alt+คลิก** ในเครื่องมือ Paint/Backdrop/Wall/Castle/Place(Primitive) = ดูดเลย • Esc ยกเลิก
 - 2026-11-22: Prop ห้อง (`rp_*`) ใน editor แสดงหน้าตาจริงเหมือนในเกม (ใช้ `frpBuild` จาก `js/28-fcs-props.js`) เห็นชนิดและทิศที่หมุน • เส้น Cell ของกำแพงพังแสดงทั้งสองด้าน
 - 2026-11-22: **Decor Box / Decor Cylinder** มีช่อง **Collides** (ค่าเริ่มต้นปิด = เดินทะลุ, ติ๊ก = ชนตามขนาดและความสูง) • Primitive box ชนเป็นค่าเริ่มต้น (ช่องเดียวกัน)
 - รอบ 2026-11-21: **T** = Resize (ลากหน้าเดียว อีกด้านอยู่กับที่, snap ครึ่ง grid) • Top view = **Shift+T** • **Shift/Ctrl+คลิก** = เลือกหลายอัน (กรอบเหลือง; gizmo/ลาก/Delete/Ctrl+D ทำทุกอัน) • คลิกแรก = เลือกอย่างเดียว คลิกซ้ำแล้วลาก = ย้าย (ปิด **Drag Move** = ย้ายด้วย gizmo เท่านั้น) • Duplicate วางทับตำแหน่งเดิม • หมวด **Collision Shapes** (`col_box`/`col_cyl` = prim `vis:0 col:1`) • พื้น/บันได: Inspector **Solid Below** (auto = ทางลาดที่ปลายล่างแตะพื้น) → ส่งออกเป็นวงชน `k:'flr'` ใต้บันได (bot nav ข้าม)

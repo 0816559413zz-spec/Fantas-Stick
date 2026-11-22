@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-22 Map Builder: eyedropper (💧 Pick) next to every colour box and in the Paint / Backdrop panels — click on the map to take the colour of an item, the ground surface or backdrop surface, or a height for Backdrop Set Height; Alt+click does the same in Paint, Backdrop, Wall, Castle and Place (primitive) tools.
+
 - 2026-11-22 Map Builder: new Backdrop tool (🌊, key J) to build the scenery outside the play area: start from a preset (sea-cliff headland, island, mountain valley, hills & fields, lakeside, flat), then raise/lower/smooth/flatten/set height, paint surfaces (grass, field, rock, sand, dirt, snow or auto), brush tree density, set the sea/lake level (lower ground becomes water with waves and shore foam in the game) and place sea stacks. Optional overcast sky look. The game draws it with the same cliff/sea/tree renderer as Cliff Side Castle; nothing collides.
 
 - 2026-11-22 Cliff Side Castle backdrop, round 2 (user: not realistic, not continuous, odd sky): the sky is now a cloud shader (thick overcast deck, horizon fading into the fog) instead of a picture, so looking up no longer shows rings; the forest end of the map now joins the mainland (no sea gap), the mainland has pine woods and field patches in softer greens; the cliff face has buttresses and crevices with shading.

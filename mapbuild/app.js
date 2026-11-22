@@ -554,8 +554,8 @@ function bdOpts(b) {   // Settings panel of the Backdrop tool
   if (opt.bm === 'stack') b.append(slider('Radius', 'sr', 2, 30, 0.5), slider('Height above sea', 'sh', 2, 80, 1), el('p', { class: 'note' }, 'Click = add a rock pillar • Shift+click = remove the nearest'));
   else {
     b.append(h3('Brush'), slider('Size (radius m)', 'brad', 3, 400, 1), opt.bm !== 'paint' ? slider(opt.bm === 'tree' ? 'Speed' : 'Strength', 'bstr', 0.5, 20, 0.5) : null, check('Soft Edge', 'soft'));
-    if (opt.bm === 'set') b.append(slider('Height (m)', 'bh', -80, 300, 1));
-    if (opt.bm === 'paint') b.append(pal(BD.BSURF, opt.bs, i => { opt.bs = i; renderOpts(); }), el('p', { class: 'note' }, 'Shift = back to Auto (grass on flat, rock on steep, sand at the water, snow up high)'));
+    if (opt.bm === 'set') b.append(slider('Height (m)', 'bh', -80, 300, 1), el('div', { class: 'row' }, el('span', { style: 'flex:1' }, 'Alt+click = take the height under the cursor'), pickBtn('height', v => { opt.bh = clamp(Math.round(v), -80, 300); renderOpts(); }, 'a height')));
+    if (opt.bm === 'paint') b.append(el('div', { class: 'row' }, el('span', { style: 'flex:1' }, 'Current: ' + BD.BSURF[opt.bs].n), pickBtn('bsurf', v => { opt.bs = v; renderOpts(); }, 'a surface (map ground → closest colour)')), pal(BD.BSURF, opt.bs, i => { opt.bs = i; renderOpts(); }), el('p', { class: 'note' }, 'Shift = back to Auto (grass on flat, rock on steep, sand at the water, snow up high)'));
     if (opt.bm === 'tree') b.append(slider('Density (0–255)', 'btd', 10, 255, 5), el('p', { class: 'note' }, 'Drag = grow trees toward this density • Shift = clear • no trees under water or on cliffs'));
   }
   const sea = el('input', { type: 'checkbox', checked: B.sea != null, onchange: () => { pushUndo('b'); B.sea = sea.checked ? (opt.seaL != null ? opt.seaL : -2) : null; bdAfter(); } });
@@ -568,6 +568,34 @@ function bdOpts(b) {   // Settings panel of the Backdrop tool
 }
 function bdAfter() { const B = M.bd; updBd(0, 0, B.nx - 1, B.ny - 1); bdSea(); bdStacks(); bdTreesBuild(); renderOpts(); changed(); }
 const bdLim = () => M.bd && show.bd ? { x0: M.bd.x0, z0: M.bd.z0, x1: M.bd.x0 + (M.bd.nx - 1) * M.bd.c, z1: M.bd.z0 + (M.bd.ny - 1) * M.bd.c, d: 3200 } : { x0: -20, z0: -20, x1: M.W + 20, z1: M.H + 20, d: 900 };
+
+// ================= eyedropper (💧 Pick): take a colour / surface / height from what is under the cursor =================
+// pickArm = {k:'color'|'surf'|'bsurf'|'height', apply(v), n} armed by a 💧 button; Alt+click in Paint / Backdrop / Wall / Castle / Place picks for that tool
+let pickArm = null;
+const pickCol = new THREE.Color(), pickC2 = new THREE.Color();
+function nearestPal(list, hex, skip0) { pickCol.set(hex); let bi = skip0 ? 1 : 0, bd = 1e9; list.forEach((s, i) => { if (skip0 && i === 0) return; pickC2.set(s.c); const d = (pickC2.r - pickCol.r) ** 2 + (pickC2.g - pickCol.g) ** 2 + (pickC2.b - pickCol.b) ** 2; if (d < bd) { bd = d; bi = i; } }); return bi; }
+function pickSample() {   // → {color, surf (map SURF index), bsurf (BSURF index), height, what}
+  const it = pickItem(), g = M.bd ? bdHit() : groundHit();
+  if (it && it.ref && (!g || it.t <= g.t + 0.01)) { const o = find(it.ref), c = o && (o.c || (o.t && MD.isDeco(o.t) && MD.DECO_COL[o.k || 'stone']) || (o.t && OBJ[o.t] && OBJ[o.t].c));
+    if (c) { const y = it.p.y; return { color: c, surf: nearestPal(SURF, c), bsurf: nearestPal(BD.BSURF, c, 1), height: +y.toFixed(2), what: 'item' }; } }
+  if (!g) return null;
+  if (BD.bdOut(M, g.x, g.z) <= 0) { const k = clamp(Math.round(g.z / C), 0, M.ny - 1) * M.nx + clamp(Math.round(g.x / C), 0, M.nx - 1), si = M.sf[k], c = SURF[si].c;
+    return { color: c, surf: si, bsurf: nearestPal(BD.BSURF, c, 1), height: +g.y.toFixed(2), what: 'ground' }; }
+  const B = M.bd, k = BD.bdCell(B, g.x, g.z), i = k % B.nx, j = (k / B.nx) | 0, bi = B.sf[k] || BD.bdAuto(B, bdY ? bdY[k] : g.y, bdY ? bdSlope(i, j) : 0), c = BD.BSURF[bi].c;
+  return { color: c, surf: nearestPal(SURF, c), bsurf: bi, height: +BD.bdRaw(B, g.x, g.z).toFixed(1), what: 'backdrop' };
+}
+function pickFor(k, apply, n) { pickArm = { k, apply, n }; cv.style.cursor = 'crosshair'; $('hint').textContent = '💧 Click on the map to pick ' + (n || k) + ' • Esc = cancel'; need(); }
+function pickOff() { pickArm = null; cv.style.cursor = ''; $('hint').textContent = HINT[tool] || ''; }
+function toolPick() {   // what Alt+click picks in the current tool
+  if (tool === 'paint') return { k: 'surf', apply: v => { opt.surf = v; renderOpts(); } };
+  if (tool === 'bd') return opt.bm === 'paint' ? { k: 'bsurf', apply: v => { opt.bs = v; renderOpts(); } } : opt.bm === 'set' || opt.bm === 'flat' ? { k: 'height', apply: v => { opt.bh = clamp(Math.round(v), -80, 300); opt.bm = 'set'; renderOpts(); } } : null;
+  if (tool === 'wall') return { k: 'color', apply: v => { opt.wc = v; renderOpts(); } };
+  if (tool === 'castle') return { k: 'color', apply: v => { partPP(opt.part).c = v; renderOpts(); } };
+  if (tool === 'place' && opt.cat === 'prim') return { k: 'color', apply: v => { opt.prim.c = v; renderOpts(); } };
+  return null;
+}
+function doPick(P) { const r = pickSample(); if (!r) { stat('Nothing to pick there', 'warn'); return; } P.apply(r[P.k]); stat('💧 Picked ' + (P.k === 'height' ? 'height ' + r.height : P.k === 'color' ? r.color : P.k === 'surf' ? SURF[r.surf].n : BD.BSURF[r.bsurf].n) + ' from ' + r.what, 'ok'); need(); }
+const pickBtn = (k, apply, n) => el('button', { class: 'tl-btn', title: 'Eyedropper: click on the map to pick ' + (n || k) + ' (or Alt+click with the tool)', style: 'padding:2px 8px', onclick: e => { e.preventDefault(); pickFor(k, apply, n); } }, '💧 Pick');
 
 // ================= helpers drawn in the view =================
 const ringGeo = new THREE.BufferGeometry(); ringGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(65 * 3), 3));
@@ -678,6 +706,8 @@ cv.addEventListener('pointerdown', e => {
   cv.focus(); cv.setPointerCapture(e.pointerId); updHover(e);
   if (e.button === 2 || e.button === 1 || (e.button === 0 && (spaceDown || (tool === 'select' && gmode === 'hand')))) { drag = { k: e.button === 2 ? 'orbit' : 'pan', x: e.clientX, y: e.clientY }; return; }
   if (e.button !== 0) return;
+  if (pickArm) { const P = pickArm; pickOff(); doPick(P); return; }
+  if (e.altKey && tool !== 'select' && tool !== 'paint') { const P = toolPick(); if (P) { doPick(P); return; } }
   const inv = e.shiftKey;
   if (tool === 'bd') { if (!hover || !M.bd) return; if (opt.bm === 'stack') { bdStackClick(inv); return; } pushUndo('b'); stroke = { k: 'bd', inv, h0: BD.bdRaw(M.bd, hover.x, hover.z), seed: Math.random() * 99 }; bdBrush(0.016, inv); return; }
   if (tool === 'sculpt') {
@@ -952,6 +982,7 @@ addEventListener('keydown', e => {
   if (e.ctrlKey || e.metaKey) return;
   if (k === 'q' || k === 'w' || k === 'e' || k === 'r' || (k === 't' && !e.shiftKey)) { setGizmo({ q: 'hand', w: 'translate', e: 'rotate', r: 'scale', t: 'resize' }[k]); return; }   // Unity transform tools
   const T = TOOLS.find(t => t[3] === k); if (T) { setTool(T[0]); return; }
+  if (k === 'escape' && pickArm) { pickOff(); need(); return; }
   if (k === 'escape') { if (fdraft) { fdraft = null; undo.pop(); drawLine(null); drawHandles(); } else if (draft) { draft = null; undo.pop(); drawLine(null); drawHandles(); } else { sel = null; renderSide(); updSel(); } need(); }
   else if (k === 'enter' && fdraft) finishFree();
   else if (k === 'backspace' && fdraft) { fdraft.pts.pop(); if (!fdraft.pts.length) { fdraft = null; undo.pop(); drawLine(null); } drawHandles(); need(); }
@@ -1089,10 +1120,10 @@ function renderOpts() {
     if (opt.smode === 'set') b.append(slider('Height', 'hval', -5, 20, 0.25));
     if (opt.smode === 'ramp') b.append(slider('Width', 'rad', 0.5, 20, 0.5, opt), check('Soft Edge', 'soft'), el('p', { class: 'note' }, 'Drag from the low point to the high point: the ground in between becomes a smooth ramp (width = 2 × this value)')); else brush();
     b.append(el('p', { class: 'note', html: 'Slopes steeper than ~58° (1.6 up per 1 across) can’t be walked up — shown red<br>jump height ~1.4' }));
-  } else if (tool === 'paint') { b.append(h3('Paint'), pal(SURF, opt.surf, i => { opt.surf = i; renderOpts(); })); brush(); b.append(el('p', { class: 'note' }, 'Green = the game grows 3D grass • mud/water/ice/lava are saved as special game surfaces')); }
+  } else if (tool === 'paint') { b.append(h3('Paint'), el('div', { class: 'row' }, el('span', { style: 'flex:1' }, 'Current: ' + SURF[opt.surf].n), pickBtn('surf', v => { opt.surf = v; renderOpts(); }, 'a ground surface')), pal(SURF, opt.surf, i => { opt.surf = i; renderOpts(); })); brush(); b.append(el('p', { class: 'note' }, 'Green = the game grows 3D grass • mud/water/ice/lava are saved as special game surfaces')); }
   else if (tool === 'wall') {
     b.append(h3('Wall Preset'), pal(MD.WALL_PRESET, opt.wall, i => { const P = MD.WALL_PRESET[i]; Object.assign(opt, { wall: i, wth: P.th, wh: P.h, wc: P.c, wm: P.m }); renderOpts(); }, 'one'),
-      h3('Settings'), slider('Thickness', 'wth', 0.3, 4, 0.1), slider('Height', 'wh', 0.4, 14, 0.1), el('div', { class: 'row' }, el('label', null, 'Color'), el('input', { type: 'color', value: opt.wc, oninput: e => { opt.wc = e.target.value; } })),
+      h3('Settings'), slider('Thickness', 'wth', 0.3, 4, 0.1), slider('Height', 'wh', 0.4, 14, 0.1), el('div', { class: 'row' }, el('label', null, 'Color'), el('input', { type: 'color', value: opt.wc, oninput: e => { opt.wc = e.target.value; } }), pickBtn('color', v => { opt.wc = v; renderOpts(); }, 'a colour')),
       check('Curved (through points)', 'wcurve'), check('Breakable (in segments)', 'wbrk'), el('p', { class: 'note' }, 'Start the click on an upper floor = wall/rail standing on that floor (doesn’t block below) • thinner walls use more colliders'));
   } else if (tool === 'pnl') { const q = opt.pn;
     b.append(h3('Panel Preset'), pal(MD.PN_PRESET.map(p => ({ n: p.n, c: MD.PN_COL[p.mat] })), q.pre, i => { const P = MD.PN_PRESET[i]; Object.assign(q, { pre: i, mat: P.mat, m: P.m, thru: P.thru === 0 ? 0 : 1, sy: P.sy, T: P.T, cs: P.cs, y: P.y || 0, hp: 0 }); renderOpts(); }, 'one'),
@@ -1104,7 +1135,7 @@ function renderOpts() {
     b.append(h3('Castle Pieces'), pal(keys.map(q => ({ n: MD.PART[q].n, c: MD.PART[q].c })), keys.indexOf(k), i => { opt.part = keys[i]; renderOpts(); need(); }),
       h3('Size'), ...Object.entries(D.p).map(([q, v]) => slider(MD.PART_P[q], q, v[1], v[2], v[3], pp)),
       h3('Options'), ...Object.keys(D.f).map(q => check(MD.PART_F[q], q, pp)),
-      el('div', { class: 'row' }, el('label', null, 'Color'), el('input', { type: 'color', value: pp.c, oninput: e => { pp.c = e.target.value; need(); } })),
+      el('div', { class: 'row' }, el('label', null, 'Color'), el('input', { type: 'color', value: pp.c, oninput: e => { pp.c = e.target.value; need(); } }), pickBtn('color', v => { pp.c = v; renderOpts(); }, 'a colour')),
       check('Breakable (whole piece)', 'brk', pp), el('p', { class: 'note' }, 'Breakable = no battlements/walkway on top (pieces can’t float) • off = sturdy wall (default)'),
       k === 'free' ? el('p', { class: 'note', html: 'Free shape: click point by point to draw a closed outline on the ground • click the first point/Enter/double-click = finish • Backspace undo point • Esc cancel<br>Then select the piece and drag the blue points (Alt+click an edge = add point) • "Taper" 1 = straight, lower = narrow/pointed top' }) : null,
       h3('Snap'), el('div', { class: 'row' }, el('label', null, 'Place Grid'), el('select', { class: 'tl-sel', onchange: e => { opt.csnap = +e.target.value; need(); }, html: [[0, 'Off'], [0.5, '0.5'], [1, '1'], [2, '2']].map(([v, n]) => `<option value="${v}"${v === opt.csnap ? ' selected' : ''}>${n}</option>`).join('') })),
@@ -1125,7 +1156,7 @@ function renderOpts() {
     if (opt.cat === 'sys' || opt.cat === 'game' || opt.cat === 'prim' || opt.cat === 'collide' || opt.cat === 'mode' || opt.cat === 'room' || opt.cat === 'prefab' || opt.cat === 'deco') { b.append(pal(items.map(([t, D]) => ({ n: D.n, c: D.c })), items.findIndex(([t]) => t === opt.obj), i => { opt.obj = items[i][0]; renderOpts(); need(); }, 'one'));
       const D = OBJ[opt.obj]; if (D && D.note) b.append(el('p', { class: 'note' }, D.note));
       if (opt.cat === 'collide') b.append(h3('Size'), slider('Width', 'sx', 0.2, 30, 0.1, opt.prim), slider('Height', 'sy', 0.2, 30, 0.1, opt.prim), slider('Depth', 'sz', 0.2, 30, 0.1, opt.prim), el('p', { class: 'note' }, 'Shown red see-through here, invisible in the game • it is a Box/Cylinder with Visible off + Collider on'));
-      if (opt.cat === 'prim') b.append(h3('Size/Color'), slider('Width', 'sx', 0.2, 30, 0.1, opt.prim), slider('Height', 'sy', 0.2, 30, 0.1, opt.prim), slider('Depth', 'sz', 0.2, 30, 0.1, opt.prim), el('div', { class: 'row' }, el('label', null, 'Color'), el('input', { type: 'color', value: opt.prim.c, oninput: e => { opt.prim.c = e.target.value; need(); } })));
+      if (opt.cat === 'prim') b.append(h3('Size/Color'), slider('Width', 'sx', 0.2, 30, 0.1, opt.prim), slider('Height', 'sy', 0.2, 30, 0.1, opt.prim), slider('Depth', 'sz', 0.2, 30, 0.1, opt.prim), el('div', { class: 'row' }, el('label', null, 'Color'), el('input', { type: 'color', value: opt.prim.c, oninput: e => { opt.prim.c = e.target.value; need(); } }), pickBtn('color', v => { opt.prim.c = v; renderOpts(); }, 'a colour')));
       if (opt.cat === 'game') b.append(el('p', { class: 'note' }, 'The game adds the models and break system for these (shown as stand-in shapes here)'));
       if (opt.cat === 'deco') b.append(el('p', { class: 'note' }, 'Decor the game draws itself (hall style): no collision, not in the .glb • boxes/cylinders use materials "castle stone" etc., set in the Inspector'));
       if (opt.cat === 'prefab') b.append(el('p', { class: 'note' }, items.length ? 'Click to place a room (room centre) • Shift+wheel = rotate 90° • a room = a map named room-…, made/edited like any map' : 'No rooms yet — create a new map whose id starts with room- (flat ground) and place the room’s items in it'));
@@ -1162,6 +1193,7 @@ function fld(label, it, key, o = {}) {   // bound field: number / text / color /
   else if (type === 'checkbox') { inp = el('input', { type, checked: !!get(), onchange: commit }); return el('label', { class: 'chk' }, inp, label); }
   else if (type === 'textarea') inp = el('textarea', { class: 'tl-in', value: get() || '', onchange: commit });
   else { let v = get(); if (type === 'number' && v != null) v = +(o.deg ? v * 180 / Math.PI : v).toFixed(o.deg ? 1 : 2); inp = el('input', { class: type === 'color' ? '' : 'tl-in', type, value: v == null ? '' : v, step: o.step || (o.deg ? 5 : 0.1), onchange: commit }); if (o.min != null) inp.min = o.min; if (o.ph) inp.placeholder = o.ph; }
+  if (type === 'color') return el('div', { class: 'row' }, el('label', null, label), inp, pickBtn('color', v => { inp.value = v; commit(); }, 'a colour'));
   return el('div', { class: 'row' }, el('label', null, label), inp);
 }
 function decoFields(it) {   // inspector rows for dc_* decor
