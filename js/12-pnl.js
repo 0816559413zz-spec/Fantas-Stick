@@ -163,7 +163,7 @@ function pnlMoundH(x,y){if(!PNL.length)return 0;let g=0;for(const p of sgNear(sg
 function pnlTick(dt){
   if(!BLDON)return;
   for(const p of PNL){if(p.burnT<=0)continue;p.burnT-=dt;const d=PNDEF.dps*dt;
-    if(p.mode==='g'){p.hp[0]-=d;if(p.hp[0]<=0){pnBreakAll(p,'fire');pnlSupport(p);}continue;}
+    if(p.mode==='g'){if(!pnSolid(p,0)){p.burnT=0;continue;}p.hp[0]-=d;if(p.hp[0]<=0){p.burnT=0;pnBreakAll(p,'fire');pnlSupport(p);}continue;}   // broken burning door: stop (was re-breaking every tick = endless shake)
     for(let k=0;k<p.st.length;k++)pnDmgCell(p,k,d,'fire');if(p.sup){p.sup=0;pnlSupport(p);}}
 }
 function pnlSnap(){

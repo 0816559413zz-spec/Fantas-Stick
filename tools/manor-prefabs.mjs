@@ -66,11 +66,24 @@ function house(H) {
     const nx = Math.sin(s.rot), nz = Math.cos(s.rot), off = T / 2 + 0.45; colBox(s.x + s.U[0] * u + nx * off, s.z + s.U[1] * u + nz * off, 1.9, H.wh - 0.3, 0.9, s.rot); }
   if (H.bay) colBox((H.w - P) * (H.bay.u - 0.5), H.d / 2 + T / 2 + 0.45, H.bay.w, 2.8, 0.95);
   if (H.porch != null) for (const sx of [-1, 1]) put('cyl', (H.w - P) * (H.porch - 0.5) + sx * 1.0, H.d / 2 + T / 2 + 1.35, { sx: 0.24, sy: 2.6, sz: 0.24, c: '#ff5a5a', vis: 0, col: 1 });
+  // roof collision: invisible sloped floors on the roof top (rf:1 → only used when the room instance ticks 'Roof collision')
+  // gable + cross gables + lean-to; the tower's pyramid has none (a max of planes can't make a pyramid)
+  const OV = 0.45, GOV = 0.12, lift = 0.22 * Math.sqrt(1 + tp * tp), xo = H.w / 2 + T / 2, zo = H.d / 2 + T / 2;
+  const roofF = (x, z, w, d, rot, y, y2) => M.floors.push({ id: n++, x: f3(cx + x), z: f3(cz + z), w: f3(w), d: f3(d), rot: f3(rot), y: f3(y), y2: f3(y2), th: 0.3, c: '#7a8090', vis: 0, sol: 0, rf: 1, grp });
+  if (t === 'gable') {
+    const ze = zo + OV, top = H.wh + zo * tp + lift, eave = H.wh - OV * tp + lift;
+    roofF(0, ze / 2, 2 * (xo + GOV), ze, 0, top, eave); roofF(0, -ze / 2, 2 * (xo + GOV), ze, 0, eave, top);
+    for (const q of H.xg || []) { const qx = (H.w - P) * (q.u - 0.5), xw = q.w / 2 + T / 2, Yx = H.wh + xw * tp + lift, zb = zo - (xw * tp) / tp - 0.8, z1 = zo + GOV + 0.15;
+      roofF(qx - (xw + OV) / 2, (zb + z1) / 2, z1 - zb, xw + OV, PI / 2, eave, Yx); roofF(qx + (xw + OV) / 2, (zb + z1) / 2, z1 - zb, xw + OV, PI / 2, Yx, eave); }
+  } else if (t === 'shed') {
+    const zf = zo + OV, zb = -zo - 0.15, hAt = z => H.wh + (zo - z) * tp + lift;
+    roofF(0, (zf + zb) / 2, 2 * (xo + GOV), zf - zb, 0, hAt(zb), hAt(zf));
+  }
   // flagstone path from the door to the front edge (game-drawn floor decor, no collision)
   const door = (H.open.f || []).find(o => o[2] === 'd');
   if (door) { const x = (H.w - P) * (door[0] - 0.5), z0 = H.d / 2 + 0.3, z1 = D - cz; put('dc_box', x, (z0 + z1) / 2, { k: 'floor', y: 0.03, sx: 1.8, sy: 0.06, sz: f3(z1 - z0) }); }
   M.seq = n;
   fs.writeFileSync('maps/build/' + id + '.json', JSON.stringify(MD.pack(M)));
-  console.log(id, W + 'x' + D, M.objs.length, 'items,', M.objs.filter(o => o.t === 'pn_wall').length, 'panels');
+  console.log(id, W + 'x' + D, M.objs.length, 'items,', M.objs.filter(o => o.t === 'pn_wall').length, 'panels,', M.floors.length, 'roof floors');
 }
 SP.houses.forEach(house);

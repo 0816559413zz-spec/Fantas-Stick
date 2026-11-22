@@ -1253,6 +1253,7 @@ function renderSide() {
       box.append(section('Room (prefab) — ' + (R ? R.name : it.ref), true,
         fld('Room', it, 'ref', { type: 'select', items: rooms.map(m => [m.id, m.name]), after: () => loadRooms().then(() => { syncAll(); renderSide(); changed(); }) }),
         fld('Position X (room centre)', it, 'x'), fld('Position Z (room centre)', it, 'z'), fld('Rotation (deg, steps of 90)', it, 'rot', { deg: 1, step: 90 }),
+        R && R.floors.some(f => f.rf) ? fld('Roof collision (players can stand on the roof)', it, 'rfc', { type: 'checkbox', set: v => { if (v) it.rfc = 1; else delete it.rfc; }, after: () => { syncAll(); renderSide(); changed(); } }) : null,
         el('div', { class: 'seg' }, el('button', { class: 'tl-btn', onclick: () => { location.href = 'mapbuild.html?id=' + encodeURIComponent(it.ref); } }, 'Open This Room'),
           el('button', { class: 'tl-btn', title: 'Copy the room’s contents into this map, every piece editable (no longer linked to the room file) • ground under the room is flattened + painted like the room', onclick: () => { if (!R) return; pushUndo('a'); MD.roomUnpack(M, it, R); sel = null; buildTerrain(); syncAll(); renderSide(); changed(); } }, 'Unpack Room into Map')),
         el('p', { class: 'note' }, R ? 'Size ' + R.W + ' × ' + R.H + ' m • edit the room’s contents in its own file (every map using it updates) • , . rotate 90° • drag to move' : 'Room not loaded yet (' + it.ref + ')'), btns)); }

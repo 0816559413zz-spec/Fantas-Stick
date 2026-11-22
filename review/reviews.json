@@ -3213,7 +3213,7 @@
    "who": "Manor houses",
    "status": "wait",
    "created": "2026-11-22T18:30:00",
-   "updated": "2026-11-22T18:30:00",
+   "updated": "2026-11-22T19:10:00",
    "imgs": [],
    "links": [
     "/mapbuild.html?id=room-house-manor",
@@ -3235,7 +3235,7 @@
     }
    ],
    "feedback": "",
-   "reply": ""
+   "reply": "แก้ประตู/หน้าต่างที่ไหม้แล้วสั่นรัวหลังพัง • เพิ่มตัวเลือก Roof collision (เลือกห้อง → ติ๊กใน Inspector) ยืนบนหลังคาได้ ยกเว้นบ้านหอ"
   }
  ]
 }
