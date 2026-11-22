@@ -195,7 +195,7 @@ function fcsDecoFile(list){
 function fcsDecoKit(){
   const G={},add=(k,g)=>(G[k]=G[k]||[]).push(g),bx=new THREE.BoxGeometry(1,1,1),lights=[],sprites=[],cloths=[],dn={};
   const V={
-    box:(k,x,y,z,sx,sy,sz)=>{const g=bx.clone();g.scale(sx,sy,sz);g.translate(x,y,z);add(k,g);},
+    box:(k,x,y,z,sx,sy,sz)=>{if(k==='lit')hallWinRec(x,y,z,sx,sy,sz);const g=bx.clone();g.scale(sx,sy,sz);g.translate(x,y,z);add(k,g);},
     cyl:(k,x,y,z,rt,rb,h,seg)=>{const g=new THREE.CylinderGeometry(rt,rb,h,seg||8);g.translate(x,y,z);add(k,g);},
     roof:(cx,y,cz,w,d,h,rot)=>{rot=rot||0;const s=new THREE.Shape();s.moveTo(-d/2-0.6,0);s.lineTo(0,h);s.lineTo(d/2+0.6,0);s.lineTo(d/2+0.6,-0.6);s.lineTo(0,h-0.75);s.lineTo(-d/2-0.6,-0.6);s.lineTo(-d/2-0.6,0);
       const g=new THREE.ExtrudeGeometry(s,{depth:w+1.2,bevelEnabled:false});g.translate(0,0,-(w+1.2)/2);g.rotateY(Math.PI/2+rot);g.translate(cx,y,cz);add('roof',g);

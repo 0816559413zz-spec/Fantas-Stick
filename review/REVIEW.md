@@ -3,6 +3,355 @@
 > เขียนอัตโนมัติจาก `review.html` (ผ่าน `tools/serve.py`) — อย่าแก้ไฟล์นี้ตรง ๆ, แก้ `review/reviews.json` แล้วรัน `python tools/serve.py --review-md`.
 > **Claude:** ทำเฉพาะหัวข้อสถานะ **✏️ ขอแก้** — อ่านความเห็นผู้ใช้ (`ความเห็นผู้ใช้`) + เปิดรูปด้วย Read → แก้ → ตั้ง `status:"wait"` + เขียน `reply` (ไทยสั้น ๆ ว่าแก้อะไร) เพื่อส่งกลับให้ผู้ใช้รีวิวใหม่. อย่าตั้ง `ok` เอง (ผู้ใช้เป็นคนกดผ่าน). งานที่ **⏳ รอ** = รอผู้ใช้ ไม่ต้องทำอะไร
 
+## #141 Great Hall · กระจกสี + ลำแสง + โทนแสงในห้องโถง
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Map • สาย/ส่วน: Great Hall
+
+**วิธีดู / อะไรรอรีวิว:**
+เข้าห้องโถงใหญ่ (fcs / fcs-file) หน้าต่างเป็นกระจกสียอดแหลม มีลำแสงเอียงลงพื้นพร้อมฝุ่นลอย และแสงสีตกบนพื้น อยู่ในห้องแล้วแสงรวมเย็นลง (เงาอมฟ้า ไฮไลต์อุ่น) โคมระย้ายังอุ่นเหมือนเดิม
+
+- ลิงก์/ไฟล์: `/index.html?nosw&playmap=fcs&pm=siege`
+- ลิงก์/ไฟล์: `/shots/hall-mood-wide.jpg`
+- ลิงก์/ไฟล์: `/shots/hall-mood-windows.jpg`
+- ลิงก์/ไฟล์: `/shots/hall-mood-floor.jpg`
+
+**เช็กลิสต์:**
+- [ ] ลายกระจกสีและความสว่างหน้าต่าง
+- [ ] ลำแสง + แสงสีบนพื้น แรงพอดีไหม
+- [ ] โทนแสงตอนอยู่ในห้อง (เย็นลง/ตัดกับโคมไฟ)
+
+## #140 ลดงาน VFX เคียว Darkness และ Shard Storm
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Darkness / Radiance
+
+**วิธีดู / อะไรรอรีวิว:**
+รวมละอองเคียวเป็นชุดเดียวต่อชั้น ประหยัดรายละเอียดเสริมเมื่อไกลหรือเครื่องช้า ส่วนวงพื้นและคมฟันหลักยังแสดง
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ba_perf_high.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ba_perf_low.gif`
+- ลิงก์/ไฟล์: `/shots/motion_radiance_shard_storm_quality.gif`
+
+## #139 Darkness เกจโล่เหนือแถบเลือดและท่าค้าง BA
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+เกจเวลาโล่แสดงตลอดเหนือแถบเลือด ท่าค้างหลังฟันซ้ายไปขวาโน้มช่วงบนน้อยลง
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ba_lighter_left_hold.gif`
+
+## #138 Darkness BA ขา หัว และเคียวเงา
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+แยกขาจากท่าบิดตัว หัวเล็งตามเป้า และเพิ่มเคียวเงากับรอยฟันซ้ำให้ชัดขึ้น Flow ขึ้นไม่ว่าเป้าที่ฆ่าจะมีตราหรือไม่
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_marked_ba_head_legs.gif`
+
+## #137 Darkness BA ค้างท่าและเก็บเคียว
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+BA ฟันสลับจากท่าค้าง เว้น 2 วิแล้วคลายตัวตามเคียว เช็กการลอยและการหมุนกลับหลังท่า
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ba_hold_chain_front.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_scythe_recovery_audit.gif`
+
+## #136 Darkness BA ท่าบิดตัวตามแรงฟัน
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+ถ่ายน้ำหนักฝั่งง้างก่อนบิดสะโพกนำ ไหล่ตามแรงฟันแล้วค่อยคลายเข้าท่ายืนหรือเดิน
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ba_body_twist_tdm.gif`
+
+## #135 Darkness BA สะเก็ดปลายคมและหางด้าม
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+สะเก็ดหมึกปลิวออกพ้นขอบคม เพิ่มความต่างของริ้วในแถบดำ และลดความทึบหางด้ามเหลือ 46% ของเดิม
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ba_tip_particles_tdm.gif`
+
+## #134 Darkness BA ลายหมึกและเปลวที่ปลายคม
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+ลายหมึกวิ่งในแถบดำฝั่งใบมีด เปลวปลายคมใช้รูปจากสันเคียวและมีเศษหมึก หางด้ามใช้จังหวะเดิม
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ba_blade_texture_tdm.gif`
+
+## #133 Darkness Long Dash คืนหางริ้วเดิม
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+คืนหางเส้นยาวแบบ #130 พร้อมเก็บหัวลูกเงาขนาดเล็กจาก #132
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_long_dash_restored_tail_tdm.gif`
+
+## #132 Darkness Long Dash ตัวเล็กลงและหางแยกริ้ว
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+ย่อหัวลูกเงาราว 25% ให้หางปลิวแยกเป็นสี่ริ้วก่อนจาง
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_long_dash_separate_ribbons_tdm.gif`
+
+## #131 Darkness Long Dash ใช้ผิวเดียวจากหัวถึงหาง
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+ริ้ว 16 เส้นไหลบนผิวโค้งชิ้นเดียวตลอดหัวและหาง ลดขอบและชั้นซ้อนตรงคอ
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_long_dash_same_surface_tdm.gif`
+
+## #130 Darkness Long Dash เพิ่มริ้วบนหัว
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+เพิ่มเส้นแนบผิวจาก 10 เป็น 16 เส้นและให้ตรงกับริ้วหาง
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_long_dash_more_head_lines_tdm.gif`
+
+## #129 Darkness Long Dash เส้นเรียบไปกับผิว
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+เส้นช่วงหัวอยู่บนผิวจริง ริ้วหางเริ่มที่ระดับผิวเดียวกันแล้วค่อยคลี่ออก
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_long_dash_flush_lines_tdm.gif`
+
+## #128 Darkness Long Dash ริ้วโค้งคลุมถึงหัว
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+เส้นเงาค่อย ๆ โผล่จากปลายหัว โค้งแนบตามทรงและต่อกับริ้วหางโดยไม่มีจุดเริ่มแข็ง
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_long_dash_wrapped_tip_tdm.gif`
+
+## #127 Darkness Long Dash หางคลุมครึ่งหลัง
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+ริ้วเงาซ้อนตั้งแต่กึ่งกลางลูกเงา ผิวครึ่งหลังละลายเข้าหางระหว่างพุ่งและเลี้ยว
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_long_dash_merged_tail_tdm.gif`
+
+## #126 Darkness ฮิตบ็อกซ์ BA รอยฟันพื้น และทิศ Dash
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Gameplay / VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+BA โดนรอบตัวในรัศมี 25 หน่วย รอยกวาดค้างในโลก ริ้วปลายคมขยับและฟันลงมีสะเก็ดกระทบพื้น Dash ตาม WASD และรีเซ็ต BA ลูกเงามีหางยาวแนบลำตัว
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ba_world_arc_tdm.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ba_ground_contact_tdm.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_wasd_quick_tdm.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_wasd_long_tdm.gif`
+
+## #125 Darkness BA หางด้ามจางเร็วขึ้น
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+หลังฟัน หางด้ามจางหมดราว 0.4 วิ หางคมอยู่ราว 0.9 วิ
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ba_short_shaft_tdm.gif`
+
+## #124 Darkness BA หางฟันค้างชัดขึ้น
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Animation / VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+BA กวาด 150° ข้างละ 75° หางค้างให้เห็นเต็มช่วงสั้นแล้วจางจนหมดราว 0.9 วิหลังฟัน
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ba_150_linger_tdm.gif`
+
+## #123 Darkness คืนเคียวหลัง Nightfall ไม่มีตรา
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Animation • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+เคียวไหลและหมุนต่อจากแรงงัดเป็นโค้งเดียวจนถึงท่าลอยข้างตัว กด BA แทรกได้ระหว่างทาง
+
+- ลิงก์/ไฟล์: `/shots/motion_nightfall_plain_recovery_smooth_tdm.gif`
+
+## #122 Darkness ต่อ BA หลัง Nightfall และเดินขณะบล็อก
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Animation / Gameplay • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+คลิก BA ช่วงท้าย Nightfall เพื่อฟันต่อทันทีที่พุ่งจบ ปล่อยไว้ให้เคียวควงคืนท่า โล่ 80 หน่วย เดินบนพื้นตามปกติ
+
+- ลิงก์/ไฟล์: `/shots/motion_nightfall_marked_buffered_into_ba_tdm.gif`
+- ลิงก์/ไฟล์: `/shots/motion_nightfall_flow_buffered_into_ba_tdm.gif`
+- ลิงก์/ไฟล์: `/shots/motion_nightfall_plain_recovery_tdm.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_shield_grounded_tdm.gif`
+
+## #121 Darkness BA กวาด 150° และหางเฟดช้าลง
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Animation / Gameplay • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+ฟันทั้งสองฝั่งข้างละ 75° จากแนวเล็ง หางคมและหางด้ามค่อย ๆ จางหลังฟัน
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ba_150_tdm.gif`
+
+## #120 Darkness เทสต์คอมโบ Team PvP
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Animation / Gameplay • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+Quick Dash ต่อ BA สองฝั่ง, Death Sentence ต่อ Nightfall แบบติดตราและ Flow, Umbral Veil ถอนเคียวแล้วฟันต่อขณะวงยังอยู่
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_combo_dash_ba.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_combo_marked_nightfall.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_combo_flow_nightfall.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_combo_veil_ba.gif`
+
+## #119 Darkness BA กวาดตรงกลาง 120°
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Animation / Gameplay • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+ฟันทั้งสองฝั่งจากขอบ 60° ผ่านแนวเล็งกลางไปถึง 60° อีกฝั่ง คมและกรวยโดนใช้มุมเดียวกันทั้ง BA ปกติและเสริม
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ba_centered_tdm.gif`
+
+## #118 Darkness ท่าคทา BA และขนาดโล่
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Animation / VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+ใช้ท่าคทาจาก Studio ทั้งสองฝั่งใน BA และย่อโล่จาก 112 เหลือ 100 หน่วยทั้งภาพและระยะกันจริง
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ba_wand_tdm.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_shield_compact_tdm.gif`
+
+## #117 Radiance HUD ช่วยเล็ง Crystal Bond และพื้น Shard Storm
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: HUD / VFX • สาย/ส่วน: Radiance
+
+**วิธีดู / อะไรรอรีวิว:**
+เส้นทองสองข้างเพื่อนที่เล็งได้ยาวและหนาขึ้นเล็กน้อย เส้นจางลงระหว่างคูลดาวน์ พื้น Storm มีรังผึ้งกับขอบทองชัดขึ้นและแนบพื้น
+
+- ลิงก์/ไฟล์: `/shots/motion_radiance_bond_clear_tdm.gif`
+- ลิงก์/ไฟล์: `/shots/motion_radiance_storm_ground_tdm.gif`
+
+## #116 Radiance และ Darkness แก้บั๊กและเกลา VFX จาก QA
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Gameplay / VFX • สาย/ส่วน: Radiance / Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+ย่อโล่ Darkness เหลือ 112, Ward Drain กดเพดานครบเวลา, Nightfall ยึดจุดหยุดจริง, Radiance ใช้ผลึกเสริมเฉพาะตอนอัลติ พร้อมเกลาคิวแสงและวงเตือนของทั้งสองสาย
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_qapass.gif`
+- ลิงก์/ไฟล์: `/shots/motion_radiance_qapass.gif`
+
+## #115 Darkness หางด้าม BA และเคียว Nightfall มีตรา
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Animation / VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+คืนหางด้ามชั้นเดิมจาก Studio ให้ BA ทั้งสองฝั่ง Nightfall มีตราให้เคียวลอยต่ำแนวนอนเยื้องซ้าย หันปลายคมเข้าหาเป้าตอนพุ่ง และมองเห็นก่อนคมถึงเป้าทั้งสองครั้ง
+
+- ลิงก์/ไฟล์: `/shots/scythe_ba_top.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ba_shaft_tdm.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_nightfall_marked_aim_tdm.gif`
+
+## #114 Darkness จังหวะ Maw, BA, Nightfall และ Ward Drain
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Gameplay / Animation / VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+ชาร์จ Maw เดินได้และหยุดตอนปล่อย BA กว้างขึ้นตามปลายเคียว Flow Nightfall พุ่งเร็วขึ้น แบบมีตราลูกเงาเล็กและเห็นเคียวชัดขึ้น Ward Drain ขึ้นโล่ร้าวตามผู้โดนครบ 4 วิ
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_maw_charge_walk_tdm.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ba_wide_tdm.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_nightfall_flow_fast_tdm.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_nightfall_marked_clear_tdm.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ward_drain_target_tdm.gif`
+
+## #113 Darkness แก้วงควงค้างตอน Nightfall ไม่มีตรา
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Bug / VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+ฟัน BA ให้เห็นวงควงแล้วกด Nightfall ไม่มีตรา วงควงเดิมหายตามเคียว จากนั้นกด BA ระหว่างเคียว Nightfall คืนท่า เคียวเริ่มฟันต่อจากตำแหน่งปัจจุบัน
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_nightfall_plain_combo_tdm.gif`
+
+## #112 Darkness ยกกล้องให้เห็นหางฟันบนพื้น
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Camera / VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+ยกกล้องหลังผู้เล่นขึ้นโดยใช้ระยะถอยเดิม เป้าอยู่กลางจอและเล็งสูงต่ำตามเดิม
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ground_slash_camera_tdm.gif`
+
+## #111 Darkness BA ไหลกลับต่อจากจังหวะลอย
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Animation / VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+เคียวลอยฝั่งที่ฟันจบแล้วใช้ความเร็วเดิมต่อเข้าทางกลับซ้ายเมื่อเว้น BA ครบ 2 วิ ชะลอเมื่อถึงท่าพัก
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ba_glide_tdm.gif`
+
+## #110 Darkness BA เคียวลอยต่อจากแรงควง
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Animation / VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+ช่วงรอฝั่งที่ฟันจบ เคียวค่อย ๆ เอียงและลอยเบา ๆ ต่อจากแรงควง ครบ 2 วิแล้วไหลเป็นโค้งกลับทางซ้าย
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ba_hover_return_tdm.gif`
+
+## #109 Darkness BA ค้างเคียวฝั่งที่ฟันจบ
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Animation / VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+เคียวควงแล้วค้างที่ฝั่งจบจนเว้น BA ครบ 2 วิ จากนั้นลอยพร้อมหมุนกลับข้างซ้าย ยังกดฟันสลับฝั่งต่อได้จากตำแหน่งที่ค้าง
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ba_wait_return_tdm.gif`
+
+## #108 Darkness คืนลูกเงาและวงหมึกตอนเคียวควง
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Gameplay / VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+BA ฟันสลับซ้าย→ขวาและขวา→ซ้าย พร้อม VFX ตอนควง Night Waltz ใช้ลูกเงาทรงรีและริ้วขดร่วมกับ Studio ขอบ B แนบพื้นจริงและกล้องยกให้เห็นทางชิ่ง
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ba_alternate_tdm.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_waltz_approved_tdm.gif`
+
+## #107 Darkness ขอบ Night Waltz เดิมและพุ่งชิ่งกลับมา
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Gameplay / VFX • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+Night Waltz ชนเป้ามีตราก่อนแล้วชิ่งในวงเดิม, Flow Nightfall ใช้ลูกเงากับเคียวด้านซ้ายหลังและฟันทีเดียว, Long Dash หัวลูกเงาต่อกับหาง, BA ซ้ายไปขวาเพิ่มหางซ้อนชั้นและควงหนึ่งรอบ
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_waltz_chain_tdm.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_nightfall_flow_orb_tdm.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_hold_ball_tdm.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ba_tail_spin_tdm.gif`
+
+## #106 Radiance ล็อกเป้า Crystal Bond, มุมโล่ และท่ามือร่างเทพ
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Gameplay / VFX / HUD • สาย/ส่วน: Radiance
+
+**วิธีดู / อะไรรอรีวิว:**
+ล็อก Bond จนเล็งเพื่อนในระยะ มีเส้นมุมบางบนเพื่อนที่เลือก โล่เงยก้มตามทิศเล็ง มือร่างเทพยิงจากแนวไหล่ เกจเวลาเป็นวงขาวเส้นบางรอบเป้าเล็ง
+
+- ลิงก์/ไฟล์: `/shots/motion_light_bond_fixes.gif`
+- ลิงก์/ไฟล์: `/shots/motion_light_shield_fixes.gif`
+- ลิงก์/ไฟล์: `/shots/motion_light_sovereign_cursor_fixes.gif`
+
+## #105 Darkness แก้กล้องและจังหวะคืนเคียวในแมตช์
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Gameplay / VFX / HUD • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+BA ฟันซ้ายไปขวา ระยะกับมุมลดลง หนีด้วยลูกเงาที่หางตามตัวจริง โล่ลอยแล้วขาไม่ก้าว ขยายแถบเวลา Night Waltz มีพื้นกับลูกเงา Nightfall ใน Flow พุ่งฟันครั้งเดียวและกล้องตามเป้า คืนเคียวต่อเนื่องหลังจบสกิล
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_ba_fixes.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_hold_fixes.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_shield_fixes.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_waltz_fixes.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_nightfall_flow_fixes.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_nightfall_marked_fixes.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_veil_fixes.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_sentence_fixes.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_maw_fixes.gif`
+
+## #104 Darkness วงเวลา Flow, ชาร์จ Dash และเกจโล่
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Gameplay / HUD • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+Quick Dash รีเซ็ต BA ทันที Flow ใช้วงขาวเส้นบาง Dash ใช้ขีดขาวสองขีด และเกจโล่เป็นเส้นขาวเหนือเป้าเล็งแบบ Radiance เฟดเร็วตอนกดและปล่อย
+
+- ลิงก์/ไฟล์: `/shots/motion_darkness_quick_hud_v5.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_flow_hud_v5.gif`
+- ลิงก์/ไฟล์: `/shots/motion_darkness_shield_hud_v5.gif`
+
 ## #102 Radiant Sovereign เพิ่มแรงปะทะลำฝ่ามือและลำจากอก
 - สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX • สาย/ส่วน: Radiance
 

@@ -380,6 +380,15 @@ fcsRoomsView:178 fcsDecoFile:180 fcsDecoKit:195 MB_STYLE:238 _poOn:239 fileStyle
 ## js/28-fcs-forest.js (259) — ป่าสนหมอก ในแผนที่ First Castle Strike (เฟส 1 = ช่อง x 0–28 ของ Map Editor) — ทำตามรูปอ้า…
 FF:7 FF_X1:8 FF_NS:9 ffGroundTex:11 ffParts:33 fcsForest:40 ffMerge:123 ffDetail:131 fcsRuin:158 ffSkyMat:201 ffMist:229 ffMistFrame:246 fcsForestTick:248 FFC:259
 
+## js/28-fcs-hall.js (113) — Great Hall mood (fcs + fcs-file) — user 2026-11-22 "make the hall look like ref 2" (items…
+HALL:9 hallWinRec:12 hallRect:14
+§15 textures: 4 glass designs side by side (pane = opaque with stone corn…
+hallTex:16
+§46 build (called once per world build, after the room view / file deco f…
+hallBuild:47 hallEnv:101
+§103 mood: blend by how far the camera is inside the hall rect (3 m soft e…
+hallPre:104 hallPost:112
+
 ## js/28-fcs-props.js (156) — FCS room props — look + destruction (user 2026-11-20). Gameplay side: RPK / roomProp in j…
 FRP:11 FRP_PV:12 FRP_PB:13 frpMat:16
 §26 part builders: local metres, x along the prop, z across, y up. push(g…
@@ -387,18 +396,18 @@ frpBuild:27 fcsPropsBuild:75 fcsPropsView:101 fcsRoomBrkFx:110 FRP_DEB:111 frpDe
 §139 wall hit marks (event 'rwh'): decal quads on the wall face, ring buff…
 frpMarkTex:140 fcsWallHit:144
 
-## js/28-maps-build.js (775) — สร้างแผนที่
-CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:44 _prewarmed:46 prewarmShaders:47 batchStatic:66 makeCandles:91 updateCandles:100 buildCastle:109 buildHogsmeade:175 buildGreatHall:250 buildForest:320
-§417 ทุ่งหญ้าฮอกวอตส์ (เย็น)
-ringTrees:418 grassTex:427 buildMeadow:428
-§447 ทะเลสาบน้ำแข็ง (กลางคืน)
-buildLake:448
-§469 ซากลานประลอง (เย็น ทราย)
-§470 Test Place (ห้องฝึก): พื้นตารางเรียบๆ กลางวัน + วงโซนเสกมอนสเตอร์
-§471 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน guides…
-makeSnow:472 makeFireflies:479 makeSnitch:486 fileMapFx:493
-§503 แผนที่จากไฟล์ Blender (guides/MAP-DESIGN.md)
-terrGeo:505 buildFileMap:513 tickM:566 TRPAD:567 ARPAD:567 SHPAD:567 signTex:568 testSign:569 buildTest:576 buildRuins:681 buildPitch:706
+## js/28-maps-build.js (776) — สร้างแผนที่
+CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:45 _prewarmed:47 prewarmShaders:48 batchStatic:67 makeCandles:92 updateCandles:101 buildCastle:110 buildHogsmeade:176 buildGreatHall:251 buildForest:321
+§418 ทุ่งหญ้าฮอกวอตส์ (เย็น)
+ringTrees:419 grassTex:428 buildMeadow:429
+§448 ทะเลสาบน้ำแข็ง (กลางคืน)
+buildLake:449
+§470 ซากลานประลอง (เย็น ทราย)
+§471 Test Place (ห้องฝึก): พื้นตารางเรียบๆ กลางวัน + วงโซนเสกมอนสเตอร์
+§472 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน guides…
+makeSnow:473 makeFireflies:480 makeSnitch:487 fileMapFx:494
+§504 แผนที่จากไฟล์ Blender (guides/MAP-DESIGN.md)
+terrGeo:506 buildFileMap:514 tickM:567 TRPAD:568 ARPAD:568 SHPAD:568 signTex:569 testSign:570 buildTest:577 buildRuins:682 buildPitch:707
 
 ## js/28-pnl-build.js (245) — Breakable panels — view (state = PNL in js/12-pnl.js)
 PNV:7 PN_MI:8 PN_GLSL:9 pnlMat:41 PN_RUB:92 PN_HEAP:93 pnlCls:100 PN_ZU:108 pnlGeo:109 pnlBuild:192 pnlSyncOne:212 pnlView:234 pnlFX:237
@@ -913,4 +922,4 @@ _dvPanel:95 _dvBtn:98 _dvBody:100 _dvHead:100 devUiApply:102 devFreeMouse:110 de
 §130 rows
 dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:193 devUiAct:200
 
-(114 files, 33743 lines)
+(115 files, 33857 lines)

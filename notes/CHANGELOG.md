@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-22 Great Hall look (user: make the hall look like the reference, items 1+2): the hall windows are now pointed stained-glass panes (4 designs) that glow, with slanted light shafts, slow dust motes and coloured light patches on the floor. Inside the hall the light turns cool (dimmer cool sky light, blue-grey shadows, warm highlights) so the windows and the warm chandeliers stand out. Works on fcs and fcs-file (any 'lit' window inside the hall).
+
 - 2026-11-22 Map Builder: eyedropper (💧 Pick) next to every colour box and in the Paint / Backdrop panels — click on the map to take the colour of an item, the ground surface or backdrop surface, or a height for Backdrop Set Height; Alt+click does the same in Paint, Backdrop, Wall, Castle and Place (primitive) tools.
 
 - 2026-11-22 Map Builder: new Backdrop tool (🌊, key J) to build the scenery outside the play area: start from a preset (sea-cliff headland, island, mountain valley, hills & fields, lakeside, flat), then raise/lower/smooth/flatten/set height, paint surfaces (grass, field, rock, sand, dirt, snow or auto), brush tree density, set the sea/lake level (lower ground becomes water with waves and shore foam in the game) and place sea stacks. Optional overcast sky look. The game draws it with the same cliff/sea/tree renderer as Cliff Side Castle; nothing collides.
