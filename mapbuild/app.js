@@ -10,6 +10,7 @@ import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import * as MD from './model.js';
+import * as BD from './backdrop.js';
 const { C, SURF, OBJ } = MD;
 
 const $ = id => document.getElementById(id);
@@ -21,8 +22,9 @@ const el = (tag, props, ...kids) => { const e = document.createElement(tag); if 
 let M = null, online = false, dirty = false, saveT = 0, list = [];
 let tool = 'select', sel = null, msel = [];   // sel = {k:'wall'|'floor'|'obj', id, pt?} = primary (Inspector, gizmo) • msel = more items picked with Shift/Ctrl
 const opt = { smode: 'up', rad: 4, str: 4, soft: 1, hval: 2, surf: 0, wall: 0, wth: 1, wh: 3.5, wc: '#8a8478', wm: 'stone', wcurve: 0, wbrk: 0, floor: 0, fw: 4, fh: 3, fauto: 1, obj: 'spawn', cat: 'sys',
-  rrot: 1, rscale: 0, dens: 3, snap: 0, part: 'wall', pp: {}, csnap: 1, psnap: 1, prim: { c: '#8a8478', sx: 2, sy: 2, sz: 2 }, pn: { pre: 0, mat: 'brick', m: 'p', thru: 1, sy: 3.6, T: 0.3, cs: 0.6, hp: 0, y: 0 } };
-const show = { steep: true, col: false, grid: false, sky: true, area: true };
+  rrot: 1, rscale: 0, dens: 3, snap: 0, part: 'wall', pp: {}, csnap: 1, psnap: 1, prim: { c: '#8a8478', sx: 2, sy: 2, sz: 2 }, pn: { pre: 0, mat: 'brick', m: 'p', thru: 1, sy: 3.6, T: 0.3, cs: 0.6, hp: 0, y: 0 },
+  bm: 'up', brad: 40, bstr: 4, bh: 0, bs: 1, btd: 200, sr: 6, sh: 20, bpre: 'coast', bseed: 1 };   // b* = backdrop tool
+const show = { steep: true, col: false, grid: false, sky: true, area: true, bd: true };
 let undo = [], redo = [];
 let hover = null, stroke = null, drag = null, draft = null, ghostRot = 0, spaceDown = false;
 const fly = new Set();   // keys held while right-dragging (WASD fly, Q/E down/up)
@@ -373,7 +375,7 @@ function buildCol() {
 
 // ================= camera / picking =================
 function camApply() {
-  cam.pitch = clamp(cam.pitch, 0.08, 1.55); cam.dist = clamp(cam.dist, 3, 900);
+  cam.pitch = clamp(cam.pitch, 0.08, 1.55); cam.dist = clamp(cam.dist, 3, M ? bdLim().d : 900);
   const ty = M ? MD.gh(M, clamp(cam.x, 0, M.W), clamp(cam.z, 0, M.H)) : 0, cp = Math.cos(cam.pitch);
   const tx = cam.x - M.W / 2, tz = cam.z - M.H / 2;
   camera.position.set(tx + Math.sin(cam.yaw) * cp * cam.dist, ty + Math.sin(cam.pitch) * cam.dist, tz + Math.cos(cam.yaw) * cp * cam.dist);
@@ -413,9 +415,10 @@ const snapV = v => opt.snap ? Math.round(v / opt.snap) * opt.snap : +v.toFixed(2
 
 // ================= undo =================
 const META = ['walls', 'floors', 'objs', 'parts', 'rooms', 'name', 'desc', 'sky', 'style', 'fog', 'music', 'weather', 'fx', 'modes', 'random', 'autoProps', 'skirt', 'seq'];
-function snap(kind) { const e = {}; if (kind !== 'o') { e.hg = M.hg.slice(); e.sf = M.sf.slice(); e.W = M.W; e.H = M.H; } if (kind !== 't') { const o = {}; for (const k of META) o[k] = M[k]; e.js = JSON.stringify(o); } return e; }
+function snap(kind) { if (kind === 'b') return { isBd: 1, bd: BD.bdClone(M.bd) }; const e = {}; if (kind !== 'o') { e.hg = M.hg.slice(); e.sf = M.sf.slice(); e.W = M.W; e.H = M.H; } if (kind !== 't') { const o = {}; for (const k of META) o[k] = M[k]; e.js = JSON.stringify(o); } return e; }
 function pushUndo(kind) { undo.push(snap(kind)); if (undo.length > 40) undo.shift(); redo = []; }
 function restore(e) {
+  if (e.isBd) { const back = snap('b'); M.bd = e.bd; buildBd(); applySky(); renderOpts(); changed(); return back; }
   const kind = e.hg && e.js ? 'a' : e.hg ? 't' : 'o', back = snap(kind);
   if (e.hg) { const rs = e.W !== M.W || e.H !== M.H; M.W = e.W; M.H = e.H; M.nx = Math.round(M.W / C) + 1; M.ny = Math.round(M.H / C) + 1; M.hg = e.hg; M.sf = e.sf; if (rs) buildTerrain(); else updTerrain(0, 0, M.nx - 1, M.ny - 1); }
   if (e.js) Object.assign(M, JSON.parse(e.js));
@@ -457,6 +460,115 @@ function applyRamp(A, B, W) {   // straight slope from A to B (heights taken at 
   updTerrain(i0, j0, i1, j1);
 }
 
+// ================= backdrop (land / sea / trees around the play area — mapbuild/backdrop.js) =================
+const gBd = new THREE.Group(); gBd.name = 'backdrop'; root.add(gBd);
+let bdMesh = null, bdWater = null, bdTrees = null, bdStk = null, bdY = null, bdTT = 0;
+const bdSurf = BD.BSURF.map(s => new THREE.Color(s.c)), bdSeaC = new THREE.Color('#33505a'), bdTmp = new THREE.Color();
+const bdEdge = (x, z) => MD.gh(M, x, z);
+function bdAt(x, z) { return BD.bdOut(M, x, z) < -0.01 ? MD.gh(M, clamp(x, 0, M.W), clamp(z, 0, M.H)) - 4 : BD.bdHeight(M.bd, M, x, z, bdEdge); }   // shown height (inside = under the map ground)
+function bdSlope(i, j) { const B = M.bd, k = j * B.nx + i, Y = bdY, l = Y[i > 0 ? k - 1 : k], r = Y[i < B.nx - 1 ? k + 1 : k], u = Y[j > 0 ? k - B.nx : k], d = Y[j < B.ny - 1 ? k + B.nx : k]; return Math.max(Math.abs(r - l), Math.abs(d - u)) / (2 * B.c); }
+function buildBd() {
+  clearGroup(gBd); bdMesh = bdWater = bdTrees = bdStk = null; bdY = null; if (!M || !M.bd) return;
+  const B = M.bd, n = B.nx * B.ny, pos = new Float32Array(n * 3), idx = new Uint32Array((B.nx - 1) * (B.ny - 1) * 6);
+  for (let j = 0; j < B.ny; j++) for (let i = 0; i < B.nx; i++) { const k = (j * B.nx + i) * 3; pos[k] = B.x0 + i * B.c; pos[k + 2] = B.z0 + j * B.c; }
+  let q = 0; for (let j = 0; j < B.ny - 1; j++) for (let i = 0; i < B.nx - 1; i++) { const a = j * B.nx + i, b = a + 1, d = a + B.nx, e = d + 1; idx[q++] = a; idx[q++] = d; idx[q++] = b; idx[q++] = b; idx[q++] = d; idx[q++] = e; }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(n * 3), 3)); g.setAttribute('color', new THREE.BufferAttribute(new Float32Array(n * 3), 3)); g.setIndex(new THREE.BufferAttribute(idx, 1));
+  bdMesh = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ vertexColors: true })); bdMesh.userData.own = 1; bdMesh.frustumCulled = false; gBd.add(bdMesh); bdY = new Float32Array(n);
+  updBd(0, 0, B.nx - 1, B.ny - 1); bdSea(); bdStacks(); bdTreesBuild(); gBd.visible = show.bd; need();
+}
+function updBd(i0, j0, i1, j1) {
+  const B = M.bd; if (!B || !bdMesh) return; const g = bdMesh.geometry, P = g.attributes.position.array, N = g.attributes.normal.array, Cc = g.attributes.color.array;
+  i0 = clamp(i0 - 1, 0, B.nx - 1); j0 = clamp(j0 - 1, 0, B.ny - 1); i1 = clamp(i1 + 1, 0, B.nx - 1); j1 = clamp(j1 + 1, 0, B.ny - 1);
+  for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) { const k = j * B.nx + i; bdY[k] = bdAt(B.x0 + i * B.c, B.z0 + j * B.c); P[k * 3 + 1] = bdY[k]; }
+  for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) { const k = j * B.nx + i, Y = bdY, l = Y[i > 0 ? k - 1 : k], r = Y[i < B.nx - 1 ? k + 1 : k], u = Y[j > 0 ? k - B.nx : k], d = Y[j < B.ny - 1 ? k + B.nx : k];
+    const sx = (l - r) / (2 * B.c), sz = (u - d) / (2 * B.c), L = Math.hypot(sx, 1, sz); N[k * 3] = sx / L; N[k * 3 + 1] = 1 / L; N[k * 3 + 2] = sz / L;
+    const y = Y[k], si = B.sf[k] || BD.bdAuto(B, y, bdSlope(i, j)); bdTmp.copy(bdSurf[si] || bdSurf[1]).multiplyScalar(0.92 + 0.16 * MD.hash2(i, j));
+    if (B.sea != null && y < B.sea) bdTmp.lerp(bdSeaC, clamp((B.sea - y) / 6, 0, 1) * 0.7);
+    Cc[k * 3] = bdTmp.r; Cc[k * 3 + 1] = bdTmp.g; Cc[k * 3 + 2] = bdTmp.b; }
+  g.attributes.position.needsUpdate = g.attributes.normal.needsUpdate = g.attributes.color.needsUpdate = true; need();
+}
+function bdSea() {
+  if (bdWater) { gBd.remove(bdWater); bdWater.geometry.dispose(); bdWater = null; } const B = M.bd; if (!B || B.sea == null) return;
+  const w = (B.nx - 1) * B.c, h = (B.ny - 1) * B.c; bdWater = new THREE.Mesh(new THREE.PlaneGeometry(w, h).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#2c6a80', roughness: 0.25, metalness: 0.1, transparent: true, opacity: 0.82 }));
+  bdWater.position.set(B.x0 + w / 2, B.sea, B.z0 + h / 2); bdWater.renderOrder = 2; gBd.add(bdWater);
+}
+function bdStacks() {
+  if (bdStk) { gBd.remove(bdStk); bdStk.traverse(o => { if (o.isMesh) o.geometry.dispose(); }); bdStk = null; } const B = M.bd; if (!B || !B.st.length) return;
+  bdStk = new THREE.Group(); const base = B.sea != null ? B.sea : 0, m = new THREE.MeshLambertMaterial({ color: '#5a554e', flatShading: true });
+  for (const s of B.st) { const c = new THREE.Mesh(new THREE.CylinderGeometry(s.r * 0.75, s.r, s.h + 6, 9, 3), m); c.position.set(s.x, base - 6 + (s.h + 6) / 2, s.z); bdStk.add(c); }
+  gBd.add(bdStk);
+}
+function bdTreesBuild() {
+  if (bdTrees) { gBd.remove(bdTrees); bdTrees.geometry.dispose(); bdTrees = null; } const B = M.bd; if (!B) return;
+  const P = BD.bdTreePts(B, M, bdAt, 9000); if (!P.length) return; const n = P.length / 3;
+  const geo = new THREE.ConeGeometry(2.4, 9, 6).translate(0, 4.5, 0);
+  bdTrees = new THREE.InstancedMesh(geo, new THREE.MeshLambertMaterial({ color: '#2c4a2a', flatShading: true }), n); const m4 = new THREE.Matrix4();
+  for (let i = 0; i < n; i++) { const s = P[i * 3 + 2]; bdTrees.setMatrixAt(i, m4.makeScale(s, s, s).setPosition(P[i * 3], bdAt(P[i * 3], P[i * 3 + 1]) - 0.3, P[i * 3 + 1])); }
+  bdTrees.frustumCulled = false; gBd.add(bdTrees); need();
+}
+function bdHit() {   // ray march over the backdrop + map ground
+  if (!M.bd) return groundHit();
+  const o = ray.ray.origin, d = ray.ray.direction, ox = o.x + M.W / 2, oz = o.z + M.H / 2, B = M.bd, maxT = cam.dist * 4 + 3000; let t = 0, pt = 0;
+  const inG = (x, z) => x >= B.x0 && z >= B.z0 && x <= B.x0 + (B.nx - 1) * B.c && z <= B.z0 + (B.ny - 1) * B.c;
+  const top = (x, z) => BD.bdOut(M, x, z) < 0 ? MD.gh(M, x, z) : Math.max(bdAt(x, z), B.sea != null ? B.sea : -1e9);
+  const below = t => { const x = ox + d.x * t, z = oz + d.z * t; if (!inG(x, z)) return false; return o.y + d.y * t <= top(x, z); };
+  for (; t < maxT; pt = t, t += Math.max(0.5, t * 0.01)) if (below(t)) { let a = pt, b = t; for (let i = 0; i < 14; i++) { const m = (a + b) / 2; if (below(m)) b = m; else a = m; }
+    const x = ox + d.x * b, z = oz + d.z * b; return { x, z, y: top(x, z), t: b, on: 'bd' }; }
+  return null;
+}
+function bdRange(x, z, R) { const B = M.bd; return [clamp(Math.floor((x - R - B.x0) / B.c), 0, B.nx - 1), clamp(Math.floor((z - R - B.z0) / B.c), 0, B.ny - 1), clamp(Math.ceil((x + R - B.x0) / B.c), 0, B.nx - 1), clamp(Math.ceil((z + R - B.z0) / B.c), 0, B.ny - 1)]; }
+function bdBrush(dt, inv) {
+  const h = hover, B = M.bd; if (!h || !B || !stroke) return;
+  const R = opt.brad, [i0, j0, i1, j1] = bdRange(h.x, h.z, R), a = B.hg, nx = B.nx, mode = opt.bm, s = opt.bstr; let src = null; if (mode === 'smooth') src = a.slice();
+  for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+    const d = Math.hypot(B.x0 + i * B.c - h.x, B.z0 + j * B.c - h.z), f = falloff(d, R); if (f <= 0) continue; const k = j * nx + i;
+    if (mode === 'up' || mode === 'down') a[k] += ((mode === 'up') !== inv ? 1 : -1) * s * 3 * f * dt;
+    else if (mode === 'smooth') { let t = 0, n = 0; for (let y = -1; y <= 1; y++) for (let x = -1; x <= 1; x++) { const X = i + x, Y = j + y; if (X < 0 || Y < 0 || X >= nx || Y >= B.ny) continue; t += src[Y * nx + X]; n++; } a[k] += (t / n - a[k]) * Math.min(1, f * s * dt * 1.6); }
+    else if (mode === 'flat') a[k] += (stroke.h0 - a[k]) * Math.min(1, f * s * dt * 1.4);
+    else if (mode === 'set') a[k] += (opt.bh - a[k]) * Math.min(1, f * s * dt * 3);
+    else if (mode === 'noise') a[k] += (MD.vnoise(i * 0.31 + stroke.seed, j * 0.31) + 0.5 * MD.vnoise(i * 0.8, j * 0.8 + stroke.seed) - 0.75) * (inv ? -1 : 1) * s * 2 * f * dt;
+    else if (mode === 'paint') { if (d < R * (opt.soft ? 0.86 + 0.28 * MD.hash2(i + 7, j + 3) : 1)) B.sf[k] = inv ? 0 : opt.bs; }
+    else if (mode === 'tree') { const tg = inv ? 0 : opt.btd; B.tr[k] = clamp(Math.round(B.tr[k] + (tg - B.tr[k]) * Math.min(1, f * dt * 5)), 0, 255); }
+    a[k] = clamp(a[k], -200, 600);
+  }
+  updBd(i0, j0, i1, j1); stroke.moved = 1;
+  if (mode === 'tree' && performance.now() - bdTT > 250) { bdTT = performance.now(); bdTreesBuild(); }
+}
+function bdStackClick(inv) {
+  const B = M.bd, h = hover; if (!B || !h) return; pushUndo('b');
+  if (inv) { let bi = -1, bd = 1e9; B.st.forEach((s, i) => { const d = Math.hypot(s.x - h.x, s.z - h.z) - s.r; if (d < bd) { bd = d; bi = i; } }); if (bi >= 0 && bd < 12) B.st.splice(bi, 1); }
+  else B.st.push({ x: +h.x.toFixed(1), z: +h.z.toFixed(1), r: opt.sr, h: opt.sh });
+  const [i0, j0, i1, j1] = bdRange(h.x, h.z, 60); updBd(i0, j0, i1, j1); bdStacks(); changed();
+}
+function bdCreate(pre, seed) {
+  pushUndo('b'); const B = M.bd ? Object.assign(BD.bdNew(M, { E: M.bd.E, c: M.bd.c }), { look: M.bd.look }) : BD.bdNew(M); BD.bdGen(B, M, pre, seed); M.bd = B; buildBd(); applySky(); renderOpts(); changed();
+}
+function bdOpts(b) {   // Settings panel of the Backdrop tool
+  const B = M.bd;
+  b.append(h3('Start From Preset'), el('div', { class: 'row' }, el('label', null, 'Preset'), el('select', { class: 'tl-sel', onchange: e => { opt.bpre = e.target.value; }, html: BD.BD_PRESETS.map(([k, n]) => `<option value="${k}"${k === opt.bpre ? ' selected' : ''}>${n}</option>`).join('') })),
+    slider('Variation (seed)', 'bseed', 1, 20, 1),
+    el('button', { class: 'tl-btn pri', style: 'width:100%;margin:4px 0', onclick: () => { if (B && !confirm('Replace the whole backdrop with this preset? (Undo works)')) return; bdCreate(opt.bpre, opt.bseed); } }, B ? '↻ Rebuild From Preset' : '＋ Create Backdrop'),
+    el('p', { class: 'note' }, 'Covers the map + 600 m on every side (5 m grid) • inside the play area nothing is drawn; near the edge it meets your map ground • no collision'));
+  if (!B) return;
+  b.append(h3('Mode'), seg([['up', 'Raise'], ['down', 'Lower'], ['smooth', 'Smooth'], ['flat', 'Flatten', 'Pull to the height where the drag started'], ['set', 'Set Height'], ['noise', 'Noise'], ['paint', 'Paint'], ['tree', 'Trees'], ['stack', 'Sea Stack']], opt.bm, v => { opt.bm = v; renderOpts(); need(); }));
+  if (opt.bm === 'stack') b.append(slider('Radius', 'sr', 2, 30, 0.5), slider('Height above sea', 'sh', 2, 80, 1), el('p', { class: 'note' }, 'Click = add a rock pillar • Shift+click = remove the nearest'));
+  else {
+    b.append(h3('Brush'), slider('Size (radius m)', 'brad', 3, 400, 1), opt.bm !== 'paint' ? slider(opt.bm === 'tree' ? 'Speed' : 'Strength', 'bstr', 0.5, 20, 0.5) : null, check('Soft Edge', 'soft'));
+    if (opt.bm === 'set') b.append(slider('Height (m)', 'bh', -80, 300, 1));
+    if (opt.bm === 'paint') b.append(pal(BD.BSURF, opt.bs, i => { opt.bs = i; renderOpts(); }), el('p', { class: 'note' }, 'Shift = back to Auto (grass on flat, rock on steep, sand at the water, snow up high)'));
+    if (opt.bm === 'tree') b.append(slider('Density (0–255)', 'btd', 10, 255, 5), el('p', { class: 'note' }, 'Drag = grow trees toward this density • Shift = clear • no trees under water or on cliffs'));
+  }
+  const sea = el('input', { type: 'checkbox', checked: B.sea != null, onchange: () => { pushUndo('b'); B.sea = sea.checked ? (opt.seaL != null ? opt.seaL : -2) : null; bdAfter(); } });
+  const lv = el('input', { class: 'tl-in', type: 'number', step: 0.5, value: B.sea != null ? B.sea : (opt.seaL != null ? opt.seaL : -2), style: 'width:70px', onchange: e => { pushUndo('b'); opt.seaL = +e.target.value; if (B.sea != null) B.sea = opt.seaL; bdAfter(); } });
+  b.append(h3('Water'), el('div', { class: 'row' }, el('label', { class: 'chk' }, sea, 'Sea / lake level'), lv), el('p', { class: 'note' }, 'Everything lower than this level is water (waves + foam on the shore in the game)'),
+    h3('Look'), el('div', { class: 'row' }, el('label', null, 'Sky'), el('select', { class: 'tl-sel', onchange: e => { pushUndo('b'); B.look = e.target.value; changed(); }, html: BD.BD_LOOK.map(([k, n]) => `<option value="${k}"${k === (B.look || '') ? ' selected' : ''}>${n}</option>`).join('') })),
+    check('Show Backdrop', 'bd', show, () => { gBd.visible = show.bd; applySky(); camApply(); }),
+    check('Use in Game', 'on', B, () => changed()),
+    el('button', { class: 'tl-btn', style: 'width:100%;margin-top:6px', onclick: () => { if (!confirm('Delete the backdrop? (Undo works)')) return; pushUndo('b'); M.bd = null; buildBd(); applySky(); renderOpts(); changed(); } }, '✕ Delete Backdrop'));
+}
+function bdAfter() { const B = M.bd; updBd(0, 0, B.nx - 1, B.ny - 1); bdSea(); bdStacks(); bdTreesBuild(); renderOpts(); changed(); }
+const bdLim = () => M.bd && show.bd ? { x0: M.bd.x0, z0: M.bd.z0, x1: M.bd.x0 + (M.bd.nx - 1) * M.bd.c, z1: M.bd.z0 + (M.bd.ny - 1) * M.bd.c, d: 3200 } : { x0: -20, z0: -20, x1: M.W + 20, z1: M.H + 20, d: 900 };
+
 // ================= helpers drawn in the view =================
 const ringGeo = new THREE.BufferGeometry(); ringGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(65 * 3), 3));
 const ring = new THREE.Line(ringGeo, new THREE.LineBasicMaterial({ color: 0xffffff, depthTest: false, transparent: true, opacity: 0.9 })); ring.renderOrder = 10; ring.frustumCulled = false; gHelp.add(ring);
@@ -464,9 +576,9 @@ const lineGeo = new THREE.BufferGeometry(); const line = new THREE.Line(lineGeo,
 const gHandles = new THREE.Group(); gHelp.add(gHandles);
 let ghost = null, ghostKey = '';
 function drawRing() {
-  const on = hover && (tool === 'sculpt' || tool === 'paint' || tool === 'scatter'); ring.visible = !!on; if (!on) return;
-  const P = ringGeo.attributes.position.array, R = opt.rad;
-  for (let i = 0; i <= 64; i++) { const a = i / 64 * 6.2832, x = clamp(hover.x + Math.cos(a) * R, 0, M.W), z = clamp(hover.z + Math.sin(a) * R, 0, M.H); P[i * 3] = x; P[i * 3 + 1] = MD.gh(M, x, z) + 0.12; P[i * 3 + 2] = z; }
+  const on = hover && (tool === 'sculpt' || tool === 'paint' || tool === 'scatter' || (tool === 'bd' && M.bd && opt.bm !== 'stack')); ring.visible = !!on; if (!on) return;
+  const P = ringGeo.attributes.position.array, R = tool === 'bd' ? opt.brad : opt.rad;
+  for (let i = 0; i <= 64; i++) { const a = i / 64 * 6.2832; let x = hover.x + Math.cos(a) * R, z = hover.z + Math.sin(a) * R, y; if (tool === 'bd') y = Math.max(bdAt(x, z), M.bd.sea != null ? M.bd.sea : -1e9) + 0.6; else { x = clamp(x, 0, M.W); z = clamp(z, 0, M.H); y = MD.gh(M, x, z) + 0.12; } P[i * 3] = x; P[i * 3 + 1] = y; P[i * 3 + 2] = z; }
   ringGeo.attributes.position.needsUpdate = true;
 }
 function drawLine(pts) {   // [[x,z],[x,z]…] draped on the ground; null = hide
@@ -524,7 +636,7 @@ function protoObj(x, z) {
 }
 
 // ================= pointer =================
-function updHover(e) { setRay(e); hover = (tool === 'place' || tool === 'floor' || tool === 'wall' || tool === 'pnl' || tool === 'scatter' || tool === 'castle') ? surfHit() : groundHit(); if (hover && tool === 'scatter') hover.y = MD.gh(M, hover.x, hover.z); }
+function updHover(e) { setRay(e); if (tool === 'bd') { hover = bdHit(); return; } hover = (tool === 'place' || tool === 'floor' || tool === 'wall' || tool === 'pnl' || tool === 'scatter' || tool === 'castle') ? surfHit() : groundHit(); if (hover && tool === 'scatter') hover.y = MD.gh(M, hover.x, hover.z); }
 function placeObj(h, extra) {
   if (opt.obj.startsWith('room:')) { const r = { id: nid(), ref: opt.obj.slice(5), x: snapV(h.x), z: snapV(h.z), rot: Math.round(ghostRot / (Math.PI / 2)) * (Math.PI / 2) };
     M.rooms.push(r); sel = { k: 'room', id: r.id }; loadRooms().then(() => { syncRooms(); renderSide(); }); return r; }
@@ -567,6 +679,7 @@ cv.addEventListener('pointerdown', e => {
   if (e.button === 2 || e.button === 1 || (e.button === 0 && (spaceDown || (tool === 'select' && gmode === 'hand')))) { drag = { k: e.button === 2 ? 'orbit' : 'pan', x: e.clientX, y: e.clientY }; return; }
   if (e.button !== 0) return;
   const inv = e.shiftKey;
+  if (tool === 'bd') { if (!hover || !M.bd) return; if (opt.bm === 'stack') { bdStackClick(inv); return; } pushUndo('b'); stroke = { k: 'bd', inv, h0: BD.bdRaw(M.bd, hover.x, hover.z), seed: Math.random() * 99 }; bdBrush(0.016, inv); return; }
   if (tool === 'sculpt') {
     if (!hover) return;
     if (opt.smode === 'ramp') { drag = { k: 'ramp', a: { x: hover.x, z: hover.z } }; return; }
@@ -619,7 +732,7 @@ cv.addEventListener('pointermove', e => {
   if (drag && (drag.k === 'orbit' || drag.k === 'pan')) {
     const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY;
     if (drag.k === 'orbit') { cam.yaw -= dx * 0.006; cam.pitch += dy * 0.005; }
-    else { const s = cam.dist * 0.0016, c = Math.cos(cam.yaw), sn = Math.sin(cam.yaw); cam.x -= (dx * c + dy * sn) * s; cam.z -= (-dx * sn + dy * c) * s; cam.x = clamp(cam.x, -20, M.W + 20); cam.z = clamp(cam.z, -20, M.H + 20); }
+    else { const s = cam.dist * 0.0016, c = Math.cos(cam.yaw), sn = Math.sin(cam.yaw); cam.x -= (dx * c + dy * sn) * s; cam.z -= (-dx * sn + dy * c) * s; { const L = bdLim(); cam.x = clamp(cam.x, L.x0, L.x1); cam.z = clamp(cam.z, L.z0, L.z1); } }
     camApply(); return;
   }
   updHover(e); status();
@@ -644,6 +757,7 @@ cv.addEventListener('pointerup', e => {
   if (drag && drag.k === 'ramp') { if (hover && Math.hypot(hover.x - drag.a.x, hover.z - drag.a.z) > 1) { pushUndo('t'); applyRamp(drag.a, hover, opt.rad * 2); afterTerrain(); } drawLine(null); }
   else if (drag && drag.k === 'floor') { makeFloor(drag.a, hover || drag.a); drawLine(null); }
   else if (drag && (drag.k === 'move' || drag.k === 'pt' || drag.k === 'fpt') && drag.moved) { changed(); colDirty(); renderSide(); }
+  if (stroke && stroke.k === 'bd') { bdTreesBuild(); changed(); stroke = null; }
   if (stroke) { if (stroke.k !== 'scatter' && stroke.moved) afterTerrain(); else if (stroke.k === 'scatter') { changed(); colDirty(); } stroke = null; }
   if (drag && drag.k === 'orbit') fly.clear();
   drag = null; need();
@@ -651,6 +765,7 @@ cv.addEventListener('pointerup', e => {
 cv.addEventListener('pointerleave', () => { hover = null; need(); });
 cv.addEventListener('dblclick', () => { if ((tool === 'wall' || tool === 'pnl') && draft) { draft.pts.pop(); finishWall(false); } else if (tool === 'castle' && fdraft) { fdraft.pts.pop(); finishFree(); } });
 cv.addEventListener('wheel', e => { e.preventDefault();
+  if (e.shiftKey && tool === 'bd') { opt.brad = clamp(Math.round(opt.brad * (e.deltaY > 0 ? 0.9 : 1.11)), 3, 400); renderOpts(); need(); return; }
   if (e.shiftKey && (tool === 'sculpt' || tool === 'paint' || tool === 'scatter')) { opt.rad = clamp(+(opt.rad * (e.deltaY > 0 ? 0.9 : 1.11)).toFixed(1), 0.5, 40); renderOpts(); need(); return; }
   if (e.shiftKey && (tool === 'place' || tool === 'castle')) { ghostRot += (e.deltaY > 0 ? 1 : -1) * (tool === 'castle' ? Math.PI / 4 : Math.PI / 12); need(); return; }
   cam.dist *= e.deltaY > 0 ? 1.12 : 0.89; camApply(); }, { passive: false });
@@ -847,6 +962,7 @@ addEventListener('keydown', e => {
   else if (k === 't') { cam.pitch = 1.55; cam.yaw = 0; camApply(); }
   else if (k === 'f') frameSel();
   else if (k === ',' || k === '.' || k === '<' || k === '>') { const cst = tool === 'castle' || (sel && sel.k === 'part'), a = (k === ',' || k === '<' ? 1 : -1) * (cst ? (e.shiftKey ? Math.PI / 12 : Math.PI / 4) : (e.shiftKey ? Math.PI / 36 : Math.PI / 12)); if (tool === 'place' || tool === 'floor' || tool === 'castle') { ghostRot += a; need(); } else rotSel(a); }
+  else if ((k === '[' || k === ']') && tool === 'bd') { opt.brad = clamp(Math.round(opt.brad * (k === '[' ? 0.85 : 1.18)), 3, 400); renderOpts(); need(); }
   else if (k === '[' || k === ']') { if (tool === 'sculpt' || tool === 'paint' || tool === 'scatter') { opt.rad = clamp(+(opt.rad * (k === '[' ? 0.85 : 1.18)).toFixed(1), 0.5, 40); renderOpts(); } else scaleSel(k === '[' ? 0.9 : 1.1); need(); }
   else if (k === 'end') { e.preventDefault(); snapGround(); }
   else if (k === 'pageup' || k === 'pagedown') { e.preventDefault(); liftSel((k === 'pageup' ? 1 : -1) * (e.shiftKey ? 0.05 : 0.25)); }
@@ -953,10 +1069,11 @@ const TOOLS = [['select', '⬚', 'Select', 'v', 'Click to select, drag to move �
   ['floor', '▭', 'Upper Floor', 'l', 'Drag from A to B = bridge/ramp joining two points • plain click = standard platform • walkable underneath if height ≥ 2.8'],
   ['castle', '♜', 'Castle', 'c', 'Pick a piece, then click to place • , . rotate 45° (Shift = 15°) or Shift+wheel • piece ends snap together • click on top of a wall/walkway = place at that height • use Select to move/resize'],
   ['place', '◈', 'Place', 'o', 'Click to place • , . or Shift+wheel = rotate • can be placed on upper floors'],
+  ['bd', '🌊', 'Backdrop', 'j', 'Backdrop = land/sea outside the play area (drawn in the game, no collision) • pick a mode in Settings, drag to sculpt/paint/plant • Shift = invert • Shift+wheel or [ ] = brush size • Sea Stack: click = add, Shift+click = remove'],
   ['scatter', '⁘', 'Scatter', 'g', 'Drag to scatter the chosen item (trees, rocks, grass) • Shift = remove items in the circle'],
 ];
 const HINT = Object.fromEntries(TOOLS.map(t => [t[0], t[4]]));
-function setTool(t) { if (draft) { draft = null; undo.pop(); drawLine(null); } if (fdraft) { fdraft = null; undo.pop(); drawLine(null); } tool = t; if (t === 'scatter' && !isVisualType(opt.obj)) { const a = KIT.list.find(a => a.cat === 'tree'); if (a) { opt.obj = 'kit:' + a.id; opt.cat = 'tree'; } } renderTools(); renderOpts(); drawHandles(); $('hint').textContent = HINT[t] || ''; placeGizmo(); need(); }
+function setTool(t) { const wasBd = tool === 'bd'; setTimeout(() => { if (M && (wasBd || t === 'bd')) applySky(); }, 0); if (draft) { draft = null; undo.pop(); drawLine(null); } if (fdraft) { fdraft = null; undo.pop(); drawLine(null); } tool = t; if (t === 'scatter' && !isVisualType(opt.obj)) { const a = KIT.list.find(a => a.cat === 'tree'); if (a) { opt.obj = 'kit:' + a.id; opt.cat = 'tree'; } } renderTools(); renderOpts(); drawHandles(); $('hint').textContent = HINT[t] || ''; placeGizmo(); need(); }
 function renderTools() { const box = $('tools'); box.textContent = ''; for (const t of TOOLS) box.append(el('button', { class: tool === t[0] ? 'on' : '', title: t[2] + ' (' + t[3].toUpperCase() + ')', onclick: () => setTool(t[0]) }, el('b', null, t[1]))); const T = TOOLS.find(x => x[0] === tool); if ($('optTitle')) $('optTitle').textContent = '⚙ ' + (T ? T[2] : '') + ' Settings'; }
 const h3 = t => el('h3', null, t);
 function seg(items, cur, on) { const d = el('div', { class: 'seg' }); for (const [v, n, tip] of items) d.append(el('button', { class: 'tl-btn' + (v === cur ? ' on' : ''), title: tip || '', onclick: () => on(v) }, n)); return d; }
@@ -997,7 +1114,8 @@ function renderOpts() {
     b.append(h3('Preset'), pal(MD.FLOOR_PRESET, opt.floor, i => { opt.floor = i; opt.fw = MD.FLOOR_PRESET[i].w; renderOpts(); }, 'one'), h3('Settings'), slider('Width', 'fw', 1, 30, 0.5), slider('Height Above Ground', 'fh', 0.5, 15, 0.25),
       MD.FLOOR_PRESET[opt.floor].ramp ? null : check('Drag across: height of the higher end', 'fauto'),
       el('p', { class: 'note', html: MD.FLOOR_PRESET[opt.floor].ramp ? 'Drag from the low end to the high end: a ramp joining the two heights (the top end can sit on a platform)<br>walkable if not steeper than 1.6 per 1' : 'Drag from A to B = bridge spanning both sides • upper floor edges can be stepped onto if no higher than 1.1' }));
-  } else if (tool === 'place' || tool === 'scatter') {
+  } else if (tool === 'bd') bdOpts(b);
+  else if (tool === 'place' || tool === 'scatter') {
     if (tool === 'scatter') b.append(h3('Scatter'), slider('Size (radius)', 'rad', 0.5, 40, 0.5), slider('Density', 'dens', 0.5, 12, 0.5), slider('Random Scale ±', 'rscale', 0, 0.6, 0.05));
     b.append(check('Random Rotation', 'rrot'));
     const cats = tool === 'scatter' ? CATS.filter(c => !['sys', 'game', 'mode', 'prefab', 'room', 'deco'].includes(c[0])) : CATS;
@@ -1149,7 +1267,7 @@ function applySky() {
   const s = show.sky ? M.sky : 'studio', fog = M.fog || fogDef();
   if (s === 'studio') { scene.background = new THREE.Color(css('--bg0') || '#161616'); scene.fog = null; hemi.color.set('#ffffff'); hemi.groundColor.set('#50545c'); hemi.intensity = 1.4; sun.intensity = 2.2; sun.color.set('#ffffff'); }
   else { const night = s === 'night' || s === 'indoor';
-    scene.background = new THREE.Color(fog[0]); scene.fog = new THREE.Fog(fog[0], +fog[1], +fog[2] * 1.6);
+    scene.background = new THREE.Color(fog[0]); scene.fog = new THREE.Fog(fog[0], +fog[1], +fog[2] * 1.6); if (tool === 'bd' || (M.bd && M.bd.on && show.bd)) { scene.fog.near *= 2.5; scene.fog.far *= 2.5; }
     if (night) { hemi.color.set('#a8b8e8'); hemi.groundColor.set('#2a3448'); hemi.intensity = 0.9; sun.intensity = 1.2; sun.color.set('#c8d8ff'); }
     else { hemi.color.set(s === 'sunset' ? '#ffd0a0' : '#ffe8d0'); hemi.groundColor.set('#4a5a2a'); hemi.intensity = 1.1; sun.intensity = s === 'sunset' ? 1.9 : 2.4; sun.color.set(s === 'sunset' ? '#ffc890' : '#fff0dc'); } }
   need();
@@ -1176,7 +1294,7 @@ async function openMap(id) {
 }
 function setMap(m) {
   M = m; sel = null; msel = []; undo = []; redo = []; draft = null; PNT.br.clear(); dirty = false; GD = null;
-  buildTerrain(); applySky(); syncAll(); fit(); renderList(); renderSide(); renderOpts();
+  buildTerrain(); buildBd(); applySky(); syncAll(); fit(); renderList(); renderSide(); renderOpts();
   if (M.rooms && M.rooms.length) loadRooms().then(() => { if (M === m) { syncAll(); renderSide(); } });   // room prefabs (room-*.json)
   for (const o of M.objs) if (isKit(o)) kitTpl(kitId(o)).then(() => { clearTimeout(setMap.t); setMap.t = setTimeout(() => { if (M === m) { syncObjs(); updSel(); colDirty(); } }, 60); });
   $('vmsg').textContent = '';
@@ -1203,12 +1321,12 @@ function newDlg() {
 function resizeDlg() {
   const v = { W: M.W, H: M.H }, body = el('div'); for (const [l, k] of [['Width (m)', 'W'], ['Length (m)', 'H']]) { const i = el('input', { class: 'tl-in', type: 'number', min: 30, max: 260, value: v[k], oninput: () => { v[k] = +i.value; } }); body.append(el('div', { class: 'row' }, el('label', null, l), i)); }
   body.append(el('p', { class: 'note' }, 'Existing content stays centred; grow = edge ground is stretched, shrink = the excess is cut (↶ undo works)'));
-  dlg('Resize Map', body, 'OK', () => { const W = clamp(Math.round(v.W), 30, 260), H = clamp(Math.round(v.H), 30, 260); pushUndo('a'); MD.resize(M, W, H); buildTerrain(); syncAll(); fit(); renderSide(); changed(); });
+  dlg('Resize Map', body, 'OK', () => { const W = clamp(Math.round(v.W), 30, 260), H = clamp(Math.round(v.H), 30, 260); pushUndo('a'); MD.resize(M, W, H); buildTerrain(); buildBd(); syncAll(); fit(); renderSide(); changed(); });
 }
 
 // ================= export to the game =================
 function groundExport() {   // ground mesh for the .glb: vertex colours (no overlay), optional coarser step, skirt beyond the play area
-  const { nx, ny } = M, step = nx * ny > 400000 ? 4 : nx * ny > 70000 ? 2 : 1, cols = Math.floor((nx - 1) / step) + 1, rows = Math.floor((ny - 1) / step) + 1, sk = M.skirt > 0 ? 1 : 0, CC = cols + sk * 2, RR = rows + sk * 2, n = CC * RR;
+  const { nx, ny } = M, step = nx * ny > 400000 ? 4 : nx * ny > 70000 ? 2 : 1, cols = Math.floor((nx - 1) / step) + 1, rows = Math.floor((ny - 1) / step) + 1, sk = M.skirt > 0 && !(M.bd && M.bd.on) ? 1 : 0, CC = cols + sk * 2, RR = rows + sk * 2, n = CC * RR;
   const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), col = new Uint8Array(n * 4), idx = n > 65535 ? new Uint32Array((CC - 1) * (RR - 1) * 6) : new Uint16Array((CC - 1) * (RR - 1) * 6), tmp = [0, 0, 0];
   for (let r = 0; r < RR; r++) for (let c = 0; c < CC; c++) {
     const k = r * CC + c, gi = clamp((c - sk) * step, 0, nx - 1), gj = clamp((r - sk) * step, 0, ny - 1), out = c < sk || r < sk || c >= CC - sk || r >= RR - sk;
@@ -1263,10 +1381,10 @@ function need() { dirtyView = true; }
 function status() { $('sPos').textContent = hover ? `x ${hover.x.toFixed(1)}  z ${hover.z.toFixed(1)}  height ${hover.y.toFixed(2)}` : '–'; }
 function frame(t) {
   requestAnimationFrame(frame); const dt = Math.min(0.05, (t - last) / 1000); last = t; if (!M) return;
-  if (stroke) { if (stroke.k === 'sculpt') sculpt(dt, stroke.inv); else if (stroke.k === 'paint') paintSurf(stroke.inv); else scatter(dt, stroke.inv); dirtyView = true; }
+  if (stroke) { if (stroke.k === 'bd') bdBrush(dt, stroke.inv); else if (stroke.k === 'sculpt') sculpt(dt, stroke.inv); else if (stroke.k === 'paint') paintSurf(stroke.inv); else scatter(dt, stroke.inv); dirtyView = true; }
   const w = host.clientWidth, h = host.clientHeight; if (cv.width !== Math.round(w * renderer.getPixelRatio()) || cv.height !== Math.round(h * renderer.getPixelRatio())) { renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); dirtyView = true; }
   if (fly.size && drag && drag.k === 'orbit') { camera.getWorldDirection(v3); v3.y = 0; v3.normalize(); const sp = Math.max(8, cam.dist * 0.9) * dt * (fly.fast ? 3 : 1), fw = (fly.has('KeyW') ? 1 : 0) - (fly.has('KeyS') ? 1 : 0), rt = (fly.has('KeyD') ? 1 : 0) - (fly.has('KeyA') ? 1 : 0);
-    cam.x = clamp(cam.x + (v3.x * fw - v3.z * rt) * sp, -20, M.W + 20); cam.z = clamp(cam.z + (v3.z * fw + v3.x * rt) * sp, -20, M.H + 20); if (fly.has('KeyE')) cam.dist *= 1 + dt; if (fly.has('KeyQ')) cam.dist = Math.max(3, cam.dist * (1 - dt * 0.9)); camApply(); }
+    { const L = bdLim(); cam.x = clamp(cam.x + (v3.x * fw - v3.z * rt) * sp, L.x0, L.x1); cam.z = clamp(cam.z + (v3.z * fw + v3.x * rt) * sp, L.z0, L.z1); } if (fly.has('KeyE')) cam.dist *= 1 + dt; if (fly.has('KeyQ')) cam.dist = Math.max(3, cam.dist * (1 - dt * 0.9)); camApply(); }
   if (!dirtyView) return; dirtyView = false;
   drawRing(); updGhost(); updPartGhost(); gCol.visible = show.col; renderer.render(scene, camera);
 }

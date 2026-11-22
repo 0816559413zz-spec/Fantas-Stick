@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-22 Map Builder: new Backdrop tool (🌊, key J) to build the scenery outside the play area: start from a preset (sea-cliff headland, island, mountain valley, hills & fields, lakeside, flat), then raise/lower/smooth/flatten/set height, paint surfaces (grass, field, rock, sand, dirt, snow or auto), brush tree density, set the sea/lake level (lower ground becomes water with waves and shore foam in the game) and place sea stacks. Optional overcast sky look. The game draws it with the same cliff/sea/tree renderer as Cliff Side Castle; nothing collides.
+
 - 2026-11-22 Cliff Side Castle backdrop, round 2 (user: not realistic, not continuous, odd sky): the sky is now a cloud shader (thick overcast deck, horizon fading into the fog) instead of a picture, so looking up no longer shows rings; the forest end of the map now joins the mainland (no sea gap), the mainland has pine woods and field patches in softer greens; the cliff face has buttresses and crevices with shading.
 
 - 2026-11-22 Cliff Side Castle backdrop: the castle now sits on a headland with 40 m sea cliffs (rock strata, grass lip, boulders at the foot), sea stacks, far cliff headlands and fields to the west behind the attackers. The sea moves (swells, foam breaking on the rocks, whitecaps) and fades into an overcast grey sky and fog. New `js/67-coast.js`; a backdrop entry can now give `coast` (shape) and `look` (sky/fog/light), applied by `backdropLook` each time the map is built.

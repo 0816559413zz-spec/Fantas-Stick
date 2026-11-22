@@ -3,6 +3,7 @@
 // Units: 1 unit = 1 m in the 3D world = 20 game px. Map coords: x east (0..W), z south (0..H), y up. Game px: X = x*20, Y = z*20.
 // Format + rules: guides/MAP-BUILDER.md
 
+import { bdPack, bdUnpack, bdShift } from './backdrop.js';
 export const C = 0.5, PX = 20, NONE = -32768;   // height grid spacing (units) — the game’s collision grid uses the same 0.5
 export const HMIN = -8, HMAX = 40;
 export const TSLOPE = 1.6, TSTEP = 1.1, HEADROOM = 2.8, PR = 0.9;   // game rules (js/05-terrain.js, guides/MAP-DESIGN.md §4) — keep in sync
@@ -102,7 +103,7 @@ const b64d = s => { const b = atob(s), u = new Uint8Array(b.length); for (let i 
 export const i16b64 = a => b64e(new Uint8Array(a.buffer, a.byteOffset, a.byteLength));
 export function pack(M) {   // → plain JSON object (heights as int16 cm, base64)
   const h = new Int16Array(M.hg.length); for (let i = 0; i < h.length; i++) h[i] = Math.round(M.hg[i] * 100);
-  return Object.assign({}, M, { hg: i16b64(h), sf: b64e(M.sf) });
+  const o = Object.assign({}, M, { hg: i16b64(h), sf: b64e(M.sf) }); if (M.bd) o.bd = bdPack(M.bd); else delete o.bd; return o;
 }
 export function unpack(j) {
   const M = Object.assign(newMap({ W: j.W, H: j.H }), j);
@@ -111,6 +112,7 @@ export function unpack(j) {
   M.hg = new Float32Array(n); for (let i = 0; i < n && i < h.length; i++) M.hg[i] = h[i] / 100;
   const s = b64d(j.sf); M.sf = new Uint8Array(n); M.sf.set(s.subarray(0, n));
   for (const k of ['walls', 'floors', 'objs', 'fx', 'parts', 'rooms']) if (!Array.isArray(M[k])) M[k] = [];
+  M.bd = j.bd ? bdUnpack(j.bd) : null;   // backdrop (mapbuild/backdrop.js)
   return M;
 }
 export function resize(M, W, H) {   // keep the content centred
@@ -119,7 +121,7 @@ export function resize(M, W, H) {   // keep the content centred
     const si = clamp(i - ox, 0, M.nx - 1), sj = clamp(j - oy, 0, M.ny - 1);
     N.hg[j * N.nx + i] = M.hg[sj * M.nx + si]; N.sf[j * N.nx + i] = M.sf[sj * M.nx + si];
   }
-  const dx = ox * C, dz = oy * C;
+  const dx = ox * C, dz = oy * C; bdShift(M.bd, dx, dz);
   for (const w of M.walls) for (const p of w.pts) { p[0] += dx; p[1] += dz; }
   for (const o of M.floors.concat(M.objs, M.parts || [])) { o.x += dx; o.z += dz; }
   Object.assign(M, { W, H, nx: N.nx, ny: N.ny, hg: N.hg, sf: N.sf });
@@ -391,6 +393,7 @@ export function gameData(M, dim) {
   if (props.length || !M.autoProps) data.props = props;
   if (M.look) data.look = M.look;   // พรีเซ็ต Look (js/74-look.js) • lt = แสง/ฟ้าเฉพาะแมพ (js/28 buildFileMap) — ตั้งโดยแก้ไฟล์ต้นฉบับตรง ๆ (ยังไม่มีช่องใน Editor)
   if (M.lt) data.lt = M.lt;
+  if (M.bd && M.bd.on) data.bd = bdPack(M.bd);   // backdrop: the game draws it (js/67-coast.js)
   if (M.style) data.style = M.style;
   if (M.style === 'forest-mist' && !M.look) data.look = 'gorge';   // forest look preset (js/74-look.js)
   if (deco.length) data.deco = deco;

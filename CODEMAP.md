@@ -775,19 +775,21 @@ h4UltX:193
 §200 รูปตัวละครเรา (FFA / TDM แทนแผนที่ย่อ)
 H4PF:202 h4PfMode:203 h4PfAvatar:205 h4Portrait:207 h4PfRead:218 h4MapBox:224
 
-## js/67-backdrop.js (140) — ฉากหลังนอกพื้นที่เล่น (ผู้ใช้ 2026-10-28: "ทำ LOD หลอกตาของนอกแมพ ให้รู้สึกว่าแมพกว้าง")
+## js/67-backdrop.js (141) — ฉากหลังนอกพื้นที่เล่น (ผู้ใช้ 2026-10-28: "ทำ LOD หลอกตาของนอกแมพ ให้รู้สึกว่าแมพกว้าง")
 BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
-bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:136 backdropHide:140
+bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:137 backdropHide:141
 
-## js/67-coast.js (204) — Sea-cliff backdrop (user 2026-11-22, ref photo: ruined castle on a grassy headland, ~40 m…
+## js/67-coast.js (258) — Sea-cliff backdrop (user 2026-11-22, ref photo: ruined castle on a grassy headland, ~40 m…
 COAST:10
 §23 2D value noise (deterministic)
 cvN:24 cvF:26
 §27 overcast sky dome (shader: thick cloud deck on a flat layer, horizon …
 COAST_SKY:28 coastSky:29 backdropLook:54
 §64 land shape
-coastShape:65 coastH:90 coastGrid:104 bdCoast:114 coastTrees:190
+coastShape:65 coastH:90
+§103 height sources: one interface for the code coast (BACKDROP.fcs) and M…
+coastSrcProc:106 BD_SURF:112 bdB64:113 bdRle:114 bdHsh:115 bdGridSrc:116 coastGrid:150 bdCoast:160 coastTreePts:241 coastTreeMesh:249
 
 ## js/68-darkness-view.js (1120) — 
 nightWaltzStrip:2 nightWaltzBorder:80 stDarkVeilGround:118 darkFxMesh:195 drawDarknessHud:201 drawDarkHudBar:220 darknessMarkView:227 darkWaveViews:237 darkActiveViews:237 darkViewRoot:238 darkViewTemp:244 darknessClear:256 darkWorldAt:264 darkMarkWind:267 darkMarkLaunch:295 darkMarkContact:307 darkViewNow:320 darkFlowHud:320 darkIdleWeaponPose:321 darkBAGroundImpact:325 darkSettleWeapon:340 darkBlendWeapon:351 darkShowWeaponReturn:374 darkTrailHistory:381 darkDashView:420 darknessCharacter:466 darknessEfx:703 stDarkShieldInk:1000 stDarkVeilBlade:1043 stWardDrainPool:1080
@@ -911,4 +913,4 @@ _dvPanel:95 _dvBtn:98 _dvBody:100 _dvHead:100 devUiApply:102 devFreeMouse:110 de
 §130 rows
 dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:193 devUiAct:200
 
-(114 files, 33688 lines)
+(114 files, 33743 lines)

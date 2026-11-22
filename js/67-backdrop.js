@@ -86,7 +86,8 @@ function bdTree(kind){const parts=[],put=(geo,col,y)=>{geo=geo.toNonIndexed();ge
   const n=parts.reduce((t,q)=>t+q.attributes.position.count,0),P=new Float32Array(n*3),C=new Float32Array(n*3);let o=0;
   for(const q of parts){P.set(q.attributes.position.array,o*3);C.set(q.attributes.color.array,o*3);o+=q.attributes.position.count;q.dispose();}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('color',new THREE.BufferAttribute(C,3));g.computeVertexNormals();return g;}
-function buildBackdrop(id){const B=BACKDROP&&BACKDROP[id];if(!B)return;
+function buildBackdrop(id){const fm=MAPS[id]&&MAPS[id].fm;if(fm&&fm.bd&&fm.bd.on&&fm.bd.hg){const cg=bdCoast(id,{grid:fm.bd});world.add(cg);return cg;}   // Map Builder backdrop (js/67-coast bdGridSrc)
+  const B=BACKDROP&&BACKDROP[id];if(!B)return;
   if(B.coast){const cg=bdCoast(id,B);world.add(cg);return cg;}   // sea cliffs (js/67-coast)
   const g=new THREE.Group();g.name='backdrop';const hx=MW/2*S3+20,hz=MH/2*S3+17,sd=B.seed||1,low=QUAL.mode==='low';
   const L2=new THREE.Vector2(LDIR.x,LDIR.z).normalize(),C=k=>new THREE.Color(k);

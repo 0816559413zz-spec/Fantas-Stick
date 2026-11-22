@@ -51,7 +51,7 @@ function coastSky(){
   COAST_SKY=m;return m;
 }
 // map look (sky / fog / light) — every buildWorld (cached maps too), after setSky
-function backdropLook(id){const B=BACKDROP&&BACKDROP[id],L=B&&B.look;if(typeof FF!=='undefined'){FF.ovc=0;FF.base=null;FF.on=false;}
+function backdropLook(id){const fm=MAPS[id]&&MAPS[id].fm,fb=fm&&fm.bd&&fm.bd.on?fm.bd:null,B=BACKDROP&&BACKDROP[id],L=fb?(fb.look==='overcast'?BACKDROP.fcs.look:null):B&&B.look;if(typeof FF!=='undefined'){FF.ovc=0;FF.base=null;FF.on=false;}
   if(COAST_SKY)COAST_SKY.visible=false;SKY.mesh.visible=true;if(!L)return;   // forest fog blend re-captures its base from this look
   if(L.sky&&typeof FF!=='undefined'&&FF.sky&&FF.sky.parent===world){const U=FF.sky.material.uniforms;FF.ovc=1;   // castle map's own cloud sky → overcast blue-grey everywhere
     U.uK.value=1;FF.sky.visible=false;}   // its cloud sky is replaced by the coast sky dome (FF.ovc still hides the sun)
@@ -100,6 +100,52 @@ function coastH(S,x,z,out){
   if(out){out.sd=Math.min(d,ds);out.d=d;out.t=t;}
   return y;
 }
+// ---------- height sources: one interface for the code coast (BACKDROP.fcs) and Map Builder backdrops (data.bd) ----------
+// src.h(x,z,o) → height (world m) and o.sd (m to the shore, > 0 = water), o.d (land distance for the turf lip), o.w (cliff relief 0..1), o.si (painted surface, 0 = auto)
+// src.sea = sea level or null • src.trees(low) → [x,z,y,scale,…]
+function coastSrcProc(B,hx0,hz0,sk,low){
+  const S=coastShape(B,hx0,hz0,sk),SEA=COAST.sea;
+  return {sea:SEA,S,h(x,z,o){const y=coastH(S,x,z,o);o.w=Math.min(1,Math.max(0,(o.t-y-0.6)/5))*Math.min(1,Math.max(0,(y-SEA+3)/5));o.si=0;return y;},
+    trees(){return coastTreePts(S,hx0,hz0,low);}};
+}
+// Map Builder backdrop grid (mapbuild/backdrop.js — same blend / stack / tree rules)
+const BD_SURF=['#000000','#4f7034','#3a542c','#7d8650','#6a645c','#c8b88a','#6e5a40','#e8edf0'];   // = BSURF in mapbuild/backdrop.js
+function bdB64(s){const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u;}
+function bdRle(s,n){const b=bdB64(s),u=new Uint8Array(n);let p=0;for(let i=0;i+1<b.length&&p<n;i+=2){u.fill(b[i+1],p,Math.min(n,p+b[i]));p+=b[i];}return u;}
+function bdHsh(a,b){let h=Math.imul(a|0,374761393)^Math.imul(b|0,668265263);h=Math.imul(h^(h>>>13),1274126177);return((h^(h>>>16))>>>0)/4294967296;}
+function bdGridSrc(J,hx0,hz0,low){
+  const nx=J.nx,ny=J.ny,n=nx*ny,c=J.c,hb=bdB64(J.hg),h16=new Int16Array(hb.buffer,0,hb.length>>1),hg=new Float32Array(n);for(let i=0;i<n&&i<h16.length;i++)hg[i]=h16[i]/10;
+  const sf=bdRle(J.sf,n),tr=bdRle(J.tr,n),sea=J.sea==null?null:+J.sea,X0=J.x0-hx0,Z0=J.z0-hz0;   // grid origin in world m
+  const st=(J.st||[]).map(q=>({x:q.x-hx0,z:q.z-hz0,r:+q.r,h:+q.h}));
+  // signed shore distance per cell (m, > 0 = water): two-pass chamfer from each side
+  const sd=new Float32Array(n);
+  if(sea!=null){const W=new Uint8Array(n);for(let k=0;k<n;k++)W[k]=hg[k]<sea?1:0;
+    const dist=want=>{const D=new Float32Array(n);for(let k=0;k<n;k++)D[k]=W[k]===want?1e6:0;const a=c,b=c*1.4142;
+      for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const k=j*nx+i;let v=D[k];if(!v)continue;if(i>0)v=Math.min(v,D[k-1]+a);if(j>0){v=Math.min(v,D[k-nx]+a);if(i>0)v=Math.min(v,D[k-nx-1]+b);if(i<nx-1)v=Math.min(v,D[k-nx+1]+b);}D[k]=v;}
+      for(let j=ny-1;j>=0;j--)for(let i=nx-1;i>=0;i--){const k=j*nx+i;let v=D[k];if(!v)continue;if(i<nx-1)v=Math.min(v,D[k+1]+a);if(j<ny-1){v=Math.min(v,D[k+nx]+a);if(i<nx-1)v=Math.min(v,D[k+nx+1]+b);if(i>0)v=Math.min(v,D[k+nx-1]+b);}D[k]=v;}
+      return D;};
+    const dw=dist(1),dl=dist(0);for(let k=0;k<n;k++)sd[k]=W[k]?Math.min(dw[k],5e3)-c*0.5:-(Math.min(dl[k],5e3)-c*0.5);}
+  else sd.fill(-1e3);
+  const bil=(A,x,z)=>{const fx=Math.min(nx-1.001,Math.max(0,(x-X0)/c)),fz=Math.min(ny-1.001,Math.max(0,(z-Z0)/c)),i=fx|0,j=fz|0,u=fx-i,v=fz-j,k=j*nx+i;return (A[k]*(1-u)+A[k+1]*u)*(1-v)+(A[k+nx]*(1-u)+A[k+nx+1]*u)*v;};
+  const edge=(x,z)=>GY(Math.min(MW,Math.max(0,x/S3+MW/2)),Math.min(MH,Math.max(0,z/S3+MH/2)));   // map ground at the nearest edge point (m)
+  const raw=(x,z)=>{let y=bil(hg,x,z);const e=Math.max(Math.abs(x)-hx0,Math.abs(z)-hz0);if(e<12){const t=Math.min(1,Math.max(0,e/12)),q=t*t*(3-2*t);y=edge(x,z)*(1-q)+y*q;}return y;};
+  const stk=(x,z,y,o)=>{let ds=1e9;for(const s of st){const d=Math.hypot(x-s.x,z-s.z)-s.r-(cvN(x*0.25,z*0.25,9)-0.5)*3;if(d<ds)ds=d;if(d<6){const base=sea!=null?sea:y,k=d<0?1:1-d/6,yh=base+s.h*(d<-2?1:0.6+0.4*k)+(cvN(x*0.3,z*0.3,61)-0.5)*3;y=Math.max(y,d<0?yh:base-6+(yh-base+6)*k*k);}}if(o)o.ds=ds;return y;};
+  const src={sea,
+    h(x,z,o){const e=Math.max(Math.abs(x)-hx0,Math.abs(z)-hz0);
+      if(e<-1.5){o.sd=-50;o.d=-50;o.w=0;o.si=0;return edge(x,z)-3;}   // under the real map ground
+      let y=raw(x,z);const sl=Math.max(Math.abs(raw(x+c*0.5,z)-raw(x-c*0.5,z)),Math.abs(raw(x,z+c*0.5)-raw(x,z-c*0.5)))/c;
+      y=stk(x,z,y,o);o.sd=Math.min(bil(sd,x,z),o.ds);o.d=-1e3;
+      o.w=Math.min(1,Math.max(0,(sl-0.8)/0.8))*(sea!=null?Math.min(1,Math.max(0,(y-sea+3)/5)):1);
+      o.si=sf[Math.min(ny-1,Math.max(0,Math.round((z-Z0)/c)))*nx+Math.min(nx-1,Math.max(0,Math.round((x-X0)/c)))];return y;},
+    trees(){const P=[],cap=low?1200:4500,o={},yAt=(x,z)=>src.h(x,z,o),sl=sea!=null?sea:-1e9;
+      for(let j=0;j<ny&&P.length<cap*4;j++)for(let i=0;i<nx;i++){const k=j*nx+i,t=tr[k];if(!t)continue;
+        for(let q=0;q<2;q++){const id=k*2+q;if(bdHsh(id,991)>=t/255*0.8)continue;
+          const x=X0+(i+bdHsh(id,992)-0.5)*c,z=Z0+(j+bdHsh(id,994)-0.5)*c;if(Math.max(Math.abs(x)-hx0,Math.abs(z)-hz0)<8)continue;
+          const y=yAt(x,z);if(y<sl+0.8)continue;if(Math.max(Math.abs(yAt(x+2,z)-yAt(x-2,z)),Math.abs(yAt(x,z+2)-yAt(x,z-2)))/4>1.1)continue;
+          P.push(x,z,y,0.9+bdHsh(id,993)*0.9);if(P.length>=cap*4)break;}}
+      return P;}};
+  return src;
+}
 // ring grid around the play area: t = along a rounded rect perimeter, r = outward along its normal
 function coastGrid(hx0,hz0,sk,low){
   const bx=hx0+sk-2,bz=hz0+sk-2,rc=22,sp=low?6:3.4,ca=low?20:36,pts=[];
@@ -112,28 +158,33 @@ function coastGrid(hx0,hz0,sk,low){
   return {pts,rs};
 }
 function bdCoast(id,B){
-  const hx0=MW/2*S3,hz0=MH/2*S3,fm=MAPS[id]&&MAPS[id].fm,sk=fm&&fm.skirt>0?+fm.skirt:0,low=QUAL.mode==='low',SEA=COAST.sea;
-  const S=coastShape(B,hx0,hz0,sk),{pts,rs}=coastGrid(hx0,hz0,sk,low),NT=pts.length,NR=rs.length,N=NT*NR;
-  const pos=new Float32Array(N*3),sea=new Float32Array(N*3),sdA=new Float32Array(N),ofA=new Float32Array(N),dA=new Float32Array(N),o={};
-  for(let i=0;i<NT;i++){const [px,pz,nx,nz]=pts[i];for(let j=0;j<NR;j++){const k=i*NR+j,x=px+nx*rs[j],z=pz+nz*rs[j],y=coastH(S,x,z,o);
+  const hx0=MW/2*S3,hz0=MH/2*S3,fm=MAPS[id]&&MAPS[id].fm,low=QUAL.mode==='low',sk=B.grid?0:fm&&fm.skirt>0?+fm.skirt:0;
+  const src=B.grid?bdGridSrc(B.grid,hx0,hz0,low):coastSrcProc(B,hx0,hz0,sk,low),SEA=src.sea!=null?src.sea:-1e4,S=src.S;
+  const {pts,rs}=coastGrid(hx0,hz0,sk,low),NT=pts.length,NR=rs.length,N=NT*NR;
+  const pos=new Float32Array(N*3),sea=new Float32Array(N*3),sdA=new Float32Array(N),ofA=new Float32Array(N),dA=new Float32Array(N),siA=new Uint8Array(N),o={};
+  for(let i=0;i<NT;i++){const [px,pz,nx,nz]=pts[i];for(let j=0;j<NR;j++){const k=i*NR+j,x=px+nx*rs[j],z=pz+nz*rs[j],y=src.h(x,z,o);
     // cliff face relief: vertical buttresses + crevices (noise along the coast, slow in height → no folds), pushed along the outward normal
-    const w=Math.min(1,Math.max(0,(o.t-y-0.6)/5))*Math.min(1,Math.max(0,(y-SEA+3)/5)),u=x+z,
+    const w=o.w,u=x+z,
       off=w?((cvF(u*0.045,y*0.012,201,3)-0.5)*7+(cvN(u*0.23,y*0.05,202)-0.5)*2.2)*w:0;
-    pos[k*3]=x+nx*off;pos[k*3+1]=y;pos[k*3+2]=z+nz*off;sea[k*3]=x;sea[k*3+1]=SEA;sea[k*3+2]=z;sdA[k]=o.sd;ofA[k]=off;dA[k]=o.d;}}
+    pos[k*3]=x+nx*off;pos[k*3+1]=y;pos[k*3+2]=z+nz*off;sea[k*3]=x;sea[k*3+1]=SEA;sea[k*3+2]=z;sdA[k]=o.sd;ofA[k]=off;dA[k]=o.d;siA[k]=o.si;}}
   const idx=[];for(let i=0;i<NT;i++){const i2=(i+1)%NT;for(let j=0;j<NR-1;j++){const a=i*NR+j,b=i2*NR+j;idx.push(a,b,a+1,a+1,b,b+1);}}
   const g=new THREE.Group();g.name='backdrop';
   // land
   const lg=new THREE.BufferGeometry();lg.setAttribute('position',new THREE.BufferAttribute(pos,3));lg.setIndex(idx);lg.computeVertexNormals();
   const nrm=lg.attributes.normal,col=new Float32Array(N*3),c=new THREE.Color(),Q=h=>new THREE.Color(h),
     G1=Q('#4b6b33'),G2=Q('#5f8040'),G3=Q('#3a542c'),FD=Q('#7d8650'),FB=Q('#6e6e4a'),DT=Q('#8f8a78'),
-    R1=Q('#4d4943'),R2=Q('#7a736b'),R3=Q('#35332f'),MO=Q('#4f663a'),WET=Q('#262524'),XC=-189;   // XC = castle side starts (forest end west of it)
+    R1=Q('#4d4943'),R2=Q('#7a736b'),R3=Q('#35332f'),MO=Q('#4f663a'),WET=Q('#262524'),SA=Q('#b9a97c'),SN=Q('#e4e9ec'),PS=BD_SURF.map(Q),
+    XC=B.grid?-1e9:-189;   // XC = castle side starts (forest end west of it) — code coast only
   for(let k=0;k<N;k++){const x=pos[k*3],y=pos[k*3+1],z=pos[k*3+2],ny=nrm.getY(k),n=cvN(x*0.08,z*0.08,91),n2=cvN(x*0.013,z*0.013,92),of=ofA[k];
-    if(ny>0.8&&y>SEA+6){c.copy(G1).lerp(G2,n2*0.8).lerp(G3,n*0.35);   // grass
+    if(siA[k]){c.copy(PS[siA[k]]||PS[1]).multiplyScalar(0.9+0.2*n);if(ny<0.6&&siA[k]!==4)c.lerp(R2,0.35);if(y<SEA+2.5)c.lerp(WET,0.6);}   // painted in Map Builder
+    else if(ny>0.8&&y>SEA+6){c.copy(G1).lerp(G2,n2*0.8).lerp(G3,n*0.35);   // grass
       const e=Math.max(Math.abs(x)-hx0,Math.abs(z)-hz0);   // m outside the map edge
       if(e>40){const f=cvN(x*0.011+n*0.25,z*0.017,94);if(f>0.62)c.lerp(FD,Math.min(1,(f-0.62)*6)*0.7);else if(f<0.3)c.lerp(G3,Math.min(1,(0.3-f)*5)*0.6);   // field patchwork
         if(cvN(x*0.006,z*0.006,95)>0.7)c.lerp(FB,0.35);}
       if(e<9&&x>XC)c.lerp(DT,(1-Math.max(0,e)/9)*0.55);   // worn ground next to the castle's stone yard
-      if(dA[k]>-6&&dA[k]<-2.5)c.lerp(G3,0.35);}   // darker turf at the cliff lip
+      if(dA[k]>-6&&dA[k]<-2.5)c.lerp(G3,0.35);
+      if(y>110)c.lerp(SN,Math.min(1,(y-110)/25));}   // snow up high
+    else if(ny>0.8&&y>SEA-3){c.copy(SA).multiplyScalar(0.92+0.16*n);if(y<SEA+0.6)c.lerp(WET,0.35);}   // beach / shallows
     else{const band=0.5+0.5*Math.sin(y*0.9+n*2.5),st=cvN((x+z)*0.6,y*0.04,96);
       c.copy(R1).lerp(R2,band*0.5+st*0.25).lerp(R3,cvN(x*0.03,z*0.03+y*0.05,93)*0.45);
       c.multiplyScalar(Math.min(1.18,Math.max(0.55,1+of*0.09)));   // recessed = shaded, buttresses lit
@@ -178,27 +229,30 @@ function bdCoast(id,B){
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
       }`});
-  const so=new THREE.Mesh(sg,sm);so.name='coastSea';so.frustumCulled=false;
+  const so=new THREE.Mesh(sg,sm);so.name='coastSea';so.frustumCulled=false;so.visible=src.sea!=null;
   so.onBeforeRender=()=>{U.uT.value=performance.now()/1000;if(scene.fog)U.uFogC.value.copy(scene.fog.color);U.uL.value.copy(LDIR);};
   g.add(so);
-  const tr=coastTrees(S,hx0,hz0,low);if(tr)g.add(tr);
+  const tr=coastTreeMesh(src.trees(),low);if(tr)g.add(tr);
   for(const q of g.children){q.castShadow=q.receiveShadow=false;}
-  if(window.WD)WD.coast={g,S,H:(x,z)=>coastH(S,x,z,{}),N};
+  if(window.WD)WD.coast={g,S,src,H:(x,z)=>src.h(x,z,{}),N};
   return g;
 }
 // pine clumps on the mainland + far headlands (the forest end of the map runs on into them), one InstancedMesh
-function coastTrees(S,hx0,hz0,low){
-  const M=(y,sx)=>new THREE.Matrix4().makeTranslation(0,y,0).multiply(new THREE.Matrix4().makeScale(sx||1,1,sx||1));
-  const geo=ffMerge([[new THREE.CylinderGeometry(0.2,0.32,2.4,5),'#4a3828',M(1.2)],[new THREE.ConeGeometry(2.5,4.6,7),'#1c2f1d',M(3.8),'#2c4829'],
-    [new THREE.ConeGeometry(1.9,3.8,7),'#203520',M(6.0),'#33522e'],[new THREE.ConeGeometry(1.25,3.2,7),'#243c25',M(7.9),'#3d5f35']]);
+function coastTreePts(S,hx0,hz0,low){
   const R=mulberry(9051),sp=low?13:7,cap=low?900:3200,P=[],X0=-hx0-640,X1=hx0+260;
   for(let x=X0;x<X1;x+=sp)for(let z=-hz0-620;z<hz0+620;z+=sp){if(P.length>=cap*2)break;
     const px=x+(R()-0.5)*sp,pz=z+(R()-0.5)*sp,e=Math.max(Math.abs(px)-hx0,Math.abs(pz)-hz0);if(e<22||e>640)continue;
     let k=cvF(px*0.007,pz*0.007,301,3);if(px<-hx0&&Math.abs(pz)<hz0+80)k+=0.25*(1-Math.min(1,(-hx0-px)/220));   // forest continues west of the map
     if(k<0.55||R()>(k-0.5)*2.2)continue;if(S.land(px,pz)>-9)continue;P.push(px,pz);}
-  const n=Math.min(cap,P.length/2);if(!n)return null;
+  const n=Math.min(cap,P.length/2),Q=[];for(let i=0;i<n;i++){const x=P[i*2],z=P[i*2+1];Q.push(x,z,S.top(x,z)-0.3,0.9+R()*0.9);}return Q;
+}
+function coastTreeMesh(P,low){
+  const n=P.length/4;if(!n)return null;const R=mulberry(9052);
+  const M=(y,sx)=>new THREE.Matrix4().makeTranslation(0,y,0).multiply(new THREE.Matrix4().makeScale(sx||1,1,sx||1));
+  const geo=ffMerge([[new THREE.CylinderGeometry(0.2,0.32,2.4,5),'#4a3828',M(1.2)],[new THREE.ConeGeometry(2.5,4.6,7),'#1c2f1d',M(3.8),'#2c4829'],
+    [new THREE.ConeGeometry(1.9,3.8,7),'#203520',M(6.0),'#33522e'],[new THREE.ConeGeometry(1.25,3.2,7),'#243c25',M(7.9),'#3d5f35']]);
   const im=new THREE.InstancedMesh(geo,new THREE.MeshLambertMaterial({vertexColors:true}),n),m=new THREE.Matrix4(),q=new THREE.Quaternion(),v=new THREE.Vector3(),sc=new THREE.Vector3(),cl=new THREE.Color(),Y=new THREE.Vector3(0,1,0);
-  for(let i=0;i<n;i++){const x=P[i*2],z=P[i*2+1],s=0.9+R()*0.9;q.setFromAxisAngle(Y,R()*6.28);sc.set(s*(0.85+R()*0.3),s*(0.9+R()*0.4),s);v.set(x,S.top(x,z)-0.3,z);
+  for(let i=0;i<n;i++){const s=P[i*4+3];q.setFromAxisAngle(Y,R()*6.28);sc.set(s*(0.85+R()*0.3),s*(0.9+R()*0.4),s);v.set(P[i*4],P[i*4+2]-0.3,P[i*4+1]);
     im.setMatrixAt(i,m.compose(v,q,sc));im.setColorAt(i,cl.setScalar(0.8+R()*0.35));}
   im.name='coastTrees';im.frustumCulled=false;return im;
 }
