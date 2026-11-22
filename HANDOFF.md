@@ -993,6 +993,7 @@ Phase 1 (maps from Blender files) is done — `notes/systems.md` §5e. Work in t
 (Minimap done 2026-10-17.) Vents/secret passages for Voldemort, task mini-games, 3-player Voldemort mode, more bosses (basilisk), more maps (Hogsmeade, Great Hall), cosmetics, ranked/MMR, mobile controls.
 
 ## 11. Changelog
+- 2026-11-22 — **Great Hall light follows the sun:** shafts only through hall windows the map sun (-LDIR) shines into, along the real sun direction; Map Builder glass wall panels (PNL mat glass) count as windows (wide ones split into beams); 'lit' windows get a plain pale glass pane (stained glass removed, user).
 - 2026-11-22 — **Great Hall mood (js/28-fcs-hall.js):** 'lit' windows in the hall rect (fcs room view + fcs-file deco, via `hallWinRec` in fcsDecoKit V.box) get stained-glass panes, additive light shafts + dust + coloured floor patches (4 draw calls). Camera inside → `hallPre`/`hallPost` around the render: dimmer/cooler IBL (`hallEnv`, 4 steps), cool hemi, less sun, split-tone grade; tune `HALL.M`. fcs-file hall has no roof yet, so it reads weaker there.
 - 2026-11-22 — **Map Builder eyedropper (💧 Pick):** colour fields + Paint/Backdrop panels pick colour / surface / height from the map (`pickSample`, Alt+click in drawing tools).
 - 2026-11-22 — **Map Builder Backdrop tool (🌊, J):** sculpt/paint/trees/sea level/sea stacks outside the play area + presets (coast/island/valley/plains/lake/flat), `mapbuild/backdrop.js` → `data.bd` → game `js/67-coast.js bdGridSrc` (shared renderer with the code coast). Guide: MAP-BUILDER.md "Backdrop".

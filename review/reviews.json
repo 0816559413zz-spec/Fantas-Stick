@@ -3029,13 +3029,11 @@
    "who": "Great Hall",
    "status": "wait",
    "created": "2026-11-22T10:22:53",
-   "updated": "2026-11-22T10:22:53",
+   "updated": "2026-11-22T12:00:00",
    "imgs": [],
    "links": [
-    "/index.html?nosw&playmap=fcs&pm=siege",
-    "/shots/hall-mood-wide.jpg",
-    "/shots/hall-mood-windows.jpg",
-    "/shots/hall-mood-floor.jpg"
+    "/index.html?nosw&playmap=fcs-file&pm=siege",
+    "/shots/hall-sun-file.jpg"
    ],
    "checks": [
     {
@@ -3049,7 +3047,7 @@
     }
    ],
    "feedback": "",
-   "reply": ""
+   "reply": "แสงมาตามทิศพระอาทิตย์ของแมพแล้ว เข้าเฉพาะหน้าต่างฝั่งที่โดนแดด (รวมกระจกบานใหญ่ทางซ้าย) หน้าต่างอื่นเป็นกระจกสีเดียว"
   }
  ]
 }
