@@ -551,6 +551,7 @@ function buildFileMap(id){
   gltfLoader().then(L=>L.loadAsync('assets/'+F.file+'?v='+(F.v||0))).then(gltf=>{
     if(!fb.parent)return;                                       // ฉากถูกทิ้งไปแล้ว
     const sc=gltf.scene,skip=new Set();
+    const meadowGrass=id==='meadow'?replaceMeadowTufts(sc):null;
     sc.traverse(o=>{if(/^anim_/i.test(o.name))skip.add(o);if(!o.isMesh)return;o.receiveShadow=true;o.castShadow=!(o.userData&&o.userData.ns);
       if(/^ground/i.test(o.name))o.material=Array.isArray(o.material)?o.material.map(m=>grLive(m.clone())):grLive(o.material.clone());});   // พื้นหลัก: สีเป็นหย่อม + รอยสนามรบ (js/50)
     if(typeof surfScene==='function')surfScene(sc,true);
@@ -559,9 +560,51 @@ function buildFileMap(id){
     W.remove(fb);setTimeout(()=>disposeTree(fb),5000);W.add(sc);W.userData.grPend=0;   // ทิ้งพื้นสำรองทีหลัง (กำลังอุ่นเชดเดอร์อยู่ได้)
     brkSetup(sc,skip);   // ของบังที่พังได้: แยกออกจาก batch (js/23)
     batchStatic(sc,skip);
+    if(meadowGrass)sc.add(meadowGrass);
     if(gltf.animations&&gltf.animations.length){const mx=new THREE.AnimationMixer(sc);for(const c of gltf.animations)mx.clipAction(c).play();W.userData.mixer=mx;}
     gl.shadowMap.needsUpdate=true;setTimeout(prewarmShaders,0);
   }).catch(err=>{W.userData.grPend=0;console.warn('map glb',id,err);});   // โหลดไม่ได้ = ใช้พื้นสำรองต่อ (ถ่ายหญ้าจากพื้นสำรอง)
+}
+function replaceMeadowTufts(root){
+  const old=[];
+  root.traverse(o=>{if(/^meadow_tuft(?:\.?\d+)?$/.test(o.name))old.push(o);});
+  const R=mulberry(30271),group=new THREE.Group(),spots=[[],[],[]];
+  group.name='meadowGrass';
+  for(const tuft of old){
+    const {x,y,z}=tuft.position;
+    const patch=Math.sin(x*.31+1.6*Math.sin(z*.24))*Math.sin(z*.33+1.4*Math.sin(x*.19));
+    if(R()<.32+.30*patch)spots[Math.floor(R()*spots.length)].push([x,y,z]);
+    tuft.removeFromParent();
+  }
+  const mat=new THREE.MeshLambertMaterial({side:THREE.DoubleSide});
+  const pose=new THREE.Object3D(),color=new THREE.Color();
+  for(const [kind,where] of spots.entries()){
+    if(!where.length)continue;
+    const shapeRandom=mulberry(918+kind),verts=[];
+    const width=[.064,.11,.085][kind],height=[.53,.32,.23][kind];
+    for(let i=0;i<4+kind;i++){
+      const a=i*2.39+shapeRandom()*.5,ux=Math.cos(a),uz=Math.sin(a);
+      const w=width*(.75+shapeRandom()*.5),h=height*(.5+shapeRandom()*.75),bend=.09+shapeRandom()*.17;
+      const x=ux*.07,z=uz*.07;
+      verts.push(x-uz*w,0,z+ux*w,x+uz*w,0,z-ux*w,x+ux*bend,h,z+uz*bend);
+    }
+    const geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+    geo.computeVertexNormals();
+    const mesh=new THREE.InstancedMesh(geo,mat,where.length);
+    mesh.name='meadowGrassClumps';
+    mesh.receiveShadow=true;
+    where.forEach(([x,y,z],i)=>{
+      pose.position.set(x,y-.025,z);
+      pose.rotation.y=R()*Math.PI*2;
+      pose.scale.set(.85+R()*.8,.8+R()*.65,.85+R()*.8);
+      pose.updateMatrix();
+      mesh.setMatrixAt(i,pose.matrix);
+      mesh.setColorAt(i,color.setHSL(.20+R()*.08,.42+R()*.2,.23+R()*.12));
+    });
+    group.add(mesh);
+  }
+  return group;
 }
 // ห้องฝึก: วัสดุขีดระยะ + ป้ายไม้ (ข้อความ 2 บรรทัด) — x,y = พิกัดเกม, ry = หันป้าย
 function tickM(){return new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:0.55});}

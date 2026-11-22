@@ -108,7 +108,9 @@ function fcsForest(fallback){
     if(!W.parent)return;
     const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),sv=new THREE.Vector3(),pv=new THREE.Vector3(),tm=new THREE.Matrix4(),fin=new THREE.Matrix4();
     const g=new THREE.Group();
-    for(const id in items){const P=ffParts(gltf.scene,'g_'+id);if(!P)continue;const L2=items[id],ns=FF_NS.has(id);
+    for(const id in items){const P=ffParts(gltf.scene,'g_'+id);if(!P)continue;const ns=FF_NS.has(id);
+      const groundDetail=id.startsWith('fern_')||id.startsWith('stone_');
+      const L2=groundDetail?items[id].filter((_,i)=>i%3===0):items[id];
       const mats=L2.map(o=>{e.set(o.lean?(R()-0.5)*0.07:0,o.r,o.lean?(R()-0.5)*0.07:0);q.setFromEuler(e);sv.setScalar(o.s);pv.set(tx(o.x),gy(o.x,o.y)-0.05,tz(o.y));return new THREE.Matrix4().compose(pv,q,sv);});
       tm.makeTranslation(P.off.x,P.off.y,P.off.z);
       for(const p of P.parts){const im=new THREE.InstancedMesh(p.g,p.m,L2.length);
@@ -131,8 +133,8 @@ function ffMerge(parts){
 function ffDetail(W,R,area,trees,free){
   const M=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),v=new THREE.Vector3(),sv=new THREE.Vector3(),col=new THREE.Color(),g=new THREE.Group();
   const gr=mulberry(31),tri=new THREE.BufferGeometry();tri.setAttribute('position',new THREE.Float32BufferAttribute([-0.035,0,0,0.035,0,0,0,1,0],3));
-  const tuft=ffMerge(Array.from({length:9},(_,i)=>{const a=i/9*6.283+gr(),h=0.35+gr()*0.45,lean=0.25+gr()*0.5;e.set(Math.sin(a)*lean,a,Math.cos(a)*lean*0.3);q.setFromEuler(e);
-    return [tri,'#3a3f22',new THREE.Matrix4().compose(v.set(Math.cos(a)*0.06,0,Math.sin(a)*0.06),q,sv.set(1,h,1)),'#a8a46a'];}));
+  const tuft=ffMerge(Array.from({length:6},(_,i)=>{const a=i/6*6.283+gr(),h=0.30+gr()*0.48,lean=0.25+gr()*0.5;e.set(Math.sin(a)*lean,a,Math.cos(a)*lean*0.3);q.setFromEuler(e);
+    return [tri,'#3a3f22',new THREE.Matrix4().compose(v.set(Math.cos(a)*0.06,0,Math.sin(a)*0.06),q,sv.set(i%2===0?1:0.65,h,1)),'#a8a46a'];}));
   const bush=ffMerge(Array.from({length:6},(_,i)=>[new THREE.IcosahedronGeometry(0.45+gr()*0.3,0),i<2?'#2c3a22':'#3a4a2a',new THREE.Matrix4().compose(v.set((gr()-0.5)*0.9,0.35+gr()*0.4,(gr()-0.5)*0.9),q.identity(),sv.set(1,0.8,1))]));
   const twig=ffMerge([[new THREE.CylinderGeometry(0.03,0.045,1,5),'#4a3a28',new THREE.Matrix4().makeRotationZ(Math.PI/2)],[new THREE.CylinderGeometry(0.015,0.025,0.35,4),'#4a3a28',new THREE.Matrix4().compose(v.set(0.15,0.06,0.08),q.setFromEuler(e.set(0.6,0.8,1.0)),sv.set(1,1,1))]]);
   const mush=ffMerge([0,1,2].flatMap(i=>{const x=(gr()-0.5)*0.3,z=(gr()-0.5)*0.3,s=0.6+gr()*0.6;return [[new THREE.CylinderGeometry(0.02*s,0.025*s,0.1*s,5),'#d8ceb4',new THREE.Matrix4().makeTranslation(x,0.05*s,z)],[new THREE.ConeGeometry(0.07*s,0.05*s,7),i?'#8a4a2a':'#b0562e',new THREE.Matrix4().makeTranslation(x,0.115*s,z)]];}));
@@ -151,7 +153,7 @@ function ffDetail(W,R,area,trees,free){
   for(let i=0;i<180;i++){const [bx,by]=trees[(R()*trees.length)|0],a=R()*6.283,d=40+R()*120,x=bx+Math.cos(a)*d,y=by+Math.sin(a)*d;if(free(x,y,1))B.push({x,y,s:0.7+R()*0.9,sy:0.6+R()*0.6,r:R()*6.283,l:0.8+R()*0.35,dy:-0.1});}
   area(380,(x,y,d)=>{if(d>35)K.push({x,y,s:0.6+R()*0.9,r:R()*6.283,dy:0.03,l:0.8+R()*0.3});});
   area(90,(x,y,d)=>{if(d>40)U.push({x,y,s:0.8+R()*0.8,r:R()*6.283,l:1});});
-  make(tuft,mat,T,0);make(bush,matF,B,1);make(twig,matF,K,0);make(mush,matF,U,0);
+  make(tuft,mat,T.filter((_,i)=>i%2===0),0);make(bush,matF,B,1);make(twig,matF,K.filter((_,i)=>i%2===0),0);make(mush,matF,U,0);
   W.add(g);
 }
 // ซากปราสาทรอบจุดยึด 1 (ตำแหน่ง/ความสูงจาก genFcs js/02-fcs.js — ตรงกับวงชน): ก้อนหินก่อเรียงสลับแนว ยอดแหว่ง มอสเกาะ + หอกลมพัง + กองหินหล่น

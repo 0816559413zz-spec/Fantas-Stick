@@ -111,7 +111,7 @@ function updateFx(dt){fxMPUpdate(dt);if(!FXR.inst.length)return;
     I.kids=I.kids.filter(c=>FXR.inst.includes(c));if(I.kids.length)alive=true;
     if(!alive){FXR.inst.splice(i,1);}}}
 // ---------- สร้างชั้น ----------
-function fxN(I,n){return Math.max(0,Math.round(n*I.cnt*I.k*Math.min(2,I.s)*(I.far?0.5:1)*(combatVfxReduced()?.48:1)));}
+function fxN(I,n){return Math.max(0,Math.round(n*I.cnt*I.k*Math.min(2,I.s)*(I.far?0.5:1)*(combatVfxReduced()?.40:1)));}
 function fxSpawn(S,I,w){const L=S.d,g=k=>fxG(L,k),V=(k,q)=>fxV(g(k),I,q||0),C=k=>fxCol(g(k),I);
   switch(L.t){
     case 'flash':case 'halo':vfxOnce(()=>FX.flashSprite(w[0],w[1],w[2],C('col'),V('size0')*I.s,V('size')*Math.min(1.5,I.s),S.life,g('k')*Math.min(1.3,I.k)));S.oneshot=1;break;

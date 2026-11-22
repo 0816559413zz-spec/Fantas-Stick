@@ -427,6 +427,7 @@ function disposeMaterial(m,keep){
 function disposeTree(root){
   const keep=keepMatSet(),seen=new Set();
   root.traverse(o=>{
+    if(o.isInstancedMesh)o.dispose();
     if(o.geometry&&o.geometry!==projGeo&&o.geometry!==tailGeo&&!(o.geometry.userData&&o.geometry.userData.keep))o.geometry.dispose();
     if(o.material)for(const m of [].concat(o.material))if(!seen.has(m)){seen.add(m);disposeMaterial(m,keep);}
     // โครงกระดูกของโมเดลไฟล์ (SkeletonUtils.clone = ของใครของมัน) มี bone texture บนการ์ดจอ — ไม่ทิ้ง = รั่วแมตช์ละ ~84 ชิ้น (OPTIMIZE §H)

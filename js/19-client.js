@@ -33,7 +33,7 @@ PARTS.push=function(){
 function vfxQual(){const m=QUAL.mode,cs=qualCS();return cs>=2?{mul:0.35,cap:1200,up:1}:cs?{mul:0.5,cap:2500,up:1}:m==='high'?{mul:1,cap:8000,up:2}:QUAL.lvl>=1||QUAL.scale<0.8?{mul:0.7,cap:5000,up:1}:{mul:1,cap:8000,up:1.5};}
 // เรียกต้น render ในเกม: ตั้งตัวคูณการปล่อยของเฟรมนี้
 function vfxBegin(dt){const q=vfxQual();VFXB.cap=q.cap;VFXB.mul=q.mul;VFXB.up=q.up;
-  if(combatVfxReduced()){VFXB.cap=Math.min(VFXB.cap,3000);VFXB.mul*=.50;VFXB.up=1;}
+  if(combatVfxReduced()){VFXB.cap=Math.min(VFXB.cap,2400);VFXB.mul*=.40;VFXB.up=1;}
   const fill=PARTS.length/VFXB.cap,soft=fill<0.6?1:Math.max(0.12,(1-fill)/0.4);
   VFXB.k=Math.min(VFXB.up,dt*60)*VFXB.mul*soft;VFXB.on=true;}
 function vfxEnd(){VFXB.k=1;VFXB.on=false;}
@@ -150,7 +150,7 @@ function myPos(){const v=VIEW.cur;return v?v.P.find(p=>p.id===NET.myId):null;}
 const SMOKE_K=0.4;let _bskD=0;
 function burst(x,y,col,n,sp,life,size,o){
   o=o||{};
-  if(!_bskD&&combatVfxReduced()&&n>=6&&!o.hit)n=Math.max(3,Math.round(n*(o.smoke?.34:.46)));
+  if(!_bskD&&combatVfxReduced()&&n>=6&&!o.hit)n=Math.max(3,Math.round(n*(o.smoke?.28:.40)));
   if(o.smoke&&!_bskD){const m=n*SMOKE_K;n=Math.floor(m)+(Math.random()<m%1?1:0);if(n<=0)return;}
   if(n>=6&&VFXB.k!==1){const k=VFXB.k;VFXB.k=1;_bskD++;try{burst(x,y,col,n,sp,life,size,o);}finally{VFXB.k=k;_bskD--;}return;}   // burst ใหญ่ = เอฟเฟกต์ครั้งเดียว ไม่หาร
   for(let i=0;i<n;i++){

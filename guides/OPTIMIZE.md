@@ -6,6 +6,13 @@ Scope of this track: logic, performance, algorithms, loading. Not balance/gamepl
 
 Priority: **P1** = real bug or big win, **P2** = clear win, **P3** = nice to have / needs more measuring.
 
+## 2026-11-22 map and combat rendering
+
+- High grass fell from 148,120 to 68,800 submitted blades (740,600 to 344,000 triangles per frame). Seeded positions, uneven patches and four blade profiles replace the more uniform pattern. Meadow also replaces its 420 baked tufts with fewer clumps in three shapes, each using four to six triangles.
+- Castle Strike uses fewer ground decorations and simpler coast pines in frustum-culled tiles. Each coast surface went from 132,160 to 69,984 triangles. Opaque geometry occludes the coast sky shader, and High updates its shadows every other frame or when the scene explicitly requests an update.
+- The shared continuous combat particle multiplier dropped from 0.50 to 0.40 and the soft budget from 3,000 to 2,400. Decorative bursts and scripted particle emitters also use lower counts. Hit sparks and warning geometry retain their existing rules.
+- In the 1280 × 720 High headless runs, Castle Strike fell from 1.84M submitted triangles to 0.97M on average after alternating shadow updates (1.09M on shadow frames). The warmed Meadow capture fell from 1.04M to 0.62M. These are renderer counters, and frame timing from the harness varied. A separate mixed fight cast 30 skills across all 11 paths without browser errors.
+
 ## A. Bugs found while measuring
 - [x] **P1 Texture leak.** (fixed: `disposeTree`/`disposeMaterial`; textures stay ~30 across matches) Each `hostToLobby` → `hostStart` leaves 7–10 GPU textures behind (61 → 110 after 6 matches). `buildWorld()` (line ~3462) and `disposeObj()` (~4208) only call `geometry.dispose()`; materials and their `map` CanvasTextures are never disposed. Fix: dispose `material` (+ `material.map`) too, skipping shared ones (`glowTex`, `projGeo`/`tailGeo`-style shared assets).
 - [x] **P1 Cloak NaN** (found 2026-10-18 in the heavy bench): enemy wizard cloaks (height 1.7) had NaN in their top row of vertices every frame — the rest positions are Float32, so `0.85f` is a hair above `hh=0.85` and `Math.pow(negative,1.5)` = NaN (console `computeBoundingSphere(): Computed radius is NaN`). Fixed with `Math.max(0,…)` in `updateCloth`; also `updateCloth`/`localVel` now reset on non-finite state. Side finding: in the old build, a NaN mesh plus bloom could turn the whole screen black in a test (bloom off = picture back); the new build did not black out under the same test.

@@ -55,7 +55,7 @@ const CLW={x:0,z:0,K:9};
 
 // ---------- หญ้า ----------
 // DENS = ใบต่อตร.หน่วย • S = ขนาดผืนหญ้ารอบกล้อง (หน่วย 3D) ตามระดับกราฟิก • H = ความสูงใบ • MAXN = จำนวนสูงสุด
-const GRASS={ON:true,DENS:70,H:0.32,W:0.034,MAXN:160000,CAP:160000,gustK:1.8,pushK:2.2,S:{high:46,auto:36,auto1:28},mesh:null,key:'',cache:new Map(),tex:null,box:null,bakeMs:0,n:0,trail:[],trLast:new WeakMap()};
+const GRASS={ON:true,DENS:43,H:0.32,W:0.034,MAXN:160000,CAP:160000,gustK:1.8,pushK:2.2,S:{high:40,auto:32,auto1:25},mesh:null,key:'',cache:new Map(),tex:null,box:null,bakeMs:0,n:0,trail:[],trLast:new WeakMap()};
 // ---------- รอยสนามรบบนหญ้า + พื้น (อยู่ทั้งแมตช์ — designs/battlefield.md ขั้น 3) ----------
 // ภาพรอยขนาดเท่าแผนที่ (RES ช่อง/หน่วย): R = ไหม้ • G = น้ำแข็ง • B = ราบ/หาย • A = ทิศที่ล้ม (0..1 = 0..2π)
 // ล้างเมื่อเข้าหน้าเกม (แมตช์ใหม่ — setScreen js/19) / เปลี่ยนแผนที่ • ทุกเครื่องทาที่จุดเดียวกัน (มาจาก event ของโฮสต์) • ภาพล้วน ไม่แตะโปรโตคอล
@@ -193,7 +193,7 @@ function grLive(m){m.userData.grLive=true;
 const GR_GLSL_V='uniform vec4 uGrMap;uniform sampler2D uGround;uniform vec3 uGrCam;uniform vec4 uWind;uniform vec2 uGrK;uniform vec4 uGust[12];uniform vec4 uGustB[12];uniform vec4 uPush[16];uniform sampler2D uScar;uniform float uGrH;uniform float uGrW;uniform sampler2D uGroundH;uniform vec3 uSun;uniform vec3 uGrN;uniform sampler2D uFire;'+
   'attribute vec4 aOff;varying vec3 vGC;varying vec2 vMk;varying float vTr;varying vec4 vFl;varying vec2 vHu;varying float vFi;\n'+
   'vec2 grH2(vec2 c){return fract(sin(vec2(dot(c,vec2(127.1,311.7)),dot(c,vec2(269.5,183.3))))*43758.5453);}\n';
-// ใบหญ้า (ทำในการ์ดจอทั้งหมด): ขึ้นเป็นกอ (ดึงเข้าหาจุดกลางกอทุก ~0.9 หน่วย) • 3 แบบปนกัน (ปกติ / ยาวเรียว / สั้นกว้าง) + ดอกไม้เล็ก ~3%
+// ใบหญ้า (ทำในการ์ดจอทั้งหมด): ขึ้นเป็นหย่อมสลับแน่น-โปร่ง ผสมใบ 4 แบบกับดอกไม้เล็ก ~3%
 // โคนเข้ม → ปลายอ่อนออกเหลือง • ใบโค้งออกจากกลางกอ • ลมเป็นคลื่นใหญ่วิ่งผ่านทุ่ง (ยอดคลื่นใบสว่างขึ้น) • ย้อนแสง = แสงทะลุใบ (vTr)
 const GR_BEGIN=
   'vec3 transformed;{'+
@@ -202,7 +202,9 @@ const GR_BEGIN=
   // กอหญ้า: ใบในช่องเดียวกันถูกดึงเข้าหาจุดกลางกอ (ระหว่างกอเห็นพื้นนิด ๆ)
   'vec2 ci=floor(wp/0.9);vec2 ch=grH2(ci);vec2 cc=(ci+0.2+0.6*ch)*0.9;vec2 tc=(wp-cc)*0.78;wp=cc+tc;float cd=length(tc);'+
   'vec2 muv=(wp-uGrMap.xy)/uGrMap.zw;vec4 gm=texture2D(uGround,muv);'+
-  'float ok=step(0.0,muv.x)*step(muv.x,1.0)*step(0.0,muv.y)*step(muv.y,1.0)*step(aOff.z,gm.a*1.15-0.15);'+
+  'float meadow=sin(wp.x*0.48+1.7*sin(wp.y*0.39))*sin(wp.y*0.52+1.3*sin(wp.x*0.29));'+
+  'float patch=0.30+0.70*smoothstep(-0.68,0.40,meadow);'+
+  'float ok=step(0.0,muv.x)*step(muv.x,1.0)*step(0.0,muv.y)*step(muv.y,1.0)*step(aOff.z,(gm.a*1.15-0.15)*patch);'+
   'float d=length(wp-c);float fade=1.0-smoothstep(S*0.3,S*0.48,d);'+
   // ใบที่ไม่ขึ้น (นอกผืน/ไม่มีหญ้า) = ยุบเป็นจุดเดียว ข้ามลูปลม/รอยทั้งหมด (ประหยัดการ์ดจอ)
   'if(ok*fade<0.001){transformed=vec3(wp.x,-1000.0,wp.y);vGC=vec3(0.0);vMk=vec2(0.0);vTr=0.0;vFl=vec4(0.0);vHu=vec2(0.0);vFi=0.0;}else{'+
@@ -211,7 +213,7 @@ const GR_BEGIN=
   'float cl=0.5+0.25*sin(wp.x*0.43+sin(wp.y*0.31)*2.0)+0.25*sin(wp.y*0.57+sin(wp.x*0.23)*2.0);'+   // หย่อมใหญ่สูง/เตี้ย
   // แบบใบ: ปกติ 62% • ยาวเรียว 23% • สั้นกว้าง 13% • ดอกไม้ ~2% (เฉพาะตรงที่หญ้าหนา)
   'float fl=step(0.991,r3)*step(0.45,gm.a);'+
-  'float tw=r3<0.62?1.0:(r3<0.85?0.62:1.5);float th=r3<0.62?1.0:(r3<0.85?1.32:0.6);'+
+  'float tw=r3<0.42?1.0:r3<0.64?0.42:r3<0.87?1.68:1.18;float th=r3<0.42?1.0:r3<0.64?1.56:r3<0.87?0.64:0.39;'+
   'float hgt=uGrH*(0.55+0.6*r1)*mix(th*(0.7+0.6*ch.x)*(1.0-0.3*smoothstep(0.0,0.45,cd)),1.05+0.3*r1,fl)*(0.5+0.85*cl)*fade*ok*(1.0-0.55*bu)*(1.0-smoothstep(0.62,0.92,fb));'+
   // ลม: คลื่นใหญ่วิ่งตามทิศลม (band) + คลื่นเล็ก + สั่นเล็กน้อย + กระโชก + ตัวละครแหวก
   'vec2 wd=uWind.xy;float ph=dot(wp,wd)*0.25-uWind.w*1.6;'+
@@ -266,9 +268,9 @@ function grassBuild(){
   g.setAttribute('position',new THREE.Float32BufferAttribute([-1,0,0, 1,0,0, -0.85,0.38,0, 0.85,0.38,0, -0.52,0.72,0, 0.52,0.72,0, 0,1,0],3));
   g.setAttribute('normal',new THREE.Float32BufferAttribute([0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0],3));
   g.setIndex([0,1,2, 1,3,2, 2,3,4, 3,5,4, 4,5,6]);
-  const N=GRASS.CAP,A=new Float32Array(N*4);
-  // ลำดับกระจายสม่ำเสมอ (R2) → ใช้แค่ n ใบแรกก็ยังกระจายทั่วผืน
-  for(let i=0;i<N;i++){A[i*4]=(0.5+i*0.7548776662)%1;A[i*4+1]=(0.5+i*0.5698402910)%1;const h=Math.sin(i*12.9898)*43758.5453;A[i*4+2]=h-Math.floor(h);const h2=Math.sin(i*78.233)*12543.13;A[i*4+3]=h2-Math.floor(h2);}
+  const A=new Float32Array(GRASS.CAP*4),random=mulberry(20261122);
+  // Fixed seeds keep irregular clumps in place as the viewer moves.
+  for(let i=0;i<A.length;i++)A[i]=random();
   g.setAttribute('aOff',new THREE.InstancedBufferAttribute(A,4));
   g.instanceCount=0;g.boundingSphere=new THREE.Sphere(new THREE.Vector3(),1e6);
   const m=new THREE.Mesh(g,grassMat());m.frustumCulled=false;m.receiveShadow=true;m.castShadow=false;m.renderOrder=-1;m.userData.keep=true;
