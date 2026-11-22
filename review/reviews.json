@@ -1,6 +1,22 @@
 {
- "next": 140,
+ "next": 141,
  "items": [
+  {
+   "id": 140,
+   "title": "ลดงาน VFX เคียว Darkness และ Shard Storm",
+   "text": "รวมละอองเคียวเป็นชุดเดียวต่อชั้น ประหยัดรายละเอียดเสริมเมื่อไกลหรือเครื่องช้า ส่วนวงพื้นและคมฟันหลักยังแสดง",
+   "kind": "VFX",
+   "who": "Darkness / Radiance",
+   "status": "wait",
+   "created": "2026-11-22",
+   "updated": "2026-11-22",
+   "imgs": [],
+   "links": [
+    "/shots/motion_darkness_ba_perf_high.gif",
+    "/shots/motion_darkness_ba_perf_low.gif",
+    "/shots/motion_radiance_shard_storm_quality.gif"
+   ]
+  },
   {
    "id": 139,
    "title": "Darkness เกจโล่เหนือแถบเลือดและท่าค้าง BA",

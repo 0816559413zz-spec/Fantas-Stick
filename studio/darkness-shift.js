@@ -618,7 +618,7 @@ function stDarkDashMantle(root,pointAt){
 }
 
 function stDarkHoldDash(root,caster,live){
-  const ease=stDarkEase,begin=.16,launch=begin+.50,covered=launch+.032,formed=launch+.105,arrival=formed+2;
+  const ease=stDarkEase,begin=.16,launch=begin+.50,covered=launch+.032,formed=launch+.105,arrival=launch+DARK_LONG_DASH.travel;
   const rollStart=launch-.13,acceleration=.18,braking=.34;
   const route=[[0,0],[.06,3.6],[2.65,6.9],[2.1,10],[-1.65,13.3]]
     .map(([x,z])=>new THREE.Vector3(x,0,z));
@@ -688,8 +688,9 @@ function stDarkHoldDash(root,caster,live){
     const push=ease(rollStart,covered,t)*(1-unveil);
     const spring=ease(.03,.081,age)*(1-ease(.106,.224,age));
     const plant=ease(.129,.238,age)*(1-ease(.25,.52,age));
-    if(!live){caster.g.position.copy(at);caster.g.rotation.y=yaw;caster.g.position.y=.36*spring;caster.g.visible=t<formed||age>=.045;}
-    else caster.b.visible=t<formed||age>=.045;
+    const bodyVisible=t<formed||age>=DARK_LONG_DASH.reappear;
+    if(!live){caster.g.position.copy(at);caster.g.rotation.y=yaw;caster.g.position.y=.36*spring;caster.g.visible=bodyVisible;}
+    else caster.b.visible=bodyVisible;
     const dark=ease(begin+.23,launch-.033,t)*(1-ease(.05,.18,age));
     const bodyCoverage=age<0?1-ease(launch-.021,formed,t):1;
     bodyTint(dark,bodyCoverage);

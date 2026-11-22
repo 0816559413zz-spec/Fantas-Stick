@@ -44,16 +44,16 @@ SGPH:197 SGTR:197 SG_SPR:198 sgFD:200 _sgAreaC:201 sgArea:202 _sgAreaT:209 sgAre
 ## js/02-room-greathall.js (105) — 
 
 
-## js/03-spells-core.js (250) — 
+## js/03-spells-core.js (251) —
 ICONS:8 ICOALIAS:9 hasIco:10 ICOBASE:12 icoURL:13 ICO:14 icoTint:15 icoHTML:24 PATHS:25 SPELL_LIST:34 SPELLS:34 defSpell:35 SLOTK:36 BRMAP:36 KITP:37 parseKit:38 cleanKit:55 setKit:56 pathReset:59
 §61 สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู)
 isBig:62 ccScale:64 ccTouch:65 addStun:66 addRoot:67 addFreeze:68 addSlow:73 addChill:74 ignite:79 FX_SHOCK_CYAN:87 FX_ONFIRE:87 shock:88 knock:93 addWard:94 addFrostSlow:96 frostSlow:97 moveMul:104 BRN_MAX:106 addBurn:107 addOnFire:109 addXBurn:110 addPoison:111 addSil:112 addFear:113 addBlind:114 addMark:115 healT:117 tickStatus:122 clearStatus:145 fxMask:146
 §148 วัตถุในสนามที่คาถาสร้าง: โซน / ฟ้าผ่าหน่วงเวลา / กำแพง / ช่องร่ายต่อเ…
-foesIn:149 SHIELD_BREAK_LOCK:157 shieldFaces:158 aoeHit:168 addZone:174 updateZones:179 addStrike:190 updateStrikes:191 addWall:192 updateWalls:193 updateChan:204 updateSpells:208 aimPoint:210 aimWall:222
-§224 ตัวช่วยคอมโบ (ทุกสายใช้หลักเดียวกัน: ตั้งต้น → ต่อยอด → ปิดจบ)
-ROLE_N:226 takePoison:227
-§229 ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ …
-PBASIC:230
+foesIn:149 SHIELD_BREAK_LOCK:157 shieldFaces:158 aoeHit:168 addZone:175 updateZones:180 addStrike:191 updateStrikes:192 addWall:193 updateWalls:194 updateChan:205 updateSpells:209 aimPoint:211 aimWall:223
+§225 ตัวช่วยคอมโบ (ทุกสายใช้หลักเดียวกัน: ตั้งต้น → ต่อยอด → ปิดจบ)
+ROLE_N:227 takePoison:228
+§230 ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ …
+PBASIC:231
 
 ## js/04-frost-mech.js (133) — สายน้ำแข็ง: ประชิด/ไกล (V) • ฟันดาบ/ขวาน • ไถลน้ำแข็ง • พื้นน้ำแข็ง/ภ…
 FROSTV:3 FROST_SWING3_HIT:9 frostShieldPitch:10 frostBoom:15 meleeHit:22 mirrorPos:33 frostBasic:34 frostSlam3:58 frostSlam:66 frostDash:72 addIce:77 updateIces:78 frostWavePitch:95 frostWaveSolid:98 updateWaves:104 _stO:122 _stL:122 groundH:123
@@ -84,8 +84,8 @@ GODL:232
 §234 ลูกสายฟ้าโดม: รวมไฟที่พื้น → ทะยานขึ้น → เล็ง → ฟาดไม้ยิงและค้างชี้เป…
 SDOME_POSE:235 stormDomeCost:236 stormDomeDash:237 stormDomeCharge:238 stormDomeTick:239 stormDomeFire:270 stormDomeSlam:277 updateStorm:282
 
-## js/09-darkness.js (453) — 
-DARKP:2 DARK_V:6 DARK_BA:7 DARK_CHASE_FLOW:8 DARK_MAW:9 DARK_VEIL_PULL_CLEAR:10 DARK_CHASE_T:11 darkFlow:12 darkAlive:13 darkReset:14 darkState:15 darkEvent:16 darkAim:19 darkTarget:26 darkCone:30 darkBAFloor:37 darkBATargets:41 darkMoveHeading:58 darkDashKeys:61 darkClearCooldown:65 darkMark:69 darkReveal:76 darkQueue:77 darkGainFlow:78 darkKill:84 darkTick:87 darkShieldTick:121 darkShieldCrossAt:138 darkShieldCross:147 darkBeamStop:148 darkDash:157 darkBasic:180 DARK_MARK:209 darkWaveTick:226 DARK_CHASE:248 darkMoveWaltz:296 DARK_WALTZ:321 DARK_WARD:343 DARK_VEIL:358 DARK_ULT:366 darkUltBite:381 darkMoveChase:391 darkSnap:431 darkMarked:450
+## js/09-darkness.js (455) —
+DARKP:2 DARK_V:6 DARK_BA:7 DARK_LONG_DASH:8 DARK_CHASE_FLOW:9 DARK_MAW:10 DARK_VEIL_PULL_CLEAR:11 DARK_CHASE_T:12 darkFlow:13 darkDashImmune:14 darkAlive:15 darkReset:16 darkState:17 darkEvent:18 darkAim:21 darkTarget:28 darkCone:32 darkBAFloor:39 darkBATargets:43 darkMoveHeading:60 darkDashKeys:63 darkClearCooldown:67 darkMark:71 darkReveal:78 darkQueue:79 darkGainFlow:80 darkKill:86 darkTick:89 darkShieldTick:123 darkShieldCrossAt:140 darkShieldCross:149 darkBeamStop:150 darkDash:159 darkBasic:182 DARK_MARK:211 darkWaveTick:228 DARK_CHASE:250 darkMoveWaltz:298 DARK_WALTZ:323 DARK_WARD:345 DARK_VEIL:360 DARK_ULT:368 darkUltBite:383 darkMoveChase:393 darkSnap:433 darkMarked:452
 
 ## js/09-earth.js (323) — 
 EARTH:9 ERV:12
@@ -626,14 +626,14 @@ GR_NOISE:162 GR_LIVE:167 grLive:185 GR_GLSL_V:193 GR_BEGIN:198 grassMat:245 gras
 §379 สกิลลม → หญ้า (ภาพล้วน เรียกจาก windEfx js/68)
 WIND_GRASS:381 airWind:395
 
-## js/51-warmup.js (276) — 
+## js/51-warmup.js (283) —
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_SLICE:13 WARM_X:14 WARM_Y:14 warmKeep:16 warmStaticModels:22 glReady:31 warmCompile:32 warmDraw:35 WARM_SKIP:45 warmAssets:48 warmFx:58 warmFxEnd:69 warmGather:71 warmPaths:73 warmStep:75 warmQueue:127 WARM_LOBBY:133 warmLobbyTick:134 warmTick:141
 §148 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
 warmOutline:158
 §175 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
 GWARM:180 gameWarmTick:181 gameWarmFree:214
 §220 Shader never seen before mid-match: compile in the background, hide t…
-SHR:228 shrLights:232 shrRoot:240 shrCollect:241 shrPending:247 shReadyPre:251 shReadyPost:271
+SHR:228 shrLights:232 IMZ:237 imzPre:244 imzPost:246 shrRoot:247 shrCollect:248 shrPending:254 shReadyPre:258 shReadyPost:278
 
 ## js/52-social.js (172) — 
 §6 แชท: Enter = พิมพ์ / Enter อีกที = ส่ง / Esc = ปิด • ข้อความขึ้นมุมซ้…
@@ -777,13 +777,13 @@ BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:135 backdropHide:139
 
-## js/68-darkness-view.js (1118) — 
-nightWaltzStrip:2 nightWaltzBorder:80 stDarkVeilGround:118 darkFxMesh:195 drawDarknessHud:201 drawDarkHudBar:220 darknessMarkView:227 darkWaveViews:237 darkActiveViews:237 darkViewRoot:238 darkViewTemp:244 darknessClear:256 darkWorldAt:264 darkMarkWind:267 darkMarkLaunch:295 darkMarkContact:307 darkViewNow:320 darkFlowHud:320 darkIdleWeaponPose:321 darkBAGroundImpact:325 darkSettleWeapon:340 darkBlendWeapon:351 darkShowWeaponReturn:374 darkTrailHistory:381 darkDashView:420 darknessCharacter:466 darknessEfx:701 stDarkShieldInk:998 stDarkVeilBlade:1041 stWardDrainPool:1078
+## js/68-darkness-view.js (1120) —
+nightWaltzStrip:2 nightWaltzBorder:80 stDarkVeilGround:118 darkFxMesh:195 drawDarknessHud:201 drawDarkHudBar:220 darknessMarkView:227 darkWaveViews:237 darkActiveViews:237 darkViewRoot:238 darkViewTemp:244 darknessClear:256 darkWorldAt:264 darkMarkWind:267 darkMarkLaunch:295 darkMarkContact:307 darkViewNow:320 darkFlowHud:320 darkIdleWeaponPose:321 darkBAGroundImpact:325 darkSettleWeapon:340 darkBlendWeapon:351 darkShowWeaponReturn:374 darkTrailHistory:381 darkDashView:420 darknessCharacter:466 darknessEfx:703 stDarkShieldInk:1000 stDarkVeilBlade:1043 stWardDrainPool:1080
 
-## js/68-light-view.js (1937) — 
-LGV:7 LGSH:9 LGSH_L:11 _lgM4:14 _lgQ:14 _lgSV:14 _lgS:14 _lgC:14 _lgC2:14 lgGlowTex:15 lgNeon:17 lgEmpFx:25 lgWallBurn:44 lgShardSpawn:60 lgShardTick:64 lgBaCore:65 lgCrDim:108 lgEmpBeam:112 lgNeonCrystal:126 lgSanctumFloorTex:136 lgSanctumMoteTex:147 lgHoneyTex:162 lgShield:166 _lgShieldEuler:202 lightShieldEv:203 LGPOSE:206 _lgGlass:207 _lgCore:207 _lgGeo:207 _lgEdge:207 _lgEdgeM:207 lgCrystalMesh:209 lgState:217 _lgV:218 _lgW:218 lgWorld:219 LG_ULT_ASSET:222 LG_CRYSTAL_ASSET:222 LG_ULT_INTRO:223 LG_ULT_ARRIVAL_FX:223 LG_ULT_TIME:224 lgUltMaterials:225 lgSovereignFinishes:226 lgSovereignMaterials:227 lgSovereignFinish:288 lgSovereignCrystal:309 lgSkinSovereign:318 lgPoseSovereign:371 lgSovereignHeart:447 LG_SASH_X:473 LG_SASH_Z:473 lgSovereignRibbon:474 lgSovereignFlare:533 LG_PALM_TRAVEL:546 LG_PALM_SCORCH_LIFE:547 LG_PALM_SCORCH_SLOTS:547 lgPalmGateOffset:548 lgSovereignPalmWaves:550 lgPosePalmWaves:559 lgPoseBeamWaves:565 lgSovereignPalmGate:577 lgSovereignScorchTrail:587 lgPalmScorch:615 lgSovereignCrossSparks:651 lgSovereignGather:674 lgSovereignWingCurrent:707 lgSovereignChargeSeal:736 lgSovereignChestRecoil:753 lgSovereignSeal:763 lgSovereignArmSigils:779 lgBuildSovereign:810 lgReturnMark:887 lgUltVisual:901 lgWardVisual:1138 _lgBeamM:1154 lgBeamMat:1155 lgSovereignChestBeam:1158 lgSovereignPalmBeam:1195 _lgLinkM:1265 lgLinkMat:1266 lgUnitTube:1269 lgTube:1270 lgAim:1278 lightFX:1279 lgBaseObjects:1510 lgClearBase:1511 lgClear:1512 lightDropView:1519 lgAllyEmpEnd:1525
-§1529 เหตุการณ์
-lgBlip:1531 lgArcFx:1535 lgFlyFx:1538 lgSovereignArrival:1539 lightFxTick:1578 LG_BLAST_EXPAND:1582 LG_BLAST_HOLD:1582 lgImpactDome:1583 lgBlastFloor:1623 lgBlastThreads:1654 lgFitGround:1682 lgGroundWarning:1691 lightEfx:1704 _lgHq:1861 _lgHy:1861 lgProcHead:1863 lightHeadPose:1878 LGHUD:1886 lgBondScreen:1887 drawCrystalBondHud:1888 drawLightHud:1911
+## js/68-light-view.js (1946) —
+LGV:7 LGSH:9 LGSH_L:11 _lgM4:14 _lgQ:14 _lgSV:14 _lgS:14 _lgC:14 _lgC2:14 lgGlowTex:15 lgNeon:17 lgEmpFx:25 lgWallBurn:44 lgShardSpawn:60 lgShardTick:64 lgBaCore:65 lgCrDim:108 lgEmpBeam:112 lgNeonCrystal:126 lgSanctumFloorTex:136 lgSanctumMoteTex:147 lgHoneyTex:162 lgShield:166 _lgShieldEuler:202 lightShieldEv:203 LGPOSE:206 _lgGlass:207 _lgCore:207 _lgGeo:207 _lgEdge:207 _lgEdgeM:207 lgCrystalMesh:209 lgState:217 _lgV:218 _lgW:218 lgWorld:219 LG_ULT_ASSET:222 LG_CRYSTAL_ASSET:222 LG_ULT_INTRO:223 LG_ULT_ARRIVAL_FX:223 LG_ULT_TIME:224 lgUltMaterials:225 lgSovereignFinishes:226 lgSovereignMaterials:227 lgSovereignFinish:288 lgSovereignCrystal:309 lgSkinSovereign:318 lgPoseSovereign:371 lgSovereignHeart:447 LG_SASH_X:473 LG_SASH_Z:473 lgSovereignRibbon:474 lgSovereignFlare:533 LG_PALM_TRAVEL:546 LG_PALM_SCORCH_LIFE:547 LG_PALM_SCORCH_SLOTS:547 lgPalmGateOffset:548 lgSovereignPalmWaves:550 lgPosePalmWaves:559 lgPoseBeamWaves:565 lgSovereignPalmGate:577 lgSovereignScorchTrail:587 lgPalmScorch:615 lgSovereignCrossSparks:651 lgSovereignGather:674 lgSovereignWingCurrent:707 lgSovereignChargeSeal:736 lgSovereignChestRecoil:753 lgSovereignSeal:763 lgSovereignArmSigils:779 lgBuildSovereign:810 lgReturnMark:887 lgUltVisual:901 lgWardVisual:1138 _lgBeamM:1154 lgBeamMat:1155 lgSovereignChestBeam:1158 lgSovereignPalmBeam:1195 _lgLinkM:1265 lgLinkMat:1266 lgUnitTube:1269 lgTube:1270 lgAim:1278 lightFX:1279 lgBaseObjects:1519 lgClearBase:1520 lgClear:1521 lightDropView:1528 lgAllyEmpEnd:1534
+§1538 เหตุการณ์
+lgBlip:1540 lgArcFx:1544 lgFlyFx:1547 lgSovereignArrival:1548 lightFxTick:1587 LG_BLAST_EXPAND:1591 LG_BLAST_HOLD:1591 lgImpactDome:1592 lgBlastFloor:1632 lgBlastThreads:1663 lgFitGround:1691 lgGroundWarning:1700 lightEfx:1713 _lgHq:1870 _lgHy:1870 lgProcHead:1872 lightHeadPose:1887 LGHUD:1895 lgBondScreen:1896 drawCrystalBondHud:1897 drawLightHud:1920
 
 ## js/68-nature-art.js (171) — 
 naturePlantArt:2 Turret:3 auraTextures:44 auraTex:45 LotusAura:88 glowWallTex:92 M_BUB:95 M_BUBRIM:96 M_DRIP:97 M_POOL:98 lotusPetalVeins:100 Lotus:127
@@ -899,4 +899,4 @@ _dvPanel:95 _dvBtn:98 _dvBody:100 _dvHead:100 devUiApply:102 devFreeMouse:110 de
 §130 rows
 dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:193 devUiAct:200
 
-(113 files, 33425 lines)
+(113 files, 33446 lines)

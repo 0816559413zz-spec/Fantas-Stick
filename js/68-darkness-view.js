@@ -426,7 +426,7 @@ function darkDashView(ev,o,hold,charging){
   o.darkSwingAt=undefined;
   const root=darkViewRoot(ev,hold?'Long Dash':'Quick Dash');
   const at=darkViewNow||performance.now();
-  const travel=hold?2.105:ev.duration;
+  const travel=hold?DARK_LONG_DASH.travel:ev.duration;
   const points=[{u:0,p:new THREE.Vector3()}];
   const pointAt=(u,out)=>{
     const last=points.at(-1);
@@ -589,7 +589,9 @@ function darknessCharacter(o,p,viewer,now){
   o.darkBuffBlade(now/1000,state?.[8]&&!o.darkDashFx?1:0,0);
   // far idle scythe (other players ≥ ANIM_NEAR from the camera, not swinging): rebuild its ink/flame every 2nd/3rd frame like animLod
   //   (motion is clock-based, so a skipped frame only lowers the update rate; own character and any swing stay every frame) — 2026-11-22
-  if(gear.visible&&o.g.visible){const lod=o.id===NET.myId||baseClock>0||planting||o.darkUltFx?1:animLod(o.g);o.darkLodN=(o.darkLodN||0)+1;
+  const distanceLod=o.id===NET.myId?1:animLod(o.g);
+  o.darkScytheArgs.reducedDetail=qualCS()>0||distanceLod>1;
+  if(gear.visible&&o.g.visible){const lod=baseClock>0||planting||o.darkUltFx?1:distanceLod;o.darkLodN=(o.darkLodN||0)+1;
     if(lod===1||o.darkLodN%lod===0)o.darkScythe.update(now/1000,0,0,planting?t:baseClock);}
   const flowStrike=o.darkFlowStrike,flowAge=flowStrike?(now-flowStrike.at)/1000:-Infinity;
   const F=DARK_CHASE_FLOW;

@@ -89,6 +89,55 @@ function stDarkBAGhost(root,side){
   };
 }
 
+function stScyInkBillboards(root,capacity,order,name){
+  const quad=new THREE.PlaneGeometry(1,1);
+  const geometry=new THREE.InstancedBufferGeometry().copy(quad);
+  quad.dispose();
+  const center=new THREE.InstancedBufferAttribute(new Float32Array(capacity*3),3).setUsage(THREE.DynamicDrawUsage);
+  const data=new THREE.InstancedBufferAttribute(new Float32Array(capacity*3),3).setUsage(THREE.DynamicDrawUsage);
+  geometry.setAttribute('inkCenter',center);
+  geometry.setAttribute('inkData',data);
+  const mesh=new THREE.Mesh(geometry,new THREE.ShaderMaterial({
+    transparent:true,depthWrite:false,toneMapped:false,
+    vertexShader:`attribute vec3 inkCenter,inkData;
+      varying vec2 inkUV;
+      varying float alpha;
+      void main(){
+        vec4 view=modelViewMatrix*vec4(inkCenter,1.);
+        vec2 scale=vec2(length(modelMatrix[0].xyz),length(modelMatrix[1].xyz));
+        view.xy+=position.xy*inkData.xy*scale;
+        inkUV=position.xy*2.;
+        alpha=inkData.z;
+        gl_Position=projectionMatrix*view;
+      }`,
+    fragmentShader:`varying vec2 inkUV;
+      varying float alpha;
+      void main(){
+        float r=length(inkUV);
+        float fog=r<.6?1.-r/3.:2.*max(0.,1.-r);
+        gl_FragColor=vec4(0.,0.,0.,fog*alpha);
+      }`
+  }));
+  mesh.name=name;
+  mesh.renderOrder=order;
+  mesh.frustumCulled=false;
+  mesh.visible=false;
+  root.add(mesh);
+  let count=0;
+  return {
+    add(x,y,z,width,height,opacity){
+      center.setXYZ(count,x,y,z);
+      data.setXYZ(count++,width,height,opacity);
+    },
+    flush(){
+      mesh.visible=count>0;
+      geometry.instanceCount=count;
+      if(count)center.needsUpdate=data.needsUpdate=true;
+      count=0;
+    }
+  };
+}
+
 function stChargedSlashFlakes(root,bladePt,poseAt,scale,start,duration,rnd){
   const count=72,rows=7,stride=rows*2;
   const geometry=new THREE.BufferGeometry(),indices=[];
@@ -170,7 +219,7 @@ function stCreateScythePreview(root,args,lifetime){
   for(let s=0;s<N;s++)for(let i=0;i<P-1;i++){const a=(s*P+i)*2;idx.push(a,a+1,a+2,a+1,a+3,a+2);}
   inkGeo.setAttribute('position',new THREE.BufferAttribute(pos,3));inkGeo.setAttribute('color',new THREE.BufferAttribute(col,4));inkGeo.setIndex(idx);
   const WS0=()=>args.wrap||'A';
-  const ink=new THREE.Mesh(inkGeo,stScyInk());ink.frustumCulled=false;ink.renderOrder=8;scy.add(ink);
+  const ink=new THREE.Mesh(inkGeo,stScyInk());ink.name='Scythe blade ink ribbons';ink.frustumCulled=false;ink.renderOrder=8;scy.add(ink);
   const SHOW_BLADE=true;   // รอบ 7: ใบมีดใช้เอฟเฟกต์เดียวกับแบบ B ทุกอย่าง (ผู้ใช้: "ทำไปแล้ว เอาอันเดิมกลับมา")   // รอบ 6: C ไม่ใช้หมึกเส้นมั่ว ๆ เลย → เปลวดำพุ่งจากสันแทน (ผู้ใช้เลือก)   // รอบ 4 (ผู้ใช้ชี้รูป): เอา "ขอบหมึกหยัก ๆ ที่ติดสันใบ" กลับมา — แบบ C บีบให้แนบสัน ไม่ปลิวเป็นแผ่นใหญ่   // C: ไม่ใช้แผ่นหมึกแบน (ผู้ใช้: "เหลี่ยม ๆ ลอย ๆ กาก") → ใช้ออร่าควันดำลอยขึ้นจากใบแทน   // ผู้ใช้ 2026-11-18: เอาเส้นฟุ้งบนใบออก (แบบ C) 
   // หยดหมึก
   const DROPS=48,dropGeo=new THREE.SphereGeometry(0.05,8,6),dropM=new THREE.MeshBasicMaterial({color:0x000000,toneMapped:false,transparent:true});
@@ -187,22 +236,27 @@ function stCreateScythePreview(root,args,lifetime){
   for(let i=0;i<SHC-1;i++)for(let j=0;j<SR-1;j++){const a=i*SR+j,b=(i+1)*SR+j;sidx.push(a,b,a+1,b,b+1,a+1);}
   sGeo.setAttribute('position',new THREE.BufferAttribute(spos,3));sGeo.setAttribute('color',new THREE.BufferAttribute(scol,4));sGeo.setIndex(sidx);
   const sheet=new THREE.Mesh(sGeo,stScyInk());sheet.name='Scythe spine flame';sheet.visible=SHC>0;sheet.frustumCulled=false;sheet.renderOrder=8;scy.add(sheet);
-  // ออร่าควันดำลอยขึ้นจากตัวใบ (แบบ C) — สไปรต์กลมนุ่ม สีดำ โปร่งตามอายุ
-  const AURA=0,auraTex=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d'),r=g.createRadialGradient(32,32,0,32,32,32);
-    r.addColorStop(0,'rgba(0,0,0,1)');r.addColorStop(0.45,'rgba(0,0,0,0.75)');r.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=r;g.fillRect(0,0,64,64);return new THREE.CanvasTexture(c);})();
-  const aura=[...Array(AURA)].map((_,k)=>{const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:auraTex,color:0x000000,transparent:true,depthWrite:false,toneMapped:false}));sp.renderOrder=9;scy.add(sp);return sp;});
   // พันด้าม: A = 3 จุด ribbon เกลียวแน่น • B = เส้นหมึกยาวพันหลวม ๆ ทั้งด้าม มีห่วง/ปลายสะบัดแบบเปลวไฟ (ผู้ใช้ส่ง ref 2026-11-18)
   const WS=args.wrap||'A';
   const WR=WS==='C'?(args.shaftInk?1:0):3,   /* รอบ 14: ผู้ใช้เอาหมึกด้ามออก (เปิดคืนด้วย args.shaftInk) */WP=WS==='C'?110:WS==='B'?70:26,wrapGeo=new THREE.BufferGeometry(),wpos=new Float32Array(WR*WP*2*3),wcol=new Float32Array(WR*WP*2*4),widx=[];
   for(let s=0;s<WR;s++)for(let i=0;i<WP-1;i++){const a=(s*WP+i)*2;widx.push(a,a+1,a+2,a+1,a+3,a+2);}
   wrapGeo.setAttribute('position',new THREE.BufferAttribute(wpos,3));wrapGeo.setAttribute('color',new THREE.BufferAttribute(wcol,4));wrapGeo.setIndex(widx);
-  const wrap=new THREE.Mesh(wrapGeo,stScyInk());wrap.frustumCulled=false;wrap.renderOrder=8;scy.add(wrap);
+  const wrap=new THREE.Mesh(wrapGeo,stScyInk());wrap.frustumCulled=false;wrap.renderOrder=8;wrap.visible=WR>0;scy.add(wrap);
 
   const rnd=k=>{const x=Math.sin(k*127.1+311.7)*43758.5453;return x-Math.floor(x);};
   const strands=[...Array(N)].map((_,s)=>({ph:rnd(s+1),sp:0.55+rnd(s+7)*0.5,k:args.wrap==='C'?rnd(s+3)*0.06:0.02+rnd(s+3)*0.55,side:rnd(s+5)<0.5?1:-1,curl:(rnd(s+9)-0.5)*2,w:0.07+rnd(s+11)*0.12,peel:0.3+rnd(s+13)*0.55}));
-  const lineAt=(arr,t)=>{const n=arr.length-1,f=Math.min(n-1e-6,Math.max(0,t*n)),i=f|0,u=f-i;return [arr[i][0]+(arr[i+1][0]-arr[i][0])*u,arr[i][1]+(arr[i+1][1]-arr[i][1])*u];};
-  const bladePt=(t,k)=>{const L=stScyLines,a=lineAt(L.spine,t),b=lineAt(L.edge,t);return [a[0]+(b[0]-a[0])*k,a[1]+(b[1]-a[1])*k];};
-  const tan=t=>{const a=lineAt(stScyLines.spine,Math.max(0,t-0.02)),b=lineAt(stScyLines.spine,Math.min(1,t+0.02)),dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy)||1;return [dx/l,dy/l];};
+  const lineScratch=[0,0],bladePoint=[0,0],tangent=[0,0];
+  const lineAt=(arr,t,out)=>{const n=arr.length-1,f=Math.min(n-1e-6,Math.max(0,t*n)),i=f|0,u=f-i;
+    out[0]=arr[i][0]+(arr[i+1][0]-arr[i][0])*u;out[1]=arr[i][1]+(arr[i+1][1]-arr[i][1])*u;};
+  const bladePt=(t,k,out=[0,0])=>{
+    lineAt(stScyLines.spine,t,out);lineAt(stScyLines.edge,t,lineScratch);
+    out[0]+=(lineScratch[0]-out[0])*k;out[1]+=(lineScratch[1]-out[1])*k;return out;
+  };
+  const tan=(t,out=[0,0])=>{
+    lineAt(stScyLines.spine,t-.02,out);lineAt(stScyLines.spine,t+.02,lineScratch);
+    const dx=lineScratch[0]-out[0],dy=lineScratch[1]-out[1],length=Math.hypot(dx,dy)||1;
+    out[0]=dx/length;out[1]=dy/length;return out;
+  };
   const v=new THREE.Vector3(),M4=new THREE.Matrix4(),Q=new THREE.Quaternion(),SC=new THREE.Vector3();
   const t0=performance.now();
   const clock=()=>((typeof stVnow!=='undefined'?stVnow:performance.now())-(typeof stVnow!=='undefined'?(root.userData.v0??(root.userData.v0=stVnow)):t0))/1000;
@@ -236,8 +290,8 @@ function stCreateScythePreview(root,args,lifetime){
   const fr2=new THREE.BufferGeometry(),f2pos=new Float32Array(HK*HH*3),f2col=new Float32Array(HK*HH*4);fr2.setAttribute('position',new THREE.BufferAttribute(f2pos,3));fr2.setAttribute('color',new THREE.BufferAttribute(f2col,4));fr2.setIndex(tidx);
   const fringe=new THREE.Mesh(fr2,stScyInk());fringe.frustumCulled=false;fringe.renderOrder=7;if(hasBATrail)trailRoot.add(fringe);
   // ถ่านดำหลุดจากปลายหาง
-  const EMB=hasBATrail?(args.liveBA?18:28):0,embTex=(()=>{const c=document.createElement('canvas');c.width=c.height=32;const g=c.getContext('2d'),r=g.createRadialGradient(16,16,0,16,16,16);r.addColorStop(0,'rgba(0,0,0,1)');r.addColorStop(0.6,'rgba(0,0,0,0.8)');r.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=r;g.fillRect(0,0,32,32);return new THREE.CanvasTexture(c);})();
-  const embers=[...Array(EMB)].map(()=>{const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:embTex,color:0x000000,transparent:true,depthWrite:false,toneMapped:false}));sp.renderOrder=8;trailRoot.add(sp);return sp;});
+  const EMB=hasBATrail?(args.liveBA?18:28):0;
+  const embers=EMB?stScyInkBillboards(trailRoot,EMB,8,'Scythe trail embers'):null;
   const FLECKS=18;
   const tipFlecks=args.liveBA&&hasBATrail?new THREE.InstancedMesh(
     new THREE.IcosahedronGeometry(1,0),
@@ -269,7 +323,9 @@ function stCreateScythePreview(root,args,lifetime){
   teGeo.setAttribute('position',new THREE.BufferAttribute(tepos,3));teGeo.setAttribute('color',new THREE.BufferAttribute(tecol,4));teGeo.setIndex(teidx);
   const tailSheet=new THREE.Mesh(teGeo,stScyInk());tailSheet.name='Scythe BA tip spine flame';tailSheet.frustumCulled=false;tailSheet.renderOrder=9;if(hasBATrail)trailRoot.add(tailSheet);
   // ละอองหมึกตอนควง (ผู้ใช้ 2026-11-19: ควงแบบโล่แต่มีละอองสาดออกมามากกว่า)
-  const SPL=BA?36:0,splash=[...Array(SPL)].map(()=>{const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:embTex,color:0x000000,transparent:true,depthWrite:false,toneMapped:false}));sp.renderOrder=9;root.add(sp);return sp;});
+  const SPL=BA?36:0,splash=SPL?stScyInkBillboards(root,SPL,9,'Scythe spin spray'):null;
+  const splashOrigins=Array.from({length:SPL},()=>({at:NaN,point:new THREE.Vector3()}));
+  let splashSide,splashRange,splashArc;
   // ตอนควงหลังฟัน (ผู้ใช้ 2026-11-19): ใช้ VFX ควงแบบท่าโล่ (จานหมึก + แผ่นเปลวรอบขอบ) + เส้นเปลวดำ 3 เส้นคนละทิศ ควงตามเคียวแล้วหาย
   const spinG=new THREE.Group();spinG.name='Scythe BA spin';spinG.rotation.x=-Math.PI/2;spinG.visible=false;if(hasBASpin)root.add(spinG);
   const SPR=1.75*S,spinInk=hasBASpin&&typeof stDarkShieldInk==='function'?stDarkShieldInk(spinG,SPR):null,spinFl=hasBASpin&&typeof stDarkShieldFlames==='function'?stDarkShieldFlames(spinG,SPR):null;
@@ -407,8 +463,9 @@ function stCreateScythePreview(root,args,lifetime){
     caster.wandG.visible=true;caster.tip.visible=false;tipBall.position.set(0,-1.1,0);caster.armR.add(tipBall);
   }
   // ออร่าดำรอบปลายคทา (ผู้ใช้ 2026-11-19): หมอกดำนุ่มเต้นช้า ๆ 3 ชั้น + เกล็ดหมึกเล็กวนรอบ 5 จุด
-  const tAura=[0,1,2].map(i=>{const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:embTex,color:i===1?0x1a1324:0x000000,transparent:true,depthWrite:false,toneMapped:false}));sp.renderOrder=9;tipBall.add(sp);return sp;});
-  const tMotes=[...Array(5)].map(()=>{const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:embTex,color:0x000000,transparent:true,depthWrite:false,toneMapped:false}));sp.renderOrder=9;tipBall.add(sp);return sp;});
+  const embTex=caster?(()=>{const c=document.createElement('canvas');c.width=c.height=32;const g=c.getContext('2d'),r=g.createRadialGradient(16,16,0,16,16,16);r.addColorStop(0,'rgba(0,0,0,1)');r.addColorStop(0.6,'rgba(0,0,0,0.8)');r.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=r;g.fillRect(0,0,32,32);return new THREE.CanvasTexture(c);})():null;
+  const tAura=(caster?[0,1,2]:[]).map(i=>{const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:embTex,color:i===1?0x1a1324:0x000000,transparent:true,depthWrite:false,toneMapped:false}));sp.renderOrder=9;tipBall.add(sp);return sp;});
+  const tMotes=Array.from({length:caster?5:0},()=>{const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:embTex,color:0x000000,transparent:true,depthWrite:false,toneMapped:false}));sp.renderOrder=9;tipBall.add(sp);return sp;});
   const updAura=T=>{tAura.forEach((sp,i)=>{const p=0.5+0.5*Math.sin(T*(2.1+i*0.9)+i*2);const sz=(0.22+0.1*i)*(0.85+0.3*p);sp.scale.set(sz,sz,1);sp.material.opacity=[0.75,0.45,0.28][i]*(0.75+0.25*p);});
     tMotes.forEach((sp,i)=>{const a=T*(2.4+i*0.3)+i*1.26,r=0.11+0.04*Math.sin(T*3+i);sp.position.set(Math.cos(a)*r,Math.sin(a*1.3)*0.06+((T*0.6+i*0.2)%1)*0.12-0.04,Math.sin(a)*r);const z=0.045*(1-((T*0.6+i*0.2)%1)*0.6);sp.scale.set(z,z,1);sp.material.opacity=0.85;});};
   const _d=new THREE.Vector3(),_qb=new THREE.Quaternion(),_dn=new THREE.Vector3(0,-1,0),_tp=new THREE.Vector3();
@@ -650,8 +707,8 @@ function stCreateScythePreview(root,args,lifetime){
       tail.visible=fringe.visible=shTail.visible=tailFlames.visible=tailSheet.visible=spinG.visible=false;
       if(tipFlecks)tipFlecks.visible=false;
       for(const fx of spinLines)fx.visible=false;
-      for(const fx of splash)fx.visible=false;
-      for(const fx of embers)fx.visible=false;
+      splash?.flush();
+      embers?.flush();
     }
     baFxVisible=showTrail;
     if(showTrail){
@@ -750,13 +807,30 @@ function stCreateScythePreview(root,args,lifetime){
               const w=Math.min(1,Math.sin(Math.PI*u)*1.4)*al*0.75;U.c[i*8+3]=w;U.c[i*8+7]=w*0.9;}
             U.g.attributes.position.needsUpdate=true;U.g.attributes.color.needsUpdate=true;}}
         // ละอองตอนควง: เกิดที่ปลายใบตอนควง แล้วพุ่งออกจากตัวพร้อมตก
-        {const kc=Math.floor(swing/LOOP);for(let i=0;i<SPL;i++){const sp=splash[i],kk=args.liveBA?0:i%NSW,b0=kc*LOOP+SW0+kk*GAP+WU+SWP+HOLD+(args.liveBA?liveSplashSpread*i/SPL:SPIN*((i/NSW|0)/(SPL/NSW))),age=swing-b0,life=splashLife;
-          sp.visible=age>=0&&age<=life;
-          if(!sp.visible){sp.material.opacity=0;continue;}
-          const Pb=baPose(b0),Mb=new THREE.Matrix4().compose(Pb.pos,Pb.QB,new THREE.Vector3(S,S,S)),[bx,by]=bladePt(0.7+0.3*rnd(i+300),0.3);_p.set(bx,by,0).applyMatrix4(Mb);
-          const ox=_p.x,oz=_p.z,ol=Math.hypot(ox,oz)||1,vh=3.5+2.5*rnd(i+301);
-          sp.position.set(_p.x+ox/ol*vh*age+(rnd(i+302)-0.5)*age*2,_p.y+(1.2+rnd(i+303))*age-4.5*age*age,_p.z+oz/ol*vh*age);
-          const sz=(0.2+0.18*rnd(i+304))*S*(1-age/life*0.5);sp.scale.set(sz,sz*1.3,1);sp.material.opacity=0.9*(1-age/life);}}
+        if(splash){
+          if(splashSide!==args.baSide||splashRange!==args.range||splashArc!==args.arc){
+            splashSide=args.baSide;splashRange=args.range;splashArc=args.arc;
+            for(const source of splashOrigins)source.at=NaN;
+          }
+          const kc=Math.floor(swing/LOOP),stride=args.reducedDetail?2:1;
+          for(let i=0;i<SPL;i+=stride){
+            const swingIndex=args.liveBA?0:i%NSW;
+            const spread=args.liveBA?liveSplashSpread*i/SPL:SPIN*Math.floor(i/NSW)/(SPL/NSW);
+            const born=kc*LOOP+SW0+swingIndex*GAP+WU+SWP+HOLD+spread,age=swing-born;
+            if(age<0||age>=splashLife)continue;
+            const source=splashOrigins[i],origin=source.point;
+            if(source.at!==born){
+              const poseAtBirth=baPose(born),[bx,by]=bladePt(.7+.3*rnd(i+300),.3,bladePoint);
+              origin.set(bx*S,by*S,0).applyQuaternion(poseAtBirth.QB).add(poseAtBirth.pos);
+              source.at=born;
+            }
+            const outward=(3.5+2.5*rnd(i+301))*age/(Math.hypot(origin.x,origin.z)||1);
+            const sz=(.2+.18*rnd(i+304))*S*(1-age/splashLife*.5);
+            splash.add(origin.x*(1+outward)+(rnd(i+302)-.5)*age*2,
+              origin.y+(1.2+rnd(i+303))*age-4.5*age*age,origin.z*(1+outward),sz,sz*1.3,.9*(1-age/splashLife));
+          }
+          splash.flush();
+        }
         if(tipFlecks){
           tipFlecks.visible=tipRow>=0&&tipStrength>.012;
           if(tipFlecks.visible){
@@ -779,20 +853,25 @@ function stCreateScythePreview(root,args,lifetime){
             tipFlecks.instanceMatrix.needsUpdate=true;
           }
         }
-        for(let e=0;e<EMB;e++){const sp=embers[e],ph=(T*1.4+rnd(e+80))%1;
+        const emberStride=args.reducedDetail?2:1;
+        for(let e=0;e<EMB;e+=emberStride){const ph=(T*1.4+rnd(e+80))%1;
           const j=Math.min(HH-1,Math.floor(HH*(0.55+0.4*rnd(e+81)))),k=Math.floor(rnd(e+82)*HK),i2=j*HK+k;
-          const al=f2col[i2*4+3];sp.visible=trailActive&&al>0;if(!sp.visible){sp.material.opacity=0;continue;}sp.position.set(f2pos[i2*3]+Math.sin(T*3+e)*0.15*ph,f2pos[i2*3+1]+0.2+ph*1.1,f2pos[i2*3+2]+Math.cos(T*2+e)*0.15*ph);
-          const sz=(0.12+0.12*rnd(e+83))*(1-ph*0.6);sp.scale.set(sz,sz*1.5,1);sp.material.opacity=Math.min(1,al*2)*Math.sin(ph*Math.PI);}}}
+          const al=f2col[i2*4+3];if(!trailActive||al<=0)continue;
+          const sz=(0.12+0.12*rnd(e+83))*(1-ph*0.6);
+          embers.add(f2pos[i2*3]+Math.sin(T*3+e)*.15*ph,f2pos[i2*3+1]+.2+ph*1.1,f2pos[i2*3+2]+Math.cos(T*2+e)*.15*ph,sz,sz*1.5,Math.min(1,al*2)*Math.sin(ph*Math.PI));}
+        embers?.flush();}}
     if(!stScyLines)return;
     // ---------- หมึกไหลตามใบแล้วม้วนหลุด ----------
-    for(let s=0;s<N;s++){
+    const inkCount=args.reducedDetail?Math.ceil(N/2):N;
+    inkGeo.setDrawRange(0,inkCount*(P-1)*6);
+    for(let s=0;s<inkCount;s++){
       const d=strands[s],life=1.6/d.sp,age=((FT*d.sp*0.62+d.ph)%1);   // FT = flame phase (faster in Flow)   // 0..1 วงจรชีวิตของเส้น
       const head=age*1.15;                                           // หัวเส้นเดินจากโคน → เลยปลาย
       for(let i=0;i<P;i++){
         const u=i/(P-1),tt=head-u*0.32;                              // หางตามหลังหัว
         const tc=Math.min(1,Math.max(0,tt));
-        let [x,y]=bladePt(tc,d.k*(1-0.6*tc));
-        const [tx,ty]=tan(tc);
+        let [x,y]=bladePt(tc,d.k*(1-0.6*tc),bladePoint);
+        const [tx,ty]=tan(tc,tangent);
         const peel=Math.max(0,tt-d.peel*0.6)/0.5;                    // ช่วงท้ายของเส้นม้วนหลุดออกจากสัน (ขึ้นด้านนอกใบ)
         const HUG=false,CUT=args.wrap==='C',CAP=false;   // รอบ 9 (ผู้ใช้เลือกในรูปวง): เก็บ "1 เปลวหยักติดสัน" ของแบบ B • ตัด "2 พลูมพุ่งขวาบน" = ช่วงที่ม้วนหลุดออกจากสัน   // รอบ 8: C = เปลวบนใบแบบ B ทุกอย่าง แต่ห้ามลอยสูงเกินตัวใบ (ไม่เอาออร่าด้านบน)   // รอบ 5: ใช้หมึกชุดเดิม (แบบ B) ทุกอย่าง แค่ตัดช่วงที่ปลิวออกไปไกลทิ้ง
         const offRaw=HUG?Math.min(0.09,peel*0.12)*(0.6+0.4*Math.sin(T*6+s+u*5)):peel*peel*(0.45+0.35*d.curl);   // C: เปลวสั้นแนบสัน สะบัดเบา ๆ
@@ -810,7 +889,7 @@ function stCreateScythePreview(root,args,lifetime){
     inkGeo.attributes.position.needsUpdate=true;inkGeo.attributes.color.needsUpdate=true;
     // ---------- แผ่นเปลวจากสัน: ยอดเป็นลิ้นไฟหยัก วิ่งตามใบ • มี "ลิ้นหลุด" เป็นช่วง ๆ (ช่องว่างวิ่งขึ้น แล้วโคนลุกใหม่) ----------
     for(let i=0;i<SHC;i++){
-      const tt=0.03+0.9*i/(SHC-1),[sx,sy]=bladePt(tt,0.0),[tx,ty]=tan(tt),nx=-ty,ny=tx;
+      const tt=0.03+0.9*i/(SHC-1),[sx,sy]=bladePt(tt,0.0,bladePoint),[tx,ty]=tan(tt,tangent),nx=-ty,ny=tx;
       const profile=stScySpineProfile(tt,FT,spineProfile),{cycle:cyc,gap}=profile;
       const H=profile.height*(1-0.45*tt)*(1+1.65*charge);
       for(let j=0;j<SR;j++){
@@ -837,18 +916,10 @@ function stCreateScythePreview(root,args,lifetime){
       }
     }
     if(FN){fGeo.attributes.position.needsUpdate=true;fGeo.attributes.color.needsUpdate=true;}
-    // ---------- ออร่าควันดำลอยขึ้นจากใบ ----------
-    for(let k=0;k<AURA;k++){
-      const sp=aura[k],life=1.4+rnd(k+60)*0.9,ph=((T/life)+rnd(k+61))%1,tt=0.05+rnd(k+62)*0.85,kk=rnd(k+63)*0.55;
-      const [x,y]=bladePt(tt,0.0);   // เศษหลุดจากปลายเปลว (ออกจากสันจริง ๆ)
-      const rise=0.12+ph*(0.45+rnd(k+64)*0.35);
-      sp.position.set(x+0.06*Math.sin(T*1.3+k)*ph-ph*0.08,y+rise,(rnd(k+65)-0.5)*0.12+0.05*Math.sin(T+k)*ph);
-      const sz=(0.035+rnd(k+66)*0.04)*(1-ph*0.6);sp.scale.set(sz,sz*1.6,1);
-      sp.material.opacity=Math.sin(ph*Math.PI)*0.85;
-    }
     // ---------- หยดหมึกหลุดจากสัน ----------
-    for(let k=0;k<DROPS;k++){
-      const ph=(T*0.7+rnd(k+40))%1,tt=0.15+rnd(k+41)*0.8,[x,y]=bladePt(tt,0.02),[tx,ty]=tan(tt);
+    drops.count=args.reducedDetail?DROPS/2:DROPS;
+    for(let k=0;k<drops.count;k++){
+      const ph=(T*0.7+rnd(k+40))%1,tt=0.15+rnd(k+41)*0.8,[x,y]=bladePt(tt,0.02,bladePoint),[tx,ty]=tan(tt,tangent);
       const fly=ph*0.5*(1+charge*.62);v.set(x-ty*fly*0.9+tx*fly*0.3,y+tx*fly*0.9-fly*fly*0.8,(rnd(k+42)-0.5)*0.3*ph-drag*fly);
       const sc=(1-ph)*(0.6+rnd(k+43));SC.set(sc,sc*(1.4+ph),sc);M4.compose(v,Q,SC);drops.setMatrixAt(k,M4);
     }

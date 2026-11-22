@@ -5,11 +5,13 @@ PATHS.push({id:'darkness',n:'สายความมืด',ic:'🌑',col:'#5e4
   combo:'ติดตรา → ไล่ตาม → Night Waltz → ฟันเคียว • ฆ่าศัตรูเพื่อเข้า Flow'});
 const DARK_V={mark:8,markPrep:.58,waltzForm:.73,flow:6,dashCd:8,shieldTime:3,shieldRadius:40,shieldLock:5,shieldPrep:.45};
 const DARK_BA={range:175,powerRange:210,arc:150,near:25,height:1.25};
+const DARK_LONG_DASH={travel:2.105,reappear:.045};
 const DARK_CHASE_FLOW={wind:.095,hit:.255,exit:.335,end:.72,damage:20};
 const DARK_MAW={release:.73,walkAgain:1.69,bite:1.8,cameraEnd:2.48};
 const DARK_VEIL_PULL_CLEAR=1.8;
 const DARK_CHASE_T={launch:.25,arrival:.80,reappear:1.72,wandDown:1.955,land:2.17,end:2.29,hits:[.89,1.245,2.127]};
 const darkFlow=p=>p.dark?.flow>G.time;
+const darkDashImmune=p=>p.pathIdx===DARKP&&p.dark?.longUntil>0&&G.time<p.dark.longUntil+DARK_LONG_DASH.reappear;
 const darkAlive=t=>!t.dead&&t.alive!==false&&!t.downed;
 function darkReset(p){p.dark=null;p.darkReveal=0;p.darkDrain=0;}
 function darkState(p){return p.dark??={marks:new Map(),charges:[],actions:[],waves:[],shield:DARK_V.shieldTime};}
@@ -166,13 +168,13 @@ function darkDash(p,inp,pr,dt,setCd){
   const long=held&&d.charges.length===0&&G.time-d.dashStart>=.5;
   if(held&&!long)return true;
   d.dashStart=null;
-  const cost=long?2:1,duration=long?2.105:.14,heading=darkMoveHeading(inp,p.ang||0);
+  const cost=long?2:1,duration=long?DARK_LONG_DASH.travel:.14,heading=darkMoveHeading(inp,p.ang||0);
   for(let i=0;i<cost;i++)d.charges.push(Math.max(G.time,d.charges.at(-1)||0)+DARK_V.dashCd);
   setCd('dodge',d.charges.length===2?d.charges[0]-G.time:0);
   p.dash=duration;p.dashSp=(long?500:120)/duration;
   p.dashX=Math.cos(heading);p.dashY=Math.sin(heading);
   setCd('basic',0);
-  if(long){d.longUntil=G.time+duration;d.longAxis=heading-(darkDashKeys(inp)??0);p.inv=Math.max(p.inv,.45);}
+  if(long){d.longUntil=G.time+duration;d.longAxis=heading-(darkDashKeys(inp)??0);}
   else d.empower=G.time+3;
   darkEvent(p,long?'darkdashlong':'darkdashquick',{duration,a:heading});
   return true;

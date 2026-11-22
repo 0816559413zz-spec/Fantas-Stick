@@ -1,6 +1,10 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-22 Darkness: Long Dash blocks direct, area, and damage-over-time damage through its orb form and the brief transition back to the caster.
+
 - 2026-11-22 Performance round 2: empty InstancedMesh pools (count 0, ~90 per TDM frame) are hidden while rendering (`imzPre` js/51, `?noimz` = old): empty render calls 87 -> 17 per frame, frozen-frame CPU 28.9 -> 27.9 ms. Measured that the game is CPU-bound (GPU wait 2.5 ms of 26) and nothing else is over 1 ms on its own; notes in OPTIMIZE section U.
+
+- 2026-11-22 Performance: batched Darkness BA embers and spin spray, cached spray origins, and reduced decorative scythe detail and Shard Storm's inner crystal orbit at distance or under the CPU-saving graphics tier.
 
 - 2026-11-22 Performance (TDM 6v4 with bots): new bench `tools/bench-tdm.js` (real frames, 10 players). 34.7 → 40.8 fps, p99 200 → 58 ms, frames over 50 ms 36 → 22 per 30 s, draws 328 → 272; at `--cpu 2` 13.5 → 14.5 fps. Objects whose shader is still linking are compiled in the background and hidden for a few frames instead of freezing the frame (`shReadyPre`, `?noshready`); warm-up runs in the lobby too (`?nolobbywarm`), compiles in 5 ms slices (`?nowarmslice`), now includes Light/Darkness/Nature effects and the cracked look of each map's breakables; empty GPU particle batches are hidden; the Fire Heat bar's blurred parts are cached (same picture); Nature thorn/root tubes rebuild only while growing; far idle Darkness scythes update every 2nd/3rd frame; minimap obstacles batch by colour. Details in `guides/OPTIMIZE.md` §U.
 

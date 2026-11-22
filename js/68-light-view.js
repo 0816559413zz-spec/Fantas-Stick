@@ -1479,7 +1479,7 @@ function lightFX(o,p,pz,now,dt,velocity){
   else if(S.san){S.sanRc=0;S.sanG=0;S.sanLevel=null;S.san.visible=S.sanR.visible=S.sanTint.visible=false;if(S.sanWv)S.sanWv.visible=false;for(const c of S.sanO)c.visible=false;for(const M of S.sanM)M.g.visible=false;S.sanT0=0;}
   // ---------- Shard Storm: วงใบมีดคริสตัลหมุนอยู่กับที่ (ไม่ตามตัว) ----------
   const W=L[8];
-  if(W){if(!S.veil){S.veil=new THREE.Group();S.vB=[];const sm=new THREE.MeshBasicMaterial({color:hdr('#ffb840',1.1),transparent:true,opacity:.16,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
+  if(W){if(!S.veil){S.veil=new THREE.Group();S.veil.name='Shard Storm orbit';S.vB=[];const sm=new THREE.MeshBasicMaterial({color:hdr('#ffb840',1.1),transparent:true,opacity:.16,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
       for(let r=0;r<2;r++){const n=r?3:2,ro=r?0.78:0.42;for(let q=0;q<n;q++){const b=new THREE.Group(),c=lgCrystalMesh(1);c.rotation.z=Math.PI/2;c.scale.set(3.6,5.2,2.2);b.add(c);
         const materials=c.children.map(mesh=>{
           const material=mesh.material=mesh.material.clone();
@@ -1499,8 +1499,17 @@ function lightFX(o,p,pz,now,dt,velocity){
       lgFitGround(S.veilF.geometry,W[0],W[1],floor,R,.054);
     }
     S.veilR.visible=k>.01;S.veil.visible=S.veilF.visible=k>0.01;S.veil.position.copy(P);S.veil.scale.setScalar(R*ge);
-    for(const B of S.vB){const a=B.a0+(B.r?1:-1)*now/(B.r?380:300);B.b.position.set(Math.cos(a)*B.ro,(-.30+ge*(.83+.24*B.r+.07*Math.sin(now/250+B.a0))-.45*(1-fd))/Math.max(.01,R*ge),Math.sin(a)*B.ro);B.b.rotation.set(0,-a+(B.r?0:Math.PI),0.25);B.b.scale.setScalar(k/Math.max(.01,R*ge));B.b.visible=k>0.01;
-      B.st.position.y=0.06/(R*ge+0.01);B.st.rotation.z=B.r?-a:-a-0.8;B.st.material.opacity=.075*k;
+    const reduced=qualCS()>0||cam.position.distanceToSquared(P)>35*35;
+    const bladeScale=Math.max(.01,R*ge);
+    S.vB[0].st.material.opacity=.075*k;
+    for(const B of S.vB){
+      B.b.visible=B.st.visible=k>.01&&(!reduced||B.r===1);
+      if(!B.b.visible)continue;
+      const a=B.a0+(B.r?1:-1)*now/(B.r?380:300);
+      B.b.position.set(Math.cos(a)*B.ro,(-.30+ge*(.83+.24*B.r+.07*Math.sin(now/250+B.a0))-.45*(1-fd))/bladeScale,Math.sin(a)*B.ro);
+      B.b.rotation.set(0,-a+(B.r?0:Math.PI),0.25);
+      B.b.scale.setScalar(k/bladeScale);
+      B.st.position.y=0.06/(R*ge+0.01);B.st.rotation.z=B.r?-a:-a-0.8;
       for(const {material,opacity} of B.materials)material.opacity=opacity*.66*k;}
     S.veilR.position.copy(P);S.veilR.scale.setScalar(R);S.veilR.material.opacity=.91*k;
     S.veilF.position.copy(P);S.veilF.scale.setScalar(R);S.veilF.material.opacity=.29*k;
