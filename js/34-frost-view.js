@@ -95,7 +95,17 @@ function fwLink(){const geo=new THREE.BufferGeometry();geo.setAttribute('positio
 // เมทริกซ์โลกของใบอาวุธ W ถ้าอาวุธอยู่ท่า P (ใช้เก็บจุดหางแสงย่อยระหว่างเฟรม ให้โค้งเนียน)
 function fwMat(o,W,P,off){fwAim(P.bx,P.by,P.bz,P.nx,P.ny,P.nz);_fwP.set(P.x+(off?off[0]:0),P.y+(off?off[1]:0),P.z+(off?off[2]:0));_fwM2.compose(_fwP,_fwQ,_fwS);_fwM.multiplyMatrices(o.g.matrixWorld,_fwM2);return _fwM.multiply(W.matrix);}
 // Frost slide leg pose [R pitch, R spread, L pitch, L spread] (window.__SLV overrides for tests)
-const SLIDE_LEGS=[0.5,-0.42,0.18,0.42];
+// Frost slide pose [body yaw, R pitch, R spread, L pitch, L spread] (window.__SLV overrides for tests)
+const SLIDE_POSE=[1.2,0.05,-0.5,0.05,0.5];
+// Head/neck turn back toward the cursor while the body is side-on (restores the clip pose first, no build-up)
+const _slQ=new THREE.Quaternion();
+function frostSlideHead(o){
+  if(!o.fileModel)return;const a=o.slHead||0;
+  const H=o.slHB||(o.slHB=['neck','head'].map(n=>{const b=o.fileModel.getObjectByName(n);return b?{b,base:new THREE.Quaternion(),ap:new THREE.Quaternion(),on:false}:null;}).filter(Boolean));
+  for(const h of H){const q=h.b.quaternion;if(h.on&&q.equals(h.ap))q.copy(h.base);h.on=Math.abs(a)>0.01;if(!h.on)continue;
+    h.base.copy(q);q.multiply(_slQ.setFromAxisAngle(_slAx,a*0.5));h.ap.copy(q);}
+}
+const _slAx=new THREE.Vector3(0,1,0);
 function frostFX(o,p,pz,now,dt){
   const F=p.fr;
   if(!F){if(o.fw)o.fw.g.visible=false;if(o.fwLk)o.fwLk.visible=false;if(o.ishield)o.ishield.visible=false;if(o.cryoM)o.cryoM.visible=false;if(o.cryoFx){fxKill(o.cryoFx);o.cryoFx=null;}if(o.fwx)o.fwx.forEach(c=>{c.g.visible=false;c.on=0;});return;}
@@ -223,17 +233,22 @@ function frostFX(o,p,pz,now,dt){
     if(Math.random()<0.3){o.ishield.getWorldPosition(_pw);const s=simOf(_pw);PARTS.push({x:s.x+rnd(-8,8),y:s.y+rnd(-8,8),h:s.h+rnd(-0.5,0.5),vx:0,vy:0,vh:0.4,life:0.5,max:0.5,col:'#dff6ff',size:1.6,g:0});}
   }else{if(o.shFx){fxStop(o.shFx);o.shFx=null;}if(o.ishield)o.ishield.visible=false;}
   // ไถลน้ำแข็ง
-  // Slide pose (user 2026-11-23): balance stance, front leg out, back leg braced, legs still; upper body free for attacks
-  if(flags&1){o.slK=Math.min(1,(o.slK||0)+dt/0.12);const k=o.slK;
-    // body leans back a little, knees out: both legs spread wide and pushed forward, feet planted (no stepping)
-    o.b.rotation.x=lerp(o.b.rotation.x,0,k);o.b.position.y=-0.2*k;if(!(o.swT>0)&&!(o.grDown>0))o.b.rotation.y=lerp(o.b.rotation.y,0,k);   // chest + head square to the cursor
-    {const V=window.__SLV||SLIDE_LEGS;o.legs[0].rotation.x=V[0]*k;o.legs[0].rotation.z=V[1]*k;o.legs[1].rotation.x=V[2]*k;o.legs[1].rotation.z=V[3]*k;}
-    if(!(o.swT>0)&&!(o.grDown>0)&&!(o.grUp>0)){o.armL.rotation.x=lerp(o.armL.rotation.x,-0.25,k);o.armL.rotation.z=lerp(o.armL.rotation.z,1.05,k);}   // free left arm out for balance
+  // Slide pose (user 2026-11-23): surf stance — body turned side-on, one leg front / one leg back, feet planted,
+  // head still looks forward (cursor), arms balance with a little sway. Attacks square the body back up.
+  if(flags&1){o.slK=Math.min(1,(o.slK||0)+dt/0.15);const k=o.slK,busy=o.swT>0||o.grDown>0||o.grUp>0;
+    o.slTw=lerp(o.slTw||0,busy?0:1,Math.min(1,dt*10));const tw=o.slTw*k,S=window.__SLV||SLIDE_POSE,sw=Math.sin(now/260),sw2=Math.sin(now/410+1);
+    o.b.rotation.x=lerp(o.b.rotation.x,0,k);o.b.position.y=-0.18*k;o.b.rotation.y=lerp(o.b.rotation.y,S[0],tw);o.b.rotation.z=0.04*sw2*tw;
+    // body side-on: spread in the body frame = one foot ahead, one behind along the slide
+    o.legs[0].rotation.x=S[1]*k;o.legs[0].rotation.z=S[2]*k;o.legs[1].rotation.x=S[3]*k;o.legs[1].rotation.z=S[4]*k;
+    if(!busy){o.armL.rotation.x=lerp(o.armL.rotation.x,-0.2+0.12*sw,k);o.armL.rotation.z=lerp(o.armL.rotation.z,1.15+0.18*sw2,k);
+      o.armR.rotation.z=lerp(o.armR.rotation.z,o.armR.rotation.z-0.35-0.12*sw2,tw);}
+    o.slHead=-S[0]*tw*0.85;
     for(let i=0;i<3;i++)PARTS.push({x:p.x+rnd(-10,10),y:p.y+rnd(-10,10),h:pz+0.1,vx:rnd(-60,60),vy:rnd(-60,60),vh:rnd(0.5,2),life:0.35,max:0.35,col:i?'#ffffff':'#bfeaff',size:1.8,g:4});
     if(Math.random()<0.8)PARTS.push({x:p.x+rnd(-12,12),y:p.y+rnd(-12,12),h:pz+0.12,vx:rnd(-10,10),vy:rnd(-10,10),vh:0.15,life:0.9,max:0.9,col:'#eef8ff',size:6,g:0,smoke:true,grow:0.9,drag:2});
     const lp=o.slLast||[p.x,p.y];if(Math.hypot(p.x-lp[0],p.y-lp[1])>45){dfCracks((p.x+lp[0])/2,(p.y+lp[1])/2,pz+0.06,40,'#bfeaff',0.9);o.slLast=[p.x,p.y];}else if(!o.slLast)o.slLast=[p.x,p.y];
     o.slA=p.a;}
-  else o.slK=0;
+  else{o.slK=0;o.slTw=0;o.slHead=0;}
+  frostSlideHead(o);
   if(!(flags&1)&&o.slLast){const a=o.slA||p.a||0;o.slLast=null;PARTS.push({x:p.x,y:p.y,h:pz+0.2,vx:0,vy:0,vh:0.3,life:0.8,max:0.8,col:'#eef8ff',size:8,g:0,smoke:true,grow:1});
     for(let i=0;i<8;i++){const an=a+rnd(-0.5,0.5),v=rnd(150,280);iceBit(_cryG,p.x+Math.cos(a)*14,p.y+Math.sin(a)*14,pz+0.2,0.07,0.12,0.07,{life:0.6,up:0.02,down:0.2,v:[Math.cos(an)*v,Math.sin(an)*v,rnd(2,4)],spin:rnd(-12,12)});}
     for(let i=0;i<10;i++)PARTS.push({x:p.x+Math.cos(a)*16,y:p.y+Math.sin(a)*16,h:pz+0.1,vx:Math.cos(a+rnd(-0.6,0.6))*rnd(120,240),vy:Math.sin(a+rnd(-0.6,0.6))*rnd(120,240),vh:rnd(0.5,2.5),life:0.35,max:0.35,col:i%2?'#ffffff':'#bfeaff',size:1.6,g:6});}

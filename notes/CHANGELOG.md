@@ -1433,3 +1433,4 @@
 - 2026-11-23 Frost slide stance v2 (wide legs forward, balance arm, cloak open)
 - 2026-11-23 Frost slide: stop file run clip while sliding (upright, no stride)
 - 2026-11-23 Frost slide: legs fixed (were crossed), wide forward stance, chest/head face cursor
+- 2026-11-23 Frost slide: side-on surf stance, head to cursor, balancing arm sway
