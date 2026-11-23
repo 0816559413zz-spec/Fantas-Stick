@@ -95,11 +95,11 @@ function hud4Draw(me,v){
   const darkness=k.path===DARKP;
   const shieldFill=darkness?(me.dk?.[4]??DARK_V.shieldTime)/DARK_V.shieldTime:
     stand?(standBroken?1-eSmooth('stb',stand[0])/Math.max(1,ERV.standOff):stand[7]/300):me.se/100;
-  const shieldText=stand?(standBroken?'Stand แตก':(stand[7]|0)+' / 300'):'โล่';
+  const shieldText=stand?(standBroken?'Stand แตก':(stand[7]|0)+' / 300'):k.path===1?'การ์ดดาบ '+Math.round((me.se||0)*FROST_GUARD.hp/100):'โล่';
   h4Set('sb',clamp(shieldFill,0,1).toFixed(3),x=>Q.subB.style.width=x*100+'%');
   h4Set('st',shieldText,x=>Q.subT.textContent=x);
   h4Set('sk',!!standBroken,x=>Q.sub.classList.toggle('brk',x));
-  h4Set('sh',SHIELD_OFF&&!stand,x=>Q.sub.style.display=x?'none':'');
+  h4Set('sh',SHIELD_OFF&&!stand&&k.path!==1,x=>Q.sub.style.display=x?'none':'');
   {let s='';for(const [bit,ic] of STATUS_ICO)if((me.fm|0)&bit)s+=`<span>${ic}</span>`;h4Set('ch',s,x=>Q.chips.innerHTML=x);}
   h4Set('ed',!locked&&screen==='game',x=>{H4.el.classList.toggle('edit',x);if(!x)h4Pick(null);});   // เมาส์ว่าง (Esc/เมนู) = ลากสลับไพ่ได้
   // ช่องสกิล (ไพ่ + ไอคอนเล็ก)

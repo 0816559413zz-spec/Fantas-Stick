@@ -1,5 +1,5 @@
 {
- "next": 160,
+ "next": 161,
  "items": [
   {
    "id": 157,
@@ -3381,6 +3381,24 @@
     "/shots/frost_trail_zoom.jpg",
     "/shots/frost_slide_body.jpg",
     "/shots/frost_wave_compare.jpg"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 160,
+   "title": "Frost คลิกขวา: การ์ดดาบ (Sword Guard)",
+   "text": "กดคลิกขวาค้าง: ชี้ไม้ไปข้างหน้ายกสูงนิด ตัวเฉียง ดาบลอยเอียงขวางหน้า (ตามเมาส์ขึ้นลง) + โดมครึ่งวงจางมาก (สว่างแวบตอนกันโดน) • กันเฉพาะครึ่งวงด้านหน้า: ลดดาเมจ 60% เข้าการ์ด รับได้รวม 100 แล้วแตก (ล็อก 5 วิ) • เดินช้า ฟันได้ระหว่างการ์ด • การ์ดฟื้นเองตอนไม่ยก (~25 วิ เต็ม) • โดนหลัง = เต็ม • มีแค่ Frost ที่มีการ์ด",
+   "kind": "Skill",
+   "who": "Frost",
+   "status": "wait",
+   "created": "2026-11-23T22:00:00",
+   "updated": "2026-11-23T22:00:00",
+   "imgs": [],
+   "links": [
+    "/shots/motion_frost_guard.gif",
+    "/shots/frost_guard.jpg",
+    "/index.html?nosw"
    ],
    "feedback": "",
    "reply": ""

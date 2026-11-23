@@ -165,6 +165,11 @@ function frostFX(o,p,pz,now,dt){
       // ผู้ใช้ 2026-11-16: ไม่ชูขึ้นฟ้าแล้ว — ดาบพุ่งมาหน้าตัวทันทีแล้วหมุนเป็นกังหันเร็วขึ้นเรื่อย ๆ → แยก 3 เล่มตอนร่ายจบ (ร่ายเร็วขึ้น)
       {const e=E(u/.18),a=u*u*38+u*8;P.x=lerp(P.x,0,e);P.y=lerp(P.y,1.9,e);P.z=lerp(P.z,2.3,e);P.bx=Math.sin(a);P.by=Math.cos(a);P.bz=0;P.nx=0;P.ny=0;P.nz=1;P.strike=false;P.rate=40;}}
   }
+  // Sword Guard (right-click, user 2026-11-23): wand pointed forward and a bit high, body turned diagonal (not side-on),
+  // sword angled across the front (low-right → high-left); arm + sword follow mouse pitch, body follows mouse yaw
+  if(fwOn&&p.sh&&!(o.swT>0)&&!(o.grDown>0)){const pt=clamp((F[4]||0)/1000,-0.9,0.9),R=1.45,c=Math.cos(pt),s=Math.sin(pt);
+    P.x=-0.6;P.y=0.95+s*R;P.z=0.3+c*R;P.bx=0.72;P.by=0.69*c;P.bz=-0.69*s;P.nx=0;P.ny=s;P.nz=c;P.rate=18;P.strike=false;o.fwSub=0;
+    ax=-1.85-pt*0.95;az=-0.05;by=0.6;bx=0;}
   // วางอาวุธ: ช่วงฟันจริงวางตรงทุกเฟรม (ทางโค้งคม ไม่ตัดมุม) • นอกนั้นไล่ตามนุ่ม ๆ
   fwAim(P.bx,P.by,P.bz,P.nx,P.ny,P.nz);_fwP.set(P.x,P.y,P.z);
   {const G=o.fw.g;if(P.strike||!o.fwInit){G.position.copy(_fwP);G.quaternion.copy(_fwQ);o.fwInit=1;}else{const r=Math.min(1,dt*P.rate);G.position.lerp(_fwP,r);G.quaternion.slerp(_fwQ,r);}}
@@ -221,17 +226,18 @@ function frostFX(o,p,pz,now,dt){
     LREQ.push({x:_pw.x,y:_pw.y-0.8,z:_pw.z,col:'#8fe0ff',int:2.5,dist:9});
     if(melee){const W=ff?o.axe:o.sword;for(let i=0;i<3;i++){_ev.set(0,-rnd(0.3,1.9),0);W.localToWorld(_ev);const q=simOf(_ev);PARTS.push({x:q.x,y:q.y,h:q.h,vx:0,vy:0,vh:0,life:0.08,max:0.08,col:i?'#bfeaff':'#ffffff',size:2.6,g:0});}}}
   // โล่อัศวินน้ำแข็ง (แทนโล่ฟองสบู่)
+  // Sword Guard: very faint half-dome in front, tilts with aim pitch; brightens briefly on each blocked hit (o.grdHit)
   if(p.sh){
-    if(!o.ishield){o.ishield=makeKiteShield();o.g.add(o.ishield);}
-    const pitch=(F[4]||0)/1000,reach=1.45,size=1.25;
-    if(!o.shFx)o.shFx=fxPlay('frost/shield_a',{x:p.x,y:p.y,h:pz,follow:p.id,s:size,aimPitch:pitch,pivotY:1.15});
-    if(o.shFx)o.shFx.o.aimPitch=pitch;
-    o.ishield.visible=true;o.ishield.position.set(0.12,1.15+Math.sin(pitch)*reach,Math.cos(pitch)*reach);
-    o.ishield.rotation.set(-pitch,0,0);o.ishield.scale.setScalar(size);
-    o.armL.rotation.x=-1.3;o.armL.rotation.z=0.5;
-    o.shield.visible=!!((p.fm|0)&(128|16384));
-    if(Math.random()<0.3){o.ishield.getWorldPosition(_pw);const s=simOf(_pw);PARTS.push({x:s.x+rnd(-8,8),y:s.y+rnd(-8,8),h:s.h+rnd(-0.5,0.5),vx:0,vy:0,vh:0.4,life:0.5,max:0.5,col:'#dff6ff',size:1.6,g:0});}
-  }else{if(o.shFx){fxStop(o.shFx);o.shFx=null;}if(o.ishield)o.ishield.visible=false;}
+    if(!o.gdome){const M=new THREE.MeshBasicMaterial({color:hdr('#bfeaff',1.2),transparent:true,opacity:0.06,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
+      const R=new THREE.MeshBasicMaterial({color:hdr('#dff6ff',1.4),transparent:true,opacity:0.14,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
+      const d=new THREE.Mesh(new THREE.SphereGeometry(1.7,28,14,-Math.PI/2,Math.PI,0,Math.PI),M),r=new THREE.Mesh(new THREE.TorusGeometry(1.7,0.012,6,40,Math.PI),R);
+      r.rotation.z=Math.PI/2;r.rotation.y=Math.PI/2;const g=new THREE.Group();g.add(d,r);g.userData={M,R};o.gdome=g;o.g.add(g);}
+    const pt=clamp((F[4]||0)/1000,-0.9,0.9),G=o.gdome;G.visible=true;G.position.set(0,1.2,0.25);G.rotation.set(-pt,0,0);
+    o.grdIn=Math.min(1,(o.grdIn||0)+dt/0.15);o.grdHit=Math.max(0,(o.grdHit||0)-dt*3);const f=o.grdIn*(0.85+0.15*Math.sin(now/300));
+    G.userData.M.opacity=(0.03+0.16*o.grdHit)*f;G.userData.R.opacity=(0.07+0.3*o.grdHit)*f;G.scale.setScalar(0.9+0.1*o.grdIn);
+    if(!(o.swT>0)){o.armL.rotation.x=lerp(o.armL.rotation.x,-0.5,0.3);o.armL.rotation.z=lerp(o.armL.rotation.z,0.7,0.3);}
+    if(o.ishield)o.ishield.visible=false;
+  }else{if(o.gdome)o.gdome.visible=false;o.grdIn=0;if(o.shFx){fxStop(o.shFx);o.shFx=null;}if(o.ishield)o.ishield.visible=false;}
   // ไถลน้ำแข็ง
   // Slide pose (user 2026-11-23): surf stance — body turned side-on, one leg front / one leg back, feet planted,
   // head still looks forward (cursor), arms balance with a little sway. Attacks square the body back up.

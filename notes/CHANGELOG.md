@@ -1437,3 +1437,4 @@
 - 2026-11-23 Frost slide trail: narrow angular ice plates, radius 46→28
 - 2026-11-23 Frost slide trail a bit wider (plates 0.6, radius 34)
 - 2026-11-23 Frost slide trail bigger (plates 0.75, radius 42)
+- 2026-11-23 Frost right-click Sword Guard (60% into a 100 guard, diagonal sword + faint half-dome)

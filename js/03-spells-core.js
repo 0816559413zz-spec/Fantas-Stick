@@ -2,6 +2,10 @@
 const SHIELD_OFF=true;
 // Out-of-combat regen (user 2026-11-23): no damage dealt or taken for `wait` s = heal `rate` HP/s.
 const REGEN={wait:5,rate:15};
+// Frost right-click Sword Guard (user 2026-11-23): only class with a guard. Front half-circle, blocks `block` of each hit
+// into a guard worth `hp` damage (shieldE 0..100 = guard HP %), slow walk, can still attack. No time drain.
+const FROST_GUARD={block:0.6,hp:100};
+const shieldAllowed=p=>!SHIELD_OFF||p.pathIdx===1;
 // =====================================================================
 //  ระบบคาถาใหม่: สาย (path) × คาถา (spell) + สถานะ (status effects)
 //  ผู้เล่นเลือก "สาย" 1 สาย → ได้เวทโบราณ (X) ของสายนั้น + จัดชุดคาถา Q/E/R/F (ใส่ได้เฉพาะคาถาของสายตัวเอง)
@@ -159,7 +163,10 @@ function foesIn(team,x,y,r,hMax){
 // โล่บางสาย (เช่นโล่อัศวินน้ำแข็ง) กันได้เฉพาะด้านหน้า 120°
 // z = ความสูงต้นทาง (ม.) • โล่ที่ aim3d (สายลมตอนบิน/ร่อน) หันตามเป้าเล็ง 3 มิติ: กันได้ทุกทิศที่เล็งไป รวมบน/ล่าง (ผู้ใช้ 2026-11-10)
 const SHIELD_BREAK_LOCK=5;
-function shieldFaces(t,x,y,z){
+// Frost guard never fully blocks (it only soaks part of a hit in damage()) → frostGuardFaces
+function shieldFaces(t,x,y,z){return t.pathIdx===1?false:shieldFacesRaw(t,x,y,z);}
+function frostGuardFaces(t,x,y,z){return t.pathIdx===1&&shieldFacesRaw(t,x,y,z);}
+function shieldFacesRaw(t,x,y,z){
   if(!t.shieldOn||t.pathIdx===DARKP)return false;
   const B=PBASIC[t.pathIdx|0];
   if(B&&B.front&&x!=null){const A=B.frontA||Math.PI/3;
@@ -238,8 +245,8 @@ const PBASIC=[
     hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');if((t.spkN=(t.spkN|0)+1)>=PYV.sparkN){t.spkN=0;addBurn(t,1,pr.owner);}},
     tick:pyroBasic,onParry:pyroParry,onBlock:pyroBlock,dash:pyroDash,shieldSwing:true},
   {id:'b_frost',type:'icicle',n:'ดาบน้ำแข็ง / แท่งน้ำแข็ง',d:'กด V สลับโหมด • ประชิด: ดาบน้ำแข็งคอมโบ 10/10/15 ระยะ ~120 จังหวะ 3 ฮีล 10 เดินได้ระหว่างฟัน • ไกล: แท่งน้ำแข็ง 7 ดาเมจ ทุก 0.3 วิ ระยะ ~700 ช้าลง +10% (สูงสุด 30%) • อยู่สูงกว่า ~4 เมตร + ฟัน = กระโดดฟาดลงพื้น 30',
-    shd:'โล่อัศวินน้ำแข็ง: กันเฉพาะด้านหน้า 120° ยกได้นานกว่าปกติ 2 เท่า ฟันดาบระหว่างยกโล่ได้ (ช้าลง) • Parry = ฟันครั้งต่อไปใน 1.5 วิ เป็นจังหวะ 3 ทันที',dsd:'ไถลน้ำแข็ง (Shift) 5 วิ เร็ว +80% (ลื่น หยุดทันทีไม่ได้) ทิ้งทางน้ำแข็ง 4 วิ: ศัตรูเดินทับช้า +10% และลื่น เราเดินทับเร็ว +20% • คูลดาวน์ 6 วิหลังไถลจบ',
-    front:true,aim3d:()=>true,shDrain:0.5,shieldSwing:true,
+    shd:'การ์ดดาบ (คลิกขวาค้าง): ยกดาบขวางหน้า กันครึ่งวงหน้า ลดดาเมจ 60% เข้าการ์ด (รับได้ 100) เดินช้า ฟันได้ • เดิม: โล่อัศวินน้ำแข็ง: กันเฉพาะด้านหน้า 120° ยกได้นานกว่าปกติ 2 เท่า ฟันดาบระหว่างยกโล่ได้ (ช้าลง) • Parry = ฟันครั้งต่อไปใน 1.5 วิ เป็นจังหวะ 3 ทันที',dsd:'ไถลน้ำแข็ง (Shift) 5 วิ เร็ว +80% (ลื่น หยุดทันทีไม่ได้) ทิ้งทางน้ำแข็ง 4 วิ: ศัตรูเดินทับช้า +10% และลื่น เราเดินทับเร็ว +20% • คูลดาวน์ 6 วิหลังไถลจบ',
+    front:true,frontA:Math.PI/2,aim3d:()=>true,shDrain:0,shieldSwing:true,
     hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');addFrostSlow(t,FROSTV.icicleSlow);},
     tick:frostBasic,onParry:p=>{p.ripT=1.5;},dash:frostDash},
   {id:'b_storm',type:'pb2',n:'ลำสายฟ้า / สายฟ้าสามเหลี่ยม',d:'กดค้าง = ลำสายฟ้า (แบบ Winston) ระยะ 300 ล็อกทุกคนในกรวยหน้าอัตโนมัติ คนละ 3 ดาเมจ ทุก 0.4 วิ • ได้ Lightning stack ใหม่ = กดยิงครั้งถัดไปฟาดสายฟ้าจากฟ้าเป็นสามเหลี่ยมด้านหน้า (ยาว 250 ปลายกว้าง 120) 20 ดาเมจ + Shock',
