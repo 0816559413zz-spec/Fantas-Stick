@@ -232,10 +232,13 @@ function frostFX(o,p,pz,now,dt){
     if(!o.gwave){const M=new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,
         uniforms:{t:{value:0},a:{value:0},c:{value:new THREE.Color(hdr('#bfeaff',1.3))}},
         vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+        // soft shield sheet (no lines): solid faint glow, fades out toward the left/right ends and top/bottom, slow shimmer
         fragmentShader:'uniform float t,a;uniform vec3 c;varying vec2 vUv;void main(){vec2 q=vUv*2.0-1.0;float sd=abs(q.x);'+
-          'float f=(1.0-smoothstep(0.05,1.0,sd))*(1.0-smoothstep(0.25,1.0,abs(q.y)));float r=0.5+0.5*sin(sd*22.0-t*7.0);'+
-          'gl_FragColor=vec4(c*f*(0.25+0.75*r*r)*a,1.0);}'});
-      o.gwave=new THREE.Mesh(new THREE.PlaneGeometry(3.4,1.5),M);o.gwave.frustumCulled=false;o.g.add(o.gwave);}
+          'float f=(1.0-smoothstep(0.2,1.0,sd))*(1.0-smoothstep(0.45,1.0,abs(q.y)));float sh=0.9+0.1*sin(t*2.0+q.x*2.0+q.y*3.0);'+
+          'gl_FragColor=vec4(c*f*sh*a,1.0);}'});
+      // curved like a shield: arc of a cylinder bowed toward the front
+      const geo=new THREE.CylinderGeometry(2.2,2.2,1.6,32,1,true,-0.8,1.6);geo.translate(0,0,-2.2);
+      o.gwave=new THREE.Mesh(geo,M);o.gwave.frustumCulled=false;o.g.add(o.gwave);}
     const W=o.gwave,[cx,cy,cz,pt]=o.grdC;W.visible=true;W.position.set(cx,cy,cz+0.05);W.rotation.set(-pt,0,0);
     o.grdIn=Math.min(1,(o.grdIn||0)+dt/0.2);o.grdHit=Math.max(0,(o.grdHit||0)-dt*3);
     W.material.uniforms.t.value=now/1000;W.material.uniforms.a.value=(0.2+0.45*o.grdHit)*o.grdIn;W.scale.set(0.7+0.3*o.grdIn+0.15*o.grdHit,1,1);
