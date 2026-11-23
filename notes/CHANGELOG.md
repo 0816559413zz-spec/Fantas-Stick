@@ -1444,3 +1444,4 @@
 - 2026-11-23 Frost guard: ripple lines → soft curved shield sheet
 - 2026-11-23 Frost Sword Guard approved by user (chat)
 - 2026-11-23 Light: always float at BA height, BA charge 0.6 s + new dmg/rates, calmer beam
+- 2026-11-23 Earth Rampart replaces Terra Auger (wall + push)

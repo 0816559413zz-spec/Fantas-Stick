@@ -12,7 +12,8 @@ const ECOL={stone:'#8f7a5c',dark:'#5e4d38',dust:'#b39a74',glow:'#ffcf6a',mud:'#5
 // แขนกัน (R) พับศอกบังหน้า: fist = จุดกำปั้น [หน้า px, ขวา px, สูง] • elbow = ทิศศอก [ซ้าย, หน้า, ลง]
 // larm = แขน L (จาง) ง้างหมัดเก็บไว้ข้างเอว แบบนักสู้ [ต้นแขน x (+ = ศอกไปหลัง), กาง z, ศอก x] • lo = ท่อนล่างจางเป็นทราย [สูง (คูณ), ตำแหน่ง y] ให้หายเร็วขึ้น
 const EGUARD_BIG=/[?&]eshield=big/.test(location.search),EGUARD=EGUARD_BIG?{sc:1.8,back:80,side:14,z:0.05,lean:0.8,fist:[14,12,1.95],elbow:[0.8,1,0.3],larm:[-0.4,0.1,-1.97],lo:[0.5,1.37]}:{sc:1.55,back:69,side:12,z:0.2,lean:0.8,fist:[14,12,1.85],elbow:[0.8,1,0.3],larm:[-0.4,0.1,-1.97],lo:[0.5,1.37]};
-var EV={st:new Map(),es:new Map(),anims:[],fog:null,crush:[]};
+var EV={st:new Map(),es:new Map(),anims:[],fog:null,crush:[],rpush:[]};
+const V_RAMP_PUSH=200;   // Stand follows the shoved wall (approx push distance)
 const eW=(x,y,h)=>new THREE.Vector3(tx(x),(h||0)+GY(x,y),tz(y));
 const EARTH_FIST_SCALE=1.9;
 const eYaw=(x1,y1,x2,y2)=>Math.atan2(x2-x1,y2-y1);
@@ -730,6 +731,9 @@ function syncEarth(v,dt,now){
         for(let i=0;i<3;i++)smoke(lerp(o.x1,o.x2,rnd(0,1)),lerp(o.y1,o.y2,rnd(0,1)),0.2,3,ECOL.dust,1.6,9,L*0.15);shake(0.15);}
       else if(o.k===2){eChunks(o.x,o.y,0.3,5,120,5,0.14);smoke(o.x,o.y,0.3,4,ECOL.dust,1.1,7,40);}
       else if(o.k!==3){burst(o.x,o.y,ECOL.dust,14,140,0.9,4,{h:0.3,vh:[1,4],g:3,smoke:true,grow:1.5});}}
+    if(o.k===0){const tx2=(w[2]+w[4])/2,ty2=(w[3]+w[5])/2;   // Rampart push: wall slides to the new snapshot spot
+      if(Math.hypot(tx2-o.x,ty2-o.y)>2){const k=Math.min(1,dt*18);o.x+= (tx2-o.x)*k;o.y+=(ty2-o.y)*k;o.g.position.copy(eW(o.x,o.y,0));o.base.copy(o.g.position);
+        if(Math.random()<0.9){burst(o.x+rnd(-30,30),o.y+rnd(-30,30),ECOL.dust,4,160,0.5,2.6,{h:0.2,vh:[1,4],g:6});eChunks(o.x,o.y,0.2,1,180,6,0.18);}}}
     const age=(now-o.born)/1000;
     if(o.k===0||o.k===2)o.g.scale.y=Math.min(1,0.05+age/(o.k===0?0.22:0.3));
     if(o.k===3)o.mat.opacity=0.14+0.08*Math.sin(now/300);
@@ -751,6 +755,11 @@ function syncEarth(v,dt,now){
         if(Math.random()<0.35*strain){const q=lerp(-1,1,Math.random());burst(o.x+c*q*130,o.y+sn*q*130,ECOL.dust,2,60,0.7,3,{h:rnd(0.5,5),vh:[0,1],g:2,smoke:true,grow:1.4});}}
       if(Math.random()<0.4*strain)eChunks(C.x+rnd(-80,80),C.y+rnd(-80,80),0.2,1,80,3,0.12);}
     if(C.t>(C.boom||9)+0.6){disposeObj(G.g);EV.crush.splice(i,1);}}
+  // Rampart push: Stand rises behind the wall, two-hand shove forward, fades
+  for(let i=EV.rpush.length-1;i>=0;i--){const R=EV.rpush[i];R.t+=dt;const c=Math.cos(R.a),sn=Math.sin(R.a),G=R.G,u=Math.min(1,R.t/0.35);
+    const wx=R.x+c*V_RAMP_PUSH*Math.min(1,R.t/0.35),wy=R.y+sn*V_RAMP_PUSH*Math.min(1,R.t/0.35);G.g.position.copy(eW(wx-c*(70-30*u),wy-sn*(70-30*u),-0.4));G.g.rotation.y=Math.atan2(c,sn);
+    standOp(G,R.t<0.5?Math.min(1,R.t/0.1):Math.max(0,1-(R.t-0.5)/0.35));standPose(G,{t:now/1000,lean:0.35*u});
+    if(R.t>0.9){disposeObj(G.g);EV.rpush.splice(i,1);}}
   // ฝุ่น Dust Burst
   const me=myPos();let inEnemy=false;
   for(const d of (v.ED||[])){const [,x,y,r,t,team,boom,ids]=d;
@@ -851,6 +860,8 @@ function earthEfx(ev){
     case 'esbwall':eDebris(x,y,H,26,240);ring(x,y,'#ffd86b',70,0.4,H);burst(x,y,'#ffe7a0',12,120,0.6,2.2,{h:H+0.8,g:0});shake(0.4);if(near)snd('boom',ev);return true;
     // ----- Tectonic Crush -----
     case 'ewallup':shake(0.35);if(near)snd('boom',ev);return true;
+    case 'erampup':shake(0.3);if(near)snd('boom',ev);eChunks(x,y,0.3,6,160,7,0.2);return true;   // Rampart rises (wall itself appears from the ES snapshot)
+    case 'erampush':{const G=makeStand(2.0,true);EV.rpush.push({t:0,x,y,a:ev.a,G});eAppear(x-Math.cos(ev.a)*60,y-Math.sin(ev.a)*60,0,1.6);shake(0.45);if(near)snd('boom',ev);return true;}   // Stand shoves the wall
     case 'ecrushw':{const G=makeStand(3.2,true);EV.crush.push({t:0,x,y,a:ev.a,id:ev.id,G});eAppear(x+Math.cos(ev.a)*190,y+Math.sin(ev.a)*190,0,2.4);if(near)snd('buff',{x,y,vol:0.5});return true;}
     case 'ecrush':{const C=EV.crush.find(q=>!q.boom&&Math.hypot(q.x-x,q.y-y)<80);if(C)C.boom=C.t;
       const c=Math.cos(ev.a),s=Math.sin(ev.a);for(let i=-3;i<=3;i++)eDebris(x+c*i*45,y+s*i*45,1+rnd(0,3),10,200);eWave(x,y,0.3,240);eChunks(x,y,2,22,360,8,0.35);

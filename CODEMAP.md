@@ -93,30 +93,33 @@ SDOME_POSE:235 stormDomeCost:236 stormDomeDash:237 stormDomeCharge:238 stormDome
 ## js/09-darkness.js (463) — 
 DARKP:2 DARK_V:6 DARK_BA:7 DARK_LONG_DASH:8 DARK_CHASE_FLOW:9 DARK_MAW:10 DARK_VEIL_PULL_CLEAR:11 DARK_CHASE_T:12 DARK_WALTZ_ORB:13 darkFlow:14 darkOrbImmune:15 darkAlive:23 darkReset:24 darkState:25 darkEvent:26 darkAim:29 darkTarget:36 darkCone:40 darkBAFloor:47 darkBATargets:51 darkMoveHeading:68 darkClearCooldown:71 darkMark:75 darkReveal:82 darkQueue:83 darkGainFlow:84 darkKill:90 darkTick:93 darkShieldTick:127 darkShieldCrossAt:144 darkShieldCross:153 darkBeamStop:154 darkDash:163 darkBasic:186 DARK_MARK:216 darkWaveTick:233 DARK_CHASE:255 darkMoveWaltz:306 DARK_WALTZ:331 DARK_WARD:353 DARK_VEIL:368 DARK_ULT:376 darkUltBite:391 darkMoveChase:401 darkSnap:441 darkMarked:460
 
-## js/09-earth.js (337) — 
+## js/09-earth.js (360) — สายดิน ⛰️ (ผู้ใช้ออกแบบทั้งหมด — designs/earth.md §0 FINAL SPEC) • ฝั่งโฮสต์
+§8 Tectonic Crush: Stand ดันช้า (TECT.v.push) แล้วกำแพงปิดเร็ว (TECT.v.s…
 EARTH:9 ERV:12
 §24 ตัวช่วย
 eOn:25 eStand:26 eNoStand:27 eSegD:29 eAdd:30 eCollide:32 eProjHit:52 eKill:55
 §57 ทุกเฟรมของผู้เล่นสายดิน (เรียกจาก updatePlayer หลังส่วนโล่)
-earthTick:58 earthSpd:82 earthShHit:84 earthBreak:85 earthReset:87
-§89 ท่าพื้นฐาน (คลิกซ้าย)
-earthBasic:90 earthFistStart:99 earthCBStart:100 earthFistAim:101 earthFistFire:102 earthFistBreak:109
-§121 Dash: Stand Rampage / Rock Boost Escape
-earthDash:122 earthRampEnd:141
-§146 สกิล 1: Stonebreaker
-earthStoneAim:147 STONEB:156
-§175 สกิล 2: Mud Swamp
-MUDS:176
-§180 สกิล 3: Tectonic Crush
-TECT:182 earthCrush:195
-§206 สกิล 4: Dust Burst
-DUSTB:207
-§212 สกิล 5: Terra Auger
-AUGER:214 eAugAim:218 earthAugFire:219 earthMound:230
-§233 อัลติ: Wrath — ชาร์จบนพื้น หินดันผู้เล่นขึ้นฟ้า Stand ปาเสาลงจุดเล็ง
-WRATH_READY_T:234 WRATH_THROW_SWING_T:235 WRATH_DRAW_T:236 WRATH:237 earthWrathAim:243 earthWrathFlightAngles:244 earthPillarThrow:250 earthPillarImpact:256 earthWrathTick:264 earthWrathEnd:288 E_WRS:292 earthSpikeTick:293
-§299 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
-updateEarth:300 earthSnapP:313 earthSnapW:329
+earthTick:58 earthSpd:83 earthShHit:85 earthBreak:86 earthReset:88
+§90 ท่าพื้นฐาน (คลิกซ้าย)
+earthBasic:91 earthFistStart:100 earthCBStart:101 earthFistAim:102 earthFistFire:103 earthFistBreak:110
+§122 Dash: Stand Rampage / Rock Boost Escape
+earthDash:123 earthRampEnd:142
+§147 สกิล 1: Stonebreaker
+earthStoneAim:148 STONEB:157
+§176 สกิล 2: Mud Swamp
+MUDS:177
+§181 สกิล 3: Tectonic Crush
+TECT:183 earthCrush:196
+§207 สกิล 4: Dust Burst
+DUSTB:208
+§213 สกิล 5: Terra Auger
+AUGER:216
+§217 สกิล 5: Rampart — วางกำแพงหินหน้าตัว • กดอีกครั้ง = ดันกำแพงพุ่งไปจุด…
+RAMPART:218 earthRampartTick:233 eAugAim:241 earthAugFire:242 earthMound:253
+§256 อัลติ: Wrath — ชาร์จบนพื้น หินดันผู้เล่นขึ้นฟ้า Stand ปาเสาลงจุดเล็ง
+WRATH_READY_T:257 WRATH_THROW_SWING_T:258 WRATH_DRAW_T:259 WRATH:260 earthWrathAim:266 earthWrathFlightAngles:267 earthPillarThrow:273 earthPillarImpact:279 earthWrathTick:287 earthWrathEnd:311 E_WRS:315 earthSpikeTick:316
+§322 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
+updateEarth:323 earthSnapP:336 earthSnapW:352
 
 ## js/09-light.js (564) — สายแสง ✨ Radiance (ผู้ใช้ออกแบบทั้งหมด — designs/light.md) • ฝั่งโฮสต์ • รอบแรก 2026-11-1…
 LIGHTP:8 LTV:12 lgOn:19 lightShieldPitch:20 lightShieldGauge:21 lightClearBond:22 lightReset:26 lightAlly:32 lightLinkPos:33 lightUnlink:34 lightReleaseAlly:52 lightBondTarget:59 lightBondTap:79 lightRecall:94
@@ -599,32 +602,32 @@ WB:298 wbInit:299 wbBegin:309 wbEnd:310 fxWarpMake:311 fxWarpTick:324
 §332 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:335 fxVolLoad:336 fxVolTex:340 fxVolSet:343 fxVolReady:344 fxVolMake:345 fxVolTick:348 fxPreAssets:353 fxAssetsWait:355
 
-## js/47-earth-view.js (996) — 
-ECOL:9 EGUARD_BIG:14 EGUARD:14 EV:15 eW:16 EARTH_FIST_SCALE:17 eYaw:18
-§19 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
-ETEX:20 eTex:21 eFadeTex:35 eMat:37 eTMat:38 rockGeo:39 ROCKU:45 rockMesh:46 coneMesh:48 _eChunkM:50 eChunks:51
-§53 Stand (บล็อกหิน/ทรายครึ่งตัวบน)
-makeStand:55
-§92 Rampage: เกราะลมหน้า Stand (ผู้ใช้: เหมือนอุกกาบาตตกโลก ต้านลม — เปลื…
-makeBow:94 EBOW:103 _RIM:103 eRampWind:104 eSpikes:116 standOp:121 _ikDn:124 eArmIK:125 PK:132 standPose:134 _eRq:161 _eRq2:161 _eRx:161 standRun:162 eState:180 eStandOf:181 eGiantOf:182 eSandFall:184 eAppear:185 eAim:187
-§190 วงเตือนบนพื้น (BA ชาร์จ / จุดปาเสา): วงเข้มก่อน แล้วสีอ่อนค่อย ๆ เติม…
-makeWarn:191 eWarnAt:196 eStoneDir:197 eStonePrep:201 eFistCharge:209 eStonePunch:226 eFistEase:238 eFistMotion:239 eFistPose:243 eFistPlayerPose:268 eWrathPillarDir:285 eWrathBoostRock:286 eWrathStand:311 eWrathPlayerPose:386 _eForearmAxis:403 _eForearmQ:403 earthFistForearm:404
-§415 ทุกเฟรม: ผู้เล่นสายดิน (เรียกจาก syncPlayers)
-earthFX:416
-§490 สว่าน (ref: designs/earth_ref/drill_ref.png): หินแหลมเรียวเป็นตัวหลัก…
-eSteelEnv:492 eHeatTex:497 EDR:502 eDrillGeo:503 makeDrill:509 drillHeat:516
-§518 เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายห…
-ePillarVeins:519 makePillar:537
-§543 กระสุนหิน
-earthFistMat:545 makeEarthFist:549 eFistCrumble:565 earthProjMesh:588 SLAB:598 makeSlab:599 eSlabGeo:604 eSlabMats:615 slabCracks:682
-§685 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
-earthClear:686 eMergePartial:694 eMergeKids:699 eMakeSO:707 syncEarth:724 earthFog:769 eMudScreen:772 _eOlMat:779 eOutlines:781 _eCamT:786 eAnim:787 eDebris:788 eWave:790 eAirWave:792 esbImpact:795
-§802 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
-earthEfx:803 eWindOut:912 eAirCone:918 eDrillFly:920
-§924 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
-earthMudZone:925 earthMudSink:932
-§933 HUD ใต้เป้าเล็ง
-ESM:935 eSmooth:936 ESF:939 eShieldFx:940 eChips:945 eShieldSegs:948 eShieldNum:962 eShieldArc:966 drawEarthHud:979
+## js/47-earth-view.js (1007) — สายดิน ⛰️ — ภาพฝั่งเครื่องเล่น (Stand / Stand ใหญ่ / กำแพง / เสา / เนิน / ฝุ่น / สว่าน / …
+ECOL:9 EGUARD_BIG:14 EGUARD:14 EV:15 V_RAMP_PUSH:16 eW:17 EARTH_FIST_SCALE:18 eYaw:19
+§20 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
+ETEX:21 eTex:22 eFadeTex:36 eMat:38 eTMat:39 rockGeo:40 ROCKU:46 rockMesh:47 coneMesh:49 _eChunkM:51 eChunks:52
+§54 Stand (บล็อกหิน/ทรายครึ่งตัวบน)
+makeStand:56
+§93 Rampage: เกราะลมหน้า Stand (ผู้ใช้: เหมือนอุกกาบาตตกโลก ต้านลม — เปลื…
+makeBow:95 EBOW:104 _RIM:104 eRampWind:105 eSpikes:117 standOp:122 _ikDn:125 eArmIK:126 PK:133 standPose:135 _eRq:162 _eRq2:162 _eRx:162 standRun:163 eState:181 eStandOf:182 eGiantOf:183 eSandFall:185 eAppear:186 eAim:188
+§191 วงเตือนบนพื้น (BA ชาร์จ / จุดปาเสา): วงเข้มก่อน แล้วสีอ่อนค่อย ๆ เติม…
+makeWarn:192 eWarnAt:197 eStoneDir:198 eStonePrep:202 eFistCharge:210 eStonePunch:227 eFistEase:239 eFistMotion:240 eFistPose:244 eFistPlayerPose:269 eWrathPillarDir:286 eWrathBoostRock:287 eWrathStand:312 eWrathPlayerPose:387 _eForearmAxis:404 _eForearmQ:404 earthFistForearm:405
+§416 ทุกเฟรม: ผู้เล่นสายดิน (เรียกจาก syncPlayers)
+earthFX:417
+§491 สว่าน (ref: designs/earth_ref/drill_ref.png): หินแหลมเรียวเป็นตัวหลัก…
+eSteelEnv:493 eHeatTex:498 EDR:503 eDrillGeo:504 makeDrill:510 drillHeat:517
+§519 เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายห…
+ePillarVeins:520 makePillar:538
+§544 กระสุนหิน
+earthFistMat:546 makeEarthFist:550 eFistCrumble:566 earthProjMesh:589 SLAB:599 makeSlab:600 eSlabGeo:605 eSlabMats:616 slabCracks:683
+§686 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
+earthClear:687 eMergePartial:695 eMergeKids:700 eMakeSO:708 syncEarth:725 earthFog:778 eMudScreen:781 _eOlMat:788 eOutlines:790 _eCamT:795 eAnim:796 eDebris:797 eWave:799 eAirWave:801 esbImpact:804
+§811 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
+earthEfx:812 eWindOut:923 eAirCone:929 eDrillFly:931
+§935 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
+earthMudZone:936 earthMudSink:943
+§944 HUD ใต้เป้าเล็ง
+ESM:946 eSmooth:947 ESF:950 eShieldFx:951 eChips:956 eShieldSegs:959 eShieldNum:973 eShieldArc:977 drawEarthHud:990
 
 ## js/48-ragdoll.js (409) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 _ragFw:41 ragBones:42 ragBasis:49 ragTargets:57 ragStart:63 ragBack:96 ragFloor:97 ragStep:98 ragPose:163 ragWrite:178 ragRestore:190 ragEnd:194 ragTick:196 ragHideDead:240 clearDeathFades:249 deathSlashSplit:257 deathDissolve:310 deathVisualSync:385
@@ -952,4 +955,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(117 files, 35230 lines)
+(117 files, 35264 lines)
