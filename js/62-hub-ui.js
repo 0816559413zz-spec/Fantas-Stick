@@ -220,7 +220,7 @@ function hubLobby(){
   const host=NET.isHost,M=MODES[L.mode]||MODES.train,hm=HMODES.find(x=>x.k===L.mode)||{k:L.mode,en:modeTitle(M),th:'',d:M.d};
   const team=!!M.team,me=L.players.find(p=>p.id===NET.myId);
   const K=parseKit(myKit),P=PATHS[K.path]||PATHS[0],ult=SPELL_LIST[K.ult];
-  const alt=M.map&&L.mode!=='train'&&MAPS[L.mpk]&&MAPS[L.mpk].allModes,fixed=M.map&&!alt?M.map:null,mk=fixed||L.mpk||'',canAlt=M.map&&L.mode!=='train',img=mk?`url('${HUI_IMG}maps/${mk}.jpg')`:'none';
+  const alt=M.map&&L.mode!=='train'&&MAPS[L.mpk]&&MAPS[L.mpk].allModes,fixed=M.map&&!alt?modeMap(M):null,mk=fixed||L.mpk||'',canAlt=M.map&&L.mode!=='train',img=mk?`url('${HUI_IMG}maps/${mk}.jpg')`:'none';
   const err=host?validate():'';
   const plRow=p=>{const kk=parseKit(p.kt!==undefined?p.kt:'0'),pp=PATHS[kk.path]||PATHS[0];return `<div class="pl ${p.id===NET.myId?'me':''}">${typeof prfAvatar==='function'?prfAvatar(p.n,p.fr,pp.col,30,icoHTML('p_'+pp.id,pp.col,15)):`<span class="em">${icoHTML('p_'+pp.id,pp.col,18)}</span>`}<span class="nm">${esc(p.n)}</span>${p.id===L.host?`<span class="cr" title="โฮสต์">${hSvg('crown')}</span>`:''}${speakingIds().has(p.id)?'<span class="spk">♪</span>':''}${p.b&&host?`${team?`<button class="bt" data-bott="${p.id}" title="ย้ายทีม">⇄</button>`:''}<button class="bt" data-botx="${p.id}" title="ลบบอท">✕</button>`:''}</div>`;};
   // เพิ่มบอท (โฮสต์): เลือกธาตุ + ความเก่ง แล้วกด + บอท (js/15-bot lobbyBotAdd) • โหมดที่บอทยังเล่นไม่เป็น = บอกไว้

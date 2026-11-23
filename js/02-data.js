@@ -197,6 +197,7 @@ function loadAllMapData(){return modelManifest().then(m=>Promise.all(Object.keys
 // แผนที่ที่ใช้ได้กับโหมดนี้ (ไฟล์แผนที่บอกโหมดเองได้)
 // เครื่องลูก: ยังไม่มีข้อมูลแผนที่นี้ → สั่งโหลดแล้วรอ snapshot ถัดไป (โหลดไม่ได้ = ใช้แผนที่สำรอง)
 function mapReady(id){if(MAPS[id]||FMAPS.fail.has(id))return true;loadMapData(id);return false;}
+function modeMap(M){return M&&M.mapF&&MAPS[M.mapF]?M.mapF:M&&M.map;}   // a mode's fixed map: Map Builder version (mapF, e.g. siege fcs-file) once loaded, else the code map
 function mapOkFor(id,mode){if(MAP_OFF.has(id))return false;if(MAPS[id]&&MAPS[id].only&&MAPS[id].only!==mode)return false;/* only = แผนที่เฉพาะโหมด (ปราสาท First Castle Strike) */const f=MAPS[id]&&MAPS[id].fm;return !f||!f.modes||f.modes.includes(mode);}
 // ---------- ของประกอบฉากที่พังได้ / ใช้ได้ (prop) ----------
 // ตำแหน่งสุ่มแบบ seed จากชื่อแผนที่ → ทุกเครื่องคำนวณได้ตรงกันเอง ส่งในเน็ตแค่สถานะ (snapshot PB: 1 ตัวต่อชิ้น 0=ปกติ 1=พัง 2=ใช้แล้ว)

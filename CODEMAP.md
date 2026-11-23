@@ -13,18 +13,18 @@ CITY_MID:140 CITY_C2:140 cityModeData:141 mapArea:157 AREA:158 areaClamp:160
 ## js/02-citytest.js (28) — แมพทดสอบเมืองใหญ่ (กล่องเทา) — ใช้วัดความลื่นของเครื่องยนต์ก่อนสร้างเ…
 CITY_N:4 CITY_B:4 CITY_ROAD:4 genCityTest:5 cityTestProps:19
 
-## js/02-data.js (390) — 
+## js/02-data.js (391) — 
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
 §73 Test Place (ห้องฝึก): พื้นโล่งไม่มีสิ่งกีดขวาง
 TEST_W:75 TEST_H:75 TEST_C:75 TEST_VIL:75 TEST_GW:77 TEST_Z:78 TEST_ST:85 TEST_PH:86 testWalls:88 testDummySpots:90 testFences:92 genTest:105 testProps:120 trZone:133 trBotPad:134 trFixSpots:136 trShow:138 genGreatHall:139 MAPS:147 MAP_OFF:160 PLAYMAP:161 RANDOM_MAPS:162 MAPID:163 MW:163 MH:163 OBS:163 setMapVars:164
 §165 แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets…
-FMAPS:168 b64i16:169 regFileMap:170 loadMapData:188 loadAllMapData:196 mapReady:199 mapOkFor:200
-§201 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
-PROPDEF:205 PROP_OFF_MODES:212 PROP_USE:214 PROPS:215 PROPON:215 genProps:216
-§236 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
-HOUSES:238 HAIRC:243 HAIRSTY:245 WOODC:248 WOODN:249 WCOREC:250 WCOREN:251 WANDSTY:252 WANDN:257 WANDNN:272 EYEC:273 SKINC:274 CLOAKC:275 TIESTY:276 LOOKK:277 LOOKN:277 lookStr:278 parseLook:279 randLook:280 LOOKS:281 LOOKP:281 KITS:281 getKit:282 getLook:283 CREST_SH:284 CREST_PAT:285 starPts:290 CREST_ANI:292 crestSVG:298 houseColor:306 TEAMC:307 TEAMN:307 NOBROOM:309 ROOM_MAX:311 MODES:312 hostModeEnabled:324 PLAY:326 PDEF:327 EDEF:354 POOLS:367 CDK:377 BUFFS:380 BRAR:389 rollRar:390
+FMAPS:168 b64i16:169 regFileMap:170 loadMapData:188 loadAllMapData:196 mapReady:199 modeMap:200 mapOkFor:201
+§202 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
+PROPDEF:206 PROP_OFF_MODES:213 PROP_USE:215 PROPS:216 PROPON:216 genProps:217
+§237 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
+HOUSES:239 HAIRC:244 HAIRSTY:246 WOODC:249 WOODN:250 WCOREC:251 WCOREN:252 WANDSTY:253 WANDN:258 WANDNN:273 EYEC:274 SKINC:275 CLOAKC:276 TIESTY:277 LOOKK:278 LOOKN:278 lookStr:279 parseLook:280 randLook:281 LOOKS:282 LOOKP:282 KITS:282 getKit:283 getLook:284 CREST_SH:285 CREST_PAT:286 starPts:291 CREST_ANI:293 crestSVG:299 houseColor:307 TEAMC:308 TEAMN:308 NOBROOM:310 ROOM_MAX:312 MODES:313 hostModeEnabled:325 PLAY:327 PDEF:328 EDEF:355 POOLS:368 CDK:378 BUFFS:381 BRAR:390 rollRar:391
 
 ## js/02-fcs-data.js (3) — 
 FCS_DATA:3
@@ -201,10 +201,10 @@ W_WL:553 W_DR:559 W_VX:565 W_VO:571 W_FW:577 W_UL:587
 ## js/10-net.js (203) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NETU:65 netUndelta:66 setStatus:72 hostGame:74 hostPeer:83 netConnect:103 joinWatch:114 joinFail:129 netLost:135 joinGame:150 joinPeer:161 clientOnData:176 leave:191 leaveRoom:193
 
-## js/11-host.js (482) — 
-G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:75 hostRemove:84 validate:100 hostStart:114 hostToLobby:143 MIDJOIN:150 modeCap:151 midJoin:152 CHATT:168 chatRelay:169 emoHost:177 resetBody:179 fmap:185 spawnPts:186 teamPts:188 spSpread:190 placeAll:191 respawn:203
-§222 ลูปหลักฝั่งโฮสต์
-hostTick:223 angDiff:240 cH:242 vR:243 updatePlayer:245 hitProp:469 damagePropsIn:476 nearUseProp:477 useProp:478
+## js/11-host.js (485) — 
+G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:75 hostRemove:84 validate:100 hostStart:114 hostToLobby:146 MIDJOIN:153 modeCap:154 midJoin:155 CHATT:171 chatRelay:172 emoHost:180 resetBody:182 fmap:188 spawnPts:189 teamPts:191 spSpread:193 placeAll:194 respawn:206
+§225 ลูปหลักฝั่งโฮสต์
+hostTick:226 angDiff:243 cH:245 vR:246 updatePlayer:248 hitProp:472 damagePropsIn:479 nearUseProp:480 useProp:481
 
 ## js/12-buildings.js (441) — environment damage / rays / collision shared by breakable things
 BLDON:4 bldMoundH:5 damageEnv:7 bldRay:16 aimClip:21 aimLineH:29 aimRay3:30 projEl:57 bldPush:62 updateBldg:68
@@ -939,4 +939,4 @@ _dvPanel:95 _dvBtn:98 _dvBody:100 _dvHead:100 devUiApply:102 devFreeMouse:110 de
 §130 rows
 dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:193 devUiAct:200
 
-(116 files, 35012 lines)
+(116 files, 35016 lines)
