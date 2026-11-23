@@ -475,14 +475,14 @@ rr:11 SLOTS:12 fmtTime:13
 §14 ชิ้นส่วน HUD ธีมทอง-น้ำเงิน
 HG:15 HG2:15 HUDF:17 hudTick:18 readyPulse:20 diaPath:22 plate:24 frameBox:30 bossTrail:38 drawBossBar:39 spellDia:59 thinBar:88 drawHUD:93 raceRankClient:173 drawModeHUD:177 MM:215 MMB:216 drawMinimap:217 slotKey:293 mySlots:294 STATUS_ICO:303 SLOTS_IMP:304 BR_LOCK:305 CLUSTER:307 E_NEEDSTAND:308 slotState:309 drawBottom:333 drawBoard:348 FHUD:373 FHTEX:374 fhFrame:375 FH_EDGE:378 FH_CORE:378 fhMix:379 FHC:381 fhLayer:382 drawFireHeat:385 SNAPB:469 snapBanner:470 drawSnapBanner:471
 
-## js/39-menu.js (286) — 
+## js/39-menu.js (291) — 
 myLook:5 myColor:5 myKit:5 myName:6 renderMyHouse:9
 §11 หน้าสร้าง/แต่งตัวละคร (2 ขั้น: 1 หน้าตา → 2 เลือกบ้าน)
 crLib:12 crSaved:12 crKitSaved:12 crOpen:12 crStep:12 crTab:12 crFirst:12 crKitOnly:12 crSlot:12 CRTABS:13 sw_:14 bt_:15 nameBox_:16 crPanelSet:17 crRenderStep1:22 crRenderWand:33
 §36 ขั้น 3: สาย + ชุดคาถา
 ROLE_COL:37 roleTag:38 DESIGNED:39 spellTags:40 spellDescHTML:47 baseDescHTML:51 SB_THEME:59 ROLE_ORDER:68 sbFxRun:69 sbFxT:69 sbParts:69 crRenderKit:70 sbStartFx:99 sbFxTick:100 sbBurst:127 crAssign:133 crRenderHouse:142 crGo:149 crSaveName:161 crSetHouse:162 openCreator:163 closeCreator:173 lobbyKitSend:180
 §222 ฉากเปิด (#intro) + ประกายบนหน้าเมนู (#menuFx)
-TITLE:225 titleSpark:226 TSPR:228 titleSprite:229 titleDraw:230 titleLoop:240 titleGo:251 JOINQ:259 ovResult:279
+TITLE:225 titleSpark:226 TSPR:228 titleSprite:229 titleDraw:230 titleLoop:240 titleGo:251 JOINQ:264 ovResult:284
 
 ## js/40-train-settings.js (256) — เมนูทดลอง (ห้องฝึก / Test Place)
 trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14
@@ -644,14 +644,16 @@ GR_NOISE:162 GR_LIVE:167 grLive:186 GR_GLSL_V:196 GR_BEGIN:201 grassMat:253 gras
 §398 สกิลลม → หญ้า (ภาพล้วน เรียกจาก windEfx js/68)
 WIND_GRASS:400 airWind:414
 
-## js/51-warmup.js (306) — 
+## js/51-warmup.js (344) — 
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_SLICE:13 WARM_X:14 WARM_Y:14 warmKeep:16 warmStaticModels:22 glReady:31 warmCompile:32 warmDraw:35 WARM_SKIP:45 warmAssets:48 warmFx:58 warmFxEnd:69 warmGather:71 warmPaths:73 warmFrame:75 warmStep:77 warmCharVariants:135 warmQueue:149 WARM_LOBBY:155 warmLobbyTick:156 warmTick:163
-§170 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
-warmOutline:180
-§197 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
-GWARM:202 gameWarmTick:203 gameWarmFree:236
-§242 Shader never seen before mid-match: compile in the background, hide t…
-SHR:250 shrLights:254 IMZ:259 imzPre:266 imzPost:268 shrRoot:269 shrCollect:270 shrPending:276 shReadyPre:280 shReadyPost:301
+§172 Entry loader (PRELOAD-STANDARD step 3, 2026-11-23)
+PRE:178 preloadReg:179 preProg:180 preFin:181 preStart:183 preTick:198
+§208 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
+warmOutline:218
+§235 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
+GWARM:240 gameWarmTick:241 gameWarmFree:274
+§280 Shader never seen before mid-match: compile in the background, hide t…
+SHR:288 shrLights:292 IMZ:297 imzPre:304 imzPost:306 shrRoot:307 shrCollect:308 shrPending:314 shReadyPre:318 shReadyPost:339
 
 ## js/52-social.js (172) — 
 §6 แชท: Enter = พิมพ์ / Enter อีกที = ส่ง / Esc = ปิด • ข้อความขึ้นมุมซ้…
@@ -951,4 +953,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(117 files, 35444 lines)
+(117 files, 35487 lines)

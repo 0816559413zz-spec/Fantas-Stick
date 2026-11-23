@@ -154,19 +154,57 @@ function warmQueue(ps,key){WARM.key=key;WARM.late=false;WARM.q=['common'];
 // countdown then finds the same key and only adds the late compile. `?nolobbywarm` = old path.
 const WARM_LOBBY=!/[?&]nolobbywarm/.test(location.search);
 function warmLobbyTick(){
-  if(!WARM_LOBBY||GWARM.busy||!GWARM.key||!LOBBY||LOBBY.ph!=='lobby'||!world||screen!=='lobby')return;
+  if(PRE.st===1||!WARM_LOBBY||GWARM.busy||!GWARM.key||!LOBBY||LOBBY.ph!=='lobby'||!world||screen!=='lobby')return;
   const ps=[...new Set(LOBBY.players.map(p=>{const k=getKit(p.id);return k&&PATHS[k.path]?PATHS[k.path].id:null;}).filter(Boolean))].sort(),key=builtKey+'|'+ps.join(',');
   if(key!==WARM.key)warmQueue(ps,key);
   if(!WARM.q.length||WARM.busy)return;
   const step=WARM.q.shift();try{warmStep(step);}catch(e){console.warn('warmup',step,e);WARM.busy=false;}
 }
 function warmTick(v){
+  if(PRE.st===1&&v.ph==='count')preFin();   // match starting while still preloading: per-match queue takes over (done steps skipped)
+  if(PRE.st===1)return;
   if(v.ph==='count'){const ps=warmPaths(v).sort(),key=builtKey+'|'+ps.join(',');
     if(key!==WARM.key)warmQueue(ps,key);
-    if(!WARM.late&&v.cd<=1){WARM.late=true;WARM.q.push('compile');}}
+    if(!WARM.late&&v.cd<=1){WARM.late=true;if(!PRE.on)WARM.q.push('compile');}}
   if(!WARM.q.length||WARM.busy)return;
   const step=WARM.q.shift();try{warmStep(step);}catch(e){console.warn('warmup',step,e);WARM.busy=false;}
 }
+// ---------- Entry loader (PRELOAD-STANDARD step 3, 2026-11-23) ----------
+// Warms every path at page load (during the title logo), not per match: FX files of all classes, code visuals (WARM.reg),
+// character fight variants on two sample students (plain + batched, own look), then one sliced compile + draw. CLICK TO BEGIN
+// waits on it with a progress bar. Lobby/countdown then only add what depends on the map (brk, map pieces) or on new looks
+// (chars). New systems register code-built visuals with preloadReg(pathId, builder...) (builder returns Object3D or array;
+// it is placed far off-map and kept in WARM.hold). `?nopreload` = old per-match path.
+const PRE={on:!/[?&]nopreload/.test(location.search),st:0,n:0,best:0,t0:0,ms:0,cb:[],smp:[],max:45000};
+function preloadReg(id,...f){(WARM.reg[id]||(WARM.reg[id]=[])).push(...f);}
+function preProg(){return PRE.st===2?1:PRE.st===1?PRE.best:0;}
+function preFin(){if(PRE.st===1){PRE.st=2;PRE.ms=performance.now()-PRE.t0;WARM.log.push('preload '+PRE.ms.toFixed(0)+'ms');}
+  const cb=PRE.cb;PRE.cb=[];for(const f of cb)try{f();}catch(e){console.warn('preload cb',e);}}
+function preStart(cb){if(cb)PRE.cb.push(cb);
+  if(!PRE.on||PRE.st===2){preFin();return;}if(PRE.st===1)return;
+  PRE.st=1;PRE.t0=performance.now();
+  // samples for warmCharVariants: real file model with my look, one plain and one batched (merged skin) — kept in GWARM.chars
+  //   (gameWarmTick reuses them by look, gameWarmFree frees them after the first match)
+  try{const L=myLook,k=lookStr(L);for(const b of [0,1]){const key=k+(b?'#b':'');if(GWARM.chars.has(key))continue;
+    const o=makeStudent(L,'pre'+b);o.bat=!!b;useFileModel(o,'char_student',lookTint(L),L);o.g.visible=false;o.g.position.set(tx(WARM_X),-1000,tz(WARM_Y));GWARM.chars.set(key,o);PRE.smp.push(o);}}
+  catch(e){console.warn('preload chars',e);}
+  const ps=[...new Set([...Object.keys(WARM_FXDIR),...Object.keys(WARM.reg)])].sort();
+  WARM.key='pre|'+ps.join(',');WARM.late=true;WARM.q=['common'];
+  for(const p of ps){if(WARM_FXDIR[p])WARM.q.push('fx:'+p);(WARM.reg[p]||[]).forEach((f,i)=>WARM.q.push('reg:'+p+':'+i));}
+  WARM.q=WARM.q.filter(s=>!WARM.done.has(s));WARM.q.push('chars','compile');PRE.n=WARM.q.length+Object.keys(WARM_FXDIR).length+2;
+  warmFrame(preTick);}
+// start at page load (the title logo takes ~2.5 s anyway); not in VFX Studio / recorder pages
+if(PRE.on&&!/[?&](studio|rec)/.test(location.search))setTimeout(()=>preStart(),0);
+function preTick(){if(PRE.st!==1)return;
+  const left=WARM.q.length+(WARM.busy?1:0)+WARM.q.filter(s=>s.startsWith('fx:')||s==='common').filter(s=>!WARM.prepared.has(s)).length;
+  PRE.best=Math.max(PRE.best,Math.min(0.99,1-left/PRE.n));
+  if(performance.now()-PRE.t0>PRE.max){console.warn('preload timeout, left:',WARM.q.join(' '));preFin();return;}   // never block the game: the rest goes on in lobby/countdown
+  if(!WARM.q.length&&!WARM.busy){preFin();return;}
+  if(!WARM.busy){const step=WARM.q[0];
+    // character variants need the loaded model: wait for it (max 10 s)
+    if(step==='chars'&&PRE.smp.some(o=>!o.fileModel)&&performance.now()-PRE.t0<10000){warmFrame(preTick);return;}
+    WARM.q.shift();try{warmStep(step);}catch(e){console.warn('preload',step,e);WARM.busy=false;}}
+  warmFrame(preTick);}
 // ---------- ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน) ----------
 // ไฟ 3 มิติแบบ raymarch (fireVol) — เดิมไม่ได้อุ่น: compile ครั้งแรกกลางไฟต์ (tools/bench-bots.js 2026-11-02)
 // These code-created materials are not covered by the FX JSON layer scan.
@@ -301,6 +339,6 @@ function shReadyPre(){
 function shReadyPost(){imzPost();if(!SHR.hid.length)return;for(const o of SHR.hid)o.visible=true;SHR.hid.length=0;}
 SHR.ext=!!gl.getContext().getExtension('KHR_parallel_shader_compile');
 if(window.WD){window.WD.SHR=SHR;window.WD.IMZ=IMZ;}
-if(window.WD)window.WD.warm=WARM;
+if(window.WD){window.WD.warm=WARM;window.WD.PRE=PRE;window.WD.glProgs=()=>gl.info.programs.length;window.WD.glList=()=>gl.info.programs.map(p=>p.name+'|'+p.cacheKey.split(',').slice(-3).join(','));}
 if(window.WD)window.WD.gwarm=GWARM;
 if(window.WD)window.WD.WARM=WARM;

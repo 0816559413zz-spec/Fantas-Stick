@@ -250,6 +250,11 @@ function titleLoop(){
 }
 function titleGo(){
   const intro=$('#intro');if(!intro||intro.classList.contains('go'))return;
+  // entry loader (js/51 PRE): wait with a progress bar until every class's shaders are ready
+  if(typeof PRE!=='undefined'&&PRE.on&&PRE.st!==2){if(intro.classList.contains('loading'))return;intro.classList.add('loading');
+    const bar=intro.querySelector('.inLoad i'),txt=intro.querySelector('.inLoad span');
+    const upd=()=>{if(!intro.classList.contains('loading'))return;const k=preProg();if(bar)bar.style.width=(k*100).toFixed(1)+'%';if(txt)txt.textContent='กำลังเตรียมเวทมนตร์ '+Math.floor(k*100)+'%';requestAnimationFrame(upd);};upd();
+    preStart(()=>{intro.classList.remove('loading');titleGo();});return;}
   try{ac();snd('whoosh',{vol:0.8});setTimeout(()=>snd('buff',{vol:0.6}),180);}catch(e){}
   titleSpark(TITLE.parts,innerWidth/2,innerHeight*0.45,140,700,'230,232,255');
   intro.classList.add('go');STAGE.introT=0;document.body.classList.add('menuIn');

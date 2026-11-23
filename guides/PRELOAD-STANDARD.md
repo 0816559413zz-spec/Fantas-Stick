@@ -149,6 +149,27 @@ Rule: **light changes = uniform changes, never structural changes.**
 - Forbidden for this: a new DirectionalLight for the shaft, swapping the room to "lit" materials, toggling shadows or
   `scene.environment`.
 
+**Step 3 status (built 2026-11-23):**
+- Entry loader `PRE` (js/51): starts at page load (during the title logo), runs the warm queue for **every** path
+  (`common`, `fx:<all 9>`, every `WARM.reg` builder, `chars` on two sample students with my look (plain + batched, kept in
+  `GWARM.chars`), then the sliced `compile` + draw). CLICK TO BEGIN waits on it with a progress bar (`#intro.loading`,
+  `.inLoad`, js/39 `titleGo`); max 45 s, then the rest continues in lobby/countdown. `?nopreload` = old per-match path.
+- Registry: `preloadReg(pathId, builder...)` (adds to `WARM.reg`). FX files are found from `WARM_FXDIR`; character variants
+  from `warmCharVariants`. Lobby (`warmLobbyTick`) and countdown (`warmTick`) wait while `PRE` runs, skip done steps, and
+  the late countdown compile is off when `PRE` is on.
+- Bench `tools/bench-entry.js` (siege fcs-file, 10 players, headless software GL):
+
+  | | preload | lobby progs | countdown progs | first 5 s of play: progs / longest frame |
+  |---|---|---|---|---|
+  | `?nopreload` | – | 42 | 119 | 66 / 551 ms (6 frames >100 ms) |
+  | PRE | 11.6 s (software GL) | 5 | 66 | **0 / 24 ms** |
+
+- Left in the countdown: the picked map's own pieces (castle, props, grass, banners, brush strokes, their shadow/depth
+  programs) because the map is built at `hostStart`. Moving them earlier needs the open decision "maps preloaded at entry vs
+  when picked" (§8).
+- Gate after step 3: siege 63 / 70 mid-match programs (same groups as step 2: code ShaderMaterials such as Light
+  Sovereign, death dissolve, …), i.e. step 4 work; nothing new from the loader.
+
 ## 7. Work order
 
 | Step | Work | Done when |
