@@ -109,6 +109,7 @@ Tool: ศูนย์รวม Tool → **Map Builder** • โค้ด: `mapbu
 - `sea` ระดับน้ำ (ต่ำกว่า = น้ำ มีคลื่น/ฟองซัดฝั่ง, `null` = ไม่มีน้ำ) • `st[]` หินโผล่กลางทะเล `{x,z,r,h}` • `look` `''` | `'overcast'` (ฟ้าครึ้ม+หมอกแบบหน้าผาริมทะเล) • `on` = ใช้ในเกม
 - ในพื้นที่เล่นไม่วาด • 12 ม. แรกนอกขอบ ความสูงค่อย ๆ ต่อจากพื้นขอบแผนที่ (`BD_BLEND`) • มี Backdrop แล้ว .glb ไม่ใส่ขอบ Outer Border
 - Preset (`bdGen`): coast (แหลมหน้าผาแบบ fcs), island, valley, plains, lake, flat • แปรง: Raise/Lower/Smooth/Flatten/Set Height/Noise/Paint/Trees • Sea Stack คลิก = เพิ่ม, Shift+คลิก = ลบ
+- **LOD ใกล้ขอบ (2026-11-23):** ใกล้ขอบละเอียดเท่าพื้นที่เล่น → ลดตามระยะ: ต้นสนจริง → สนเบา → กรวย, หิน/พุ่ม/เฟิร์นใกล้ขอบ, หญ้าขึ้นต่อนอกขอบ 36 ม. + สีหญ้าริมขอบรับสีพื้นแผนที่ (ค่าใน `BD_LOD` js/67-coast) • กราฟิก Low = แบบเดิม • `?nobdlod` = ปิด
 - แผนที่โค้ด `fcs` ยังใช้ฉากหลังหน้าผาแบบโค้ด (`BACKDROP.fcs.coast`) • `fcs-file` ใช้แบบโค้ดจนกว่าจะสร้าง Backdrop ใน Map Builder แล้วส่งเข้าเกม
 
 ## Indoor Light Zone (โซนแสงในห้อง) — Place → Room / Breakables, 2026-11-22

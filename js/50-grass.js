@@ -182,13 +182,16 @@ const GR_LIVE='{vec2 q=vGW.xz;float n1=grN(q*0.031)*0.62+grN(q*0.083+5.1)*0.38,n
   'c=mix(c,c*vec3(0.62,0.45,0.3),smoothstep(0.02,0.35,sc.r));c=mix(c,vec3(0.028,0.024,0.02),smoothstep(0.3,0.95,sc.r));'+   // ไหม้: ขอบน้ำตาล กลางดำ
   'c=mix(c,mix(c*vec3(0.75,0.95,1.15),vec3(0.72,0.82,0.92),0.7),smoothstep(0.05,0.85,sc.g)*0.85);'+   // น้ำแข็ง: เกล็ดขาวฟ้า (ยังเห็นพื้นเดิมนิด ๆ)
   'diffuseColor.rgb=c;}';
-function grLive(m){m.userData.grLive=true;
+// far = [near, far] m from the camera: pattern fades out between them (backdrop land, js/67-coast) — skipped beyond far
+function grLive(m,far){m.userData.grLive=true;
+  const LIVE=far?GR_LIVE.replace('up=smoothstep(0.55,0.85,vGU)','up=smoothstep(0.55,0.85,vGU)*gF').replace('if(uGrLo<0.5){','if(uGrLo<0.5&&gF>0.0){')
+    .replace('{vec2 q=vGW.xz;','{vec2 q=vGW.xz;float gF=1.0-smoothstep('+far[0].toFixed(1)+','+far[1].toFixed(1)+',distance(vGW,cameraPosition));'):GR_LIVE;
   m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,SCAR.U);
     sh.vertexShader='varying vec3 vGW;varying float vGU;\n'+sh.vertexShader.replace('#include <project_vertex>','#include <project_vertex>\nvGW=(modelMatrix*vec4(transformed,1.0)).xyz;vGU=normalize(mat3(modelMatrix)*normal).y;');
-    sh.fragmentShader='varying vec3 vGW;varying float vGU;uniform sampler2D uScar;uniform vec4 uScarMap;uniform sampler2D uFire;\n'+GR_NOISE+sh.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\n'+GR_LIVE)   // หลังสีจุดยอด (แผนที่จากไฟล์ใช้สีจุดยอด)
+    sh.fragmentShader='varying vec3 vGW;varying float vGU;uniform sampler2D uScar;uniform vec4 uScarMap;uniform sampler2D uFire;\n'+GR_NOISE+sh.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\n'+LIVE)   // หลังสีจุดยอด (แผนที่จากไฟล์ใช้สีจุดยอด)
       .replace('#include <normal_fragment_begin>','#include <normal_fragment_begin>\nnormal=normalize(mix(normal,(viewMatrix*vec4(0.0,1.0,0.0,0.0)).xyz,0.45*smoothstep(0.5,0.9,vGU)));')
       .replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\n'+GR_FIRE);};   // เหลี่ยมพื้นนุ่มลง (เนินดูโค้ง)
-  m.customProgramCacheKey=()=>'grlive4';
+  m.customProgramCacheKey=far?()=>'grlive4f'+far.join('_'):()=>'grlive4';
   return m;}
 const GR_GLSL_V='uniform vec4 uGrMap;uniform sampler2D uGround;uniform vec3 uGrCam;uniform vec4 uWind;uniform vec2 uGrK;uniform vec4 uGust[12];uniform vec4 uGustB[12];uniform vec4 uPush[16];uniform sampler2D uScar;uniform float uGrH;uniform float uGrW;uniform sampler2D uGroundH;uniform vec3 uSun;uniform vec3 uGrN;uniform sampler2D uFire;'+
   'attribute vec4 aOff;varying vec3 vGC;varying vec2 vMk;varying float vTr;varying vec4 vFl;varying vec2 vHu;varying float vFi;\n'+
@@ -280,7 +283,8 @@ function grassBuild(){
 const _grBasic=new WeakMap();
 function grassBake(){
   const t0=performance.now();SCAR.U.uScar.value=SCAR.empty;
-  const hx=MW*S3/2+4,hz=MH*S3/2+4,res=Math.min(1024,Math.max(128,Math.round(Math.max(hx,hz)*2/0.22)));
+  const bdM=world&&world.userData.bdM||0,bdH=bdM?world.userData.bdH:null,mx=MW*S3/2,mz=MH*S3/2;   // Map Builder / coast backdrop: grass carries on bdM m past the edge, thinning out (js/67-coast)
+  const hx=mx+4+bdM,hz=mz+4+bdM,res=Math.min(1024,Math.max(128,Math.round(Math.max(hx,hz)*2/0.22)));
   const rw=Math.max(32,Math.round(res*hx/Math.max(hx,hz))),rh=Math.max(32,Math.round(res*hz/Math.max(hx,hz)));
   const oc=new THREE.OrthographicCamera(-hx,hx,hz,-hz,1,600);oc.position.set(0,300,0);oc.up.set(0,0,-1);oc.lookAt(0,0,0);oc.updateMatrixWorld();
   const hidden=[];for(const o of scene.children)if(o!==world&&o.visible){o.visible=false;hidden.push(o);}
@@ -307,8 +311,9 @@ function grassBake(){
   const N=rw*rh,D=new Float32Array(N),R=new Float32Array(N),Gc=new Float32Array(N),B=new Float32Array(N),Y=new Float32Array(N),st=new Uint8Array(N);   // st: 0 = ใช้ได้, 1 = ใต้พุ่มไม้ (เติมจากรอบ ๆ), 2 = ไม่มีหญ้า
   for(let j=0;j<rh;j++)for(let i=0;i<rw;i++){const k=j*rw+i,p=k*4;
     const r=col[p]/255,g=col[p+1]/255,b=col[p+2]/255,y=hgt[p],has=hgt[p+3]>0.5;
-    const X=-hx+(i+0.5)/rw*2*hx,Z=hz-(j+0.5)/rh*2*hz,ground=TW(X,Z);
-    const green=has&&g>0.02?Math.max(0,Math.min(1,((g-Math.max(r,b))/g-0.04)*4)):0;
+    const X=-hx+(i+0.5)/rw*2*hx,Z=hz-(j+0.5)/rh*2*hz,eo=Math.max(Math.abs(X)-mx,Math.abs(Z)-mz),ground=bdH&&eo>0?bdH(X,Z):TW(X,Z);
+    let green=has&&g>0.02?Math.max(0,Math.min(1,((g-Math.max(r,b))/g-0.04)*4)):0;
+    if(bdM&&eo>0){const t=Math.min(1,Math.max(0,(eo-bdM*0.3)/(bdM*0.7)));green*=1-t*t*(3-2*t);}   // outside the map: full near the edge → none at bdM
     R[k]=r;Gc[k]=g;B[k]=b;Y[k]=has?y:ground;D[k]=green;
     // ผิวบนสูงกว่าพื้น: เขียว + สูง ≥2 = พุ่มไม้ (ใต้นั้นยังมีหญ้า เติมจากรอบ ๆ) / อื่น ๆ (หลังคา กำแพง หิน) = ไม่มีหญ้า
     st[k]=has&&y>ground+0.9?(green>0.3&&y>ground+2?1:2):0;if(st[k]===2)D[k]=0;}
@@ -326,13 +331,21 @@ function grassBake(){
       if(c)fill.push(k,r/c,g/c,b/c,y/c,d/c*0.97);}
     for(let f=0;f<fill.length;f+=6){const k=fill[f];R[k]=fill[f+1];Gc[k]=fill[f+2];B[k]=fill[f+3];Y[k]=fill[f+4];D[k]=fill[f+5];st[k]=0;}
     if(!fill.length)break;}
+  // backdrop edge (js/67-coast bdTint): grass next to the map takes the colour of the map ground beside it — backdrop mesh + blades in the margin (no colour seam)
+  let tint=null;
+  if(bdM){const T=BD_LOD.tint,smp=(x,z)=>{const cx=Math.max(-mx+2,Math.min(mx-2,x)),cz=Math.max(-mz+2,Math.min(mz-2,z)),i0=Math.floor((cx+hx)/(2*hx)*rw),j0=Math.floor((hz-cz)/(2*hz)*rh);let r=0,g=0,b=0,c=0;
+      for(let j=j0-2;j<=j0+2;j++)for(let i=i0-2;i<=i0+2;i++){if(i<0||j<0||i>=rw||j>=rh)continue;const k=j*rw+i;if(st[k]||D[k]<0.25)continue;r+=R[k];g+=Gc[k];b+=B[k];c++;}
+      return c>=4?[r/c,g/c,b/c]:null;};   // only grass pixels 2 m inside the edge (walls / paths → null = keep the backdrop colour)
+    for(let j=0;j<rh;j++)for(let i=0;i<rw;i++){const k=j*rw+i;if(st[k]||D[k]<=0)continue;const X=-hx+(i+0.5)/rw*2*hx,Z=hz-(j+0.5)/rh*2*hz,eo=Math.max(Math.abs(X)-mx,Math.abs(Z)-mz);if(eo<=0||eo>=T)continue;
+      const c=smp(X,Z);if(!c)continue;const t=eo/T,w=1-t*t*(3-2*t);R[k]+=(c[0]-R[k])*w;Gc[k]+=(c[1]-Gc[k])*w;B[k]+=(c[2]-B[k])*w;}
+    if(world.userData.bdTint&&!world.userData.bdTinted)tint=world.userData.bdTint(smp);}
   let n=0;
   for(let k=0;k<N;k++){const p=k*4,d=st[k]?0:D[k];C[p]=toS(R[k]);C[p+1]=toS(Gc[k]);C[p+2]=toS(B[k]);C[p+3]=Math.round(d*255);if(d>0.2)n++;H[k]=THREE.DataUtils.toHalfFloat(Y[k]);}
   GRASS.tex=new THREE.DataTexture(C,rw,rh,THREE.RGBAFormat);GRASS.tex.colorSpace=THREE.SRGBColorSpace;GRASS.tex.magFilter=GRASS.tex.minFilter=THREE.LinearFilter;GRASS.tex.needsUpdate=true;
   GRASS.texH=new THREE.DataTexture(H,rw,rh,THREE.RedFormat,THREE.HalfFloatType);GRASS.texH.magFilter=GRASS.texH.minFilter=THREE.LinearFilter;GRASS.texH.needsUpdate=true;
   GRASS.box=[-hx,hz,2*hx,-2*hz];GRASS.n=n;
   // เก็บไว้ 4 แผนที่ล่าสุด (กลับมาแผนที่เดิมไม่ต้องถ่ายใหม่)
-  const BC=GRASS.cache;BC.delete(builtKey);BC.set(builtKey,{tex:GRASS.tex,texH:GRASS.texH,box:GRASS.box,n});
+  const BC=GRASS.cache;BC.delete(builtKey);BC.set(builtKey,{tex:GRASS.tex,texH:GRASS.texH,box:GRASS.box,n,tint});
   while(BC.size>4){const [k,v]=BC.entries().next().value;BC.delete(k);v.tex.dispose();v.texH.dispose();}
   airForMap();
   GRASS.bakeMs=+(performance.now()-t0).toFixed(1);}
@@ -348,7 +361,7 @@ function grassTick(dt){
   if(screen!=='game'||!world){m.visible=false;GRASS.trail.length=0;return;}   // ล้างรอยตอนเข้าแมตช์ใหม่ = setScreen (js/19)
   if(world.userData.grPend){m.visible=false;return;}   // รอ .glb พื้นจริง (js/28 buildFileMap) ก่อนถ่ายแผนที่หญ้า
   if(GRASS.key!==builtKey){GRASS.key=builtKey;const c=GRASS.cache.get(builtKey);
-    if(c){Object.assign(GRASS,{tex:c.tex,texH:c.texH,box:c.box,n:c.n});airForMap();}
+    if(c){Object.assign(GRASS,{tex:c.tex,texH:c.texH,box:c.box,n:c.n});airForMap();if(c.tint&&world.userData.bdTint&&!world.userData.bdTinted)world.userData.bdTint(null,c.tint);}   // rebuilt backdrop, cached grass → same edge tint
     else try{grassBake();}catch(e){console.error(e);GRASS.n=0;}}
   if(SCAR.clearNext||SCAR.key!==builtKey){SCAR.clearNext=false;SCAR.key=builtKey;scarReset();}
   if(SCAR.dirty&&SCAR.tex){SCAR.tex.needsUpdate=true;SCAR.dirty=false;}
@@ -377,7 +390,7 @@ function grassTick(dt){
   U.uGrN.value.set(Math.min(AIR_NG,AIR.G.length),L.length,0);   // ลูปใน shader วนเฉพาะช่องที่ใช้
 }
 
-window.WD&&Object.assign(window.WD,{FIRE,grassScar,GRASS});   // ทดสอบ/ดีบัก
+window.WD&&Object.assign(window.WD,{FIRE,grassScar,GRASS,grLive});   // ทดสอบ/ดีบัก
 
 // ---------- สกิลลม → หญ้า (ภาพล้วน เรียกจาก windEfx js/68) ----------
 // ev.x/y = พิกัดเกม, a = ทิศ (เรเดียน) • รัศมี/แรงเป็นหน่วย 3D (เมตร) / แรงกระโชก (1 ≈ ระเบิดใหญ่) • ทุกท่าแค่ตั้งตาราง ปรับค่าได้ที่นี่

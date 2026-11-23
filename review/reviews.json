@@ -1,5 +1,5 @@
 {
- "next": 152,
+ "next": 153,
  "items": [
   {
    "id": 148,
@@ -3252,6 +3252,26 @@
     "/mapbuild.html?id=fcs-file",
     "/shots/abbey_preview_castle.png",
     "/shots/abbey_preview_high.png"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 153,
+   "title": "Backdrop ใกล้ขอบละเอียดเท่าพื้นที่เล่น แล้วลดตามระยะ (fcs-file)",
+   "text": "หญ้า/ดอกไม้ขึ้นต่อนอกขอบ 36 ม. • สีหญ้าริมขอบต่อจากพื้นแผนที่ (ไม่มีรอยต่อ) • ต้นสนจริง (gorge) ใกล้ขอบ → สนเบา → กรวยไกล สุ่มต่อต้นไม่เป็นเส้น • หิน/พุ่ม/เฟิร์นใกล้ขอบ • ผิวพื้นแบบเดียวกับพื้นที่เล่น จางตามระยะ • เทียบแบบเดิม: ?nobdlod • perf ยังต้องวัดซ้ำ",
+   "kind": "Map",
+   "who": "Backdrop",
+   "status": "wait",
+   "created": "2026-11-23T10:00:00",
+   "updated": "2026-11-23T10:00:00",
+   "imgs": [],
+   "links": [
+    "/index.html?nosw&playmap=fcs-file",
+    "/index.html?nosw&playmap=fcs-file&nobdlod",
+    "/shots/bd_lod_high.jpg",
+    "/shots/bd_lod_after.jpg",
+    "/shots/bd_lod_before.jpg"
    ],
    "feedback": "",
    "reply": ""
