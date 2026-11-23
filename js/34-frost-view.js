@@ -94,6 +94,8 @@ function fwLink(){const geo=new THREE.BufferGeometry();geo.setAttribute('positio
   const l=new THREE.Line(geo,new THREE.LineBasicMaterial({color:hdr('#a8e6ff',1.6),transparent:true,opacity:0.35,blending:THREE.AdditiveBlending,depthWrite:false}));l.frustumCulled=false;l.visible=false;return l;}
 // เมทริกซ์โลกของใบอาวุธ W ถ้าอาวุธอยู่ท่า P (ใช้เก็บจุดหางแสงย่อยระหว่างเฟรม ให้โค้งเนียน)
 function fwMat(o,W,P,off){fwAim(P.bx,P.by,P.bz,P.nx,P.ny,P.nz);_fwP.set(P.x+(off?off[0]:0),P.y+(off?off[1]:0),P.z+(off?off[2]:0));_fwM2.compose(_fwP,_fwQ,_fwS);_fwM.multiplyMatrices(o.g.matrixWorld,_fwM2);return _fwM.multiply(W.matrix);}
+// Frost slide leg pose [R pitch, R spread, L pitch, L spread] (window.__SLV overrides for tests)
+const SLIDE_LEGS=[0.5,-0.42,0.18,0.42];
 function frostFX(o,p,pz,now,dt){
   const F=p.fr;
   if(!F){if(o.fw)o.fw.g.visible=false;if(o.fwLk)o.fwLk.visible=false;if(o.ishield)o.ishield.visible=false;if(o.cryoM)o.cryoM.visible=false;if(o.cryoFx){fxKill(o.cryoFx);o.cryoFx=null;}if(o.fwx)o.fwx.forEach(c=>{c.g.visible=false;c.on=0;});return;}
@@ -224,8 +226,8 @@ function frostFX(o,p,pz,now,dt){
   // Slide pose (user 2026-11-23): balance stance, front leg out, back leg braced, legs still; upper body free for attacks
   if(flags&1){o.slK=Math.min(1,(o.slK||0)+dt/0.12);const k=o.slK;
     // body leans back a little, knees out: both legs spread wide and pushed forward, feet planted (no stepping)
-    o.b.rotation.x=lerp(o.b.rotation.x,0,k);o.b.position.y=-0.2*k;
-    o.legs[0].rotation.x=0.38*k;o.legs[0].rotation.z=0.4*k;o.legs[1].rotation.x=0.3*k;o.legs[1].rotation.z=-0.4*k;
+    o.b.rotation.x=lerp(o.b.rotation.x,0,k);o.b.position.y=-0.2*k;if(!(o.swT>0)&&!(o.grDown>0))o.b.rotation.y=lerp(o.b.rotation.y,0,k);   // chest + head square to the cursor
+    {const V=window.__SLV||SLIDE_LEGS;o.legs[0].rotation.x=V[0]*k;o.legs[0].rotation.z=V[1]*k;o.legs[1].rotation.x=V[2]*k;o.legs[1].rotation.z=V[3]*k;}
     if(!(o.swT>0)&&!(o.grDown>0)&&!(o.grUp>0)){o.armL.rotation.x=lerp(o.armL.rotation.x,-0.25,k);o.armL.rotation.z=lerp(o.armL.rotation.z,1.05,k);}   // free left arm out for balance
     for(let i=0;i<3;i++)PARTS.push({x:p.x+rnd(-10,10),y:p.y+rnd(-10,10),h:pz+0.1,vx:rnd(-60,60),vy:rnd(-60,60),vh:rnd(0.5,2),life:0.35,max:0.35,col:i?'#ffffff':'#bfeaff',size:1.8,g:4});
     if(Math.random()<0.8)PARTS.push({x:p.x+rnd(-12,12),y:p.y+rnd(-12,12),h:pz+0.12,vx:rnd(-10,10),vy:rnd(-10,10),vh:0.15,life:0.9,max:0.9,col:'#eef8ff',size:6,g:0,smoke:true,grow:0.9,drag:2});

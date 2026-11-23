@@ -1432,3 +1432,4 @@
 - 2026-11-23 Frost: slide balance stance; Glacier Rend wave no ice trail/speed, no ground mark when aimed up
 - 2026-11-23 Frost slide stance v2 (wide legs forward, balance arm, cloak open)
 - 2026-11-23 Frost slide: stop file run clip while sliding (upright, no stride)
+- 2026-11-23 Frost slide: legs fixed (were crossed), wide forward stance, chest/head face cursor
