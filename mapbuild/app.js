@@ -1492,6 +1492,22 @@ function frame(t) {
   drawRing(); updGhost(); updPartGhost(); gCol.visible = show.col; renderer.render(scene, camera);
 }
 
+// Capture the current view as PNG: helpers hidden, up to 2x resolution (max 4096 px); download + copy to shots/ when online
+async function shotPNG() {
+  if (!M) return;
+  const w = host.clientWidth, h = host.clientHeight, pr = renderer.getPixelRatio(), R = Math.max(1, Math.min(Math.max(pr, 2), 4096 / w, 4096 / h));
+  const hide = [gHelp, gCol, tc, selBox, ...mBoxes].filter(Boolean), was = hide.map(o => o.visible);
+  hide.forEach(o => { o.visible = false; });
+  let url, size = '';
+  try { renderer.setPixelRatio(R); renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.render(scene, camera); url = cv.toDataURL('image/png'); size = cv.width + '×' + cv.height; }
+  finally { hide.forEach((o, i) => { o.visible = was[i]; }); renderer.setPixelRatio(pr); renderer.setSize(w, h, false); need(); }
+  const d = new Date(), p2 = n => String(n).padStart(2, '0'), name = `${(M.id || 'map').replace(/[^\w-]/g, '_')}-${d.getFullYear()}${p2(d.getMonth() + 1)}${p2(d.getDate())}-${p2(d.getHours())}${p2(d.getMinutes())}${p2(d.getSeconds())}`;
+  const a = document.createElement('a'); a.href = url; a.download = name + '.png'; document.body.append(a); a.click(); a.remove();
+  let msg = `📷 Saved ${name}.png (${size}) to Downloads`;
+  if (online) { try { const j = await (await fetch('/api/shot?name=mb-' + name, { method: 'POST', body: url })).json(); if (j.ok) msg += ' + ' + j.path; } catch (_) {} }
+  stat(msg, 'ok');
+}
+
 // ================= boot =================
 $('bNew').onclick = newDlg; $('bSave').onclick = save; $('bUndo').onclick = doUndo; $('bRedo').onclick = doRedo; $('bExport').onclick = exportGame;
 $('bPlay').onclick = async () => { const w = window.open('about:blank', 'mb_play'); if (await exportGame()) w.location = 'index.html?nosw&playmap=' + M.id + (M.modes.length === 1 && M.modes[0] === 'siege' ? '&pm=siege' : '') + '&t=' + Date.now(); else w.close(); };
@@ -1499,7 +1515,7 @@ $('mapSel').onchange = e => openMap(e.target.value);
 for (const b of document.querySelectorAll('#gbar [data-g]')) b.onclick = () => setGizmo(b.dataset.g);
 $('snapSel').value = String(opt.snap); $('snapSel').onchange = e => { opt.snap = +e.target.value; placeGizmo(); };
 $('hq').oninput = renderHier;
-$('vTop').onclick = () => { cam.pitch = 1.55; cam.yaw = 0; camApply(); }; $('vFit').onclick = fit;
+$('vTop').onclick = () => { cam.pitch = 1.55; cam.yaw = 0; camApply(); }; $('vFit').onclick = fit; $('vShot').onclick = shotPNG;
 { let dm = 1; try { dm = localStorage.getItem('mb-dragmove') === '0' ? 0 : 1; } catch (_) {} opt.dragMove = dm; $('oDrag').checked = !!dm; }
 $('oDrag').onchange = e => { opt.dragMove = e.target.checked ? 1 : 0; try { localStorage.setItem('mb-dragmove', String(opt.dragMove)); } catch (_) {} };
 $('oSteep').onchange = e => { show.steep = e.target.checked; updTerrain(0, 0, M.nx - 1, M.ny - 1); need(); };

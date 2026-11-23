@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-23 — **Map Builder 📷 PNG:** Scene bar button captures the current camera view at 2× (max 4096 px) without grid/gizmo/selection helpers; downloads the PNG and keeps a copy in `shots/`.
 - 2026-11-23 Scene lighting: new Look presets snow (lake: AgX, lower exposure, moonlit blue snow instead of blown white), sand (ruins: AgX, less fill, visible sun shadows) and meadow (less fill, more contrast), mapped via LOOK.map in js/74-look.js. No perf cost. tools/look-shots.js now starts TDM with 2 lobby bots (the old coop flow stayed in the lobby). Review board item added.
 - 2026-11-23 — **Normal jump (protocol v107):** Space jumps reach about 1.90 m in 0.35 s with an 11.1 impulse and 31 upward gravity. Descent uses 19.5. The elbows open to shoulder height and fold forward. The legs spread while airborne and gather for landing, with the local cape hem swept behind them. Casts take priority on the upper body. The phase travels through the player snapshot.
 - 2026-11-23 — **Combat performance:** Skip selected off-screen particles and Pyro shield volume updates, use slower remote animation updates outside the view, and batch Nature shield vines, motes and World Tree roots. F3 adds host snapshot queue and trim counts and guest receive gaps.
