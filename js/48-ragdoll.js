@@ -254,6 +254,15 @@ function clearDeathFades(){
     v.fn(v,1);FIREV.splice(i,1);
   }
 }
+// Slash-split piece material: own world-space plane cut (discard) instead of three's clippingPlanes — renderer.compile() ignores
+// clipping state, so a clipping program could not be warmed up and compiled mid-fight on the first frost/scythe kill (0.3–0.9 s)
+function deathClipMat(original,clipU){
+  const m=original.clone(),ob=original.onBeforeCompile;
+  m.onBeforeCompile=function(sh,r){ob.call(this,sh,r);sh.uniforms.uDc=clipU;
+    sh.vertexShader='varying vec3 vDcW;\n'+sh.vertexShader.replace('#include <project_vertex>','#include <project_vertex>\nvDcW=(modelMatrix*vec4(transformed,1.0)).xyz;');
+    sh.fragmentShader='varying vec3 vDcW;uniform vec4 uDc;\n'+sh.fragmentShader.replace('#include <clipping_planes_fragment>','if(dot(vDcW,uDc.xyz)+uDc.w<0.0)discard;\n#include <clipping_planes_fragment>');};
+  m.customProgramCacheKey=()=>original.customProgramCacheKey()+'|dclip';
+  m.transparent=true;m.depthWrite=false;m.forceSinglePass=true;return m;}
 function deathSlashSplit(o,hit){
   const source=o.fileModel,cloner=MODELS.lib?.SU,hips=ragBones(o)?.hips;
   if(!source||!cloner||!hips)return false;
@@ -261,27 +270,27 @@ function deathSlashSplit(o,hit){
   const seam=hips.getWorldPosition(new THREE.Vector3()),base=o.g.position;
   const angle=hit.angle??(-o.g.rotation.y-Math.PI*.5),dx=Math.cos(angle),dz=Math.sin(angle);
   const axis=new THREE.Vector3(dz,0,-dx),root=new THREE.Group(),materials=new Set(),skeletons=new Set();
-  root.name='Slash defeat pieces';gl.localClippingEnabled=true;
+  root.name='Slash defeat pieces';
   const pieces=[true,false].map(upper=>{
     const group=new THREE.Group(),model=cloner.clone(source),cache=new Map();
     const pivot=new THREE.Vector3(seam.x,upper?seam.y:base.y,seam.z);
     group.position.copy(pivot);root.add(group);group.add(model);
     source.matrixWorld.decompose(model.position,model.quaternion,model.scale);model.position.sub(pivot);
     const normal=new THREE.Vector3(0,upper?1:-1,0),edge=new THREE.Vector3(0,seam.y-pivot.y,0),plane=new THREE.Plane();
+    const clipU={value:new THREE.Vector4(0,1,0,1e9)};
     model.traverse(part=>{
       if(!part.isMesh)return;
       if(/^wand_/.test(part.name)){part.visible=false;return;}
       if(part.isSkinnedMesh)skeletons.add(part.skeleton);
       const clip=original=>{
         if(cache.has(original))return cache.get(original);
-        const m=original.clone();m.onBeforeCompile=original.onBeforeCompile;m.customProgramCacheKey=original.customProgramCacheKey;
-        m.clippingPlanes=[plane];m.transparent=true;m.depthWrite=false;m.forceSinglePass=true;
+        const m=deathClipMat(original,clipU);
         materials.add(m);cache.set(original,m);return m;
       };
       part.material=Array.isArray(part.material)?part.material.map(clip):clip(part.material);
       part.castShadow=false;part.frustumCulled=false;
     });
-    return {upper,group,pivot,normal,edge,plane};
+    return {upper,group,pivot,normal,edge,plane,clipU};
   });
   (deathFades??=new Set()).add(root);
   fireTemp(root,[],1.25,(_v,k)=>{
@@ -301,6 +310,7 @@ function deathSlashSplit(o,hit){
       }
       Q.updateMatrixWorld(true);
       P.plane.setFromNormalAndCoplanarPoint(P.normal,P.edge).applyMatrix4(Q.matrixWorld);
+      P.clipU.value.set(P.plane.normal.x,P.plane.normal.y,P.plane.normal.z,P.plane.constant);
     }
     const opacity=1-_cs(clamp((t-.79)/.46,0,1));
     for(const m of materials)m.opacity=opacity;

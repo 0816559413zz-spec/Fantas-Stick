@@ -11,6 +11,25 @@ function stDarkShiftStudent(root,look,name,tint){
   return actor;
 }
 
+// body tint material (shared by the live tint and the match warm-up, so both build the same shader program)
+function stDarkTintMat(source,softFade,strength,coverage){
+  const material=source.clone();
+  delete material.userData.keep;
+  if(softFade)material.transparent=true;
+  material.customProgramCacheKey=()=>source.customProgramCacheKey()+'|dark-body-tint';
+  material.onBeforeCompile=(shader,renderer)=>{
+    source.onBeforeCompile.call(material,shader,renderer);
+    shader.uniforms.darkBodyTint=strength;shader.uniforms.darkBodyCoverage=coverage;
+    shader.fragmentShader='uniform float darkBodyTint,darkBodyCoverage;\n'+shader.fragmentShader.replace(
+      '#include <opaque_fragment>',
+      `#include <opaque_fragment>
+      vec3 shadowBody=vec3(.009,.006,.014)+gl_FragColor.rgb*.048;
+      gl_FragColor.rgb=mix(gl_FragColor.rgb,shadowBody,darkBodyTint);
+      gl_FragColor.a*=darkBodyCoverage;`);
+  };
+  return material;
+}
+
 function stDarkBodyTint(target,softFade=false){
   const strength={value:0};
   const coverage={value:1};
@@ -22,20 +41,7 @@ function stDarkBodyTint(target,softFade=false){
     const copies=new Map();
     const darken=source=>{
       if(copies.has(source))return copies.get(source);
-      const material=source.clone();
-      delete material.userData.keep;
-      if(softFade)material.transparent=true;
-      material.customProgramCacheKey=()=>source.customProgramCacheKey()+'|dark-body-tint';
-      material.onBeforeCompile=(shader,renderer)=>{
-        source.onBeforeCompile.call(material,shader,renderer);
-        shader.uniforms.darkBodyTint=strength;shader.uniforms.darkBodyCoverage=coverage;
-        shader.fragmentShader='uniform float darkBodyTint,darkBodyCoverage;\n'+shader.fragmentShader.replace(
-          '#include <opaque_fragment>',
-          `#include <opaque_fragment>
-          vec3 shadowBody=vec3(.009,.006,.014)+gl_FragColor.rgb*.048;
-          gl_FragColor.rgb=mix(gl_FragColor.rgb,shadowBody,darkBodyTint);
-          gl_FragColor.a*=darkBodyCoverage;`);
-      };
+      const material=stDarkTintMat(source,softFade,strength,coverage);
       copies.set(source,material);
       return material;
     };

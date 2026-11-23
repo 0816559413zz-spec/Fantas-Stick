@@ -121,14 +121,35 @@ function warmStep(step){
     for(const m of warmM){const o=new THREE.Mesh(_rockGeo,m);o.position.set(tx(WARM_X),-1000,tz(WARM_Y));warmKeep(o);}
     const fxI=warmFx(WARM_COMMON);warmGather();warmFxEnd(fxI);}
   else if(step.startsWith('fx:')){const fxI=warmFx([WARM_FXDIR[step.slice(3)]]);warmGather();warmFxEnd(fxI);}
+  else if(step==='chars'){const g=warmCharVariants();if(g){g.position.set(tx(WARM_X),0,tz(WARM_Y));warmKeep(g);}}
   else if(step.startsWith('reg:')){const [,id,i]=step.split(':'),f=WARM.reg[id][+i];
     for(const o of [].concat(f()||[]))if(o&&o.isObject3D){if(!o.parent)scene.add(o);o.position.set(tx(WARM_X),0,tz(WARM_Y));}
     warmGather();}
   WARM.log.push(step+' '+(performance.now()-t0).toFixed(0)+'ms');}
 // เรียกทุกเฟรมจาก render loop — ตอนเข้านับถอยหลังสร้างคิวงาน แล้วทำเฟรมละ 1 ขั้น
+// Character material variants that only appear mid-fight (2026-11-23, user: freezes in siege fights, F3 shader+2..6 at 0.4–1 s each):
+// hit flash (basic on skinned), ghost body (transparent clone), slash-split death pieces (clip plane + single-pass transparent),
+// death dissolve of wand/attachments, Darkness body tint (opaque + soft fade, stDarkTintMat). Built once per new variant on copies
+// of the loaded character meshes (lobby warm-up chars + players) so the countdown compile covers them. Kept in WARM.hold.
+WARM.cv=new Set();
+function warmCharVariants(){
+  const g=new THREE.Group(),one={value:1},plane=new THREE.Plane(new THREE.Vector3(0,1,0),0);
+  const flash=new THREE.MeshBasicMaterial({color:hdr('#ffffff',1.15)});
+  const one4={value:new THREE.Vector4(0,1,0,1e9)};
+  const fade=src=>{const m=src.clone();m.transparent=true;m.depthWrite=false;m.forceSinglePass=true;m.onBeforeCompile=src.onBeforeCompile;const k=src.customProgramCacheKey();m.customProgramCacheKey=()=>k;return m;};
+  const V=[['flash',()=>flash,m=>m.isSkinnedMesh||m.isMesh],['ghost',ghostOf,()=>true],['clip',src=>deathClipMat(src,one4),()=>true],['fade',fade,m=>!m.isSkinnedMesh],
+    ['dark',src=>stDarkTintMat(src,false,one,one),()=>true],['darkS',src=>stDarkTintMat(src,true,one,one),()=>true]];
+  const roots=[...PM3.values(),...GWARM.chars.values()];
+  for(const o of roots){const r=o&&o.g;if(!r||!o.fileModel)continue;   // whole actor: body + wand + darkness gear (scythe) etc.
+    if(r.parent===scene||!r.parent)paintPre(r);   // painterly cel first, so the clones carry the same key as the live ones
+    r.traverse(m=>{if(!m.isMesh||m.isInstancedMesh||!m.material||Array.isArray(m.material)||m.material.isShaderMaterial)return;const src=m.material;
+      const base=(m.isSkinnedMesh?'S':'M')+src.type+'|'+src.customProgramCacheKey()+'|'+src.transparent+src.side+!!src.map+!!src.normalMap+!!src.emissiveMap+!!src.alphaMap+(src.vertexColors?1:0)+!!m.geometry.attributes.color;
+      for(const [n,mk,ok] of V){if(!ok(m))continue;const k=n+'|'+base;if(WARM.cv.has(k))continue;WARM.cv.add(k);
+        try{const c=m.clone();c.material=mk(src);c.frustumCulled=false;if(n==='clip'||n==='fade')c.castShadow=false;g.add(c);}catch(e){console.warn('warm char variant',n,e);}}});}
+  return g.children.length?g:null;}
 function warmQueue(ps,key){WARM.key=key;WARM.late=false;WARM.q=['common'];
   for(const p of ps){if(WARM_FXDIR[p])WARM.q.push('fx:'+p);(WARM.reg[p]||[]).forEach((f,i)=>WARM.q.push('reg:'+p+':'+i));}
-  WARM.q=WARM.q.filter(s=>!WARM.done.has(s));WARM.q.push('brk','compile');}
+  WARM.q=WARM.q.filter(s=>!WARM.done.has(s));WARM.q.push('brk','chars','compile');}
 // Same queue while players wait in the lobby (2026-11-22): the 3 s countdown was too short — in a 10-player match the class
 // effects + compile (1.2–2 s) ran into the first seconds of the fight. Starts once the lobby's game-scene warm-up is done; the
 // countdown then finds the same key and only adds the late compile. `?nolobbywarm` = old path.
