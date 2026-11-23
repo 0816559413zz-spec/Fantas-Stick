@@ -47,7 +47,6 @@
 ## 4. The workflow (do it in this order)
 1. **Read the request.**
    - Check `notes/vfx-notes.md` for what the user already approved for that skill.
-   - Check `notes/prompts/` if a VFX round prompt exists.
 2. **Find the event.**
    - Effects are triggered by host events: `{k:'efx', z:'<name>', x, y, h, a, r, id, …}` (spell visuals) or generic events like `cast`, `imp`, `pop`, `boom`, `parry`, `die`.
    - To find names: `grep "z:'" js/0*.js js/1*.js`. Or use the `EFXAUG` keys in `js/44-vfx-kit.js`. `CODEMAP.md` tells you where code lives.

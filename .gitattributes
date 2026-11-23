@@ -1,7 +1,2 @@
-# Claude Code Game Studios: bash scripts must keep LF
-.claude/**/*.sh text eol=lf
-.claude/**/*.awk text eol=lf
-.claude/**/*.md text eol=lf
-
 # Windows launchers (*.bat) must be CRLF everywhere (git checkout + GitHub ZIP) — LF = "The syntax of the command is incorrect"
 *.bat text eol=crlf
