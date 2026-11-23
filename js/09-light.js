@@ -10,7 +10,7 @@ ICONS.add('radiantsovereign');
 PATHS.push({id:'light',n:'สายแสง',ic:'✨',col:'#ffe9a8',d:'ซัพพอร์ตคู่หู — แบ่งคริสตัล 3 ชิ้นให้ตัวเองหรือเพื่อนที่ลิงก์ ยิงลำแสง ฮีลพื้นที่ วางกับดักล่องหน',
   combo:'Crystal Bond ส่งคริสตัลให้เพื่อน (กัน/ตีแรงขึ้น) • เก็บไว้เอง = ลำแสง/โล่แรงสุด • Empower Light บัฟทั้งเราและเพื่อน • Light Step วาร์ปไปหาเพื่อน ให้โล่ลดดาเมจ'});
 const LTV=PATHS[LIGHTP].v={max:3,linkR:650,linkPick:160,sendT:0.3,holdT:0.4,allyDR:0.05,allyDmg:0.05,
-  baRange:600,baCharge:1.4,heatT:8,heatIdle:2,heatDrain:2,ohT:2,baFloat:0.5,baRise:1.3,baMove:0.7,ba0:[5,1.0],ba1:[7,0.7],ba2:[10,0.6],ba3:[12,0.5],baW:[10,14,18,22],
+  baRange:600,baCharge:0.6,heatT:8,heatIdle:2,heatDrain:2,ohT:2,baFloat:0.5,baRise:1.3,baMove:0.7,ba0:[5,1.0],ba1:[7,0.5],ba2:[12,0.5],ba3:[15,0.4],baW:[10,14,18,22],
   shHp:[0,120,180,300],shReg:1,
   dsDist:250,dsAllyR:900,dsPick:180,dsCd:8,dsDmg:15,dsR:150,dsDR:0.3,dsDRT:2,
   prismT:0};   // 0 = ปริซึมอยู่ตลอดจนเรียกคืน/ลิงก์ใหม่ (ผู้ใช้ 2026-11-18)
@@ -103,9 +103,9 @@ function lightTick(p,dt){
   if(p.lgDch<1)p.lgDch=Math.min(1,p.lgDch+dt/(LTV.dsCd*p.buffs.cdr));
   p.cd.dodge=p.lgDch>=1?0:(1-p.lgDch)*LTV.dsCd;p.cdMax.dodge=LTV.dsCd;
   if(p.shieldOn&&p.lc<=0){p.shieldOn=false;}
-  // ลอยขึ้น 0.5 ม. ตอนชาร์จ/ยิงลำแสง (มีคริสตัล)
-  const g=p.lgBeam!==0&&p.lc>0?groundH(p.x,p.y,p.z):null;
-  if(g!==null&&p.z<=g+LTV.baFloat+0.02){p.lgFl=Math.min(1,(p.lgFl||0)+dt/LTV.baRise);const u=p.lgFl,e=u*u*u*(u*(u*6-15)+10);p.z=g+LTV.baFloat*e;p.vz=0;p.hover=0.15;}
+  // Always hover at BA float height (user 2026-11-23): walking, standing, landing from a fall all settle at +baFloat
+  const g=p.alive&&!p.downed&&!p.fly&&!p.lgUlt&&!(p.vz>0.5)?groundH(p.x,p.y,p.z):null;
+  if(g!==null&&p.z<=g+LTV.baFloat+0.02){if(!(p.lgFl>0)&&p.z>g+0.1)p.lgFl=1;p.lgFl=Math.min(1,(p.lgFl||0)+dt/LTV.baRise);const u=p.lgFl,e=u*u*u*(u*(u*6-15)+10);p.z=g+LTV.baFloat*e;p.vz=0;p.hover=0.15;}
   else p.lgFl=0;
   lightHeatTick(p,dt);   // เกจร้อน BA เดินทุกเฟรม (ตอนกางโล่ด้วย)
   lightSkillsTick(p,dt);

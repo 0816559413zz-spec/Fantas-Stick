@@ -447,7 +447,7 @@ function updatePlayer(p,dt,acting){
   const B=PBASIC[p.pathIdx|0]||PBASIC[0];
   if(pr.v&&p.pathIdx===1&&!(p.fmCd>0)&&!(p.cryo>0)&&!(p.mirror>0)){p.fmode=p.fmode===1?0:1;p.fmCd=1;p.cmbT=0;emit({k:'efx',z:'fswap',x:p.x,y:p.y,h:p.z+1,id:p.id,m:p.fmode});}
   // กระโดด (Space) ทุกสาย
-  if(pr.jp&&!(p.cryo>0)&&!(p.mudT>0)&&!p.wr&&!p.dchgOn&&p.z<=groundH(p.x,p.y,p.z)+0.05&&!(p.colos>0)){
+  if(pr.jp&&!(p.cryo>0)&&!(p.mudT>0)&&!p.wr&&!p.dchgOn&&p.z<=groundH(p.x,p.y,p.z)+(p.pathIdx===LIGHTP?LTV.baFloat+0.05:0.05)&&!(p.colos>0)){
     p.vz=PLAY.jump;p.jumpAir=true;p.airPose=1;
     emit({k:'efx',z:'jump',x:p.x,y:p.y,h:p.z,id:p.id});
   }

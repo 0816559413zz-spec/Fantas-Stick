@@ -1,5 +1,5 @@
 {
- "next": 162,
+ "next": 163,
  "items": [
   {
    "id": 157,
@@ -3417,6 +3417,23 @@
     "/index.html?nosw&dev=1&playmap=forest",
     "/shots/ph_ui.jpg",
     "/shots/ph_test.jpg"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 162,
+   "title": "Light: ลอยตลอด + BA ชาร์จเร็วขึ้น",
+   "text": "ลอยที่ระดับ BA (0.5 ม.) ตลอด เดิน/ยืน/ตกลงมาก็ค้างระดับนี้ กระโดดได้ • BA ชาร์จ 0.6 วิ • 1 คริสตัล 7/0.5 วิ • 2 = 12/0.5 • 3 = 15/0.4 (0 คริสตัล 5/1 วิ เท่าเดิม) • ลำแสงสั่น/เต้นน้อยลง",
+   "kind": "Skill",
+   "who": "Light",
+   "status": "wait",
+   "created": "2026-11-23T23:40:00",
+   "updated": "2026-11-23T23:40:00",
+   "imgs": [],
+   "links": [
+    "/shots/motion_light_float.gif",
+    "/shots/light_float_sheet.jpg"
    ],
    "feedback": "",
    "reply": ""

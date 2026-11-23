@@ -73,10 +73,10 @@ function lgBaCore(S,on,a,b,fwd,w,now){
   const bdt=Math.min(0.05,Math.max(0,(now-(S.bNow||now))/1000));S.bNow=now;lgShardTick(S,bdt);if(hitK!==1)lgWallBurn(S,null,null,0,now,bdt);if(hitK!==2&&S.hitO){lgNeon(S.hitO,0);S.hitO=null;}if(!on)return;
   const len=a.distanceTo(b),side=new THREE.Vector3().crossVectors(fwd,new THREE.Vector3(0,1,0)).normalize(),up=new THREE.Vector3().crossVectors(side,fwd).normalize();
   // ลำเต้นเป็นจังหวะ + ร้อนแล้วลำเปลี่ยน (ผู้ใช้ 2026-11-17): ใกล้เต็ม = แกนออกส้มขาว ลำสั่น ประกายร้อนแตกจากปากลำ
-  const hk=clamp(((S.bHeat||0)-0.6)/0.4,0,1),pl=1+0.16*Math.sin(now/150)+0.06*Math.sin(now/53);S.bPulse=pl;
+  const hk=clamp(((S.bHeat||0)-0.6)/0.4,0,1),pl=1+0.05*Math.sin(now/150)+0.02*Math.sin(now/53);   // calmer beam (user 2026-11-23)S.bPulse=pl;
   if(hk>0){const j=w*0.35*hk;const o=side.clone().multiplyScalar((Math.random()-0.5)*j).addScaledVector(up,(Math.random()-0.5)*j);a=a.clone().add(o.clone().multiplyScalar(0.3));b=b.clone().add(o);
     if(Math.random()<hk*0.5){const x=a.x/S3+MW/2,y=a.z/S3+MH/2;burst(x,y,Math.random()<0.5?'#ffb070':'#ff8a3a',2,120,0.25,1.8,{h:a.y,vh:[0,3],g:4});}}
-  lgAim(S.bC,a,b);S.bC.scale.x=S.bC.scale.y=w*0.32*pl*(1+0.25*hk)*(1+0.12*Math.sin(now/35));S.bC.material.color.copy(hdr('#fffbe8',1.15)).lerp(hdr('#ff8a30',1.0),hk);S.bC.material.opacity=0.6;
+  lgAim(S.bC,a,b);S.bC.scale.x=S.bC.scale.y=w*0.32*pl*(1+0.25*hk)*(1+0.04*Math.sin(now/35));S.bC.material.color.copy(hdr('#fffbe8',1.15)).lerp(hdr('#ff8a30',1.0),hk);S.bC.material.opacity=0.6;
 
   // ขั้นตามจำนวนคริสตัล (ผู้ใช้ 2026-11-17): 1 = แกน+แสงฟุ้ง • 2 = + วงแสงวิ่งรอบลำ • 3 = + ประกายวิ่งตามลำ + ปลายลำใหญ่ขึ้น • วงที่ปากลำโตและเพิ่มชั้นตามขั้น
   const st=S.bSt||0;
@@ -1155,7 +1155,7 @@ function lgWardVisual(o,S,active,now){
 let _lgBeamM=null;
 function lgBeamMat(){if(_lgBeamM)return _lgBeamM;_lgBeamM=new THREE.ShaderMaterial({uniforms:{uT:{value:0},uK:{value:1}},transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,
   vertexShader:'varying vec2 vU;varying vec3 vN,vV;void main(){vU=uv;vec4 mv=modelViewMatrix*vec4(position,1.);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',
-  fragmentShader:'uniform float uT,uK;varying vec2 vU;varying vec3 vN,vV;void main(){float f=abs(dot(normalize(vN),normalize(vV)));float core=smoothstep(0.35,0.95,f);float s=0.75+0.25*sin(vU.y*40.-uT*30.);float fade=smoothstep(1.,0.85,vU.y);vec3 col=mix(vec3(1.,0.7,0.15),vec3(1.,0.9,0.55),core);float a=(0.06+0.6*core)*s*fade*uK;gl_FragColor=vec4(col*a,a);}'});_lgBeamM.userData.keep=true;return _lgBeamM;}
+  fragmentShader:'uniform float uT,uK;varying vec2 vU;varying vec3 vN,vV;void main(){float f=abs(dot(normalize(vN),normalize(vV)));float core=smoothstep(0.35,0.95,f);float s=0.92+0.08*sin(vU.y*40.-uT*30.);float fade=smoothstep(1.,0.85,vU.y);vec3 col=mix(vec3(1.,0.7,0.15),vec3(1.,0.9,0.55),core);float a=(0.06+0.6*core)*s*fade*uK;gl_FragColor=vec4(col*a,a);}'});_lgBeamM.userData.keep=true;return _lgBeamM;}
 function lgSovereignChestBeam(){
   const shared={time:LG_ULT_TIME,span:{value:1},age:{value:0},fade:{value:1}};
   const material=outer=>new THREE.ShaderMaterial({uniforms:{...shared,shell:{value:outer?1:0}},
