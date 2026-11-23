@@ -1,5 +1,5 @@
 {
- "next": 164,
+ "next": 165,
  "items": [
   {
    "id": 157,
@@ -3452,6 +3452,24 @@
     "/shots/motion_earth_rampart.gif",
     "/shots/earth_rampart_sheet.jpg",
     "/shots/earth_rampart_look.jpg"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 164,
+   "title": "ต้นไม้ป่า Painterly ไหวตามลม + แสงทะลุใบ",
+   "text": "ทั้งต้นเอนตามลมประจำแมพ มีคลื่นลมวิ่งผ่านป่าเป็นระลอก พุ่มโยก ใบสั่น • สกิลระเบิด/ลมดันต้นไม้ใกล้ ๆ ให้เอน • เงาบนพื้นไหวตาม • ใบเรืองเมื่อย้อนแดด • ปรับแรงได้ใน tune.html → 🎨 Paint → ต้นไม้ไหวตามลม • ดู GIF: tree_wind.gif (ลมแรงกว่าปกติ 0.6) และ tree_gust.gif (ลมกระโชก)",
+   "kind": "Look",
+   "who": "Trees",
+   "status": "wait",
+   "created": "2026-11-23T17:00:00",
+   "updated": "2026-11-23T17:00:00",
+   "imgs": [],
+   "links": [
+    "/shots/tree_wind.gif",
+    "/shots/tree_gust.gif",
+    "/index.html?nosw&playmap=forest"
    ],
    "feedback": "",
    "reply": ""

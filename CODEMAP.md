@@ -927,7 +927,7 @@ _dvCyl:259 _dvMat:260 devOverlay:261
 §281 2D overlay map: spawn zones + capture zones + players (click = warp)
 _dvMap:282 _dvY:286 devMapDraw:287
 
-## js/77-paint.js (291) — 
+## js/77-paint.js (326) — 
 PAINT:12 paintOn:22 paintMap:24 paintLights:33
 §42 VFX สีสด (ทดลอง): บนแมพสว่าง เอฟเฟกต์เรืองแสงเดิมซีดเป็นขาว-เหลืองอ่อ…
 _ptHSL:43 paintVivid:44 paintVfx:46
@@ -937,12 +937,14 @@ BLOB:58 blobPre:59 blobFire:60 paintGrass:82
 paintAtlas:84 paintStrokeTex:108
 §116 ต้นไม้
 paintTreeGeo:117 paintCanopy:160 paintKit:164
-§187 ลายพู่กันบนผิว (ต่อท้าย onBeforeCompile เดิมของวัสดุ เหมือน js/76)
-PT_VS:188 PT_VS_BODY:189 PT_FS:190 PT_FS_BODY:191 PT_CEL_RE:200 PT_CEL_CHUNK:201 paintPatch:204 paintApply:219 paintSweep:221
-§222 ฉากของแมพ (เรียกจาก buildFileMap ก่อน brkSetup/batchStatic)
-paintScene:223 paintShafts:238
-§249 ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเร…
-§275 ปรับค่า (tune.html / F8)
+§191 tree wind (user 2026-11-23: trees more alive)
+PTW:193 PTW_HEAD:196 PTW_BODY:198 PTW_FS:212 ptWindTick:215
+§219 ลายพู่กันบนผิว (ต่อท้าย onBeforeCompile เดิมของวัสดุ เหมือน js/76)
+PT_VS:220 PT_VS_BODY:221 PT_FS:222 PT_FS_BODY:223 PT_CEL_RE:232 PT_CEL_CHUNK:233 paintPatch:236 paintApply:251 paintSweep:253
+§254 ฉากของแมพ (เรียกจาก buildFileMap ก่อน brkSetup/batchStatic)
+paintScene:255 paintShafts:270
+§281 ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเร…
+§307 ปรับค่า (tune.html / F8)
 
 ## js/78-dev-ui.js (246) — Dev Mode UI (user 2026-11-20): one floating window, many small column…
 §10 orbit camera
@@ -957,4 +959,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(117 files, 35325 lines)
+(117 files, 35360 lines)

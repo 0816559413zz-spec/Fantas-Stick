@@ -166,10 +166,14 @@ function paintKit(){
   const R=mulberry(31337),map=paintAtlas();
   const mat=new THREE.MeshStandardMaterial({map,vertexColors:true,alphaTest:0.42,roughness:1,metalness:0,side:THREE.FrontSide,name:'paint_tree'});
   mat.userData.noSurf=true;mat.userData.keep=true;mat.userData.noBake=true;mat.envMapIntensity=0.55;
-  // ใบไหวตามลมเบา ๆ (เฉพาะแผ่นใบ: uv.x > 0.5) — ใช้เวลาเดียวกับลำแสง/ฝุ่น
-  mat.onBeforeCompile=sh=>{sh.uniforms.uPtT=PAINT.T;
-    sh.vertexShader='uniform float uPtT;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n if(uv.x>0.5){float ph=position.x*0.7+position.z*0.9+position.y*0.5;transformed.x+=sin(uPtT*1.3+ph)*0.07;transformed.z+=cos(uPtT*1.1+ph*1.3)*0.07;transformed.y+=sin(uPtT*1.7+ph*0.7)*0.03;}');};
-  mat.customProgramCacheKey=()=>'ptree1';paintPatch(mat,false);
+  // wind (whole tree bends with height², travelling gust bands, cluster wobble, leaf flutter, skill gusts) + light through leaves — ptWindVS / ptLeafFS
+  mat.onBeforeCompile=sh=>{Object.assign(sh.uniforms,PTW.U);
+    sh.vertexShader=PTW_HEAD+'varying float vPtLeaf;varying vec3 vPtWP;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n'+PTW_BODY+'vPtLeaf=uv.x>0.5?1.0:0.0;')
+      .replace('#include <worldpos_vertex>','#include <worldpos_vertex>\n vPtWP=(modelMatrix*vec4(transformed,1.0)).xyz;');
+    sh.fragmentShader='uniform vec3 uPtSun;uniform vec3 uPtSunC;uniform float uPtTr;varying float vPtLeaf;varying vec3 vPtWP;\n'+sh.fragmentShader.replace('#include <opaque_fragment>',PTW_FS+'#include <opaque_fragment>');};
+  mat.customProgramCacheKey=()=>'ptree2';paintPatch(mat,false);
+  const dmat=new THREE.MeshDepthMaterial({depthPacking:THREE.RGBADepthPacking,map,alphaTest:0.42});dmat.userData.keep=true;   // shadows sway with the tree
+  dmat.onBeforeCompile=sh=>{Object.assign(sh.uniforms,PTW.U);sh.vertexShader=PTW_HEAD+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n'+PTW_BODY);};dmat.customProgramCacheKey=()=>'ptreeD';
   const tree=[
     paintTreeGeo({seed:11,H:14.5,r0:0.42,r1:0.14,lean:0.9,stubs:6,ly0:7,ly1:17,blobs:paintCanopy(R,9.2,15.6,3.6,8,2.5,17,2.5)}),
     paintTreeGeo({seed:23,H:12,r0:0.38,r1:0.13,lean:1.4,stubs:4,ly0:6,ly1:14.5,blobs:paintCanopy(R,7.6,13,3.2,7,2.3,16,2.4)}),
@@ -181,9 +185,37 @@ function paintKit(){
   const bush=[
     paintTreeGeo({seed:61,H:0,ly0:-0.2,ly1:1.9,pal:['#1c5238','#2f8438','#6ab83c','#c6e055'],blobs:[[0,0.45,0,0.75,10,0.75,1.15],[0.6,0.35,0.3,0.55,7,0.75,1.0],[-0.5,0.4,-0.4,0.6,7,0.75,1.0]]}),
     paintTreeGeo({seed:67,H:0,ly0:-0.2,ly1:1.7,pal:['#1a4c3c','#2a7a40','#58a83a','#b4d850'],blobs:[[0,0.4,0,0.7,10,0.7,1.1],[-0.55,0.3,0.35,0.5,7,0.7,0.95]]})];
-  return PAINT.kit={mat,tree,far,bush,stroke:(PAINT.U.tPt.value=paintStrokeTex())};
+  return PAINT.kit={mat,dmat,tree,far,bush,stroke:(PAINT.U.tPt.value=paintStrokeTex())};
 }
 PAINT.T={value:0};
+// ---------- tree wind (user 2026-11-23: trees more alive) ----------
+// PTW.amp = bend at 14 m height per unit of wind (m) • gust = how hard skill gusts (AIR.G, js/50) push trees • tr = light through leaves (sun behind)
+const PTW={amp:1.1,flut:0.09,gust:1.6,tr:0.55,
+  U:{uPtT:PAINT.T,uPtW:{value:new THREE.Vector4(1,0,0.3,0)},uPtG:{value:Array.from({length:12},()=>new THREE.Vector4(0,0,1,0))},uPtGB:{value:Array.from({length:12},()=>new THREE.Vector4())},
+    uPtN:{value:0},uPtK:{value:new THREE.Vector3(1.1,0.09,1.6)},uPtSun:{value:new THREE.Vector3(0,1,0)},uPtSunC:{value:new THREE.Color(1,1,1)},uPtTr:{value:0.55}}};
+const PTW_HEAD='uniform float uPtT;uniform vec4 uPtW;uniform vec4 uPtG[12];uniform vec4 uPtGB[12];uniform float uPtN;uniform vec3 uPtK;\n';
+// world offset at the tree top, then back into the tree's local space (rotation + uniform scale) — mesh-per-tree, origin = trunk base
+const PTW_BODY=`{vec3 wo=modelMatrix[3].xyz;float sc=length(modelMatrix[0].xyz);float h=max(transformed.y,0.0)*sc;float k=h/14.0;
+ vec2 wd=uPtW.xy;float t=uPtW.w;float st=uPtW.z;
+ float band=smoothstep(-0.2,1.0,sin(dot(wo.xz,wd)*0.045-t*0.55+sin(dot(wo.xz,vec2(-wd.y,wd.x))*0.03)*1.6));
+ float ph=dot(wo.xz,wd)*0.07-t*0.9;
+ vec2 off=wd*st*(0.35+0.2*sin(ph)+0.75*band)+vec2(sin(t*0.83+wo.x*0.31),cos(t*0.71+wo.z*0.27))*0.1*(st+0.25);
+ for(int i=0;i<12;i++){if(float(i)>=uPtN)break;vec4 g=uPtG[i];vec4 gb=uPtGB[i];vec2 dd=wo.xz-g.xy;float L=length(dd);float R=g.z*1.7+3.0;float fl=1.0-smoothstep(R*0.5,R,L);
+   off+=(dd/(L+1.0)*g.w+vec2(-dd.y,dd.x)/(L+1.0)*gb.x+gb.yz)*fl*uPtK.z;}
+ float cw=sin(t*1.7+dot(position,vec3(0.37,0.21,0.33)))*0.22*(st+0.3);
+ vec2 wofs=off*k*k*uPtK.x+wd*cw*k;
+ float fl2=uv.x>0.5?uPtK.y*(1.0+st*2.0+length(off)*0.6):0.0;float pf=position.x*0.7+position.z*0.9+position.y*0.5;
+ vec3 w3=vec3(wofs.x,-0.5*dot(wofs,wofs)/(h+1.0),wofs.y)+vec3(sin(t*2.6+pf),sin(t*3.1+pf*0.7)*0.4,cos(t*2.2+pf*1.3))*fl2;
+ transformed+=transpose(mat3(modelMatrix))*w3/(sc*sc);}
+`;
+// light through leaves: sun behind the leaf (view toward sun) → leaf glows with its own colour
+const PTW_FS=`if(vPtLeaf>0.5){vec3 V=normalize(cameraPosition-vPtWP);float bk=pow(max(0.0,dot(-V,uPtSun)),3.0);
+ outgoingLight+=diffuseColor.rgb*uPtSunC*bk*uPtTr*(0.5+0.5*smoothstep(0.0,0.8,diffuseColor.g));}
+`;
+function ptWindTick(){const U=PTW.U;U.uPtW.value.set(AIR.dir.x,AIR.dir.y,AIR.str,AIR.t);U.uPtK.value.set(PTW.amp,PTW.flut,PTW.gust);U.uPtTr.value=PTW.tr;
+  U.uPtSun.value.copy(LDIR).normalize();U.uPtSunC.value.copy(moonL.color).multiplyScalar(moonL.intensity*0.35);
+  let n=0;for(let i=0;i<12;i++){const g=AIR.G[i],u=U.uPtG.value[i],b=U.uPtGB.value[i];if(g){const e=airEnv(g);u.set(g.x,g.z,g.R,airGv(g));b.set(g.sw*e,g.dx*e,g.dz*e,0);n=i+1;}else{u.w=0;b.set(0,0,0,0);}}
+  U.uPtN.value=n;}
 // ---------- ลายพู่กันบนผิว (ต่อท้าย onBeforeCompile เดิมของวัสดุ เหมือน js/76) ----------
 const PT_VS='varying vec3 vPtP;varying vec3 vPtN;\n';
 const PT_VS_BODY='\n{vec4 ptl=vec4(transformed,1.0);\n#ifdef USE_INSTANCING\n ptl=instanceMatrix*ptl;\n#endif\n vPtP=(modelMatrix*ptl).xyz;vPtN=normalize(mat3(modelMatrix)*objectNormal);}\n';
@@ -225,7 +257,7 @@ function paintScene(id,sc){
   const hash=s=>{let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h;};
   sc.traverse(o=>{if(!o.isMesh)return;const nm=o.name||'';
     const set=(L)=>{const bb=o.geometry.boundingBox||(o.geometry.computeBoundingBox(),o.geometry.boundingBox);o.userData.ptY=bb.min.y;
-      o.geometry=L[(hash(nm)+n++)%L.length];o.material=K.mat;o.castShadow=true;o.receiveShadow=true;};
+      o.geometry=L[(hash(nm)+n++)%L.length];o.material=K.mat;o.customDepthMaterial=K.dmat;o.castShadow=true;o.receiveShadow=true;};
     if(/^forest_tree/i.test(nm))set(K.tree);
     else if(/^forest_far/i.test(nm))set(K.far);
     else if(/^forest_bush/i.test(nm))set(K.bush);
@@ -264,7 +296,7 @@ class PaintPass extends Pass{
         'b=b/max(1.0-dot(b,LW),0.02);if(!(b.r+b.g+b.b>=0.0))b=src;'+
         'gl_FragColor=vec4(mix(src,b,uK),1.0);}'}));}
   render(r,write,read){const U=PAINT.KU;U.tDiffuse.value=read.texture;U.uPx.value.set(1/read.width,1/read.height);U.uR.value=PAINT.kuwR*Math.max(1,read.height/720);U.uK.value=typeof screen==='string'&&screen!=='game'?0:PAINT.kuw;
-    PAINT.T.value=performance.now()*0.001;paintGrass();if(PAINT.cur&&(PAINT.fr=(PAINT.fr||0)+1)%30===1)paintSweep();
+    PAINT.T.value=performance.now()*0.001;ptWindTick();paintGrass();if(PAINT.cur&&(PAINT.fr=(PAINT.fr||0)+1)%30===1)paintSweep();
     r.setRenderTarget(this.renderToScreen?null:write);this.q.render(r);}
 }
 PAINT.pass=new PaintPass();PAINT.pass.enabled=false;
@@ -274,6 +306,9 @@ lookPreset('paint','dusk',{sky:'noon',warm:true,env:0.75,tr:0.86,tg:1.06,tb:1.02
   dust:0.6,dustS:0.8,dustK:1.5,mist:0.5,mistA:0.07,mistS:1.1,mistH:2.4,mistL:0.6,mistK:1.4,flow:1,lo:[0.74,1.03,1.2],hi:[1.10,1.08,0.80]});
 // ---------- ปรับค่า (tune.html / F8) ----------
 (function(){const G=['paint','🎨 Paint (ลุคภาพวาด)'],S='ลุคภาพวาด',Rg=(k,l,g,s,o)=>tuneNum(G,S,'paint.'+k,l,g,v=>{s(v);paintLights(PAINT.cur||builtMap);},o);
+  {const W=(k,l,o)=>tuneNum(G,'ต้นไม้ไหวตามลม','paint.tree.'+k,l,()=>PTW[k],v=>{PTW[k]=v;},o);
+    W('amp','ต้นไม้ • เอนตามลม (เมตรที่ยอด 14 ม. ต่อแรงลม 1)',{min:0,max:4,step:0.05});W('flut','ใบไม้ • สั่นระริก',{min:0,max:0.4,step:0.01});
+    W('gust','ต้นไม้ • แรงผลักจากสกิล (ลมกระโชก)',{min:0,max:5,step:0.05});W('tr','ใบไม้ • แสงทะลุใบเมื่อย้อนแดด',{min:0,max:2,step:0.05});}
   Rg('kuw','ฟิลเตอร์ภาพวาด • ความแรง (0 = ปิด)',()=>PAINT.kuw,v=>{PAINT.kuw=v;},{min:0,max:1,step:0.05});
   Rg('kuwR','ฟิลเตอร์ภาพวาด • ขนาดปื้นสี',()=>PAINT.kuwR,v=>{PAINT.kuwR=v;},{min:0.5,max:3,step:0.05});
   Rg('stroke','ลายพู่กันบนผิว • ความเข้ม',()=>PAINT.U.uPt.value.z,v=>{PAINT.U.uPt.value.z=v;},{min:0,max:1.5,step:0.05});
@@ -288,4 +323,4 @@ lookPreset('paint','dusk',{sky:'noon',warm:true,env:0.75,tr:0.86,tg:1.06,tb:1.02
   Rg('sat','ความสดของสี',()=>PAINT.sat,v=>{PAINT.sat=v;},{min:0.8,max:1.6,step:0.01});
   Rg('sun','ความแรงแดด',()=>PAINT.sun,v=>{PAINT.sun=v;},{min:0.5,max:5,step:0.05});})();
 if(typeof builtMap==='string'&&builtMap)paintLights(builtMap);
-window.WD&&Object.assign(window.WD,{PAINT,paintLights,paintKit});
+window.WD&&Object.assign(window.WD,{PAINT,paintLights,paintKit,PTW});
