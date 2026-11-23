@@ -1438,3 +1438,4 @@
 - 2026-11-23 Frost slide trail a bit wider (plates 0.6, radius 34)
 - 2026-11-23 Frost slide trail bigger (plates 0.75, radius 42)
 - 2026-11-23 Frost right-click Sword Guard (60% into a 100 guard, diagonal sword + faint half-dome)
+- 2026-11-23 Frost guard v2: square body, tip-down slanted sword, faint side ripple instead of dome
