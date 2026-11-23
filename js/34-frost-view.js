@@ -94,6 +94,18 @@ function fwLink(){const geo=new THREE.BufferGeometry();geo.setAttribute('positio
   const l=new THREE.Line(geo,new THREE.LineBasicMaterial({color:hdr('#a8e6ff',1.6),transparent:true,opacity:0.35,blending:THREE.AdditiveBlending,depthWrite:false}));l.frustumCulled=false;l.visible=false;return l;}
 // เมทริกซ์โลกของใบอาวุธ W ถ้าอาวุธอยู่ท่า P (ใช้เก็บจุดหางแสงย่อยระหว่างเฟรม ให้โค้งเนียน)
 function fwMat(o,W,P,off){fwAim(P.bx,P.by,P.bz,P.nx,P.ny,P.nz);_fwP.set(P.x+(off?off[0]:0),P.y+(off?off[1]:0),P.z+(off?off[2]:0));_fwM2.compose(_fwP,_fwQ,_fwS);_fwM.multiplyMatrices(o.g.matrixWorld,_fwM2);return _fwM.multiply(W.matrix);}
+// Frost slide leg pose [R pitch, R spread, L pitch, L spread] (window.__SLV overrides for tests)
+// Frost slide pose [body yaw, R pitch, R spread, L pitch, L spread] (window.__SLV overrides for tests)
+const SLIDE_POSE=[1.2,0.05,-0.5,0.05,0.5];
+// Head/neck turn back toward the cursor while the body is side-on (restores the clip pose first, no build-up)
+const _slQ=new THREE.Quaternion();
+function frostSlideHead(o){
+  if(!o.fileModel)return;const a=o.slHead||0;
+  const H=o.slHB||(o.slHB=['neck','head'].map(n=>{const b=o.fileModel.getObjectByName(n);return b?{b,base:new THREE.Quaternion(),ap:new THREE.Quaternion(),on:false}:null;}).filter(Boolean));
+  for(const h of H){const q=h.b.quaternion;if(h.on&&q.equals(h.ap))q.copy(h.base);h.on=Math.abs(a)>0.01;if(!h.on)continue;
+    h.base.copy(q);q.multiply(_slQ.setFromAxisAngle(_slAx,a*0.5));h.ap.copy(q);}
+}
+const _slAx=new THREE.Vector3(0,1,0);
 function frostFX(o,p,pz,now,dt){
   const F=p.fr;
   if(!F){if(o.fw)o.fw.g.visible=false;if(o.fwLk)o.fwLk.visible=false;if(o.ishield)o.ishield.visible=false;if(o.cryoM)o.cryoM.visible=false;if(o.cryoFx){fxKill(o.cryoFx);o.cryoFx=null;}if(o.fwx)o.fwx.forEach(c=>{c.g.visible=false;c.on=0;});return;}
@@ -139,7 +151,7 @@ function frostFX(o,p,pz,now,dt){
   if(!melee&&!p.fl&&(flags&32)){ax=-1.42;az=0.1;bx=0.12;by=-0.1;}
   if(o.grUp>0){o.grUp-=dt;const k=1-Math.max(0,o.grUp)/0.5;const e=1-Math.pow(1-Math.min(1,k/0.45),3);ax=lerp(-1.42,-3.0,e);az=0.05;bx=lerp(0.12,-0.2,e);by=0;}
   if(o.grDown>0){o.grDown-=dt;const k=1-Math.max(0,o.grDown)/0.3;az=-0.05;by=0;o.fwSub=0;
-    if(k<0.35){const e=Math.pow(k/0.35,1.4);ax=lerp(-0.3,-2.85,e);bx=lerp(0.3,-0.25,e);if(fwOn){fwChop(P,lerp(2.35,-0.55,e),ff);P.strike=true;}}   // งัดขึ้นเร็ว
+    if(k<0.35){const e=Math.pow(k/0.35,1.4);ax=lerp(-0.3,-2.85,e);bx=lerp(0.3,-0.25,e);if(fwOn){fwChop(P,lerp(2.35,-0.55,e),ff);P.strike=(o.grPt||0)<=0.05;}}   // งัดขึ้นเร็ว • aimed up = no trail dragging on the ground (user 2026-11-23)
     else{const e=1-Math.pow(1-(k-0.35)/0.65,3),pt=o.grPt||0,th=clamp(Math.PI/2-pt-0.2,0.15,1.75);ax=lerp(-2.85,-1.25-pt*0.9,e);bx=lerp(-0.25,-pt*0.28,e);if(fwOn){fwChop(P,lerp(-0.55,th,e),ff);P.strike=false;P.rate=lerp(30,10,e);}}}   // จบ: ใบชี้ตามแนวเล็ง (ผู้ใช้ 2026-11-11 คลื่นตามเป้า)
   // ฟาดจากที่สูง (กระโดดลง): อาวุธพุ่งนำลงไปข้างหน้า ปลายชี้พื้น
   if(fwOn&&o.slamT>0&&pz>0.2&&!(o.swT>0)){P.x=0;P.y=0.5;P.z=1.4;P.bx=0;P.by=-0.8;P.bz=0.6;P.nx=1;P.ny=0;P.nz=0;P.rate=14;P.strike=false;ax=-0.6;az=-0.1;bx=0.25;}
@@ -153,6 +165,12 @@ function frostFX(o,p,pz,now,dt){
       // ผู้ใช้ 2026-11-16: ไม่ชูขึ้นฟ้าแล้ว — ดาบพุ่งมาหน้าตัวทันทีแล้วหมุนเป็นกังหันเร็วขึ้นเรื่อย ๆ → แยก 3 เล่มตอนร่ายจบ (ร่ายเร็วขึ้น)
       {const e=E(u/.18),a=u*u*38+u*8;P.x=lerp(P.x,0,e);P.y=lerp(P.y,1.9,e);P.z=lerp(P.z,2.3,e);P.bx=Math.sin(a);P.by=Math.cos(a);P.bz=0;P.nx=0;P.ny=0;P.nz=1;P.strike=false;P.rate=40;}}
   }
+  // Sword Guard (right-click, user 2026-11-23): face straight, wand pointed forward and a bit high, floating sword
+  // tip-down and slanted across the front; arm + sword follow mouse pitch, body follows mouse yaw
+  if(fwOn&&p.sh&&!(o.swT>0)&&!(o.grDown>0)){const pt=clamp((F[4]||0)/1000,-0.9,0.9),c=Math.cos(pt),s=Math.sin(pt),L=ff?2.0:1.75;
+    const gx=0.55,gy=-0.83*c,gz=0.83*s,cx=0,cy=1.25+s*1.35,cz=0.25+c*1.35;   // blade dir (handle → tip) and sword centre
+    P.x=cx-gx*L*0.5;P.y=cy-gy*L*0.5;P.z=cz-gz*L*0.5;P.bx=gx;P.by=gy;P.bz=gz;P.nx=0;P.ny=s;P.nz=c;P.rate=18;P.strike=false;o.fwSub=0;
+    o.grdC=[cx,cy,cz,pt];ax=-1.85-pt*0.95;az=-0.05;by=0.6;bx=0;}   // body turned diagonal, head turned back to the cursor (frostSlideHead)
   // วางอาวุธ: ช่วงฟันจริงวางตรงทุกเฟรม (ทางโค้งคม ไม่ตัดมุม) • นอกนั้นไล่ตามนุ่ม ๆ
   fwAim(P.bx,P.by,P.bz,P.nx,P.ny,P.nz);_fwP.set(P.x,P.y,P.z);
   {const G=o.fw.g;if(P.strike||!o.fwInit){G.position.copy(_fwP);G.quaternion.copy(_fwQ);o.fwInit=1;}else{const r=Math.min(1,dt*P.rate);G.position.lerp(_fwP,r);G.quaternion.slerp(_fwQ,r);}}
@@ -209,24 +227,42 @@ function frostFX(o,p,pz,now,dt){
     LREQ.push({x:_pw.x,y:_pw.y-0.8,z:_pw.z,col:'#8fe0ff',int:2.5,dist:9});
     if(melee){const W=ff?o.axe:o.sword;for(let i=0;i<3;i++){_ev.set(0,-rnd(0.3,1.9),0);W.localToWorld(_ev);const q=simOf(_ev);PARTS.push({x:q.x,y:q.y,h:q.h,vx:0,vy:0,vh:0,life:0.08,max:0.08,col:i?'#bfeaff':'#ffffff',size:2.6,g:0});}}}
   // โล่อัศวินน้ำแข็ง (แทนโล่ฟองสบู่)
-  if(p.sh){
-    if(!o.ishield){o.ishield=makeKiteShield();o.g.add(o.ishield);}
-    const pitch=(F[4]||0)/1000,reach=1.45,size=1.25;
-    if(!o.shFx)o.shFx=fxPlay('frost/shield_a',{x:p.x,y:p.y,h:pz,follow:p.id,s:size,aimPitch:pitch,pivotY:1.15});
-    if(o.shFx)o.shFx.o.aimPitch=pitch;
-    o.ishield.visible=true;o.ishield.position.set(0.12,1.15+Math.sin(pitch)*reach,Math.cos(pitch)*reach);
-    o.ishield.rotation.set(-pitch,0,0);o.ishield.scale.setScalar(size);
-    o.armL.rotation.x=-1.3;o.armL.rotation.z=0.5;
-    o.shield.visible=!!((p.fm|0)&(128|16384));
-    if(Math.random()<0.3){o.ishield.getWorldPosition(_pw);const s=simOf(_pw);PARTS.push({x:s.x+rnd(-8,8),y:s.y+rnd(-8,8),h:s.h+rnd(-0.5,0.5),vx:0,vy:0,vh:0.4,life:0.5,max:0.5,col:'#dff6ff',size:1.6,g:0});}
-  }else{if(o.shFx){fxStop(o.shFx);o.shFx=null;}if(o.ishield)o.ishield.visible=false;}
+  // Sword Guard: very faint ripple spreading left/right from the sword, fading out to the sides; brighter on a blocked hit
+  if(p.sh&&o.grdC){
+    if(!o.gwave){const M=new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,
+        uniforms:{t:{value:0},a:{value:0},c:{value:new THREE.Color(hdr('#bfeaff',1.3))}},
+        vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+        // soft shield sheet (no lines): solid faint glow, fades out toward the left/right ends and top/bottom, slow shimmer
+        fragmentShader:'uniform float t,a;uniform vec3 c;varying vec2 vUv;void main(){vec2 q=vUv*2.0-1.0;float sd=abs(q.x);'+
+          'float f=(1.0-smoothstep(0.2,1.0,sd))*(1.0-smoothstep(0.45,1.0,abs(q.y)));float sh=0.9+0.1*sin(t*2.0+q.x*2.0+q.y*3.0);'+
+          'gl_FragColor=vec4(c*f*sh*a,1.0);}'});
+      // curved like a shield: arc of a cylinder bowed toward the front
+      const geo=new THREE.CylinderGeometry(2.2,2.2,1.6,32,1,true,-0.8,1.6);geo.translate(0,0,-2.2);
+      o.gwave=new THREE.Mesh(geo,M);o.gwave.frustumCulled=false;o.g.add(o.gwave);}
+    const W=o.gwave,[cx,cy,cz,pt]=o.grdC;W.visible=true;W.position.set(cx,cy,cz+0.05);W.rotation.set(-pt,0,0);
+    o.grdIn=Math.min(1,(o.grdIn||0)+dt/0.2);o.grdHit=Math.max(0,(o.grdHit||0)-dt*3);
+    W.material.uniforms.t.value=now/1000;W.material.uniforms.a.value=(0.2+0.45*o.grdHit)*o.grdIn;W.scale.set(0.7+0.3*o.grdIn+0.15*o.grdHit,1,1);
+    if(!(o.swT>0)){o.armL.rotation.x=lerp(o.armL.rotation.x,-0.5,0.3);o.armL.rotation.z=lerp(o.armL.rotation.z,0.7,0.3);}
+    if(o.ishield)o.ishield.visible=false;
+  }else{if(o.gwave)o.gwave.visible=false;o.grdIn=0;if(!p.sh)o.grdC=null;if(o.shFx){fxStop(o.shFx);o.shFx=null;}if(o.ishield)o.ishield.visible=false;}
   // ไถลน้ำแข็ง
-  if(flags&1){o.b.rotation.x=0.5;o.legs[0].rotation.x=-0.75;o.legs[1].rotation.x=0.6;o.armL.rotation.x=0.6;o.armL.rotation.z=0.6;
+  // Slide pose (user 2026-11-23): surf stance — body turned side-on, one leg front / one leg back, feet planted,
+  // head still looks forward (cursor), arms balance with a little sway. Attacks square the body back up.
+  if(flags&1){o.slK=Math.min(1,(o.slK||0)+dt/0.15);const k=o.slK,busy=o.swT>0||o.grDown>0||o.grUp>0;
+    o.slTw=lerp(o.slTw||0,busy?0:1,Math.min(1,dt*10));const tw=o.slTw*k,S=window.__SLV||SLIDE_POSE,sw=Math.sin(now/260),sw2=Math.sin(now/410+1);
+    o.b.rotation.x=lerp(o.b.rotation.x,0,k);o.b.position.y=-0.18*k;o.b.rotation.y=lerp(o.b.rotation.y,S[0],tw);o.b.rotation.z=0.04*sw2*tw;
+    // body side-on: spread in the body frame = one foot ahead, one behind along the slide
+    o.legs[0].rotation.x=S[1]*k;o.legs[0].rotation.z=S[2]*k;o.legs[1].rotation.x=S[3]*k;o.legs[1].rotation.z=S[4]*k;
+    if(!busy){o.armL.rotation.x=lerp(o.armL.rotation.x,-0.2+0.12*sw,k);o.armL.rotation.z=lerp(o.armL.rotation.z,1.15+0.18*sw2,k);
+      o.armR.rotation.z=lerp(o.armR.rotation.z,o.armR.rotation.z-0.35-0.12*sw2,tw);}
+    o.slHead=-S[0]*tw*0.85;
     for(let i=0;i<3;i++)PARTS.push({x:p.x+rnd(-10,10),y:p.y+rnd(-10,10),h:pz+0.1,vx:rnd(-60,60),vy:rnd(-60,60),vh:rnd(0.5,2),life:0.35,max:0.35,col:i?'#ffffff':'#bfeaff',size:1.8,g:4});
     if(Math.random()<0.8)PARTS.push({x:p.x+rnd(-12,12),y:p.y+rnd(-12,12),h:pz+0.12,vx:rnd(-10,10),vy:rnd(-10,10),vh:0.15,life:0.9,max:0.9,col:'#eef8ff',size:6,g:0,smoke:true,grow:0.9,drag:2});
-    const lp=o.slLast||[p.x,p.y];if(Math.hypot(p.x-lp[0],p.y-lp[1])>45){dfCracks((p.x+lp[0])/2,(p.y+lp[1])/2,pz+0.06,40,'#bfeaff',0.9);o.slLast=[p.x,p.y];}else if(!o.slLast)o.slLast=[p.x,p.y];
+    const lp=o.slLast||[p.x,p.y];if(Math.hypot(p.x-lp[0],p.y-lp[1])>45){dfCracks((p.x+lp[0])/2,(p.y+lp[1])/2,pz+0.06,20,'#bfeaff',0.5);o.slLast=[p.x,p.y];}else if(!o.slLast)o.slLast=[p.x,p.y];
     o.slA=p.a;}
-  else if(o.slLast){const a=o.slA||p.a||0;o.slLast=null;PARTS.push({x:p.x,y:p.y,h:pz+0.2,vx:0,vy:0,vh:0.3,life:0.8,max:0.8,col:'#eef8ff',size:8,g:0,smoke:true,grow:1});
+  else{o.slK=0;o.slTw=0;o.slHead=p.sh&&fwOn?-fa.by*0.9:0;}
+  frostSlideHead(o);
+  if(!(flags&1)&&o.slLast){const a=o.slA||p.a||0;o.slLast=null;PARTS.push({x:p.x,y:p.y,h:pz+0.2,vx:0,vy:0,vh:0.3,life:0.8,max:0.8,col:'#eef8ff',size:8,g:0,smoke:true,grow:1});
     for(let i=0;i<8;i++){const an=a+rnd(-0.5,0.5),v=rnd(150,280);iceBit(_cryG,p.x+Math.cos(a)*14,p.y+Math.sin(a)*14,pz+0.2,0.07,0.12,0.07,{life:0.6,up:0.02,down:0.2,v:[Math.cos(an)*v,Math.sin(an)*v,rnd(2,4)],spin:rnd(-12,12)});}
     for(let i=0;i<10;i++)PARTS.push({x:p.x+Math.cos(a)*16,y:p.y+Math.sin(a)*16,h:pz+0.1,vx:Math.cos(a+rnd(-0.6,0.6))*rnd(120,240),vy:Math.sin(a+rnd(-0.6,0.6))*rnd(120,240),vh:rnd(0.5,2.5),life:0.35,max:0.35,col:i%2?'#ffffff':'#bfeaff',size:1.6,g:6});}
   // แช่แข็งตัวเอง

@@ -253,7 +253,7 @@ function jumpElbowPose(o,weight){
 const CBLOCK=[-1.45,0.55,-0.15,0.12,-1.35,-0.15];
 const CBLOCK_PATH={0:[-1.25,0.35,-0.08,0.08,-1.15,-0.4],1:[-1.25,0.1,-0.18,0.13,-1.65,-0.1],7:[-1.5,-0.16,0,0.34,-1.5,0.16],8:[-1.4,0.25,-0.1,0.08,-1.45,-0.25]};
 function blockPose(o,p,dt,now){
-  const on=!!p.sh&&!p.ea&&!p.fl&&!p.dn;o.bkw=(o.bkw||0)+((on?1:0)-(o.bkw||0))*Math.min(1,dt*(on?14:6));const w=o.bkw;if(w<0.005)return;
+  const on=!!p.sh&&!p.ea&&!p.fl&&!p.dn&&!p.fr;o.bkw=(o.bkw||0)+((on?1:0)-(o.bkw||0))*Math.min(1,dt*(on?14:6));const w=o.bkw;if(w<0.005)return;
   const R=o.armR.rotation,L=o.armL.rotation,br=Math.sin(now/420)*0.03,B=CBLOCK_PATH[getKit(p.id).path]||CBLOCK;
   R.x=lerp(R.x,B[0]+br,w);R.z=lerp(R.z,B[1],w);o.b.rotation.y+=B[2]*w;o.b.rotation.x+=(B[3]+br*0.5)*w;L.x=lerp(L.x,B[4]-br,w);L.z=lerp(L.z,B[5],w);o.b.position.y-=0.1*w;
   if(!(p.wv>1)){o.legs[0].rotation.x=lerp(o.legs[0].rotation.x,0.22,w);o.legs[1].rotation.x=lerp(o.legs[1].rotation.x,-0.3,w);o.legs[0].rotation.z=0.1*w;o.legs[1].rotation.z=-0.1*w;}
@@ -342,7 +342,7 @@ function syncPlayers(P,mode,now,dt){
     o.b.position.set(0,0,0);o.b.rotation.set(0,0,0);   // one-frame pose offsets must not build up (body drifted back / stayed tilted)
     if(o.darkGear?.visible)o.armR.rotation.y=0;   // BA wand twist is applied fresh each frame
     const hoverPose=!!p.lt?.[0]&&!!p.lt[4]&&!p.fl&&!p.dn;
-    if(o.anim)animTick(o,{down:!!p.dn,fly:!!p.fl,sp:hoverPose||p.wn&&p.wn[5]>=1?0:v.sp,castT:o.castT,hitT:o.hitT},dt,isMe?1:!detail&&!o.castT&&!o.hitT&&!p.ds?3:animLod(g));
+    if(o.anim)animTick(o,{down:!!p.dn,fly:!!p.fl,sp:hoverPose||p.wn&&p.wn[5]>=1||(p.fr&&p.fr[3]&1)?0:v.sp,castT:o.castT,hitT:o.hitT},dt,isMe?1:!detail&&!o.castT&&!o.hitT&&!p.ds?3:animLod(g));
     if(!o.fileModel)updateCloth(o.cloak,v.lvx,v.lvz,v.sp*(p.fl?1.4:1),now,dt);   // มีโมเดลไฟล์ = ผ้าคลุมโค้ดซ่อนอยู่ (ผ้าจริงคือ js/49)
     o.bsp=v.sp;broomView(o,p,dt,now);o.cocoon.visible=!!p.rt;   // ไม้กวาด: เอียงเลี้ยว + อนิเมชันเรียก/เก็บ (js/69)
     if(p.rt)o.cocoon.rotation.y=now/400;
@@ -376,7 +376,7 @@ function syncPlayers(P,mode,now,dt){
     if(jumpArmsCandidate){jumpArmBaseR.copy(o.armR.quaternion);jumpArmBaseL.copy(o.armL.quaternion);}
     castPose(o,p,v,dt,now);
     o.ends.forEach((E,i)=>{E.rotation.x=-clamp(v.lvz*0.07,0,1.2)+Math.sin(now*0.012+i*1.7)*0.08*(1+v.sp*0.15);E.rotation.z=clamp(v.lvx*0.04,-0.6,0.6);});
-    o.shield.visible=!!p.sh||!!(p.fm&(128|16384));
+    o.shield.visible=!!(p.sh&&!p.fr)||!!(p.fm&(128|16384));   // Frost Sword Guard: no bubble (own half-dome)
     const fireSh=p.sh&&getKit(p.id).path===0;
     if(o.shield.visible){o.shield.material.uniforms.t.value=now/1000;o.shield.material.uniforms.c.value.set(fireSh?'#ff7a2a':p.sh?'#7ff0ff':(p.fm&128)?'#6fb8d8':'#9a7a3a');}
     // โล่ไฟ = เปลือกไฟลุกหุ้มรอบตัว (fireShieldFX ใน js/33) แทนโล่ฟอง

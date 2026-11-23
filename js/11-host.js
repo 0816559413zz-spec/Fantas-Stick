@@ -260,6 +260,8 @@ function updatePlayer(p,dt,acting){
   for(const k of CDK)p.cd[k]=Math.max(0,p.cd[k]-dt*(p.ovc>0?1.3:1));
   p.stun=Math.max(0,p.stun-dt);p.inv=Math.max(0,p.inv-dt);tickStatus(p,dt);
   if(p.breath>0)p.breath-=dt;
+  p.regen=p.alive&&!p.downed&&p.hp<p.maxHp&&G.time-(p.cbT??-99)>=REGEN.wait;
+  if(p.regen)p.hp=Math.min(p.maxHp,p.hp+REGEN.rate*dt);
   if(p.snapT>0&&p.alive&&!p.downed){p.snapT-=dt;if(p.snapT<=0)pyroSnap(p);}
   if(p.mlCast>0){if(!p.alive||p.downed)p.mlCast=0;else{p.mlCast-=dt;if(p.mlCast<=0)mirrorStart(p);}}   // Mirror Legion ร่าย 1 วิ
   if(p.novaT>0){if(!p.alive||p.downed)p.novaT=0;else{p.novaT-=dt;if(p.novaT<=0)pyroNova(p);}}
@@ -358,7 +360,7 @@ function updatePlayer(p,dt,acting){
   if(p.wfw)windLandCheck(p);
 
   // โล่
-  const wantSh=!SHIELD_OFF&&canAct&&!p.fly&&!cageBusy&&G.mode!=='imp'&&!(G.ball&&G.ball.holder===p.id)&&inp.sh&&p.shieldBroken<=0&&p.shieldE>5&&!(PBASIC[p.pathIdx|0]?.noShield?.(p))&&p.dash<=0&&!p.natureHook&&!p.dchgOn&&!(p.colos>0)&&!(p.cryo>0)&&!p.dfall&&p.pathIdx!==2&&!p.aug&&!p.ramp&&!p.wr&&!(p.wsbL>0)&&!p.wwAim;
+  const wantSh=shieldAllowed(p)&&canAct&&!p.fly&&!cageBusy&&G.mode!=='imp'&&!(G.ball&&G.ball.holder===p.id)&&inp.sh&&p.shieldBroken<=0&&p.shieldE>5&&!(PBASIC[p.pathIdx|0]?.noShield?.(p))&&p.dash<=0&&!p.natureHook&&!p.dchgOn&&!(p.colos>0)&&!(p.cryo>0)&&!p.dfall&&p.pathIdx!==2&&!p.aug&&!p.ramp&&!p.wr&&!(p.wsbL>0)&&!p.wwAim;
   if(p.pathIdx===DARKP)darkShieldTick(p,wantSh&&!(p.dark?.ultUntil>G.time),dt);
   else{
   if(wantSh&&!p.shieldOn){p.shieldOn=true;p.shieldT=G.time;p.shBlk=0;p.shPar=0;}
@@ -415,7 +417,7 @@ function updatePlayer(p,dt,acting){
   if(p.dash<=0)p.ultSlash=null;
   if(p.sdHit)stormDashTick(p);
   if(p.fpath&&!(p.dash>0))pyroPathEnd(p);
-  if(p.slideT>0&&Math.hypot(p.x-p.slX,p.y-p.slY)>40){const lx=p.slX,ly=p.slY;p.slX=p.x;p.slY=p.y;addIce({x:p.x,y:p.y,r:46,t:4,team:p.team,owner:p.id,kind:'path',lx,ly});}
+  if(p.slideT>0&&Math.hypot(p.x-p.slX,p.y-p.slY)>40){const lx=p.slX,ly=p.slY;p.slX=p.x;p.slY=p.y;addIce({x:p.x,y:p.y,r:42,t:4,team:p.team,owner:p.id,kind:'path',lx,ly});/* narrower slide trail (user 2026-11-23, was 46, then 28, 34) */}
   p.x+=p.vx*dt;p.y+=p.vy*dt;
   const fr=Math.exp(-6*dt);p.vx*=fr;p.vy*=fr;
   if(!p.gh)collideWorld(p,PR,p.z);else{p.x=clamp(p.x,30,MW-30);p.y=clamp(p.y,30,MH-30);}

@@ -44,16 +44,16 @@ SGPH:197 SGTR:197 SG_SPR:198 sgFD:200 _sgAreaC:201 sgArea:202 _sgAreaT:209 sgAre
 ## js/02-room-greathall.js (105) — 
 
 
-## js/03-spells-core.js (253) — 
-SHIELD_OFF:2 ICONS:10 ICOALIAS:11 hasIco:12 ICOBASE:14 icoURL:15 ICO:16 icoTint:17 icoHTML:26 PATHS:27 SPELL_LIST:36 SPELLS:36 defSpell:37 SLOTK:38 BRMAP:38 KITP:39 parseKit:40 cleanKit:57 setKit:58 pathReset:61
-§63 สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู)
-isBig:64 ccScale:66 ccTouch:67 addStun:68 addRoot:69 addFreeze:70 addSlow:75 addChill:76 ignite:81 FX_SHOCK_CYAN:89 FX_ONFIRE:89 shock:90 knock:95 addWard:96 addFrostSlow:98 frostSlow:99 moveMul:106 BRN_MAX:108 addBurn:109 addOnFire:111 addXBurn:112 addPoison:113 addSil:114 addFear:115 addBlind:116 addMark:117 healT:119 tickStatus:124 clearStatus:147 fxMask:148
-§150 วัตถุในสนามที่คาถาสร้าง: โซน / ฟ้าผ่าหน่วงเวลา / กำแพง / ช่องร่ายต่อเ…
-foesIn:151 SHIELD_BREAK_LOCK:159 shieldFaces:160 aoeHit:170 addZone:177 updateZones:182 addStrike:193 updateStrikes:194 addWall:195 updateWalls:196 updateChan:207 updateSpells:211 aimPoint:213 aimWall:225
-§227 ตัวช่วยคอมโบ (ทุกสายใช้หลักเดียวกัน: ตั้งต้น → ต่อยอด → ปิดจบ)
-ROLE_N:229 takePoison:230
-§232 ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ …
-PBASIC:233
+## js/03-spells-core.js (262) — 
+SHIELD_OFF:2 REGEN:4 FROST_GUARD:7 shieldAllowed:8 ICONS:16 ICOALIAS:17 hasIco:18 ICOBASE:20 icoURL:21 ICO:22 icoTint:23 icoHTML:32 PATHS:33 SPELL_LIST:42 SPELLS:42 defSpell:43 SLOTK:44 BRMAP:44 KITP:45 parseKit:46 cleanKit:63 setKit:64 pathReset:67
+§69 สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู)
+isBig:70 ccScale:72 ccTouch:73 addStun:74 addRoot:75 addFreeze:76 addSlow:81 addChill:82 ignite:87 FX_SHOCK_CYAN:95 FX_ONFIRE:95 shock:96 knock:101 addWard:102 addFrostSlow:104 frostSlow:105 moveMul:112 BRN_MAX:114 addBurn:115 addOnFire:117 addXBurn:118 addPoison:119 addSil:120 addFear:121 addBlind:122 addMark:123 healT:125 tickStatus:130 clearStatus:153 fxMask:154
+§156 วัตถุในสนามที่คาถาสร้าง: โซน / ฟ้าผ่าหน่วงเวลา / กำแพง / ช่องร่ายต่อเ…
+foesIn:157 SHIELD_BREAK_LOCK:165 shieldFaces:167 frostGuardFaces:168 shieldFacesRaw:169 aoeHit:179 addZone:186 updateZones:191 addStrike:202 updateStrikes:203 addWall:204 updateWalls:205 updateChan:216 updateSpells:220 aimPoint:222 aimWall:234
+§236 ตัวช่วยคอมโบ (ทุกสายใช้หลักเดียวกัน: ตั้งต้น → ต่อยอด → ปิดจบ)
+ROLE_N:238 takePoison:239
+§241 ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ …
+PBASIC:242
 
 ## js/04-frost-mech.js (141) — สายน้ำแข็ง: ประชิด/ไกล (V) • ฟันดาบ/ขวาน • ไถลน้ำแข็ง • พื้นน้ำแข็ง/ภ…
 FROSTV:3 FROST_SWING3_HIT:9 frostContactTime:10 frostShieldPitch:11 frostBoom:16 meleeHit:23 mirrorPos:34 frostBasic:35 frostCutTick:57 frostSlam3:66 frostSlam:74 frostDash:80 addIce:85 updateIces:86 frostWavePitch:103 frostWaveSolid:106 updateWaves:112 _stO:130 _stL:130 groundH:131
@@ -201,17 +201,17 @@ W_WL:553 W_DR:559 W_VX:565 W_VO:571 W_FW:577 W_UL:587
 ## js/10-net.js (210) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NET_QMAX:70 NETU:72 netUndelta:73 setStatus:79 hostGame:81 hostPeer:90 netConnect:110 joinWatch:121 joinFail:136 netLost:142 joinGame:157 joinPeer:168 clientOnData:183 leave:198 leaveRoom:200
 
-## js/11-host.js (486) — 
+## js/11-host.js (488) — 
 G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:76 hostRemove:85 validate:101 hostStart:115 hostToLobby:147 MIDJOIN:154 modeCap:155 midJoin:156 CHATT:172 chatRelay:173 emoHost:181 resetBody:183 fmap:189 spawnPts:190 teamPts:192 spSpread:194 placeAll:195 respawn:207
 §226 ลูปหลักฝั่งโฮสต์
-hostTick:227 angDiff:244 cH:246 vR:247 updatePlayer:249 hitProp:473 damagePropsIn:480 nearUseProp:481 useProp:482
+hostTick:227 angDiff:244 cH:246 vR:247 updatePlayer:249 hitProp:475 damagePropsIn:482 nearUseProp:483 useProp:484
 
-## js/12-buildings.js (441) — environment damage / rays / collision shared by breakable things
+## js/12-buildings.js (444) — environment damage / rays / collision shared by breakable things
 BLDON:4 bldMoundH:5 damageEnv:7 bldRay:16 aimClip:21 aimLineH:29 aimRay3:30 projEl:57 bldPush:62 updateBldg:68
 §69 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
 BRKDEF:73 BRK_M:73 BRK_MCOL:73 BRK:74 genBrk:75 brkApply:82 brkStage:87 hitBrk:88 damageBrkIn:96 brkSnap:102 brkParse:103
 §104 ตารางช่อง (spatial grid) สำหรับแมพใหญ่: หาเฉพาะของใกล้ ๆ แทนวนทุกชิ้น…
-SG:107 OCX:109 OCY:109 obsD2:110 obsEach:111 obsBox:112 sgObs:113 sgProps:113 sgGrid:114 sgNear:121 _sgCR:126 _sgCW:126 _sgCB:126 _sgCO:126 _sgPO:126 _sgPB:126 _sgPP:126 _sgM:126 _sgE:126 _sgA:126 _cwLast:128 collideWorld:129 shoot:170 eShoot:198 foesOf:205 breakShield:213 ULT_RATE:220 ultActive:221 gainUlt:222 lifesteal:223 impactProjectile:225 damage:226 playerDown:299 killProj:322 explode:333 hitTarget:345 hitProjectileTarget:349 updateProjectiles:366 projStep:374
+SG:107 OCX:109 OCY:109 obsD2:110 obsEach:111 obsBox:112 sgObs:113 sgProps:113 sgGrid:114 sgNear:121 _sgCR:126 _sgCW:126 _sgCB:126 _sgCO:126 _sgPO:126 _sgPB:126 _sgPP:126 _sgM:126 _sgE:126 _sgA:126 _cwLast:128 collideWorld:129 shoot:170 eShoot:198 foesOf:205 breakShield:213 ULT_RATE:220 ultActive:221 gainUlt:222 lifesteal:223 impactProjectile:225 damage:226 playerDown:302 killProj:325 explode:336 hitTarget:348 hitProjectileTarget:352 updateProjectiles:369 projStep:377
 
 ## js/12-city-dmg.js (270) — เมืองพังได้ (designs/city-bot-battle.md ขั้น 4) — ข้อมูลที่ทุกเครื่อง…
 CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:16 cityOn:17 cityLayout:19 cityReset:29 cityApplyBox:45 cityApplyItem:46 cityHex:47 cityMark:48 cityRampSync:49 cityPanelAt:51 cityHitPanel:56 cityTowerStart:70 cityTowerStrip:76 cityTowerFall:80 cityHitItem:91 cityHitObs:100 _sgCD:105 cityDamageIn:107 cityTick:118 _sgCM:129 cityMoundH:130 cityMounds:140
@@ -286,7 +286,7 @@ MY:210 myDB:211 mySave:212 myLoad:215 myDecodeReady:221 myPlay:222 myNext:234 my
 §256 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:257 THEMES:258 padNote:263 musicTick:270 toggleMusic:299
 
-## js/19-client.js (323) — 
+## js/19-client.js (342) — 
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 combatFxParams:21 FULL_COMBAT_VFX:22 combatVfxReduced:23 _apush:24 vfxQual:33 vfxBegin:35 vfxEnd:39 vfxOnce:41 vfxExtra:43 PCOL:44 setScreen:46 onLobby:58
@@ -299,7 +299,7 @@ PRED:122 predictMe:123 myPos:144
 §146 เอฟเฟกต์
 SMOKE_K:149 burst:150 smoke:163 ring:164 floatText:165 shake:166 weaponContactAge:167 weaponImpactAge:183 wandPos:188 impactFX:190 explosionFX:212
 §224 เอฟเฟกต์คาถาใหม่
-ZV:225 COLB:225 WVV:225 GLV:225 ICEV:225 SLV:225 ULTV:225 OBV:225 _iceDisc:227 _iceEdge:228 _iceSpk:229 iceFloorMat:230 _icePlane:231 _icePathMat:232 _iceWvM:232 iceWvMat:234 makeIceFloor:246 ICE_WV:273 updateIceFloors:274 FLASHM:286 FLASHING:287 flashModel:288 endFlash:301 tickFlash:302 GHOSTM:304 SOLIDM:304 ghostOf:305 setGhost:311 hitSparks:319
+ZV:225 COLB:225 WVV:225 GLV:225 ICEV:225 SLV:225 ULTV:225 OBV:225 _iceDisc:227 _iceEdge:228 _iceSpk:229 iceFloorMat:230 _icePlane:231 _icePathMat:232 _iceWvM:232 iceWvMat:234 _iceShardGeo:247 _isM:250 _isQ:250 _isP:250 _isS:250 _isY:250 iceShardTrail:251 _iceShardMat:256 makeIceFloor:257 ICE_WV:292 updateIceFloors:293 FLASHM:305 FLASHING:306 flashModel:307 endFlash:320 tickFlash:321 GHOSTM:323 SOLIDM:323 ghostOf:324 setGhost:330 hitSparks:338
 
 ## js/20-vfx-pyro-storm.js (857) — Dragonfall (ภาพ)
 makeDfCircle:3 stormCircleCyan:20 DFV:25 dfCracks:26 updateDfCracks:36 _domeAim:37 domeChargeOrb:38 _spearUp:46 _spearDir:46 _spearA:46 _spearB:46 DOME_SPEAR_LEN:47 stormDomePath:48 stormDomeSpearFX:52 stormDomeHoverFX:83 stormDomeReadyFX:107 stormDomeGroundPoint:128 stormDomeFracture:131 stormDomeFloorPullFX:177 stormDomeFieldFX:204 stormDomePose:240 dragonfallFX:304
@@ -330,13 +330,13 @@ BRKV:109 BRK_COL:109 brkSetup:110 BRK_CM:129 brkCrackMat:130 brkClip:146 brkYc:1
 ## js/24-minions-view.js (68) — สัตว์เวท: โมเดลโปร่งแสง + ซิงก์จาก snapshot (MN)
 MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
 
-## js/25-efx.js (371) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
+## js/25-efx.js (372) — efxFX: ภาพของ event "efx" ทุกคาถา (หนึ่ง case ต่อหนึ่งเอฟเฟกต์)
 efxState:4 efxFX:21 an:42 rr:42
 
-## js/26-fx-events.js (281) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
+## js/26-fx-events.js (282) — fx(ev): เอฟเฟกต์+เสียงของทุก event จากโฮสต์ • statusFX (สถานะบนตัว) •…
 onfOutlineMat:4 onFireFX:6 statusFX:17 fx:44
-§249 overlay: เลือกบัฟ / สรุปผล
-choosePick:250 syncOverlays:255 showOver:276
+§250 overlay: เลือกบัฟ / สรุปผล
+choosePick:251 syncOverlays:256 showOver:277
 
 ## js/27-world.js (404) — 
 S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 gl:12
@@ -441,10 +441,10 @@ localVel:3
 §11 ภาพของสายไฟ: ชาร์จลูกไฟ / ย่อตัวชาร์จพุ่ง / วงเวทพ่นไฟ / ดีดนิ้ว / กล…
 _pw:12 simOf:13 makeColossus:14 makeMagicCircle:67 _fsGeo:77 fireShieldFX:79 pyroFX:104 NOVAD:302 _novaGeo:302 novaDome:303 updateNovaDomes:308 frostMlCast:312 pyroNovaCharge:332 pyTip:347 BLZV:350 blzOutlineMat:351 blzOutline:353 blazeLinks:358 blazeVignette:367
 
-## js/34-frost-view.js (292) — ภาพของสายน้ำแข็ง: ดาบ/ขวานน้ำแข็งที่ปลายไม้ ท่าฟัน โล่อัศวิน ไถล แช่แ…
+## js/34-frost-view.js (328) — ภาพของสายน้ำแข็ง: ดาบ/ขวานน้ำแข็งที่ปลายไม้ ท่าฟัน โล่อัศวิน ไถล แช่แ…
 iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39
 §51 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
-makeIceCrown:55 frostCrown:60 FWS:66 FWA:66 _fwM:67 _fwM2:67 _fwX:67 _fwY:67 _fwZ:67 _fwP:67 _fwS:67 _fwQ:67 _eo:68 _ei:68 _ss:68 fwAim:70 fwWeapons:71 FWP:73 FWT:73 fwChop:74 fwSweep:75 FF_RISE:76 fwIdle:77 fwSwing:80 FWL_N:92 fwLink:93 fwMat:96 frostFX:97
+makeIceCrown:55 frostCrown:60 FWS:66 FWA:66 _fwM:67 _fwM2:67 _fwX:67 _fwY:67 _fwZ:67 _fwP:67 _fwS:67 _fwQ:67 _eo:68 _ei:68 _ss:68 fwAim:70 fwWeapons:71 FWP:73 FWT:73 fwChop:74 fwSweep:75 FF_RISE:76 fwIdle:77 fwSwing:80 FWL_N:92 fwLink:93 fwMat:96 SLIDE_POSE:99 _slQ:101 frostSlideHead:102 _slAx:108 frostFX:109
 
 ## js/35-sync.js (769) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 §2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
@@ -771,16 +771,16 @@ BKICO:376 buffShow:380
 §399 จอมืดตอนเริ่มแมตช์ (ผู้ใช้ 2026-10-23: กระตุกตอนเริ่มแมตช์แรก)
 BRIEF_PIC:403 gameCover:404
 
-## js/66-hud4.js (225) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
+## js/66-hud4.js (226) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
 H4E:5 H4:15 h4God:16 h4Pal:17 hud4Col:19 h4Parts:21 h4AuBits:26 h4Key:41 h4Ico:42 h4Build:43 h4Set:73 hud4Draw:74
-§131 ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง
-h4Glass:133 h4Bits:139 h4Fx:141 h4CardUse:143 h4GlassOut:147 h4Place:151 h4OrdKey:154 h4OrdLoad:155 h4Swap:158 h4Pick:161 h4AltKey:163 h4CardWire:167
-§178 ไพ่อัลติ
-H4SH:180 h4UltCard:182 h4UltUse:187 hud4Frame:189 hud4Hide:190
-§191 ไพ่อัลติกลางจอ (ผู้ใช้ 2026-11-01)
-h4UltX:194
-§201 รูปตัวละครเรา (FFA / TDM แทนแผนที่ย่อ)
-H4PF:203 h4PfMode:204 h4PfAvatar:206 h4Portrait:208 h4PfRead:219 h4MapBox:225
+§132 ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง
+h4Glass:134 h4Bits:140 h4Fx:142 h4CardUse:144 h4GlassOut:148 h4Place:152 h4OrdKey:155 h4OrdLoad:156 h4Swap:159 h4Pick:162 h4AltKey:164 h4CardWire:168
+§179 ไพ่อัลติ
+H4SH:181 h4UltCard:183 h4UltUse:188 hud4Frame:190 hud4Hide:191
+§192 ไพ่อัลติกลางจอ (ผู้ใช้ 2026-11-01)
+h4UltX:195
+§202 รูปตัวละครเรา (FFA / TDM แทนแผนที่ย่อ)
+H4PF:204 h4PfMode:205 h4PfAvatar:207 h4Portrait:209 h4PfRead:220 h4MapBox:226
 
 ## js/67-backdrop.js (141) — 
 BACKDROP:8
@@ -942,4 +942,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(117 files, 35158 lines)
+(117 files, 35230 lines)

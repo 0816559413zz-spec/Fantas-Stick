@@ -68,7 +68,8 @@ const an=a+rnd(-1.05,1.05),rr=R*rnd(0.55,1.05);PARTS.push({x:px+Math.cos(an)*rr,
     case 'auhit':burst(x,y,'#dff6ff',5,90,0.3,1.4,{h:H,vh:[0,2],g:5});if(Math.random()<0.5)iceChips(x,y,H,2,70,2);break;
     case 'aura':ring(x,y,'#bfeaff',180,0.4,0.2);smoke(x,y,H+0.6,14,'#eef8ff',0.9,8,140);for(let i=0;i<20;i++){const an=i/20*6.283;PARTS.push({x,y,h:H+rnd(0.3,1.8),vx:Math.cos(an)*200-Math.sin(an)*120,vy:Math.sin(an)*200+Math.cos(an)*120,vh:rnd(0,1),life:0.5,max:0.5,col:i%2?'#ffffff':'#cfefff',size:2,g:0,drag:2});}if(near)snd('push',{x,y,vol:0.4});break;
     case 'grcharge':if(ev.m){playFx('ice_charge',x,y,H);if(near)snd('buff',ev);}break;   // โหมดประชิดไม่ชาร์จแล้ว
-    case 'gwave':{if(ev.cl)break;const c=Math.cos(ev.a),sn=Math.sin(ev.a);makeSlash(x-c*20,y-sn*20,0.4,ev.a,85,true,0.1,'#cfefff');burst(x+c*40,y+sn*40,'#dff6ff',30,320,0.4,2.4,{h:0.6,vh:[1,5],g:6,a:ev.a,spread:0.7});FX.flashLight(x,y,1.2,'#8fe0ff',5,14,0.25);}if(near){snd('whoosh',ev);snd('slam',{x,y,vol:0.4});}break;
+    case 'gwave':{if(ev.cl)break;const c=Math.cos(ev.a),sn=Math.sin(ev.a);if((ev.pt||0)<=0.05)makeSlash(x-c*20,y-sn*20,0.4,ev.a,85,true,0.1,'#cfefff');   // ground slash mark only when slashing at the ground (user 2026-11-23)
+      burst(x+c*40,y+sn*40,'#dff6ff',30,320,0.4,2.4,{h:0.6,vh:[1,5],g:6,a:ev.a,spread:0.7});FX.flashLight(x,y,1.2,'#8fe0ff',5,14,0.25);}if(near){snd('whoosh',ev);snd('slam',{x,y,vol:0.4});}break;
     case 'glacier':playFx('ice_impact',x,y,0.8,{s:1});if(near){snd('break',ev);shake(5);}break;
     case 'mirror':if(near){snd('nova',{x,y,vol:0.7});shake(2);}break;   // ไม่มีน้ำแข็งที่พื้นแล้ว (ผู้ใช้ 2026-11-14) — ดาบแยก 3 เล่ม = frostMlCast
     case 'mirrorend':burst(x,y,'#dff6ff',40,200,0.5,2,{h:H,g:3});break;

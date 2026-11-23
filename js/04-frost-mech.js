@@ -119,7 +119,7 @@ function updateWaves(dt){
     else{w.x+=w.dx*st;w.y+=w.dy*st;w.acc+=st;}
     const o=G.players[w.owner];
     if(o)for(const t of foesOf(w.team)){if(w.hit.has(t))continue;if(Math.hypot(t.x-w.x,t.y-w.y)<40+(t.r||PR)&&(w.gnd||w.pt===undefined?cH(t)<4:Math.abs(cH(t)-w.h)<2.6)){w.hit.add(t);aoeHit(o,t,GV.waveDmg,t=>addFrostSlow(t,GV.waveSlow));}}
-    if((w.gnd||w.pt===undefined)&&w.acc>=50){w.acc=0;addIce({x:w.x,y:w.y,r:72,t:4,team:w.team,kind:'path',lx:w.x-w.dx*50,ly:w.y-w.dy*50,wv:1});}
+    // No ice trail / ally speed from the wave (user 2026-11-23)
     if(w.x<30||w.x>MW-30||w.y<30||w.y>MH-30)w.left=0;
   }
   G.waves=G.waves.filter(w=>w.left>0);

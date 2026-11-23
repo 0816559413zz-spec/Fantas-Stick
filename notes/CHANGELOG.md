@@ -1429,3 +1429,17 @@
 - 2026-11-11 — **[branch `graphics-painterly`] แก้อัลติไฟ/กำแพงไฟดูเป็น "ภาพไฟก้อนใหญ่" (ผู้ใช้ติ)** สาเหตุ: โหมด cel ตัดขอบต่ำเกิน ทำให้เปลือกไฟของเกราะยักษ์และไฟ 3 มิติกลายเป็นแผ่นทึบสีเดียวเต็มชิ้น • แก้ใน js/42: `fireMat` ตัดขอบที่ h≈0.3 (ระดับที่ไฟเดิมเห็นชัด → กลับเป็นลิ้นไฟมีช่องโหว่), เปลือก shell โปร่งนิด ๆ, `fireVol`/`fireSeqVol` ตัดขอบที่ความร้อน 0.3–0.38 และใช้สีจากความร้อนของผิวหน้าเปลว (`hs`) แทนจุดร้อนสุด → เห็นลิ้นไฟไหลขึ้นบนผิว • ภาพ `fire-blob-5-f.jpg`, `fire-blob-7-ult.jpg`
 - 2026-11-11 — **[branch `graphics-painterly`] ร่างยักษ์ไฟ (อัลติ Inferno Colossus) รุ่น 2 ตามภาพอ้างอิงสตอรี่บอร์ด #14 (ผู้ใช้สั่ง)** โมเดลใหม่ `colossus_torso`/`colossus_arm` (ปั้นด้วยชิ้น poly ใน `tools/gen-colossus-fx.js`): กระโปรงเกราะ 6 แผ่น เข็มขัด อกเกราะมีสันกลาง วงแกนกลางอก บ่าเกราะปีกแหลมซ้อน 2 ชั้น ครีบหลังสูง 2 คู่ หมวกเกราะมีหงอน+เขา+ครีบข้าง แขนมีศอกแหลม ปลอกแขนบาน กำปั้นใหญ่มีข้อนิ้ว • วัสดุใหม่ `armor` (js/45 `fxArmorMat` + `fxArmorLines`): เนื้อทองส้มโปร่ง 2 เฉดตามหน้าเหลี่ยม ประกายเม็ดเล็ก + เส้นขอบสว่างหนาทุกสันเหลี่ยม แบบภาพเรฟ • ไฟเปลือกเดิมที่คลุมร่างเอาออกในรุ่นนี้ (เก็บท่อนล่างเป็นไฟ 3D) • `fire/colossus` (ในเกม) สร้างจาก build('c'), แบบ a/b เดิมยังสร้างได้ • ภาพ `designs/graphics-painterly/colossus-v2-*.jpg`
 - 2026-11-23 Storm right-click lightning shield also off (SHIELD_OFF)
+- 2026-11-23 Out-of-combat regen 5 s / 15 HP/s + gold HP outline and screen edge (protocol v108, review #158)
+- 2026-11-23 Frost: slide balance stance; Glacier Rend wave no ice trail/speed, no ground mark when aimed up
+- 2026-11-23 Frost slide stance v2 (wide legs forward, balance arm, cloak open)
+- 2026-11-23 Frost slide: stop file run clip while sliding (upright, no stride)
+- 2026-11-23 Frost slide: legs fixed (were crossed), wide forward stance, chest/head face cursor
+- 2026-11-23 Frost slide: side-on surf stance, head to cursor, balancing arm sway
+- 2026-11-23 Frost slide trail: narrow angular ice plates, radius 46→28
+- 2026-11-23 Frost slide trail a bit wider (plates 0.6, radius 34)
+- 2026-11-23 Frost slide trail bigger (plates 0.75, radius 42)
+- 2026-11-23 Frost right-click Sword Guard (60% into a 100 guard, diagonal sword + faint half-dome)
+- 2026-11-23 Frost guard v2: square body, tip-down slanted sword, faint side ripple instead of dome
+- 2026-11-23 Frost guard: diagonal body, head to cursor, ripple a bit stronger
+- 2026-11-23 Frost guard: ripple lines → soft curved shield sheet
+- 2026-11-23 Frost Sword Guard approved by user (chat)
