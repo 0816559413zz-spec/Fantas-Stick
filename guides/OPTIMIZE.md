@@ -6,6 +6,10 @@ Scope of this track: logic, performance, algorithms, loading. Not balance/gamepl
 
 Priority: **P1** = real bug or big win, **P2** = clear win, **P3** = nice to have / needs more measuring.
 
+## 2026-11-23 Preload standard
+
+Shader compiles (not downloads) cause the fight/match-start freezes. Rules for every system and the graphics/perf plan (registry, entry loader, mid-match compile detector, fixed light rig, painterly in assets): `guides/PRELOAD-STANDARD.md`.
+
 ## 2026-11-22 map and combat rendering
 
 - High grass fell from 148,120 to 68,800 submitted blades (740,600 to 344,000 triangles per frame). Seeded positions, uneven patches and four blade profiles replace the more uniform pattern. Meadow also replaces its 420 baked tufts with fewer clumps in three shapes, each using four to six triangles.
