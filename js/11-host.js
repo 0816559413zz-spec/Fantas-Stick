@@ -260,6 +260,8 @@ function updatePlayer(p,dt,acting){
   for(const k of CDK)p.cd[k]=Math.max(0,p.cd[k]-dt*(p.ovc>0?1.3:1));
   p.stun=Math.max(0,p.stun-dt);p.inv=Math.max(0,p.inv-dt);tickStatus(p,dt);
   if(p.breath>0)p.breath-=dt;
+  p.regen=p.alive&&!p.downed&&p.hp<p.maxHp&&G.time-(p.cbT??-99)>=REGEN.wait;
+  if(p.regen)p.hp=Math.min(p.maxHp,p.hp+REGEN.rate*dt);
   if(p.snapT>0&&p.alive&&!p.downed){p.snapT-=dt;if(p.snapT<=0)pyroSnap(p);}
   if(p.mlCast>0){if(!p.alive||p.downed)p.mlCast=0;else{p.mlCast-=dt;if(p.mlCast<=0)mirrorStart(p);}}   // Mirror Legion ร่าย 1 วิ
   if(p.novaT>0){if(!p.alive||p.downed)p.novaT=0;else{p.novaT-=dt;if(p.novaT<=0)pyroNova(p);}}

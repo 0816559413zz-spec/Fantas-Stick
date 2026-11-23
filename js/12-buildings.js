@@ -255,7 +255,7 @@ function damage(t,amt,srcId,kind,noFlash=false,impact){
     if(t.mrk>0&&kind!=='burn')amt*=1.12;
     t.hp-=amt;
     emit({k:'hit',x:t.x,y:t.y,h:cH(t)+vR(t)+0.4,n:Math.round(amt),nf:noFlash?1:undefined,e:t.id,s:srcId||undefined,m:melee,ms:swing,mc:impact?.chase,ns:src&&src.baHit?1:undefined,b:kind==='burn'?1:undefined,kl:t.hp<=0?1:undefined,a:(kind==='aoe'||kind==='zone')?1:undefined});
-    if(src){gainUlt(src,amt);lifesteal(src,amt);src.dmgDealt+=amt;if(kind!=='burn')pyroHeatGain(src,amt);}
+    if(src){src.cbT=G.time;gainUlt(src,amt);lifesteal(src,amt);src.dmgDealt+=amt;if(kind!=='burn')pyroHeatGain(src,amt);}
     if(t.hp<=0){t.dead=true;t.lastHit=srcId;if(src){src.kills++;darkKill(src);}emit({k:'die',x:t.x,y:t.y,h:cH(t),c:EDEF[t.type].col,t:t.type});}
     return;
   }
@@ -288,7 +288,7 @@ function damage(t,amt,srcId,kind,noFlash=false,impact){
   if(darkFlow(t))amt*=.8;
   amt=natureGuard(t,amt);
   const real=Math.min(amt,Math.max(0,t.hp));   // ดาเมจจริง (ไม่นับส่วนที่เกินเลือด)
-  t.hp-=amt;t.lastHit=srcId;t.dmgTaken=(t.dmgTaken||0)+real;
+  t.hp-=amt;t.lastHit=srcId;t.dmgTaken=(t.dmgTaken||0)+real;t.cbT=G.time;if(src&&src!==t)src.cbT=G.time;
   if(G.balDmg&&src&&src!==t){const k=src.pathIdx+':'+kind+(src.z>1.5?':air':'');G.balDmg[k]=(G.balDmg[k]||0)+real;if(G.balWho){const w=G.balWho;w[k]=w[k]||{};const st=(new Error().stack||'').split('\n').slice(2,6).map(l=>(l.match(/at (\S+)/)||[])[1]).filter(f=>f&&!/aoeHit|damage|Array|forEach/.test(f)),id=st.slice(0,2).join('<');w[k][id]=(w[k][id]||0)+real;}}   // ดีบัก balance (WD.G.balDmg={})   // สรุปจบเกม: ดาเมจที่รับ
   if(G.mode==='ffa')ffaDmgLog(t,srcId,real,kind);   // assist + จอตอนตาย (js/54)
   if(src&&src!==t){gainUlt(src,amt*0.7);lifesteal(src,amt);src.dmgDealt+=amt;if(kind!=='burn')pyroHeatGain(src,real);}

@@ -1,5 +1,5 @@
 {
- "next": 158,
+ "next": 159,
  "items": [
   {
    "id": 157,
@@ -3344,6 +3344,24 @@
     "/shots/look_before_sheet.jpg",
     "/shots/look_after_sheet.jpg",
     "/index.html?nosw&playmap=lake"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 158,
+   "title": "ฟื้นเลือดนอกไฟต์ + ขอบเหลืองที่แถบเลือด",
+   "text": "ไม่โดนดาเมจและไม่ทำดาเมจ 5 วิ = ฟื้นเลือด 15/วิ (HP 200 → เต็มใน ~13 วิ) • ตอนฟื้น: แถบเลือดมีขอบเหลืองกระพริบ + แสงกวาดผ่าน + เครื่องหมาย + ลอยขึ้น • ขอบจอมีแสงทองจาง ๆ หายใจเข้าออก • ลอง: เข้าห้องฝึก ให้หุ่นยิงโดนแล้วหลบ 5 วิ",
+   "kind": "HUD",
+   "who": "Combat",
+   "status": "wait",
+   "created": "2026-11-23T18:00:00",
+   "updated": "2026-11-23T18:00:00",
+   "imgs": [],
+   "links": [
+    "/shots/regen_hud.jpg",
+    "/shots/regen_zoom.jpg",
+    "/index.html?nosw"
    ],
    "feedback": "",
    "reply": ""

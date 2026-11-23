@@ -61,7 +61,7 @@ function h4Build(me,v){
   // ซ้ายล่าง: กรอบแผนที่ย่อ | รายชื่อทีม (.h4Sq) • ชื่อเรา • โล่ (.h4Sub) • เลือด (.h4Seg + ตัวเลข)
   L+=`<div class="h4Me"><div class="h4Map">${h4PfAvatar(me,E)}<i class="c a"></i><i class="c b"></i><i class="c d"></i><i class="c e"></i></div>
     <div class="h4Hp"><div class="h4Sq"></div><div class="h4Chips"></div><div class="h4Nm">${esc(me.n||'')}<small>${E.n}</small><em>LV ${typeof progLv==='function'?progLv().L:1}</em></div>
-    <div class="h4Sub"><i><b></b></i><small></small></div><div class="h4HpR"><div class="h4Seg"></div><div class="h4Num"><span class="hp">0</span><small class="mh">/ 0</small><em class="xh"></em></div></div></div></div>`;
+    <div class="h4Sub"><i><b></b></i><small></small></div><div class="h4HpR" style="position:relative"><div class="h4RgSp">${[8,46,90,132,176,220].map((x,i)=>`<i style="left:${x}px;animation-delay:${(i*0.27%1.6).toFixed(2)}s">+</i>`).join('')}</div><div class="h4Seg"></div><div class="h4Num"><span class="hp">0</span><small class="mh">/ 0</small><em class="xh"></em></div></div></div></div>`;
   root.innerHTML=`<div class="h4L">${L}</div><div class="h4R">${R}</div>${h4UltX(P.id,U,au)}`;
   H4.el=root;H4.cache={};H4.rdy={};H4.segN=0;H4.uFull=false;
   H4.q={hp:root.querySelector('.hp'),mh:root.querySelector('.mh'),xh:root.querySelector('.xh'),seg:root.querySelector('.h4Seg'),sub:root.querySelector('.h4Sub'),subB:root.querySelector('.h4Sub b'),subT:root.querySelector('.h4Sub small'),
@@ -89,6 +89,7 @@ function hud4Draw(me,v){
   for(let i=0;i<nx;i++){const f=clamp((xh-i*per)/per,0,1);h4Set('s'+(nh+i),f.toFixed(3),x=>H4.seg[nh+i][1].style.width=x*100+'%');}
   h4Set('hp',hpv,x=>Q.hp.textContent=x);h4Set('mh',me.mh,x=>Q.mh.textContent='/ '+x);h4Set('xh',xh,x=>Q.xh.textContent=x>0?'+'+x:'');
   h4Set('low',hr<0.35&&me.al,x=>H4.el.classList.toggle('low',x));
+  h4Set('rg',!!(me.rg&&me.al),x=>{H4.el.classList.toggle('regen',x);const f=document.getElementById('rgFx')||document.body.appendChild(Object.assign(document.createElement('div'),{id:'rgFx'}));f.classList.toggle('on',x);});
   // The secondary bar shows shield HP, Darkness guard time, or Stand HP.
   const stand=me.ea,standBroken=stand&&stand[0]>0;
   const darkness=k.path===DARKP;

@@ -1,5 +1,7 @@
 // Shield removed from the game (user 2026-11-23). Code kept; set false to bring it back.
 const SHIELD_OFF=true;
+// Out-of-combat regen (user 2026-11-23): no damage dealt or taken for `wait` s = heal `rate` HP/s.
+const REGEN={wait:5,rate:15};
 // =====================================================================
 //  ระบบคาถาใหม่: สาย (path) × คาถา (spell) + สถานะ (status effects)
 //  ผู้เล่นเลือก "สาย" 1 สาย → ได้เวทโบราณ (X) ของสายนั้น + จัดชุดคาถา Q/E/R/F (ใส่ได้เฉพาะคาถาของสายตัวเอง)
