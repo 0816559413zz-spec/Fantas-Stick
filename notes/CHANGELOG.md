@@ -1431,3 +1431,4 @@
 - 2026-11-23 Out-of-combat regen 5 s / 15 HP/s + gold HP outline and screen edge (protocol v108, review #158)
 - 2026-11-23 Frost: slide balance stance; Glacier Rend wave no ice trail/speed, no ground mark when aimed up
 - 2026-11-23 Frost slide stance v2 (wide legs forward, balance arm, cloak open)
+- 2026-11-23 Frost slide: stop file run clip while sliding (upright, no stride)
