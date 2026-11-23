@@ -139,7 +139,7 @@ function frostFX(o,p,pz,now,dt){
   if(!melee&&!p.fl&&(flags&32)){ax=-1.42;az=0.1;bx=0.12;by=-0.1;}
   if(o.grUp>0){o.grUp-=dt;const k=1-Math.max(0,o.grUp)/0.5;const e=1-Math.pow(1-Math.min(1,k/0.45),3);ax=lerp(-1.42,-3.0,e);az=0.05;bx=lerp(0.12,-0.2,e);by=0;}
   if(o.grDown>0){o.grDown-=dt;const k=1-Math.max(0,o.grDown)/0.3;az=-0.05;by=0;o.fwSub=0;
-    if(k<0.35){const e=Math.pow(k/0.35,1.4);ax=lerp(-0.3,-2.85,e);bx=lerp(0.3,-0.25,e);if(fwOn){fwChop(P,lerp(2.35,-0.55,e),ff);P.strike=true;}}   // งัดขึ้นเร็ว
+    if(k<0.35){const e=Math.pow(k/0.35,1.4);ax=lerp(-0.3,-2.85,e);bx=lerp(0.3,-0.25,e);if(fwOn){fwChop(P,lerp(2.35,-0.55,e),ff);P.strike=(o.grPt||0)<=0.05;}}   // งัดขึ้นเร็ว • aimed up = no trail dragging on the ground (user 2026-11-23)
     else{const e=1-Math.pow(1-(k-0.35)/0.65,3),pt=o.grPt||0,th=clamp(Math.PI/2-pt-0.2,0.15,1.75);ax=lerp(-2.85,-1.25-pt*0.9,e);bx=lerp(-0.25,-pt*0.28,e);if(fwOn){fwChop(P,lerp(-0.55,th,e),ff);P.strike=false;P.rate=lerp(30,10,e);}}}   // จบ: ใบชี้ตามแนวเล็ง (ผู้ใช้ 2026-11-11 คลื่นตามเป้า)
   // ฟาดจากที่สูง (กระโดดลง): อาวุธพุ่งนำลงไปข้างหน้า ปลายชี้พื้น
   if(fwOn&&o.slamT>0&&pz>0.2&&!(o.swT>0)){P.x=0;P.y=0.5;P.z=1.4;P.bx=0;P.by=-0.8;P.bz=0.6;P.nx=1;P.ny=0;P.nz=0;P.rate=14;P.strike=false;ax=-0.6;az=-0.1;bx=0.25;}
@@ -221,12 +221,16 @@ function frostFX(o,p,pz,now,dt){
     if(Math.random()<0.3){o.ishield.getWorldPosition(_pw);const s=simOf(_pw);PARTS.push({x:s.x+rnd(-8,8),y:s.y+rnd(-8,8),h:s.h+rnd(-0.5,0.5),vx:0,vy:0,vh:0.4,life:0.5,max:0.5,col:'#dff6ff',size:1.6,g:0});}
   }else{if(o.shFx){fxStop(o.shFx);o.shFx=null;}if(o.ishield)o.ishield.visible=false;}
   // ไถลน้ำแข็ง
-  if(flags&1){o.b.rotation.x=0.5;o.legs[0].rotation.x=-0.75;o.legs[1].rotation.x=0.6;o.armL.rotation.x=0.6;o.armL.rotation.z=0.6;
+  // Slide pose (user 2026-11-23): balance stance, front leg out, back leg braced, legs still; upper body free for attacks
+  if(flags&1){o.slK=Math.min(1,(o.slK||0)+dt/0.12);const k=o.slK;
+    o.b.rotation.x=lerp(o.b.rotation.x,0.06,k);o.b.position.y=-0.12*k;
+    o.legs[0].rotation.x=-0.62*k;o.legs[0].rotation.z=0.16*k;o.legs[1].rotation.x=0.42*k;o.legs[1].rotation.z=-0.2*k;
     for(let i=0;i<3;i++)PARTS.push({x:p.x+rnd(-10,10),y:p.y+rnd(-10,10),h:pz+0.1,vx:rnd(-60,60),vy:rnd(-60,60),vh:rnd(0.5,2),life:0.35,max:0.35,col:i?'#ffffff':'#bfeaff',size:1.8,g:4});
     if(Math.random()<0.8)PARTS.push({x:p.x+rnd(-12,12),y:p.y+rnd(-12,12),h:pz+0.12,vx:rnd(-10,10),vy:rnd(-10,10),vh:0.15,life:0.9,max:0.9,col:'#eef8ff',size:6,g:0,smoke:true,grow:0.9,drag:2});
     const lp=o.slLast||[p.x,p.y];if(Math.hypot(p.x-lp[0],p.y-lp[1])>45){dfCracks((p.x+lp[0])/2,(p.y+lp[1])/2,pz+0.06,40,'#bfeaff',0.9);o.slLast=[p.x,p.y];}else if(!o.slLast)o.slLast=[p.x,p.y];
     o.slA=p.a;}
-  else if(o.slLast){const a=o.slA||p.a||0;o.slLast=null;PARTS.push({x:p.x,y:p.y,h:pz+0.2,vx:0,vy:0,vh:0.3,life:0.8,max:0.8,col:'#eef8ff',size:8,g:0,smoke:true,grow:1});
+  else o.slK=0;
+  if(!(flags&1)&&o.slLast){const a=o.slA||p.a||0;o.slLast=null;PARTS.push({x:p.x,y:p.y,h:pz+0.2,vx:0,vy:0,vh:0.3,life:0.8,max:0.8,col:'#eef8ff',size:8,g:0,smoke:true,grow:1});
     for(let i=0;i<8;i++){const an=a+rnd(-0.5,0.5),v=rnd(150,280);iceBit(_cryG,p.x+Math.cos(a)*14,p.y+Math.sin(a)*14,pz+0.2,0.07,0.12,0.07,{life:0.6,up:0.02,down:0.2,v:[Math.cos(an)*v,Math.sin(an)*v,rnd(2,4)],spin:rnd(-12,12)});}
     for(let i=0;i<10;i++)PARTS.push({x:p.x+Math.cos(a)*16,y:p.y+Math.sin(a)*16,h:pz+0.1,vx:Math.cos(a+rnd(-0.6,0.6))*rnd(120,240),vy:Math.sin(a+rnd(-0.6,0.6))*rnd(120,240),vh:rnd(0.5,2.5),life:0.35,max:0.35,col:i%2?'#ffffff':'#bfeaff',size:1.6,g:6});}
   // แช่แข็งตัวเอง

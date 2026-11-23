@@ -1,5 +1,5 @@
 {
- "next": 159,
+ "next": 160,
  "items": [
   {
    "id": 157,
@@ -3361,6 +3361,24 @@
    "links": [
     "/shots/regen_hud.jpg",
     "/shots/regen_zoom.jpg",
+    "/index.html?nosw"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 159,
+   "title": "Frost: ท่าไถลทรงตัว + คลื่นดาบไม่ทิ้งรอยตอนยิงขึ้น",
+   "text": "ไถล (Shift): ตัวตั้งตรง ย่อลงนิด ขาหน้ายื่นออก ขาหลังยัน ขาไม่ก้าว แขน/ตัวบนยังฟันได้ตามท่า (ผ้าคลุมบังขาเยอะ) • Glacier Rend คลื่นดาบ: เล็งขึ้น = ไม่มีรอยฟันที่พื้น/ไม่มีริบบิ้นลากพื้น • เล็งพื้น = มีรอยเหมือนเดิม • คลื่นไม่ทิ้งพื้นน้ำแข็งแล้ว → ไม่มีบัฟวิ่งเร็วจากทางคลื่น",
+   "kind": "Skill",
+   "who": "Frost",
+   "status": "wait",
+   "created": "2026-11-23T19:00:00",
+   "updated": "2026-11-23T19:00:00",
+   "imgs": [],
+   "links": [
+    "/shots/motion_frost_slide.gif",
+    "/shots/frost_wave_compare.jpg",
     "/index.html?nosw"
    ],
    "feedback": "",
