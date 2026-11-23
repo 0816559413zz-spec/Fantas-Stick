@@ -66,6 +66,19 @@ function warmFx(dirs){const out=[];if(!FXR.ready)return out;const p0=PARTS.lengt
       }catch(e){S.st=2;}}
     out.push(I);}
   PARTS.length=Math.min(PARTS.length,p0);return out;}
+// Compile these objects right now (their effect may remove them before the queue's compile step). Materials get the
+// warmKeep treatment so a later dispose cannot delete the program. Used by builders that have to run an effect's timeline.
+function warmNow(objs){const byScene=new Map();
+  for(const r of objs)if(r&&r.isObject3D)r.traverse(o=>{if(!o.material)return;let t=o;while(t.parent)t=t.parent;const sc=t===fxScene?fxScene:scene;
+    (byScene.get(sc)||byScene.set(sc,[]).get(sc)).push(o);
+    for(const m of [].concat(o.material))if(m&&!m.userData.warm){m.userData.warm=1;m.dispose=()=>{};}
+    if(o.isMesh&&!Array.isArray(o.material))flatMark(o.material,o.geometry);});
+  const prev=gl.getRenderTarget();gl.setRenderTarget(composer.renderTarget1);
+  try{for(const [sc,L] of byScene)gl.compile({traverse(f){for(const o of L)f(o);},traverseVisible(){}},cam,sc);}catch(e){console.warn('warmNow',e);}finally{gl.setRenderTarget(prev);}}
+// Run one FX instance's timeline (dt steps) and compile whatever its layers build on the way (code layers patch materials as it plays).
+function warmFxRun(I,dur,dt,each){if(!I)return;for(let t=0;t<=dur;t+=dt){try{updateFx(dt);}catch(e){}if(each)try{each(I,t);}catch(e){}
+  warmNow(I.L.map(S=>S.obj).concat(I.L.map(S=>S.inner)));}
+  for(const S of I.L){if(S.d.t==='trail'&&S.obj)trailStop(S.obj);}try{fxKill(I);}catch(e){}}
 function warmFxEnd(fxI){for(const I of fxI){for(const S of I.L){if(S.d.t==='trail'&&S.obj)trailStop(S.obj);S.obj=null;S.mats=null;}fxKill(I);}}
 // เก็บทุกอย่างที่อยู่ไกล (ของจากไฟล์เอฟเฟกต์/ตัวช่วยสร้างเองลง scene หรือ fxScene)
 function warmGather(){for(const sc of [scene,fxScene])for(const o of sc.children.slice())if(Math.abs(o.position.x-tx(WARM_X))<200&&Math.abs(o.position.z-tz(WARM_Y))<200)warmKeep(o,sc===fxScene);}
@@ -110,6 +123,8 @@ function warmStep(step){
     WARM.log.push('brk '+seen.size);return;}
   if(step==='evload'){WARM.busy=true;   // fetch recorded samples, then one step per 12 events
     fetch('assets/warm-events.json',{cache:'no-cache'}).then(r=>r.ok?r.json():[]).catch(()=>[]).then(L=>{PRE.ev=Array.isArray(L)?L:[];
+      // flag variants the bench may not have hit (marked hit, held dash, broken wall …): replay each sample with the flag flipped too
+      for(const ev of PRE.ev.slice())for(const f of WARM_EVFLAGS)if(f in ev||(f==='marked'&&/^dark/.test(ev.z||'')))PRE.ev.push({...ev,[f]:ev[f]?0:1});
       const k=WARM.q.indexOf('compile');const st=[];for(let i=0;i<PRE.ev.length;i+=12)st.push('evr:'+i);
       WARM.q.splice(k<0?WARM.q.length:k,0,...st);PRE.n+=st.length;WARM.busy=false;});return;}
   if(step.startsWith('evr:')){const i=+step.slice(4),t0=performance.now(),n=warmRehearse((PRE.ev||[]).slice(i,i+12));WARM.log.push(step+' '+n+' '+(performance.now()-t0).toFixed(0)+'ms');return;}
@@ -153,7 +168,8 @@ function warmCharVariants(){
   const fade=src=>{const m=src.clone();m.transparent=true;m.depthWrite=false;m.forceSinglePass=true;m.onBeforeCompile=src.onBeforeCompile;const k=src.customProgramCacheKey();m.customProgramCacheKey=()=>k;return m;};
   const V=[['flash',()=>flash,m=>m.isSkinnedMesh||m.isMesh],['ghost',ghostOf,()=>true],['clip',src=>deathClipMat(src,one4),()=>true],['fade',fade,m=>!m.isSkinnedMesh],
     ['dark',src=>stDarkTintMat(src,false,one,one),()=>true],['darkS',src=>stDarkTintMat(src,true,one,one),()=>true],
-    ['darkF',()=>stDarkTintMat(flash,false,one,one),()=>true],   // Darkness tint over a hit flash
+    ['darkF',()=>stDarkTintMat(flash,false,one,one),()=>true],
+    ['darkClip',src=>deathClipMat(stDarkTintMat(src,false,one,one),one4),()=>true],   // slash-split death of a Darkness-tinted body   // Darkness tint over a hit flash
     ...WARM.cvx];   // registered body overlays (preloadCharMat: class outline shells etc.)
   const roots=[...PM3.values(),...GWARM.chars.values()];
   for(const o of roots){const r=o&&o.g;if(!r||!o.fileModel)continue;   // whole actor: body + wand + darkness gear (scythe) etc.
@@ -221,6 +237,7 @@ const WARM_REC_SKIP=new Set(['sk','emo','kf','pot','die','sgwall','sgcore','sgch
 function warmRec(ev){if(!ev||WARM_REC_SKIP.has(ev.k)||ev.id==='__warm')return;const k=ev.k+'|'+(ev.z||ev.t||'');let L=WARM.rec.get(k);if(!L)WARM.rec.set(k,L=[]);
   if(L.length>=2)return;try{L.push(JSON.parse(JSON.stringify(ev)));}catch(e){}}
 function warmRecDump(){const out=[];for(const L of WARM.rec.values())out.push(...L);return out;}
+const WARM_EVFLAGS=['marked','broke','hold'];
 const WARM_EVX=/^(x|x\d|tx|ax|bx|cx|ox|sx|ex|px|wx|fx2)$/,WARM_EVY=/^(y|y\d|ty|ay|by|cy|oy|sy|ey|py|wy|fy2)$/;
 function warmEvShift(ev){const dx=WARM_X-(ev.x||0),dy=WARM_Y-(ev.y||0),o={};
   for(const k in ev){const v=ev[k];o[k]=typeof v==='number'&&WARM_EVX.test(k)?v+dx:typeof v==='number'&&WARM_EVY.test(k)?v+dy:v;}
@@ -387,6 +404,6 @@ function shReadyPre(){
 function shReadyPost(){imzPost();if(!SHR.hid.length)return;for(const o of SHR.hid)o.visible=true;SHR.hid.length=0;}
 SHR.ext=!!gl.getContext().getExtension('KHR_parallel_shader_compile');
 if(window.WD){window.WD.SHR=SHR;window.WD.IMZ=IMZ;}
-if(window.WD){window.WD.warm=WARM;window.WD.PRE=PRE;window.WD.warmRecDump=warmRecDump;window.WD.warmRehearse=warmRehearse;window.WD.warmEvShift=warmEvShift;window.WD.glProgs=()=>gl.info.programs.length;window.WD.glList=()=>gl.info.programs.map(p=>{const k=p.cacheKey.split(',');return k[0].slice(0,24)+'|'+p.name+'|'+k.slice(-3).join(',').slice(0,60);});}
+if(window.WD){window.WD.warm=WARM;window.WD.PRE=PRE;window.WD.warmRecDump=warmRecDump;window.WD.warmRehearse=warmRehearse;window.WD.glKeys=()=>gl.info.programs.map(p=>p.cacheKey);window.WD.matKeys=m=>{const pr=gl.properties.get(m);return pr&&pr.programs?[...pr.programs.keys()]:[];};window.WD.warmEval=f=>f({THREE,scene,fxScene,gl,cam,composer,WARM,PM3,tx,tz,WARM_X,WARM_Y,stDarkFlowOrbs,stDarkFlowArm,stDarkFlowFlames});window.WD.warmEvShift=warmEvShift;window.WD.glProgs=()=>gl.info.programs.length;window.WD.glList=()=>gl.info.programs.map(p=>{const k=p.cacheKey.split(',');return k[0].slice(0,24)+'|'+p.name+'|'+k.slice(-3).join(',').slice(0,60);});}
 if(window.WD)window.WD.gwarm=GWARM;
 if(window.WD)window.WD.WARM=WARM;

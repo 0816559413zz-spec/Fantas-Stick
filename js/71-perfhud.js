@@ -72,7 +72,7 @@ function shwFrame(gap){
   SHW.len=L.length;
   for(const pg of L){if(SHW.seen.has(pg))continue;SHW.seen.add(pg);
     if(!SHW.armed)continue;
-    const e={t:new Date().toTimeString().slice(0,8),ms:Math.round(gap),name:pg.name||'?',diff:shwDiff(pg),who:shwWho(pg)};
+    const e={t:new Date().toTimeString().slice(0,8),ms:Math.round(gap),name:pg.name||'?',diff:shwDiff(pg),who:shwWho(pg),key:pg.cacheKey};
     SHW.n++;SHW.L.push(e);if(SHW.L.length>40)SHW.L.shift();
     console.warn('[shader mid-match]',e.ms+'ms',e.name,e.diff,e.who.join(' | '));
     if(DEV.on)toast('⚠ shader ใหม่กลางแมตช์ '+e.ms+'ms: '+e.name+' — '+e.who[0]);}}

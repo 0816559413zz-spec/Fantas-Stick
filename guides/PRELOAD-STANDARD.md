@@ -214,6 +214,18 @@ Rule: **light changes = uniform changes, never structural changes.**
   Sovereign crystal core ("new shape" = new geometry attributes), Flow orb tails / scythe blade inside death dissolve,
   Water outline see-through, Points `uv>false`, unnamed code ShaderMaterials, auto-instanced copies (`instz`).
 
+**Step 4 status (round 3, 2026-11-23):**
+- `warmNow(objs)` compiles objects immediately (for effects that remove their pieces before the queue's compile) and
+  `warmFxRun(I, dur, dt, each)` plays one FX instance's timeline at entry, compiling as code layers patch materials.
+  Nature uses it for the tree / wall studies (summon, break, expire), with hit-glow / scorch patches applied each step.
+- Light builder adds the Sovereign crystal and `lgCrystalMesh`; `warmCharVariants` adds Darkness tint + slash clip.
+- Rehearsal replays each sample with flags flipped (`WARM_EVFLAGS`: marked / broke / hold; `marked` for every dark event).
+- SHW entries carry the full program key (`e.key`) for diagnosis.
+- Gate: siege 18 / 23, tdm 12 / 13; **slow frames 0 / 0 / 0 / 1** (round 2: 2–17). A Darkness-only match makes no
+  ShaderMaterial programs mid-fight; in the mixed bench some Darkness views still get never-seen sources (Night Waltz,
+  Ward Drain, Nightfall, unnamed `Scene>Mesh` ShaderMaterials) → next: dump their source in the mixed bench
+  (`WD.SHW.L[i].key` + `gl.getAttachedShaders`) and find which branch builds them.
+
 ## 7. Work order
 
 | Step | Work | Done when |
