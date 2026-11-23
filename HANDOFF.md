@@ -1,5 +1,9 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
+**Normal jump (2026-11-23, protocol v107):** Space uses an impulse of 11.1 and upward gravity of 31 to reach about 1.90 m in 0.35 s on flat ground at 60 Hz. Jump descent gravity is 19.5. The upper arms open so the elbows reach near shoulder height, with forearms folded forward. The front knee lifts and the trailing leg opens to the other side, then both gather for landing. The local cape hem sweeps back to reveal the legs. Casting takes over the arms while the legs continue. Review in Training with Space and Ring of Embers.
+
+**Camera and whole-game performance (2026-11-23):** Added local culling for off-screen cosmetic emitters, slower idle bone updates for remote players outside the view, and batched Nature root and shield FX. F3 reports host send queue/trims and guest receive gaps. Castle-specific work is deferred by user request. See [audit and verification](guides/OPTIMIZE.md#v-camera-visibility-and-whole-game-performance-audit-2026-11-23).
+
 **Backdrop LOD ใกล้ขอบ (2026-11-23, รีวิว #153):** แผนที่ที่มี Backdrop (Map Builder `bd` / coast) — ใกล้ขอบละเอียดเท่าพื้นที่เล่นแล้วลดตามระยะ (`BD_LOD` + `bdNearKit` js/67-coast): ต้นสน gorge.glb ที่ e<55–115 ม. → pine_la/lb <140–230 ม. → กรวยไกล (สุ่มต่อต้น ไม่เป็นเส้น), หิน/พุ่ม/เฟิร์น 5–70 ม., พื้น = Standard+`grLive(m,far)`+surface จางตามระยะกล้อง, ตาข่ายละเอียดขึ้น • หญ้าขึ้นต่อนอกขอบ 36 ม. + สีหญ้าริมขอบรับสีพื้นแผนที่ (`grassBake` js/50, `world.userData.bdH/bdM/bdTint`) • Low = แบบเดิม • `?nobdlod` = ปิดเทียบ • ⚠ perf ยังไม่วัดนิ่ง (headless แกว่ง: +11–13 draw, +~225k tris, ~+0.3–0.8 ms) → วัด bench-6v6 แบบ siege fcs-file กล้องขอบตะวันตก
 
 **fcs-file = แผนที่หลัก (2026-11-23, ผู้ใช้):** ไม่ย้ายสะพาน L เปลือกไข่ / ซากจุดยึด 1 แบบขยาย / รั้ว 20 แนว จาก `fcs` โค้ดเดิม — ระบบ js/12-fcs-bridge.js + `fcsShell*` ยังอยู่แต่ทำงานเฉพาะ `fcs` แบบเก่า

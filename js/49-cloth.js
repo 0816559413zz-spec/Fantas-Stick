@@ -159,11 +159,25 @@ function clStep(C,h,gy,caps,bv,W){const P=C.P,Q=C.Q,T=C.T,pk=C.pk,E=C.E,N=C.N,g=
       P[a]+=dx*s*wa;P[a+1]+=dy*s*wa;P[a+2]+=dz*s*wa;P[b]-=dx*s*wb;P[b+1]-=dy*s*wb;P[b+2]-=dz*s*wb;}
     const hitB=(it&1)||it===CLOTH.IT-1;   // ชนตัว: รอบเว้นรอบ + รอบสุดท้ายเสมอ (ไม่ทะลุตัว แต่คำนวณน้อยลงเกือบครึ่ง)
     for(let n=0;n<N;n++){if(pk[n]>=1)continue;const i=n*3;if(hitB)for(const c of caps)clCapsule(P,Q,i,c[0],c[1],c[2]);if(P[i+1]<gy){P[i+1]=gy;Q[i]=lerp(Q[i],P[i],0.6);Q[i+2]=lerp(Q[i+2],P[i+2],0.6);}if(W&&it===CLOTH.IT-1)clWorldHit(P,Q,i,W);}}}
-function clDraw(C){const po=C.mo.geometry.attributes.position,pi=C.mi.geometry.attributes.position;for(let n=0;n<C.N;n++)if(C.pk[n]>=1){const i=n*3;C.P[i]=C.T[i];C.P[i+1]=C.T[i+1];C.P[i+2]=C.T[i+2];}po.array.set(C.P);po.needsUpdate=true;C.mo.geometry.computeVertexNormals();
+function clDraw(C){const po=C.mo.geometry.attributes.position,pi=C.mi.geometry.attributes.position;for(let n=0;n<C.N;n++)if(C.pk[n]>=1){const i=n*3;C.P[i]=C.T[i];C.P[i+1]=C.T[i+1];C.P[i+2]=C.T[i+2];}po.array.set(C.P);
+  const jump=C.o.jumpLegs;
+  if(jump?.weight>.01){
+    // Sweep the lower cape behind the legs while its simulated positions keep settling.
+    const lift=jump.p[6]*jump.weight,yaw=C.o.g.rotation.y,fx=Math.sin(yaw),fz=Math.cos(yaw);
+    for(let r=1;r<C.NR;r++){
+      const blend=lift*(r/(C.NR-1))**2;
+      for(let j=0;j<CL_NC;j++){
+        const edge=(2*j/(CL_NC-1)-1)**2,i=(r*CL_NC+j)*3;
+        const back=blend*(.38+.26*edge);
+        po.array[i]-=fx*back;po.array[i+1]+=blend*(.36+.27*edge);po.array[i+2]-=fz*back;
+      }
+    }
+  }
+  po.needsUpdate=true;C.mo.geometry.computeVertexNormals();
   // ครั้งแรก: ให้ด้านนอกหันออกจากตัว (กลับลำดับสามเหลี่ยมถ้ากลับด้าน)
   if(!C.flip){C.flip=true;const nm=C.mo.geometry.attributes.normal,n=Math.floor(C.N/2)+3*CL_NC,i=n*3;_clA.set(C.P[i],0,C.P[i+2]);C.o.g.getWorldPosition(_clB);_clA.x-=_clB.x;_clA.z-=_clB.z;
     if(nm.getX(n)*_clA.x+nm.getZ(n)*_clA.z<0){const gi=C.mo.geometry.index.array.slice().reverse(),go=C.mi.geometry.index.array.slice().reverse();C.mo.geometry.setIndex(Array.from(gi));C.mi.geometry.setIndex(Array.from(go));C.mo.geometry.computeVertexNormals();}}
-  const nm=C.mo.geometry.attributes.normal,A=pi.array;for(let i=0;i<C.N*3;i+=3){A[i]=C.P[i]-nm.array[i]*CL_IN;A[i+1]=C.P[i+1]-nm.array[i+1]*CL_IN;A[i+2]=C.P[i+2]-nm.array[i+2]*CL_IN;}
+  const nm=C.mo.geometry.attributes.normal,A=pi.array,B=po.array;for(let i=0;i<C.N*3;i+=3){A[i]=B[i]-nm.array[i]*CL_IN;A[i+1]=B[i+1]-nm.array[i+1]*CL_IN;A[i+2]=B[i+2]-nm.array[i+2]*CL_IN;}
   pi.needsUpdate=true;C.mi.geometry.computeVertexNormals();}
 // ทุกเฟรม (หลัง syncPlayers): ผ้าของเราเอง
 function clothTick(dt){if(!CLOTH.ON||typeof NET==='undefined')return;const o=PM3.get(NET.myId);if(!o||!o.fileModel||o.stormCapeHidden)return;

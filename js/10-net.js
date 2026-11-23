@@ -1,7 +1,7 @@
 // =====================================================================
 //  เครือข่าย (PeerJS / WebRTC)
 // =====================================================================
-const PREFIX='wizduel-th-v106-';
+const PREFIX='wizduel-th-v107-';
 const NET={peer:null,isHost:false,online:false,myId:'me',conns:new Map(),hostConn:null,code:'',spec:false,rtt:0,
   // token ของแท็บนี้ (อยู่ข้ามการรีเฟรช) — โฮสต์ใช้จำว่า "คนเดิมต่อกลับมา" ตอนเน็ตหลุด
   tok:(()=>{const r=()=>Math.random().toString(36).slice(2,10);try{let t=sessionStorage.getItem('wd_tok');if(!t){t=r();sessionStorage.setItem('wd_tok',t);}return t;}catch(e){return r();}})()};
@@ -49,14 +49,17 @@ function netDelta(base){
 const NET_MAX=15000,_netTE=new TextEncoder();
 function netSendSnap(s){
   const m={t:'s',s},sz=()=>_netTE.encode(JSON.stringify(m)).length;
-  const b0=SET.stats?sz():0;if(SET.stats){PERF.snapN++;PERF.snapB+=b0;}   // ตัววัดเน็ต (js/71) — วัดขนาดเฉพาะตอนเปิดแผง
-  if((SET.stats?b0:sz())>NET_MAX){
+  let bytes=sz();
+  const trimmed=bytes>NET_MAX;
+  if(trimmed){
     s.ev=(s.ev||[]).filter(e=>e.e!=='h');
-    while(sz()>NET_MAX&&s.ev.length)s.ev=s.ev.slice(0,s.ev.length>>1);
-    if(sz()>NET_MAX&&s.J)while(sz()>NET_MAX&&s.J.length)s.J=s.J.slice(0,s.J.length>>1);
+    bytes=sz();
+    while(bytes>NET_MAX&&s.ev.length){s.ev=s.ev.slice(0,s.ev.length>>1);bytes=sz();}
+    while(bytes>NET_MAX&&s.J?.length){s.J=s.J.slice(0,s.J.length>>1);bytes=sz();}
     NETD.trim=(NETD.trim|0)+1;
   }
   sendAll(m);
+  if(SET.stats)perfNetSend(bytes,trimmed);
 }
 // ลูกข่าย: เติมกลับเป็นสตริงเต็มก่อนเข้า onSnap (snapApply/brkParse/pnlParse ใช้แบบเดิม)
 const NETU={};
@@ -179,7 +182,7 @@ function clientOnData(d){
     case 'lobby':onLobby(d);break;
     case 'start':VIEW.prev=VIEW.cur=null;sbufReset();setScreen('game');break;
     case 'po':{const r=performance.now()-d.c;NET.rtt=NET.rtt?NET.rtt*0.8+r*0.2:r;break;}   // ปิงไป-กลับ (เฉลี่ยนุ่ม ๆ)
-    case 's':if(screen!=='game')setScreen('game');unpackP(d.s);netUndelta(d.s);onSnap(d.s);break;
+    case 's':if(SET.stats)perfNetReceive();if(screen!=='game')setScreen('game');unpackP(d.s);netUndelta(d.s);onSnap(d.s);break;
     case 'priv':onPriv(d.m);break;
   }
 }

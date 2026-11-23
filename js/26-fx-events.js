@@ -3,25 +3,27 @@
 // On Fire (อัลติไฟ Inferno Nova): ขอบตัวเรืองแดง-ส้ม + ไฟเล็ก ๆ ลอยตามหลังตอนเดิน (ไม่เยอะ)
 const onfOutlineMat=new THREE.MeshBasicMaterial({color:'#ff5a14',side:THREE.BackSide,depthWrite:false,toneMapped:false});onfOutlineMat.userData.keep=true;
 onfOutlineMat.onBeforeCompile=sh=>{sh.vertexShader=sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\ntransformed+=normalize(normal)*.045;');};
-function onFireFX(o,on,x,y,z,sz){
+function onFireFX(o,on,x,y,z,sz,detail){
   if(on&&!o.onfOut){const root=o.fileModel||o.b||o.g;const hulls=[];if(root)root.traverse(m=>{if(m.isMesh&&!m.userData.natOutline&&!m.userData.blzOut&&!m.userData.onfOut&&m.visible)hulls.push(m);});
     o.onfOut=hulls.map(m=>{const c=m.isSkinnedMesh?new THREE.SkinnedMesh(m.geometry,onfOutlineMat):new THREE.Mesh(m.geometry,onfOutlineMat);if(m.isSkinnedMesh)c.bind(m.skeleton,m.bindMatrix);c.userData.onfOut=true;c.renderOrder=996;m.parent.add(c);return {m,c};});}
   if(!o.onfOut)return;
   for(const {m,c} of o.onfOut){c.visible=on&&m.visible;if(on){c.position.copy(m.position);c.quaternion.copy(m.quaternion);c.scale.copy(m.scale);}}
   if(!on)return;const t=performance.now();onfOutlineMat.color.setRGB(2.2,.55+.3*Math.sin(t/110),.08);
+  if(!detail)return;
   // ไฟตามหลัง: อนุภาคค้างอยู่ที่เดิม คนเดินไปก็เป็นทางไฟเล็ก ๆ ข้างหลัง
   if(Math.random()<0.7)PARTS.push({x:x+rnd(-9,9),y:y+rnd(-9,9),h:z+rnd(0.3,sz*1.4),vx:rnd(-6,6),vy:rnd(-6,6),vh:rnd(0.8,1.8),life:rnd(0.45,0.7),max:0.7,col:Math.random()<0.5?'#ff4a12':'#ffb040',size:rnd(2.6,4.2),g:-1.2,fl:true});
   if(Math.random()<0.3)PARTS.push({x:x+rnd(-11,11),y:y+rnd(-11,11),h:z+rnd(0.2,sz*1.6),vx:rnd(-12,12),vy:rnd(-12,12),vh:rnd(1.5,3),life:rnd(0.5,0.8),max:0.8,col:'#ffe08a',size:rnd(1.2,1.8),g:-0.8});   // ประกายเล็ก ๆ
 }
-function statusFX(o,fm,x,y,z,sz,now){
-  onFireFX(o,!!(fm&FX_ONFIRE),x,y,z,sz);
+function statusFX(o,fm,x,y,z,sz,now,detail=true){
+  onFireFX(o,!!(fm&FX_ONFIRE),x,y,z,sz,detail);
   if(!fm)return;
   earthMudSink(o,fm,x,y);
   if(fm&8){
     if(!o.ice){o.ice=new THREE.Mesh(new THREE.IcosahedronGeometry(1,0),new THREE.MeshStandardMaterial({color:'#bfeaff',transparent:true,opacity:0.5,roughness:0.5,emissive:'#2f6a9a',flatShading:true}));o.g.add(o.ice);}
     o.ice.visible=true;o.ice.scale.set(sz*0.5,sz*0.9,sz*0.5);o.ice.position.y=sz*0.85;
-    if(Math.random()<0.2)burst(x,y,'#dff6ff',1,30,0.6,1.6,{h:z+rnd(0.2,sz*1.5),vh:[0,0.5],g:0});
+    if(detail&&Math.random()<0.2)burst(x,y,'#dff6ff',1,30,0.6,1.6,{h:z+rnd(0.2,sz*1.5),vh:[0,0.5],g:0});
   }else if(o.ice)o.ice.visible=false;
+  if(!detail)return;
   if((fm&4)&&!(fm&8)&&Math.random()<0.25)PARTS.push({x:x+rnd(-14,14),y:y+rnd(-14,14),h:z+rnd(0.1,sz*1.6),vx:rnd(-10,10),vy:rnd(-10,10),vh:rnd(-1,-0.2),life:0.7,max:0.7,col:Math.random()<0.5?'#ffffff':'#9fe8ff',size:2.2,g:0,sh:4,rot:rnd(0,6.283),vr:rnd(-3,3),c2:'#5ab8ff'});
   if((fm&16)&&!(o.waveShockUntil>FIRE_U.time.value)){
     const cyan=!!(fm&FX_SHOCK_CYAN);

@@ -71,6 +71,8 @@ function warmFxEnd(fxI){for(const I of fxI){for(const S of I.L){if(S.d.t==='trai
 function warmGather(){for(const sc of [scene,fxScene])for(const o of sc.children.slice())if(Math.abs(o.position.x-tx(WARM_X))<200&&Math.abs(o.position.z-tz(WARM_Y))<200)warmKeep(o,sc===fxScene);}
 // สายในแมตช์ (จาก kit ของทุกคนในสแนปช็อต)
 function warmPaths(v){const s=new Set();for(const p of (v&&v.P)||[]){const k=getKit(p.id);if(k&&PATHS[k.path])s.add(PATHS[k.path].id);}return [...s];}
+// Keep shader slices scheduled when the headless harness freezes the match loop.
+const warmFrame=requestAnimationFrame.bind(window);
 // งาน 1 ขั้น: 'common' / 'fx:<สาย>' / 'reg:<สาย>:<i>' / 'compile'
 function warmStep(step){
   if(step==='compile'){WARM.busy=true;const t0=performance.now(),jobs=[];
@@ -86,7 +88,7 @@ function warmStep(step){
           for(const o of part)if(o.isMesh&&!Array.isArray(o.material))flatMark(o.material,o.geometry);
           if(part.length)gl.compile(fk,cam,sc);if(i>=L.length){ji++;i=0;}}}
         catch(e){console.warn('warm compile',e);ji=jobs.length;}finally{gl.setRenderTarget(prev);part=[];}
-        if(ji<jobs.length)requestAnimationFrame(tick);else Promise.race([glReady(),new Promise(r=>setTimeout(r,4000))]).then(fin,fin);};
+        if(ji<jobs.length)warmFrame(tick);else Promise.race([glReady(),new Promise(r=>setTimeout(r,4000))]).then(fin,fin);};
       tick();return;}
     scene.add(WARM.hold);fxScene.add(WARM.holdF);const hid=[];
     for(const sc of [scene,fxScene])sc.traverse(o=>{if(!o.visible&&!o.isLight){o.visible=true;hid.push(o);}});   // ไฟที่ซ่อนอยู่ห้ามเปิด (จำนวนไฟเปลี่ยน = เชดเดอร์คนละชุดกับตอนเล่น)

@@ -7,17 +7,44 @@
 //  ปุ่ม 📋 คัดลอกค่าปัจจุบันเป็นข้อความ (วางให้ Claude ดูได้เลย) • F3 = เปิด/ปิดแผงเร็ว ๆ
 // =====================================================================
 const PERF={N:240,ft:new Float32Array(240),cpu:new Float32Array(240),i:0,n:0,host:0,hostAcc:0,
-  last:0,snapN:0,snapB:0,snapIn:0,rate:{snap:0,kb:0,snapIn:0},rateT:0,txt:'',txtT:0,el:null,cv:null,pan:null,calls:0,tris:0};
+  last:0,netTime:0,netSample:null,netRate:null,txt:'',txtT:0,el:null,cv:null,pan:null,calls:0,tris:0};
+function perfNetSample(){
+  return PERF.netSample||(PERF.netSample={sent:0,received:0,bytes:0,trimmed:0,gap:0,lastReceive:0,queued:0});
+}
+function perfNetSend(bytes,trimmed){
+  const sample=perfNetSample();sample.sent++;sample.bytes+=bytes;if(trimmed)sample.trimmed++;
+  for(const conn of NET.conns.values())if(conn.open){
+    sample.queued=Math.max(sample.queued,conn.dataChannel?.bufferedAmount||0);
+  }
+}
+function perfNetReceive(){
+  const sample=perfNetSample(),now=performance.now();
+  if(sample.lastReceive)sample.gap=Math.max(sample.gap,now-sample.lastReceive);
+  sample.lastReceive=now;sample.received++;
+}
+function perfNetFrame(now){
+  if(!SET.stats||!NET.online||screen!=='game'){
+    PERF.netTime=0;PERF.netSample=PERF.netRate=null;return;
+  }
+  if(!PERF.netTime)PERF.netTime=now;
+  const seconds=(now-PERF.netTime)/1000;
+  if(seconds<1)return;
+  const sample=perfNetSample();
+  const gap=Math.max(sample.gap,sample.lastReceive?now-sample.lastReceive:0);
+  PERF.netRate={...sample,gap,sent:sample.sent/seconds,received:sample.received/seconds,kb:sample.bytes/1024/seconds};
+  PERF.netTime=now;PERF.netSample=null;perfNetSample().lastReceive=sample.lastReceive;
+}
 // เรียกจาก frame() (js/37) ทุกเฟรม: dt = เวลาเฟรม (วิ), cpu = ms ที่ JS ใช้ในเฟรมนี้, host = ms ที่โฮสต์คำนวณเกม
 function perfFrame(dt,cpu,host){
   const on=!!(SET.fpsg||SET.stats);
   if(gl.info.autoReset===on)gl.info.autoReset=!on;   // นับ draw call ของทุก pass ในเฟรม (ปกติ three รีเซ็ตทุก render() → เห็นแค่ pass สุดท้าย)
-  if(!on){if(PERF.el)PERF.el.style.display='none';PERF.last=0;return;}
+  if(!on){if(PERF.netTime)perfNetFrame(0);if(PERF.el)PERF.el.style.display='none';PERF.last=0;return;}
+  const tn=performance.now();
+  if(SET.stats||PERF.netTime)perfNetFrame(tn);
   const R=gl.info.render;PERF.calls=R.calls;PERF.tris=R.triangles;gl.info.reset();
-  const tn=performance.now(),ft=PERF.last?tn-PERF.last:dt*1000;PERF.last=tn;   // เวลาจริง (dt ของเกมถูกตัดที่ 50 ms)
+  const ft=PERF.last?tn-PERF.last:dt*1000;PERF.last=tn;   // เวลาจริง (dt ของเกมถูกตัดที่ 50 ms)
   const i=PERF.i;PERF.ft[i]=ft;PERF.cpu[i]=cpu;PERF.i=(i+1)%PERF.N;PERF.n=Math.min(PERF.N,PERF.n+1);
   PERF.host=PERF.host*0.9+host*0.1;
-  PERF.rateT+=dt;if(PERF.rateT>=1){PERF.rate={snap:PERF.snapN/PERF.rateT,kb:PERF.snapB/1024/PERF.rateT,snapIn:PERF.snapIn/PERF.rateT};PERF.snapN=PERF.snapB=PERF.snapIn=0;PERF.rateT=0;}
   perfDom();PERF.el.style.display='block';PERF.el.style.top=SET.fps?'28px':'8px';
   PERF.cv.style.display=SET.fpsg?'block':'none';PERF.pan.style.display=SET.stats?'block':'none';
   if(SET.fpsg)perfGraph();
@@ -63,7 +90,10 @@ function perfRows(){const S=perfStats(),I=gl.info,v=VIEW.cur,mem=performance.mem
   if(screen==='game'&&v){
     rows.push(['ในฉาก',`อนุภาค ${PARTS.length} • เอฟเฟกต์ ${FXR.inst.length} • คน ${v.P.length} • ศัตรู ${v.E.length} • กระสุน ${(v.J||[]).length}`]);
     rows.push(['แผนที่',`${builtMap||'-'} • โหมด ${v.mode||'-'}`]);}
-  if(NET.online)rows.push(['เน็ต',NET.isHost?`ส่ง ${PERF.rate.snap.toFixed(0)} snapshot/วิ • ${PERF.rate.kb.toFixed(1)} KB/วิ ต่อคน • ${NET.conns.size} คนต่ออยู่`:`รับ ${PERF.rate.snapIn.toFixed(0)} snapshot/วิ • ปิง ${NET.rtt?Math.round(NET.rtt):'-'} ms`]);
+  const net=PERF.netRate;
+  if(NET.online&&net)rows.push(['เน็ต',NET.isHost?
+    `ส่ง ${net.sent.toFixed(0)} snapshot/วิ • ${net.kb.toFixed(1)} KB/วิ ต่อคน • คิวส่งสูงสุด ${(net.queued/1024).toFixed(1)} KB • ตัดข้อมูล ${net.trimmed} ครั้ง`:
+    `รับ ${net.received.toFixed(0)} snapshot/วิ • ช่วงห่างสูงสุด ${net.gap.toFixed(0)} ms • ปิง ${NET.rtt?Math.round(NET.rtt):'-'} ms`]);
   return rows;}
 function perfPanel(){PERF.pan.innerHTML=perfRows().map(([k,v])=>`<div><b>${k}</b> ${v}</div>`).join('')+'<button type="button" data-pcopy>📋 คัดลอก</button>';}
 function perfText(){return '[Fantas Stick perf '+new Date().toISOString().slice(0,16).replace('T',' ')+' '+navigator.userAgent.replace(/^.*?\) /,'').slice(0,60)+']\n'+perfRows().map(([k,v])=>k+': '+String(v).replace(/<[^>]+>/g,'')).join('\n');}

@@ -385,14 +385,14 @@ function modeSnap(){
 // ---------- สร้าง snapshot ส่งให้ทุกเครื่อง ----------
 const r1=v=>Math.round(v*10)/10;
 // ลดขนาด snapshot ที่ส่งออกเน็ต: ช่องของผู้เล่นที่เป็นค่าปกติ (false/0/ว่าง) ไม่ต้องส่ง — ลูกข่ายเติมกลับเป็นค่าเดิมเป๊ะ (unpackP) • โฮสต์ใช้ snapshot เต็มเหมือนเดิม
-const DEFP={nt:0,sc:0,fl:false,rt:false,z:0,aw:0,wv:0,al:true,dn:false,rv:0,sh:false,st:false,ds:false,iv:false,bn:false,u:0,k:0,d:0,rs:0,bo:null,bR:null,pk:false,dmg:0,fm:0,gh:false,hb:false,lap:0,cp:0,fin:0,bs:false,br:0,cg:0,dc:0,bm:0,sn:0,co:0,kd:0,hv:0,df:0,sm:0,ob:0,fr:0,xh:0,fs:0,ul:'',tk:0};
+const DEFP={nt:0,sc:0,fl:false,rt:false,z:0,ja:0,aw:0,wv:0,al:true,dn:false,rv:0,sh:false,st:false,ds:false,iv:false,bn:false,u:0,k:0,d:0,rs:0,bo:null,bR:null,pk:false,dmg:0,fm:0,gh:false,hb:false,lap:0,cp:0,fin:0,bs:false,br:0,cg:0,dc:0,bm:0,sn:0,co:0,kd:0,hv:0,df:0,sm:0,ob:0,fr:0,xh:0,fs:0,ul:'',tk:0};
 function packP(L){return L.map(p=>{const o={};for(const k in p)if(!(k in DEFP)||p[k]!==DEFP[k])o[k]=p[k];return o;});}
 function unpackP(s){if(s&&s.P)for(const p of s.P)for(const k in DEFP)if(!(k in p))p[k]=DEFP[k];}
 function makeSnap(){
   return {ph:G.ph,sl:G.endT>0?1:0,ot:G.ot&&G.mode==='ffa'?1:0,PT:ffaSnapPots(),mode:G.mode,mp:G.map,PB:PROPON?PROPS.map(o=>o.st).join(''):'',BK:brkSnap(),EF:efsSnap(),BS:bskSnap(),CB:citySnapB(),CS:citySnapS(),PN:pnlSnap(),tm:Math.max(0,Math.ceil(G.timer)),cd:G.cdT||0,wave:G.wave,round:G.round,rw:G.rw,ts:G.teamScore,
     bt:Math.ceil(G.buffT||0),ban:G.banner?G.banner.text:'',res:G.result,el:G.en.length+G.queue.length,
     feed:G.feed.filter(f=>G.time-f.t<6).slice(-5).map(f=>f.text),
-    P:plist().map(p=>{const lotus=natureLotusCooldown(p);return {id:p.id,n:p.name,c:p.color,tm:p.team,x:r1(p.x),y:r1(p.y),z:r1(p.z||0),fl:!!p.fly,rt:p.root>0&&!(p.rootSelf>G.time),a:Math.round(p.ang*100)/100,fh:p.fly&&p.flyOn?Math.round(p.fh*100)/100:0,bb:p.fly&&p.flyOn?[Math.round(p.bbv||0),p.bbf|0]:0,
+    P:plist().map(p=>{const lotus=natureLotusCooldown(p);return {id:p.id,n:p.name,c:p.color,tm:p.team,x:r1(p.x),y:r1(p.y),z:r1(p.z||0),ja:p.airPose||0,fl:!!p.fly,rt:p.root>0&&!(p.rootSelf>G.time),a:Math.round(p.ang*100)/100,fh:p.fly&&p.flyOn?Math.round(p.fh*100)/100:0,bb:p.fly&&p.flyOn?[Math.round(p.bbv||0),p.bbf|0]:0,
       hp:Math.ceil(p.hp),mh:p.maxHp,aw:p.awayT>0?1:0,wv:p.alive&&!p.downed?p.wSpd|0:0,al:p.alive,dn:p.downed,rv:r1(p.revive),sh:p.shieldOn,se:Math.round(p.shieldE),
       st:p.stun>0,ds:p.dash>0,iv:p.inv>0,bn:p.burn>0,u:Math.floor(p.ult),k:p.kills,d:p.deaths,rs:Math.ceil(p.respawn),
       cd:CDK.map(k=>r1(lotus?.[0]===k?lotus[1]:p.cd[k])),cm:CDK.map(k=>lotus?.[0]===k?2:p.cdMax[k]||1),bo:p.bo,bR:p.br,pk:p.picked,bf:p.taken,dmg:Math.round(p.dmgDealt),
