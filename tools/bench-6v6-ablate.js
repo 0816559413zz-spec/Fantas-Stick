@@ -1,7 +1,10 @@
 // Runs tools/bench-6v6.js several times with one feature switched off each time → shows where the GPU/CPU time goes.
 //   node tools/bench-6v6-ablate.js [name ...]      (needs python tools/serve.py; runs one after another so GPU timings are not disturbed)
 const {spawnSync}=require('child_process'),fs=require('fs'),path=require('path'),os=require('os');
-const ALL={base:{},nolook:{nolook:1},noshadow:{noshadow:1},noao:{noao:1},nobloom:{nobloom:1},nofx:{nofx:1},res720:{res:[1280,720]},res1440:{res:[2560,1440]}};
+const ALL={base:{},nolook:{nolook:1},noshadow:{noshadow:1},noao:{noao:1},nobloom:{nobloom:1},nofx:{nofx:1},res720:{res:[1280,720]},res1440:{res:[2560,1440]},
+  // painterly castle (fcs-file): what the paint look costs in a 6v6 fight
+  fcs:{map:'fcs-file'},fcsNoFxcel:{map:'fcs-file',pre:'WD.PAINT.fxcel=0;WD.PAINT.relight();'},fcsNoBlob:{map:'fcs-file',pre:'WD.PAINT.blob=0;WD.PAINT.relight();'},
+  fcsNoKuw:{map:'fcs-file',pre:'WD.PAINT.kuw=0;WD.PAINT.relight();'},fcsNoTrees:{map:'fcs-file',pre:'WD.scene.traverse(o=>{if(o.name==="ptree_inst")o.visible=false;});'}};
 const names=process.argv.slice(2).length?process.argv.slice(2):Object.keys(ALL),out={};
 for(const n of names){const o=ALL[n];if(!o){console.error('unknown',n);continue;}
   const tmp=path.join(os.tmpdir(),'bench6v6-'+n+'.js');

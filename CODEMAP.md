@@ -399,7 +399,7 @@ frpBuild:27 fcsPropsBuild:75 fcsPropsView:101 fcsRoomBrkFx:110 FRP_DEB:111 frpDe
 §139 wall hit marks (event 'rwh'): decal quads on the wall face, ring buff…
 frpMarkTex:140 fcsWallHit:144
 
-## js/28-maps-build.js (822) — สร้างแผนที่
+## js/28-maps-build.js (823) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:47 _prewarmed:49 prewarmShaders:50 batchStatic:69 makeCandles:94 updateCandles:103 buildCastle:112 buildHogsmeade:178 buildGreatHall:253 buildForest:323
 §420 ทุ่งหญ้าฮอกวอตส์ (เย็น)
 ringTrees:421 grassTex:430 buildMeadow:431
@@ -410,7 +410,7 @@ buildLake:451
 §474 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน guides…
 makeSnow:475 makeFireflies:482 makeSnitch:489 fileMapFx:496
 §506 แผนที่จากไฟล์ Blender (guides/MAP-DESIGN.md)
-terrGeo:508 buildFileMap:516 replaceMeadowTufts:571 tickM:613 TRPAD:614 ARPAD:614 SHPAD:614 signTex:615 testSign:616 buildTest:623 buildRuins:728 buildPitch:753
+terrGeo:508 buildFileMap:516 replaceMeadowTufts:572 tickM:614 TRPAD:615 ARPAD:615 SHPAD:615 signTex:616 testSign:617 buildTest:624 buildRuins:729 buildPitch:754
 
 ## js/28-pnl-build.js (245) — Breakable panels — view (state = PNL in js/12-pnl.js)
 PNV:7 PN_MI:8 PN_GLSL:9 pnlMat:41 PN_RUB:92 PN_HEAP:93 pnlCls:100 PN_ZU:108 pnlGeo:109 pnlBuild:192 pnlSyncOne:212 pnlView:234 pnlFX:237
@@ -923,7 +923,7 @@ _dvCyl:259 _dvMat:260 devOverlay:261
 §281 2D overlay map: spawn zones + capture zones + players (click = warp)
 _dvMap:282 _dvY:286 devMapDraw:287
 
-## js/77-paint.js (329) — 
+## js/77-paint.js (345) — Paint 🎨 — ลุค "ภาพวาด" (branch graphics-painterly, ทดลอง): ป่ากลางวันแดดลอดใบไม้แบบภาพอ้…
 PAINT:12 paintOn:22 paintMap:24 kuwOn:33 paintLights:34
 §43 VFX สีสด (ทดลอง): บนแมพสว่าง เอฟเฟกต์เรืองแสงเดิมซีดเป็นขาว-เหลืองอ่อ…
 _ptHSL:44 paintVivid:45 paintVfx:47
@@ -934,14 +934,14 @@ paintAtlas:85 paintStrokeTex:109
 §117 ต้นไม้
 paintTreeGeo:118 paintCanopy:161 paintKit:165
 §192 tree wind (user 2026-11-23: trees more alive)
-PTW:194 PTW_HEAD:197 PTW_BODY:199 PTW_FS:213 ptWindTick:216
-§220 ลายพู่กันบนผิว (ต่อท้าย onBeforeCompile เดิมของวัสดุ เหมือน js/76)
-PT_VS:221 PT_VS_BODY:222 PT_FS:223 PT_FS_BODY:224 paintPatch:234 paintApply:248
-§249 ฉากของแมพ (เรียกจาก buildFileMap ก่อน brkSetup/batchStatic)
-paintScene:250 paintShafts:265
-§276 ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเร…
-kuwQ:279 KUW_LOOP:280 kuwMat:282
-§310 ปรับค่า (tune.html / F8)
+PTW:194 PTW_HEAD:197 PTW_BODY:199 PTW_FS:219 ptWindTick:222
+§226 ลายพู่กันบนผิว (ต่อท้าย onBeforeCompile เดิมของวัสดุ เหมือน js/76)
+PT_VS:227 PT_VS_BODY:228 PT_FS:229 PT_FS_BODY:230 paintPatch:240 paintApply:254 ptreeScene:257
+§265 ฉากของแมพ (เรียกจาก buildFileMap ก่อน brkSetup/batchStatic)
+paintScene:266 paintShafts:281
+§292 ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเร…
+kuwQ:295 KUW_LOOP:296 kuwMat:298
+§326 ปรับค่า (tune.html / F8)
 
 ## js/78-dev-ui.js (246) — Dev Mode UI (user 2026-11-20): one floating window, many small column…
 §10 orbit camera
@@ -956,4 +956,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(117 files, 35609 lines)
+(117 files, 35626 lines)

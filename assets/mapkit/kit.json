@@ -198,6 +198,14 @@
   {"id":"manor/gables","name":"Triple-Gable House (frame) · Manor","cat":"build","src":"mapkit/manor.glb","node":"mn_gables","col":0,"brk":0,"ns":0,"v":1795348205169},
   {"id":"manor/tower","name":"Tower House (frame) · Manor","cat":"build","src":"mapkit/manor.glb","node":"mn_tower","col":0,"brk":0,"ns":0,"v":1795348205169},
   {"id":"manor/leanto","name":"Wall Lean-to House (frame) · Manor","cat":"build","src":"mapkit/manor.glb","node":"mn_leanto","col":0,"brk":0,"ns":0,"v":1795348205169},
-  {"id":"abbey/mount","name":"Abbey Mount (decor) · Castle","cat":"build","src":"mapkit/abbey.glb","node":"ab_mount","col":0,"brk":0,"ns":0,"v":1795353331360}
+  {"id":"abbey/mount","name":"Abbey Mount (decor) · Castle","cat":"build","src":"mapkit/abbey.glb","node":"ab_mount","col":0,"brk":0,"ns":0,"v":1795353331360},
+  {"id":"ptree/tree_a","name":"Wind Tree A (tall) · Painterly","cat":"tree","src":"mapkit/ptree.glb","node":"pt_tree_a","col":1,"brk":0,"ns":0,"v":1795452592986},
+  {"id":"ptree/tree_b","name":"Wind Tree B (leaning) · Painterly","cat":"tree","src":"mapkit/ptree.glb","node":"pt_tree_b","col":1,"brk":0,"ns":0,"v":1795452592986},
+  {"id":"ptree/tree_c","name":"Wind Tree C (short, wide) · Painterly","cat":"tree","src":"mapkit/ptree.glb","node":"pt_tree_c","col":1,"brk":0,"ns":0,"v":1795452592986},
+  {"id":"ptree/tree_d","name":"Wind Tree D (giant) · Painterly","cat":"tree","src":"mapkit/ptree.glb","node":"pt_tree_d","col":1,"brk":0,"ns":0,"v":1795452592986},
+  {"id":"ptree/far_a","name":"Wind Tree Far A (light) · Painterly","cat":"tree","src":"mapkit/ptree.glb","node":"pt_far_a","col":1,"brk":0,"ns":1,"v":1795452592986},
+  {"id":"ptree/far_b","name":"Wind Tree Far B (light) · Painterly","cat":"tree","src":"mapkit/ptree.glb","node":"pt_far_b","col":1,"brk":0,"ns":1,"v":1795452592986},
+  {"id":"ptree/bush_a","name":"Wind Bush A · Painterly","cat":"tree","src":"mapkit/ptree.glb","node":"pt_bush_a","col":0,"brk":0,"ns":1,"v":1795452592986},
+  {"id":"ptree/bush_b","name":"Wind Bush B · Painterly","cat":"tree","src":"mapkit/ptree.glb","node":"pt_bush_b","col":0,"brk":0,"ns":1,"v":1795452592986}
  ]
 }

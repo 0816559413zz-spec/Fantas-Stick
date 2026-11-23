@@ -192,22 +192,28 @@ PAINT.T={value:0};
 // ---------- tree wind (user 2026-11-23: trees more alive) ----------
 // PTW.amp = bend at 14 m height per unit of wind (m) • gust = how hard skill gusts (AIR.G, js/50) push trees • tr = light through leaves (sun behind)
 const PTW={amp:1.1,flut:0.09,gust:1.6,tr:0.55,
-  U:{uPtT:PAINT.T,uPtW:{value:new THREE.Vector4(1,0,0.3,0)},uPtG:{value:Array.from({length:12},()=>new THREE.Vector4(0,0,1,0))},uPtGB:{value:Array.from({length:12},()=>new THREE.Vector4())},
+  U:{uPtT:PAINT.T,uPtW:{value:new THREE.Vector4(1,0,0.3,0)},uPtWG:{value:Array.from({length:12},()=>new THREE.Vector4(0,0,1,0))},uPtWB:{value:Array.from({length:12},()=>new THREE.Vector4())},
     uPtN:{value:0},uPtK:{value:new THREE.Vector3(1.1,0.09,1.6)},uPtSun:{value:new THREE.Vector3(0,1,0)},uPtSunC:{value:new THREE.Color(1,1,1)},uPtTr:{value:0.55}}};
-const PTW_HEAD='uniform float uPtT;uniform vec4 uPtW;uniform vec4 uPtG[12];uniform vec4 uPtGB[12];uniform float uPtN;uniform vec3 uPtK;\n';
-// world offset at the tree top, then back into the tree's local space (rotation + uniform scale) — mesh-per-tree, origin = trunk base
-const PTW_BODY=`{vec3 wo=modelMatrix[3].xyz;float sc=length(modelMatrix[0].xyz);float h=max(transformed.y,0.0)*sc;float k=h/14.0;
+const PTW_HEAD='uniform float uPtT;uniform vec4 uPtW;uniform vec4 uPtWG[12];uniform vec4 uPtWB[12];uniform float uPtN;uniform vec3 uPtK;\n';
+// world offset at the tree top, then back into the tree's local space (rotation + uniform scale) — mesh-per-tree or InstancedMesh (Map Builder ptree kit), origin = trunk base
+const PTW_BODY=`{
+#ifdef USE_INSTANCING
+ mat4 ptM=modelMatrix*instanceMatrix;
+#else
+ mat4 ptM=modelMatrix;
+#endif
+ vec3 wo=ptM[3].xyz;float sc=length(ptM[0].xyz);float h=max(transformed.y,0.0)*sc;float k=h/14.0;
  vec2 wd=uPtW.xy;float t=uPtW.w;float st=uPtW.z;
  float band=smoothstep(-0.2,1.0,sin(dot(wo.xz,wd)*0.045-t*0.55+sin(dot(wo.xz,vec2(-wd.y,wd.x))*0.03)*1.6));
  float ph=dot(wo.xz,wd)*0.07-t*0.9;
  vec2 off=wd*st*(0.35+0.2*sin(ph)+0.75*band)+vec2(sin(t*0.83+wo.x*0.31),cos(t*0.71+wo.z*0.27))*0.1*(st+0.25);
- for(int i=0;i<12;i++){if(float(i)>=uPtN)break;vec4 g=uPtG[i];vec4 gb=uPtGB[i];vec2 dd=wo.xz-g.xy;float L=length(dd);float R=g.z*1.7+3.0;float fl=1.0-smoothstep(R*0.5,R,L);
+ for(int i=0;i<12;i++){if(float(i)>=uPtN)break;vec4 g=uPtWG[i];vec4 gb=uPtWB[i];vec2 dd=wo.xz-g.xy;float L=length(dd);float R=g.z*1.7+3.0;float fl=1.0-smoothstep(R*0.5,R,L);
    off+=(dd/(L+1.0)*g.w+vec2(-dd.y,dd.x)/(L+1.0)*gb.x+gb.yz)*fl*uPtK.z;}
  float cw=sin(t*1.7+dot(position,vec3(0.37,0.21,0.33)))*0.22*(st+0.3);
  vec2 wofs=off*k*k*uPtK.x+wd*cw*k;
  float fl2=uv.x>0.5?uPtK.y*(1.0+st*2.0+length(off)*0.6):0.0;float pf=position.x*0.7+position.z*0.9+position.y*0.5;
  vec3 w3=vec3(wofs.x,-0.5*dot(wofs,wofs)/(h+1.0),wofs.y)+vec3(sin(t*2.6+pf),sin(t*3.1+pf*0.7)*0.4,cos(t*2.2+pf*1.3))*fl2;
- transformed+=transpose(mat3(modelMatrix))*w3/(sc*sc);}
+ transformed+=transpose(mat3(ptM))*w3/(sc*sc);}
 `;
 // light through leaves: sun behind the leaf (view toward sun) → leaf glows with its own colour
 const PTW_FS=`if(vPtLeaf>0.5){vec3 V=normalize(cameraPosition-vPtWP);float bk=pow(max(0.0,dot(-V,uPtSun)),3.0);
@@ -215,7 +221,7 @@ const PTW_FS=`if(vPtLeaf>0.5){vec3 V=normalize(cameraPosition-vPtWP);float bk=po
 `;
 function ptWindTick(){const U=PTW.U;U.uPtW.value.set(AIR.dir.x,AIR.dir.y,AIR.str,AIR.t);U.uPtK.value.set(PTW.amp,PTW.flut,PTW.gust);U.uPtTr.value=PTW.tr;
   U.uPtSun.value.copy(LDIR).normalize();U.uPtSunC.value.copy(moonL.color).multiplyScalar(moonL.intensity*0.35);
-  let n=0;for(let i=0;i<12;i++){const g=AIR.G[i],u=U.uPtG.value[i],b=U.uPtGB.value[i];if(g){const e=airEnv(g);u.set(g.x,g.z,g.R,airGv(g));b.set(g.sw*e,g.dx*e,g.dz*e,0);n=i+1;}else{u.w=0;b.set(0,0,0,0);}}
+  let n=0;for(let i=0;i<12;i++){const g=AIR.G[i],u=U.uPtWG.value[i],b=U.uPtWB.value[i];if(g){const e=airEnv(g);u.set(g.x,g.z,g.R,airGv(g));b.set(g.sw*e,g.dx*e,g.dz*e,0);n=i+1;}else{u.w=0;b.set(0,0,0,0);}}
   U.uPtN.value=n;}
 // ---------- ลายพู่กันบนผิว (ต่อท้าย onBeforeCompile เดิมของวัสดุ เหมือน js/76) ----------
 const PT_VS='varying vec3 vPtP;varying vec3 vPtN;\n';
@@ -246,6 +252,16 @@ function paintPatch(m,strokes){
   m.customProgramCacheKey=function(){return (pk&&pk!==pkDef?pk.call(this):(prior&&prior!==def?prior.toString().length:''))+'|pt2s';};
   m.needsUpdate=true;return m;}
 function paintApply(m){return paintPatch(m,true);}
+// Map Builder wind trees (kit ptree/*, tools/ptree-export.js): pieces whose material is 'paint_tree' → one InstancedMesh per
+// tree shape with the shared wind material (any map, paint look or not). Called from buildFileMap before brkSetup/batchStatic.
+function ptreeScene(sc){
+  const K=paintKit(),G=new Map(),m4=new THREE.Matrix4();sc.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(sc.matrixWorld).invert();
+  sc.traverse(o=>{if(o.isMesh&&!o.isInstancedMesh&&o.material&&o.material.name==='paint_tree'){let L=G.get(o.geometry);if(!L)G.set(o.geometry,L=[]);L.push(o);}});
+  let n=0;
+  for(const [geo,L] of G){const im=new THREE.InstancedMesh(geo,K.mat,L.length);im.name='ptree_inst';im.customDepthMaterial=K.dmat;
+    L.forEach((o,i)=>im.setMatrixAt(i,m4.multiplyMatrices(inv,o.matrixWorld)));im.instanceMatrix.needsUpdate=true;im.computeBoundingSphere();
+    im.castShadow=L.some(o=>o.castShadow);im.receiveShadow=true;sc.add(im);for(const o of L)o.parent.remove(o);n+=L.length;}
+  return n;}
 // ---------- ฉากของแมพ (เรียกจาก buildFileMap ก่อน brkSetup/batchStatic) ----------
 function paintScene(id,sc){
   if(!paintOn(id))return;const K=paintKit();let n=0;
@@ -302,7 +318,7 @@ class PaintPass extends Pass{
 }
 PAINT.pass=new PaintPass();PAINT.pass.enabled=false;
 // entry preload: draw the filter once into a tiny target so its program is linked before the first paint map
-preloadReg('paint',()=>{const rt=new THREE.WebGLRenderTarget(8,8),pr=gl.getRenderTarget();gl.setRenderTarget(rt);try{PAINT.pass.q.render(gl);}finally{gl.setRenderTarget(pr);rt.dispose();}return [];});
+preloadReg('paint',()=>{const K=paintKit(),im=new THREE.InstancedMesh(K.tree[0],K.mat,1);im.setMatrixAt(0,new THREE.Matrix4());im.customDepthMaterial=K.dmat;im.castShadow=im.receiveShadow=true;im.frustumCulled=false;return im;},()=>{const rt=new THREE.WebGLRenderTarget(8,8),pr=gl.getRenderTarget();gl.setRenderTarget(rt);try{PAINT.pass.q.render(gl);}finally{gl.setRenderTarget(pr);rt.dispose();}return [];});
 composer.insertPass(PAINT.pass,composer.passes.indexOf(bloom));
 // พรีเซ็ต Look ของลุคภาพวาด: ฟ้ากลางวัน • เงาอมเขียวฟ้า ไฮไลต์อมเหลือง (lo/hi) • ลำแสง + หมอก + ละอองลอย
 lookPreset('paint','dusk',{sky:'noon',warm:true,env:0.75,tr:0.86,tg:1.06,tb:1.02,hemi:0.82,amb:0.14,exp:1.0,con:1.12,split:0.14,tone:0,rays:1.1,haze:0.75,hazeK:1.5,hazeH:0.08,
@@ -326,4 +342,4 @@ lookPreset('paint','dusk',{sky:'noon',warm:true,env:0.75,tr:0.86,tg:1.06,tb:1.02
   Rg('sat','ความสดของสี',()=>PAINT.sat,v=>{PAINT.sat=v;},{min:0.8,max:1.6,step:0.01});
   Rg('sun','ความแรงแดด',()=>PAINT.sun,v=>{PAINT.sun=v;},{min:0.5,max:5,step:0.05});})();
 if(typeof builtMap==='string'&&builtMap)paintLights(builtMap);
-window.WD&&Object.assign(window.WD,{PAINT,paintLights,paintKit,PTW});
+window.WD&&Object.assign(window.WD,{PAINT,paintLights,paintKit,PTW,ptreeScene,PTW_SRC:{PTW_HEAD,PTW_BODY,PTW_FS}});

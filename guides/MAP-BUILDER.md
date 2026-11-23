@@ -125,6 +125,11 @@ Tool: ศูนย์รวม Tool → **Map Builder** • โค้ด: `mapbu
 - **หลังคามี Collision (ตัวเลือก):** เลือกห้อง (room instance) → Inspector ติ๊ก "Roof collision" (`inst.rfc`) → ใช้แผ่นพื้นล่องหนบนหลังคา (`floors[].rf:1`, `vis:0`, `sol:0`) ให้ยืนบนหลังคาได้ • ปิด = ไม่มี • แตกห้องตอนติ๊กอยู่ = ได้แผ่นพื้นติดมาด้วย (ลบเองได้) • มี: gable / จั่วหน้า / lean-to = แผ่นลาด, tower (ปิรามิด) = แผ่นเรียบซ้อนเป็นขั้น 0.25 m • แผ่นหลังคาตันจากผิวบนลงถึงยอดผนัง (ฟิลด์ floor `yb` = ความสูงก้นแผ่นแบบ absolute, ส่งออกเป็น `bot` ของ TERR.fl) → สกิล/กระสุนทะลุไม่ได้ (`terrSolid`) • ตัวที่ตกเร็ว/บินเข้าไปในเนื้อแผ่นใกล้ผิวบน (<1 m) ถูกดันขึ้นไปยืนบนหลังคา (`groundH` js/04) • แผนที่ที่ส่งออกก่อน 2026-11-22 ต้องกด ⬆ ส่งเข้าเกมใหม่
 - แก้: `assets/src/manor_spec.json` (ขนาด หลังคา หน้าต่าง ปล่องไฟ ไม้เลื้อย) → รัน Blender `assets/src/manor_build.py` (ได้ `assets/mapkit/manor.glb` + `manor.info.json` = bbox ที่ prefab ใช้ชดเชยการจัดกึ่งกลางของ kit) → `node tools/manor-prefabs.mjs` (เขียน prefab + ลงทะเบียน kit.json)
 
+## ต้นไม้ลมพัด (kit `ptree/*`) — 2026-11-24
+- คลัง: `ptree/tree_a`–`tree_d` (สูง 11–19 ม.), `far_a/b` (ใบน้อย เบา), `bush_a/b` (พุ่ม ไม่ชน) หมวด tree • ไฟล์ `assets/mapkit/ptree.glb` สร้างจาก `paintKit()` (js/77) ด้วย `node tools/ptree-export.js` (ลงทะเบียน kit.json ให้เอง)
+- ในเกม: ชิ้นที่วัสดุชื่อ `paint_tree` → `ptreeScene` (js/77, เรียกจาก buildFileMap ก่อน batchStatic) รวมเป็น InstancedMesh ต่อรูปทรง + วัสดุลมกลาง (เอนตามลมแมพ/ลมสกิล, ใบสั่น, แสงทะลุใบ, เงาไหวตาม) ทุกแมพ (ไม่ต้องเปิดลุคภาพวาด)
+- `node tools/ptree-place.mjs [mapId]` = เปลี่ยนต้นสน `gorge/pine_*` ทั้งแมพเป็น ptree (ตำแหน่ง/มุมเดิม) แล้วส่งออก `node tools/headless.js --url "mapbuild.html?export=<id>" --js tools/mb-export.js --quiet` • fcs-file เปลี่ยนแล้ว 319 ต้น
+
 ## Group ใน Hierarchy (โฟลเดอร์ของผู้ใช้) — 2026-11-22
 - ของทุกชนิด (obj/wall/floor/part/room) มี `grp` = ชื่อกลุ่ม • `M.groups` = ลำดับกลุ่ม (เก็บกลุ่มว่างไว้ด้วย) • **เกมไม่สนใจ** ใช้จัดระเบียบใน Tool เท่านั้น (คนละอย่างกับ `g` ของ pn_wall)
 - Ctrl+G = รวมของที่เลือกเป็นกลุ่มใหม่ (ตั้งชื่อทันที) • Ctrl+Shift+G = เอาออกจากกลุ่ม • คลิกชื่อกลุ่ม = เลือกทั้งกลุ่ม (Shift = เพิ่ม) • ดับเบิลคลิก = เปลี่ยนชื่อ (ชื่อว่าง = ยุบกลุ่ม) • Inspector → Group = พิมพ์/เลือกชื่อเพื่อย้ายเข้ากลุ่ม

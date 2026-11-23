@@ -238,6 +238,20 @@ Rule: **light changes = uniform changes, never structural changes.**
   the local player (mesh is visible in the scene graph). Not checked in a real window yet.
 - Next in step 5: N light slots measurement (needs real GPU), trees as `.glb`, strokes in textures (user decision §8).
 
+**Step 5 status (round 2, 2026-11-24): trees as `.glb`:**
+- `tools/ptree-export.js` writes the `paintKit()` trees (4 tall, 2 far, 2 bushes) to `assets/mapkit/ptree.glb` + Map Builder kit
+  `ptree/*`. `tools/ptree-place.mjs` swapped the 319 gorge pines of fcs-file for them (same spots).
+- Game: `ptreeScene` (js/77, from `buildFileMap`) turns pieces with material `paint_tree` into one `InstancedMesh` per tree shape
+  with the shared wind material (`PTW_BODY` now reads `modelMatrix*instanceMatrix`). Instanced variant preloaded (`preloadReg('paint')`).
+- **Bug fixed:** the tree wind uniforms were named `uPtG` / `uPtGB`, the same name as the step-2 cel uniform `uPtG` in the shared
+  lighting chunk → the tree program failed to link and every painterly tree (forest map too) drew nothing since step 2. Renamed
+  `uPtWG` / `uPtWB`. Rule: shared-chunk uniforms (`uPtG`, `PTG`) are reserved names.
+- 6v6 on fcs-file (`node tools/bench-6v6-ablate.js fcs fcsNoBlob fcsNoKuw ...`, headless NVIDIA, 1080p, high): GPU 12.9 ms
+  (scene RenderPass 9.6, FX 1.5, Kuwahara 0.75), **CPU 18.9 ms median / 31 p95** → the 6v6 drop is CPU-bound, not the paint look.
+  Blob fire off: −0.9 ms GPU; Kuwahara off: −1.5 ms. VFX cel (`PCEL`) is a uniform branch inside the same particle shaders
+  (no extra pass). Some ablation runs (`tdm` + `mapPick`) loaded another map (no PaintPass, ~1 M tris) and were dropped — the
+  bench needs a fixed map for tdm before the fxcel / trees-off rows can be trusted.
+
 ## 7. Work order
 
 | Step | Work | Done when |

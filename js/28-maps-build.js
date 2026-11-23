@@ -560,6 +560,7 @@ function buildFileMap(id){
     fileStyleScene(sc);   // style presets (js/28-fcs-castle.js) — MAP-STANDARD round 4   // ผิววัสดุ (js/76): แมพนิ่ง = ฉายตามพิกัดโลก
     backdropHide(id,sc);   // ของไกลเดิมที่ฉากหลัง (js/67) มาแทน
     W.remove(fb);setTimeout(()=>disposeTree(fb),5000);W.add(sc);W.userData.grPend=0;   // ทิ้งพื้นสำรองทีหลัง (กำลังอุ่นเชดเดอร์อยู่ได้)
+    if(typeof ptreeScene==='function')ptreeScene(sc);   // Map Builder wind trees → InstancedMesh + wind material (js/77)
     if(typeof paintScene==='function')paintScene(id,sc);   // ลุคภาพวาด: ต้นไม้ใหม่ + ลายพู่กัน (js/77)
     brkSetup(sc,skip);   // ของบังที่พังได้: แยกออกจาก batch (js/23)
     batchStatic(sc,skip);
