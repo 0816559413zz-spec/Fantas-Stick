@@ -39,6 +39,7 @@ recipe difference of each new program.
 | numbers baked into shader source (`${x}` per instance) | uniforms |
 | `material.dispose()` on something other instances may reuse (three deletes the program with the last user) | keep it, or return to a pool |
 | swap `mesh.material` to an unregistered material after the mesh is in the scene | register the variant; swap only between registered ones |
+| `ShaderMaterial.dispose()` to free memory (three forgets the source id → the next one compiles again) | nothing: it is a no-op now (js/27); programs are pinned |
 | three `clippingPlanes` | discard against a uniform plane in the shader (`deathClipMat`, js/48) |
 | build meshes from code on every cast | build once, pool, reuse |
 
@@ -197,6 +198,21 @@ Rule: **light changes = uniform changes, never structural changes.**
   - Nature summon tree `model-em` variants (studio/nature-summon.js), Frost `MeshPhysicalMaterial` shards,
     Darkness `Flow orb tails` (uv/alphaMap variant), `sc_silver` scythe blade fades / `dclip` on the Darkness body,
     Darkness target mark, misc. body overlays (`op0.06` fade, `#121019`).
+
+**Step 4 status (round 2, 2026-11-23):**
+- **Root cause of "new source every cast":** three's shader cache gives each ShaderMaterial source an id and drops it when
+  the last material with that source is disposed; the next cast gets a new id = new program key = compile, although the
+  same program is still pinned. Fix: `THREE.ShaderMaterial.prototype.dispose` is a no-op (js/27, right after the renderer).
+  Rule added to §2: disposing a ShaderMaterial is not a way to free GPU memory here.
+- More preload builders: Light (Sovereign arrival, impact/blast/inner domes, blast floor/threads, scorch trail), Darkness
+  (Nightfall Flow arm/flames/orb tails, scythe + its see-through fade copy, target mark), Nature (tree/wall FX with their
+  hit-glow / scorch patches, lotus + auras, turrets, seed ball). Wall scorch patch now applies from the first frame.
+- `preloadCharMat`: see-through copies of the On-fire/Blaze/Nature outline shells (they fade by toggling `transparent`),
+  Darkness chase echo ink.
+- Gate (runs vary a lot on the headless machine): siege 36/32, tdm 22/13 (round 1: 40/31, 28/23; start 63/70, 45/76).
+  Left: Nature tree `model-em`/bark variants that the FX file gets at its first tick (`fxModelEmission`, `natBase` tint),
+  Sovereign crystal core ("new shape" = new geometry attributes), Flow orb tails / scythe blade inside death dissolve,
+  Water outline see-through, Points `uv>false`, unnamed code ShaderMaterials, auto-instanced copies (`instz`).
 
 ## 7. Work order
 

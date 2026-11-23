@@ -21,6 +21,12 @@ const PTG={x:0,y:0,z:0,w:0};
   for(const k of ['standard','physical'])THREE.ShaderLib[k].uniforms.uPtG={value:PTG};}
 // antialias ปิดไว้: ภาพผ่าน EffectComposer (render target) อยู่แล้ว MSAA ของ canvas จึงไม่ช่วยอะไร แค่กินแรง
 const gl=new THREE.WebGLRenderer({canvas:document.getElementById('gl'),antialias:false,powerPreference:'high-performance'});
+// ShaderMaterial.dispose() = no-op (PRELOAD-STANDARD step 4, 2026-11-23). three gives each ShaderMaterial source an id in its shader
+//   cache and drops the id when the last material with that source is disposed; the next effect with the same source gets a NEW id
+//   = new program key = a fresh compile mid-fight, although the identical program is still pinned (pinPrograms js/37). Every code
+//   VFX disposes its materials when it ends, so every cast after the first recompiled. Keeping the ids costs a few strings; the
+//   programs are pinned anyway. Textures in uniforms are still disposed by disposeMaterial (js/29).
+THREE.ShaderMaterial.prototype.dispose=function(){};
 // ตรวจ error ของ shader ทุกตัวที่ compile = บังคับ CPU รอการ์ดจอ compile เสร็จ (getProgramInfoLog ~3% ของเฟรมตอนสู้กัน) → ปิด ยกเว้น ?debug
 gl.debug.checkShaderErrors=/[?&]debug\b/.test(location.search);
 gl.setPixelRatio(Math.min(1,window.devicePixelRatio||1));

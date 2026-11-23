@@ -342,20 +342,20 @@ onfOutlineMat:4 onFireFX:6 statusFX:17 fx:44
 §251 overlay: เลือกบัฟ / สรุปผล
 choosePick:252 syncOverlays:257 showOver:278
 
-## js/27-world.js (434) — 
+## js/27-world.js (440) — 
 S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 PTG:15 gl:23
-§31 เงานุ่มแบบ PCSS (contact-hardening): ใกล้จุดสัมผัสคม ไกลจากวัตถุที่บั…
-PCSS:34 scene:61 cam:63 composer:64
-§65 ท่อภาพ (post-processing): ฉาก → ชั้นเอฟเฟกต์นุ่ม (FXPass) → แสงฟุ้ง →…
-rpass:68 fxScene:70 SOFTU:72 SOFT_GLSL:73 FXMATS:75 fxMat:76 softify:78 HAZE_U:83 AOU:87 GFX:93 AO_ON:94 AO_HEAD:95 AO_CALC:99 AO_COPY:113
-§134 TAA (ลบขอบหยักแบบสะสมหลายเฟรม) — กราฟิกสูงเท่านั้น • ปิดด้วย ?notaa
-TAA:137 TAA_FRAG:138 _taaH:153 taaWanted:154 taaBegin:155 taaEnd:163 taaFinish:164 taaResolve:166 AO_RT:176 fxPass:198 bloom:199 GRADEU:206 gradePass:227 aaPass:245
-§247 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
-QUAL:248 QUAL_NAME:249 qualPR:250 applyQuality:256 qualTick:277
-§293 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
-qualCS:297 CULL:298 cullTick:299 texCanvas:310 glowTex:311 stoneTex:312 runeTex:318 glowMats:326 glowMat:327 STONEM:329 stoneMat:330 shadowAll:331 SKY:334 hemi:355 moonL:357 LDIR:361 setSky:362 SKYB:375 skyFollow:376
-§377 เงาตามผู้เล่น
-SHD:381 _shF:382 _shR:382 _shU:382 _shC:382 _shY:382 SHD_DM:386 shadowDepthSplit:387 shadowFollow:392 shadowSoft:412 LPOOL:414 MLS_N:420 MLS:420 mlsPoint:422 _mlsP:424 mlsInScene:425 mlsTick:426
+§37 เงานุ่มแบบ PCSS (contact-hardening): ใกล้จุดสัมผัสคม ไกลจากวัตถุที่บั…
+PCSS:40 scene:67 cam:69 composer:70
+§71 ท่อภาพ (post-processing): ฉาก → ชั้นเอฟเฟกต์นุ่ม (FXPass) → แสงฟุ้ง →…
+rpass:74 fxScene:76 SOFTU:78 SOFT_GLSL:79 FXMATS:81 fxMat:82 softify:84 HAZE_U:89 AOU:93 GFX:99 AO_ON:100 AO_HEAD:101 AO_CALC:105 AO_COPY:119
+§140 TAA (ลบขอบหยักแบบสะสมหลายเฟรม) — กราฟิกสูงเท่านั้น • ปิดด้วย ?notaa
+TAA:143 TAA_FRAG:144 _taaH:159 taaWanted:160 taaBegin:161 taaEnd:169 taaFinish:170 taaResolve:172 AO_RT:182 fxPass:204 bloom:205 GRADEU:212 gradePass:233 aaPass:251
+§253 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
+QUAL:254 QUAL_NAME:255 qualPR:256 applyQuality:262 qualTick:283
+§299 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
+qualCS:303 CULL:304 cullTick:305 texCanvas:316 glowTex:317 stoneTex:318 runeTex:324 glowMats:332 glowMat:333 STONEM:335 stoneMat:336 shadowAll:337 SKY:340 hemi:361 moonL:363 LDIR:367 setSky:368 SKYB:381 skyFollow:382
+§383 เงาตามผู้เล่น
+SHD:387 _shF:388 _shR:388 _shU:388 _shC:388 _shY:388 SHD_DM:392 shadowDepthSplit:393 shadowFollow:398 shadowSoft:418 LPOOL:420 MLS_N:426 MLS:426 mlsPoint:428 _mlsP:430 mlsInScene:431 mlsTick:432
 
 ## js/28-city-build.js (386) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
@@ -644,18 +644,18 @@ GR_NOISE:162 GR_LIVE:167 grLive:186 GR_GLSL_V:196 GR_BEGIN:201 grassMat:253 gras
 §398 สกิลลม → หญ้า (ภาพล้วน เรียกจาก windEfx js/68)
 WIND_GRASS:400 airWind:414
 
-## js/51-warmup.js (388) — อุ่นเครื่องช่วงนับถอยหลัง (ผู้ใช้ 2026-10-21: "ช่วงนับถอยหลังให้โหลดสิ่งที่ต้องใช้ — กดสก…
-WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_SLICE:13 WARM_X:14 WARM_Y:14 warmKeep:16 warmStaticModels:22 glReady:31 warmCompile:32 warmDraw:35 WARM_SKIP:45 warmAssets:48 warmFx:58 warmFxEnd:69 warmGather:71 warmPaths:73 warmFrame:75 warmStep:77 preloadCharMat:143 warmCharVariants:145 warmQueue:161 WARM_LOBBY:167 warmLobbyTick:168 warmTick:175
-§186 Entry loader (PRELOAD-STANDARD step 3, 2026-11-23)
-PRE:192 preloadReg:193 preProg:194 preFin:195 preStart:197
-§210 Event rehearsal (PRELOAD-STANDARD step 4, 2026-11-23)
-WARM_REC_SKIP:216 warmRec:217 warmRecDump:219 WARM_EVX:220 WARM_EVY:220 warmEvShift:221 warmRehearse:226 preTick:233
-§243 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
-warmOutline:253
-§270 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
-GWARM:275 gameWarmTick:276 LMAP:309 lobbyMapTick:310 gameWarmFree:318
-§324 Shader never seen before mid-match: compile in the background, hide t…
-SHR:332 shrLights:336 IMZ:341 imzPre:348 imzPost:350 shrRoot:351 shrCollect:352 shrPending:358 shReadyPre:362 shReadyPost:383
+## js/51-warmup.js (392) — 
+WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_SLICE:13 WARM_X:14 WARM_Y:14 warmKeep:16 warmStaticModels:22 glReady:31 warmCompile:32 warmDraw:35 WARM_SKIP:45 warmAssets:48 warmFx:58 warmFxEnd:69 warmGather:71 warmPaths:73 warmFrame:75 warmStep:77 preloadCharMat:143 warmTrCopy:146 warmCharVariants:149 warmQueue:165 WARM_LOBBY:171 warmLobbyTick:172 warmTick:179
+§190 Entry loader (PRELOAD-STANDARD step 3, 2026-11-23)
+PRE:196 preloadReg:197 preProg:198 preFin:199 preStart:201
+§214 Event rehearsal (PRELOAD-STANDARD step 4, 2026-11-23)
+WARM_REC_SKIP:220 warmRec:221 warmRecDump:223 WARM_EVX:224 WARM_EVY:224 warmEvShift:225 warmRehearse:230 preTick:237
+§247 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
+warmOutline:257
+§274 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
+GWARM:279 gameWarmTick:280 LMAP:313 lobbyMapTick:314 gameWarmFree:322
+§328 Shader never seen before mid-match: compile in the background, hide t…
+SHR:336 shrLights:340 IMZ:345 imzPre:352 imzPost:354 shrRoot:355 shrCollect:356 shrPending:362 shReadyPre:366 shReadyPost:387
 
 ## js/52-social.js (172) — 
 §6 แชท: Enter = พิมพ์ / Enter อีกที = ส่ง / Esc = ปิด • ข้อความขึ้นมุมซ้…
@@ -811,10 +811,10 @@ coastSrcProc:110 BD_SURF:116 bdB64:117 bdRle:118 bdHsh:119 bdGridSrc:120 coastGr
 §295 near-edge detail bands (user 2026-11-23: backdrop next to the play ar…
 bdNearKit:299
 
-## js/68-darkness-view.js (1144) — 
+## js/68-darkness-view.js (1152) — 
 nightWaltzStrip:2 nightWaltzBorder:80 stDarkVeilGround:118 darkFxMesh:195 drawDarknessHud:201 drawDarkHudBar:220 darknessMarkView:227 darkWaveViews:237 darkActiveViews:237 darkViewRoot:238 darkViewTemp:245 darknessClear:257 darkDeathRoots:265 darkDeathClear:268 darkWorldAt:282 darkMarkWind:285 darkMarkLaunch:313 darkMarkContact:325 darkViewNow:338 darkFlowHud:338 darkIdleWeaponPose:339 darkBAGroundImpact:343 darkSettleWeapon:358 darkBlendWeapon:369 darkShowWeaponReturn:392 darkTrailHistory:399 darkDashView:438 darknessCharacter:484 darknessEfx:727 stDarkShieldInk:1024 stDarkVeilBlade:1067 stWardDrainPool:1104
 
-## js/68-light-view.js (1955) — 
+## js/68-light-view.js (1960) — 
 LGV:7 LGSH:9 LGSH_L:11 _lgM4:14 _lgQ:14 _lgSV:14 _lgS:14 _lgC:14 _lgC2:14 lgGlowTex:15 lgNeon:17 lgEmpFx:25 lgWallBurn:44 lgShardSpawn:60 lgShardTick:64 lgBaCore:65 lgCrDim:108 lgEmpBeam:112 lgNeonCrystal:126 lgSanctumFloorTex:136 lgSanctumMoteTex:147 lgHoneyTex:162 lgShield:166 _lgShieldEuler:202 lightShieldEv:203 LGPOSE:206 _lgLeanBase:207 _lgLeanUndo:207 _lgGlass:208 _lgCore:208 _lgGeo:208 _lgEdge:208 _lgEdgeM:208 lgCrystalMesh:210 lgState:218 _lgV:219 _lgW:219 lgWorld:220 LG_ULT_ASSET:223 LG_CRYSTAL_ASSET:223 LG_ULT_INTRO:224 LG_ULT_ARRIVAL_FX:224 LG_ULT_TIME:225 lgUltMaterials:226 lgSovereignFinishes:227 lgSovereignMaterials:228 lgSovereignFinish:289 lgSovereignCrystal:310 lgSkinSovereign:319 lgPoseSovereign:372 lgSovereignHeart:448 LG_SASH_X:474 LG_SASH_Z:474 lgSovereignRibbon:475 lgSovereignFlare:534 LG_PALM_TRAVEL:547 LG_PALM_SCORCH_LIFE:548 LG_PALM_SCORCH_SLOTS:548 lgPalmGateOffset:549 lgSovereignPalmWaves:551 lgPosePalmWaves:560 lgPoseBeamWaves:566 lgSovereignPalmGate:578 lgSovereignScorchTrail:588 lgPalmScorch:616 lgSovereignCrossSparks:652 lgSovereignGather:675 lgSovereignWingCurrent:708 lgSovereignChargeSeal:737 lgSovereignChestRecoil:754 lgSovereignSeal:764 lgSovereignArmSigils:780 lgBuildSovereign:811 lgReturnMark:888 lgUltVisual:902 lgWardVisual:1139 _lgBeamM:1155 lgBeamMat:1156 lgSovereignChestBeam:1159 lgSovereignPalmBeam:1196 _lgLinkM:1266 lgLinkMat:1267 lgUnitTube:1270 lgTube:1271 lgAim:1279 lightFX:1280 lgBaseObjects:1523 lgClearBase:1524 lgClear:1525 lightDropView:1532 lgAllyEmpEnd:1538
 §1542 เหตุการณ์
 lgBlip:1544 lgArcFx:1548 lgFlyFx:1551 lgSovereignArrival:1552 lightFxTick:1591 LG_BLAST_EXPAND:1595 LG_BLAST_HOLD:1595 lgImpactDome:1596 lgBlastFloor:1636 lgBlastThreads:1667 lgFitGround:1695 lgGroundWarning:1704 lightEfx:1717 _lgHq:1874 _lgHy:1874 lgProcHead:1876 lightHeadPose:1891 LGHUD:1899 lgBondScreen:1900 drawCrystalBondHud:1901 drawLightHud:1924
@@ -827,7 +827,7 @@ _natFx:3 natFxClear:4 natFxMake:5 T:6 S:6 O:6 seed:7 ease:8 outQ:8 inQ:8 phase:8
 §91 อนุภาค
 Pool:92 leafGeo:100 LEAF:101 SPK:102 DIRT:103 PUFF:104 CHIP:105 POOLS:106 leafCols:107 leaves:108 sparks:109 dirt:110 puff:111 chips:112 TrailRibbon:114 WHIP_N:125 WHIP_L:125 WHIP_LAG:125 Whip:126 CLIPS:189 tick:190 clip:191 drop:192 natFx:195
 
-## js/68-nature-view.js (890) — 
+## js/68-nature-view.js (902) — 
 NAT_VIEW:2 NAT_MARKS:2 NAT_MOTION:2 natV:3 natWorld:4 natPhase:5 natSmooth:6 natEase:7 natOut:8 natStd:9 natAdd:10 natMesh:11 natRing:12 natLeaf:16 natPlantM:19 natGlow:26 natArt:29 natureProjectileModel:31 natSet:37 natAnimate:38 natTube:39 natTrail:50 natSeed:68 natLotus:77 natBall:93 natPlantView:103 natStartStudy:113 natWearWall:131 natTreeGlow:154 natModelTick:174 natMarker:257 natMarks:268 natThorn:287 NAT_SHIELD_K:292 natShieldMake:293 natureCharacter:366 natOutlineMat:395 natOutline:399 natLinks:411 syncNature:426 natureClear:445 natDome:454 natMuzzle:476 natSlam:486 natHook:503 natCoil:560 _nfQ:581 _nfT:581 _nfX:581 natWandTip:583 HOOK_HIT:586 natPullQ:586 natPullE:586 _nwQ:587 natForearmR:589 natEmpPose:593 natBigSlam:601 natRootWarn:608 natRootUp:612 natThornLine:633 natRest:649 natHookFoePose:654 natHookPose:670 natHookArm:686 natShock:688 natSprout:689 natHealRims:690 natWhipHit:692 natBallRange:693 natSummon:695 NAT_TREE_GREEN:703 NAT_TREE_RED:703 _natGlowRed:704 natFoe:705 natTreeTint:706 natTreeAura:707 natAuraDrop:717 NAT_HOLO:719 natHoloMake:720 natHolo:731 natHoloClear:734 natDirOf:735 natMoment:736 natureEvent:765 NTHUD:833 drawNatureHud:834 NPH:855 NPH_IC:856 natPortraitObj:862 natPortrait:863 natPlantHud:875
 
 ## js/68-storm-bow.js (285) — 
@@ -955,4 +955,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(117 files, 35545 lines)
+(117 files, 35580 lines)

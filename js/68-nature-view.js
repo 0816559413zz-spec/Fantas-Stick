@@ -129,7 +129,7 @@ function natStartStudy(name,s,stay=false){
   return fx;
 }
 function natWearWall(fx,burn){
-  if(!burn?.some(v=>v>0)||!fx)return;
+  if(!burn||!fx)return;   // patch from the first frame (was: only once scorched = a new program mid-fight)
   for(const layer of fx.L){
     const m=layer.inner?.material;
     if(!m||!layer.d.model?.startsWith('nature_wood_wall'))continue;
@@ -888,3 +888,15 @@ function natPlantHud(me,v){
     const head=NPH.img[o.k]?`<img src="${NPH.img[o.k]}">`:`<svg viewBox="0 0 24 24">${NPH_IC[o.k]}</svg>`;
     return `<div class="r${low?' low':''}">${t!=null?`<span class="tm">${t}</span>`:''}<div class="hd">${head}</div><b>${hp}</b><i style="--p:${Math.round(hp/o.maxHp*100)}%"></i></div>`;}).join('');
 }
+
+// Preload (PRELOAD-STANDARD step 4): tree / wall FX with the runtime shader patches they get in a fight (tree hit glow,
+// wall scorch) — the FX file warm-up builds them without. One instance each, detached like warmFxEnd.
+preloadReg('nature',()=>{
+  for(const [name,k] of [['nature/tree_summon','tree'],['nature/wood_wall_growth_study','wall'],['nature/wood_wall_break_study','wall'],['nature/tree_break_study','tree']]){
+    try{const f=natStartStudy(name,{x:WARM_X,y:WARM_Y,h:0,a:0,age:0});if(!f)continue;
+      if(k==='tree')natTreeGlow(f,0);else natWearWall(f,[0,0,0]);
+      warmGather();for(const S of f.L){if(S.d.t==='trail'&&S.obj)trailStop(S.obj);S.obj=null;S.mats=null;}fxKill(f);}catch(e){console.warn('warm nature',name,e);}}
+  // summoned plants (lotus with bubble + auras, turret ground/wall, seed ball): built by the plant sync, not by events
+  const out=[];for(const k of ['lotus','turret','turretW','ball'])try{const v=natPlantView({k:k==='turretW'?'turret':k,wall:k==='turretW'});if(v&&v.g)out.push(v.g);}catch(e){console.warn('warm nature plant',k,e);}
+  return out;
+});

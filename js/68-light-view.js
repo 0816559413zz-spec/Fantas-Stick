@@ -1952,4 +1952,9 @@ function drawLightHud(x,y,me){
 // first ult — 15 programs mid-fight in the gate. Build one of each at entry (kept in WARM.hold).
 preloadReg('light',()=>Promise.all([loadModel(LG_ULT_ASSET),loadModel(LG_CRYSTAL_ASSET)]).then(()=>{
   const out=[],V=lgBuildSovereign();if(V&&V.g){V.g.visible=true;out.push(V.g);}
-  out.push(lgSovereignChestBeam(),lgSovereignPalmBeam());return out;}));
+  out.push(lgSovereignChestBeam(),lgSovereignPalmBeam(),lgSovereignScorchTrail());
+  // ult strike / blast pieces (add themselves to the scene at the warm spot; warmGather keeps them)
+  try{lgSovereignArrival(lgWorld(WARM_X,WARM_Y,1));}catch(e){}
+  for(const k of ['impact','blast','inner'])try{lgImpactDome(WARM_X,WARM_Y,0,1.2,1,k);}catch(e){}
+  try{lgBlastFloor(WARM_X,WARM_Y,0,1.2,1);lgBlastThreads(WARM_X,WARM_Y,0,1.2,1);}catch(e){}
+  return out;}));

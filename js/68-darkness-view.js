@@ -1142,3 +1142,11 @@ function stWardDrainPool(parent,radius,fade){
     material.uniforms.age.value=age;
   };
 }
+// Preload (PRELOAD-STANDARD step 4): visuals that live on the Darkness caster's gear, so the event rehearsal cannot build them:
+// Nightfall Flow arm/flames/orb tails, and the scythe with its see-through fade copies (chase / death fade).
+preloadReg('darkness',()=>loadModel('dark_scythe').then(()=>{
+  const root=new THREE.Group();scene.add(root);
+  try{stDarkFlowArm(root);stDarkFlowFlames(root);stDarkFlowOrbs(root);}catch(e){console.warn('warm dark flow',e);}
+  try{stDarkTargetMark(root);}catch(e){console.warn('warm dark mark',e);}   // mark over marked targets (vertex-alpha colours)
+  try{const sc=stCreateScythePreview(root,{wrap:'C',manual:true,scale:1});const sc2=stCreateScythePreview(root,{wrap:'C',manual:true,scale:1});stChaseScytheOpacity(sc2)(.5);}catch(e){console.warn('warm dark scythe',e);}
+  return root;}));

@@ -142,6 +142,10 @@ WARM.cv=new Set();WARM.cvx=[];
 // Materials a system puts on (or as a shell over) character body meshes: preloadCharMat(name, material | src=>material, mesh=>bool)
 function preloadCharMat(n,mk,ok){WARM.cvx.push([n,typeof mk==='function'?mk:()=>mk,ok||(()=>true)]);}
 preloadCharMat('eol',()=>_eOlMat);preloadCharMat('wol',()=>_wtOlMat);preloadCharMat('onf',()=>onfOutlineMat);preloadCharMat('blz',()=>blzOutlineMat);preloadCharMat('nol',()=>natOutlineMat);
+// outline shells fade out by switching transparent on the shared material (= another program): warm the see-through copy too
+function warmTrCopy(src){const c=src.clone();c.transparent=true;c.opacity=.5;c.onBeforeCompile=src.onBeforeCompile;const k=src.customProgramCacheKey();c.customProgramCacheKey=()=>k;return c;}
+for(const [n,f] of [['onfT',()=>onfOutlineMat],['blzT',()=>blzOutlineMat],['nolT',()=>natOutlineMat]]){let c=null;preloadCharMat(n,()=>c||(c=warmTrCopy(f())));}
+{let ink=null;preloadCharMat('ink',()=>ink||(ink=new THREE.MeshBasicMaterial({color:0x121019,toneMapped:false,transparent:true,depthWrite:false})));}   // Darkness chase echo body (studio/darkness-chase.js)
 function warmCharVariants(){
   const g=new THREE.Group(),one={value:1},plane=new THREE.Plane(new THREE.Vector3(0,1,0),0);
   const flash=new THREE.MeshBasicMaterial({color:hdr('#ffffff',1.15)});
