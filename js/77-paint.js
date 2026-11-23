@@ -250,7 +250,9 @@ function paintPatch(m,strokes){
   m.needsUpdate=true;return m;}
 function paintApply(m){return paintPatch(m,true);}
 // กวาดทั้งฉากเป็นระยะ (เฉพาะตอนอยู่แมพภาพวาด): วัสดุใหม่ที่ยังไม่มี cel (ตัวละคร, prop, ชิ้นที่เกิดทีหลัง) → ใส่
-function paintSweep(){scene.traverse(o=>{if(!o.isMesh)return;const M=o.material;if(Array.isArray(M)){for(const m of M)if(m&&!m.userData.pt)paintPatch(m,false);}else if(M&&!M.userData.pt)paintPatch(M,false);});}
+function paintSweep(root){(root||scene).traverse(o=>{if(!o.isMesh)return;const M=o.material;if(Array.isArray(M)){for(const m of M)if(m&&!m.userData.pt)paintPatch(m,false);}else if(M&&!M.userData.pt)paintPatch(M,false);});}
+// before any warm-up/first compile: patch now so the cel program is the one compiled ahead (patching after = recompile mid-match = freeze)
+function paintPre(...roots){if(!PAINT||!PAINT.cur)return;for(const r of roots)if(r)paintSweep(r);}
 // ---------- ฉากของแมพ (เรียกจาก buildFileMap ก่อน brkSetup/batchStatic) ----------
 function paintScene(id,sc){
   if(!paintOn(id))return;const K=paintKit();let n=0;
