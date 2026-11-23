@@ -108,6 +108,11 @@ function warmStep(step){
     for(const q of BRKV.grp||[])for(const p of (q&&q.parts)||[]){const k=p.geo.uuid+'|'+p.mat.uuid;if(seen.has(k)||seen.size>=48)continue;seen.add(k);
       for(const lv of [1,2]){const o=new THREE.Mesh(p.geo,brkCrackMat(p.mat,lv));o.castShadow=!!(p.e&&p.e.cs);o.receiveShadow=true;o.position.set(tx(WARM_X),-1000,tz(WARM_Y));o.frustumCulled=false;B.add(o);}}
     WARM.log.push('brk '+seen.size);return;}
+  if(step==='evload'){WARM.busy=true;   // fetch recorded samples, then one step per 12 events
+    fetch('assets/warm-events.json',{cache:'no-cache'}).then(r=>r.ok?r.json():[]).catch(()=>[]).then(L=>{PRE.ev=Array.isArray(L)?L:[];
+      const k=WARM.q.indexOf('compile');const st=[];for(let i=0;i<PRE.ev.length;i+=12)st.push('evr:'+i);
+      WARM.q.splice(k<0?WARM.q.length:k,0,...st);PRE.n+=st.length;WARM.busy=false;});return;}
+  if(step.startsWith('evr:')){const i=+step.slice(4),t0=performance.now(),n=warmRehearse((PRE.ev||[]).slice(i,i+12));WARM.log.push(step+' '+n+' '+(performance.now()-t0).toFixed(0)+'ms');return;}
   WARM.done.add(step);const t0=performance.now();
   if(step==='common'){const T=trailLayer();if(!T.mesh.parent)WARM.holdF.add(T.mesh);
     // เศษหินใช้ได้ทุกสาย (ไฟ/ของพังด้วย) ทั้ง mesh เดี่ยวและ instanced ไม่ใช่เฉพาะ Earth
@@ -123,22 +128,29 @@ function warmStep(step){
   else if(step.startsWith('fx:')){const fxI=warmFx([WARM_FXDIR[step.slice(3)]]);warmGather();warmFxEnd(fxI);}
   else if(step==='chars'){const g=warmCharVariants();if(g){g.position.set(tx(WARM_X),0,tz(WARM_Y));warmKeep(g);}}
   else if(step.startsWith('reg:')){const [,id,i]=step.split(':'),f=WARM.reg[id][+i];
-    for(const o of [].concat(f()||[]))if(o&&o.isObject3D){if(!o.parent)scene.add(o);o.position.set(tx(WARM_X),0,tz(WARM_Y));}
-    warmGather();}
+    const place=r=>{for(const o of [].concat(r||[]))if(o&&o.isObject3D){if(!o.parent)scene.add(o);o.position.set(tx(WARM_X),0,tz(WARM_Y));}warmGather();};
+    const r=f();if(r&&typeof r.then==='function'){WARM.busy=true;   // async builder (needs a model file first)
+      r.then(place,e=>console.warn('warm reg',step,e)).finally(()=>{WARM.busy=false;});return;}
+    place(r);}
   WARM.log.push(step+' '+(performance.now()-t0).toFixed(0)+'ms');}
 // เรียกทุกเฟรมจาก render loop — ตอนเข้านับถอยหลังสร้างคิวงาน แล้วทำเฟรมละ 1 ขั้น
 // Character material variants that only appear mid-fight (2026-11-23, user: freezes in siege fights, F3 shader+2..6 at 0.4–1 s each):
 // hit flash (basic on skinned), ghost body (transparent clone), slash-split death pieces (clip plane + single-pass transparent),
 // death dissolve of wand/attachments, Darkness body tint (opaque + soft fade, stDarkTintMat). Built once per new variant on copies
 // of the loaded character meshes (lobby warm-up chars + players) so the countdown compile covers them. Kept in WARM.hold.
-WARM.cv=new Set();
+WARM.cv=new Set();WARM.cvx=[];
+// Materials a system puts on (or as a shell over) character body meshes: preloadCharMat(name, material | src=>material, mesh=>bool)
+function preloadCharMat(n,mk,ok){WARM.cvx.push([n,typeof mk==='function'?mk:()=>mk,ok||(()=>true)]);}
+preloadCharMat('eol',()=>_eOlMat);preloadCharMat('wol',()=>_wtOlMat);preloadCharMat('onf',()=>onfOutlineMat);preloadCharMat('blz',()=>blzOutlineMat);preloadCharMat('nol',()=>natOutlineMat);
 function warmCharVariants(){
   const g=new THREE.Group(),one={value:1},plane=new THREE.Plane(new THREE.Vector3(0,1,0),0);
   const flash=new THREE.MeshBasicMaterial({color:hdr('#ffffff',1.15)});
   const one4={value:new THREE.Vector4(0,1,0,1e9)};
   const fade=src=>{const m=src.clone();m.transparent=true;m.depthWrite=false;m.forceSinglePass=true;m.onBeforeCompile=src.onBeforeCompile;const k=src.customProgramCacheKey();m.customProgramCacheKey=()=>k;return m;};
   const V=[['flash',()=>flash,m=>m.isSkinnedMesh||m.isMesh],['ghost',ghostOf,()=>true],['clip',src=>deathClipMat(src,one4),()=>true],['fade',fade,m=>!m.isSkinnedMesh],
-    ['dark',src=>stDarkTintMat(src,false,one,one),()=>true],['darkS',src=>stDarkTintMat(src,true,one,one),()=>true]];
+    ['dark',src=>stDarkTintMat(src,false,one,one),()=>true],['darkS',src=>stDarkTintMat(src,true,one,one),()=>true],
+    ['darkF',()=>stDarkTintMat(flash,false,one,one),()=>true],   // Darkness tint over a hit flash
+    ...WARM.cvx];   // registered body overlays (preloadCharMat: class outline shells etc.)
   const roots=[...PM3.values(),...GWARM.chars.values()];
   for(const o of roots){const r=o&&o.g;if(!r||!o.fileModel)continue;   // whole actor: body + wand + darkness gear (scythe) etc.
     r.traverse(m=>{if(!m.isMesh||m.isInstancedMesh||!m.material||Array.isArray(m.material)||m.material.isShaderMaterial)return;const src=m.material;
@@ -163,9 +175,11 @@ function warmLobbyTick(){
 function warmTick(v){
   if(PRE.st===1&&v.ph==='count')preFin();   // match starting while still preloading: per-match queue takes over (done steps skipped)
   if(PRE.st===1)return;
+  const ph0=WARM.ph;WARM.ph=v.ph;
   if(v.ph==='count'){const ps=warmPaths(v).sort(),key=builtKey+'|'+ps.join(',');
     if(key!==WARM.key)warmQueue(ps,key);
-    if(!WARM.late&&v.cd<=1){WARM.late=true;if(!PRE.on)WARM.q.push('compile');}}
+    if(ph0!=='count')WARM.late=false;
+    if(!WARM.late&&v.cd<=(PRE.on?2.5:1)){WARM.late=true;if(PRE.on)WARM.q.push('chars');WARM.q.push('compile');}}   // real player actors exist only from the countdown: their variants (dedup by recipe) + one sliced compile
   if(!WARM.q.length||WARM.busy)return;
   const step=WARM.q.shift();try{warmStep(step);}catch(e){console.warn('warmup',step,e);WARM.busy=false;}
 }
@@ -191,8 +205,29 @@ function preStart(cb){if(cb)PRE.cb.push(cb);
   const ps=[...new Set([...Object.keys(WARM_FXDIR),...Object.keys(WARM.reg)])].sort();
   WARM.key='pre|'+ps.join(',');WARM.late=true;WARM.q=['common'];
   for(const p of ps){if(WARM_FXDIR[p])WARM.q.push('fx:'+p);(WARM.reg[p]||[]).forEach((f,i)=>WARM.q.push('reg:'+p+':'+i));}
-  WARM.q=WARM.q.filter(s=>!WARM.done.has(s));WARM.q.push('chars','compile');PRE.n=WARM.q.length+Object.keys(WARM_FXDIR).length+2;
+  WARM.q=WARM.q.filter(s=>!WARM.done.has(s));WARM.q.push('chars');if(!/[?&]norehearse/.test(location.search))WARM.q.push('evload');WARM.q.push('compile');PRE.n=WARM.q.length+Object.keys(WARM_FXDIR).length+2;
   warmFrame(preTick);}
+// ---------- Event rehearsal (PRELOAD-STANDARD step 4, 2026-11-23) ----------
+// Code-built skill visuals (ShaderMaterials made in view handlers) are covered without registering each one: a bench run with
+// ?warmrec records real event samples per kind (WARM.rec, fx() js/26) → tools/warm-events.js writes assets/warm-events.json.
+// At entry every sample is replayed through fx() far off-map (positions shifted, actor id '__warm', sound/shake muted) and
+// whatever it built is kept in WARM.hold for the compile. Re-run the tool after adding skills. `?norehearse` = skip.
+WARM.rec=/[?&]warmrec\b/.test(location.search)?new Map():null;
+const WARM_REC_SKIP=new Set(['sk','emo','kf','pot','die','sgwall','sgcore','sgch','chat','ping']);
+function warmRec(ev){if(!ev||WARM_REC_SKIP.has(ev.k)||ev.id==='__warm')return;const k=ev.k+'|'+(ev.z||ev.t||'');let L=WARM.rec.get(k);if(!L)WARM.rec.set(k,L=[]);
+  if(L.length>=2)return;try{L.push(JSON.parse(JSON.stringify(ev)));}catch(e){}}
+function warmRecDump(){const out=[];for(const L of WARM.rec.values())out.push(...L);return out;}
+const WARM_EVX=/^(x|x\d|tx|ax|bx|cx|ox|sx|ex|px|wx|fx2)$/,WARM_EVY=/^(y|y\d|ty|ay|by|cy|oy|sy|ey|py|wy|fy2)$/;
+function warmEvShift(ev){const dx=WARM_X-(ev.x||0),dy=WARM_Y-(ev.y||0),o={};
+  for(const k in ev){const v=ev[k];o[k]=typeof v==='number'&&WARM_EVX.test(k)?v+dx:typeof v==='number'&&WARM_EVY.test(k)?v+dy:v;}
+  if(o.id!==undefined)o.id='__warm';return o;}
+// a sample student (PRE.smp) stands in as actor '__warm' so visuals attached to the caster are built too; afterwards its
+// new materials get the warmKeep treatment (dispose = no-op) because gameWarmFree disposes the sample later.
+function warmRehearse(list){globalThis.WARM_MUTE=true;let n=0;const smp=PRE.smp.find(o=>o.fileModel);if(smp)PM3.set('__warm',smp);
+  try{for(const ev of list){try{fx(warmEvShift(ev));n++;}catch(e){(WARM.rerr||(WARM.rerr=[])).push((ev.k+'|'+(ev.z||ev.t||''))+': '+String(e&&e.message).slice(0,100));}}}finally{globalThis.WARM_MUTE=false;if(smp&&PM3.get('__warm')===smp)PM3.delete('__warm');}
+  if(smp)smp.g.traverse(q=>{for(const m of [].concat(q.material||[])){if(!m||m.userData.warm)continue;m.userData.warm=1;m.dispose=()=>{};}});
+  PARTS.length=0;TEXTS.length=0;warmGather();return n;}
+PRE.ev=null;
 // start at page load (the title logo takes ~2.5 s anyway); not in VFX Studio / recorder pages
 if(PRE.on&&!/[?&](studio|rec)/.test(location.search))setTimeout(()=>preStart(),0);
 function preTick(){if(PRE.st!==1)return;
@@ -348,6 +383,6 @@ function shReadyPre(){
 function shReadyPost(){imzPost();if(!SHR.hid.length)return;for(const o of SHR.hid)o.visible=true;SHR.hid.length=0;}
 SHR.ext=!!gl.getContext().getExtension('KHR_parallel_shader_compile');
 if(window.WD){window.WD.SHR=SHR;window.WD.IMZ=IMZ;}
-if(window.WD){window.WD.warm=WARM;window.WD.PRE=PRE;window.WD.glProgs=()=>gl.info.programs.length;window.WD.glList=()=>gl.info.programs.map(p=>{const k=p.cacheKey.split(',');return k[0].slice(0,24)+'|'+p.name+'|'+k.slice(-3).join(',').slice(0,60);});}
+if(window.WD){window.WD.warm=WARM;window.WD.PRE=PRE;window.WD.warmRecDump=warmRecDump;window.WD.warmRehearse=warmRehearse;window.WD.warmEvShift=warmEvShift;window.WD.glProgs=()=>gl.info.programs.length;window.WD.glList=()=>gl.info.programs.map(p=>{const k=p.cacheKey.split(',');return k[0].slice(0,24)+'|'+p.name+'|'+k.slice(-3).join(',').slice(0,60);});}
 if(window.WD)window.WD.gwarm=GWARM;
 if(window.WD)window.WD.WARM=WARM;

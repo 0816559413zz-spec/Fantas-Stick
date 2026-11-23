@@ -163,7 +163,7 @@ function burst(x,y,col,n,sp,life,size,o){
 function smoke(x,y,h,n,col,life,size,sp){burst(x,y,col||'#3a3640',n,sp||60,life||1.4,size||6,{h,vh:[0.3,1.4],g:-0.6,smoke:true,grow:1.6,drag:2});}
 function ring(x,y,col,r,life,h){SHAPES_Q.push({k:'ring',x,y,h:h!==undefined?h:0.15,col,s1:r*S3,life});}
 function floatText(x,y,t,col,size,h){TEXTS.push({x:x+rnd(-8,8),y,h,t:String(t),col,size:size||16,life:0.9,max:0.9});}
-function shake(a){if(!SET.shake)return;shakeA=Math.max(shakeA,a);}
+function shake(a){if(!SET.shake||globalThis.WARM_MUTE)return;shakeA=Math.max(shakeA,a);}
 function weaponContactAge(age,at,resistance=.140,hold=.042){
   const elapsed=age-at;
   if(elapsed<=0)return age;

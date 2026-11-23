@@ -317,6 +317,7 @@ function deathSlashSplit(o,hit){
   });
   return true;
 }
+const DD_ALPHA=['opacity','uOpacity','uAlpha','alpha','uFade','fade','uA'];
 function deathDissolve(sources){
   const root=new THREE.Group(),materials=new Map(),geometries=new Map(),seen=new Set();
   root.name='Player death dissolve';
@@ -351,16 +352,12 @@ function deathDissolve(sources){
           const material=sourceMaterial.clone();
           material.transparent=true;material.depthWrite=false;material.forceSinglePass=true;
           if(material.isShaderMaterial){
+            // same shader text = same program (PRELOAD-STANDARD rule: no shader text built mid-fight). Fade through the
+            //   effect's own alpha uniform when it has one; otherwise it stays as is and is hidden halfway (fadeK).
             for(const [key,uniform] of Object.entries(sourceMaterial.uniforms))if(uniform.value?.isTexture)material.uniforms[key].value=uniform.value;
-            material.uniforms.deathFade=fade;
-            material.fragmentShader=`uniform float deathFade;
-              #define main deathSource
-              ${material.fragmentShader}
-              #undef main
-              void main(){
-                deathSource();
-                gl_FragColor.a*=deathFade;
-              }`;
+            const ak=DD_ALPHA.find(k=>typeof material.uniforms[k]?.value==='number');
+            materials.set(sourceMaterial,{material,opacity:ak?material.uniforms[ak].value:1,ak,fadeK:!ak});
+            return material;
           }else{
             material.onBeforeCompile=sourceMaterial.onBeforeCompile;
             const key=sourceMaterial.customProgramCacheKey();
@@ -381,7 +378,7 @@ function deathDissolve(sources){
   (deathFades??=new Set()).add(root);
   fireTemp(root,[],.62,(_v,k)=>{
     if(k>=1){
-      for(const {material} of materials.values())material.dispose();
+      // materials are not disposed: three deletes a program with its last material, and the next death would compile it again
       for(const geometry of geometries.values())geometry.dispose();
       for(const part of root.children)if(part.isInstancedMesh)part.dispose();
       root.clear();root.removeFromParent();deathFades.delete(root);return;
@@ -389,7 +386,10 @@ function deathDissolve(sources){
     const left=1-k*k*(3-2*k);
     root.position.y=.18*k;
     fade.value=left;
-    for(const {material,opacity} of materials.values())if(!material.isShaderMaterial)material.opacity=opacity*left;
+    for(const {material,opacity,ak,fadeK} of materials.values()){
+      if(!material.isShaderMaterial)material.opacity=opacity*left;
+      else if(ak)material.uniforms[ak].value=opacity*left;
+      else if(fadeK)material.visible=left>.5;}
   });
 }
 function deathVisualSync(o,p,wasVisible){

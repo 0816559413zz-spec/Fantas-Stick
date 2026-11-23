@@ -24,4 +24,4 @@ for(let f=0;f<N;f++){
   if(ms>150)slow.push({f,ms:Math.round(ms)});
   if(f%10===0)await sleep(0);}
 const S=WD.SHW;
-return {gate:S.n===0?'PASS':'FAIL',mode,map:WD.builtMap||G().map,paths:used,armed:S.armed,shaders:S.n,slow,list:S.L.map(e=>`${e.ms}ms ${e.name} | ${e.diff} | ${e.who.join(' ; ')}`),errs:HL.errs.slice(0,5)};
+return {gate:S.n===0?'PASS':'FAIL',mode,map:WD.builtMap||G().map,paths:used,armed:S.armed,shaders:S.n,slow,list:S.L.map(e=>`${e.ms}ms ${e.name} | ${e.diff} | ${e.who.join(' ; ')}`),errs:HL.errs.slice(0,5),files:WD.warm.rec?{'warm-rec.json':JSON.stringify(WD.warmRecDump())}:undefined};

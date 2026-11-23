@@ -59,7 +59,7 @@ function noiz(dst,dur,vol,ft,f0,f1,q,t0,att){
   s.connect(f);f.connect(g);g.connect(dst);s.start(t,Math.random());s.stop(t+dur+0.05);
 }
 function snd(n,o){
-  if(!AC||AC.state!=='running')return;
+  if(!AC||AC.state!=='running'||globalThis.WARM_MUTE)return;   // WARM_MUTE: event rehearsal at entry (js/51)
   o=o||{};
   const now=performance.now();if(sfxLast[n]&&now-sfxLast[n]<40)return;sfxLast[n]=now;
   try{

@@ -1948,3 +1948,8 @@ function drawLightHud(x,y,me){
     const [tx,ty]=P(hi-0.128),r=4.2+0.5*Math.sin(T/260);cx.save();cx.translate(tx,ty);cx.rotate(T/1400);cx.shadowColor=oh?'#ff6a3a':'#ffd36a';cx.shadowBlur=8;cx.fillStyle=c1;
     cx.beginPath();for(let i=0;i<8;i++){const a=i*Math.PI/4,q=i%2?r*0.32:r;cx.lineTo(Math.cos(a)*q,Math.sin(a)*q);}cx.closePath();cx.fill();cx.restore();}
   cx.restore();}
+// Preload (PRELOAD-STANDARD step 4): the Radiant Sovereign form, its chest/palm beams are code ShaderMaterials built at the
+// first ult — 15 programs mid-fight in the gate. Build one of each at entry (kept in WARM.hold).
+preloadReg('light',()=>Promise.all([loadModel(LG_ULT_ASSET),loadModel(LG_CRYSTAL_ASSET)]).then(()=>{
+  const out=[],V=lgBuildSovereign();if(V&&V.g){V.g.visible=true;out.push(V.g);}
+  out.push(lgSovereignChestBeam(),lgSovereignPalmBeam());return out;}));

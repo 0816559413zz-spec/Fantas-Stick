@@ -177,6 +177,27 @@ Rule: **light changes = uniform changes, never structural changes.**
 - Gate after step 3: siege 63 / 70 mid-match programs (same groups as step 2: code ShaderMaterials such as Light
   Sovereign, death dissolve, …), i.e. step 4 work; nothing new from the loader.
 
+**Step 4 status (round 1, 2026-11-23):**
+- Death dissolve (js/48): ShaderMaterials are cloned without rewriting their source (fade through an alpha uniform from
+  `DD_ALPHA` when present, else hidden halfway); materials are no longer disposed (a dispose deleted the program and the
+  next death compiled it again).
+- Character overlays: `preloadCharMat(name, mat | src=>mat, mesh=>bool)` (js/51) adds variants to `warmCharVariants`;
+  registered: Earth/Water/On-fire/Blaze/Nature outline shells, Darkness tint over hit flash. The countdown runs the
+  `chars` step again on the real player actors (+ compile).
+- Light: `preloadReg('light', async builder)` builds the Radiant Sovereign form + chest/palm beams (async builders are
+  allowed: `reg:` steps wait for a returned promise).
+- **Event rehearsal:** `node tools/warm-events.js` runs the gate bench with `?warmrec` and writes real event samples
+  (2 per kind, 225 kinds) to `assets/warm-events.json`; the entry loader replays them through `fx()` far off-map with a
+  sample student as actor `'__warm'` (sound/shake muted, `WARM_MUTE`), keeping what they build. Re-run the tool after
+  adding skills. Errors land in `WD.warm.rerr`. `?norehearse` = skip. SHW entries now show a material signature.
+- Gate: siege 63/70 → 40/31, tdm 45–76 → 28/23 (runs vary ±10). Not 0 yet. Remaining, by kind:
+  - code ShaderMaterials whose **source changes per cast** (new shader IDs even though rehearsal built the same effect:
+    Umbral Veil, Ward Drain, Quick Dash, Night Waltz, Sovereign impact dome/blast/arrival) → find the numbers baked in
+    the source and move them to uniforms;
+  - Nature summon tree `model-em` variants (studio/nature-summon.js), Frost `MeshPhysicalMaterial` shards,
+    Darkness `Flow orb tails` (uv/alphaMap variant), `sc_silver` scythe blade fades / `dclip` on the Darkness body,
+    Darkness target mark, misc. body overlays (`op0.06` fade, `#121019`).
+
 ## 7. Work order
 
 | Step | Work | Done when |

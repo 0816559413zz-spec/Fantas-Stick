@@ -42,6 +42,7 @@ function statusFX(o,fm,x,y,z,sz,now,detail=true){
 }
 
 function fx(ev,raw){   // raw = ภาพเดิมในโค้ดเท่านั้น (ไม่ใช้ bind.json)
+  if(WARM.rec)warmRec(ev);   // ?warmrec: record event samples for the entry rehearsal (js/51)
   if(ev.k==='sk'){skAnim(ev);return;}
   if(ev.k==='emo'){emoFx(ev);return;}   // อีโมต (js/52)
   if(ev.k==='hit'&&ev.e!==undefined)comboHit(ev);   // ห้องฝึก: นับคอมโบ (js/53)

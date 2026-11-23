@@ -56,10 +56,12 @@ function shwDiff(pg){const a=pg.cacheKey.split(',');let best=null,bd=1e9;
   if(!best)return 'new shape';
   return a.map((v,i)=>v!==best[i]?i+':'+String(best[i]).slice(0,28)+'>'+String(v).slice(0,28):null).filter(Boolean).slice(0,6).join(' ');}
 function shwPath(o){const n=[];for(let q=o,k=0;q&&k<5;q=q.parent,k++)n.push(q.name||q.type);return n.reverse().join('>');}
+// material signature for the first user: side / transparent / fog / colour / opacity / userData keys (finds who made it)
+function shwSig(m){try{return 's'+m.side+(m.transparent?' tr':'')+(m.fog===false?' nofog':'')+(m.color?' #'+m.color.getHexString():'')+(m.opacity<1?' op'+m.opacity.toFixed(2):'')+(Object.keys(m.userData).length?' ud:'+Object.keys(m.userData).join('/'):'');}catch(e){return '';}}
 function shwWho(pg){const out=[];
   for(const sc of [scene,fxScene])sc.traverse(o=>{if(out.length>=3||!o.material)return;
     for(const m of [].concat(o.material)){const pr=m&&gl.properties.get(m);if(!pr)continue;
-      if(pr.currentProgram===pg||(pr.programs&&[...pr.programs.values()].includes(pg))){out.push((sc===fxScene?'fx:':'')+shwPath(o)+' ['+(m.name||m.type)+']');break;}}});
+      if(pr.currentProgram===pg||(pr.programs&&[...pr.programs.values()].includes(pg))){out.push((sc===fxScene?'fx:':'')+shwPath(o)+' ['+(m.name||m.type)+(out.length?'':' '+shwSig(m))+']');break;}}});
   return out.length?out:['(not in scene: shadow/depth or already gone)'];}
 function shwFrame(gap){
   const L=gl.info.programs;if(!L)return;
