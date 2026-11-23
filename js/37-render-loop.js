@@ -83,8 +83,21 @@ function render(dt,now){
   shakeA=Math.max(0,shakeA-dt*30);
   vfxBegin(dt);try{renderGame(v,P,E,me,dt,now);}finally{vfxEnd();}
 }
+const detailCull=/[?&](?:nodetailcull|studio|fullvfx)(?:[=&]|$)/.test(location.search)?null:{
+  volume:new THREE.Frustum(),matrix:new THREE.Matrix4(),sphere:new THREE.Sphere()
+};
+function viewDetailAt(x,y,z,radius){
+  if(!detailCull)return true;
+  const sphere=detailCull.sphere;
+  sphere.center.set(x,y,z);sphere.radius=radius;
+  return detailCull.volume.intersectsSphere(sphere);
+}
 // ส่วนที่รันทุกเฟรมในเกม (อยู่ใต้งบเอฟเฟกต์ vfxBegin/vfxEnd)
 function renderGame(v,P,E,me,dt,now){
+  if(detailCull){
+    cam.updateMatrixWorld();
+    detailCull.volume.setFromProjectionMatrix(detailCull.matrix.multiplyMatrices(cam.projectionMatrix,cam.matrixWorldInverse));
+  }
   let t0=performance.now();
   if(!FXSTUDIO.seek){syncPlayers(P,v.mode,now,dt);pf('p.sync',t0);let t1=performance.now();grassTick(dt);pf('p.grass',t1);t1=performance.now();QUAL.clA+=dt;{const cs=qualCS();if(!cs||QUAL.frame%(cs+1)===0){clothTick(QUAL.clA);QUAL.clA=0;}}pf('p.cloth',t1);gameWarmFree(dt);}pf('players',t0);   // grassTick = ลม + หญ้า (js/50) • clothTick = ผ้าคลุมจริงของเรา (js/49)
   if(me&&me.al&&!me.fl&&!me.dn){const o=PM3.get(me.id);if(o){const k=Math.floor(o.walk/Math.PI);if(o.stepK!==undefined&&k!==o.stepK)snd('step',{vol:0.35,rev:0.1});o.stepK=k;}}t0=performance.now();

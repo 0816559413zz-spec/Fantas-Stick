@@ -307,27 +307,68 @@ function natShieldMake(o){
       #include <colorspace_fragment>
       }`
   }));
-  const motes=Array.from({length:24},(_,i)=>{const m=natMesh(new THREE.OctahedronGeometry(.025+(i%3)*.009),new THREE.MeshBasicMaterial({color:i%2?'#a8f77c':'#e1ffc4',transparent:true,opacity:.7,depthWrite:false}),g);return m;});
-  g.userData.nat={hitWave,hitT:-1e9,motes};
+  const motes=new THREE.InstancedMesh(new THREE.OctahedronGeometry(1),new THREE.MeshBasicMaterial({transparent:true,opacity:.7,depthWrite:false}),24);
+  motes.frustumCulled=false;
+  const moteColor=new THREE.Color(),motePose=new THREE.Object3D();
+  for(let i=0;i<motes.count;i++)motes.setColorAt(i,moteColor.set(i%2?'#a8f77c':'#e1ffc4'));
+  motes.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  g.add(motes);
+  g.userData.nat={hitWave,hitT:-1e9};
   shield.position.y=1.23;g.add(shield);
-  const F=natFx(),{V3,Tube,Thorns,thornsAlong,M,T}=F,C=[new T.Color('#e8ffb3'),new T.Color('#688f41'),new T.Color('#b4dc79')],A=new T.Color('#304d20'),B=new T.Color('#507c2c');
-  const vines=Array.from({length:9},(_,k)=>{const tube=Tube(30,7,M.bark,g),th=Thorns(40,1.5,g);tube.castShadow=false;th.castShadow=false;return {tube,th,k,strike:null,built:false};});
+  const F=natFx(),{V3,TubeSet,Thorns,thornsAlong,M,T}=F,C=[new T.Color('#e8ffb3'),new T.Color('#688f41'),new T.Color('#b4dc79')],A=new T.Color('#304d20'),B=new T.Color('#507c2c');
+  const tubes=TubeSet(9,30,7,M.bark,g),thorns=Thorns(9*40,1.5,g);
+  tubes.castShadow=thorns.castShadow=false;
+  const vines=Array.from({length:9},(_,k)=>({tube:tubes.part(k),th:[],k,strike:null,built:false,visible:false}));
+  let dirty=false;
   const rad=u=>.16*Math.pow(1-u,.72)+.002,H=[.70,.57,.77,.66,.49,.73,.62,.80,.60],Y=1.23,SP=NAT_SHIELD_K;
   const build=(v,st2,angle,reach,climb=1)=>{const pts=[],k=v.k,base=V3(0,Y-1.25,0);for(let i=0;i<30;i++){const u=i/29,theta=Math.PI-(Math.PI*H[k]*u*climb),a=k*Math.PI*2/9+Math.sin(u*3+k)*.09,r=1.36,p=V3(Math.sin(theta)*Math.sin(a)*r,Y+Math.cos(theta)*r,Math.sin(theta)*Math.cos(a)*r);
       if(st2>0&&st2<1.80){const rise=natEase(natPhase(st2-u*.16,0,.58)),fall=natOut(natPhase(st2-u*.11,.79,.94)),back=natEase(natPhase(st2-u*.07,1.18,1.63)),ang=fall*Math.PI/2,arc=V3(0,Math.cos(ang)*4.8*u,Math.sin(ang)*reach*u+(1-fall)*1.45*Math.sin(Math.PI*u));arc.y+=Math.sin(u*Math.PI)*(.85*(1-fall));arc.x+=Math.sin(u*6-st2*9)*Math.sin(u*Math.PI)*.60*(1-fall);arc.z+=Math.sin(u*5-st2*7)*u*.32*(1-fall);arc.applyAxisAngle(V3(0,1,0),angle).add(base);p.lerp(arc,rise*(1-back)*natEase(Math.min(1,u*4)));}
       pts.push(p);}
-    v.tube.set(pts,rad,(u,c)=>c.copy(A).lerp(B,u*.35));const list=thornsAlong(pts,rad,2,1.25);v.th.put(list);list.forEach((_,i)=>v.th.setColorAt(i,C[i%3]));if(v.th.instanceColor)v.th.instanceColor.needsUpdate=true;v.built=true;};
+    v.tube.set(pts,rad,(u,c)=>c.copy(A).lerp(B,u*.35));v.th=thornsAlong(pts,rad,2,1.25);v.built=true;dirty=true;};
   g.userData.nat.vines=vines;
   g.userData.nat.strike=(angle,reach)=>{let best=null,d0=9;for(const v of vines){if(v.strike)continue;let d=Math.abs(angDiff(angle,v.k*Math.PI*2/9));if(d<d0){d0=d;best=v;}}if(best)best.strike={t:0,angle,reach};};
-  g.userData.nat.tick=dt=>{const U=g.userData.nat,age=U.age??9;shield.scale.setScalar(Math.max(.02,natOut(natPhase(age,0,.13))));for(const v of vines){const climb=natEase(natPhase(age,.16+v.k*.05,1.02+v.k*.05));v.tube.visible=v.th.visible=climb>.01;if(climb<1&&!v.strike){build(v,0,0,4.6,climb);v.built=false;continue;}if(v.strike){const S=v.strike;S.t+=dt;const st2=S.t<NAT_SHIELD_HIT?S.t*SP:1.07+(S.t-NAT_SHIELD_HIT);if(st2>=1.8){v.strike=null;build(v,0,0,4.6);}else build(v,st2,S.angle,S.reach);}else if(!v.built)build(v,0,0,4.6);}};
+  g.userData.nat.tick=(dt,time,detail)=>{
+    const U=g.userData.nat,age=U.age??9;
+    shield.scale.setScalar(Math.max(.02,natOut(natPhase(age,0,.13))));
+    for(const v of vines){
+      const climb=natEase(natPhase(age,.16+v.k*.05,1.02+v.k*.05));
+      if(v.visible!==(climb>.01)){v.visible=climb>.01;dirty=true;}
+      if(v.strike){
+        const S=v.strike;S.t+=dt;
+        const st2=S.t<NAT_SHIELD_HIT?S.t*SP:1.07+(S.t-NAT_SHIELD_HIT);
+        if(st2>=1.8){v.strike=null;build(v,0,0,4.6);}
+        else build(v,st2,S.angle,S.reach);
+      }else if(v.visible&&(!v.built||climb<1))build(v,0,0,4.6,climb);
+      v.built=climb>=1;
+      v.tube.show(v.visible);
+    }
+    tubes.flush();
+    if(dirty){
+      const list=[];let offset=0;
+      for(const v of vines)if(v.visible){
+        list.push(...v.th);
+        for(let i=0;i<v.th.length;i++)thorns.setColorAt(offset++,C[i%3]);
+      }
+      thorns.put(list);if(thorns.instanceColor)thorns.instanceColor.needsUpdate=true;
+      dirty=false;
+    }
+    motes.visible=detail;
+    if(!detail)return;
+    for(let i=0;i<motes.count;i++){
+      const a=i*2.4+time*.4,y=((i*.31+time*.25)%2.4)-1.2,r=Math.sqrt(Math.max(.1,1-y*y/1.9))*1.4;
+      motePose.position.set(Math.sin(a)*r,y+1.23,Math.cos(a)*r);
+      motePose.scale.setScalar(.025+(i%3)*.009);motePose.updateMatrix();motes.setMatrixAt(i,motePose.matrix);
+    }
+    motes.instanceMatrix.needsUpdate=true;
+  };
   return g;
 }
-function natureCharacter(o,p,now){
+function natureCharacter(o,p,now,detail=true){
   const native=getKit(p.id).path===NATUREP;
   if(native&&p.sh&&p.al&&!p.dn){
     if(!o.natShield)o.natShield=natShieldMake(o);
     o.natShield.visible=true;o.shield.visible=false;
-    {const U=o.natShield.userData.nat,t=now/1000;if(!U.wasOn){U.wasOn=true;U.bornT=now;U.vines.forEach(v=>{v.built=false;v.climb=-1;});}U.age=(now-U.bornT)/1000;U.hitWave.value=clamp((now-U.hitT)/360,0,1);U.tick(Math.min(.05,(now-(U.lastN||now))/1000));U.lastN=now;U.motes.forEach((m,i)=>{const a=i*2.4+t*.4,y=((i*.31+t*.25)%2.4)-1.2,r=Math.sqrt(Math.max(.1,1-y*y/1.9))*1.4;m.position.set(Math.sin(a)*r,y+1.23,Math.cos(a)*r);});}
+    {const U=o.natShield.userData.nat;if(!U.wasOn){U.wasOn=true;U.bornT=now;U.vines.forEach(v=>{v.built=false;});}U.age=(now-U.bornT)/1000;U.hitWave.value=clamp((now-U.hitT)/360,0,1);U.tick(Math.min(.05,(now-(U.lastN||now))/1000),now/1000,detail);U.lastN=now;}
   }else if(o.natShield){o.natShield.visible=false;o.natShield.userData.nat.wasOn=false;}
   const count=p.nt?.[1]||0;
   if(count&&!o.natSpores){
@@ -568,11 +609,26 @@ function natRootWarn(ev){const F=natFx(),{T}=F,P=natWorld(ev.x,ev.y,ev.h),R=ev.r
   const mk=(a,b,c,o)=>{const m=new T.Mesh(new T.RingGeometry(a,b,40),new T.MeshBasicMaterial({color:c,transparent:true,opacity:o,depthWrite:false,side:T.DoubleSide}));m.rotation.x=-Math.PI/2;g.add(m);return m;};
   const rim=mk(.9,1,'#ff2a1a',.95),fill=mk(0,1,'#ff3a2a',.22),inner=mk(.0,.02,'#ff6a4a',.6);
   F.clip(ev.t,t=>{const k=t/ev.t;g.scale.setScalar(R);rim.material.opacity=.55+.4*Math.sin(t*28);inner.scale.setScalar(Math.max(.01,k*50));inner.material.opacity=.35*(1-k*.5);fill.material.opacity=.12+.12*k;},()=>{const i=F.ALL.indexOf(g);if(i>=0)F.ALL.splice(i,1);g.parent&&g.parent.remove(g);g.traverse(q=>{q.geometry&&q.geometry.dispose();q.material&&q.material.dispose();});});}
-function natRootUp(ev){const F=natFx(),{V3,T,M,Tube,Thorns,thornsAlong,dirt,leaves,sparks}=F,B=natWorld(ev.x,ev.y,ev.h),R=ev.r*S3*.6,dark=new T.Color('#3a2412'),mid=new T.Color('#5a7a2c'),tipC=new T.Color('#b6ff63'),roots=[];
-  for(let i=0;i<6;i++){const a=i/6*6.283+Math.random()*.5,r=R*(.25+Math.random()*.6);roots.push({tube:Tube(12,7,M.bark),th:Thorns(14,1.1,null,true),x:B.x+Math.cos(a)*r,z:B.z+Math.sin(a)*r,a:a+Math.PI+(Math.random()-.5)*.6,H:1.6+Math.random()*1.4,R:.16+Math.random()*.08,tw:Math.random()*6});}
+function natRootUp(ev){const F=natFx(),{V3,T,M,TubeSet,Thorns,thornsAlong,dirt,leaves,sparks}=F,B=natWorld(ev.x,ev.y,ev.h),R=ev.r*S3*.6,dark=new T.Color('#3a2412'),mid=new T.Color('#5a7a2c'),tipC=new T.Color('#b6ff63'),roots=[];
+  const count=6,tubes=TubeSet(count,12,7,M.bark),thorns=Thorns(count*14,1.1,null,true);
+  for(let i=0;i<count;i++){const a=i/count*6.283+Math.random()*.5,r=R*(.25+Math.random()*.6);roots.push({tube:tubes.part(i),x:B.x+Math.cos(a)*r,z:B.z+Math.sin(a)*r,a:a+Math.PI+(Math.random()-.5)*.6,H:1.6+Math.random()*1.4,R:.16+Math.random()*.08,tw:Math.random()*6});}
   F.O.y=B.y;dirt(B.clone(),22,4,{spread:1.6});leaves(B.clone().add(V3(0,.4,0)),8,2.6);sparks(B.clone().add(V3(0,.5,0)),14,3,'#eaffa0','#5fa83a');natShock(B,'#a8ff6a',3,.4,.5);
-  F.clip(1.1,t=>{const k=natOut(natPhase(t,0,.12))*(1-natEase(natPhase(t,.6,1.05)));for(const q of roots){q.tube.visible=q.th.visible=k>.01;if(!q.tube.visible||q.lk===k)continue;q.lk=k;const P=[],ax=Math.cos(q.a),az=Math.sin(q.a);for(let i=0;i<12;i++){const u=i/11,h=q.H*u*k,b=q.H*.55*u*u*k,w=Math.sin(u*5+q.tw)*.08*u;P.push(V3(q.x+ax*b-az*w,B.y+h,q.z+az*b+ax*w));}const rad=u=>Math.max(.004,q.R*((1-u)**1.5)*Math.max(.05,k));q.tube.set(P,rad,(u,c)=>c.copy(dark).lerp(mid,Math.min(1,u*1.4)).lerp(tipC,Math.max(0,u-.78)*3));q.th.put(thornsAlong(P,rad,3,.9*k,2.1));}},
-    ()=>{for(const q of roots){F.drop(q.tube);F.drop(q.th);}});
+  let lastGrowth=-1;
+  F.clip(1.1,t=>{
+    const growth=natOut(natPhase(t,0,.12))*(1-natEase(natPhase(t,.6,1.05))),visible=growth>.01;
+    tubes.visible=thorns.visible=visible;
+    if(!visible||growth===lastGrowth)return;
+    lastGrowth=growth;
+    const thornList=[];
+    for(const q of roots){
+      const P=[],ax=Math.cos(q.a),az=Math.sin(q.a);
+      for(let i=0;i<12;i++){const u=i/11,h=q.H*u*growth,b=q.H*.55*u*u*growth,w=Math.sin(u*5+q.tw)*.08*u;P.push(V3(q.x+ax*b-az*w,B.y+h,q.z+az*b+ax*w));}
+      const rad=u=>Math.max(.004,q.R*((1-u)**1.5)*Math.max(.05,growth));
+      q.tube.set(P,rad,(u,c)=>c.copy(dark).lerp(mid,Math.min(1,u*1.4)).lerp(tipC,Math.max(0,u-.78)*3));
+      thornList.push(...thornsAlong(P,rad,3,.9*growth,2.1));
+    }
+    tubes.flush();thorns.put(thornList);
+  },()=>{F.drop(tubes);F.drop(thorns);});
   snd('boom',{x:ev.x,y:ev.y,vol:.4});}
 function natThornLine(ev){const F=natFx(),{V3,T,M,TubeSet,Thorns,thornsAlong,dirt,leaves,sparks}=F,o=ev.id!=null?PM3.get(ev.id):null;if(o)o.natEmpC={k:'line',t:0};
   // Whip-style thorns: bark tubes dark at the root, light green toward a bright tip, hooked thorns along them.

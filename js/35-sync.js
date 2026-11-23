@@ -134,6 +134,117 @@ function characterStance(o,P,feet,w){
   o.b.rotation.y=lerp(o.b.rotation.y,P[2],w);o.b.rotation.x=lerp(o.b.rotation.x,P[3],w);o.b.rotation.z=lerp(o.b.rotation.z,P[6],w);o.b.position.y+=P[7]*w;o.bz=1;
   if(feet){for(let i=0;i<2;i++){o.legs[i].rotation.x=lerp(o.legs[i].rotation.x,feet[i],w);o.legs[i].rotation.z=lerp(o.legs[i].rotation.z,feet[i+2],w);}}
 }
+// Lower-body layer after casting poses. The arms, wand and torso stay with the skill.
+const JUMP_LEGS={
+  // Thigh pitch R/L, spread R/L, knee bend R/L, cloak lift, arm pitch, elbow bend, shoulder lift, arm spread.
+  push: [-.27,.29,-.13,.11,.28,.16,.40,-.08,1.08,.045,.38],
+  tuck: [-.92,.36,-.43,.39,.64,.42,.98,-.07,1.53,.16,1.48],
+  crest:[-.68,.22,-.39,.35,.48,.40,.79,-.07,1.53,.15,1.43],
+  fall: [-.46,.16,-.34,.30,.36,.34,.54],
+  reach:[-.20,.05,-.18,.16,.15,.21,.31,-.04,.75,.025,.41],
+  land: [-.43,-.28,-.12,.11,.54,.57,.15,-.07,.61,0,.20]
+};
+function jumpLegPose(o,p,dt,locked){
+  if(locked||p.dn||p.fl||p.st||p.gh||p.ds||p.df||o.dp||o.wsl||o.rag){o.jumpLegs=null;return 0;}
+  const phase=p.ja||0;
+  if(!phase&&!o.jumpLegs)return 0;
+  const J=o.jumpLegs||(o.jumpLegs={phase:0,time:0,p:Float32Array.from(JUMP_LEGS.push),weight:0,land:0});
+  if(!phase&&J.phase===2&&p.z<=groundH(p.x,p.y,p.z)+.11)J.land=.17;
+  if(phase)J.land=0;
+  J.time=phase===J.phase?J.time+dt:0;J.phase=phase;
+  let start=JUMP_LEGS.land,end=start,u=1;
+  if(phase===1){
+    const topped=J.time>=.13;
+    start=topped?JUMP_LEGS.tuck:JUMP_LEGS.push;
+    end=topped?JUMP_LEGS.crest:JUMP_LEGS.tuck;
+    u=_cs(clamp((J.time-(topped?.13:0))/(topped?.20:.13),0,1));
+  }else if(phase===2){
+    start=JUMP_LEGS.fall;end=JUMP_LEGS.reach;u=_cs(clamp((J.time-.05)/.29,0,1));
+  }
+  const on=phase||J.land>0,blend=1-Math.exp(-dt*(phase===1?29:21));
+  J.weight=lerp(J.weight,phase?1:clamp(J.land/.12,0,1)*.78,1-Math.exp(-dt*(on?30:15)));
+  J.land=Math.max(0,J.land-dt);
+  if(!on&&J.weight<.015){o.jumpLegs=null;return 0;}
+  for(let i=0;i<7;i++)J.p[i]=lerp(J.p[i],lerp(start[i],end[i],u),blend);
+  // Hands follow through at the apex before easing down over the descent.
+  const handStart=phase===2?JUMP_LEGS.crest:start;
+  const handProgress=phase===2?_cs(clamp((J.time-.065)/.37,0,1)):u;
+  for(let i=7;i<J.p.length;i++)J.p[i]=lerp(J.p[i],lerp(handStart[i],end[i],handProgress),blend);
+  for(let i=0;i<2;i++){
+    const rotation=o.legs[i].rotation;
+    rotation.x=lerp(rotation.x,J.p[i],J.weight);
+    rotation.z=lerp(rotation.z,J.p[i+2],J.weight);
+  }
+  return J.weight;
+}
+const jumpCloakTurn=new THREE.Quaternion(),jumpCloakEuler=new THREE.Euler();
+function jumpCloakPose(o,lift){
+  const active=lift>.005,wasActive=o.jumpCloakActive;
+  if(!o.fileModel||(!active&&!wasActive))return;
+  o.jumpCloakActive=active;
+  const bones=o.jumpCloak||(o.jumpCloak=['cloak_B','cloak_L','cloak_R'].map(n=>{
+    const bone=o.fileModel.getObjectByName(n);
+    return bone?{bone,base:new THREE.Quaternion(),applied:new THREE.Quaternion()}:null;
+  }));
+  for(let i=0;i<bones.length;i++){
+    const k=bones[i];if(!k)continue;
+    const rotation=k.bone.quaternion;
+    if(wasActive&&rotation.equals(k.applied))rotation.copy(k.base);
+    if(!active)continue;
+    k.base.copy(rotation);
+    jumpCloakEuler.set(lift*(i===0?.58:.49),0,lift*(i===1?.42:i===2?-.42:0));
+    rotation.multiply(jumpCloakTurn.setFromEuler(jumpCloakEuler));
+    k.applied.copy(rotation);
+  }
+}
+const jumpArmBaseR=new THREE.Quaternion(),jumpArmBaseL=new THREE.Quaternion();
+const jumpElbowAxis=new THREE.Vector3(1,0,0),jumpElbowTurn=new THREE.Quaternion();
+const jumpElbowPivot=new THREE.Vector3(0,-.32,0);
+function clearJumpArms(o){
+  const a=o.jumpArms;
+  if(!a?.applied)return;
+  for(const k of a.elbows)if(k.bone.quaternion.equals(k.after))k.bone.quaternion.copy(k.before);
+  for(const k of a.shoulders)if(k.position.equals(k.after))k.position.copy(k.before);
+  o.wandG.position.copy(a.wandPos);o.wandG.quaternion.copy(a.wandRot);o.tip.position.copy(a.tipPos);
+  a.applied=false;
+}
+// Only use the airborne balance pose when the skill pipeline left both arms free.
+function jumpArmPose(o,p,weight,casting){
+  if(!weight||!o.rig||casting||p.sh||o.emo||o.faW>0||o.sbArmIn>.02||o.eFistBend!=null||o.natFaR>0||o.natFaL>0||
+    !o.armR.quaternion.equals(jumpArmBaseR)||!o.armL.quaternion.equals(jumpArmBaseL))return 0;
+  for(const [arm,side] of [[o.armR,-1],[o.armL,1]]){
+    const r=arm.rotation;
+    r.x=lerp(r.x,o.jumpLegs.p[7],weight);
+    r.z=lerp(r.z,side*o.jumpLegs.p[10],weight);
+  }
+  return weight;
+}
+function jumpElbowPose(o,weight){
+  const a=o.jumpArms||(o.jumpArms={
+    elbows:['forearm_R','forearm_L'].map(n=>o.fileModel.getObjectByName(n)).filter(Boolean)
+      .map(bone=>({bone,before:new THREE.Quaternion(),after:new THREE.Quaternion()})),
+    shoulders:[o.armR,o.armL,...o.rig.filter(k=>!k.leg).map(k=>k.bone)]
+      .map(({position})=>({position,before:new THREE.Vector3(),after:new THREE.Vector3()})),
+    wandPos:o.wandG.position.clone(),wandRot:o.wandG.quaternion.clone(),tipPos:o.tip.position.clone(),applied:false
+  });
+  jumpElbowTurn.setFromAxisAngle(jumpElbowAxis,-o.jumpLegs.p[8]*weight);
+  for(const k of a.elbows){
+    k.before.copy(k.bone.quaternion);
+    k.bone.quaternion.multiply(jumpElbowTurn);
+    k.after.copy(k.bone.quaternion);
+  }
+  const lift=o.jumpLegs.p[9]*weight;
+  for(const k of a.shoulders){
+    k.before.copy(k.position);
+    k.position.y+=lift;k.position.x*=1-lift*.55;
+    k.after.copy(k.position);
+  }
+  o.wandG.position.copy(a.wandPos).sub(jumpElbowPivot).applyQuaternion(jumpElbowTurn).add(jumpElbowPivot);
+  o.wandG.quaternion.copy(a.wandRot).premultiply(jumpElbowTurn);
+  o.tip.position.copy(a.tipPos).sub(jumpElbowPivot).applyQuaternion(jumpElbowTurn).add(jumpElbowPivot);
+  o.tip.getWorldPosition(o.tipW);
+  a.applied=true;
+}
 // ยกโล่ (คลิกขวาค้าง): ไม้ขวางหน้าอก มือซ้ายดันออก ย่อตัวรับแรง หายใจ/สั่นนิด ๆ — สายดินใช้ Stand กันเลยไม่ใส่
 const CBLOCK=[-1.45,0.55,-0.15,0.12,-1.35,-0.15];
 const CBLOCK_PATH={0:[-1.25,0.35,-0.08,0.08,-1.15,-0.4],1:[-1.25,0.1,-0.18,0.13,-1.65,-0.1],7:[-1.5,-0.16,0,0.34,-1.5,0.16],8:[-1.4,0.25,-0.1,0.08,-1.45,-0.25]};
@@ -215,17 +326,19 @@ function syncPlayers(P,mode,now,dt){
       setGhost(o,o.ghost);
     }
     const x=tx(p.x),z=tz(p.y);
-    o.zs=o.zs===undefined?(p.z||0)+GY(p.x,p.y):lerp(o.zs,(p.z||0)+GY(p.x,p.y)+(p.gh?0.6+Math.sin(now/500)*0.2:0),1-Math.exp(-20*dt));
+    o.zs=o.zs===undefined?(p.z||0)+GY(p.x,p.y):lerp(o.zs,(p.z||0)+GY(p.x,p.y)+(p.gh?0.6+Math.sin(now/500)*0.2:0),1-Math.exp(-(p.ja===1?38:20)*dt));
     g.position.set(x,o.zs,z);
+    const isMe=p.id===NET.myId,detail=isMe||viewDetailAt(x,o.zs+1,z,6);
     {const A=broomHead(o,p,dt);g.rotation.y=Math.atan2(Math.cos(A),Math.sin(A));}   // บิน = หันตามไม้กวาด (js/69)
     const v=localVel(o,x,z,dt,g.rotation.y);
+    clearJumpArms(o);
     o.darkScythe?.resetLiveHandPose();
-    if(!p.al){const l=LGV.st.get(p.id);if(l)lgClear(l);if(o.natureWhipView)natureWhipView(o,null);if(ragTick(o,p,v,dt,now))ragHideDead(o,p,now);continue;}   // ตาย = ragdoll ค้างจนเกิดใหม่ (js/48)
+    if(!p.al){o.jumpLegs=null;jumpCloakPose(o,0);const l=LGV.st.get(p.id);if(l)lgClear(l);if(o.natureWhipView)natureWhipView(o,null);if(ragTick(o,p,v,dt,now))ragHideDead(o,p,now);continue;}   // ตาย = ragdoll ค้างจนเกิดใหม่ (js/48)
     o.hitT=Math.max(0,(o.hitT||0)-dt);
     o.b.position.set(0,0,0);o.b.rotation.set(0,0,0);   // one-frame pose offsets must not build up (body drifted back / stayed tilted)
     if(o.darkGear?.visible)o.armR.rotation.y=0;   // BA wand twist is applied fresh each frame
     const hoverPose=!!p.lt?.[0]&&!!p.lt[4]&&!p.fl&&!p.dn;
-    if(o.anim)animTick(o,{down:!!p.dn,fly:!!p.fl,sp:hoverPose||p.wn&&p.wn[5]>=1?0:v.sp,castT:o.castT,hitT:o.hitT},dt,p.id===NET.myId?1:animLod(g));
+    if(o.anim)animTick(o,{down:!!p.dn,fly:!!p.fl,sp:hoverPose||p.wn&&p.wn[5]>=1?0:v.sp,castT:o.castT,hitT:o.hitT},dt,isMe?1:!detail&&!o.castT&&!o.hitT&&!p.ds?3:animLod(g));
     if(!o.fileModel)updateCloth(o.cloak,v.lvx,v.lvz,v.sp*(p.fl?1.4:1),now,dt);   // มีโมเดลไฟล์ = ผ้าคลุมโค้ดซ่อนอยู่ (ผ้าจริงคือ js/49)
     o.bsp=v.sp;broomView(o,p,dt,now);o.cocoon.visible=!!p.rt;   // ไม้กวาด: เอียงเลี้ยว + อนิเมชันเรียก/เก็บ (js/69)
     if(p.rt)o.cocoon.rotation.y=now/400;
@@ -242,7 +355,7 @@ function syncPlayers(P,mode,now,dt){
       o.legs[0].rotation.x=o.legs[1].rotation.x=-1.25;
       o.armL.rotation.x=-1.05;o.armL.rotation.z=-0.25;o.armR.rotation.x=-1.05;o.armR.rotation.z=0.25;
       o.broom.rotation.x=-0.1+Math.sin(now/300)*0.04;o.broom.rotation.z=clamp(-v.lvx*0.02,-0.4,0.4);
-      if(Math.random()<0.8){const ha=o.fhS!==undefined?o.fhS:p.a,bx=p.x-Math.cos(ha)*30,by=p.y-Math.sin(ha)*30;PARTS.push({x:bx+rnd(-4,4),y:by+rnd(-4,4),h:(p.z||0)+0.8+rnd(-0.1,0.1),vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(-0.3,0.3),life:0.6,max:0.6,col:Math.random()<0.5?'#ffe9a8':'#ffffff',size:1.6,g:0.5});}
+      if(detail&&Math.random()<0.8){const ha=o.fhS!==undefined?o.fhS:p.a,bx=p.x-Math.cos(ha)*30,by=p.y-Math.sin(ha)*30;PARTS.push({x:bx+rnd(-4,4),y:by+rnd(-4,4),h:(p.z||0)+0.8+rnd(-0.1,0.1),vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(-0.3,0.3),life:0.6,max:0.6,col:Math.random()<0.5?'#ffe9a8':'#ffffff',size:1.6,g:0.5});}
     }else{
       const wfly=hoverPose||p.wn&&p.wn[5]>=1;if(!wfly)o.walk+=dt*v.sp*0.8;   // บิน Featherwing: ไม่ก้าวขา ไม่มีเสียงเท้า
       const sw=wfly?0:Math.sin(o.walk)*Math.min(1,v.sp/5);
@@ -254,6 +367,9 @@ function syncPlayers(P,mode,now,dt){
       o.armR.rotation.x=o.cpT>0?-0.35+sw*0.4:lerp(-0.35+sw*0.4,-1.55,ck);o.armR.rotation.z=-0.12;o.b.rotation.y=0;
     }
     if(o.rig)rigStd(o);
+    const jumpArmsCandidate=p.ja||o.jumpLegs;
+    const casting=!!(o.caN||o.cpT>0||o.castT>0);
+    if(jumpArmsCandidate){jumpArmBaseR.copy(o.armR.quaternion);jumpArmBaseL.copy(o.armL.quaternion);}
     castPose(o,p,v,dt,now);
     o.ends.forEach((E,i)=>{E.rotation.x=-clamp(v.lvz*0.07,0,1.2)+Math.sin(now*0.012+i*1.7)*0.08*(1+v.sp*0.15);E.rotation.z=clamp(v.lvx*0.04,-0.6,0.6);});
     o.shield.visible=!!p.sh||!!(p.fm&(128|16384));
@@ -261,21 +377,20 @@ function syncPlayers(P,mode,now,dt){
     if(o.shield.visible){o.shield.material.uniforms.t.value=now/1000;o.shield.material.uniforms.c.value.set(fireSh?'#ff7a2a':p.sh?'#7ff0ff':(p.fm&128)?'#6fb8d8':'#9a7a3a');}
     // โล่ไฟ = เปลือกไฟลุกหุ้มรอบตัว (fireShieldFX ใน js/33) แทนโล่ฟอง
     if(fireSh)o.shield.visible=false;
-    fireShieldFX(o,p,fireSh,dt);
+    fireShieldFX(o,p,fireSh,dt,detail);
     // + ลูกแก้วไฟหุ้มตัว + เม็ดไฟลอยรอบ (แบบ 19 ต.ค. เช้า — ผู้ใช้เลือก "A + ตอนนี้" 2026-10-20)
     if(fireSh&&(!fxLoopName('fsh')||fxLoopKeep('fsh'))){if(!o.fsh){o.fsh=new THREE.Mesh(_fbGeo,fireMat({mode:'ball',shell:1,flow:[0,1,0],scale:[1.4,1.4,1.4],speed:1.4,heat:-0.12,op:0.85,int:1.0}));o.fsh.scale.setScalar(1.38);o.fsh.position.y=1.1;o.g.add(o.fsh);}
       o.fsh.visible=true;o.fsh.rotation.y+=dt*0.6;o.fsh.material.uniforms.uInt.value=o.fshK||1;o.fsh.material.uniforms.uOp.value=.85*(o.fshH||1);
-      for(let i=0;i<3;i++){const an=rnd(0,6.283),r=rnd(26,34);PARTS.push({x:p.x+Math.cos(an)*r,y:p.y+Math.sin(an)*r,h:(o.zs||0)+rnd(0.2,2.2),vx:0,vy:0,vh:rnd(1.2,2.6),life:0.4,max:0.4,col:i?'#ff7a2a':'#ffc04a',size:rnd(2.4,3.6),g:-1.5});}}
+      if(detail)for(let i=0;i<3;i++){const an=rnd(0,6.283),r=rnd(26,34);PARTS.push({x:p.x+Math.cos(an)*r,y:p.y+Math.sin(an)*r,h:(o.zs||0)+rnd(0.2,2.2),vx:0,vy:0,vh:rnd(1.2,2.6),life:0.4,max:0.4,col:i?'#ff7a2a':'#ffc04a',size:rnd(2.4,3.6),g:-1.5});}}
     else if(o.fsh)o.fsh.visible=false;
-    statusFX(o,p.fm|0,p.x,p.y,o.zs||0,2.2,now);
+    statusFX(o,p.fm|0,p.x,p.y,o.zs||0,2.2,now,detail);
     o.stars.visible=!!p.st;o.stars.rotation.y=now/250;
-    const isMe=p.id===NET.myId;
     if(p.fl)o.ring.visible=false;
     else if(teamOn()){o.ring.visible=true;o.ring.material.color.set(TEAMC[p.tm]);}
     else if(isMe){o.ring.visible=true;o.ring.material.color.set('#ffffff');}
     else o.ring.visible=false;
     o.tip.scale.setScalar(0.3+0.08*Math.sin(now/120)+(o.castT>0?0.4:0))*((p.cg||0)>0?0.4:1);
-    if(o.wspk&&p.al)wandSparks(o,dt);   // ไม้สำเร็จรูปที่มีประกาย (js/29)
+    if(detail&&o.wspk&&p.al)wandSparks(o,dt);   // ไม้สำเร็จรูปที่มีประกาย (js/29)
     const pz=o.zs;
     pyroFX(o,p,pz,now,dt);
     stormFX(o,p,pz,now,dt);
@@ -297,15 +412,25 @@ function syncPlayers(P,mode,now,dt){
     else if(o.natureWhipView?.vine.visible)o.armR.rotation.y=0;
     hitRecoilPose(o,dt);
     lightHeadPose(o);
-    if(o.rig){rigSync(o,dt);windForearm(o);stormBowForearm(o);earthFistForearm(o);natForearmR(o);if(domeKnee)dpKnees(o,0,domeKnee);}
+    const jumpWeight=jumpLegPose(o,p,dt,domeKnee);
+    const jumpArmWeight=jumpArmPose(o,p,jumpWeight,casting||activeWhip);
+    if(o.rig){
+      rigSync(o,dt,false,jumpWeight,jumpArmWeight);windForearm(o);stormBowForearm(o);earthFistForearm(o);natForearmR(o);
+      if(domeKnee)dpKnees(o,0,domeKnee);
+      else if(jumpWeight)dpKnees(o,o.jumpLegs.p[4]*jumpWeight,o.jumpLegs.p[5]*jumpWeight);
+      if(jumpArmWeight)jumpElbowPose(o,jumpArmWeight);
+    }
+    jumpCloakPose(o,jumpWeight?(o.jumpLegs.p[6]*jumpWeight):0);
     if(activeWhip||o.natureWhipView)natureWhipView(o,activeWhip);
-    natureCharacter(o,p,now);
+    natureCharacter(o,p,now,detail);
     darknessCharacter(o,p,myP,now);
     if(ragTick(o,p,v,dt,now))o.tip.scale.setScalar(0.001);   // ล้ม/กระแทกแรง = ragdoll (js/48)
-    if(p.bn&&Math.random()<0.7)burst(p.x,p.y,'#ff6a2a',1,30,0.45,3.5,{h:pz+rnd(0.3,1.8),vh:[1,2.5],g:-1});
-    if(p.u>=100&&Math.random()<0.35)burst(p.x+rnd(-18,18),p.y+rnd(-18,18),'#ffd86b',1,10,0.9,1.8,{h:pz+rnd(0,0.4),vh:[1.5,3],g:-0.3});
-    if(p.sh&&!fireSh&&!p.ea&&getKit(p.id).path!==DARKP&&Math.random()<0.3)burst(p.x,p.y,'#7ff6ff',1,40,0.4,1.4,{h:pz+rnd(0.3,2)});
-    if(p.ds)burst(p.x,p.y,'#bfefff',2,30,0.3,2,{h:pz+rnd(0.4,1.6),g:0});
+    if(detail){
+      if(p.bn&&Math.random()<0.7)burst(p.x,p.y,'#ff6a2a',1,30,0.45,3.5,{h:pz+rnd(0.3,1.8),vh:[1,2.5],g:-1});
+      if(p.u>=100&&Math.random()<0.35)burst(p.x+rnd(-18,18),p.y+rnd(-18,18),'#ffd86b',1,10,0.9,1.8,{h:pz+rnd(0,0.4),vh:[1.5,3],g:-0.3});
+      if(p.sh&&!fireSh&&!p.ea&&getKit(p.id).path!==DARKP&&Math.random()<0.3)burst(p.x,p.y,'#7ff6ff',1,40,0.4,1.4,{h:pz+rnd(0.3,2)});
+      if(p.ds)burst(p.x,p.y,'#bfefff',2,30,0.3,2,{h:pz+rnd(0.4,1.6),g:0});
+    }
   }
   for(const [id,o] of PM3)if(!seen.has(id)){if(o.fball)scene.remove(o.fball);if(o.orbG)scene.remove(o.orbG);lightDropView(id);disposeObj(o.g);PM3.delete(id);}
 }
@@ -320,6 +445,7 @@ function syncEnemies(E,P,now,dt){
     if(tgt)o.g.rotation.y=Math.atan2(tx(tgt.x)-x,tz(tgt.y)-z);
     o.hs=o.hs===undefined?(e.h||0)+GY(e.x,e.y):lerp(o.hs,(e.h||0)+GY(e.x,e.y),1-Math.exp(-15*dt));
     o.g.position.set(x,o.hs,z);
+    const detail=viewDetailAt(x,o.hs+(o.h||2)*.5,z,Math.max(6,o.h||2));
     const v=localVel(o,x,z,dt,o.g.rotation.y);
     o.hitT=Math.max(0,(o.hitT||0)-dt);o.atkT=Math.max(0,(o.atkT||0)-dt);
     if(o.anim)animTick(o,{fly:o.hs>1,sp:v.sp,atk:!!(e.sl||e.lg)||o.atkT>0,hitT:o.hitT},dt,animLod(o.g));
@@ -336,15 +462,15 @@ function syncEnemies(E,P,now,dt){
     }else if(o.wings){
       for(const w of o.wings)w.wg.rotation.y=w.s*Math.sin(now/25)*0.9;
       o.b.position.y=Math.sin(now/200+e.id)*0.15;
-      if(Math.random()<0.4)PARTS.push({x:e.x,y:e.y,h:o.hs+rnd(-0.2,0.2),vx:rnd(-15,15),vy:rnd(-15,15),vh:-0.3,life:0.6,max:0.6,col:'#8fd0ff',size:1.4,g:0.4});
+      if(detail&&Math.random()<0.4)PARTS.push({x:e.x,y:e.y,h:o.hs+rnd(-0.2,0.2),vx:rnd(-15,15),vy:rnd(-15,15),vh:-0.3,life:0.6,max:0.6,col:'#8fd0ff',size:1.4,g:0.4});
     }else o.b.position.y=v.sp>0.3?Math.abs(Math.sin(now/90+e.id))*0.12:0;
     if(o.cloak)updateCloth(o.cloak,v.lvx,v.lvz,v.sp,now,dt);
     o.stars.visible=!!e.st;o.stars.rotation.y=now/250;
     if(o.tele){o.tele.visible=!!e.sl;if(e.sl)o.tele.material.opacity=0.2+0.2*Math.sin(now/60);if(o.club)o.club.rotation.x=e.sl?-0.6:Math.PI/2.6;}
-    if(e.bn&&Math.random()<0.7)burst(e.x,e.y,'#ff6a2a',1,30,0.45,3.5,{h:o.hs+rnd(0.3,o.h*0.8),vh:[1,2.5],g:-1});
+    if(detail&&e.bn&&Math.random()<0.7)burst(e.x,e.y,'#ff6a2a',1,30,0.45,3.5,{h:o.hs+rnd(0.3,o.h*0.8),vh:[1,2.5],g:-1});
     darknessMarkView(o,e.dk,(o.h||2)*.65);
-    statusFX(o,e.fm|0,e.x,e.y,o.hs||0,Math.max(1.2,(o.h||2)*0.9),now);
-    if(e.t==='wiz'&&Math.random()<0.15)smoke(e.x,e.y,0.2,1,'#1a2a14',1.2,4,20);
+    statusFX(o,e.fm|0,e.x,e.y,o.hs||0,Math.max(1.2,(o.h||2)*0.9),now,detail);
+    if(detail&&e.t==='wiz'&&Math.random()<0.15)smoke(e.x,e.y,0.2,1,'#1a2a14',1.2,4,20);
   }
   for(const [id,o] of EM3)if(!seen.has(id)){disposeObj(o.g);EM3.delete(id);}
 }
