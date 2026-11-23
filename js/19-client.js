@@ -259,7 +259,7 @@ function makeIceFloor(x,y,r,t,ring,lx,ly,wv){
     if(!_icePathMat){_icePathMat=new THREE.MeshStandardMaterial({color:'#a8d4ec',emissive:'#1f5f90',emissiveIntensity:0.18,roughness:0.85,metalness:0,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});_icePathMat.userData.keep=true;}
     const g=new THREE.Group();g.position.set(tx(x),0.03+GY(x,y),tz(y));scene.add(g);
     if(!_iceShardMat){_iceShardMat=new THREE.MeshStandardMaterial({color:'#7cc4ee',emissive:'#2a86cc',emissiveIntensity:0.4,roughness:0.25,metalness:0.05,flatShading:true,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});_iceShardMat.userData.keep=true;}
-    const dx=lx!==undefined?tx(lx)-tx(x):0,dz=lx!==undefined?tz(ly)-tz(y):0,L=Math.hypot(dx,dz),s=Math.max(0.3,r*S3*0.6);
+    const dx=lx!==undefined?tx(lx)-tx(x):0,dz=lx!==undefined?tz(ly)-tz(y):0,L=Math.hypot(dx,dz),s=Math.max(0.35,r*S3*0.75);
     const geo=iceShardTrail(L>0.01&&L<6?dx:0,L>0.01&&L<6?dz:0,L<6?L:0,s);const m=new THREE.Mesh(geo,_iceShardMat);g.add(m);
     return {g,mats:[],spikes:[],age:0,t,path:true,geo};
   }
