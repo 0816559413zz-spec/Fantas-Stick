@@ -88,6 +88,24 @@ map; **new programs during the fight must be 0**. Run it before committing skill
   beams/dome), `Player death dissolve` rewriting each ShaderMaterial, hit flash `MeshBasicMaterial` on batched students,
   Frost Shard Storm `MeshPhysicalMaterial` without cel, Nature lotus petals, flow orb tails (uv variant).
 
+**Step 2 status (built 2026-11-23):**
+- `PTG` (js/27, before the renderer exists): three's `lights_physical_pars_fragment` carries the cel bands
+  (`uPtG.x`, set per map by `paintLights` js/77) and `lights_fragment_end` dims sky/ambient/env by `uPtG.y` (indoor, 0 = off,
+  reserved for zones). `ShaderLib.standard/physical.uniforms.uPtG` holds a plain `{x,y,z,w}` object, which three's
+  `cloneUniforms` passes by reference, so every Standard/Physical material reads the live value. Custom shaders without
+  the uniform read 0 = unchanged. Per-material cel patch, `paintSweep`, `paintPre`, the SHR paint hook and `|pt2c` keys
+  are gone; `paintPatch` now only adds brush strokes (`|pt2s`) to map pieces at map build (removed in step 5).
+  Shots before/after on fcs-file are identical; programs at match start 255 → 230.
+- `MLS` map light slots (js/27): 8 real point lights always in the scene (+ `LPOOL` 6 = 14 point lights on every map).
+  `mlsPoint(col,int,dist,decay)` returns an Object3D marker that maps add instead of a PointLight (`intensity` etc. stay
+  editable, e.g. torch flicker); `mlsTick` (from `updateLights` js/30) moves slots to the nearest markers, fading by rank;
+  `disposeTree` drops markers. Code maps' torches/crystal/castle lights use it. All current maps are Map Builder files
+  with no point lights, so **Map Builder light points (a `light` object exported to `mlsPoint`) are step 5**.
+- Indoor already exists as camera-based zones (`lz`, js/28-fcs-hall.js, MAP-BUILDER "Indoor Light Zone"); `uPtG.y` is
+  the hook for per-pixel indoor dimming later.
+- Gate after step 2: siege 65, tdm 70 (no `|pt2c`, no light-count recipes); the rest is step 4 (code VFX, death
+  dissolve of ShaderMaterials, flash on batched students, Frost Shard Storm, Nature lotus/bark).
+
 ## 4. Fixed budgets
 
 **Light rig (same on every map, whole match):**

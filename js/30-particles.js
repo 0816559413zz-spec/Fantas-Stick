@@ -371,4 +371,5 @@ function updateLights(dt){
     else L.intensity=0;
   }
   LREQ=[];
+  mlsTick(dt);
 }

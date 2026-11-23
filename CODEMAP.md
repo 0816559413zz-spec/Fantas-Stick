@@ -342,20 +342,20 @@ onfOutlineMat:4 onFireFX:6 statusFX:17 fx:44
 §250 overlay: เลือกบัฟ / สรุปผล
 choosePick:251 syncOverlays:256 showOver:277
 
-## js/27-world.js (404) — 
-S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 gl:12
-§20 เงานุ่มแบบ PCSS (contact-hardening): ใกล้จุดสัมผัสคม ไกลจากวัตถุที่บั…
-PCSS:23 scene:50 cam:52 composer:53
-§54 ท่อภาพ (post-processing): ฉาก → ชั้นเอฟเฟกต์นุ่ม (FXPass) → แสงฟุ้ง →…
-rpass:57 fxScene:59 SOFTU:61 SOFT_GLSL:62 FXMATS:64 fxMat:65 softify:67 HAZE_U:72 AOU:76 GFX:82 AO_ON:83 AO_HEAD:84 AO_CALC:88 AO_COPY:102
-§123 TAA (ลบขอบหยักแบบสะสมหลายเฟรม) — กราฟิกสูงเท่านั้น • ปิดด้วย ?notaa
-TAA:126 TAA_FRAG:127 _taaH:142 taaWanted:143 taaBegin:144 taaEnd:152 taaFinish:153 taaResolve:155 AO_RT:165 fxPass:187 bloom:188 GRADEU:195 gradePass:216 aaPass:234
-§236 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
-QUAL:237 QUAL_NAME:238 qualPR:239 applyQuality:245 qualTick:266
-§282 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
-qualCS:286 CULL:287 cullTick:288 texCanvas:299 glowTex:300 stoneTex:301 runeTex:307 glowMats:315 glowMat:316 STONEM:318 stoneMat:319 shadowAll:320 SKY:323 hemi:344 moonL:346 LDIR:350 setSky:351 SKYB:364 skyFollow:365
-§366 เงาตามผู้เล่น
-SHD:370 _shF:371 _shR:371 _shU:371 _shC:371 _shY:371 SHD_DM:375 shadowDepthSplit:376 shadowFollow:381 shadowSoft:401 LPOOL:403
+## js/27-world.js (434) — 
+S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 PTG:15 gl:23
+§31 เงานุ่มแบบ PCSS (contact-hardening): ใกล้จุดสัมผัสคม ไกลจากวัตถุที่บั…
+PCSS:34 scene:61 cam:63 composer:64
+§65 ท่อภาพ (post-processing): ฉาก → ชั้นเอฟเฟกต์นุ่ม (FXPass) → แสงฟุ้ง →…
+rpass:68 fxScene:70 SOFTU:72 SOFT_GLSL:73 FXMATS:75 fxMat:76 softify:78 HAZE_U:83 AOU:87 GFX:93 AO_ON:94 AO_HEAD:95 AO_CALC:99 AO_COPY:113
+§134 TAA (ลบขอบหยักแบบสะสมหลายเฟรม) — กราฟิกสูงเท่านั้น • ปิดด้วย ?notaa
+TAA:137 TAA_FRAG:138 _taaH:153 taaWanted:154 taaBegin:155 taaEnd:163 taaFinish:164 taaResolve:166 AO_RT:176 fxPass:198 bloom:199 GRADEU:206 gradePass:227 aaPass:245
+§247 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
+QUAL:248 QUAL_NAME:249 qualPR:250 applyQuality:256 qualTick:277
+§293 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
+qualCS:297 CULL:298 cullTick:299 texCanvas:310 glowTex:311 stoneTex:312 runeTex:318 glowMats:326 glowMat:327 STONEM:329 stoneMat:330 shadowAll:331 SKY:334 hemi:355 moonL:357 LDIR:361 setSky:362 SKYB:375 skyFollow:376
+§377 เงาตามผู้เล่น
+SHD:381 _shF:382 _shR:382 _shU:382 _shC:382 _shY:382 SHD_DM:386 shadowDepthSplit:387 shadowFollow:392 shadowSoft:412 LPOOL:414 MLS_N:420 MLS:420 mlsPoint:422 _mlsP:424 mlsInScene:425 mlsTick:426
 
 ## js/28-city-build.js (386) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
@@ -415,12 +415,12 @@ terrGeo:508 buildFileMap:516 replaceMeadowTufts:571 tickM:613 TRPAD:614 ARPAD:61
 ## js/28-pnl-build.js (245) — Breakable panels — view (state = PNL in js/12-pnl.js)
 PNV:7 PN_MI:8 PN_GLSL:9 pnlMat:41 PN_RUB:92 PN_HEAP:93 pnlCls:100 PN_ZU:108 pnlGeo:109 pnlBuild:192 pnlSyncOne:212 pnlView:234 pnlFX:237
 
-## js/29-characters.js (440) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
+## js/29-characters.js (441) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
 makeCloak:2 updateCloth:10 wandNamed:34 wandSparks:83
 §92 โมเดลนักเรียนเวทมนตร์
-SHGEO:94 SHMAT:94 SHTEX:94 sGeo:95 sMat:96 bMat:99 matKey:101 bodyPatch:107 BODYM:114 bodyMat:115 plainMat:120 mergeBody:121 sStripe:157 hashStr:158 stripeTex:159 shieldMat:160 addStatus:168 makeStudent:174 makeEnemy:281 keepTex:419 keepMatSet:420 disposeMaterial:421 disposeTree:427 disposeObj:438 PM3:439 EM3:439 JM3:439 clearDyn:440
+SHGEO:94 SHMAT:94 SHTEX:94 sGeo:95 sMat:96 bMat:99 matKey:101 bodyPatch:107 BODYM:114 bodyMat:115 plainMat:120 mergeBody:121 sStripe:157 hashStr:158 stripeTex:159 shieldMat:160 addStatus:168 makeStudent:174 makeEnemy:281 keepTex:419 keepMatSet:420 disposeMaterial:421 disposeTree:427 disposeObj:439 PM3:440 EM3:440 JM3:440 clearDyn:441
 
-## js/30-particles.js (374) — อนุภาค 2 ชั้น: แสงเรือง (additive) + ควัน (normal)
+## js/30-particles.js (375) — อนุภาค 2 ชั้น: แสงเรือง (additive) + ควัน (normal)
 PMAX:2 PGLOW_OCC:6 PLIT:6
 §7 อนุภาคบน GPU (ผู้ใช้ 2026-11-06 ลองเล่นแล้วให้เปิดทุกคน • ?cpup = กลั…
 PGPU:10 PGPU_F:10 PG_U:10 PGPU_HEAD:11 PGPU_DEAD:18 PGPU_MV:19 pgpuGeo:20 makePointSys:24
@@ -644,14 +644,14 @@ GR_NOISE:162 GR_LIVE:167 grLive:186 GR_GLSL_V:196 GR_BEGIN:201 grassMat:253 gras
 §398 สกิลลม → หญ้า (ภาพล้วน เรียกจาก windEfx js/68)
 WIND_GRASS:400 airWind:414
 
-## js/51-warmup.js (309) — 
-WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_SLICE:13 WARM_X:14 WARM_Y:14 warmKeep:16 warmStaticModels:22 glReady:31 warmCompile:32 warmDraw:35 WARM_SKIP:45 warmAssets:48 warmFx:58 warmFxEnd:69 warmGather:71 warmPaths:73 warmFrame:75 warmStep:77 warmCharVariants:135 warmQueue:150 WARM_LOBBY:156 warmLobbyTick:157 warmTick:164
-§171 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
-warmOutline:181
-§198 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
-GWARM:203 gameWarmTick:204 gameWarmFree:237
-§243 Shader never seen before mid-match: compile in the background, hide t…
-SHR:251 shrLights:255 IMZ:260 imzPre:267 imzPost:269 shrRoot:270 shrCollect:271 shrPending:279 shReadyPre:283 shReadyPost:304
+## js/51-warmup.js (306) — 
+WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_SLICE:13 WARM_X:14 WARM_Y:14 warmKeep:16 warmStaticModels:22 glReady:31 warmCompile:32 warmDraw:35 WARM_SKIP:45 warmAssets:48 warmFx:58 warmFxEnd:69 warmGather:71 warmPaths:73 warmFrame:75 warmStep:77 warmCharVariants:135 warmQueue:149 WARM_LOBBY:155 warmLobbyTick:156 warmTick:163
+§170 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
+warmOutline:180
+§197 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
+GWARM:202 gameWarmTick:203 gameWarmFree:236
+§242 Shader never seen before mid-match: compile in the background, hide t…
+SHR:250 shrLights:254 IMZ:259 imzPre:266 imzPost:268 shrRoot:269 shrCollect:270 shrPending:276 shReadyPre:280 shReadyPost:301
 
 ## js/52-social.js (172) — 
 §6 แชท: Enter = พิมพ์ / Enter อีกที = ส่ง / Esc = ปิด • ข้อความขึ้นมุมซ้…
@@ -919,7 +919,7 @@ _dvCyl:259 _dvMat:260 devOverlay:261
 §281 2D overlay map: spawn zones + capture zones + players (click = warp)
 _dvMap:282 _dvY:286 devMapDraw:287
 
-## js/77-paint.js (328) — 
+## js/77-paint.js (320) — 
 PAINT:12 paintOn:22 paintMap:24 paintLights:33
 §42 VFX สีสด (ทดลอง): บนแมพสว่าง เอฟเฟกต์เรืองแสงเดิมซีดเป็นขาว-เหลืองอ่อ…
 _ptHSL:43 paintVivid:44 paintVfx:46
@@ -932,11 +932,11 @@ paintTreeGeo:117 paintCanopy:160 paintKit:164
 §191 tree wind (user 2026-11-23: trees more alive)
 PTW:193 PTW_HEAD:196 PTW_BODY:198 PTW_FS:212 ptWindTick:215
 §219 ลายพู่กันบนผิว (ต่อท้าย onBeforeCompile เดิมของวัสดุ เหมือน js/76)
-PT_VS:220 PT_VS_BODY:221 PT_FS:222 PT_FS_BODY:223 PT_CEL_RE:232 PT_CEL_CHUNK:233 paintPatch:236 paintApply:251 paintSweep:253 paintPre:255
-§256 ฉากของแมพ (เรียกจาก buildFileMap ก่อน brkSetup/batchStatic)
-paintScene:257 paintShafts:272
-§283 ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเร…
-§309 ปรับค่า (tune.html / F8)
+PT_VS:220 PT_VS_BODY:221 PT_FS:222 PT_FS_BODY:223 paintPatch:233 paintApply:247
+§248 ฉากของแมพ (เรียกจาก buildFileMap ก่อน brkSetup/batchStatic)
+paintScene:249 paintShafts:264
+§275 ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเร…
+§301 ปรับค่า (tune.html / F8)
 
 ## js/78-dev-ui.js (246) — Dev Mode UI (user 2026-11-20): one floating window, many small column…
 §10 orbit camera
@@ -951,4 +951,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(117 files, 35423 lines)
+(117 files, 35444 lines)

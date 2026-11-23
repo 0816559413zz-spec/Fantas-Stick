@@ -427,6 +427,7 @@ function disposeMaterial(m,keep){
 function disposeTree(root){
   const keep=keepMatSet(),seen=new Set();
   root.traverse(o=>{
+    if(o.isMapLight)MLS.pts.delete(o);   // map light slot marker (js/27)
     if(o.isInstancedMesh)o.dispose();
     if(o.geometry&&o.geometry!==projGeo&&o.geometry!==tailGeo&&!(o.geometry.userData&&o.geometry.userData.keep))o.geometry.dispose();
     if(o.material)for(const m of [].concat(o.material))if(!seen.has(m)){seen.add(m);disposeMaterial(m,keep);}

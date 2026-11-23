@@ -230,7 +230,7 @@ function fcsDecoKit(){
     const g=new THREE.PlaneGeometry(w,h,1,4);g.translate(0,-h/2,0);const p=g.attributes.position;for(let i=0;i<p.count;i++){const y=p.getY(i);p.setZ(i,Math.sin(y*1.3)*0.08);}
     const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.rotation.y=a;o.castShadow=true;addW(o);
     const gb=new THREE.Mesh(sGeo(THREE.BoxGeometry,w+0.2,0.12,0.12),new THREE.MeshStandardMaterial({color:'#c9a24a',metalness:0.6,roughness:0.4}));gb.position.set(x,y,z);gb.rotation.y=a;addW(gb);}
-  for(const [x,y,z] of lights){const L=new THREE.PointLight('#ffb36a',FCSC.pl,46,1.4);L.position.set(x,y,z);addW(L);}
+  for(const [x,y,z] of lights){const L=mlsPoint('#ffb36a',FCSC.pl,46,1.4);L.position.set(x,y,z);addW(L);}
   if(Object.keys(dn).length)fcsCastleDressing(dn,mats.wood,mats.iron);
   }};
 }

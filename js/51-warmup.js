@@ -29,7 +29,7 @@ function warmStaticModels(names){for(const name of new Set(names.filter(Boolean)
 // (compile ตอน RT = null ได้ program อีกแบบ (srgb + ACES) ที่เกมไม่ได้ใช้ → ยังกระตุกตอนใช้จริงอยู่ดี)
 // รอการ์ดจอ compile เสร็จแบบไม่ค้างหน้าจอ (KHR_parallel_shader_compile) แล้วค่อยวาด: วาดก่อนเสร็จ = CPU ค้างรอ 100-300 ms
 function glReady(max){const t0=performance.now();return new Promise(res=>{const chk=()=>{let ok=true;try{ok=gl.info.programs.every(p=>p.isReady());}catch(e){}if(ok||performance.now()-t0>(max||4000))res();else setTimeout(chk,30);};chk();});}
-function warmCompile(scenes){paintPre(scene,WARM.hold);const prev=gl.getRenderTarget();gl.setRenderTarget(composer.renderTarget1);
+function warmCompile(scenes){const prev=gl.getRenderTarget();gl.setRenderTarget(composer.renderTarget1);
   try{for(const sc of scenes){sc.traverse(o=>{if(o.isMesh&&!Array.isArray(o.material))flatMark(o.material,o.geometry);});gl.compile(sc,cam);}return [glReady()];}finally{gl.setRenderTarget(prev);}}   // compile (ไม่ใช่ compileAsync): r160 compileAsync โยน isReady of undefined ถ้าวัสดุไม่มี program → ค้างรอ 4 วิทุกแมตช์ • ไดรเวอร์ compile ขนานอยู่แล้ว
 // compile อย่างเดียวไม่ส่ง vertex/index buffer ขึ้น GPU: วาดลงภาพเล็กที่ไม่แสดงไว้ด้วย
 function warmDraw(){
@@ -75,7 +75,7 @@ function warmPaths(v){const s=new Set();for(const p of (v&&v.P)||[]){const k=get
 const warmFrame=requestAnimationFrame.bind(window);
 // งาน 1 ขั้น: 'common' / 'fx:<สาย>' / 'reg:<สาย>:<i>' / 'compile'
 function warmStep(step){
-  if(step==='compile'){WARM.busy=true;const t0=performance.now(),jobs=[];paintPre(scene,WARM.hold);
+  if(step==='compile'){WARM.busy=true;const t0=performance.now(),jobs=[];
     const fin=()=>{try{warmDraw();}catch(e){console.warn('warm draw',e);}WARM.busy=false;WARM.log.push('compile/upload '+(performance.now()-t0).toFixed(0)+'ms');};
     // compile in ~5 ms slices, one per frame (2026-11-22): the one-shot compile of scene + fxScene + hold froze the lobby/countdown
     //   for 0.6–1.5 s. three's compile() visits materials whether visible or not, so nothing has to be un-hidden; lights come from the
@@ -141,7 +141,6 @@ function warmCharVariants(){
     ['dark',src=>stDarkTintMat(src,false,one,one),()=>true],['darkS',src=>stDarkTintMat(src,true,one,one),()=>true]];
   const roots=[...PM3.values(),...GWARM.chars.values()];
   for(const o of roots){const r=o&&o.g;if(!r||!o.fileModel)continue;   // whole actor: body + wand + darkness gear (scythe) etc.
-    if(r.parent===scene||!r.parent)paintPre(r);   // painterly cel first, so the clones carry the same key as the live ones
     r.traverse(m=>{if(!m.isMesh||m.isInstancedMesh||!m.material||Array.isArray(m.material)||m.material.isShaderMaterial)return;const src=m.material;
       const base=(m.isSkinnedMesh?'S':'M')+src.type+'|'+src.customProgramCacheKey()+'|'+src.transparent+src.side+!!src.map+!!src.normalMap+!!src.emissiveMap+!!src.alphaMap+(src.vertexColors?1:0)+!!m.geometry.attributes.color;
       for(const [n,mk,ok] of V){if(!ok(m))continue;const k=n+'|'+base;if(WARM.cv.has(k))continue;WARM.cv.add(k);
@@ -215,7 +214,7 @@ function gameWarmTick(dt){
     // compile (ไม่ใช่ compileAsync): three r160 compileAsync พังถ้าวัสดุบางชิ้นไม่มี program (isReady of undefined) • ไดรเวอร์ compile ขนานอยู่แล้ว (KHR_parallel_shader_compile)
     //   ฉากเกมกับ fxScene คนละเฟรม (กันห้องสะดุดทีเดียวนาน)
     const comp=sc=>{const pr0=gl.getRenderTarget();gl.setRenderTarget(composer.renderTarget1);try{gl.compile(sc,cam);}finally{gl.setRenderTarget(pr0);}};
-    paintPre(scene);try{comp(scene);}finally{for(const o of hid)o.visible=false;}
+    try{comp(scene);}finally{for(const o of hid)o.visible=false;}
     setTimeout(()=>{const h2=[];fxScene.traverse(o=>{if(!o.visible&&!o.isLight){o.visible=true;h2.push(o);}});try{comp(fxScene);}catch(e){}for(const o of h2)o.visible=false;},120);
     const fin=()=>{setTimeout(()=>{   // วาดครั้งเดียว (เฟรมถัดไป ไม่ซ้อนกับ compile)
       try{if(screen==='lobby'){
@@ -269,10 +268,8 @@ function imzPre(){if(!IMZ.on)return;if(--IMZ.scan<=0){IMZ.scan=120;for(const r o
 function imzPost(){const H=IMZ.hid;if(!H.length)return;for(let i=0;i<H.length;i++)H[i].visible=true;H.length=0;}
 function shrRoot(o){while(o.parent)o=o.parent;return o;}
 function shrCollect(o){const m=o.material;
-  if(m){for(const x of Array.isArray(m)?m:[m]){if(!x)continue;
-    const pt=SHR.pt&&x.isMeshStandardMaterial&&!x.userData.pt;if(pt){paintPatch(x,false);x.userData.shr=0;}   // painterly cel: patch before compile (was paintSweep later = second compile in the fight)
-    if(x.userData.shr===1)continue;if(SHR.pend.has(x)){SHR.sib.push(o);continue;}   // another object already compiling this material: it waits too
-    if(!pt&&gl.properties.get(x).currentProgram!==undefined){x.userData.shr=1;continue;}
+  if(m){for(const x of Array.isArray(m)?m:[m]){if(!x||x.userData.shr===1)continue;if(SHR.pend.has(x)){SHR.sib.push(o);continue;}   // another object already compiling this material: it waits too
+    if(gl.properties.get(x).currentProgram!==undefined){x.userData.shr=1;continue;}
     if(o.isMesh)flatMark(x,o.geometry);SHR.pend.set(x,{t:0,pg:null});if(SHR.list[SHR.list.length-1]!==o)SHR.list.push(o);}}
   const c=o.children;for(let i=0;i<c.length;i++)shrCollect(c[i]);}
 // material still linking? (polls at most one program per frame)
@@ -289,7 +286,7 @@ function shReadyPre(){
       if(r===scene||r===fxScene){SHR.retry.delete(o);let L=per.get(r);if(!L)per.set(r,L=[]);L.push(o);}
       else{const n=(SHR.retry.get(o)||0)+1;if(n<30){SHR.retry.set(o,n);SHR.q.push(o);}else SHR.retry.delete(o);}}   // built first, put in the scene later
     const prev=gl.getRenderTarget();
-    for(const [sc,L] of per){SHR.list.length=0;SHR.pt=!!(PAINT&&PAINT.cur)&&sc===scene;for(const o of L)shrCollect(o);if(!SHR.list.length)continue;
+    for(const [sc,L] of per){SHR.list.length=0;for(const o of L)shrCollect(o);if(!SHR.list.length)continue;
       const before=new Set(gl.info.programs),vis=SHR.list.map(o=>o.visible);for(const o of SHR.list)o.visible=true;
       gl.setRenderTarget(composer.renderTarget1);try{gl.compile(SHR.fake,cam,shrLights(sc,now));}catch(err){console.warn('shReady',err);}finally{gl.setRenderTarget(prev);}
       SHR.list.forEach((o,i)=>{o.visible=vis[i];let w=false;

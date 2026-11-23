@@ -8,6 +8,17 @@ const CITY_KERB=0.14;
 function cityKerb(x,y){const Z=MAPID==='city'&&MAPS.city&&MAPS.city.zones;if(!Z)return 0;for(const z of Z)if(x>=z.x&&x<=z.x+z.w&&y>=z.y&&y<=z.y+z.d)return CITY_KERB;return 0;}
 const GY=(x,y)=>TERR?terrT(x,y):cityKerb(x,y),TW=(X,Z)=>TERR?terrT(X*20+MW/2,Z*20+MH/2):cityKerb(X*20+MW/2,Z*20+MH/2);
 const hdr=(c,k)=>new THREE.Color(c).multiplyScalar(k);
+// Shared lighting extras for every Standard/Physical program (guides/PRELOAD-STANDARD.md step 2), set before anything compiles:
+// one recipe on every map, no per-material patch. PTG.x = painterly cel strength (0 = smooth, js/77 sets it per map),
+// PTG.y = sky/ambient/env dim for indoor areas (0 = none; zones come later). Plain object, not a Vector4: three's cloneUniforms
+// copies it by reference, so every material reads the live value. Custom shaders without the uniform read 0 = unchanged.
+const PTG={x:0,y:0,z:0,w:0};
+{const C=THREE.ShaderChunk,re=/float dotNL = saturate\( dot\( (geometryNormal|geometry\.normal), directLight\.direction \) \);(\s*)vec3 irradiance = dotNL \* directLight\.color;/;
+  const lp=C.lights_physical_pars_fragment.replace(re,(m,n,ws)=>'float dotNL = dot( '+n+', directLight.direction );dotNL=mix(saturate(dotNL),smoothstep(0.0,0.07,dotNL)*0.6+smoothstep(0.5,0.57,dotNL)*0.4,uPtG.x);'+ws+'vec3 irradiance = dotNL * directLight.color;');
+  if(lp===C.lights_physical_pars_fragment)console.warn('PTG: cel hook not found in lights_physical_pars_fragment');
+  C.lights_physical_pars_fragment='uniform vec4 uPtG;\n'+lp;
+  C.lights_fragment_end='#if defined( STANDARD )\n{float ptSky=1.0-uPtG.y;\n#if defined( RE_IndirectDiffuse )\nirradiance*=ptSky;iblIrradiance*=ptSky;\n#endif\n#if defined( RE_IndirectSpecular )\nradiance*=ptSky;\n#endif\n}\n#endif\n'+C.lights_fragment_end;
+  for(const k of ['standard','physical'])THREE.ShaderLib[k].uniforms.uPtG={value:PTG};}
 // antialias ปิดไว้: ภาพผ่าน EffectComposer (render target) อยู่แล้ว MSAA ของ canvas จึงไม่ช่วยอะไร แค่กินแรง
 const gl=new THREE.WebGLRenderer({canvas:document.getElementById('gl'),antialias:false,powerPreference:'high-performance'});
 // ตรวจ error ของ shader ทุกตัวที่ compile = บังคับ CPU รอการ์ดจอ compile เสร็จ (getProgramInfoLog ~3% ของเฟรมตอนสู้กัน) → ปิด ยกเว้น ?debug
@@ -402,3 +413,22 @@ function shadowSoft(c){c=c||moonL.shadow.camera;moonL.shadow.radius=PCSS.on&&QUA
 // ไฟชั่วคราวสำหรับคาถา (pool คงที่ ไม่ต้อง compile shader ใหม่)
 const LPOOL=[];
 for(let i=0;i<6;i++){const L=new THREE.PointLight('#ffffff',0,12,2);L.position.set(0,-100,0);scene.add(L);LPOOL.push(L);}
+// Map light slots (guides/PRELOAD-STANDARD.md §4): every map has the same MLS_N real point lights, so the shader recipe never
+// depends on the map. Maps place light points with mlsPoint() (an Object3D marker added to the world like a light, with
+// intensity/color/distance/decay); each frame the slots go to the points nearest the camera, fading in/out by rank (mlsTick,
+// from updateLights js/30). Points in worlds that are not in the scene (cached maps) are skipped. Never cast shadows.
+const MLS_N=8,MLS={L:[],pts:new Set(),fade:3};
+for(let i=0;i<MLS_N;i++){const L=new THREE.PointLight('#ffffff',0,1,2);L.position.set(0,-100,0);scene.add(L);MLS.L.push(L);}
+function mlsPoint(col,int,dist,decay){const o=new THREE.Object3D();o.name='map light';o.isMapLight=true;
+  o.color=new THREE.Color(col);o.intensity=int;o.distance=dist;o.decay=decay===undefined?2:decay;o.mlsW=0;MLS.pts.add(o);return o;}
+const _mlsP=new THREE.Vector3();
+function mlsInScene(o){for(let q=o,k=0;q&&k<12;q=q.parent,k++)if(q===scene)return true;return false;}
+function mlsTick(dt){
+  const C=[];for(const o of MLS.pts){if(!o.parent){continue;}if(!mlsInScene(o)){o.mlsW=0;continue;}o.getWorldPosition(_mlsP);
+    const d=_mlsP.distanceToSquared(cam.position);o.mlsD=d;o.mlsX=_mlsP.x;o.mlsY=_mlsP.y;o.mlsZ=_mlsP.z;C.push(o);}
+  C.sort((a,b)=>a.mlsD-b.mlsD);
+  const k=Math.min(1,dt*MLS.fade);for(let i=0;i<C.length;i++){const o=C[i];o.mlsW+=((i<MLS_N?1:0)-o.mlsW)*k;}
+  const U=C.filter(o=>o.mlsW>0.01).sort((a,b)=>b.mlsW-a.mlsW||a.mlsD-b.mlsD);
+  for(let i=0;i<MLS_N;i++){const L=MLS.L[i],o=U[i];
+    if(o){L.position.set(o.mlsX,o.mlsY,o.mlsZ);L.color.copy(o.color);L.intensity=o.intensity*o.mlsW;L.distance=o.distance;L.decay=o.decay;}
+    else L.intensity=0;}}

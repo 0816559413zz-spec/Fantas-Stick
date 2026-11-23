@@ -161,7 +161,7 @@ function buildCastle(){
     TORCHES.push({fl:fl2,x,z,ph:Math.random()*10});
   }
   [[-20,-1],[20,-1],[-20,1],[20,1]].forEach(([x,sz],i)=>{
-    const L=addW(new THREE.PointLight('#ff9a40',1.4,26,2));L.position.set(x,4,sz*(hh-1));TORCHES[i].light=L;
+    const L=addW(mlsPoint('#ff9a40',1.4,26,2));L.position.set(x,4,sz*(hh-1));TORCHES[i].light=L;
   });
   for(const c of OBS){
     const r=c.r*S3,g=new THREE.Group(),m=stoneMat(3,3);
@@ -384,7 +384,7 @@ function buildForest(){
   const cr=new THREE.Mesh(new THREE.OctahedronGeometry(1.1,0),new THREE.MeshStandardMaterial({color:'#7fe8ff',emissive:hdr('#3fc8ff',1.6),roughness:0.2,metalness:0.1,flatShading:true}));
   cr.scale.set(1,1.7,1);CRYSTAL.add(cr);
   const cg=new THREE.Sprite(glowMat('#5fd8ff',1.4));cg.scale.setScalar(7);CRYSTAL.add(cg);
-  const cL=new THREE.PointLight('#5fd8ff',2.2,30,2);CRYSTAL.add(cL);
+  const cL=mlsPoint('#5fd8ff',2.2,30,2);CRYSTAL.add(cL);
   CRYSTAL.position.set(0,7,0);
 
   // หญ้า พุ่มไม้ เห็ดเรืองแสง

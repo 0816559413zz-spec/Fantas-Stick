@@ -16,7 +16,7 @@ var PAINT={on:!/[?&]nopaint\b/.test(location.search),cur:null,kit:null,
     forest:{sky:'day',fog:['#9fdccc',30,260],look:'paint',weather:'clear:100',
     back:{near:{col:'#4a8a3c',col2:'#35703a'},trees:{col:['#2f6e3c','#3d8440','#28603a']},mid:{col:'#5f9c88',lit:'#b4dcb0',tint:'#8cc4a6'},
       mist:[{d:235,h:45,col:'#d4f0dc',a:0.6}],far:{col:'#8cbcc0',lit:'#e0f4e0',tint:'#b0dcd0',snow:'#f6fff4'}}}},
-  cel:1,vivid:1,fxcel:1,blob:1,blobThr:0.42,blobSize:1.45,bloom:0.4,U:{tPt:{value:null},uPt:{value:new THREE.Vector4(1/3.2,1/9,0.5,0.6)},uPtCel:{value:0}},
+  cel:1,vivid:1,fxcel:1,blob:1,blobThr:0.42,blobSize:1.45,bloom:0.4,U:{tPt:{value:null},uPt:{value:new THREE.Vector4(1/3.2,1/9,0.5,0.6)}},
   KU:{tDiffuse:{value:null},uPx:{value:new THREE.Vector2(1,1)},uR:{value:1.0},uK:{value:1}}};
 PAINT.relight=id=>paintLights(id||builtMap);   // debug: re-apply lights after tuning PAINT.maps[id]
 function paintOn(id){return !!(PAINT&&PAINT.on&&SET.paint&&PAINT.maps[id]);}   // SET.paint = Settings > Graphics (applies on next map load)
@@ -34,10 +34,10 @@ function paintLights(id){
   if(!PAINT)return;PAINT.cur=paintOn(id)?id:null;
   if(PAINT.pass)PAINT.pass.enabled=!!PAINT.cur&&PAINT.kuw>0&&QUAL.mode!=='low';
   paintGrass();paintVfx();
-  if(!PAINT.cur){GRADEU.uSat.value=1.1;PAINT.U.uPtCel.value=0;return;}
+  if(!PAINT.cur){GRADEU.uSat.value=1.1;PTG.x=0;return;}
   hemi.color.set('#86dcea');hemi.groundColor.set('#4f9a58');const mo=PAINT.maps[PAINT.cur]||{};hemi.intensity=mo.hemi!==undefined?mo.hemi:LOOK.P.paint.hemi;   // per-map overrides: sun / hemi / exp / ground
   moonL.color.set('#fff0bc');moonL.intensity=mo.sun!==undefined?mo.sun:PAINT.sun;if(mo.exp!==undefined)gl.toneMappingExposure=mo.exp;GRADEU.uSat.value=PAINT.sat;
-  PAINT.KU.uK.value=PAINT.kuw;PAINT.U.uPtCel.value=PAINT.cel;
+  PAINT.KU.uK.value=PAINT.kuw;PTG.x=PAINT.cel;
 }
 // ---------- VFX สีสด (ทดลอง): บนแมพสว่าง เอฟเฟกต์เรืองแสงเดิมซีดเป็นขาว-เหลืองอ่อน → ดันความสด + กดสีซีดให้เข้ม, ไฟไล่ เหลือง→ส้ม→แดง→ม่วงแดง, แสงฟุ้งเบาลง ----------
 const _ptHSL={h:0,s:0,l:0};
@@ -171,7 +171,7 @@ function paintKit(){
     sh.vertexShader=PTW_HEAD+'varying float vPtLeaf;varying vec3 vPtWP;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n'+PTW_BODY+'vPtLeaf=uv.x>0.5?1.0:0.0;')
       .replace('#include <worldpos_vertex>','#include <worldpos_vertex>\n vPtWP=(modelMatrix*vec4(transformed,1.0)).xyz;');
     sh.fragmentShader='uniform vec3 uPtSun;uniform vec3 uPtSunC;uniform float uPtTr;varying float vPtLeaf;varying vec3 vPtWP;\n'+sh.fragmentShader.replace('#include <opaque_fragment>',PTW_FS+'#include <opaque_fragment>');};
-  mat.customProgramCacheKey=()=>'ptree2';paintPatch(mat,false);
+  mat.customProgramCacheKey=()=>'ptree2';
   const dmat=new THREE.MeshDepthMaterial({depthPacking:THREE.RGBADepthPacking,map,alphaTest:0.42});dmat.userData.keep=true;   // shadows sway with the tree
   dmat.onBeforeCompile=sh=>{Object.assign(sh.uniforms,PTW.U);sh.vertexShader=PTW_HEAD+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n'+PTW_BODY);};dmat.customProgramCacheKey=()=>'ptreeD';
   const tree=[
@@ -228,31 +228,23 @@ const PT_FS_BODY=`
  pc=mix(pc,pc*vec3(0.7,0.96,1.14),smoothstep(-0.04,-0.26,ps)*uPt.w);
  diffuseColor.rgb=pc;}
 `;
-// แสงแบบ cel-shade: แสงตรง (แดด/ไฟ) ตัดเป็น 2 แถบ (เงา / กลาง / สว่าง) แทนไล่เฉดเรียบ — แก้ในสูตรแสงของวัสดุ Standard, uPtCel = ความแรง (0 = แสงเดิม)
-const PT_CEL_RE=/float dotNL = saturate\( dot\( (geometryNormal|geometry\.normal), directLight\.direction \) \);(\s*)vec3 irradiance = dotNL \* directLight\.color;/;
-const PT_CEL_CHUNK=THREE.ShaderChunk.lights_physical_pars_fragment.replace(PT_CEL_RE,(m,n,ws)=>'float dotNL = dot( '+n+', directLight.direction );dotNL=mix(saturate(dotNL),smoothstep(0.0,0.07,dotNL)*0.6+smoothstep(0.5,0.57,dotNL)*0.4,uPtCel);'+ws+'vec3 irradiance = dotNL * directLight.color;');
-PAINT.celOk=PT_CEL_CHUNK!==THREE.ShaderChunk.lights_physical_pars_fragment;
-// ใส่ลุคภาพวาดให้วัสดุ: strokes = ลายพู่กัน (เฉพาะชิ้นแมพ) • cel ใส่ทุกชิ้น (รวมตัวละคร/ของประกอบฉาก — paintSweep)
+// cel-shade lives in the shared lighting chunk (js/27 PTG.x) — no per-material patch, no extra shader recipes
+// brush strokes on map pieces only (paintScene, before warm-up); cel is shared (js/27)
 function paintPatch(m,strokes){
-  if(!m||!m.isMeshStandardMaterial||m.userData.pt)return m;
-  if(strokes&&(m.transparent||m.alphaTest||/water|glass|sky|glow|emit|ice|fire|paint_tree/i.test(m.name||'')))strokes=false;
-  m.userData.pt=strokes?2:1;
+  if(!strokes||!m||!m.isMeshStandardMaterial||m.userData.pt)return m;
+  if(m.transparent||m.alphaTest||/water|glass|sky|glow|emit|ice|fire|paint_tree/i.test(m.name||''))return m;
+  m.userData.pt=2;
   const prior=m.onBeforeCompile,def=THREE.Material.prototype.onBeforeCompile,pk=m.customProgramCacheKey,pkDef=THREE.Material.prototype.customProgramCacheKey;
   m.onBeforeCompile=function(sh,r){
     if(prior&&prior!==def)prior.call(this,sh,r);
     Object.assign(sh.uniforms,PAINT.U);
     let f=sh.fragmentShader;
-    if(PAINT.celOk&&f.includes('#include <lights_physical_pars_fragment>'))f='uniform float uPtCel;\n'+f.replace('#include <lights_physical_pars_fragment>',PT_CEL_CHUNK);
-    if(strokes){sh.vertexShader=PT_VS+sh.vertexShader.replace('#include <project_vertex>','#include <project_vertex>'+PT_VS_BODY);
+    {sh.vertexShader=PT_VS+sh.vertexShader.replace('#include <project_vertex>','#include <project_vertex>'+PT_VS_BODY);
       f=PT_FS+f.replace('#include <alphatest_fragment>',PT_FS_BODY+'#include <alphatest_fragment>');}
     sh.fragmentShader=f;};
-  m.customProgramCacheKey=function(){return (pk&&pk!==pkDef?pk.call(this):(prior&&prior!==def?prior.toString().length:''))+'|pt2'+(strokes?'s':'c');};
+  m.customProgramCacheKey=function(){return (pk&&pk!==pkDef?pk.call(this):(prior&&prior!==def?prior.toString().length:''))+'|pt2s';};
   m.needsUpdate=true;return m;}
 function paintApply(m){return paintPatch(m,true);}
-// กวาดทั้งฉากเป็นระยะ (เฉพาะตอนอยู่แมพภาพวาด): วัสดุใหม่ที่ยังไม่มี cel (ตัวละคร, prop, ชิ้นที่เกิดทีหลัง) → ใส่
-function paintSweep(root){(root||scene).traverse(o=>{if(!o.isMesh)return;const M=o.material;if(Array.isArray(M)){for(const m of M)if(m&&!m.userData.pt)paintPatch(m,false);}else if(M&&!M.userData.pt)paintPatch(M,false);});}
-// before any warm-up/first compile: patch now so the cel program is the one compiled ahead (patching after = recompile mid-match = freeze)
-function paintPre(...roots){if(!PAINT||!PAINT.cur)return;for(const r of roots)if(r)paintSweep(r);}
 // ---------- ฉากของแมพ (เรียกจาก buildFileMap ก่อน brkSetup/batchStatic) ----------
 function paintScene(id,sc){
   if(!paintOn(id))return;const K=paintKit();let n=0;
@@ -298,7 +290,7 @@ class PaintPass extends Pass{
         'b=b/max(1.0-dot(b,LW),0.02);if(!(b.r+b.g+b.b>=0.0))b=src;'+
         'gl_FragColor=vec4(mix(src,b,uK),1.0);}'}));}
   render(r,write,read){const U=PAINT.KU;U.tDiffuse.value=read.texture;U.uPx.value.set(1/read.width,1/read.height);U.uR.value=PAINT.kuwR*Math.max(1,read.height/720);U.uK.value=typeof screen==='string'&&screen!=='game'?0:PAINT.kuw;
-    PAINT.T.value=performance.now()*0.001;ptWindTick();paintGrass();if(PAINT.cur&&(PAINT.fr=(PAINT.fr||0)+1)%30===1)paintSweep();
+    PAINT.T.value=performance.now()*0.001;ptWindTick();paintGrass();
     r.setRenderTarget(this.renderToScreen?null:write);this.q.render(r);}
 }
 PAINT.pass=new PaintPass();PAINT.pass.enabled=false;

@@ -322,7 +322,7 @@ function deathDissolve(sources){
   root.name='Player death dissolve';
   const fade={value:1};
   for(const source of sources){
-    if(!source)continue;
+    if(!source||!source.isObject3D)continue;   // fx layers may hold non-Object3D handles
     source.updateWorldMatrix(true,true);
     source.traverseVisible(part=>{
       if(seen.has(part)||!part.material||!part.layers.test(cam.layers)||part.isSkinnedMesh||

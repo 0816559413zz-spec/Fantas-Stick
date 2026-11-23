@@ -151,4 +151,4 @@ function perfPanel(){PERF.pan.innerHTML=perfRows().map(([k,v])=>`<div><b>${k}</b
 function perfText(){return '[Fantas Stick perf '+new Date().toISOString().slice(0,16).replace('T',' ')+' '+navigator.userAgent.replace(/^.*?\) /,'').slice(0,60)+']\n'+perfRows().map(([k,v])=>k+': '+String(v).replace(/<[^>]+>/g,'')).join('\n');}
 // F3 = เปิด/ปิดแผงข้อมูล (ไม่ทับปุ่มเกม: F1–F12 ยังไม่ถูกใช้)
 addEventListener('keydown',e=>{if(e.code!=='F3')return;e.preventDefault();SET.stats=SET.stats?0:1;try{saveSet();}catch(_){}});
-if(window.WD){window.WD.perf=PERF;window.WD.perfText=perfText;window.WD.FRZ=FRZ;window.WD.SHW=SHW;window.WD.shwFrame=shwFrame;window.WD.PATHS=PATHS;window.WD.MODES=MODES;window.WD.getKit=getKit;if(!('builtMap' in window.WD))Object.defineProperty(window.WD,'builtMap',{get:()=>builtMap});}
+if(window.WD){window.WD.perf=PERF;window.WD.perfText=perfText;window.WD.FRZ=FRZ;window.WD.SHW=SHW;window.WD.shwFrame=shwFrame;window.WD.PATHS=PATHS;window.WD.MODES=MODES;window.WD.MLS=MLS;window.WD.mlsPoint=mlsPoint;window.WD.getKit=getKit;if(!('builtMap' in window.WD))Object.defineProperty(window.WD,'builtMap',{get:()=>builtMap});}
