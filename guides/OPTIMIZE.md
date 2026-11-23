@@ -8,7 +8,7 @@ Priority: **P1** = real bug or big win, **P2** = clear win, **P3** = nice to hav
 
 ## 2026-11-23 Preload standard
 
-Shader compiles (not downloads) cause the fight/match-start freezes. Rules for every system and the graphics/perf plan (registry, entry loader, mid-match compile detector, fixed light rig, painterly in assets): `guides/PRELOAD-STANDARD.md`.
+Shader compiles (not downloads) cause the fight/match-start freezes. Rules for every system and the graphics/perf plan (registry, entry loader, mid-match compile detector, fixed light rig, painterly in assets): `guides/PRELOAD-STANDARD.md`. Gate: `node tools/shader-gate.js` (mid-match shaders must be 0; baseline 45–76 per run).
 
 ## 2026-11-22 map and combat rendering
 
