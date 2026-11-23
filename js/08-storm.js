@@ -23,7 +23,7 @@ function stormBasic(p,inp,dt,setCd){
   const prev=p.bfPrev;p.bfPrev=inp.fire;
   // โล่สายฟ้า: คลิกขวา (กดครั้งเดียว) เปิด / กดอีกครั้งระเบิด — ใช้ได้ทุกเวลา รวมระหว่างอัลติ (ผู้ใช้ 2026-11-16) • bash=1 = มีประจุ Dash ชน 1 ครั้งต่อการกาง
   const shP=inp.sh&&!p.shPrv;p.shPrv=inp.sh;
-  if(shP){if(p.stS)stormShieldBlast(p);else if(!(p.stCd>0)){p.stS={t:STORMV.shieldT,abs:0,bash:1};emit({k:'efx',z:'ston',x:p.x,y:p.y,h:p.z,id:p.id});}}
+  if(shP&&!SHIELD_OFF){if(p.stS)stormShieldBlast(p);else if(!(p.stCd>0)){p.stS={t:STORMV.shieldT,abs:0,bash:1};emit({k:'efx',z:'ston',x:p.x,y:p.y,h:p.z,id:p.id});}}
   p.bTg=0;
   if(p.sdome){if(p.sdome.ph===2&&inp.fire&&!prev)stormDomeFire(p);p.beam=0;return;}
   if(p.rail||p.slnT>0){p.beam=0;return;}
