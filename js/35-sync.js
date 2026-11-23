@@ -145,11 +145,15 @@ const JUMP_LEGS={
   land: [-.43,-.28,-.12,.11,.54,.57,.15,-.07,.61,0,.20]
 };
 function jumpLegPose(o,p,dt,locked){
-  if(locked||p.dn||p.fl||p.st||p.gh||p.ds||p.df||o.dp||o.wsl||o.rag){o.jumpLegs=null;return 0;}
+  if(locked||p.dn||p.fl||p.st||p.gh||p.ds||p.df||p.hv||p.co||o.dp||o.wsl||o.rag){o.jumpLegs=null;return 0;}
   const phase=p.ja||0;
   if(!phase&&!o.jumpLegs)return 0;
   const J=o.jumpLegs||(o.jumpLegs={phase:0,time:0,p:Float32Array.from(JUMP_LEGS.push),weight:0,land:0});
-  if(!phase&&J.phase===2&&p.z<=groundH(p.x,p.y,p.z)+.11)J.land=.17;
+  if(!phase&&J.phase){
+    // A movement skill can take over before the character touches down.
+    if(p.z>groundH(p.x,p.y,p.z)+.11){o.jumpLegs=null;return 0;}
+    if(J.phase===2)J.land=.17;
+  }
   if(phase)J.land=0;
   J.time=phase===J.phase?J.time+dt:0;J.phase=phase;
   let start=JUMP_LEGS.land,end=start,u=1;
