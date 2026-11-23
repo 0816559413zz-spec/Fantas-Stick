@@ -58,9 +58,16 @@ function netSendSnap(s){
     while(bytes>NET_MAX&&s.J?.length){s.J=s.J.slice(0,s.J.length>>1);bytes=sz();}
     NETD.trim=(NETD.trim|0)+1;
   }
-  sendAll(m);
+  // Backpressure: a peer whose send queue is backed up skips this snapshot (else the queue grows to seconds of lag = long freezes on that PC)
+  let skip=0;
+  for(const c of NET.conns.values()){if(!c.open)continue;
+    const q=(c.dataChannel?.bufferedAmount||0);
+    if(q>NET_QMAX||c.bufferSize>0){skip++;frzNote('q',q,c);continue;}
+    try{c.send(m);}catch(e){}}
+  if(skip)netDeltaReset();   // skipped peers missed a delta → next snapshot sends full map state
   if(SET.stats)perfNetSend(bytes,trimmed);
 }
+const NET_QMAX=64*1024;   // ~4–20 snapshots queued = already ~0.5 s behind on a slow link
 // ลูกข่าย: เติมกลับเป็นสตริงเต็มก่อนเข้า onSnap (snapApply/brkParse/pnlParse ใช้แบบเดิม)
 const NETU={};
 function netUndelta(s){
@@ -182,7 +189,7 @@ function clientOnData(d){
     case 'lobby':onLobby(d);break;
     case 'start':VIEW.prev=VIEW.cur=null;sbufReset();setScreen('game');break;
     case 'po':{const r=performance.now()-d.c;NET.rtt=NET.rtt?NET.rtt*0.8+r*0.2:r;break;}   // ปิงไป-กลับ (เฉลี่ยนุ่ม ๆ)
-    case 's':if(SET.stats)perfNetReceive();if(screen!=='game')setScreen('game');unpackP(d.s);netUndelta(d.s);onSnap(d.s);break;
+    case 's':frzRecv();if(SET.stats)perfNetReceive();if(screen!=='game')setScreen('game');unpackP(d.s);netUndelta(d.s);onSnap(d.s);break;
     case 'priv':onPriv(d.m);break;
   }
 }

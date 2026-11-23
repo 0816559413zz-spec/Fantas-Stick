@@ -65,6 +65,7 @@ function hostOnData(conn,d){
   if(d.t==='chat'){chatRelay(id,d.m);return;}
   if(d.t==='emo'){emoHost(id,d.e);return;}
   const p=G.players[id];if(!p)return;
+  if(d.t==='in')frzIn(conn,p);
   if(d.t==='in'&&d.i&&d.i.c&&typeof d.i.c==='object'){const i=d.i;for(const k of INPN)if(i[k]!==undefined&&!Number.isFinite(i[k]))delete i[k];p.inp=i;}   // ค่าเล็งที่ไม่ใช่ตัวเลข = ตัด (กัน NaN ลามทั้งเกม)
   else if(d.t==='team'&&G.ph==='lobby'){p.lteam^=1;broadcastLobby();}
   else if(d.t==='kit'&&(G.ph==='lobby'||G.mode==='train')){setKit(p,String(d.k||'').slice(0,24));broadcastLobby();}
