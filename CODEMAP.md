@@ -869,8 +869,8 @@ dive:196 PA:197 TA:198 DIVE_DOWN:200 DIVE_POUR:200 DIVE_STEP:200 diveDist:201 la
 §459 เล่น
 WDG_YAW:460 wdgGet:461 wdgStart:462 wdgDive:469 wdgKeep:472 wdgEnd:473 wdgTick:474
 
-## js/71-perfhud.js (126) — 
-PERF:9 perfNetSample:11 perfNetSend:14 perfNetReceive:20 perfNetFrame:25 FRZ:40 frzAdd:42 frzOk:45 frzFrame:46 frzRecv:50 frzIn:52 frzNote:54 FRZ_NAME:58 frzRows:59 perfFrame:61 perfDom:76 perfStats:84 perfGraph:88 _gpuName:101 gpuIntegrated:102 perfRows:103 perfPanel:122 perfText:123
+## js/71-perfhud.js (154) — 
+PERF:9 perfNetSample:11 perfNetSend:14 perfNetReceive:20 perfNetFrame:25 FRZ:40 frzAdd:42 frzOk:45 frzFrame:46 SHW:53 shwDiff:54 shwPath:58 shwWho:59 shwFrame:64 frzRecv:77 frzIn:79 frzNote:81 FRZ_NAME:85 frzRows:86 perfFrame:88 perfDom:103 perfStats:111 perfGraph:115 _gpuName:128 gpuIntegrated:129 perfRows:130 perfPanel:150 perfText:151
 
 ## js/72-dash-pose.js (85) — 
 DPOSE:12 DPT:24 _dpQ:25 _dpX:25 _dpP:25 dpMix:26 dpKnees:28 dpStyle:36 DPDBG:41 dashPose:42 dpApply:75
@@ -951,4 +951,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(117 files, 35395 lines)
+(117 files, 35423 lines)

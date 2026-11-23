@@ -46,7 +46,34 @@ function frzOk(){return screen==='game'&&!document.hidden&&performance.now()-FRZ
 function frzFrame(gap){
   const I=gl.info,pg=I.programs?I.programs.length:0,ge=I.memory.geometries,tx=I.memory.textures,hp=performance.memory?performance.memory.usedJSHeapSize:0;
   if(gap>FRZ.MIN&&FRZ.pf<100&&frzOk())frzAdd('f',gap,`cpu ${QUAL.cpu.toFixed(0)}ms shader+${pg-FRZ.pg} geo${ge-FRZ.ge>=0?'+':''}${ge-FRZ.ge} tex+${tx-FRZ.tx}`+(hp&&FRZ.hp?` heap ${((hp-FRZ.hp)/1048576).toFixed(0)}MB`:''));
-  FRZ.pg=pg;FRZ.ge=ge;FRZ.tx=tx;FRZ.hp=hp;FRZ.pf=gap;}
+  FRZ.pg=pg;FRZ.ge=ge;FRZ.tx=tx;FRZ.hp=hp;FRZ.pf=gap;shwFrame(gap);}
+// Mid-match shader watch (guides/PRELOAD-STANDARD.md §3c): every program three creates after the match is warmed is a freeze
+// that preload missed. Logged with its recipe difference from the nearest older program and the objects using it.
+// Armed in 'play' once the warm queue is empty (+1.5 s). Dev mode (?dev=1) also toasts. WD.SHW.L = list (bench gate reads it).
+const SHW={L:[],seen:new WeakSet(),len:0,play:0,armed:false,n:0};
+function shwDiff(pg){const a=pg.cacheKey.split(',');let best=null,bd=1e9;
+  for(const q of gl.info.programs){if(q===pg)continue;const b=q.cacheKey.split(',');if(b.length!==a.length)continue;let d=0;for(let i=0;i<a.length&&d<bd;i++)if(a[i]!==b[i])d++;if(d<bd){bd=d;best=b;}}
+  if(!best)return 'new shape';
+  return a.map((v,i)=>v!==best[i]?i+':'+String(best[i]).slice(0,28)+'>'+String(v).slice(0,28):null).filter(Boolean).slice(0,6).join(' ');}
+function shwPath(o){const n=[];for(let q=o,k=0;q&&k<5;q=q.parent,k++)n.push(q.name||q.type);return n.reverse().join('>');}
+function shwWho(pg){const out=[];
+  for(const sc of [scene,fxScene])sc.traverse(o=>{if(out.length>=3||!o.material)return;
+    for(const m of [].concat(o.material)){const pr=m&&gl.properties.get(m);if(!pr)continue;
+      if(pr.currentProgram===pg||(pr.programs&&[...pr.programs.values()].includes(pg))){out.push((sc===fxScene?'fx:':'')+shwPath(o)+' ['+(m.name||m.type)+']');break;}}});
+  return out.length?out:['(not in scene: shadow/depth or already gone)'];}
+function shwFrame(gap){
+  const L=gl.info.programs;if(!L)return;
+  const play=screen==='game'&&G&&G.ph==='play';
+  if(!play){SHW.play=0;SHW.armed=false;}else if(!SHW.play)SHW.play=performance.now();
+  if(play&&!SHW.armed&&!WARM.busy&&!WARM.q.length&&performance.now()-SHW.play>1500)SHW.armed=true;
+  if(L.length===SHW.len)return;
+  SHW.len=L.length;
+  for(const pg of L){if(SHW.seen.has(pg))continue;SHW.seen.add(pg);
+    if(!SHW.armed)continue;
+    const e={t:new Date().toTimeString().slice(0,8),ms:Math.round(gap),name:pg.name||'?',diff:shwDiff(pg),who:shwWho(pg)};
+    SHW.n++;SHW.L.push(e);if(SHW.L.length>40)SHW.L.shift();
+    console.warn('[shader mid-match]',e.ms+'ms',e.name,e.diff,e.who.join(' | '));
+    if(DEV.on)toast('⚠ shader ใหม่กลางแมตช์ '+e.ms+'ms: '+e.name+' — '+e.who[0]);}}
 function frzRecv(){const n=performance.now();
   if(FRZ.lr&&n-FRZ.lr>FRZ.MIN&&frzOk())frzAdd('r',n-FRZ.lr,`ping ${NET.rtt?Math.round(NET.rtt):'-'}ms`);FRZ.lr=n;}
 function frzIn(c,p){const n=performance.now();
@@ -118,9 +145,10 @@ function perfRows(){const S=perfStats(),I=gl.info,v=VIEW.cur,mem=performance.mem
     `ส่ง ${net.sent.toFixed(0)} snapshot/วิ • ${net.kb.toFixed(1)} KB/วิ ต่อคน • คิวส่งสูงสุด ${(net.queued/1024).toFixed(1)} KB • ตัดข้อมูล ${net.trimmed} ครั้ง`:
     `รับ ${net.received.toFixed(0)} snapshot/วิ • ช่วงห่างสูงสุด ${net.gap.toFixed(0)} ms • ปิง ${NET.rtt?Math.round(NET.rtt):'-'} ms`]);
   if(FRZ.L.length)rows.push(['ค้างล่าสุด',frzRows()]);
+  if(SHW.n)rows.push(['shader กลางแมตช์',`${SHW.n} ตัว • `+SHW.L.slice(-4).map(e=>`${e.ms}ms ${e.name} (${e.who[0]})`).join(' • ')]);
   return rows;}
 function perfPanel(){PERF.pan.innerHTML=perfRows().map(([k,v])=>`<div><b>${k}</b> ${v}</div>`).join('')+'<button type="button" data-pcopy>📋 คัดลอก</button>';}
 function perfText(){return '[Fantas Stick perf '+new Date().toISOString().slice(0,16).replace('T',' ')+' '+navigator.userAgent.replace(/^.*?\) /,'').slice(0,60)+']\n'+perfRows().map(([k,v])=>k+': '+String(v).replace(/<[^>]+>/g,'')).join('\n');}
 // F3 = เปิด/ปิดแผงข้อมูล (ไม่ทับปุ่มเกม: F1–F12 ยังไม่ถูกใช้)
 addEventListener('keydown',e=>{if(e.code!=='F3')return;e.preventDefault();SET.stats=SET.stats?0:1;try{saveSet();}catch(_){}});
-if(window.WD){window.WD.perf=PERF;window.WD.perfText=perfText;window.WD.FRZ=FRZ;}
+if(window.WD){window.WD.perf=PERF;window.WD.perfText=perfText;window.WD.FRZ=FRZ;window.WD.SHW=SHW;window.WD.shwFrame=shwFrame;window.WD.PATHS=PATHS;window.WD.MODES=MODES;window.WD.getKit=getKit;if(!('builtMap' in window.WD))Object.defineProperty(window.WD,'builtMap',{get:()=>builtMap});}

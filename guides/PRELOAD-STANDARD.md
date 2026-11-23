@@ -75,6 +75,19 @@ caught on the first test, not by players.
 **3d. Bench gate.** `tools/bench-paint-freeze.js` becomes the standard check: bots of every path fight on each mode's
 map; **new programs during the fight must be 0**. Run it before committing skill, VFX or graphics work.
 
+**Step 1 status (built 2026-11-23):**
+- Detector: `SHW` in `js/71-perfhud.js` — armed in `play` once the warm queue is empty (+1.5 s); each new program → console
+  `[shader mid-match]`, F3 row "shader กลางแมตช์", toast with `?dev=1`. Entry: frame ms, recipe diff vs nearest program
+  (`index:old>new` of three's cache key), up to 3 object paths using it (`fx:` = fxScene). `WD.SHW.L` holds the last 40.
+  Programs hidden by SHR (no freeze, object pops in a few frames late) are listed too: they still must be preloaded.
+- Gate: `node tools/shader-gate.js [filter]` (needs `python tools/serve.py`) runs `tools/bench-shader-gate.js` per config
+  (siege fcs-file ×2, tdm ×2; 11 bots covering all 9 paths, shifted; 60 s fight; ults refilled every 10 s), prints each
+  mid-match program, exit 1 if any. ~2.5 min per config.
+- Baseline 2026-11-23: siege 59 / 58, tdm 45 / 76 mid-match programs; slow frames (>150 ms) 1–5 per run, max 250–414 ms.
+  Biggest groups: code VFX ShaderMaterials (Darkness Night Waltz / Umbral Veil / Ward Drain / Quick Dash, Light Sovereign
+  beams/dome), `Player death dissolve` rewriting each ShaderMaterial, hit flash `MeshBasicMaterial` on batched students,
+  Frost Shard Storm `MeshPhysicalMaterial` without cel, Nature lotus petals, flow orb tails (uv variant).
+
 ## 4. Fixed budgets
 
 **Light rig (same on every map, whole match):**
