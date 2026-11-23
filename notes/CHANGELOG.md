@@ -1441,3 +1441,4 @@
 - 2026-11-23 Frost guard v2: square body, tip-down slanted sword, faint side ripple instead of dome
 - 2026-11-23 Frost guard: diagonal body, head to cursor, ripple a bit stronger
 - 2026-11-23 Frost guard: ripple lines → soft curved shield sheet
+- 2026-11-23 Frost Sword Guard approved by user (chat)
