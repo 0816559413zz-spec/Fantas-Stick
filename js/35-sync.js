@@ -424,7 +424,7 @@ function syncPlayers(P,mode,now,dt){
       else if(jumpWeight)dpKnees(o,o.jumpLegs.p[4]*jumpWeight,o.jumpLegs.p[5]*jumpWeight);
       if(jumpArmWeight)jumpElbowPose(o,jumpArmWeight);
     }
-    jumpCloakPose(o,jumpWeight?(o.jumpLegs.p[6]*jumpWeight):0);
+    jumpCloakPose(o,Math.max(jumpWeight?(o.jumpLegs.p[6]*jumpWeight):0,o.slCloak||0));   // Frost slide opens the cloak so the stance shows
     if(activeWhip||o.natureWhipView)natureWhipView(o,activeWhip);
     natureCharacter(o,p,now,detail);
     darknessCharacter(o,p,myP,now);

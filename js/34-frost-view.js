@@ -223,13 +223,16 @@ function frostFX(o,p,pz,now,dt){
   // ไถลน้ำแข็ง
   // Slide pose (user 2026-11-23): balance stance, front leg out, back leg braced, legs still; upper body free for attacks
   if(flags&1){o.slK=Math.min(1,(o.slK||0)+dt/0.12);const k=o.slK;
-    o.b.rotation.x=lerp(o.b.rotation.x,0.06,k);o.b.position.y=-0.12*k;
-    o.legs[0].rotation.x=-0.62*k;o.legs[0].rotation.z=0.16*k;o.legs[1].rotation.x=0.42*k;o.legs[1].rotation.z=-0.2*k;
+    // body leans back a little, knees out: both legs spread wide and pushed forward, feet planted (no stepping)
+    o.b.rotation.x=lerp(o.b.rotation.x,-0.12,k);o.b.position.y=-0.2*k;
+    o.legs[0].rotation.x=-0.38*k;o.legs[0].rotation.z=0.4*k;o.legs[1].rotation.x=-0.3*k;o.legs[1].rotation.z=-0.4*k;
+    if(!(o.swT>0)&&!(o.grDown>0)&&!(o.grUp>0)){o.armL.rotation.x=lerp(o.armL.rotation.x,-0.25,k);o.armL.rotation.z=lerp(o.armL.rotation.z,1.05,k);}   // free left arm out for balance
+    o.slCloak=0.32*k;
     for(let i=0;i<3;i++)PARTS.push({x:p.x+rnd(-10,10),y:p.y+rnd(-10,10),h:pz+0.1,vx:rnd(-60,60),vy:rnd(-60,60),vh:rnd(0.5,2),life:0.35,max:0.35,col:i?'#ffffff':'#bfeaff',size:1.8,g:4});
     if(Math.random()<0.8)PARTS.push({x:p.x+rnd(-12,12),y:p.y+rnd(-12,12),h:pz+0.12,vx:rnd(-10,10),vy:rnd(-10,10),vh:0.15,life:0.9,max:0.9,col:'#eef8ff',size:6,g:0,smoke:true,grow:0.9,drag:2});
     const lp=o.slLast||[p.x,p.y];if(Math.hypot(p.x-lp[0],p.y-lp[1])>45){dfCracks((p.x+lp[0])/2,(p.y+lp[1])/2,pz+0.06,40,'#bfeaff',0.9);o.slLast=[p.x,p.y];}else if(!o.slLast)o.slLast=[p.x,p.y];
     o.slA=p.a;}
-  else o.slK=0;
+  else o.slK=o.slCloak=0;
   if(!(flags&1)&&o.slLast){const a=o.slA||p.a||0;o.slLast=null;PARTS.push({x:p.x,y:p.y,h:pz+0.2,vx:0,vy:0,vh:0.3,life:0.8,max:0.8,col:'#eef8ff',size:8,g:0,smoke:true,grow:1});
     for(let i=0;i<8;i++){const an=a+rnd(-0.5,0.5),v=rnd(150,280);iceBit(_cryG,p.x+Math.cos(a)*14,p.y+Math.sin(a)*14,pz+0.2,0.07,0.12,0.07,{life:0.6,up:0.02,down:0.2,v:[Math.cos(an)*v,Math.sin(an)*v,rnd(2,4)],spin:rnd(-12,12)});}
     for(let i=0;i<10;i++)PARTS.push({x:p.x+Math.cos(a)*16,y:p.y+Math.sin(a)*16,h:pz+0.1,vx:Math.cos(a+rnd(-0.6,0.6))*rnd(120,240),vy:Math.sin(a+rnd(-0.6,0.6))*rnd(120,240),vh:rnd(0.5,2.5),life:0.35,max:0.35,col:i%2?'#ffffff':'#bfeaff',size:1.6,g:6});}
