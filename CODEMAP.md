@@ -446,13 +446,13 @@ iceMat:2 iceRim:3 makeIceSword:4 makeIceAxe:23 makeKiteShield:39
 §51 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
 makeIceCrown:55 frostCrown:60 FWS:66 FWA:66 _fwM:67 _fwM2:67 _fwX:67 _fwY:67 _fwZ:67 _fwP:67 _fwS:67 _fwQ:67 _eo:68 _ei:68 _ss:68 fwAim:70 fwWeapons:71 FWP:73 FWT:73 fwChop:74 fwSweep:75 FF_RISE:76 fwIdle:77 fwSwing:80 FWL_N:92 fwLink:93 fwMat:96 frostFX:97
 
-## js/35-sync.js (765) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+## js/35-sync.js (769) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 §2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
 CPOSE_T:7 _ce:7 _cs:7 _cb:7 AMP_B:9 AMP_S:9 CP_BEND:10 CPOSE:12 _cpT:20 _cpR:20 CGUARD:20 CP_STEP:21 CPCOL:22 castStyle:23 castStart:24
 §25 ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเห…
-CANIM:30 SKFEET:84 SKANIM:86 skAnim:94 _caT:95 _caR:95 skillPose:96 _g2:122 wandTwoHand:123 characterPoseMix:130 characterStance:131 JUMP_LEGS:138 jumpLegPose:147 jumpCloakTurn:180 jumpCloakEuler:180 jumpCloakPose:181 jumpArmBaseR:200 jumpArmBaseL:200 jumpElbowAxis:201 jumpElbowTurn:201 jumpElbowPivot:202 clearJumpArms:203 jumpArmPose:212 jumpElbowPose:222 CBLOCK:249 CBLOCK_PATH:250 blockPose:251 castPose:257 lateSkillPose:263 castPose0:264 clearCharacterCast:293 hitRecoilPose:298 syncPlayers:307 syncEnemies:437 projGeo:477 tailGeo:478 _t1:479 makeProj:480 _a:501 _b:501 PJFX:503 syncProj:504 _awT:605 animateWorld:606
-§647 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
-_v:648 toScreen:649 BURNC:657 burnNum:658 NAMETAG:672 nameTag:673 drawLabels:677 TEXTAG:708 textTag:709 drawTexts:713 HITM:725 DIRI:725 drawXh:727 drawCrosshair:737
+CANIM:30 SKFEET:84 SKANIM:86 skAnim:94 _caT:95 _caR:95 skillPose:96 _g2:122 wandTwoHand:123 characterPoseMix:130 characterStance:131 JUMP_LEGS:138 jumpLegPose:147 jumpCloakTurn:184 jumpCloakEuler:184 jumpCloakPose:185 jumpArmBaseR:204 jumpArmBaseL:204 jumpElbowAxis:205 jumpElbowTurn:205 jumpElbowPivot:206 clearJumpArms:207 jumpArmPose:216 jumpElbowPose:226 CBLOCK:253 CBLOCK_PATH:254 blockPose:255 castPose:261 lateSkillPose:267 castPose0:268 clearCharacterCast:297 hitRecoilPose:302 syncPlayers:311 syncEnemies:441 projGeo:481 tailGeo:482 _t1:483 makeProj:484 _a:505 _b:505 PJFX:507 syncProj:508 _awT:609 animateWorld:610
+§651 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
+_v:652 toScreen:653 BURNC:661 burnNum:662 NAMETAG:676 nameTag:677 drawLabels:681 TEXTAG:712 textTag:713 drawTexts:717 HITM:729 DIRI:729 drawXh:731 drawCrosshair:741
 
 ## js/36-modes-view.js (171) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 healTex:22 makeItem:23 syncModeObjs:39
@@ -923,4 +923,4 @@ _dvPanel:95 _dvBtn:98 _dvBody:100 _dvHead:100 devUiApply:102 devFreeMouse:110 de
 §130 rows
 dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:193 devUiAct:200
 
-(115 files, 34650 lines)
+(115 files, 34654 lines)
