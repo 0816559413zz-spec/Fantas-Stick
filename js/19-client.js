@@ -243,7 +243,26 @@ function iceWvMat(){if(_iceWvM)return _iceWvM;
     g.globalCompositeOperation='source-over';});
   t.wrapS=THREE.RepeatWrapping;t.userData.keep=true;
   _iceWvM=new THREE.MeshStandardMaterial({map:t,emissive:'#1f6fb8',emissiveIntensity:.22,roughness:.42,metalness:0,transparent:true,opacity:.94,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});_iceWvM.userData.keep=true;return _iceWvM;}
+// Frost slide trail (user 2026-11-23): small angular ice plates under the feet, merged per segment
+const _iceShardGeo=[...Array(8)].map(()=>{const n=5+((Math.random()*3)|0),sh=new THREE.Shape();
+  for(let i=0;i<n;i++){const a=i/n*Math.PI*2+rnd(-0.25,0.25),r=rnd(0.55,1);i?sh.lineTo(Math.cos(a)*r*1.5,Math.sin(a)*r):sh.moveTo(Math.cos(a)*r*1.5,Math.sin(a)*r);}
+  const g=new THREE.ShapeGeometry(sh);g.rotateX(-Math.PI/2);return g;});
+const _isM=new THREE.Matrix4(),_isQ=new THREE.Quaternion(),_isP=new THREE.Vector3(),_isS=new THREE.Vector3(),_isY=new THREE.Vector3(0,1,0);
+function iceShardTrail(dx,dz,L,s){const a=-Math.atan2(dz,dx),n=Math.max(1,Math.round(L/s/1.1)),geos=[];
+  for(let i=0;i<=n;i++){const u=i/n,side=rnd(-0.35,0.35)*s,k=rnd(0.6,1)*s;
+    _isP.set(dx*u-Math.sin(a)*side,rnd(0,0.004),dz*u-Math.cos(a)*side);_isQ.setFromAxisAngle(_isY,a+rnd(-0.6,0.6));_isS.set(k,1,k*rnd(0.6,0.9));
+    const g=_iceShardGeo[(Math.random()*8)|0].clone();g.applyMatrix4(_isM.compose(_isP,_isQ,_isS));geos.push(g);}
+  const geo=mergeGeometries(geos,false);geos.forEach(g=>g.dispose());return geo;}
+let _iceShardMat=null;
 function makeIceFloor(x,y,r,t,ring,lx,ly,wv){
+  if(!ring&&!wv){
+    if(!_icePathMat){_icePathMat=new THREE.MeshStandardMaterial({color:'#a8d4ec',emissive:'#1f5f90',emissiveIntensity:0.18,roughness:0.85,metalness:0,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});_icePathMat.userData.keep=true;}
+    const g=new THREE.Group();g.position.set(tx(x),0.03+GY(x,y),tz(y));scene.add(g);
+    if(!_iceShardMat){_iceShardMat=new THREE.MeshStandardMaterial({color:'#7cc4ee',emissive:'#2a86cc',emissiveIntensity:0.4,roughness:0.25,metalness:0.05,flatShading:true,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});_iceShardMat.userData.keep=true;}
+    const dx=lx!==undefined?tx(lx)-tx(x):0,dz=lx!==undefined?tz(ly)-tz(y):0,L=Math.hypot(dx,dz),s=Math.max(0.25,r*S3*0.42);
+    const geo=iceShardTrail(L>0.01&&L<6?dx:0,L>0.01&&L<6?dz:0,L<6?L:0,s);const m=new THREE.Mesh(geo,_iceShardMat);g.add(m);
+    return {g,mats:[],spikes:[],age:0,t,path:true,geo};
+  }
   if(!ring){
     // ทางน้ำแข็งเรียบๆ ต่อเนื่อง: วัสดุทึบ (ซ้อนกันไม่เป็นดวง) • ชิ้นยาวจากจุดก่อนหน้า + ข้อต่อกลม
     if(!_icePathMat){_icePathMat=new THREE.MeshStandardMaterial({color:'#a8d4ec',emissive:'#1f5f90',emissiveIntensity:0.18,roughness:0.85,metalness:0,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});_icePathMat.userData.keep=true;}
@@ -279,7 +298,7 @@ function updateIceFloors(dt){
     for(const s of v.spikes){const u=s.userData;s.scale.set(u.rr*k+0.001,u.hh*k+0.001,u.rr*k+0.001);}
     if(v.wv){const U=v.g.userData,e=Math.max(0,Math.min(1,(v.age-ICE_WV.delay)/ICE_WV.grow)),w=U.w*(1-(1-e)*(1-e)*(1-e))*Math.min(1,Math.max(0,(v.t-v.age)/0.6))+0.001;v.g.visible=v.age>=ICE_WV.delay;if(U.q)U.q.scale.z=w;}
     else if(v.path)v.g.scale.set(k+0.001,1,k+0.001);
-    if(v.age>=v.t){scene.remove(v.g);v.mats.forEach(([m])=>m.dispose());ICEV.splice(i,1);}
+    if(v.age>=v.t){scene.remove(v.g);v.mats.forEach(([m])=>m.dispose());if(v.geo)v.geo.dispose();ICEV.splice(i,1);}
   }
 }
 // One short body flash per impact. Damage ticks cannot keep extending it.

@@ -296,7 +296,7 @@ MY:210 myDB:211 mySave:212 myLoad:215 myDecodeReady:221 myPlay:222 myNext:234 my
 §256 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:257 THEMES:258 padNote:263 musicTick:270 toggleMusic:299
 
-## js/19-client.js (323) — 
+## js/19-client.js (342) — ฝั่งแสดงผล (ทุกเครื่อง รวมโฮสต์ ใช้ snapshot เดียวกัน)
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 combatFxParams:21 FULL_COMBAT_VFX:22 combatVfxReduced:23 _apush:24 vfxQual:33 vfxBegin:35 vfxEnd:39 vfxOnce:41 vfxExtra:43 PCOL:44 setScreen:46 onLobby:58
@@ -309,7 +309,7 @@ PRED:122 predictMe:123 myPos:144
 §146 เอฟเฟกต์
 SMOKE_K:149 burst:150 smoke:163 ring:164 floatText:165 shake:166 weaponContactAge:167 weaponImpactAge:183 wandPos:188 impactFX:190 explosionFX:212
 §224 เอฟเฟกต์คาถาใหม่
-ZV:225 COLB:225 WVV:225 GLV:225 ICEV:225 SLV:225 ULTV:225 OBV:225 _iceDisc:227 _iceEdge:228 _iceSpk:229 iceFloorMat:230 _icePlane:231 _icePathMat:232 _iceWvM:232 iceWvMat:234 makeIceFloor:246 ICE_WV:273 updateIceFloors:274 FLASHM:286 FLASHING:287 flashModel:288 endFlash:301 tickFlash:302 GHOSTM:304 SOLIDM:304 ghostOf:305 setGhost:311 hitSparks:319
+ZV:225 COLB:225 WVV:225 GLV:225 ICEV:225 SLV:225 ULTV:225 OBV:225 _iceDisc:227 _iceEdge:228 _iceSpk:229 iceFloorMat:230 _icePlane:231 _icePathMat:232 _iceWvM:232 iceWvMat:234 _iceShardGeo:247 _isM:250 _isQ:250 _isP:250 _isS:250 _isY:250 iceShardTrail:251 _iceShardMat:256 makeIceFloor:257 ICE_WV:292 updateIceFloors:293 FLASHM:305 FLASHING:306 flashModel:307 endFlash:320 tickFlash:321 GHOSTM:323 SOLIDM:323 ghostOf:324 setGhost:330 hitSparks:338
 
 ## js/20-vfx-pyro-storm.js (857) — Dragonfall (ภาพ)
 makeDfCircle:3 stormCircleCyan:20 DFV:25 dfCracks:26 updateDfCracks:36 _domeAim:37 domeChargeOrb:38 _spearUp:46 _spearDir:46 _spearA:46 _spearB:46 DOME_SPEAR_LEN:47 stormDomePath:48 stormDomeSpearFX:52 stormDomeHoverFX:83 stormDomeReadyFX:107 stormDomeGroundPoint:128 stormDomeFracture:131 stormDomeFloorPullFX:177 stormDomeFieldFX:204 stormDomePose:240 dragonfallFX:304
@@ -949,4 +949,4 @@ _dvPanel:95 _dvBtn:98 _dvBody:100 _dvHead:100 devUiApply:102 devFreeMouse:110 de
 §130 rows
 dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:193 devUiAct:200
 
-(116 files, 35078 lines)
+(116 files, 35097 lines)

@@ -245,7 +245,7 @@ function frostFX(o,p,pz,now,dt){
     o.slHead=-S[0]*tw*0.85;
     for(let i=0;i<3;i++)PARTS.push({x:p.x+rnd(-10,10),y:p.y+rnd(-10,10),h:pz+0.1,vx:rnd(-60,60),vy:rnd(-60,60),vh:rnd(0.5,2),life:0.35,max:0.35,col:i?'#ffffff':'#bfeaff',size:1.8,g:4});
     if(Math.random()<0.8)PARTS.push({x:p.x+rnd(-12,12),y:p.y+rnd(-12,12),h:pz+0.12,vx:rnd(-10,10),vy:rnd(-10,10),vh:0.15,life:0.9,max:0.9,col:'#eef8ff',size:6,g:0,smoke:true,grow:0.9,drag:2});
-    const lp=o.slLast||[p.x,p.y];if(Math.hypot(p.x-lp[0],p.y-lp[1])>45){dfCracks((p.x+lp[0])/2,(p.y+lp[1])/2,pz+0.06,40,'#bfeaff',0.9);o.slLast=[p.x,p.y];}else if(!o.slLast)o.slLast=[p.x,p.y];
+    const lp=o.slLast||[p.x,p.y];if(Math.hypot(p.x-lp[0],p.y-lp[1])>45){dfCracks((p.x+lp[0])/2,(p.y+lp[1])/2,pz+0.06,20,'#bfeaff',0.5);o.slLast=[p.x,p.y];}else if(!o.slLast)o.slLast=[p.x,p.y];
     o.slA=p.a;}
   else{o.slK=0;o.slTw=0;o.slHead=0;}
   frostSlideHead(o);
