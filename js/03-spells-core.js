@@ -1,3 +1,5 @@
+// Shield removed from the game (user 2026-11-23). Code kept; set false to bring it back.
+const SHIELD_OFF=true;
 // =====================================================================
 //  ระบบคาถาใหม่: สาย (path) × คาถา (spell) + สถานะ (status effects)
 //  ผู้เล่นเลือก "สาย" 1 สาย → ได้เวทโบราณ (X) ของสายนั้น + จัดชุดคาถา Q/E/R/F (ใส่ได้เฉพาะคาถาของสายตัวเอง)

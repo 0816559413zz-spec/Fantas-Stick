@@ -1412,3 +1412,4 @@
 - 2026-11-22: lying/tilted breakable panels (Tilt 90 = floor) are standable, broken cells drop the player (floor must share a Group with the walls holding it) • Map Builder: drag on empty space = box select, Shift/Ctrl = add
 - 2026-11-23 Combat concept: cross-class combo = full reactions but secondary; own class skills stay main
 - 2026-11-23 Design: shield removed (code still has it); Pyro Heat now from damage dealt
+- 2026-11-23 Shield removed in game (SHIELD_OFF switch, HUD/wheel/guide/bots); Pyro Heat from damage dealt

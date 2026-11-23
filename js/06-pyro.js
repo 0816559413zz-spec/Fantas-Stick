@@ -35,7 +35,7 @@ function pyroBasic(p,inp,dt,setCd){
     p.chg=0;
   }
 }
-// Fire shield heat (user 2026-11-14): every 40 damage the shield absorbs = 1 Heat stack (max 4).
+// Heat (user 2026-11-23, shield removed): every 40 damage Pyro deals (not Burning ticks) = 1 Heat stack (max 4).
 // Stack 2: +10% damage, +10% walk speed • 3: +15% / +20% • 4 (full): +20% / +30%, and the next Ignition Snap does 30 damage + heals 20 per Burning stack.
 // No heat gained for 4 s = lose 1 stack every 1.5 s. Any Snap empties the bar.
 const PHEAT={per:40,max:4,hold:8,decay:3,dmg:[1,1,1.1,1.15,1.2],spd:[1,1,1.1,1.2,1.3],snapDmg:30,snapHeal:20};

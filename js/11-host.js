@@ -354,7 +354,7 @@ function updatePlayer(p,dt,acting){
   if(p.wfw)windLandCheck(p);
 
   // โล่
-  const wantSh=canAct&&!p.fly&&!cageBusy&&G.mode!=='imp'&&!(G.ball&&G.ball.holder===p.id)&&inp.sh&&p.shieldBroken<=0&&p.shieldE>5&&!(PBASIC[p.pathIdx|0]?.noShield?.(p))&&p.dash<=0&&!p.natureHook&&!p.dchgOn&&!(p.colos>0)&&!(p.cryo>0)&&!p.dfall&&p.pathIdx!==2&&!p.aug&&!p.ramp&&!p.wr&&!(p.wsbL>0)&&!p.wwAim;
+  const wantSh=!SHIELD_OFF&&canAct&&!p.fly&&!cageBusy&&G.mode!=='imp'&&!(G.ball&&G.ball.holder===p.id)&&inp.sh&&p.shieldBroken<=0&&p.shieldE>5&&!(PBASIC[p.pathIdx|0]?.noShield?.(p))&&p.dash<=0&&!p.natureHook&&!p.dchgOn&&!(p.colos>0)&&!(p.cryo>0)&&!p.dfall&&p.pathIdx!==2&&!p.aug&&!p.ramp&&!p.wr&&!(p.wsbL>0)&&!p.wwAim;
   if(p.pathIdx===DARKP)darkShieldTick(p,wantSh&&!(p.dark?.ultUntil>G.time),dt);
   else{
   if(wantSh&&!p.shieldOn){p.shieldOn=true;p.shieldT=G.time;p.shBlk=0;p.shPar=0;}

@@ -287,9 +287,9 @@ function aiBot(p,dt){
     const fx=tg.x+Math.cos(a)*R-p.x,fy=tg.y+Math.sin(a)*R-p.y,fd=Math.hypot(fx,fy);
     if(fd>60){inp.mx=(inp.mx||0)*0.5+fx/fd*0.8;inp.my=(inp.my||0)*0.5+fy/fd*0.8;}}
   // Block: ยกโล่ค้างไว้ หันหน้าหากระสุน (ระดับยาก = ยกตอนใกล้โดน → Perfect Parry)
-  const canSh=p.pathIdx!==2&&!p.aug&&!p.wwAim&&p.shieldBroken<=0;
+  const canSh=!SHIELD_OFF&&p.pathIdx!==2&&!p.aug&&!p.wwAim&&p.shieldBroken<=0;
   if(p.pathIdx!==2&&!classPlan)inp.sh=0;
-  if(p.pathIdx===WATERP&&!used&&!waterCageBusy(p)&&!p.wab&&p.hp<p.maxHp*.7&&dist2(p,tg)>260*260&&p.whg>0&&p.shieldE>20&&p.shieldBroken<=0)inp.sh=1;
+  if(!SHIELD_OFF&&p.pathIdx===WATERP&&!used&&!waterCageBusy(p)&&!p.wab&&p.hp<p.maxHp*.7&&dist2(p,tg)>260*260&&p.whg>0&&p.shieldE>20&&p.shieldBroken<=0)inp.sh=1;
   if(A.blk){const B=A.blk;B.t-=dt;
     if(B.t<=0||!canSh)A.blk=null;
     else if(B.t<=B.hold){inp.sh=1;inp.fire=0;const pr=B.pr&&!B.pr.dead?B.pr:null;if(pr){inp.ax=pr.x;inp.ay=pr.y;}else{inp.ax=tg.x;inp.ay=tg.y;}}}
