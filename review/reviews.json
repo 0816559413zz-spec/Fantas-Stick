@@ -1,5 +1,5 @@
 {
- "next": 153,
+ "next": 154,
  "items": [
   {
    "id": 148,
@@ -3272,6 +3272,24 @@
     "/shots/bd_lod_high.jpg",
     "/shots/bd_lod_after.jpg",
     "/shots/bd_lod_before.jpg"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 153,
+   "title": "แสงฉากสวยขึ้น: lake / ruins / meadow",
+   "text": "lake = แสงจันทร์บนหิมะ (AgX, หิมะไม่ขาวจ้า โทนน้ำเงิน) • ruins = ทรายไม่จ้า เงาแดดชัด (AgX) • meadow = แสงเติมน้อยลง คอนทราสต์มากขึ้น • แมพอื่นเท่าเดิม • ปรับต่อได้ใน tune.html หมวด 🌗 Look (พรีเซ็ต snow / sand / meadow) • ไม่กินแรงเครื่องเพิ่ม",
+   "kind": "Look",
+   "who": "Lighting",
+   "status": "wait",
+   "created": "2026-11-23T12:00:00",
+   "updated": "2026-11-23T12:00:00",
+   "imgs": [],
+   "links": [
+    "/shots/look_before_sheet.jpg",
+    "/shots/look_after_sheet.jpg",
+    "/index.html?nosw&playmap=lake"
    ],
    "feedback": "",
    "reply": ""

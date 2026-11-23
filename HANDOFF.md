@@ -1,5 +1,7 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
+**แสงฉาก (2026-11-23):** พรีเซ็ต Look ใหม่ `snow` (lake), `sand` (ruins), `meadow` ผูกใน `LOOK.map` js/74-look.js (AgX = หิมะ/ทรายไม่จ้า) • ปรับใน tune.html 🌗 Look • ภาพเทียบ `tools/look-shots.js` (ใช้ TDM + บอท 2 ตัวแล้ว) → `shots/look_<tag>_sheet.jpg` • ตัวละครชุดดำยังกลืนพื้นในมุมกล้องก้ม (rim แบบจอไม่ช่วยเพราะข้างหลังคือพื้น) — ยังไม่แก้
+
 **Backdrop LOD ใกล้ขอบ (2026-11-23, รีวิว #153):** แผนที่ที่มี Backdrop (Map Builder `bd` / coast) — ใกล้ขอบละเอียดเท่าพื้นที่เล่นแล้วลดตามระยะ (`BD_LOD` + `bdNearKit` js/67-coast): ต้นสน gorge.glb ที่ e<55–115 ม. → pine_la/lb <140–230 ม. → กรวยไกล (สุ่มต่อต้น ไม่เป็นเส้น), หิน/พุ่ม/เฟิร์น 5–70 ม., พื้น = Standard+`grLive(m,far)`+surface จางตามระยะกล้อง, ตาข่ายละเอียดขึ้น • หญ้าขึ้นต่อนอกขอบ 36 ม. + สีหญ้าริมขอบรับสีพื้นแผนที่ (`grassBake` js/50, `world.userData.bdH/bdM/bdTint`) • Low = แบบเดิม • `?nobdlod` = ปิดเทียบ • ⚠ perf ยังไม่วัดนิ่ง (headless แกว่ง: +11–13 draw, +~225k tris, ~+0.3–0.8 ms) → วัด bench-6v6 แบบ siege fcs-file กล้องขอบตะวันตก
 
 **fcs-file = แผนที่หลัก (2026-11-23, ผู้ใช้):** ไม่ย้ายสะพาน L เปลือกไข่ / ซากจุดยึด 1 แบบขยาย / รั้ว 20 แนว จาก `fcs` โค้ดเดิม — ระบบ js/12-fcs-bridge.js + `fcsShell*` ยังอยู่แต่ทำงานเฉพาะ `fcs` แบบเก่า

@@ -24,6 +24,13 @@ var LOOK={pm:null,env:{},cur:null,amb:null,off:/[?&]nolook\b/.test(location.sear
 // gorge = หุบเขาสนหมอกครึ้ม (แมพ gorge, รูปอ้างอิง 2026-11-18): แสงฟ้าเย็นกลาง ๆ สีจาง (AgX) เงานุ่ม หมอกตามระยะหนา + หมอกลอยต่ำ + ลำแสงบาง ๆ
 LOOK.P.gorge=Object.assign({},LOOK.P.dusk,{warm:false,env:0.35,tr:0.85,tg:1.0,tb:0.9,hemi:0.4,amb:0.1,exp:1.0,con:1.1,split:0.04,tone:0,rays:0.4,haze:0.8,hazeK:1.5,hazeH:0.12,
   dust:0.5,dustS:0.6,dustK:0.8,mist:0.55,mistA:0.07,mistS:1.4,mistH:3.0,mistL:0.35,mistK:1.1,flow:0.6});
+// snow = night on snow (lake): AgX + lower exposure so snow reads moonlit blue instead of blown white
+LOOK.P.snow=Object.assign({},LOOK.P.night,{tone:1,env:0.5,exp:0.9,con:1.22,split:0.18,hemi:0.1,tb:1.5});
+// sand = sunset desert (ruins): AgX keeps bright sand from clipping, less hemi fill = visible sun shadows
+LOOK.P.sand=Object.assign({},LOOK.P.dusk,{tone:1,exp:0.95,con:1.24,hemi:0.18,split:0.16,haze:0.45});
+// meadow = sunset grass: less flat fill + a bit more contrast/split tone
+LOOK.P.meadow=Object.assign({},LOOK.P.dusk,{hemi:0.18,con:1.16,split:0.15});
+LOOK.map={lake:'snow',ruins:'sand',meadow:'meadow'};
 function lookPreset(name,from,over){LOOK.P[name]=Object.assign({},LOOK.P[from],over||{});if(typeof lookRegister==='function')lookRegister(name);return LOOK.P[name];}
 // แมพนี้ใช้พรีเซ็ตไหน (ถูกเรียกจาก js/28 ก่อน setSky) — เก็บใน globalThis เพราะ setSky รันก่อนไฟล์นี้ตอนโหลดโมดูลครั้งแรก
 function lookMap(id,FM){globalThis.__lookMap={id,fm:FM&&FM.look};}
@@ -79,4 +86,4 @@ function lookRegister(name){const P=LOOK.P[name],sec='พรีเซ็ต "'+n
   for(const f of Object.keys(LOOK_F))tuneNum(['look','🌗 Look (พรีเซ็ตแสง)'],sec,'look.'+name+'.'+f,LOOK_F[f][0],()=>P[f],v=>{P[f]=v;lookRefresh();},{min:LOOK_F[f][1],max:LOOK_F[f][2],step:LOOK_F[f][3]});}
 for(const n of Object.keys(LOOK.P))lookRegister(n);
 if(SKY.day!==undefined)lookApply(SKY.day);   // setSky ran earlier (map already built at load) → apply now
-window.WD&&Object.assign(window.WD,{LOOK,lookPreset,lookRefresh});
+window.WD&&Object.assign(window.WD,{LOOK,lookPreset,lookRefresh,GFX});

@@ -15,6 +15,16 @@
 - ลิงก์/ไฟล์: `/shots/bd_lod_after.jpg`
 - ลิงก์/ไฟล์: `/shots/bd_lod_before.jpg`
 
+## #153 แสงฉากสวยขึ้น: lake / ruins / meadow
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Look • สาย/ส่วน: Lighting
+
+**วิธีดู / อะไรรอรีวิว:**
+lake = แสงจันทร์บนหิมะ (AgX, หิมะไม่ขาวจ้า โทนน้ำเงิน) • ruins = ทรายไม่จ้า เงาแดดชัด (AgX) • meadow = แสงเติมน้อยลง คอนทราสต์มากขึ้น • แมพอื่นเท่าเดิม • ปรับต่อได้ใน tune.html หมวด 🌗 Look (พรีเซ็ต snow / sand / meadow) • ไม่กินแรงเครื่องเพิ่ม
+
+- ลิงก์/ไฟล์: `/shots/look_before_sheet.jpg`
+- ลิงก์/ไฟล์: `/shots/look_after_sheet.jpg`
+- ลิงก์/ไฟล์: `/index.html?nosw&playmap=lake`
+
 ## #152 การชนแบบกล่อง + ภูเขาวัดตกแต่ง (โซนแดง fcs-file)
 - สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Map • สาย/ส่วน: Abbey mount
 
