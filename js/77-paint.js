@@ -11,11 +11,14 @@
 // =====================================================================
 var PAINT={on:!/[?&]nopaint\b/.test(location.search),cur:null,kit:null,
   kuw:1,kuwR:1.0,shaft:0.2,grass:[1.3,1.28,0.9],ground:[1.5,1.3,0.55],stroke:0.5,strokeHue:0.6,sat:1.32,sun:3.4,
-  maps:{forest:{sky:'day',fog:['#9fdccc',30,260],look:'paint',weather:'clear:100',
+  maps:{'fcs-file':{sky:'day',fog:['#b4e0d0',220,1300],look:'paint',weather:'clear:100',sun:1.2,hemi:0.5,ground:null},   // siege castle (Map Builder file map): overcast coast look steps aside (js/67 backdropLook)
+    fcs:{sky:'day',fog:['#b4e0d0',220,1300],look:'paint',weather:'clear:100'},   // old code castle: sky/fog/light only
+    forest:{sky:'day',fog:['#9fdccc',30,260],look:'paint',weather:'clear:100',
     back:{near:{col:'#4a8a3c',col2:'#35703a'},trees:{col:['#2f6e3c','#3d8440','#28603a']},mid:{col:'#5f9c88',lit:'#b4dcb0',tint:'#8cc4a6'},
       mist:[{d:235,h:45,col:'#d4f0dc',a:0.6}],far:{col:'#8cbcc0',lit:'#e0f4e0',tint:'#b0dcd0',snow:'#f6fff4'}}}},
   cel:1,vivid:1,fxcel:1,blob:1,blobThr:0.42,blobSize:1.45,bloom:0.4,U:{tPt:{value:null},uPt:{value:new THREE.Vector4(1/3.2,1/9,0.5,0.6)},uPtCel:{value:0}},
   KU:{tDiffuse:{value:null},uPx:{value:new THREE.Vector2(1,1)},uR:{value:1.0},uK:{value:1}}};
+PAINT.relight=id=>paintLights(id||builtMap);   // debug: re-apply lights after tuning PAINT.maps[id]
 function paintOn(id){return !!(PAINT&&PAINT.on&&SET.paint&&PAINT.maps[id]);}   // SET.paint = Settings > Graphics (applies on next map load)
 // ทับค่าของไฟล์แมพก่อนสร้างฉาก (เรียกจาก buildWorld js/28) — เก็บค่าเดิมไว้คืนเมื่อปิด
 function paintMap(id,FM){
@@ -32,8 +35,8 @@ function paintLights(id){
   if(PAINT.pass)PAINT.pass.enabled=!!PAINT.cur&&PAINT.kuw>0&&QUAL.mode!=='low';
   paintGrass();paintVfx();
   if(!PAINT.cur){GRADEU.uSat.value=1.1;PAINT.U.uPtCel.value=0;return;}
-  hemi.color.set('#86dcea');hemi.groundColor.set('#4f9a58');hemi.intensity=LOOK.P.paint.hemi;
-  moonL.color.set('#fff0bc');moonL.intensity=PAINT.sun;GRADEU.uSat.value=PAINT.sat;
+  hemi.color.set('#86dcea');hemi.groundColor.set('#4f9a58');const mo=PAINT.maps[PAINT.cur]||{};hemi.intensity=mo.hemi!==undefined?mo.hemi:LOOK.P.paint.hemi;   // per-map overrides: sun / hemi / exp / ground
+  moonL.color.set('#fff0bc');moonL.intensity=mo.sun!==undefined?mo.sun:PAINT.sun;if(mo.exp!==undefined)gl.toneMappingExposure=mo.exp;GRADEU.uSat.value=PAINT.sat;
   PAINT.KU.uK.value=PAINT.kuw;PAINT.U.uPtCel.value=PAINT.cel;
 }
 // ---------- VFX สีสด (ทดลอง): บนแมพสว่าง เอฟเฟกต์เรืองแสงเดิมซีดเป็นขาว-เหลืองอ่อน → ดันความสด + กดสีซีดให้เข้ม, ไฟไล่ เหลือง→ส้ม→แดง→ม่วงแดง, แสงฟุ้งเบาลง ----------
@@ -227,7 +230,7 @@ function paintScene(id,sc){
     else if(/^forest_far/i.test(nm))set(K.far);
     else if(/^forest_bush/i.test(nm))set(K.bush);
     else{const ms=Array.isArray(o.material)?o.material:[o.material];
-      if(/^ground/i.test(nm))for(const m of ms)if(m.color&&!m.userData.ptG){m.userData.ptG=1;m.color.multiply(new THREE.Color(PAINT.ground[0],PAINT.ground[1],PAINT.ground[2]));}   // พื้นหญ้า: เขียวเหลืองสดแบบโดนแดด (สีใบหญ้าตามพื้น)
+      const gt=PAINT.maps[id].ground!==undefined?PAINT.maps[id].ground:PAINT.ground;if(gt&&/^ground/i.test(nm))for(const m of ms)if(m.color&&!m.userData.ptG){m.userData.ptG=1;m.color.multiply(new THREE.Color(gt[0],gt[1],gt[2]));}   // พื้นหญ้า: เขียวเหลืองสดแบบโดนแดด (สีใบหญ้าตามพื้น)
       ms.forEach(paintApply);}});
   PAINT.n=n;sc.add(paintShafts());
 }

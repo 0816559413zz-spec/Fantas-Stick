@@ -55,7 +55,8 @@ function coastSky(){
 }
 // map look (sky / fog / light) — every buildWorld (cached maps too), after setSky
 function backdropLook(id){const fm=MAPS[id]&&MAPS[id].fm,fb=fm&&fm.bd&&fm.bd.on?fm.bd:null,B=BACKDROP&&BACKDROP[id],L=fb?(fb.look==='overcast'?BACKDROP.fcs.look:null):B&&B.look;if(typeof FF!=='undefined'){FF.ovc=0;FF.base=null;FF.on=false;}
-  if(COAST_SKY)COAST_SKY.visible=false;SKY.mesh.visible=true;if(!L)return;   // forest fog blend re-captures its base from this look
+  if(COAST_SKY)COAST_SKY.visible=false;SKY.mesh.visible=true;if(typeof paintOn==='function'&&paintOn(id))return;   // Painterly on: keep its day sky/fog/light (js/77)
+  if(!L)return;   // forest fog blend re-captures its base from this look
   if(L.sky&&typeof FF!=='undefined'&&FF.sky&&FF.sky.parent===world){const U=FF.sky.material.uniforms;FF.ovc=1;   // castle map's own cloud sky → overcast blue-grey everywhere
     U.uK.value=1;FF.sky.visible=false;}   // its cloud sky is replaced by the coast sky dome (FF.ovc still hides the sun)
   if(L.sky){const k=coastSky();if(k.parent!==scene)scene.add(k);k.visible=true;SKY.mesh.visible=false;SKY.sun.visible=false;SKY.moon.visible=false;SKY.stars.visible=false;}

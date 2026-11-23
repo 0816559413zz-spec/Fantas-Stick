@@ -787,18 +787,18 @@ BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:137 backdropHide:141
 
-## js/67-coast.js (325) — Sea-cliff backdrop (user 2026-11-22, ref photo: ruined castle on a grassy headland, ~40 m…
+## js/67-coast.js (326) — Sea-cliff backdrop (user 2026-11-22, ref photo: ruined castle on a grassy headland, ~40 m…
 COAST:10 BD_LOD:14
 §25 2D value noise (deterministic)
 cvN:26 cvF:28
 §29 overcast sky dome (shader: thick cloud deck on a flat layer, horizon …
 COAST_SKY:30 coastSky:31 backdropLook:57
-§67 land shape
-coastShape:68 coastH:93
-§106 height sources: one interface for the code coast (BACKDROP.fcs) and M…
-coastSrcProc:109 BD_SURF:115 bdB64:116 bdRle:117 bdHsh:118 bdGridSrc:119 coastGrid:154 bdCoast:164 coastTreePts:254 coastTreeMesh:262
-§294 near-edge detail bands (user 2026-11-23: backdrop next to the play ar…
-bdNearKit:298
+§68 land shape
+coastShape:69 coastH:94
+§107 height sources: one interface for the code coast (BACKDROP.fcs) and M…
+coastSrcProc:110 BD_SURF:116 bdB64:117 bdRle:118 bdHsh:119 bdGridSrc:120 coastGrid:155 bdCoast:165 coastTreePts:255 coastTreeMesh:263
+§295 near-edge detail bands (user 2026-11-23: backdrop next to the play ar…
+bdNearKit:299
 
 ## js/68-darkness-view.js (1144) — 
 nightWaltzStrip:2 nightWaltzBorder:80 stDarkVeilGround:118 darkFxMesh:195 drawDarknessHud:201 drawDarkHudBar:220 darknessMarkView:227 darkWaveViews:237 darkActiveViews:237 darkViewRoot:238 darkViewTemp:245 darknessClear:257 darkDeathRoots:265 darkDeathClear:268 darkWorldAt:282 darkMarkWind:285 darkMarkLaunch:313 darkMarkContact:325 darkViewNow:338 darkFlowHud:338 darkIdleWeaponPose:339 darkBAGroundImpact:343 darkSettleWeapon:358 darkBlendWeapon:369 darkShowWeaponReturn:392 darkTrailHistory:399 darkDashView:438 darknessCharacter:484 darknessEfx:727 stDarkShieldInk:1024 stDarkVeilBlade:1067 stWardDrainPool:1104
@@ -912,22 +912,22 @@ _dvCyl:259 _dvMat:260 devOverlay:261
 §281 2D overlay map: spawn zones + capture zones + players (click = warp)
 _dvMap:282 _dvY:286 devMapDraw:287
 
-## js/77-paint.js (288) — Paint 🎨 — ลุค "ภาพวาด" (branch graphics-painterly, ทดลอง): ป่ากลางวันแดดลอดใบไม้แบบภาพอ้…
-PAINT:12 paintOn:19 paintMap:21 paintLights:30
-§39 VFX สีสด (ทดลอง): บนแมพสว่าง เอฟเฟกต์เรืองแสงเดิมซีดเป็นขาว-เหลืองอ่อ…
-_ptHSL:40 paintVivid:41 paintVfx:43
-§53 ไฟก้อนหลอมรวม (blob / metaball) — ภาพอ้างอิงผู้ใช้ 2026-11-11: ไฟเป็น…
-BLOB:55 blobPre:56 blobFire:57 paintGrass:79
-§80 ภาพผิว: เปลือกไม้ (ครึ่งซ้าย) + ใบไม้ปาดพู่กัน 4 แบบ (ครึ่งขวา 2×2)
-paintAtlas:81 paintStrokeTex:105
-§113 ต้นไม้
-paintTreeGeo:114 paintCanopy:157 paintKit:161
-§184 ลายพู่กันบนผิว (ต่อท้าย onBeforeCompile เดิมของวัสดุ เหมือน js/76)
-PT_VS:185 PT_VS_BODY:186 PT_FS:187 PT_FS_BODY:188 PT_CEL_RE:197 PT_CEL_CHUNK:198 paintPatch:201 paintApply:216 paintSweep:218
-§219 ฉากของแมพ (เรียกจาก buildFileMap ก่อน brkSetup/batchStatic)
-paintScene:220 paintShafts:235
-§246 ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเร…
-§272 ปรับค่า (tune.html / F8)
+## js/77-paint.js (291) — Paint 🎨 — ลุค "ภาพวาด" (branch graphics-painterly, ทดลอง): ป่ากลางวันแดดลอดใบไม้แบบภาพอ้…
+PAINT:12 paintOn:22 paintMap:24 paintLights:33
+§42 VFX สีสด (ทดลอง): บนแมพสว่าง เอฟเฟกต์เรืองแสงเดิมซีดเป็นขาว-เหลืองอ่อ…
+_ptHSL:43 paintVivid:44 paintVfx:46
+§56 ไฟก้อนหลอมรวม (blob / metaball) — ภาพอ้างอิงผู้ใช้ 2026-11-11: ไฟเป็น…
+BLOB:58 blobPre:59 blobFire:60 paintGrass:82
+§83 ภาพผิว: เปลือกไม้ (ครึ่งซ้าย) + ใบไม้ปาดพู่กัน 4 แบบ (ครึ่งขวา 2×2)
+paintAtlas:84 paintStrokeTex:108
+§116 ต้นไม้
+paintTreeGeo:117 paintCanopy:160 paintKit:164
+§187 ลายพู่กันบนผิว (ต่อท้าย onBeforeCompile เดิมของวัสดุ เหมือน js/76)
+PT_VS:188 PT_VS_BODY:189 PT_FS:190 PT_FS_BODY:191 PT_CEL_RE:200 PT_CEL_CHUNK:201 paintPatch:204 paintApply:219 paintSweep:221
+§222 ฉากของแมพ (เรียกจาก buildFileMap ก่อน brkSetup/batchStatic)
+paintScene:223 paintShafts:238
+§249 ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเร…
+§275 ปรับค่า (tune.html / F8)
 
 ## js/78-dev-ui.js (243) — Dev Mode UI (user 2026-11-20): one floating window, many small column…
 §10 orbit camera
@@ -939,4 +939,4 @@ _dvPanel:95 _dvBtn:98 _dvBody:100 _dvHead:100 devUiApply:102 devFreeMouse:110 de
 §130 rows
 dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:193 devUiAct:200
 
-(116 files, 35008 lines)
+(116 files, 35012 lines)
