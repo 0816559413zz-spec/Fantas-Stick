@@ -1,7 +1,7 @@
 // ---------- ไฟแบบใหม่ (2026-10-19): shader ไฟเคลื่อนไหวจริง (noise ไหล) ใช้กับลูกไฟ / หางไฟ / กำแพงไฟ / ปีกไฟ / เกราะ Colossus / ระเบิดลูกไฟ ----------
 // หลักการสี: ส่วนร้อน (แกน) = เหลืองขาว ผสมแบบบวกแสง • ส่วนที่เย็นลง = ส้ม → แดงเข้ม ผสมแบบทึบ (บังฉากหลัง) → ไฟดูมีเนื้อ ไม่ขาวโพลน
 // fireMat({mode:'ball'|'sheet', ...}) • mode ball = ทรงกลม/ชิ้นเกราะ (noise ในพิกัดวัตถุ ไหลตาม flow) • mode sheet = แผ่น/กรวย/แถบ (uv.y 0 = ฐานร้อน → 1 = ปลายเปลว)
-const FIRE_U={time:{value:0}};
+const FIRE_U={time:{value:0},cel:PCEL};
 const FIRE_GLSL=`
 vec3 m289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}vec4 m289(vec4 x){return x-floor(x*(1.0/289.0))*289.0;}
 vec4 perm(vec4 x){return m289(((x*34.0)+1.0)*x);}vec4 tis(vec4 r){return 1.79284291400159-0.85373472095314*r;}
@@ -17,14 +17,17 @@ float snoise(vec3 v){const vec2 C=vec2(1.0/6.0,1.0/3.0);const vec4 D=vec4(0.0,0.
  vec4 m=max(0.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.0);m=m*m;
  return 42.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));}
 float fbm(vec3 p){float f=0.0,a=0.5;for(int i=0;i<3;i++){f+=a*snoise(p);p=p*2.03+vec3(1.7,9.2,3.1);a*=0.5;}return f*0.57+0.5;}
+uniform float uFCel;
 vec3 fireRamp(float h){vec3 c=mix(vec3(0.28,0.03,0.0),vec3(0.9,0.2,0.02),smoothstep(0.0,0.35,h));
- c=mix(c,vec3(1.0,0.52,0.08),smoothstep(0.3,0.58,h));c=mix(c,vec3(1.0,0.84,0.42),smoothstep(0.58,0.82,h));return mix(c,vec3(1.0,0.97,0.86),smoothstep(0.82,1.05,h));}
+ c=mix(c,vec3(1.0,0.52,0.08),smoothstep(0.3,0.58,h));c=mix(c,vec3(1.0,0.84,0.42),smoothstep(0.58,0.82,h));c=mix(c,vec3(1.0,0.97,0.86),smoothstep(0.82,1.05,h));
+ if(uFCel>0.5){c=vec3(0.85,0.1,0.02);c=mix(c,vec3(1.0,0.36,0.03),smoothstep(0.17,0.21,h));c=mix(c,vec3(1.0,0.66,0.1),smoothstep(0.26,0.33,h));c=mix(c,vec3(1.0,0.88,0.42),smoothstep(0.38,0.48,h));c=mix(c,vec3(1.06,0.96,0.5),smoothstep(0.56,0.78,h));}   // cel: 5 แถบสีแบน ขอบแดงส้มบาง → เหลือง → แกนขาวเหลืองกว้าง (ตามภาพอ้างอิงผู้ใช้ 2026-11-11)
+ return c;}
 `;
 // สีเปลี่ยนได้ด้วย tint (คูณ) • int = ความสว่าง (bloom จับเฉพาะส่วนร้อน) • op = ความทึบรวม
 function fireMat(o){o=o||{};const sheet=o.mode==='sheet';
   const U={time:FIRE_U.time,uOp:{value:o.op===undefined?1:o.op},uInt:{value:o.int||1.15},uScale:{value:new THREE.Vector3(...(o.scale||(sheet?[6,2.2,1]:[1.6,1.6,1.6])))},
     uFlow:{value:new THREE.Vector3(...(o.flow||[0,1,0]))},uSpeed:{value:o.speed||(sheet?1.4:1.2)},uHeat:{value:o.heat||0},uSeed:{value:o.seed===undefined?Math.random()*50:o.seed},
-    uSide:{value:o.side?1:0},uTint:{value:new THREE.Color(o.tint||'#ffffff')},uDis:{value:0},uRim:{value:o.rim===undefined?1:o.rim},uDisp:{value:o.disp||0},uInv:{value:o.shell?1:0},uNz:{value:NOISETEX}};
+    uSide:{value:o.side?1:0},uTint:{value:new THREE.Color(o.tint||'#ffffff')},uDis:{value:0},uRim:{value:o.rim===undefined?1:o.rim},uDisp:{value:o.disp||0},uInv:{value:o.shell?1:0},uNz:{value:NOISETEX},uFCel:FIRE_U.cel};
   // ball + disp: ดันผิวออกตาม noise (ขอบเป็นลิ้นไฟ) และยืดไปด้านหลังทิศไหล (-flow) เป็นหางเปลว
   const vs=`uniform float time,uSpeed,uSeed,uDisp;uniform vec3 uScale,uFlow;varying vec3 vP;varying vec3 vN;varying vec3 vV;varying vec2 vUv;${!sheet&&o.disp?FIRE_GLSL:''}
   void main(){vUv=uv;vP=position;vec3 p=position;
@@ -48,7 +51,11 @@ function fireMat(o){o=o||{};const sheet=o.mode==='sheet';
   if(h<0.06)discard;
   float a=smoothstep(0.06,0.32,h)*uOp;float add=smoothstep(0.5,0.92,h);
   vec3 c=fireRamp(h)*uTint*uInt;
-  gl_FragColor=vec4(c*a,a*(1.0-add*0.6));}`;
+  gl_FragColor=vec4(c*a,a*(1.0-add*0.6));
+  if(uFCel>0.5){   // cel: ตัดขอบที่ระดับเดียวกับส่วนที่ 'เห็นชัด' ของไฟเดิม (h≈0.3) → ยังเป็นลิ้นไฟ มีช่องโหว่ ขอบไหว ไม่กลายเป็นแผ่นทึบเต็มชิ้น
+    float ca=smoothstep(0.27,0.33,h)*step(0.25,uOp);float hh=(h-0.27)/0.73;
+    float al=ca*mix(1.0,0.82*uOp,uInv);   // เปลือกขอบ (shell เช่นเกราะยักษ์ไฟ) = โปร่งนิด ๆ เห็นตัวข้างใน
+    gl_FragColor=vec4(fireRamp(hh)*uTint*min(uInt,1.05)*al,al);}}`;
   const m=new THREE.ShaderMaterial({uniforms:U,vertexShader:vs,fragmentShader:fs,transparent:true,depthWrite:false,side:o.back?THREE.BackSide:o.single?THREE.FrontSide:THREE.DoubleSide,
     blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,blendSrcAlpha:THREE.OneFactor,blendDstAlpha:THREE.OneMinusSrcAlphaFactor});
   m.userData.keep=!!o.keep;return m;}
@@ -261,7 +268,7 @@ function fireVol(boxes,o){o=o||{};const n=boxes.length,pos=new Float32Array(n*24
     for(const q of _fvIdx)idx.push(i*8+q);});
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('bc',new THREE.BufferAttribute(bc,3));g.setAttribute('bax',new THREE.BufferAttribute(bax,3));
   g.setAttribute('bsz',new THREE.BufferAttribute(bsz,3));g.setAttribute('bmd',new THREE.BufferAttribute(bmd,2));g.setIndex(idx);g.boundingSphere=new THREE.Sphere(new THREE.Vector3(),1e4);
-  const U={uN:{value:NOISE3D},uS:FIRE3D.tex,uSim:FIRE3D.on,time:FIRE_U.time,uH:{value:1},uDis:{value:0},uInt:{value:o.int||1.0},uOcc:{value:o.occ===undefined?0.92:o.occ},uSpd:{value:o.spd||0.55},uFq:{value:o.fq||0.42},uB:{value:o.bias||0},uDen:{value:o.den||1}};
+  const U={uN:{value:NOISE3D},uS:FIRE3D.tex,uSim:FIRE3D.on,time:FIRE_U.time,uH:{value:1},uDis:{value:0},uInt:{value:o.int||1.0},uOcc:{value:o.occ===undefined?0.92:o.occ},uSpd:{value:o.spd||0.55},uFq:{value:o.fq||0.42},uB:{value:o.bias||0},uDen:{value:o.den||1},uFCel:FIRE_U.cel};
   const m=new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,side:THREE.BackSide,
     blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,blendSrcAlpha:THREE.OneFactor,blendDstAlpha:THREE.OneMinusSrcAlphaFactor,
     vertexShader:'attribute vec3 bc,bax,bsz;attribute vec2 bmd;varying vec3 vW,vC,vX,vSz;varying vec2 vMd;varying float vVZ;'+
@@ -276,7 +283,7 @@ function fireVol(boxes,o){o=o||{};const n=boxes.length,pos=new Float32Array(n*24
       'float tn=max(max(tn3.x,tn3.y),max(tn3.z,0.0)),tf=min(min(tf3.x,tf3.y),tf3.z);if(tf<=tn)discard;'+
       'if(uSoftOn>0.5){float dz=texture2D(uDepth,gl_FragCoord.xy/uRes).x;float sz=(uNear*uFar)/(uFar-dz*(uFar-uNear));vec3 fw=-vec3(viewMatrix[0][2],viewMatrix[1][2],viewMatrix[2][2]);'+
         'tf=min(tf,sz/max(dot(rd,fw),1e-3));if(tf<=tn)discard;}'+
-      'float st=(tf-tn)/24.0,jt=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453);vec3 col=vec3(0.0);float A=0.0;float md=vMd.x,sd=vMd.y;'+
+      'float st=(tf-tn)/24.0,jt=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453);vec3 col=vec3(0.0);float A=0.0,mh=0.0,hs=0.0;float md=vMd.x,sd=vMd.y;'+
       'for(int i=0;i<24;i++){vec3 p=lo+ld*(tn+(float(i)+jt)*st);float v=p.y/H,sh;'+
         // noise ไหลขึ้น 3 ชั้น → บิดความสูง (ลิ้นไฟ) + ridged (เส้นสายเปลว) + บิดขอบหนา (ไม่เป็นกล่อง)
         'vec3 q=vec3(p.x,p.y*0.45,p.z)*uFq-vec3(0.0,time*uSpd,0.0)+vec3(sd);'+
@@ -290,10 +297,11 @@ function fireVol(boxes,o){o=o||{};const n=boxes.length,pos=new Float32Array(n*24
         'float hn=n3(vec3(p.x,0.0,p.z)*uFq*0.5+vec3(sd,time*0.06,0.0));float v2=v/(0.35+hn*1.0);'+
         'float vw=v2+(nA-0.5)*0.9,rg=1.0-abs(n2-0.5)*2.0;'+
         'float heat=((1.0-vw)*1.35*mix(0.6,1.2,rg)-0.12+uB-uDis*1.3)*sh*smoothstep(1.0,0.8,v);'+
-        'if(heat<=0.04)continue;'+
+        'mh=max(mh,heat);if(heat<=0.04)continue;'+
         'float a=1.0-exp(-smoothstep(0.04,0.4,heat)*5.0*uDen*st);vec3 e=fireRamp(min(heat*0.92,1.1))*uInt;'+
-        'col+=(1.0-A)*a*e;A+=(1.0-A)*a;if(A>0.97)break;}'+
+        'col+=(1.0-A)*a*e;hs+=(1.0-A)*a*heat;A+=(1.0-A)*a;if(A>0.97)break;}'+
       // ใกล้กล้องมาก ๆ (เช่น ขอบวงที่กล้องอยู่ข้างใน) จางลง ไม่เป็นหมอกบังจอ
+      'if(uFCel>0.5){float ca=smoothstep(0.3,0.38,mh)*smoothstep(0.05,0.3,A);col=fireRamp(min(hs/max(A,1e-3)*0.58,1.1))*min(uInt,1.05)*ca;A=ca;}'+   // cel: ขอบจากจุดร้อนสุดบนเส้นมอง • สีจากความร้อนของผิวหน้าเปลว (เฉลี่ยหน้าไปหลัง) → เห็นลิ้นไฟไหลขึ้นบนผิว ไม่เป็นก้อนสีเดียว
       'float nf=smoothstep(0.8,3.0,tn);col*=nf;A*=nf;if(A<0.004)discard;gl_FragColor=vec4(col,A*uOcc);}'});
   fxMat(m);m.userData.keep=false;FXMATS.delete(m);m.depthTest=false;   // ตัดความลึกเองใน shader (uDepth)
   const mesh=new THREE.Mesh(g,m);mesh.frustumCulled=false;mesh.renderOrder=3;mesh.userData.u=U;mesh.userData.mats=[m];return mesh;}
@@ -310,7 +318,7 @@ function fireSeqLoad(name){if(FSEQ[name])return FSEQ[name].p;const S=FSEQ[name]=
     return S.v={tex:t,m};}).catch(()=>null);return S.p;}
 const fireSeqReady=n=>FSEQ[n]&&FSEQ[n].v;
 function fireSeqVol(S,o){o=o||{};const g=new THREE.BoxGeometry(2*o.hx,o.h,2*o.hz);g.translate(0,o.h/2,0);
-  const U={uT:{value:S.tex},uG:{value:new THREE.Vector2(S.m.nx,S.m.frames)},uFr:{value:0},uDis:{value:0},uH:{value:1},uSz:{value:new THREE.Vector3(o.hx,o.h,o.hz)},uInt:{value:o.int||1},uDen:{value:o.den||1},uOcc:{value:0.92}};
+  const U={uT:{value:S.tex},uG:{value:new THREE.Vector2(S.m.nx,S.m.frames)},uFr:{value:0},uDis:{value:0},uH:{value:1},uSz:{value:new THREE.Vector3(o.hx,o.h,o.hz)},uInt:{value:o.int||1},uDen:{value:o.den||1},uOcc:{value:0.92},uFCel:FIRE_U.cel};
   const m=new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,side:THREE.BackSide,
     blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,blendSrcAlpha:THREE.OneFactor,blendDstAlpha:THREE.OneMinusSrcAlphaFactor,
     vertexShader:'varying vec3 vW,vL,vCL;varying float vVZ;void main(){vec4 w=modelMatrix*vec4(position,1.0);vW=w.xyz;vL=position;vCL=(inverse(modelMatrix)*vec4(cameraPosition,1.0)).xyz;vec4 mv=viewMatrix*w;vVZ=-mv.z;gl_Position=projectionMatrix*mv;}',
@@ -321,10 +329,11 @@ function fireSeqVol(S,o){o=o||{};const g=new THREE.BoxGeometry(2*o.hx,o.h,2*o.hz
       'float tn=max(max(a.x,a.y),max(a.z,0.0)),tf=min(min(b.x,b.y),b.z);if(tf<=tn)discard;'+
       'if(uSoftOn>0.5){float dz=texture2D(uDepth,gl_FragCoord.xy/uRes).x;float sz=(uNear*uFar)/(uFar-dz*(uFar-uNear));vec3 fw=-vec3(viewMatrix[0][2],viewMatrix[1][2],viewMatrix[2][2]);tf=min(tf,sz/max(dot(rw,fw),1e-3));if(tf<=tn)discard;}'+
       'float f0=mod(floor(uFr),uG.y),f1=min(f0+1.0,uG.y-1.0),fu=fract(uFr);'+
-      'float st=(tf-tn)/32.0,jt=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453);vec3 col=vec3(0.0);float A=0.0;'+
+      'float st=(tf-tn)/32.0,jt=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453);vec3 col=vec3(0.0);float A=0.0,mh=0.0,hs=0.0;'+
       'for(int i=0;i<32;i++){vec3 p=ro+rd*(tn+(float(i)+jt)*st);vec3 u=(p-bmin)/(bmax-bmin);if(u.y>uH)continue;'+
-        'float v=mix(sv(u,f0),sv(u,f1),fu);float heat=v*1.15-uDis*1.1;if(heat<=0.03)continue;'+
-        'float al=1.0-exp(-smoothstep(0.03,0.4,heat)*6.0*uDen*st);col+=(1.0-A)*al*fireRamp(min(heat,1.1))*uInt;A+=(1.0-A)*al;if(A>0.97)break;}'+
+        'float v=mix(sv(u,f0),sv(u,f1),fu);float heat=v*1.15-uDis*1.1;mh=max(mh,heat);if(heat<=0.03)continue;'+
+        'float al=1.0-exp(-smoothstep(0.03,0.4,heat)*6.0*uDen*st);col+=(1.0-A)*al*fireRamp(min(heat,1.1))*uInt;hs+=(1.0-A)*al*heat;A+=(1.0-A)*al;if(A>0.97)break;}'+
+      'if(uFCel>0.5){float ca=smoothstep(0.3,0.38,mh)*smoothstep(0.05,0.3,A);col=fireRamp(min(hs/max(A,1e-3)*0.62,1.1))*min(uInt,1.05)*ca;A=ca;}'+
       'float nf=smoothstep(0.8,3.0,tn);col*=nf;A*=nf;if(A<0.004)discard;gl_FragColor=vec4(col,A*uOcc);}'});
   fxMat(m);m.userData.keep=false;FXMATS.delete(m);m.depthTest=false;
   const mesh=new THREE.Mesh(g,m);mesh.frustumCulled=false;mesh.renderOrder=3;mesh.userData.u=U;mesh.userData.mats=[m];return mesh;}

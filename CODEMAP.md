@@ -274,7 +274,7 @@ SGT:153 sgTeamPlan:154 sgBotMode:175 sgBreachAim:189 sgBotGoal:196 sgUnstick:212
 ## js/16-voice.js (89) — 
 VOICE:4 rosterIds:5 toggleMic:6 voiceSync:20 teamOn:37 teamOf:38 applyVoiceGates:39 VAC:49 onIncomingCall:50 voiceLevels:62 speakingIds:70 updateVoiceUI:76
 
-## js/17-input.js (66) — 
+## js/17-input.js (66) — การควบคุม
 INPUT:4 mouseX:5 mouseY:5 showBoard:5 SET_DEF:6 SET:7 KEYACT:9 KMAP:10 PMAP:10 SKORD:11 rebuildKeys:12 keyName:22 _rebind:24 MSANE:50 mouseSane:51 cvEl:66
 
 ## js/18-audio.js (306) — 
@@ -338,7 +338,7 @@ onfOutlineMat:4 onFireFX:6 statusFX:17 fx:44
 §249 overlay: เลือกบัฟ / สรุปผล
 choosePick:250 syncOverlays:255 showOver:276
 
-## js/27-world.js (402) — 
+## js/27-world.js (404) — 
 S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 gl:12
 §20 เงานุ่มแบบ PCSS (contact-hardening): ใกล้จุดสัมผัสคม ไกลจากวัตถุที่บั…
 PCSS:23 scene:50 cam:52 composer:53
@@ -349,9 +349,9 @@ TAA:126 TAA_FRAG:127 _taaH:142 taaWanted:143 taaBegin:144 taaEnd:152 taaFinish:1
 §236 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
 QUAL:237 QUAL_NAME:238 qualPR:239 applyQuality:245 qualTick:266
 §282 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
-qualCS:286 CULL:287 cullTick:288 texCanvas:299 glowTex:300 stoneTex:301 runeTex:307 glowMats:315 glowMat:316 STONEM:318 stoneMat:319 shadowAll:320 SKY:323 hemi:343 moonL:345 LDIR:349 setSky:350 SKYB:362 skyFollow:363
-§364 เงาตามผู้เล่น
-SHD:368 _shF:369 _shR:369 _shU:369 _shC:369 _shY:369 SHD_DM:373 shadowDepthSplit:374 shadowFollow:379 shadowSoft:399 LPOOL:401
+qualCS:286 CULL:287 cullTick:288 texCanvas:299 glowTex:300 stoneTex:301 runeTex:307 glowMats:315 glowMat:316 STONEM:318 stoneMat:319 shadowAll:320 SKY:323 hemi:344 moonL:346 LDIR:350 setSky:351 SKYB:364 skyFollow:365
+§366 เงาตามผู้เล่น
+SHD:370 _shF:371 _shR:371 _shU:371 _shC:371 _shY:371 SHD_DM:375 shadowDepthSplit:376 shadowFollow:381 shadowSoft:401 LPOOL:403
 
 ## js/28-city-build.js (386) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
@@ -395,18 +395,18 @@ frpBuild:27 fcsPropsBuild:75 fcsPropsView:101 fcsRoomBrkFx:110 FRP_DEB:111 frpDe
 §139 wall hit marks (event 'rwh'): decal quads on the wall face, ring buff…
 frpMarkTex:140 fcsWallHit:144
 
-## js/28-maps-build.js (819) — สร้างแผนที่
-CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:45 _prewarmed:47 prewarmShaders:48 batchStatic:67 makeCandles:92 updateCandles:101 buildCastle:110 buildHogsmeade:176 buildGreatHall:251 buildForest:321
-§418 ทุ่งหญ้าฮอกวอตส์ (เย็น)
-ringTrees:419 grassTex:428 buildMeadow:429
-§448 ทะเลสาบน้ำแข็ง (กลางคืน)
-buildLake:449
-§470 ซากลานประลอง (เย็น ทราย)
-§471 Test Place (ห้องฝึก): พื้นตารางเรียบๆ กลางวัน + วงโซนเสกมอนสเตอร์
-§472 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน guides…
-makeSnow:473 makeFireflies:480 makeSnitch:487 fileMapFx:494
-§504 แผนที่จากไฟล์ Blender (guides/MAP-DESIGN.md)
-terrGeo:506 buildFileMap:514 replaceMeadowTufts:568 tickM:610 TRPAD:611 ARPAD:611 SHPAD:611 signTex:612 testSign:613 buildTest:620 buildRuins:725 buildPitch:750
+## js/28-maps-build.js (822) — สร้างแผนที่
+CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:47 _prewarmed:49 prewarmShaders:50 batchStatic:69 makeCandles:94 updateCandles:103 buildCastle:112 buildHogsmeade:178 buildGreatHall:253 buildForest:323
+§420 ทุ่งหญ้าฮอกวอตส์ (เย็น)
+ringTrees:421 grassTex:430 buildMeadow:431
+§450 ทะเลสาบน้ำแข็ง (กลางคืน)
+buildLake:451
+§472 ซากลานประลอง (เย็น ทราย)
+§473 Test Place (ห้องฝึก): พื้นตารางเรียบๆ กลางวัน + วงโซนเสกมอนสเตอร์
+§474 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน guides…
+makeSnow:475 makeFireflies:482 makeSnitch:489 fileMapFx:496
+§506 แผนที่จากไฟล์ Blender (guides/MAP-DESIGN.md)
+terrGeo:508 buildFileMap:516 replaceMeadowTufts:571 tickM:613 TRPAD:614 ARPAD:614 SHPAD:614 signTex:615 testSign:616 buildTest:623 buildRuins:728 buildPitch:753
 
 ## js/28-pnl-build.js (245) — Breakable panels — view (state = PNL in js/12-pnl.js)
 PNV:7 PN_MI:8 PN_GLSL:9 pnlMat:41 PN_RUB:92 PN_HEAP:93 pnlCls:100 PN_ZU:108 pnlGeo:109 pnlBuild:192 pnlSyncOne:212 pnlView:234 pnlFX:237
@@ -416,14 +416,14 @@ makeCloak:2 updateCloth:10 wandNamed:34 wandSparks:83
 §92 โมเดลนักเรียนเวทมนตร์
 SHGEO:94 SHMAT:94 SHTEX:94 sGeo:95 sMat:96 bMat:99 matKey:101 bodyPatch:107 BODYM:114 bodyMat:115 plainMat:120 mergeBody:121 sStripe:157 hashStr:158 stripeTex:159 shieldMat:160 addStatus:168 makeStudent:174 makeEnemy:281 keepTex:419 keepMatSet:420 disposeMaterial:421 disposeTree:427 disposeObj:438 PM3:439 EM3:439 JM3:439 clearDyn:440
 
-## js/30-particles.js (362) — อนุภาค 2 ชั้น: แสงเรือง (additive) + ควัน (normal)
+## js/30-particles.js (374) — อนุภาค 2 ชั้น: แสงเรือง (additive) + ควัน (normal)
 PMAX:2 PGLOW_OCC:6 PLIT:6
 §7 อนุภาคบน GPU (ผู้ใช้ 2026-11-06 ลองเล่นแล้วให้เปิดทุกคน • ?cpup = กลั…
 PGPU:10 PGPU_F:10 PG_U:10 PGPU_HEAD:11 PGPU_DEAD:18 PGPU_MV:19 pgpuGeo:20 makePointSys:24
-§69 เปลวไฟ: FLAME_STYLE 0 = อนุภาคกลมเรืองแสง (ไม่ใช้รูปเปลว) • 2 = แบบให…
-FLAME_STYLE:71 PTIME:72 NOISETEX:74 FLAMETEX_V1:80 FLAMETEX_V2:85 PSYS:95 FLAMELUT:113 FLAMECOL:116 flame:117 PFB:126 ptexUse:127 ptexLoad:153 colCache:155 col3:156 CURL:159 CURL_V:160 curlAt:161 pgpuSpawn:164 _pgF:178 updateParticlesG:179 updateParticles:196
-§237 เอฟเฟกต์รูปทรง: แฟลช / วงแหวน / โดม / รอยไหม้ / สายฟ้า / แสงชั่วคราว
-SHAPES_Q:238 SHAPES:238 FLASHL:238 LINES:238 LREQ:239 ringGeo:240 ringVGeo:241 arcGeo:242 domeGeo:243 fullGeo:244 discGeo:245 decalTex:246 FX:247 jag:267 SHB:281 _sbM:281 _sbQ:281 _sbE:281 _sbS:281 _sbC:281 SHB_GEO:282 _sbDecalMat:283 shbMat:284 shbMake:295 spawnShape:307 updateShapes:317 _cp:347 updateLights:348
+§72 เปลวไฟ: FLAME_STYLE 0 = อนุภาคกลมเรืองแสง (ไม่ใช้รูปเปลว) • 2 = แบบให…
+PBLOB:74 PCEL:75 FLAME_STYLE:76 PTIME:77 NOISETEX:79 FLAMETEX_V1:85 FLAMETEX_V2:90 PSYS:100 FLAMELUT:124 FLAMECOL:127 flame:128 PFB:137 ptexUse:138 ptexLoad:164 colCache:166 colCacheV:166 col3:168 CURL:171 CURL_V:172 curlAt:173 pgpuSpawn:176 _pgF:190 updateParticlesG:191 updateParticles:208
+§249 เอฟเฟกต์รูปทรง: แฟลช / วงแหวน / โดม / รอยไหม้ / สายฟ้า / แสงชั่วคราว
+SHAPES_Q:250 SHAPES:250 FLASHL:250 LINES:250 LREQ:251 ringGeo:252 ringVGeo:253 arcGeo:254 domeGeo:255 fullGeo:256 discGeo:257 decalTex:258 FX:259 jag:279 SHB:293 _sbM:293 _sbQ:293 _sbE:293 _sbS:293 _sbC:293 SHB_GEO:294 _sbDecalMat:295 shbMat:296 shbMake:307 spawnShape:319 updateShapes:329 _cp:359 updateLights:360
 
 ## js/31-camera.js (281) — กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy)
 yaw:2 pitch:2 lastPh:2 locked:2 CAMRS:3 SENS:4 saveSet:5 applySettings:6 camPos:14 camLook:14 overlayOpen:17 showPause:18 hidePause:19 MAPCAM:20 PLACE:22 placeKey:23 PLN:32 PLR:32 placeGeos:33 updatePlaceGhost:41 _aimD:65 rayTerr:67 aimFromCrosshair:73 AIMZ:106 WBY:106 CAM_FRAMES:110 CAM_FRAME:127 CAM_TRACK:127 _camFocus:128 _camAnchor:128 _camWant:128 cameraFrame:129 camRoomK:161 _camOB:173 camObsK:174 combatCam:185 combatCameraImpact:186 combatCameraCharge:190 combatCameraFrame:202 updateCamera:215 menuCamera:277
@@ -480,12 +480,12 @@ ROLE_COL:37 roleTag:38 DESIGNED:39 spellTags:40 spellDescHTML:47 baseDescHTML:51
 §222 ฉากเปิด (#intro) + ประกายบนหน้าเมนู (#menuFx)
 TITLE:225 titleSpark:226 TSPR:228 titleSprite:229 titleDraw:230 titleLoop:240 titleGo:251 JOINQ:259 ovResult:279
 
-## js/40-train-settings.js (255) — เมนูทดลอง (ห้องฝึก / Test Place)
+## js/40-train-settings.js (256) — เมนูทดลอง (ห้องฝึก / Test Place)
 trOpenF:2 trKey:2 trN:2 TR_OPTS:3 trToggle:4 trSend:9 trSync:14
 §52 แท่นเสกบอท (โซนเสกบอท ห้องฝึก, trBotPad js/02): ยืนบนแท่น = เมนูขึ้น …
 bpOpen:53 bpOn:53 bpKey:53 bpShow:55 bpSync:57 hovEl:127
 §128 หน้าตั้งค่า
-setRow:129 setTog:130 setTab:131 XHC:132 XHN:132 setOpts:133 SET_ICO:135 SET_EN:138 renderSettings:139 drawXhPrev:161 openSettings:162 closeSettings:164 modeIcon:220 modeTitle:221 renderLobby:222
+setRow:129 setTog:130 setTab:131 XHC:132 XHN:132 setOpts:133 SET_ICO:135 SET_EN:138 renderSettings:139 drawXhPrev:162 openSettings:163 closeSettings:165 modeIcon:221 modeTitle:222 renderLobby:223
 
 ## js/41-debug.js (220) — 
 botBrain:6 _obsKeep:50 balArena:51 _balStash:54 balIsolate:55 balReset:58 balDuel:64 balTour:80 balTeamReset:95 balTeam:104 balCoop:132 balSpellTest:148
@@ -494,20 +494,20 @@ SWK:170 swSetup:171
 §189 เช็คการ์ดจอตอนเปิดเกม
 GPUC:192 gpuCheck:193
 
-## js/42-fire-vfx.js (347) — ไฟแบบใหม่ (2026-10-19): shader ไฟเคลื่อนไหวจริง (noise ไหล) ใช้กับลูก…
-FIRE_U:4 FIRE_GLSL:5 fireMat:24
-§55 ชิ้นงานสำเร็จรูป
-_fbGeo:56 _fbGeo2:56 makeFireBall:58 _ftGeo:66 makeFireTail:67 makeFireWall:70 FIREV:78 fireBlast:79 fireTemp:84 updateFireV:85
-§90 ปีกไฟ (Dragonfall) จากไฟล์ Blender mesh_fire_wing (assets/src/fx_mesh…
-makeFireWings:93 poseFireWings:100
-§101 ชิ้นงานพื้น/กระแทก (รอบ Pyro 2026-10-19): พื้นแตกเป็นใย (ดำ + ไฟลุกตา…
-_crackPaths:104 _crackGeo:113 _decM:117 _crackRibbon:119 fireCrackWeb:127 _charTex:149 charTex:150 _discGeo:153 scorch:154 _fruneTex:158 fruneTex:159 fireRune:167 _rockGeo:173 _rockM:174 _rockRestProx:175 rockChunks:176 fireGeyser:185 _mv1:193 _mv2:193 fireMeteor:194
-§206 อากาศร้อนบิดเบี้ยว (heat haze) — Blazeform "ออร่าความร้อน" (ผู้เล่น 2…
-HZM:209 hazeMat:210 _hzPlane:220 _hzRing:221 hazeOf:223 fireBurn:228
-§237 ไฟ 3 มิติจริง (volumetric) — ผู้เล่น 2026-10-19: "ไฟดูเป็นภาพ 2D เกิน…
-NOISE3D:242 FIRE3D:251 _fvIdx:256 fireVol:257 fireVolTemp:301
-§302 ไฟ 3 มิติที่ bake จาก Blender ทั้งก้อน (วิธี 1 — ผู้เล่นเลือก 2026-10…
-FSEQ:306 fireSeqLoad:307 fireSeqReady:311 fireSeqVol:312 fireSeqAt:333 _sqA:340 _sqB:340 _sqX:340 _sqY:340 _sqZ:340 _sqM:340 fireSeqLine:341
+## js/42-fire-vfx.js (356) — ไฟแบบใหม่ (2026-10-19): shader ไฟเคลื่อนไหวจริง (noise ไหล) ใช้กับลูก…
+FIRE_U:4 FIRE_GLSL:5 fireMat:27
+§62 ชิ้นงานสำเร็จรูป
+_fbGeo:63 _fbGeo2:63 makeFireBall:65 _ftGeo:73 makeFireTail:74 makeFireWall:77 FIREV:85 fireBlast:86 fireTemp:91 updateFireV:92
+§97 ปีกไฟ (Dragonfall) จากไฟล์ Blender mesh_fire_wing (assets/src/fx_mesh…
+makeFireWings:100 poseFireWings:107
+§108 ชิ้นงานพื้น/กระแทก (รอบ Pyro 2026-10-19): พื้นแตกเป็นใย (ดำ + ไฟลุกตา…
+_crackPaths:111 _crackGeo:120 _decM:124 _crackRibbon:126 fireCrackWeb:134 _charTex:156 charTex:157 _discGeo:160 scorch:161 _fruneTex:165 fruneTex:166 fireRune:174 _rockGeo:180 _rockM:181 _rockRestProx:182 rockChunks:183 fireGeyser:192 _mv1:200 _mv2:200 fireMeteor:201
+§213 อากาศร้อนบิดเบี้ยว (heat haze) — Blazeform "ออร่าความร้อน" (ผู้เล่น 2…
+HZM:216 hazeMat:217 _hzPlane:227 _hzRing:228 hazeOf:230 fireBurn:235
+§244 ไฟ 3 มิติจริง (volumetric) — ผู้เล่น 2026-10-19: "ไฟดูเป็นภาพ 2D เกิน…
+NOISE3D:249 FIRE3D:258 _fvIdx:263 fireVol:264 fireVolTemp:309
+§310 ไฟ 3 มิติที่ bake จาก Blender ทั้งก้อน (วิธี 1 — ผู้เล่นเลือก 2026-10…
+FSEQ:314 fireSeqLoad:315 fireSeqReady:319 fireSeqVol:320 fireSeqAt:342 _sqA:349 _sqB:349 _sqX:349 _sqY:349 _sqZ:349 _sqM:349 fireSeqLine:350
 
 ## js/43-frost-vfx.js (145) — 
 FROST_U:6
@@ -538,7 +538,7 @@ BFA:341 bfWreck:342 updateBfAir:347 bfRumble:370 updateBf:373
 §376 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
 SCR:377 impactFrame:380 screenFlash:381 screenRadial:382 screenKick:383 screenHurt:384 _scv:385 updateScreenFx:386 updateVfxKit:405
 
-## js/45-fx-runtime.js (398) — 
+## js/45-fx-runtime.js (430) — 
 FXR:9 FXDEG:10
 §11 โหลด
 fxFetch:12 fxDefaults:13 fxBoot:14 fxOverrides:24 fxLoad:27 fxData:31
@@ -555,17 +555,17 @@ fxN:114 fxSpawn:115 fxTick:149 fxEnd:160
 §167 อนุภาค
 _fxrnd:168 fxUnit:169 fxCone:170 fxEmit:172 fxPart:189
 §204 รูปทรง 3D
-FXGEO:205 fxMerge:206 fxRibbon:211 fxGeo:217 fxEnergyMat:237 fxWaterMat:252 fxToonWaterMat:265 fxWindShellMat:281 fxToonMat:290 fxMeshMake:298 fxMeshTick:320 fxFlipTex:335
-§340 หางแสง / รอยฟัน
-fxTrailTick:341
-§347 สายฟ้า
-fxBolt:348
-§354 ฟังก์ชันในโค้ดที่ไฟล์เรียกได้ (ชั้น t:"code")
-FXCODE:355
-§368 ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev)
-fxLoopName:370 blzFxName:371 fxLoopKeep:372 fshHitFx:374 fxBind:377
-§388 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
-fxTpl:390
+FXGEO:205 fxMerge:206 fxRibbon:211 fxGeo:217 fxEnergyMat:237 fxWaterMat:252 fxToonWaterMat:265 fxWindShellMat:281 fxToonMat:290 fxArmorMat:300 fxArmorLines:311 fxMeshMake:328 fxMeshTick:352 fxFlipTex:367
+§372 หางแสง / รอยฟัน
+fxTrailTick:373
+§379 สายฟ้า
+fxBolt:380
+§386 ฟังก์ชันในโค้ดที่ไฟล์เรียกได้ (ชั้น t:"code")
+FXCODE:387
+§400 ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev)
+fxLoopName:402 blzFxName:403 fxLoopKeep:404 fshHitFx:406 fxBind:409
+§420 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
+fxTpl:422
 
 ## js/46-fx-make.js (356) — 
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
@@ -622,7 +622,7 @@ RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rq
 ## js/49-cloth.js (202) — 
 CLOTH:10 CL_ROWS:26 CL_NC:26 CL_GAP:26 CL_IN:26 _clV:27 _clA:27 _clB:27 clPinK:29 clBind:31 cloakPanelGrid:33 cloakBodyIndices:47 stormCape:56 clothSetup:94 clTargets:123 clReset:127 clCapsule:131 _clO:135 clWorld:136 clWorldHit:144 clStep:149 clDraw:162 clothTick:183
 
-## js/50-grass.js (418) — ลม + หญ้า 3D (ภาพบนเครื่องตัวเองล้วน ไม่แตะโฮสต์/โปรโตคอล)
+## js/50-grass.js (421) — 
 AIR:10 AIR_MAP:17 AIR_NG:20 airGust:21 airGustOff:26 airEnv:27 airGs:28 airMark:30 airForMap:33 _airV:34 airAt:35 airGv:41 airTick:42
 §45 ต่อเข้ากับเอฟเฟกต์เดิม (ไม่ต้องแก้ทุกสกิล): แสงวาบ = ลมกระโชก • วงคลื…
 CLW:54
@@ -633,9 +633,9 @@ SCAR:62 scarReset:64 scarPaint:71 grassScar:86
 §91 ไฟลามหญ้า (ภาพล้วน: ไม่มีดาเมจ ไม่ซิงก์ — แต่ละเครื่องลามไม่เหมือนกัน…
 FIRE:97 GR_FIRE:100 fireReset:102 fireBuild:104 fireLight:111 fireIgnite:113 fireFx:125 fireStep:130 fireTick:154
 §159 พื้นหญ้ามีชีวิต: สีเป็นหย่อม (เขียวเข้ม / แห้งเหลือง / ดินโผล่) + จุด…
-GR_NOISE:162 GR_LIVE:167 grLive:186 GR_GLSL_V:196 GR_BEGIN:201 grassMat:251 grassBuild:269 _grBasic:283 grassBake:284 grassCount:352 grassTick:357
-§395 สกิลลม → หญ้า (ภาพล้วน เรียกจาก windEfx js/68)
-WIND_GRASS:397 airWind:411
+GR_NOISE:162 GR_LIVE:167 grLive:186 GR_GLSL_V:196 GR_BEGIN:201 grassMat:253 grassBuild:271 _grBasic:285 grassBake:286 grassCount:355 grassTick:360
+§398 สกิลลม → หญ้า (ภาพล้วน เรียกจาก windEfx js/68)
+WIND_GRASS:400 airWind:414
 
 ## js/51-warmup.js (286) — 
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_SLICE:13 WARM_X:14 WARM_Y:14 warmKeep:16 warmStaticModels:22 glReady:31 warmCompile:32 warmDraw:35 WARM_SKIP:45 warmAssets:48 warmFx:58 warmFxEnd:69 warmGather:71 warmPaths:73 warmFrame:75 warmStep:77 warmQueue:129 WARM_LOBBY:135 warmLobbyTick:136 warmTick:143
@@ -877,11 +877,10 @@ tuneOpenF:96 tuneFmt:97 tuneRow:98 tuneRefresh:101 tuneMsg:109 tuneToggle:110 tu
 §138 API สำหรับเครื่องมือแยก tune.html (เปิดเกมใน iframe แล้วเรียกผ่าน WD)
 tuneDump:139 tuneSetKey:140
 
-## js/74-look.js (89) — Look 🌗 — พรีเซ็ตลุคของฉาก: แสงรอบตัวจากท้องฟ้า (IBL) + ความสว่าง + คอนทราสต์ + ย้อมสีเงา…
-§12 ฟิลด์: sky = ท้องฟ้าที่ถ่ายเป็นแสง ('night'|'sunset') • warm = ทิศย้อ…
-LOOK:17 lookPreset:34 lookMap:36 lookName:37 lookEnvFor:38 lookApply:48 lookRays:63 _lkV:68 lookRaysFrame:70 lookRefresh:77
-§78 ลงทะเบียนในเครื่องมือปรับค่า (js/73-tune.js): 1 หมวด "🌗 Look" แยกส่ว…
-LOOK_F:79 lookRegister:85
+## js/74-look.js (90) — 
+LOOK:17 lookPreset:34 lookMap:36 lookName:37 lookEnvFor:38 lookApply:48 lookRays:64 _lkV:69 lookRaysFrame:71 lookRefresh:78
+§79 ลงทะเบียนในเครื่องมือปรับค่า (js/73-tune.js): 1 หมวด "🌗 Look" แยกส่ว…
+LOOK_F:80 lookRegister:86
 
 ## js/75-ambient.js (52) — Ambient 🌫️ — ฝุ่นลอย (dust motes) + หมอกลอยต่ำ (mist) ที่ใช้ได้ทุกแมพ ปรับตามพรีเซ็ต Loo…
 AMBX:9 AMBX_V:10 AMBX_F:24 ambMesh:27 ambQual:39 ambFrame:40
@@ -913,6 +912,23 @@ _dvCyl:259 _dvMat:260 devOverlay:261
 §281 2D overlay map: spawn zones + capture zones + players (click = warp)
 _dvMap:282 _dvY:286 devMapDraw:287
 
+## js/77-paint.js (288) — Paint 🎨 — ลุค "ภาพวาด" (branch graphics-painterly, ทดลอง): ป่ากลางวันแดดลอดใบไม้แบบภาพอ้…
+PAINT:12 paintOn:19 paintMap:21 paintLights:30
+§39 VFX สีสด (ทดลอง): บนแมพสว่าง เอฟเฟกต์เรืองแสงเดิมซีดเป็นขาว-เหลืองอ่อ…
+_ptHSL:40 paintVivid:41 paintVfx:43
+§53 ไฟก้อนหลอมรวม (blob / metaball) — ภาพอ้างอิงผู้ใช้ 2026-11-11: ไฟเป็น…
+BLOB:55 blobPre:56 blobFire:57 paintGrass:79
+§80 ภาพผิว: เปลือกไม้ (ครึ่งซ้าย) + ใบไม้ปาดพู่กัน 4 แบบ (ครึ่งขวา 2×2)
+paintAtlas:81 paintStrokeTex:105
+§113 ต้นไม้
+paintTreeGeo:114 paintCanopy:157 paintKit:161
+§184 ลายพู่กันบนผิว (ต่อท้าย onBeforeCompile เดิมของวัสดุ เหมือน js/76)
+PT_VS:185 PT_VS_BODY:186 PT_FS:187 PT_FS_BODY:188 PT_CEL_RE:197 PT_CEL_CHUNK:198 paintPatch:201 paintApply:216 paintSweep:218
+§219 ฉากของแมพ (เรียกจาก buildFileMap ก่อน brkSetup/batchStatic)
+paintScene:220 paintShafts:235
+§246 ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเร…
+§272 ปรับค่า (tune.html / F8)
+
 ## js/78-dev-ui.js (243) — Dev Mode UI (user 2026-11-20): one floating window, many small column…
 §10 orbit camera
 devOrbPick:11 devOrbToggle:23 devOrbCam:28
@@ -923,4 +939,4 @@ _dvPanel:95 _dvBtn:98 _dvBody:100 _dvHead:100 devUiApply:102 devFreeMouse:110 de
 §130 rows
 dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:193 devUiAct:200
 
-(115 files, 34657 lines)
+(116 files, 35008 lines)

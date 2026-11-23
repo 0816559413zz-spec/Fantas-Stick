@@ -1,6 +1,21 @@
 {
- "next": 156,
+ "next": 157,
  "items": [
+  {
+   "id": 156,
+   "title": "สวิตช์สไตล์ภาพวาด (Painterly) ในตั้งค่า",
+   "text": "ตั้งค่า > ภาพ > สไตล์ภาพวาด (Painterly) เปิดเป็นค่าเริ่มต้น ปิดแล้วมีผลตอนโหลดแมพถัดไป ตอนนี้ใช้กับแมพ forest (เล่น FFA เลือกป่า) รูปซ้าย = เปิด รูปขวา = ปิด",
+   "kind": "UI",
+   "who": "Graphics",
+   "status": "wait",
+   "created": "2026-11-23",
+   "updated": "2026-11-23",
+   "imgs": [],
+   "links": [
+    "/shots/pt_toggle_on.jpg",
+    "/shots/pt_toggle_off.jpg"
+   ]
+  },
   {
    "id": 148,
    "title": "เคียวรับแรงตรงปลายคม",
