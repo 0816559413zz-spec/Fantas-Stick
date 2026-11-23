@@ -342,7 +342,7 @@ onfOutlineMat:4 onFireFX:6 statusFX:17 fx:44
 §251 overlay: เลือกบัฟ / สรุปผล
 choosePick:252 syncOverlays:257 showOver:278
 
-## js/27-world.js (440) — 
+## js/27-world.js (441) — 
 S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 PTG:15 gl:23
 §37 เงานุ่มแบบ PCSS (contact-hardening): ใกล้จุดสัมผัสคม ไกลจากวัตถุที่บั…
 PCSS:40 scene:67 cam:69 composer:70
@@ -351,11 +351,11 @@ rpass:74 fxScene:76 SOFTU:78 SOFT_GLSL:79 FXMATS:81 fxMat:82 softify:84 HAZE_U:8
 §140 TAA (ลบขอบหยักแบบสะสมหลายเฟรม) — กราฟิกสูงเท่านั้น • ปิดด้วย ?notaa
 TAA:143 TAA_FRAG:144 _taaH:159 taaWanted:160 taaBegin:161 taaEnd:169 taaFinish:170 taaResolve:172 AO_RT:182 fxPass:204 bloom:205 GRADEU:212 gradePass:233 aaPass:251
 §253 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
-QUAL:254 QUAL_NAME:255 qualPR:256 applyQuality:262 qualTick:283
-§299 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
-qualCS:303 CULL:304 cullTick:305 texCanvas:316 glowTex:317 stoneTex:318 runeTex:324 glowMats:332 glowMat:333 STONEM:335 stoneMat:336 shadowAll:337 SKY:340 hemi:361 moonL:363 LDIR:367 setSky:368 SKYB:381 skyFollow:382
-§383 เงาตามผู้เล่น
-SHD:387 _shF:388 _shR:388 _shU:388 _shC:388 _shY:388 SHD_DM:392 shadowDepthSplit:393 shadowFollow:398 shadowSoft:418 LPOOL:420 MLS_N:426 MLS:426 mlsPoint:428 _mlsP:430 mlsInScene:431 mlsTick:432
+QUAL:254 QUAL_NAME:255 qualPR:256 applyQuality:262 qualTick:284
+§300 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
+qualCS:304 CULL:305 cullTick:306 texCanvas:317 glowTex:318 stoneTex:319 runeTex:325 glowMats:333 glowMat:334 STONEM:336 stoneMat:337 shadowAll:338 SKY:341 hemi:362 moonL:364 LDIR:368 setSky:369 SKYB:382 skyFollow:383
+§384 เงาตามผู้เล่น
+SHD:388 _shF:389 _shR:389 _shU:389 _shC:389 _shY:389 SHD_DM:393 shadowDepthSplit:394 shadowFollow:399 shadowSoft:419 LPOOL:421 MLS_N:427 MLS:427 mlsPoint:429 _mlsP:431 mlsInScene:432 mlsTick:433
 
 ## js/28-city-build.js (386) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
@@ -923,24 +923,25 @@ _dvCyl:259 _dvMat:260 devOverlay:261
 §281 2D overlay map: spawn zones + capture zones + players (click = warp)
 _dvMap:282 _dvY:286 devMapDraw:287
 
-## js/77-paint.js (320) — 
-PAINT:12 paintOn:22 paintMap:24 paintLights:33
-§42 VFX สีสด (ทดลอง): บนแมพสว่าง เอฟเฟกต์เรืองแสงเดิมซีดเป็นขาว-เหลืองอ่อ…
-_ptHSL:43 paintVivid:44 paintVfx:46
-§56 ไฟก้อนหลอมรวม (blob / metaball) — ภาพอ้างอิงผู้ใช้ 2026-11-11: ไฟเป็น…
-BLOB:58 blobPre:59 blobFire:60 paintGrass:82
-§83 ภาพผิว: เปลือกไม้ (ครึ่งซ้าย) + ใบไม้ปาดพู่กัน 4 แบบ (ครึ่งขวา 2×2)
-paintAtlas:84 paintStrokeTex:108
-§116 ต้นไม้
-paintTreeGeo:117 paintCanopy:160 paintKit:164
-§191 tree wind (user 2026-11-23: trees more alive)
-PTW:193 PTW_HEAD:196 PTW_BODY:198 PTW_FS:212 ptWindTick:215
-§219 ลายพู่กันบนผิว (ต่อท้าย onBeforeCompile เดิมของวัสดุ เหมือน js/76)
-PT_VS:220 PT_VS_BODY:221 PT_FS:222 PT_FS_BODY:223 paintPatch:233 paintApply:247
-§248 ฉากของแมพ (เรียกจาก buildFileMap ก่อน brkSetup/batchStatic)
-paintScene:249 paintShafts:264
-§275 ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเร…
-§301 ปรับค่า (tune.html / F8)
+## js/77-paint.js (329) — 
+PAINT:12 paintOn:22 paintMap:24 kuwOn:33 paintLights:34
+§43 VFX สีสด (ทดลอง): บนแมพสว่าง เอฟเฟกต์เรืองแสงเดิมซีดเป็นขาว-เหลืองอ่อ…
+_ptHSL:44 paintVivid:45 paintVfx:47
+§57 ไฟก้อนหลอมรวม (blob / metaball) — ภาพอ้างอิงผู้ใช้ 2026-11-11: ไฟเป็น…
+BLOB:59 blobPre:60 blobFire:61 paintGrass:83
+§84 ภาพผิว: เปลือกไม้ (ครึ่งซ้าย) + ใบไม้ปาดพู่กัน 4 แบบ (ครึ่งขวา 2×2)
+paintAtlas:85 paintStrokeTex:109
+§117 ต้นไม้
+paintTreeGeo:118 paintCanopy:161 paintKit:165
+§192 tree wind (user 2026-11-23: trees more alive)
+PTW:194 PTW_HEAD:197 PTW_BODY:199 PTW_FS:213 ptWindTick:216
+§220 ลายพู่กันบนผิว (ต่อท้าย onBeforeCompile เดิมของวัสดุ เหมือน js/76)
+PT_VS:221 PT_VS_BODY:222 PT_FS:223 PT_FS_BODY:224 paintPatch:234 paintApply:248
+§249 ฉากของแมพ (เรียกจาก buildFileMap ก่อน brkSetup/batchStatic)
+paintScene:250 paintShafts:265
+§276 ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเร…
+kuwQ:279 KUW_LOOP:280 kuwMat:282
+§310 ปรับค่า (tune.html / F8)
 
 ## js/78-dev-ui.js (246) — Dev Mode UI (user 2026-11-20): one floating window, many small column…
 §10 orbit camera
@@ -955,4 +956,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(117 files, 35599 lines)
+(117 files, 35609 lines)

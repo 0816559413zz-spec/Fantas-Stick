@@ -276,6 +276,7 @@ function applyQuality(){
   // เงาตามซอกมุม: สูง = เปิด / อัตโนมัติ = เปิดจนกว่าเครื่องเริ่มช้า (lvl≥1) / ประหยัด = ปิด (ทำงานเฉพาะตอน soft เปิด)
   AOU.uAO.value=soft&&(QUAL.mode==='high'||QUAL.lvl<1)?AO_ON.strength:0;
   if(typeof lookRays==='function')lookRays();   // ลำแสง: เปิดตามกราฟิกเหมือน AO
+  if(typeof kuwOn==='function'&&PAINT&&PAINT.pass)PAINT.pass.enabled=kuwOn();   // painterly filter (js/77): off on low / auto lvl>=1
   if(typeof surfQuality==='function')surfQuality();   // ผิววัสดุ (js/76): สูง/อัตโนมัติต้น = เปิด
   if(typeof resize==='function'&&SW)resize();
 }

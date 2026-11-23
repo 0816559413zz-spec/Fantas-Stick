@@ -30,9 +30,10 @@ function paintMap(id,FM){
     const src=(PAINT.on&&SET.paint)?o.back:B._pt0;for(const k of Object.keys(o.back)){if(Array.isArray(src[k]))B[k]=src[k].map(x=>Object.assign({},x));else Object.assign(B[k],src[k]);}}
 }
 // ไฟของแมพภาพวาด (เรียกท้าย buildWorld) — เงาได้สีจากแสงฟ้า (เขียวอมฟ้า) ส่วนโดนแดดอุ่นเหลือง
+function kuwOn(){return !!PAINT.cur&&PAINT.kuw>0&&QUAL.mode!=='low'&&!(QUAL.mode==='auto'&&QUAL.lvl>=1);}
 function paintLights(id){
   if(!PAINT)return;PAINT.cur=paintOn(id)?id:null;
-  if(PAINT.pass)PAINT.pass.enabled=!!PAINT.cur&&PAINT.kuw>0&&QUAL.mode!=='low';
+  if(PAINT.pass)PAINT.pass.enabled=kuwOn();
   paintGrass();paintVfx();
   if(!PAINT.cur){GRADEU.uSat.value=1.1;PTG.x=0;return;}
   hemi.color.set('#86dcea');hemi.groundColor.set('#4f9a58');const mo=PAINT.maps[PAINT.cur]||{};hemi.intensity=mo.hemi!==undefined?mo.hemi:LOOK.P.paint.hemi;   // per-map overrides: sun / hemi / exp / ground
@@ -273,27 +274,35 @@ function paintShafts(){
   const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({map:tex,color:new THREE.Color('#fff3b8').multiplyScalar(PAINT.shaft),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,fog:false,side:THREE.DoubleSide,name:'paint_glow_shaft'}));m.material.userData.noBake=true;
   m.renderOrder=5;m.frustumCulled=false;m.name='paint_shafts';return m;}
 // ---------- ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเรียบที่สุด = ปื้นสีเรียบ ขอบคม ----------
-class PaintPass extends Pass{
-  constructor(){super();this.needsSwap=true;
-    this.q=new FullScreenQuad(new THREE.ShaderMaterial({uniforms:PAINT.KU,depthTest:false,depthWrite:false,
+// PAINT.kuwQ: 'full' = 4×13 taps (QUAL high) • 'fast' = 4×4 bilinear taps, each tap averages a 2×2 texel block (auto)
+// • off on low and on auto once it steps down (QUAL.lvl>=1). One program per session (mode is fixed at entry).
+function kuwQ(){return QUAL.mode==='high'?'full':'fast';}
+const KUW_LOOP={full:'float W=0.0;for(int j=0;j<=3;j++)for(int i=0;i<=3;i++){float d2=float(i*i+j*j);if(d2>10.5)continue;float w=exp(-d2/9.0);W+=w;vec2 o=vec2(float(i),float(j))*uPx*uR;',
+  fast:'float W=0.0;for(int j=0;j<=1;j++)for(int i=0;i<=1;i++){vec2 t=vec2(float(i),float(j))*2.0+0.5;float d2=dot(t,t);float w=exp(-d2/9.0);W+=w;vec2 o=t*uPx*uR;'};
+function kuwMat(q){return new THREE.ShaderMaterial({uniforms:PAINT.KU,depthTest:false,depthWrite:false,name:'paint_kuwahara_'+q,
       vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}',
       fragmentShader:'uniform sampler2D tDiffuse;uniform vec2 uPx;uniform float uR;uniform float uK;varying vec2 vUv;const vec3 LW=vec3(0.2126,0.7152,0.0722);'+
         'vec3 tm(vec2 o){vec3 c=max(texture2D(tDiffuse,vUv+o).rgb,0.0);return c/(1.0+dot(c,LW));}'+
         'void main(){vec3 src=texture2D(tDiffuse,vUv).rgb;'+
         'vec3 m0=vec3(0.0),m1=vec3(0.0),m2=vec3(0.0),m3=vec3(0.0),s0=vec3(0.0),s1=vec3(0.0),s2=vec3(0.0),s3=vec3(0.0),c;'+
-        'float W=0.0;for(int j=0;j<=3;j++)for(int i=0;i<=3;i++){float d2=float(i*i+j*j);if(d2>10.5)continue;float w=exp(-d2/9.0);W+=w;vec2 o=vec2(float(i),float(j))*uPx*uR;'+
+        KUW_LOOP[q]+
           'c=tm(vec2(-o.x,-o.y));m0+=c*w;s0+=c*c*w;c=tm(vec2(o.x,-o.y));m1+=c*w;s1+=c*c*w;c=tm(vec2(-o.x,o.y));m2+=c*w;s2+=c*c*w;c=tm(o);m3+=c*w;s3+=c*c*w;}'+
         'm0/=W;m1/=W;m2/=W;m3/=W;'+
         'float v0=dot(abs(s0/W-m0*m0),vec3(1.0))+1e-6,v1=dot(abs(s1/W-m1*m1),vec3(1.0))+1e-6,v2=dot(abs(s2/W-m2*m2),vec3(1.0))+1e-6,v3=dot(abs(s3/W-m3*m3),vec3(1.0))+1e-6;'+
         'float vm=min(min(v0,v1),min(v2,v3)),a0=pow(vm/v0,5.0),a1=pow(vm/v1,5.0),a2=pow(vm/v2,5.0),a3=pow(vm/v3,5.0);'+   // ผสมนุ่มระหว่าง 4 มุม (ไม่เป็นบล็อกเหลี่ยม)
         'vec3 b=(m0*a0+m1*a1+m2*a2+m3*a3)/(a0+a1+a2+a3);'+
         'b=b/max(1.0-dot(b,LW),0.02);if(!(b.r+b.g+b.b>=0.0))b=src;'+
-        'gl_FragColor=vec4(mix(src,b,uK),1.0);}'}));}
-  render(r,write,read){const U=PAINT.KU;U.tDiffuse.value=read.texture;U.uPx.value.set(1/read.width,1/read.height);U.uR.value=PAINT.kuwR*Math.max(1,read.height/720);U.uK.value=typeof screen==='string'&&screen!=='game'?0:PAINT.kuw;
+        'gl_FragColor=vec4(mix(src,b,uK),1.0);}'});}
+class PaintPass extends Pass{
+  constructor(){super();this.needsSwap=true;this.M={};this.q=new FullScreenQuad(this.mat());}
+  mat(){const q=PAINT.kuwQ||kuwQ();return this.M[q]||(this.M[q]=kuwMat(q));}
+  render(r,write,read){this.q.material=this.mat();const U=PAINT.KU;U.tDiffuse.value=read.texture;U.uPx.value.set(1/read.width,1/read.height);U.uR.value=PAINT.kuwR*Math.max(1,read.height/720);U.uK.value=typeof screen==='string'&&screen!=='game'?0:PAINT.kuw;
     PAINT.T.value=performance.now()*0.001;ptWindTick();paintGrass();
     r.setRenderTarget(this.renderToScreen?null:write);this.q.render(r);}
 }
 PAINT.pass=new PaintPass();PAINT.pass.enabled=false;
+// entry preload: draw the filter once into a tiny target so its program is linked before the first paint map
+preloadReg('paint',()=>{const rt=new THREE.WebGLRenderTarget(8,8),pr=gl.getRenderTarget();gl.setRenderTarget(rt);try{PAINT.pass.q.render(gl);}finally{gl.setRenderTarget(pr);rt.dispose();}return [];});
 composer.insertPass(PAINT.pass,composer.passes.indexOf(bloom));
 // พรีเซ็ต Look ของลุคภาพวาด: ฟ้ากลางวัน • เงาอมเขียวฟ้า ไฮไลต์อมเหลือง (lo/hi) • ลำแสง + หมอก + ละอองลอย
 lookPreset('paint','dusk',{sky:'noon',warm:true,env:0.75,tr:0.86,tg:1.06,tb:1.02,hemi:0.82,amb:0.14,exp:1.0,con:1.12,split:0.14,tone:0,rays:1.1,haze:0.75,hazeK:1.5,hazeH:0.08,

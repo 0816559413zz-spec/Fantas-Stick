@@ -226,6 +226,18 @@ Rule: **light changes = uniform changes, never structural changes.**
   Ward Drain, Nightfall, unnamed `Scene>Mesh` ShaderMaterials) → next: dump their source in the mixed bench
   (`WD.SHW.L[i].key` + `gl.getAttachedShaders`) and find which branch builds them.
 
+**Step 5 status (round 1, 2026-11-23):**
+- Already in place before step 5: Map Builder light points (`light` objects → `mlsPoint`, the 8 map light slots) and
+  Indoor Light Zones (`lz` → `uPtG.y`). Not yet done: the 8/12/16 slot measurement on a real GPU.
+- **Kuwahara lighter:** `PAINT.kuwQ` picks one program per session — `full` (4 × 13 taps, QUAL high) or `fast`
+  (4 × 4 bilinear taps, each averages a 2×2 texel block; QUAL auto). Off on low and on auto once it steps down
+  (`kuwOn()`, also re-checked in `applyQuality`). Compiled at entry (`preloadReg('paint')`).
+  Pass alone at 1280×720 (headless): fast 0.15 ms vs full 0.33–0.56 ms; shots `shots/kuw_fast.jpg` / `kuw_full.jpg`
+  look the same at a glance. Override for tests: `WD.PAINT.kuwQ='full'|'fast'`.
+- Headless quirk seen (also on the old code): with the paint pass on, `HL.snap` after `HL.step` shows the scene without
+  the local player (mesh is visible in the scene graph). Not checked in a real window yet.
+- Next in step 5: N light slots measurement (needs real GPU), trees as `.glb`, strokes in textures (user decision §8).
+
 ## 7. Work order
 
 | Step | Work | Done when |
