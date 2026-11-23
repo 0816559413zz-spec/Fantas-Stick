@@ -56,7 +56,7 @@ function eKill(w,quiet){if(w.dead)return;w.dead=1;if(!quiet)emit({k:'efx',z:'ebr
 
 // ---------- ทุกเฟรมของผู้เล่นสายดิน (เรียกจาก updatePlayer หลังส่วนโล่) ----------
 function earthTick(p,dt){
-  earthRampartTick(p,dt);
+  earthRampAimTick(p,dt);
   if(p.ehp===undefined)p.ehp=ERV.sh;
   if(p.stdB>0){p.stdB-=dt;if(p.stdB<=0){p.stdB=0;p.ehp=ERV.sh;emit({k:'efx',z:'estdon',x:p.x,y:p.y,h:p.z,id:p.id});}}
   if(p.shieldOn)p.eShT=0;else{p.eShT=(p.eShT||0)+dt;if(p.eShT>=ERV.shDelay&&!(p.stdB>0))p.ehp=Math.min(ERV.sh,p.ehp+ERV.shRegen*dt);}
@@ -90,6 +90,7 @@ function earthReset(p){p.ehp=ERV.sh;p.stdB=0;p.eShT=0;p.epn=null;p.esb=null;p.au
 // ---------- ท่าพื้นฐาน (คลิกซ้าย) ----------
 function earthBasic(p,inp,dt,setCd){
   const prev=p.eFirePrv;p.eFirePrv=inp.fire;
+  if(p.rmpAim)return;if(p.rmpNoFire){if(inp.fire)return;p.rmpNoFire=0;}   // Rampart placing click must not punch
   if(p.aug||p.ramp||p.ecb)return;
   if(p.wr){if(p.wr.ph==='aim'&&p.wr.t>=WRATH_READY_T&&inp.fire&&!prev)earthPillarThrow(p);return;}
   if(p.stdB>0){p.eHold=0;if(inp.fire&&p.cd.basic<=0){shoot(p,'erock',{sp:'b_earth'});setCd('basic',ERV.rockCd);}return;}
@@ -214,28 +215,31 @@ const DUSTB=defSpell(EARTH,{id:'dustburst',v:{range:500,r:350,time:5,rWeak:200,t
 // กดค้างชาร์จ: แตะ = ระดับ 1 • 2 วิ = 2 • 4.5 วิ = 3 • ปล่อยแล้วสว่านพุ่งลงจุดเล็ง (600) • คูลดาวน์เริ่มตอนปล่อย
 // Terra Auger replaced by Rampart (user 2026-11-23) — same SPELL_LIST slot; old auger code kept dormant (AUGER stub)
 const AUGER={cd:14,v:{range:600,t2:2,t3:4.5,d1:20,d2:50,d3:120,r1:80,r2:110,r3:150,slow:0.15,cdCancel:7}};
-// ---------- สกิล 5: Rampart — วางกำแพงหินหน้าตัว • กดอีกครั้ง = ดันกำแพงพุ่งไปจุดเล็ง ชน = ดาเมจ + กระเด็น ----------
-const RAMPART=defSpell(EARTH,{id:'rampart',v:{dist:70,len:120,r:18,hgt:6,hp:250,life:6,push:240,pushT:0.35,dmg:25,knock:900,env:30},
-  vn:{dist:'กำแพง • ห่างจากตัว',len:'กำแพง • กว้าง',hp:'กำแพง • HP',life:'กำแพง • อยู่นาน (วิ)',push:'ดัน • ระยะ',pushT:'ดัน • เวลา (วิ)',dmg:'ดัน • ดาเมจ',knock:'ดัน • แรงกระเด็น'},
-  role:'control',n:'Rampart',ic:'🧱',cd:10,d:'วางกำแพงหินกว้าง 6 ม. สูงหน้าตัว บังกระสุน (HP 250, 6 วิ) • กดอีกครั้ง = ดันกำแพงพุ่งไปจุดเล็ง (ไกลสุด 12 ม.) ชนศัตรู 25 + กระเด็น แล้วแตก',
-  toggle(p){const R=p.rmp;if(!R||R.push)return false;const w=(G.eso||[]).find(q=>q.id===R.id&&!q.dead);if(!w){p.rmp=null;return false;}
-    const o=aimPoint(p,RAMPART.v.push+RAMPART.v.dist),cx=(w.x1+w.x2)/2,cy=(w.y1+w.y2)/2;let dx=o.x-cx,dy=o.y-cy;const L=Math.hypot(dx,dy);
-    if(L<10){dx=Math.cos(p.ang);dy=Math.sin(p.ang);}else{dx/=L;dy/=L;}
-    R.push={left:Math.min(RAMPART.v.push,Math.max(60,L)),dx,dy,hit:new Set()};w.life=RAMPART.v.pushT+1;
-    emit({k:'efx',z:'erampush',x:Math.round(cx),y:Math.round(cy),h:p.z,a:Math.round(Math.atan2(dy,dx)*100)/100,id:p.id});return true;},
-  cast(p,S,i){if(p.aug||p.ramp||p.ecb)return false;
-    if(p.rmp){const old=(G.eso||[]).find(q=>q.id===p.rmp.id);if(old)eKill(old);}
-    const V=S.v,a=p.ang,c=Math.cos(a),s=Math.sin(a),cx=p.x+c*(V.dist+V.r),cy=p.y+s*(V.dist+V.r),hx=-s*V.len/2,hy=c*V.len/2;
-    const w=eAdd({k:'tec',x1:cx-hx,y1:cy-hy,x2:cx+hx,y2:cy+hy,r:V.r,hgt:V.hgt,hp:V.hp,maxHp:V.hp,team:p.team,owner:p.id,life:V.life,rmp:1});
-    for(const t of plist().concat(G.en)){if(t===p||t.dead||t.alive===false)continue;const q=eSegD(t.x,t.y,w);if(q.d>=w.r+(t.r||PR)+4)continue;const f=isBig(t)?150:600;t.vx=(t.vx||0)+c*f;t.vy=(t.vy||0)+s*f;}
-    damageEnv(cx,cy,60,V.env*ERV.env,p.id,'rock',0.5);
-    p.rmp={id:w.id,k:SLOTK[i]};emit({k:'efx',z:'erampup',x:Math.round(cx),y:Math.round(cy),h:p.z,a:Math.round(a*100)/100,id:p.id});}});
-function earthRampartTick(p,dt){const R=p.rmp;if(!R)return;const w=(G.eso||[]).find(q=>q.id===R.id&&!q.dead);if(!w){p.rmp=null;return;}
-  const P=R.push;if(!P)return;const V=RAMPART.v,st=Math.min(P.left,V.push/V.pushT*dt);P.left-=st;
-  w.x1+=P.dx*st;w.y1+=P.dy*st;w.x2+=P.dx*st;w.y2+=P.dy*st;const cx=(w.x1+w.x2)/2,cy=(w.y1+w.y2)/2;
-  for(const t of foesOf(p.team)){if(P.hit.has(t))continue;if(eSegD(t.x,t.y,w).d<w.r+(t.r||PR)+6){P.hit.add(t);const big=isBig(t);aoeHit(p,t,V.dmg,t=>{t.vx=(t.vx||0)+P.dx*V.knock*(big?0.25:1);t.vy=(t.vy||0)+P.dy*V.knock*(big?0.25:1);});}}
-  const solid=frostWaveSolid({x:cx+P.dx*(w.r+6),y:cy+P.dy*(w.r+6),h:1,team:p.team})||cx<30||cx>MW-30||cy<30||cy>MH-30;
-  if(P.left<=0.01||solid){damageEnv(cx,cy,90,V.env*ERV.env,p.id,'rock',0.5);eKill(w);p.rmp=null;}}
+// ---------- สกิล 5: Rampart (ผู้ใช้ 2026-11-23 v2) — เลือกจุด (โฮโลแกรม) แล้วคลิกวาง: Stand ใหญ่โผล่ยื้อยกพื้น ~1 วิ
+// แล้วดึงกำแพงหินก้อนกลมเรียงต่อกันขึ้นมาทีเดียว (กว้าง ~10 ม. สูง ~4 ม.) บังกระสุน • ไม่มีดันแล้ว
+const RAMPART=defSpell(EARTH,{id:'rampart',v:{range:520,len:200,r:22,hgt:4.2,hp:500,life:5,lift:1.0,env:30},
+  vn:{range:'เลือกจุด • ไกลสุด',len:'กำแพง • กว้าง',hp:'กำแพง • HP',life:'กำแพง • อยู่นาน (วิ)',lift:'Stand ยื้อยก (วิ)'},
+  role:'control',n:'Rampart',ic:'🧱',cd:12,d:'เลือกจุดวางกำแพง (เห็นโฮโลแกรม) คลิกซ้าย = วาง • คลิกขวา/กดซ้ำ = ยกเลิก • Stand ใหญ่โผล่ยื้อยกพื้น ~1 วิ แล้วดึงกำแพงหินกว้าง ~10 ม. ขึ้นมา บังกระสุน (HP 500, 5 วิ)',
+  cast(p,S,i){if(p.aug||p.ramp||p.ecb||p.wr)return false;if(p.rmpAim){p.rmpAim=null;return false;}
+    p.rmpAim={k:SLOTK[i],t:G.time,armed:!p.inp?.fire,s0:!!p.inp?.sh,seed:(Math.random()*1e6)|0};earthRampAimUpd(p);return false;}});
+function earthRampAimUpd(p){const A=p.rmpAim,o=aimPoint(p,RAMPART.v.range);let x=o.x,y=o.y;const d=Math.hypot(x-p.x,y-p.y);
+  if(d<80){x=p.x+Math.cos(p.ang)*80;y=p.y+Math.sin(p.ang)*80;}A.x=x;A.y=y;A.a=p.ang;}
+function earthRampAimTick(p,dt){const A=p.rmpAim;if(!A)return false;const inp=p.inp||{};
+  if(!p.alive||p.downed||p.stun>0||G.time-A.t>10||(inp.sh&&!A.s0)){p.rmpAim=null;return true;}
+  A.s0=!!inp.sh;earthRampAimUpd(p);
+  if(!A.armed){if(!inp.fire)A.armed=true;return true;}
+  if(inp.fire){earthRampPlace(p,A);p.rmpAim=null;p.rmpNoFire=1;}
+  return true;}
+function earthRampPlace(p,A){const V=RAMPART.v,c=Math.cos(A.a),s=Math.sin(A.a),hx=-s*V.len/2,hy=c*V.len/2,x=A.x,y=A.y,seed=A.seed,team=p.team,id=p.id;
+  p.cd[A.k]=RAMPART.cd*p.buffs.cdr;p.cdMax[A.k]=p.cd[A.k];
+  emit({k:'sk',id,s:'rampart'});emit({k:'efx',z:'erampcall',x:Math.round(x),y:Math.round(y),h:groundH(x,y,0),a:Math.round(A.a*100)/100,n:seed,id});
+  G.strikes.push({x,y,t:V.lift,fn(){
+    const w=eAdd({k:'ramp',x1:x-hx,y1:y-hy,x2:x+hx,y2:y+hy,r:V.r,hgt:V.hgt,hp:V.hp,maxHp:V.hp,team,owner:id,life:V.life,seed});
+    for(const t of plist().concat(G.en)){if(t.dead||t.alive===false)continue;const q=eSegD(t.x,t.y,w);if(q.d>=w.r+(t.r||PR)+4)continue;   // standing on the line = pushed off to the nearer side
+      const sd=Math.sign((t.x-x)*c+(t.y-y)*s)||1,f=isBig(t)?150:650;t.vx=(t.vx||0)+c*sd*f;t.vy=(t.vy||0)+s*sd*f;}
+    damageEnv(x,y,110,V.env*ERV.env,id,'rock',0.5);
+    emit({k:'efx',z:'erampup',x:Math.round(x),y:Math.round(y),h:groundH(x,y,0),a:Math.round(A.a*100)/100,id});}});}
+// (dormant Terra Auger helpers)
 // จุดลงของสว่าน: ตามเป้าเมาส์เสมอ • เล็งเหนือขอบฟ้า (ไม่โดนพื้น) = ไกลสุด 600 ตามทิศที่หัน (ไม่ดูดเข้าศัตรูใกล้ ๆ)
 // เล็งอิสระ 3 มิติ (ผู้ใช้ 2026-10-27): ตามเส้นเป้ากลางจอจากสว่านเหนือหัว ชนพื้น/บ้าน/สุดระยะ (กลางอากาศ) • บอท = จุดเล็งบนพื้นแบบเดิม
 function eAugAim(p,range){const r=aimRay3(p,p.z+3,range);if(r)return Object.assign(r,{hit:r.hit==='bld'||r.hit==='air'||r.hit==='edge'});return aimClip(p.x,p.y,p.z+3,aimPoint(p,range),0);}
@@ -349,7 +353,7 @@ function earthSnapP(p){if(!eOn(p))return undefined;const W=p.wr;
   }
   if(W)ea[13]=[W.t,W.target.x,W.target.y,W.ox??p.x,W.oy??p.y,W.oh??p.z,W.a??p.ang,W.baseZ];
   return ea;}
-function earthSnapW(){return {ES:(G.eso||[]).map(w=>[w.id,{tec:0,pil:1,mound:2,dom:3}[w.k],w.k==='pil'?w.x1:Math.round(w.x1),w.k==='pil'?w.y1:Math.round(w.y1),Math.round(w.x2),Math.round(w.y2),w.r,w.maxHp>1e8?100:Math.max(1,Math.round(w.hp/w.maxHp*100)),w.team,w.owner,...(w.flight?[w.flight]:[])]),
+function earthSnapW(){return {ES:(G.eso||[]).map(w=>[w.id,{tec:0,pil:1,mound:2,dom:3,ramp:4}[w.k],w.k==='pil'?w.x1:Math.round(w.x1),w.k==='pil'?w.y1:Math.round(w.y1),Math.round(w.x2),Math.round(w.y2),w.r,w.maxHp>1e8?100:Math.max(1,Math.round(w.hp/w.maxHp*100)),w.team,w.owner,...(w.flight?[w.flight]:w.k==='ramp'?[w.seed]:[])]),
   ED:(G.edust||[]).map(d=>[d.id,Math.round(d.x),Math.round(d.y),d.r,Math.round(d.t*10)/10,d.team,d.boom?1:0,d.boom?d.ids:0])};}
 
 // ท่าพื้นฐาน + โล่ + Dash ของสาย (PBASIC ต้องอยู่ช่องที่ 6 = ลำดับใน PATHS)

@@ -86,7 +86,7 @@ const SKFEET={sweep:[0.25,-0.5,0.1,-0.12],powerup:[-0.25,-0.15,0.16,-0.16],ultra
 const SKANIM={ringofembers:'sweep',blazeform:'fireflare',colossus:'novaup',kindle:'upflick',ignitionsnap:'snap',
   frostforge:'forge',glacierrend:'rend',permafrost:'slam',cryoshell:'wrap',frostaura:'frostbreath',mirrorlegion:'mlraise',
   thunderline:'line',speedsiphon:'staffup',stormorbs:'orbs',stormdome:'dome',triplestrike:'skycall',godlightning:'godcall',
-  stonebreaker:'punchcmd',mudswamp:'ground',tectoniccrush:'dome',tectoniccrush_2:'clap',dustburst:'burst',terraauger:'pullback',rampart:'ground',rampart_2:'punchcmd',wrath:'ultraise',
+  stonebreaker:'punchcmd',mudswamp:'ground',tectoniccrush:'dome',tectoniccrush_2:'clap',dustburst:'burst',terraauger:'pullback',rampart:'ground',wrath:'ultraise',
   riptide:'wavecast',tidecaller:'tidecall',aquacage:'cagecast',abyssalbeam:'pullback',moonwater:'moonarts',dragondeep:'dragoncall',dragondeep_dive:'dragoncommand',voidspheres:'windvoid',aegisgale_push:'wallpush',aegisgale_place:'ground',featherwing_2:'wingflick',eyeofheaven:'heavenslam'};
 Object.assign(SKANIM,{poisondart:'natthrow',bloom:'natthrow',sporecloud:'natthrow',vinelash:'natraise',thornburst:'natraise',worldtree:'natsummon',radiantsovereign:'novaup',lgrecall:'pullback'});
 SKANIM.railgun_release='railrelease';SKANIM.terraauger_release='ground';

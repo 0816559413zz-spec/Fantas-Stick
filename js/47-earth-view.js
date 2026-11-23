@@ -12,8 +12,7 @@ const ECOL={stone:'#8f7a5c',dark:'#5e4d38',dust:'#b39a74',glow:'#ffcf6a',mud:'#5
 // แขนกัน (R) พับศอกบังหน้า: fist = จุดกำปั้น [หน้า px, ขวา px, สูง] • elbow = ทิศศอก [ซ้าย, หน้า, ลง]
 // larm = แขน L (จาง) ง้างหมัดเก็บไว้ข้างเอว แบบนักสู้ [ต้นแขน x (+ = ศอกไปหลัง), กาง z, ศอก x] • lo = ท่อนล่างจางเป็นทราย [สูง (คูณ), ตำแหน่ง y] ให้หายเร็วขึ้น
 const EGUARD_BIG=/[?&]eshield=big/.test(location.search),EGUARD=EGUARD_BIG?{sc:1.8,back:80,side:14,z:0.05,lean:0.8,fist:[14,12,1.95],elbow:[0.8,1,0.3],larm:[-0.4,0.1,-1.97],lo:[0.5,1.37]}:{sc:1.55,back:69,side:12,z:0.2,lean:0.8,fist:[14,12,1.85],elbow:[0.8,1,0.3],larm:[-0.4,0.1,-1.97],lo:[0.5,1.37]};
-var EV={st:new Map(),es:new Map(),anims:[],fog:null,crush:[],rpush:[]};
-const V_RAMP_PUSH=200;   // Stand follows the shoved wall (approx push distance)
+var EV={st:new Map(),es:new Map(),anims:[],fog:null,crush:[],rcall:[],rholo:null};
 const eW=(x,y,h)=>new THREE.Vector3(tx(x),(h||0)+GY(x,y),tz(y));
 const EARTH_FIST_SCALE=1.9;
 const eYaw=(x1,y1,x2,y2)=>Math.atan2(x2-x1,y2-y1);
@@ -154,6 +153,9 @@ function standPose(S,k){const R=S.R,L=S.L;
     L.up.rotation.set(-1.7,0,.5);L.fo.rotation.x=-.15;
     S.body.rotation.x=lerp(-.20,.25,r);S.body.rotation.y=lerp(.50,-.30,r);
   }
+  if(k.lift!==undefined){const y=k.lift,st=k.strain||0,sh=(k.shake||0)*Math.sin((k.t||0)*55),sh2=(k.shake||0)*Math.sin((k.t||0)*47+1.3);   // Rampart heave: grip low, shake while straining, then yank overhead
+    for(const [A,s] of [[R,1],[L,-1]]){A.up.rotation.x=lerp(-0.75-0.15*st,-2.7,y)+sh*0.09;A.up.rotation.z=s*lerp(0.4,0.22,y)+(s>0?sh:sh2)*0.07;A.fo.rotation.x=lerp(-0.55,-0.12,y)+sh2*0.08;}
+    S.body.rotation.x=lerp(0.5+0.12*st,-0.28,y)+sh*0.025;S.body.rotation.z=sh2*0.02;S.head.rotation.x=lerp(0.25,-0.3,y);dip+=lerp(0.25+0.1*st,-0.1,y);}
   S.body.position.y=Math.sin((k.t||0)*3)*0.08-dip;S.body.position.z=0;
   if(S.legs){const on=!!k.run;S.legs.visible=on;S.ab.visible=on;S.lo.visible=!on;}
   if(k.run)standRun(S,k);}
@@ -719,23 +721,79 @@ function eMakeSO(w){const k=w[1],x1=w[2],y1=w[3],x2=w[4],y2=w[5],r=w[6],g=new TH
   else if(k===2){   // เนินดิน Terra Auger: โดมดินเตี้ย ๆ เดินข้ามได้ (สูง = รัศมี × 0.032 ตรงกับ groundH) + ก้อนหินเล็กรอบ ๆ
     mat=eTMat('wall','#9a8262');const R=r*S3;h=r*0.032;const d=new THREE.Mesh(new THREE.SphereGeometry(R,18,6,0,Math.PI*2,0,Math.PI/2),mat);d.scale.y=h/R;d.castShadow=d.receiveShadow=true;g.add(d);
     for(let i=0;i<6;i++){const a=i/6*Math.PI*2+rnd(-0.3,0.3),rr=R*rnd(0.55,0.85),s=R*rnd(0.13,0.2),b=rockMesh(s*1.4,s,s*1.3,0.2,2,mat);b.position.set(Math.cos(a)*rr,h*(1-(rr/R)**2)*0.9,Math.sin(a)*rr);b.rotation.y=rnd(0,3);b.castShadow=true;g.add(b);}}
+  else if(k===4){const m=eRampMesh(w[10]|0,false);g.add(m);g.userData.vein=m.userData.vein;h=RAMPART.v.hgt;mat=null;g.rotation.y=eYaw(x1,y1,x2,y2);}
   else{mat=new THREE.MeshBasicMaterial({color:hdr('#ffd86b',1.2),transparent:true,opacity:0.18,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending});const L=Math.hypot(x2-x1,y2-y1)*S3;h=12;const b=new THREE.Mesh(new THREE.PlaneGeometry(L,h),mat);b.position.y=h/2;b.rotation.y=Math.PI/2;g.add(b);g.rotation.y=eYaw(x1,y1,x2,y2);}
-  if(k===0||k===2)eMergeKids(g);
-  g.position.copy(eW(k===1?x1:(x1+x2)/2,k===1?y1:(y1+y2)/2,0));scene.add(g);return {g,mat,mats:mats||(mat?[mat]:[]),k,h,born:performance.now(),x:k===1?x1:(x1+x2)/2,y:k===1?y1:(y1+y2)/2,hp:w[7],x1,y1,x2,y2,base:g.position.clone()};}
+  if(k===0||k===2)eMergeKids(g);const vein=g.userData.vein;
+  g.position.copy(eW(k===1?x1:(x1+x2)/2,k===1?y1:(y1+y2)/2,0));scene.add(g);return {g,mat,mats:mats||(mat?[mat]:[]),k,h,born:performance.now(),x:k===1?x1:(x1+x2)/2,y:k===1?y1:(y1+y2)/2,hp:w[7],x1,y1,x2,y2,base:g.position.clone(),vein};}
+// ===== Rampart wall (user 2026-11-23 v2): fused rounded boulders, uneven tops of similar height, gold energy seams =====
+const ERAMP={vein:new THREE.Color(hdr('#ffc94a',1.6)),mat:null,mat2:null,veinM:null,holoM:null,geo:new Map()};
+function eRng(seed){let a=(seed>>>0)||1;return ()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+// one rounded boulder: displaced icosphere, flattened underside, darker dirt at the bottom (vertex colour)
+function eLump(R,sx,sy,sz,px,py,pz,rx,rz,bot){
+  const g=new THREE.IcosahedronGeometry(1,3),P=g.attributes.position,C=new Float32Array(P.count*3),o1=R()*10,o2=R()*10,v=new THREE.Vector3();
+  for(let i=0;i<P.count;i++){v.fromBufferAttribute(P,i).normalize();
+    const n=Math.sin(v.x*2.3+o1)*Math.sin(v.y*2.1+o2)*Math.sin(v.z*2.6+o1*0.7)*0.16+Math.sin(v.x*5.7+o2)*Math.sin(v.z*5.1+o1)*0.05;
+    let r=1+n;if(v.y<-0.35)r*=lerp(1,0.78,(-v.y-0.35)/0.65);P.setXYZ(i,v.x*r,v.y*r,v.z*r);
+    const k=clamp((v.y+0.6)/1.4,0,1),band=0.94+0.06*Math.sin(v.y*sy*9+o1),sp=0.9+0.1*R(),t=(bot?0.62+0.38*k:0.85+0.15*k)*band*sp;C[i*3]=t;C[i*3+1]=t*0.96;C[i*3+2]=t*0.9;}
+  g.setAttribute('color',new THREE.BufferAttribute(C,3));g.scale(sx,sy,sz);g.rotateX(rx);g.rotateZ(rz);g.translate(px,py,pz);g.computeVertexNormals();return g;}
+// whole wall from a seed (host sends the seed, so the hologram and the real wall are the exact same shape)
+function eRampGeo(seed){if(ERAMP.geo.has(seed))return ERAMP.geo.get(seed);
+  const R=eRng(seed),L=RAMPART.v.len*S3,H=RAMPART.v.hgt,T=RAMPART.v.r*S3*1.25,n=7,rock=[],rock2=[],vein=[],cw=L/n,tops=[];
+  for(let i=0;i<n;i++){const z=-L/2+cw*(i+0.5)+(R()-0.5)*cw*0.25,edge=i===0||i===n-1,h=H*(edge?0.78+R()*0.1:0.9+R()*0.18),sy=h*0.55,sx=T*(0.95+R()*0.25),sz=cw*(0.72+R()*0.18);
+    rock.push(eLump(R,sx,sy,sz,(R()-0.5)*0.25,sy*0.88-0.25,z,(R()-0.5)*0.16,(R()-0.5)*0.12,true));tops.push(h);
+    if(R()<0.75){const cs=0.42+R()*0.2;(R()<0.5?rock2:rock).push(eLump(R,sx*cs*1.1,sy*cs,sz*cs*1.15,(R()-0.5)*0.4,h-sy*cs*0.55,z+(R()-0.5)*cw*0.5,(R()-0.5)*0.3,(R()-0.5)*0.3,false));}
+    for(let k=0;k<2;k++){const sd=k?1:-1,rs=0.35+R()*0.35;rock2.push(eLump(R,rs*1.2,rs*0.8,rs,sd*(T+rs*0.6),rs*0.35,z+(R()-0.5)*cw,(R()-0.5)*0.4,(R()-0.5)*0.4,true));}}
+  // gold seams where boulders meet: jagged tube up each face
+  for(let i=1;i<n;i++){const zj=-L/2+cw*i,hj=Math.min(tops[i-1],tops[i])*0.95;for(const sd of [-1,1]){const pts=[];
+    for(let k=0;k<=5;k++){const u=k/5;pts.push(new THREE.Vector3(sd*T*(0.92-0.12*Math.sin(u*Math.PI)),0.05+u*hj,zj+(R()-0.5)*0.4));}
+    vein.push(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),24,0.05,5,false));}}
+  const out={rock:mergeGeometries(rock,false),rock2:mergeGeometries(rock2,false),vein:mergeGeometries(vein,false),all:null};
+  out.all=mergeGeometries([out.rock.clone(),out.rock2.clone()].map(g=>{g.deleteAttribute('color');g.deleteAttribute('uv');return g;}),false);
+  rock.concat(rock2,vein).forEach(g=>g.dispose());ERAMP.geo.set(seed,out);
+  if(ERAMP.geo.size>12){const k=ERAMP.geo.keys().next().value;const o=ERAMP.geo.get(k);ERAMP.geo.delete(k);for(const q of Object.values(o))q&&q.dispose();}
+  return out;}
+function eRampMats(){if(ERAMP.mat)return;
+  ERAMP.mat=new THREE.MeshStandardMaterial({color:'#b9a284',vertexColors:true,roughness:0.95,metalness:0});ERAMP.mat.userData.keep=true;
+  ERAMP.mat2=new THREE.MeshStandardMaterial({color:'#a08a6e',vertexColors:true,roughness:0.95,metalness:0});ERAMP.mat2.userData.keep=true;
+  ERAMP.veinM=new THREE.MeshBasicMaterial({color:ERAMP.vein.clone()});ERAMP.veinM.userData.keep=true;
+  ERAMP.holoM=new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,uniforms:{t:{value:0},a:{value:1},c:{value:new THREE.Color(hdr('#ffd27a',1.2))}},
+    vertexShader:'varying vec3 vN,vV,vW;void main(){vec4 w=modelMatrix*vec4(position,1.0);vW=w.xyz;vN=normalize(normalMatrix*normal);vec4 m=modelViewMatrix*vec4(position,1.0);vV=normalize(-m.xyz);gl_Position=projectionMatrix*m;}',
+    fragmentShader:'uniform float t,a;uniform vec3 c;varying vec3 vN,vV,vW;void main(){float f=1.0-abs(dot(vN,vV));float rim=pow(f,2.2);float scan=0.55+0.45*smoothstep(0.35,0.5,fract(vW.y*3.2-t*1.4));'+
+      'float fl=0.88+0.12*sin(t*37.0)*sin(t*13.0);gl_FragColor=vec4(c*(0.10+0.85*rim)*scan*fl*a,1.0);}'});ERAMP.holoM.userData.keep=true;}
+function eRampMesh(seed,holo){eRampMats();const G=eRampGeo(seed),g=new THREE.Group();
+  if(holo){g.add(new THREE.Mesh(G.all,ERAMP.holoM));}
+  else{const a=new THREE.Mesh(G.rock,ERAMP.mat),b=new THREE.Mesh(G.rock2,ERAMP.mat2),vm=ERAMP.veinM.clone(),c=new THREE.Mesh(G.vein,vm);a.castShadow=a.receiveShadow=b.castShadow=b.receiveShadow=true;g.add(a,b,c);g.userData.vein=vm;}
+  return g;}
+function eRampHolo(seed){const g=eRampMesh(seed,true);g.visible=false;scene.add(g);return g;}
+function eRampPlace(g,x,y,a){g.position.copy(eW(x,y,0));g.rotation.y=-a;}   // same yaw as eYaw() of the real wall segment
+// Stand heave: grabs the ground, arms shake up to the shoulders for ~1 s, then yanks up hard and fades quickly
+function eRampTick(v,dt,now){
+  const me=(v.P||[]).find(q=>q.id===NET.myId),ra=me&&me.ra;   // own aim preview: hologram identical to the real wall
+  if(ra){if(!EV.rholo||EV.rholo.seed!==ra[3]){if(EV.rholo)scene.remove(EV.rholo.g);EV.rholo={seed:ra[3],g:eRampHolo(ra[3])};}
+    const g=EV.rholo.g;g.visible=true;eRampPlace(g,ra[0],ra[1],ra[2]);ERAMP.holoM.uniforms.t.value=now/1000;}
+  else if(EV.rholo){scene.remove(EV.rholo.g);EV.rholo=null;}
+  for(let i=EV.rcall.length-1;i>=0;i--){const R=EV.rcall[i];R.t+=dt;const c=Math.cos(R.a),sn=Math.sin(R.a),G=R.G,T=RAMPART.v.lift;
+    if(R.holo){R.holo.visible=!R.up;eRampPlace(R.holo,R.x,R.y,R.a);ERAMP.holoM.uniforms.t.value=now/1000;}
+    if(!R.up&&R.t>T+0.6){R.up=true;R.tu=R.t;}   // safety if the rise event was missed
+    const yk=R.up?Math.min(1,(R.t-R.tu)/0.16):0,strain=R.up?0:clamp((R.t-0.15)/(T-0.15),0,1);
+    G.g.position.copy(eW(R.x+c*85,R.y+sn*85,-0.9+0.5*Math.min(1,R.t/0.2)+0.6*yk));G.g.rotation.y=Math.atan2(c,sn);   // far side of the wall, facing the caster
+    standOp(G,R.up?Math.max(0,1-(R.t-R.tu-0.12)/0.3):Math.min(1,R.t/0.15));
+    standPose(G,{t:now/1000,lift:yk,strain,shake:R.up?0:strain});
+    if(!R.up){if(Math.random()<0.25+0.5*strain){const q=rnd(-1,1)*90;burst(R.x-sn*q,R.y+c*q,ECOL.dust,2,70,0.5,2.2,{h:0.1,vh:[0.5,2],g:5});}
+      if(Math.random()<0.15*strain)eChunks(R.x-sn*rnd(-90,90),R.y+c*rnd(-90,90),0.1,1,90,4,0.12);if(R.t>0.2&&Math.random()<0.2)shake(0.06+0.1*strain);}
+    if(R.up&&R.t-R.tu>0.5){disposeObj(G.g);if(R.holo)scene.remove(R.holo);EV.rcall.splice(i,1);}}}
 function syncEarth(v,dt,now){
   for(const [id,s] of EV.st)if((s.sbSlab||s.fistCharge?.visible)&&!PM3.has(id)){eStonePrep(s,null);eFistCharge(s,null,null,0);}
   const seen=new Set();
   for(const w of (v.ES||[])){seen.add(w[0]);let o=EV.es.get(w[0]);
-    if(!o){o=eMakeSO(w);EV.es.set(w[0],o);
+    if(!o){o=eMakeSO(w);o.born=now;EV.es.set(w[0],o);
       if(o.k===0){const L=Math.hypot(o.x2-o.x1,o.y2-o.y1);for(let i=0;i<=5;i++){const px=lerp(o.x1,o.x2,i/5),py=lerp(o.y1,o.y2,i/5);burst(px,py,ECOL.dust,6,140,0.9,3.6,{h:0.3,vh:[2,6],g:6});eChunks(px,py,0.3,2,150,7,0.22);}
         for(let i=0;i<3;i++)smoke(lerp(o.x1,o.x2,rnd(0,1)),lerp(o.y1,o.y2,rnd(0,1)),0.2,3,ECOL.dust,1.6,9,L*0.15);shake(0.15);}
       else if(o.k===2){eChunks(o.x,o.y,0.3,5,120,5,0.14);smoke(o.x,o.y,0.3,4,ECOL.dust,1.1,7,40);}
       else if(o.k!==3){burst(o.x,o.y,ECOL.dust,14,140,0.9,4,{h:0.3,vh:[1,4],g:3,smoke:true,grow:1.5});}}
-    if(o.k===0){const tx2=(w[2]+w[4])/2,ty2=(w[3]+w[5])/2;   // Rampart push: wall slides to the new snapshot spot
-      if(Math.hypot(tx2-o.x,ty2-o.y)>2){const k=Math.min(1,dt*18);o.x+= (tx2-o.x)*k;o.y+=(ty2-o.y)*k;o.g.position.copy(eW(o.x,o.y,0));o.base.copy(o.g.position);
-        if(Math.random()<0.9){burst(o.x+rnd(-30,30),o.y+rnd(-30,30),ECOL.dust,4,160,0.5,2.6,{h:0.2,vh:[1,4],g:6});eChunks(o.x,o.y,0.2,1,180,6,0.18);}}}
     const age=(now-o.born)/1000;
     if(o.k===0||o.k===2)o.g.scale.y=Math.min(1,0.05+age/(o.k===0?0.22:0.3));
+    if(o.k===4){const u=Math.min(1,age/0.16),b=1+2.2*(u-1)**3+1.2*(u-1)**2;o.g.scale.y=Math.max(0.02,u<1?b:1);if(o.vein)o.vein.color.copy(ERAMP.vein).multiplyScalar(0.35+1.6*Math.max(0,1-age/0.9));}
     if(o.k===3)o.mat.opacity=0.14+0.08*Math.sin(now/300);
     else if(w[7]!==o.hp&&o.mat){o.hp=w[7];for(const m of o.mats){if(!m.userData.c0)m.userData.c0=m.color.clone();m.color.copy(m.userData.c0).lerp(new THREE.Color('#5a4632'),1-w[7]/100);}burst(o.x,o.y,ECOL.dust,4,60,0.5,2,{h:rnd(0.5,o.h),g:4});}}
   for(const [id,o] of EV.es)if(!seen.has(id)){disposeObj(o.g);for(const m of o.mats)m.dispose();EV.es.delete(id);}
@@ -755,11 +813,7 @@ function syncEarth(v,dt,now){
         if(Math.random()<0.35*strain){const q=lerp(-1,1,Math.random());burst(o.x+c*q*130,o.y+sn*q*130,ECOL.dust,2,60,0.7,3,{h:rnd(0.5,5),vh:[0,1],g:2,smoke:true,grow:1.4});}}
       if(Math.random()<0.4*strain)eChunks(C.x+rnd(-80,80),C.y+rnd(-80,80),0.2,1,80,3,0.12);}
     if(C.t>(C.boom||9)+0.6){disposeObj(G.g);EV.crush.splice(i,1);}}
-  // Rampart push: Stand rises behind the wall, two-hand shove forward, fades
-  for(let i=EV.rpush.length-1;i>=0;i--){const R=EV.rpush[i];R.t+=dt;const c=Math.cos(R.a),sn=Math.sin(R.a),G=R.G,u=Math.min(1,R.t/0.35);
-    const wx=R.x+c*V_RAMP_PUSH*Math.min(1,R.t/0.35),wy=R.y+sn*V_RAMP_PUSH*Math.min(1,R.t/0.35);G.g.position.copy(eW(wx-c*(70-30*u),wy-sn*(70-30*u),-0.4));G.g.rotation.y=Math.atan2(c,sn);
-    standOp(G,R.t<0.5?Math.min(1,R.t/0.1):Math.max(0,1-(R.t-0.5)/0.35));standPose(G,{t:now/1000,lean:0.35*u});
-    if(R.t>0.9){disposeObj(G.g);EV.rpush.splice(i,1);}}
+  eRampTick(v,dt,now);
   // ฝุ่น Dust Burst
   const me=myPos();let inEnemy=false;
   for(const d of (v.ED||[])){const [,x,y,r,t,team,boom,ids]=d;
@@ -860,8 +914,11 @@ function earthEfx(ev){
     case 'esbwall':eDebris(x,y,H,26,240);ring(x,y,'#ffd86b',70,0.4,H);burst(x,y,'#ffe7a0',12,120,0.6,2.2,{h:H+0.8,g:0});shake(0.4);if(near)snd('boom',ev);return true;
     // ----- Tectonic Crush -----
     case 'ewallup':shake(0.35);if(near)snd('boom',ev);return true;
-    case 'erampup':shake(0.3);if(near)snd('boom',ev);eChunks(x,y,0.3,6,160,7,0.2);return true;   // Rampart rises (wall itself appears from the ES snapshot)
-    case 'erampush':{const G=makeStand(2.0,true);EV.rpush.push({t:0,x,y,a:ev.a,G});eAppear(x-Math.cos(ev.a)*60,y-Math.sin(ev.a)*60,0,1.6);shake(0.45);if(near)snd('boom',ev);return true;}   // Stand shoves the wall
+    case 'erampcall':EV.rcall.push({t:0,x,y,a:ev.a,seed:ev.n,id:ev.id,G:makeStand(3.0,true),holo:eRampHolo(ev.n),up:false});if(near)snd('buff',{x,y,vol:0.5});return true;   // Rampart: Stand rises and starts heaving the ground
+    case 'erampup':{shake(0.55);if(near)snd('boom',ev);const c=Math.cos(ev.a),sn=Math.sin(ev.a);   // wall yanked up: one heavy burst of dust that clears fast
+      for(let i=-4;i<=4;i++){const px=x-sn*i*24,py=y+c*i*24;burst(px,py,ECOL.dust,5,220,0.45,3.4,{h:0.4,vh:[2,7],g:7});eChunks(px,py,0.3,2,220,8,0.22);}
+      for(let i=0;i<6;i++)smoke(x-sn*rnd(-100,100),y+c*rnd(-100,100),0.3,2,ECOL.dust,0.7,8,60);
+      const R=EV.rcall.find(q=>Math.hypot(q.x-x,q.y-y)<8&&!q.up);if(R){R.up=true;R.tu=R.t;}return true;}
     case 'ecrushw':{const G=makeStand(3.2,true);EV.crush.push({t:0,x,y,a:ev.a,id:ev.id,G});eAppear(x+Math.cos(ev.a)*190,y+Math.sin(ev.a)*190,0,2.4);if(near)snd('buff',{x,y,vol:0.5});return true;}
     case 'ecrush':{const C=EV.crush.find(q=>!q.boom&&Math.hypot(q.x-x,q.y-y)<80);if(C)C.boom=C.t;
       const c=Math.cos(ev.a),s=Math.sin(ev.a);for(let i=-3;i<=3;i++)eDebris(x+c*i*45,y+s*i*45,1+rnd(0,3),10,200);eWave(x,y,0.3,240);eChunks(x,y,2,22,360,8,0.35);
