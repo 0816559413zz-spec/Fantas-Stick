@@ -1435,3 +1435,4 @@
 - 2026-11-23 Frost slide: legs fixed (were crossed), wide forward stance, chest/head face cursor
 - 2026-11-23 Frost slide: side-on surf stance, head to cursor, balancing arm sway
 - 2026-11-23 Frost slide trail: narrow angular ice plates, radius 46→28
+- 2026-11-23 Frost slide trail a bit wider (plates 0.6, radius 34)

@@ -417,7 +417,7 @@ function updatePlayer(p,dt,acting){
   if(p.dash<=0)p.ultSlash=null;
   if(p.sdHit)stormDashTick(p);
   if(p.fpath&&!(p.dash>0))pyroPathEnd(p);
-  if(p.slideT>0&&Math.hypot(p.x-p.slX,p.y-p.slY)>40){const lx=p.slX,ly=p.slY;p.slX=p.x;p.slY=p.y;addIce({x:p.x,y:p.y,r:28,t:4,team:p.team,owner:p.id,kind:'path',lx,ly});/* narrower slide trail (user 2026-11-23, was 46) */}
+  if(p.slideT>0&&Math.hypot(p.x-p.slX,p.y-p.slY)>40){const lx=p.slX,ly=p.slY;p.slX=p.x;p.slY=p.y;addIce({x:p.x,y:p.y,r:34,t:4,team:p.team,owner:p.id,kind:'path',lx,ly});/* narrower slide trail (user 2026-11-23, was 46, then 28) */}
   p.x+=p.vx*dt;p.y+=p.vy*dt;
   const fr=Math.exp(-6*dt);p.vx*=fr;p.vy*=fr;
   if(!p.gh)collideWorld(p,PR,p.z);else{p.x=clamp(p.x,30,MW-30);p.y=clamp(p.y,30,MH-30);}
