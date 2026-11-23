@@ -167,6 +167,13 @@ Rule: **light changes = uniform changes, never structural changes.**
 - Left in the countdown: the picked map's own pieces (castle, props, grass, banners, brush strokes, their shadow/depth
   programs) because the map is built at `hostStart`. Moving them earlier needs the open decision "maps preloaded at entry vs
   when picked" (§8).
+- **Map built when picked (user 2026-11-23):** `hostMapNext(lobby)` (js/11) decides the next map in the lobby (same rules
+  as before; a random pick is made once and kept until start; siege shows the Map Builder castle while its data loads) and
+  sends it as `G.map` in the lobby message. `lobbyMapTick` (js/51, called with `gameWarmTick`/`warmLobbyTick` from the
+  render loop js/37 — they used to sit in `hubRender`, which skips when the hub is off) builds it on every client, so the
+  lobby warm-up compiles its pieces. bench-entry siege: lobby 5 → 34 programs, countdown 66 → 40. The 40 left are
+  objects created by `hostStart` itself (props `PROPV`, mode visuals, grass, their depth/shadow programs); SHR hides
+  them until linked. Moving them is step 4.
 - Gate after step 3: siege 63 / 70 mid-match programs (same groups as step 2: code ShaderMaterials such as Light
   Sovereign, death dissolve, …), i.e. step 4 work; nothing new from the loader.
 

@@ -52,6 +52,7 @@ function render(dt,now){
   if(screen!=='game'||!v){
     if(PM3.size||EM3.size||JM3.size||WM3.size||MM3.size)clearDyn();
     PARTS.length=0;TEXTS.length=0;CAMRS.has=false;
+    if(screen==='lobby'&&typeof gameWarmTick==='function'){lobbyMapTick(dt);gameWarmTick(dt);warmLobbyTick();}   // lobby: build + warm the next map (js/51; was in hubRender, which skips when the hub is off)
     if(screen==='menu'||screen==='lobby'){renderStage(dt,now);return;}
     updateParticles(dt);updateShapes(dt);updateLights(dt);
     menuCamera(now);gl.shadowMap.needsUpdate=true;composer.render();return;

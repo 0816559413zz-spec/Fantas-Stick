@@ -16,7 +16,7 @@ G().mode=O.mode||'siege';if(O.map)G().mapPick=O.map;WD.broadcastLobby&&WD.broadc
 const paths=WD.PATHS.map((p,i)=>i).filter(i=>!WD.PATHS[i].off);
 for(let i=0;i<9;i++)WD.lobbyBotAdd(paths[i%paths.length],1);
 const p0=progs();WD.warm.log.length=0;gaps=[];
-await sleep(9000);
+await sleep(+(O.wait||9000));
 const lobby={progs:progs()-p0,names:names(p0),log:WD.warm.log.slice(),maxGap:Math.round(Math.max(...gaps.map(g=>g[0])))};
 const p1=progs();WD.warm.log.length=0;gaps=[];
 WD.hostStart();

@@ -268,6 +268,15 @@ function gameWarmTick(dt){
     ch.forEach(g=>g.visible=false);
   }catch(e){console.warn('gameWarm',e);GWARM.busy=false;}
 }
+// Build the next match's map while waiting in the lobby (2026-11-23, user: "สร้างตอนเลือกแมพ"): the host decides it with
+// hostMapNext (js/11) and sends it in the lobby message; every client builds it here once its data is loaded, then
+// gameWarmTick / warmLobbyTick (keyed on builtKey) compile its pieces. The countdown then finds the map built and warm.
+const LMAP={t:0};
+function lobbyMapTick(dt){
+  if(!LOBBY||LOBBY.ph!=='lobby'||screen!=='lobby')return;
+  if((LMAP.t+=dt)<0.5)return;LMAP.t=0;
+  if(NET.isHost&&G&&G.ph==='lobby'&&typeof hostMapNext==='function'){const id=hostMapNext(true);if(id&&id!==G.map){G.map=id;broadcastLobby();return;}}
+  const id=LOBBY.map;if(id&&id!==builtMap&&mapReady(id)){setMapVars(id);buildWorld(id);}}
 // ตัวละครอุ่นเครื่องหมดหน้าที่เมื่อแมตช์เริ่มวาดแล้ว (เชดเดอร์ถูก pinPrograms ตรึงไว้, geometry/วัสดุของไฟล์เป็น keep) → ทิ้งหลังเข้าเกม 2 วิ
 // เดิมเก็บไว้ตลอด + เพิ่มทุกลุคใหม่ (บอทสุ่มลุคทุกครั้งที่เติม) → ค้างในฉากหลายร้อย mesh, three ยังคำนวณ matrix ทุกเฟรม (OPTIMIZE §H)
 // รอบหน้าในห้องรอ gameWarmTick สร้างใหม่ตามคนที่อยู่จริง (GWARM.key='' บังคับให้อุ่นใหม่)
@@ -339,6 +348,6 @@ function shReadyPre(){
 function shReadyPost(){imzPost();if(!SHR.hid.length)return;for(const o of SHR.hid)o.visible=true;SHR.hid.length=0;}
 SHR.ext=!!gl.getContext().getExtension('KHR_parallel_shader_compile');
 if(window.WD){window.WD.SHR=SHR;window.WD.IMZ=IMZ;}
-if(window.WD){window.WD.warm=WARM;window.WD.PRE=PRE;window.WD.glProgs=()=>gl.info.programs.length;window.WD.glList=()=>gl.info.programs.map(p=>p.name+'|'+p.cacheKey.split(',').slice(-3).join(','));}
+if(window.WD){window.WD.warm=WARM;window.WD.PRE=PRE;window.WD.glProgs=()=>gl.info.programs.length;window.WD.glList=()=>gl.info.programs.map(p=>{const k=p.cacheKey.split(',');return k[0].slice(0,24)+'|'+p.name+'|'+k.slice(-3).join(',').slice(0,60);});}
 if(window.WD)window.WD.gwarm=GWARM;
 if(window.WD)window.WD.WARM=WARM;

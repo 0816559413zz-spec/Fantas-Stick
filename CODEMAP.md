@@ -203,10 +203,10 @@ W_WL:553 W_DR:559 W_VX:565 W_VO:571 W_FW:577 W_UL:587
 ## js/10-net.js (210) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NET_QMAX:70 NETU:72 netUndelta:73 setStatus:79 hostGame:81 hostPeer:90 netConnect:110 joinWatch:121 joinFail:136 netLost:142 joinGame:157 joinPeer:168 clientOnData:183 leave:198 leaveRoom:200
 
-## js/11-host.js (488) — 
-G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:76 hostRemove:85 validate:101 hostStart:115 hostToLobby:147 MIDJOIN:154 modeCap:155 midJoin:156 CHATT:172 chatRelay:173 emoHost:181 resetBody:183 fmap:189 spawnPts:190 teamPts:192 spSpread:194 placeAll:195 respawn:207
-§226 ลูปหลักฝั่งโฮสต์
-hostTick:227 angDiff:244 cH:246 vR:247 updatePlayer:249 hitProp:475 damagePropsIn:482 nearUseProp:483 useProp:484
+## js/11-host.js (494) — ฝั่งโฮสต์: สถานะเกมทั้งหมดคำนวณที่นี่ (server-authoritative)
+G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 freshStats:11 newPlayer:18 emptyInput:21 frameOk:23 addPlayer:24 initHostLobby:33 lobbyMsg:40 broadcastLobby:41 INPN:43 hostOnData:44 hostDrop:76 hostRemove:85 validate:101 hostMapNext:117 hostStart:128 hostToLobby:153 MIDJOIN:160 modeCap:161 midJoin:162 CHATT:178 chatRelay:179 emoHost:187 resetBody:189 fmap:195 spawnPts:196 teamPts:198 spSpread:200 placeAll:201 respawn:213
+§232 ลูปหลักฝั่งโฮสต์
+hostTick:233 angDiff:250 cH:252 vR:253 updatePlayer:255 hitProp:481 damagePropsIn:488 nearUseProp:489 useProp:490
 
 ## js/12-buildings.js (444) — environment damage / rays / collision shared by breakable things
 BLDON:4 bldMoundH:5 damageEnv:7 bldRay:16 aimClip:21 aimLineH:29 aimRay3:30 projEl:57 bldPush:62 updateBldg:68
@@ -463,10 +463,10 @@ ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 heal
 §140 หน้าประชุมโหวต (หาลอร์ดโวลเดอมอร์)
 meetKey:141 myVoted:141 castVote:142 syncMeeting:148
 
-## js/37-render-loop.js (130) — ลูปเรนเดอร์
+## js/37-render-loop.js (131) — ลูปเรนเดอร์
 lastFrame:2 HSTOP:5 hitStop:6 FXSTUDIO:8
 §9 เก็บ shader ที่ compile แล้วไว้ตลอดเกม (ผู้ใช้ 2026-11-02 "เล่นกับบอท…
-PINMAX:13 PINNED:13 KEEPSRC:16 pinPrograms:22 frame:25 _fpsAcc:42 _fpsN:42 _fpsLast:42 render:43 detailCull:88 viewDetailAt:91 renderGame:98
+PINMAX:13 PINNED:13 KEEPSRC:16 pinPrograms:22 frame:25 _fpsAcc:42 _fpsN:42 _fpsLast:42 render:43 detailCull:89 viewDetailAt:92 renderGame:99
 
 ## js/38-hud.js (480) — 
 drawReticleTimer:1
@@ -644,16 +644,16 @@ GR_NOISE:162 GR_LIVE:167 grLive:186 GR_GLSL_V:196 GR_BEGIN:201 grassMat:253 gras
 §398 สกิลลม → หญ้า (ภาพล้วน เรียกจาก windEfx js/68)
 WIND_GRASS:400 airWind:414
 
-## js/51-warmup.js (344) — 
+## js/51-warmup.js (353) — อุ่นเครื่องช่วงนับถอยหลัง (ผู้ใช้ 2026-10-21: "ช่วงนับถอยหลังให้โหลดสิ่งที่ต้องใช้ — กดสก…
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_SLICE:13 WARM_X:14 WARM_Y:14 warmKeep:16 warmStaticModels:22 glReady:31 warmCompile:32 warmDraw:35 WARM_SKIP:45 warmAssets:48 warmFx:58 warmFxEnd:69 warmGather:71 warmPaths:73 warmFrame:75 warmStep:77 warmCharVariants:135 warmQueue:149 WARM_LOBBY:155 warmLobbyTick:156 warmTick:163
 §172 Entry loader (PRELOAD-STANDARD step 3, 2026-11-23)
 PRE:178 preloadReg:179 preProg:180 preFin:181 preStart:183 preTick:198
 §208 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
 warmOutline:218
 §235 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
-GWARM:240 gameWarmTick:241 gameWarmFree:274
-§280 Shader never seen before mid-match: compile in the background, hide t…
-SHR:288 shrLights:292 IMZ:297 imzPre:304 imzPost:306 shrRoot:307 shrCollect:308 shrPending:314 shReadyPre:318 shReadyPost:339
+GWARM:240 gameWarmTick:241 LMAP:274 lobbyMapTick:275 gameWarmFree:283
+§289 Shader never seen before mid-match: compile in the background, hide t…
+SHR:297 shrLights:301 IMZ:306 imzPre:313 imzPost:315 shrRoot:316 shrCollect:317 shrPending:323 shReadyPre:327 shReadyPost:348
 
 ## js/52-social.js (172) — 
 §6 แชท: Enter = พิมพ์ / Enter อีกที = ส่ง / Esc = ปิด • ข้อความขึ้นมุมซ้…
@@ -705,7 +705,7 @@ MN_BLOCK:259 mnRay:260 mnPick:261 mnHot:267 mnToy:285
 §290 เรนเดอร์ (เรียกจาก renderStage js/32 — คืน true = จัดการแล้ว)
 mnRestore:291 mnMenuRender:297
 
-## js/61-hub.js (910) — 
+## js/61-hub.js (909) — 
 HUBS:11 HUBL:11 HUB:14 HB:18 _hq:19 _hq2:19 _hq3:19 _hv:19 _hv2:19 _hv3:19 _hY:19 hEase:20 hSm:21
 §23 อนุภาคเรืองแสงของเมนู (ขนาด/สี/ความจางต่อเม็ด)
 hubPS:24 hCol:50 H_SPARK:51
@@ -953,4 +953,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(117 files, 35487 lines)
+(117 files, 35502 lines)

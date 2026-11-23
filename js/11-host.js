@@ -112,20 +112,26 @@ function validate(){
   }
   return '';
 }
+// Map the next match will use (2026-11-23, PRELOAD-STANDARD step 3b): decided in the lobby so every client builds and warms
+// it while waiting (lobbyMapTick js/51) instead of in the countdown. lobby=true: siege shows the Map Builder castle while its data loads.
+function hostMapNext(lobby){
+  // สุ่มแผนที่ทุกครั้งที่เริ่มเกม (ไม่ซ้ำกับรอบที่แล้วถ้าเป็นไปได้)
+  const MD=MODES[G.mode],sgOk=id=>!!(id&&MAPS[id]&&MAPS[id].fcs&&mapOkFor(id,'siege'));   // siege-capable: code fcs or a Map Builder map with data.siege
+  if(PLAYMAP&&MAPS[PLAYMAP]&&(G.mode!=='siege'||sgOk(PLAYMAP)))return PLAYMAP;   // ทดลองเล่นจาก Map Builder (ห้องฝึกก็ใช้แผนที่นี้)
+  if(G.mode==='siege'&&sgOk(G.mapPick)&&G.mapPick!==MD.map)return G.mapPick;   // siege on a picked Map Builder siege map
+  if(MD.map&&(G.mode==='siege'||!(G.mode!=='train'&&MAPS[G.mapPick]&&MAPS[G.mapPick].allModes)))return G.mode==='siege'&&(sgOk(MD.mapF)||lobby&&MD.mapF&&!FMAPS.fail.has(MD.mapF))?MD.mapF:MD.map;   // siege: Map Builder castle (fcs-file, MAP-STANDARD round 6) when loaded, else code fcs • บุกปราสาท = แผนที่ของโหมดเสมอ   // โหมดที่มีแผนที่ประจำ: เลือกแผนที่ allModes (เมือง) แทนได้
+  if(G.mapPick&&MAPS[G.mapPick]&&!MAP_OFF.has(G.mapPick))return G.mapPick;
+  const R=G.rndMap;if(R&&R.mode===G.mode&&R.last===G.lastMap&&MAPS[R.id]&&mapOkFor(R.id,G.mode))return R.id;   // random pick made once in the lobby, kept until it starts
+  let ks=RANDOM_MAPS.filter(k=>k!==G.lastMap&&MAPS[k]&&mapOkFor(k,G.mode));if(!ks.length)ks=['castle'];
+  const id=ks[Math.floor(Math.random()*ks.length)];G.rndMap={mode:G.mode,last:G.lastMap,id};return id;
+}
 function hostStart(){
   removeBots(q=>!q.ai.lb);   // บอทห้องฝึก/สังเวียนหายตอนเริ่ม • บอทห้องรอ (ai.lb) อยู่ต่อ
   const err=validate();if(err){toast(err);return;}
   {const F=MODES[G.mode]&&MODES[G.mode].mapF;   // siege: wait for the Map Builder castle data (2+ MB) instead of silently falling back to the old code castle
     if(G.mode==='siege'&&F&&!PLAYMAP&&!(MAPS[F]&&MAPS[F].fcs)&&!FMAPS.fail.has(F)&&!(G.mapPick&&MAPS[G.mapPick]&&MAPS[G.mapPick].fcs&&G.mapPick!=='fcs')){
       toast('กำลังโหลดแผนที่ปราสาท… จะเริ่มเองเมื่อโหลดเสร็จ');if(!hostStart._w){hostStart._w=1;loadMapData(F).then(()=>{hostStart._w=0;if(screen==='lobby')hostStart();});}return;}}
-  // สุ่มแผนที่ทุกครั้งที่เริ่มเกม (ไม่ซ้ำกับรอบที่แล้วถ้าเป็นไปได้)
-  const MD=MODES[G.mode];
-  const sgOk=id=>!!(id&&MAPS[id]&&MAPS[id].fcs&&mapOkFor(id,'siege'));   // siege-capable: code fcs or a Map Builder map with data.siege
-  if(PLAYMAP&&MAPS[PLAYMAP]&&(G.mode!=='siege'||sgOk(PLAYMAP)))G.map=PLAYMAP;   // ทดลองเล่นจาก Map Builder (ห้องฝึกก็ใช้แผนที่นี้)
-  else if(G.mode==='siege'&&sgOk(G.mapPick)&&G.mapPick!==MD.map)G.map=G.mapPick;   // siege on a picked Map Builder siege map
-  else if(MD.map&&(G.mode==='siege'||!(G.mode!=='train'&&MAPS[G.mapPick]&&MAPS[G.mapPick].allModes)))G.map=G.mode==='siege'&&sgOk(MD.mapF)?MD.mapF:MD.map;   // siege: Map Builder castle (fcs-file, MAP-STANDARD round 6) when loaded, else code fcs • บุกปราสาท = แผนที่ของโหมดเสมอ   // โหมดที่มีแผนที่ประจำ: เลือกแผนที่ allModes (เมือง) แทนได้
-  else if(G.mapPick&&MAPS[G.mapPick]&&!MAP_OFF.has(G.mapPick))G.map=G.mapPick;
-  else{let ks=RANDOM_MAPS.filter(k=>k!==G.lastMap&&MAPS[k]&&mapOkFor(k,G.mode));if(!ks.length)ks=['castle'];G.map=ks[Math.floor(Math.random()*ks.length)];}
+  const MD=MODES[G.mode];G.map=hostMapNext();
   G.lastMap=G.map;
   SGPH=1;setMapVars(G.map);AREA=mapArea(G.map,G.mode);   // SGPH = เฟสบุกปราสาท (js/02-fcs) — เริ่มเฟส 1 ก่อนวางจุดเกิด
   PROPON=!PROP_OFF_MODES.includes(G.mode);BLDON=PROPON;

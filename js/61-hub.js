@@ -856,7 +856,6 @@ function hubRender(dt,now){
   let sc=HUBS,lay=null,want,tt=0,fvO=0;
   if(room){
     sc=HUBL;lay=hubLobbyTick(dt,now);want=hubCamRoom(_hcB);
-    if(typeof gameWarmTick==='function'){gameWarmTick(dt);warmLobbyTick();}   // อุ่นฉากเกมระหว่างรอ (js/51)
     F.lRune.rotation.z=t/20;F.lRune.material.opacity=0.24+0.08*Math.sin(t*0.8);F.dustL.rotation.y=t/60;
     if(Math.random()<dt*14)HUB.psL.add({x:rnd(-4,5),y:0.25,z:rnd(-3,2.5),vx:0,vy:0.25+Math.random()*0.3,vz:0,life:3+Math.random()*2,s:0.03+Math.random()*0.03,c:H_SPARK[(Math.random()*4)|0],sw:1.5,swr:0.1,a:0.7,fi:3});
     HUB.psL.tick(dt);
