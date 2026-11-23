@@ -1,5 +1,5 @@
 {
- "next": 158,
+ "next": 159,
  "items": [
   {
    "id": 157,
@@ -3344,6 +3344,24 @@
     "/shots/look_before_sheet.jpg",
     "/shots/look_after_sheet.jpg",
     "/index.html?nosw&playmap=lake"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 158,
+   "title": "โหมดถ่ายรูปโปรโมทแมพ (Dev F2 → 📸 ถ่ายรูป)",
+   "text": "เปิดเกมด้วย ?dev=1 → F2 → คอลัมน์ 📸 ถ่ายรูป → เปิดโหมด • บินกล้อง F3 → ➕ จำมุมนี้ • ปรับเงา / ดวงอาทิตย์ / หมอก / ลำแสง / ความสว่าง / สี / ซูม (เป็นตัวคูณจากค่าแมพ 1 = เดิม) • ความคมเงา 2K/4K/8K • ซ่อนตัวเรา • ถ่าย ×1/×2/×3 = PNG ใน photos/ (ถ้า serve.py ยังไม่รีสตาร์ท จะไปอยู่ shots/) • ปิดโหมด = ค่ากลับหมด, ค่าที่ปรับจำแยกต่อแมพ",
+   "kind": "Tool",
+   "who": "Photo mode",
+   "status": "wait",
+   "created": "2026-11-23T15:30:00",
+   "updated": "2026-11-23T15:30:00",
+   "imgs": [],
+   "links": [
+    "/index.html?nosw&dev=1&playmap=forest",
+    "/shots/ph_ui.jpg",
+    "/shots/ph_test.jpg"
    ],
    "feedback": "",
    "reply": ""

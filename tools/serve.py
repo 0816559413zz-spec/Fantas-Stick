@@ -2,6 +2,7 @@
 # เสิร์ฟไฟล์ทั้งโฟลเดอร์เหมือนเดิม + ช่องทางสำหรับ VFX Studio (studio.html):
 #   GET  /api/fx-list               → รายชื่อเอฟเฟกต์ + โมเดล (mesh) + ภาพ (tex) ทั้งหมด + เวลาแก้ล่าสุด (ไลบรารี / โหลดใหม่อัตโนมัติเมื่อไฟล์เปลี่ยน)
 #   POST /api/save?path=<ไฟล์>      → บันทึกไฟล์ (อนุญาตเฉพาะ assets/fx/**.fx.json, bind.json, mesh/<ชื่อ>.mesh.json, tex/<ชื่อ>.tex.json|.png, vol/<ชื่อ>.vol.json|.bin, assets/vfx/<ชื่อ>.glb|.png) แล้วรัน fx-check
+#   POST /api/photo?name=<ชื่อ>     → โหมดถ่ายรูปในเกม (js/79-photo.js): PNG ลง photos/<ชื่อ>.png (git-ignored)
 #   POST /api/shot?name=<ชื่อ>      → เก็บภาพ (data URL หรือไบต์ PNG/JPEG) ลง shots/<ชื่อ>.png|.jpg (git-ignore) ให้ Claude เปิดดูด้วย Read
 #   GET/POST /api/bugs              → โน้ตปัญหา (bugs.html): bugs/bugs.json + เขียน bugs/BUGS.md ให้ Claude อ่าน + ลบรูปที่ไม่ใช้แล้ว
 #   POST /api/bug-img?name=<ชื่อ>   → เก็บรูปของโน้ตลง bugs/img/<ชื่อ>.png|.jpg
@@ -743,6 +744,13 @@ class H(SimpleHTTPRequestHandler):
             d = os.path.join(ROOT, 'recordings'); os.makedirs(d, exist_ok=True)
             with open(os.path.join(d, name + '.' + ext), 'wb') as f: f.write(self._body())
             return self._json(200, {'ok': True, 'path': 'recordings/' + name + '.' + ext})
+        if u.path == '/api/photo':   # Dev photo mode (js/79-photo.js) -> photos/<name>.png
+            name = re.sub(r'[^a-zA-Z0-9_\-]', '_', q.get('name', ['photo'])[0])[:80] or 'photo'
+            data = self._body()
+            if data[:5] == b'data:': data = base64.b64decode(data.split(b',', 1)[1])
+            d = os.path.join(ROOT, 'photos'); os.makedirs(d, exist_ok=True)
+            with open(os.path.join(d, name + '.png'), 'wb') as f: f.write(data)
+            return self._json(200, {'ok': True, 'path': 'photos/' + name + '.png'})
         if u.path == '/api/shot':
             name = re.sub(r'[^a-zA-Z0-9_\-]', '_', q.get('name', ['shot'])[0])[:60] or 'shot'
             data = self._body(); ext = 'png'

@@ -138,7 +138,7 @@ const dvCol=(id,t,rows)=>'<div class="dvc'+(DEV.cfg.cl[id]?' cl':'')+'"><h4 data
 function devKeyOf(){
   const me=dvMe(),sg=G&&G.mode==='siege'&&G.sg;
   return JSON.stringify([DEV.cfg,DEV.fc.on,DEV.orb.on,G&&G.mode,me&&me.fly,me&&me.team,me&&getKit(me.id).path,sg&&sg.ph,DEV.bp,DEV.bl,DEV.bn,
-    DEV.spec,DEV.specLock,SPEC.id,DEV.spec?plist().map(p=>p.alive?1:0).join(''):'',REC.on,DEV.recLast,!!DEV.auto]);
+    DEV.spec,DEV.specLock,SPEC.id,DEV.spec?plist().map(p=>p.alive?1:0).join(''):'',REC.on,DEV.recLast,!!DEV.auto,typeof photoKey==='function'?photoKey():0]);
 }
 function devRender(){
   if(!DEV.open||!devOn())return;
@@ -185,6 +185,7 @@ function devRender(){
     dvB('🧱 ซ่อมกำแพง','walls',1),dvB('🔨 พังกำแพง','walls',0),dvB('🏆 บุกชนะ','win',0),dvB('🛡️ รับชนะ','win',1)]));
   cols.push(dvCol('dmg','💥 ทำลาย / ซ่อม',[dvSub('ที่เล็ง = จุดที่เมาส์ชี้ก่อนเปิดเมนู'),dvB('🔧 ซ่อมตรงที่เล็ง','dfix','part'),dvB('💥 พังตรงที่เล็ง','dbrk','part'),dvB('🔧 ซ่อมทั้งหลัง','dfix','whole'),
     dvB('💥 พังทั้งหลัง','dbrk','whole'),dvB('🔧 ซ่อมทั้งแมพ','dfix','map'),dvB('💥 พังทั้งแมพ','dbrk','map')]));
+  if(typeof photoCol==='function')cols.push(photoCol());   // photo mode (js/79)
   cols.push(dvCol('keys','⌨️ ปุ่มลัด',['<div class="dvnote">F2 เปิด / เมาส์ไปเมนู / ปิด<br>` สลับเมาส์ เมนู ↔ เกม<br>F3 กล้องอิสระ • F1 กล้องหมุน<br>F10 อัดวิดีโอ • F4 หยุดโลก<br>F6 วาร์ป • F7 พิกัด • F8 สโลว์ • F9 ไม้กวาด<br>?dev=0 ปิด Dev Mode</div>',dvB('↺ รีเซ็ตตำแหน่งหน้าต่าง','uireset')]));
   const sx=_dvBody.scrollLeft,sy=_dvBody.scrollTop;
   _dvBody.innerHTML=cols.join('');_dvBody.scrollLeft=sx;_dvBody.scrollTop=sy;
@@ -208,6 +209,7 @@ function devUiAct(a,k,v){
   else if(a==='recauto')devRecAuto();
   else if(a==='uireset'){C.ui={x:12,y:60,w:Math.min(1100,innerWidth-40),h:Math.min(560,innerHeight-90),op:0.78};devSave();devUiApply();}
   else if(a==='fc'){if(DEV.orb.on)devOrbToggle(false);devAct(a,k,v);return;}
+  else if(a.startsWith('ph'))photoAct(a,k,v);   // photo mode (js/79)
   else return devAct(a,k,v);
   DEV.key='';devRender();
 }
@@ -217,6 +219,7 @@ _dvPanel.addEventListener('input',e=>{
   const s=e.target.dataset&&e.target.dataset.s;if(!s)return;const v=+e.target.value,C=DEV.cfg;
   if(s==='op'){C.ui.op=v;_dvPanel.style.setProperty('--dvop',v);}
   else if(s==='fcspd')DEV.fc.spd=v;
+  else if(s.startsWith('ph.'))photoSet(s.slice(3),v);
   else C[s]=v;
   const o=_dvPanel.querySelector('[data-o="'+s+'"]');if(o)o.textContent=v.toFixed(+e.target.step<1?2:0)+(e.target.dataset.u||'');
   devSave();DEV.key=devKeyOf();

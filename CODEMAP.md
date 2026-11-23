@@ -459,10 +459,10 @@ ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 heal
 §140 หน้าประชุมโหวต (หาลอร์ดโวลเดอมอร์)
 meetKey:141 myVoted:141 castVote:142 syncMeeting:148
 
-## js/37-render-loop.js (129) — ลูปเรนเดอร์
+## js/37-render-loop.js (130) — ลูปเรนเดอร์
 lastFrame:2 HSTOP:5 hitStop:6 FXSTUDIO:8
 §9 เก็บ shader ที่ compile แล้วไว้ตลอดเกม (ผู้ใช้ 2026-11-02 "เล่นกับบอท…
-PINMAX:13 PINNED:13 KEEPSRC:16 pinPrograms:22 frame:25 _fpsAcc:42 _fpsN:42 _fpsLast:42 render:43 detailCull:87 viewDetailAt:90 renderGame:97
+PINMAX:13 PINNED:13 KEEPSRC:16 pinPrograms:22 frame:25 _fpsAcc:42 _fpsN:42 _fpsLast:42 render:43 detailCull:88 viewDetailAt:91 renderGame:98
 
 ## js/38-hud.js (480) — 
 drawReticleTimer:1
@@ -929,7 +929,7 @@ paintScene:223 paintShafts:238
 §249 ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเร…
 §275 ปรับค่า (tune.html / F8)
 
-## js/78-dev-ui.js (243) — Dev Mode UI (user 2026-11-20): one floating window, many small column…
+## js/78-dev-ui.js (246) — Dev Mode UI (user 2026-11-20): one floating window, many small column…
 §10 orbit camera
 devOrbPick:11 devOrbToggle:23 devOrbCam:28
 §42 video recording
@@ -937,6 +937,9 @@ REC:43 _dvBadge:44 devRecStart:45 devRecStop:60 devRecFrame:62 devRecSave:67 dev
 §94 window
 _dvPanel:95 _dvBtn:98 _dvBody:100 _dvHead:100 devUiApply:102 devFreeMouse:110 devToggle:111 devF2:116 devGrave:121
 §130 rows
-dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:193 devUiAct:200
+dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:194 devUiAct:201
 
-(116 files, 35049 lines)
+## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
+PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
+
+(117 files, 35158 lines)

@@ -81,6 +81,7 @@ function render(dt,now){
     updatePlaceGhost(me);
     const o=PM3.get(me.id);windUpdate(o?Math.hypot(o.svx,o.svz):0,!!me.fl);
   }else{const sv=specTarget(P,null,dt);if(sv){devSpecAim(sv,dt);updateCamera(sv,dt);}else menuCamera(now);if(DEV.fc.on&&devOn())devFcCam(dt);else if(DEV.orb.on&&devOn())devOrbCam(dt);}   // คนดู (ไม่มีตัวในเกม)
+  if(typeof photoFrame==='function')photoFrame();   // photo mode overrides (js/79)
   shakeA=Math.max(0,shakeA-dt*30);
   vfxBegin(dt);try{renderGame(v,P,E,me,dt,now);}finally{vfxEnd();}
 }
@@ -118,7 +119,7 @@ function renderGame(v,P,E,me,dt,now){
   gl.shadowMap.needsUpdate=gl.shadowMap.needsUpdate||QUAL.frame%shadowInterval===0;
   if(gl.shadowMap.needsUpdate)shadowFollow();if(QUAL.frame%30===1)shadowDepthSplit();cullTick(dt);
   if(FXSTUDIO.noDraw)return;
-  instzTick();skyFollow();t0=performance.now();shReadyPre();pf('shready',t0);t0=performance.now();hallPre(dt);taaBegin();composer.render();taaFinish();hallPost();pf('gpuSubmit',t0);pinPrograms();
+  instzTick();skyFollow();t0=performance.now();shReadyPre();pf('shready',t0);t0=performance.now();if(typeof photoPre==='function')photoPre();hallPre(dt);taaBegin();composer.render();taaFinish();if(typeof photoPost==='function')photoPost();hallPost();pf('gpuSubmit',t0);pinPrograms();
   t0=performance.now();const spk=speakingIds();
   drawLabels(P,E,v,me,spk);pf('h.labels',t0);
   {let t1=performance.now();const T=k=>{pf('h.'+k,t1);t1=performance.now();};drawMinBars(v,me);T('bars');
