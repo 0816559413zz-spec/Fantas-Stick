@@ -1,5 +1,5 @@
 {
- "next": 191,
+ "next": 192,
  "items": [
   {
    "id": 180,
@@ -3921,6 +3921,22 @@
    "imgs": [],
    "links": [
     "mapbuild.html"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 191,
+   "title": "น้ำทะเล FFT (ตั้งค่ากราฟิก → น้ำทะเล)",
+   "text": "เข้าแมพ fcs-file (siege) แล้วมองออกทะเล • ตั้งค่า → กราฟิก → โลก → น้ำทะเล: Low = น้ำแบบเดิม / High = คลื่น FFT + แสงแดด + ฟองยอดคลื่น / Cinematic = คลื่นละเอียดขึ้น + แดดระยิบ • ภาพเทียบ shots/ocean.jpg",
+   "kind": "Graphics",
+   "who": "Map",
+   "status": "wait",
+   "created": "2026-11-24",
+   "updated": "2026-11-24",
+   "imgs": [],
+   "links": [
+    "index.html"
    ],
    "feedback": "",
    "reply": ""

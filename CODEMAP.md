@@ -355,7 +355,7 @@ onfOutlineMat:4 onFireFX:6 statusFX:17 fx:44
 §251 overlay: เลือกบัฟ / สรุปผล
 choosePick:252 syncOverlays:257 showOver:278
 
-## js/27-world.js (606) — 
+## js/27-world.js (607) — 
 S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 PTG:15 gl:23
 §37 เงานุ่มแบบ PCSS (contact-hardening): ใกล้จุดสัมผัสคม ไกลจากวัตถุที่บั…
 PCSS:40 scene:67 cam:69 composer:70
@@ -364,13 +364,13 @@ rpass:74 fxScene:76 SOFTU:78 SOFT_GLSL:79 FXMATS:81 fxMat:82 softify:84 HAZE_U:8
 §140 TAA (ลบขอบหยักแบบสะสมหลายเฟรม) — กราฟิกสูงเท่านั้น • ปิดด้วย ?notaa
 TAA:143 TAA_FRAG:144 _taaH:159 taaWanted:160 taaBegin:161 taaEnd:169 taaFinish:170 taaResolve:172 AO_RT:182 fxPass:207 bloom:208 GRADEU:215 gradePass:236 aaPass:254
 §256 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
-GQ_OPT:259 GQ_PRE:281 GQ_NAME:288 GQ:289 gq:292 gqSave:293 gqPreset:294 gqSet:295 gqMode:298 gqSync:299 QUAL:300 QUAL_NAME:302 qDyn:303 qualPR:304 gqShadowSize:309 applyQuality:310 qualTick:336
-§352 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
-qualCS:356 CULL:357 cullTick:358 texCanvas:369 glowTex:370 stoneTex:371 runeTex:377 glowMats:385 glowMat:386 STONEM:388 stoneMat:389 shadowAll:390
-§393 clear midday sky (user refs 2026-11-24: anime key-art noon) — baked O…
-SKYC:398 skyBakeClear:400 skyBake:487 SKY:492 hemi:524 moonL:526 LDIR:530 setSky:531 SKYB:547 skyFollow:548
-§549 เงาตามผู้เล่น
-SHD:553 _shF:554 _shR:554 _shU:554 _shC:554 _shY:554 SHD_DM:558 shadowDepthSplit:559 shadowFollow:564 shadowSoft:584 LPOOL:586 MLS_N:592 MLS:592 mlsPoint:594 _mlsP:596 mlsInScene:597 mlsTick:598
+GQ_OPT:259 GQ_PRE:282 GQ_NAME:289 GQ:290 gq:293 gqSave:294 gqPreset:295 gqSet:296 gqMode:299 gqSync:300 QUAL:301 QUAL_NAME:303 qDyn:304 qualPR:305 gqShadowSize:310 applyQuality:311 qualTick:337
+§353 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
+qualCS:357 CULL:358 cullTick:359 texCanvas:370 glowTex:371 stoneTex:372 runeTex:378 glowMats:386 glowMat:387 STONEM:389 stoneMat:390 shadowAll:391
+§394 clear midday sky (user refs 2026-11-24: anime key-art noon) — baked O…
+SKYC:399 skyBakeClear:401 skyBake:488 SKY:493 hemi:525 moonL:527 LDIR:531 setSky:532 SKYB:548 skyFollow:549
+§550 เงาตามผู้เล่น
+SHD:554 _shF:555 _shR:555 _shU:555 _shC:555 _shY:555 SHD_DM:559 shadowDepthSplit:560 shadowFollow:565 shadowSoft:585 LPOOL:587 MLS_N:593 MLS:593 mlsPoint:595 _mlsP:597 mlsInScene:598 mlsTick:599
 
 ## js/28-city-build.js (386) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
@@ -826,7 +826,7 @@ BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:137 backdropHide:141
 
-## js/67-coast.js (415) — 
+## js/67-coast.js (439) — 
 COAST:10 BD_LOD:14
 §26 2D value noise (deterministic)
 cvN:27 cvF:29
@@ -835,9 +835,12 @@ COAST_SKY:31 coastSky:32 BD_AIR:59 BD_DET_V:63 BD_DET_F:64 bdDetailCol:68 BD_DET
 §136 land shape
 coastShape:137 coastH:162
 §175 height sources: one interface for the code coast (BACKDROP.fcs) and M…
-coastSrcProc:178 BD_SURF:184 bdB64:185 bdRle:186 bdHsh:187 bdGridSrc:188 coastGrid:224 bdCoast:234 coastTreePts:328 BD_TREE_FAR:336 coastTreeMesh:337
-§376 near-edge detail bands (user 2026-11-23: backdrop next to the play ar…
-bdNearKit:381
+coastSrcProc:178 BD_SURF:184 bdB64:185 bdRle:186 bdHsh:187 bdGridSrc:188 coastGrid:224 bdCoast:234 coastTreePts:352 BD_TREE_FAR:360 coastTreeMesh:361
+§400 near-edge detail bands (user 2026-11-23: backdrop next to the play ar…
+bdNearKit:405
+
+## js/67-ocean.js (132) — 
+OCEAN:6 OC_COMMON:9 OC_VERT:17 OC_INIT:18 OC_EVOLVE:30 OC_FFT:37 OC_ASM:43 ocJon:49 ocMat:50 oceanSim:51 oceanSpectrum:67 oceanStep:71 oceanFree:77 OCU:79 oceanTick:81 oceanRun:87 oceanWarm:93 OC_GLSL_V:97 OC_GLSL_F:99
 
 ## js/68-darkness-view.js (1153) — 
 nightWaltzStrip:2 nightWaltzBorder:80 stDarkVeilGround:118 darkFxMesh:195 drawDarknessHud:201 drawDarkHudBar:220 darknessMarkView:227 darkWaveViews:237 darkActiveViews:237 darkViewRoot:238 darkViewTemp:245 darknessClear:257 darkDeathRoots:265 darkDeathClear:268 darkWorldAt:282 darkMarkWind:285 darkMarkLaunch:313 darkMarkContact:325 darkViewNow:338 darkFlowHud:338 darkIdleWeaponPose:339 darkBAGroundImpact:343 darkSettleWeapon:358 darkBlendWeapon:369 darkShowWeaponReturn:392 darkTrailHistory:399 darkDashView:438 darknessCharacter:484 darknessEfx:727 stDarkShieldInk:1024 stDarkVeilBlade:1067 stWardDrainPool:1104
@@ -984,4 +987,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(119 files, 37301 lines)
+(120 files, 37458 lines)

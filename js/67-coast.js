@@ -279,16 +279,38 @@ function bdCoast(id,B){
   const seaGs=bdSplit(sg,idx,sea,NT,NR,(a,b,c)=>!(pos[a*3+1]>SEA+2&&pos[b*3+1]>SEA+2&&pos[c*3+1]>SEA+2));   // skip sea triangles fully under land (never seen) • sectors
   const U={uT:{value:0},uDeep:{value:new THREE.Color('#174652')},uShal:{value:new THREE.Color('#3a9490')},uSky:{value:new THREE.Color('#c6cdd0')},uFoam:{value:new THREE.Color('#eef2f1')},
     uFogC:{value:new THREE.Color(COAST.fogC)},uFogN:{value:COAST.seaN*Math.max(1,bdFar(id)/700)},uFogF:{value:COAST.seaF*Math.max(1,bdFar(id)/700)},uL:{value:new THREE.Vector3()}};
-  const sm=new THREE.ShaderMaterial({uniforms:U,fog:false,
+  Object.assign(U,OCU);   // FFT ocean textures (js/67-ocean, Graphics 'water' High/Cinematic)
+  const sm=new THREE.ShaderMaterial({uniforms:U,fog:false,defines:{OCN:gq('water')},
     vertexShader:`attribute float sd;uniform float uT;varying vec3 vW;varying float vS;
+      #if OCN>0
+      ${OC_GLSL_V}
+      #endif
       void main(){vec3 p=position;float k=smoothstep(2.0,30.0,sd);
+        #if OCN>0
+        {vec4 w0=modelMatrix*vec4(p,1.0);vec3 d=ocDisp(w0.xz,distance(cameraPosition,w0.xyz))*k;p+=d;vOH=d.y;}
+        #else
         p.y+=k*(0.45*sin(dot(p.xz,vec2(0.071,0.052))+uT*0.9)+0.28*sin(dot(p.xz,vec2(-0.043,0.097))+uT*1.3));
+        #endif
         vec4 w=modelMatrix*vec4(p,1.0);vW=w.xyz;vS=sd;gl_Position=projectionMatrix*viewMatrix*w;}`,
     fragmentShader:`uniform float uT;uniform vec3 uDeep,uShal,uSky,uFoam,uFogC,uL;uniform float uFogN,uFogF;varying vec3 vW;varying float vS;
+      #define PI 3.14159265359
+      #if OCN>0
+      ${OC_GLSL_F}
+      #endif
       float hs(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
       float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(hs(i),hs(i+vec2(1,0)),f.x),mix(hs(i+vec2(0,1)),hs(i+1.0),f.x),f.y);}
       vec2 wv(vec2 p,vec2 d,float f,float sp,float a){float ph=dot(p,d)*f+uT*sp;return d*(a*f*cos(ph));}
       void main(){vec2 p=vW.xz;
+        #if OCN>0
+        vec3 V=normalize(cameraPosition-vW),N;float dist=distance(cameraPosition,vW),fc;
+        vec3 c=ocShade(p,vS,V,dist,uL,uDeep,uShal,uSky,uFogC,uFoam,fc,N);
+        float n1=vn(p*0.45+vec2(uT*0.3,-uT*0.2)),n2=vn(p*1.3-uT*0.4);
+        float shore=1.0-smoothstep(0.0,2.5+4.0*n1,vS);
+        float roll=smoothstep(0.62,0.96,sin(vS*0.42+uT*1.7+n1*5.0))*(1.0-smoothstep(3.0,26.0,vS))*smoothstep(0.25,0.7,n2);
+        float lace=smoothstep(0.55,0.9,n2*n1*1.8)*(1.0-smoothstep(2.0,14.0,vS));
+        float f=clamp(max(max(shore,roll*0.85),max(lace*0.6,fc*0.9)),0.0,1.0);
+        c=mix(c,uFoam*(0.75+0.35*max(dot(N,uL),0.0)),f);
+        #else
         vec2 g=wv(p,normalize(vec2(0.8,0.6)),0.21,1.3,0.32)+wv(p,normalize(vec2(-0.5,0.9)),0.34,1.7,0.18)+wv(p,normalize(vec2(0.95,-0.3)),0.57,2.3,0.09)+wv(p,normalize(vec2(-0.7,-0.7)),0.9,2.9,0.05);
         g+=(vec2(vn(p*0.35+uT*0.15),vn(p*0.35-uT*0.12+7.0))-0.5)*0.12;
         vec3 N=normalize(vec3(-g.x,1.0,-g.y)),V=normalize(cameraPosition-vW);
@@ -306,13 +328,15 @@ function bdCoast(id,B){
         float caps=smoothstep(0.86,0.97,vn(p*0.06+vec2(uT*0.04,uT*0.03)))*smoothstep(0.5,0.8,n2)*0.6;
         float f=clamp(max(max(shore,roll*0.85),max(lace*0.6,caps)),0.0,1.0);
         c=mix(c,uFoam,f);
+        #endif
         float d=distance(cameraPosition,vW);c=mix(c,uFogC,smoothstep(uFogN,uFogF,d));
         gl_FragColor=vec4(c,1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
       }`});
   const seaTick=()=>{U.uT.value=performance.now()/1000;if(scene.fog)U.uFogC.value.copy(scene.fog.color);U.uL.value.copy(LDIR);};
-  for(const sg2 of seaGs){const so=new THREE.Mesh(sg2,sm);so.name='coastSea';so.userData.noBatch=1;so.visible=src.sea!=null;so.onBeforeRender=seaTick;g.add(so);}
+  OCEAN.mats.add(sm);if(src.sea!=null)oceanWarm();sm.addEventListener('dispose',()=>OCEAN.mats.delete(sm));const seaTick2=()=>{seaTick();OCEAN.seen=OCEAN.frame;};   // seen → FFT sim runs next frame
+  for(const sg2 of seaGs){const so=new THREE.Mesh(sg2,sm);so.name='coastSea';so.userData.noBatch=1;so.visible=src.sea!=null;so.onBeforeRender=seaTick2;g.add(so);}
   const TP=src.trees();bdSnapTrees(TP,pos,idx,hx0,hz0);let tr=coastTreeMesh(TP,low);if(tr)g.add(tr);
   for(const q of g.children){q.castShadow=q.receiveShadow=false;}
   if(hd)bdNearKit(g,TP,src,hx0,hz0,(far,round)=>{if(tr){g.remove(tr);tr.children[0]&&tr.children[0].geometry.dispose();}tr=coastTreeMesh(far,low,round);if(tr)g.add(tr);},typeof world!=='undefined'?world:null);

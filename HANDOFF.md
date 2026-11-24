@@ -8,6 +8,8 @@
 
 ## Latest notes (newest first)
 
+**FFT ocean, Graphics option น้ำทะเล (2026-11-24, js/67-ocean.js):** Low = old sine sea; High = 3 cascades 128² FFT (Tessendorf, trimmed port of Ultra-Water, MIT); Cinematic = 4 cascades 256² + sun glitter. Same `coastSea` material (js/67-coast) with `#if OCN>0`; shared textures `OCU`; sim runs from a `composer.render` wrapper only when a sea drew in the last 30 frames; `oceanWarm()` at map build compiles the 4 sim shaders. Test: scratchpad-style script (siege fcs-file + 3 bots, `WD.camHook`), shots `shots/ocean.jpg`. Cost headless NVIDIA: +0.3 ms High, +1.2 ms Cinematic. No planar reflection / underwater / physics / caustics.
+
 **Map Builder panel Tilt gizmo (2026-11-24, `mapbuild/app.js` placeGizmo/objectChange):** breakable panels (`pn_wall`) in Rotate mode show the X ring = Tilt `tl` about the length axis (anchor stays yaw-only, so the drag maps straight to `tl`); the Y ring still sets `rot` and keeps `tl`. In-plane roll is still not supported (game panels assume a level base edge). Tested in Map Builder. Review #190.
 
 **VRoid player models started (2026-11-24, user):** plan + steps in `designs/vroid-plan.md`. Installed Blender 5.3 and VRoid Studio 2.3 on this PC (winget). Test page `tools/vrm-test.html` (three-vrm 2.1.0, drag a .vrm in or `?vrm=assets/vrm/x.vrm`): weight table, our student.glb clips retargeted to VRM bones, spring bones, expressions — not yet tried with a real VRM (waiting for the user to export male/female into `assets/vrm/`). Blocky Blender female parked in `git stash`.

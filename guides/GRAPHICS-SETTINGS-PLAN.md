@@ -113,5 +113,9 @@ cut), smoke ×1 (`SMOKE_K` 1, was cut to 0.4 on 2026-11-18), ground marks / debr
   blades × size²; cap raised to 640k). High = ปกติ (old look), Ultra/Cinematic = ไกล. Cinematic + ไกลมาก = 639k blades.
   Old saves get the saved preset's value. Shots `shots/distcmp.jpg`. Uniforms/counts only: no shader change.
 
+- **น้ำทะเล** `water` (user 2026-11-24, Ultra-Water lite): Low = old sine sea, High = FFT 3 × 128², Cinematic = FFT 4 × 256² +
+  glitter (js/67-ocean.js). Presets: low/medium 0, high/ultra 1, cinematic 2. Shader change (define `OCN` on the coast sea material).
+  Cost +0.3 / +1.2 ms GPU (headless NVIDIA, 1080p sea view). Shots `shots/ocean.jpg`.
+
 Not done yet: gate configs per preset (Low / Cinematic), 6v6 bench per preset, entry preload compiles only the High variant
 (another preset compiles its shaders when chosen = the accepted short hitch).

@@ -272,6 +272,7 @@ const GQ_OPT=[   // [key, group, label, level names]
   ['grdist','โลก','ระยะหญ้า',['ใกล้','ปกติ','ไกล','ไกลมาก']],
   ['surf','โลก','ผิววัสดุละเอียด',['ปิด','เปิด']],
   ['amb','โลก','ฝุ่น/หมอกบรรยากาศ',['ปิด','Low','Medium','High']],
+  ['water','โลก','น้ำทะเล',['Low','High','Cinematic']],
   ['detail','โลก','ฉากไกล (โหลดแมพถัดไป)',['Low','High']],
   ['dist','โลก','ระยะของชิ้นเล็ก',['ใกล้','กลาง','ไกล']],
   ['particles','เอฟเฟกต์','อนุภาค',['Low','Medium','High','Cinematic']],
@@ -279,11 +280,11 @@ const GQ_OPT=[   // [key, group, label, level names]
   ['flash','เอฟเฟกต์','แสงวาบเต็มจอ',['ปิด','เปิด']],
 ];
 const GQ_PRE={
-  low:      {shdist:1,grdist:1,res:0,dyn:0,shadow:0,pcss:0,ao:0,bloom:0,grade:0,aa:0,paint:0,softp:0,grass:0,surf:0,amb:0,detail:0,dist:0,particles:0,debris:0,flash:0},
-  medium:   {shdist:1,grdist:1,res:1,dyn:0,shadow:2,pcss:0,ao:1,bloom:1,grade:1,aa:1,paint:1,softp:1,grass:2,surf:1,amb:2,detail:1,dist:2,particles:1,debris:1,flash:1},
-  high:     {shdist:1,grdist:1,res:2,dyn:0,shadow:3,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:3,surf:1,amb:3,detail:1,dist:2,particles:2,debris:2,flash:1},
-  ultra:    {shdist:2,grdist:2,res:3,dyn:0,shadow:4,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:3,surf:1,amb:3,detail:1,dist:2,particles:2,debris:2,flash:1},
-  cinematic:{shdist:2,grdist:2,res:3,dyn:0,shadow:4,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:4,surf:1,amb:3,detail:1,dist:2,particles:3,debris:3,flash:1},
+  low:      {water:0,shdist:1,grdist:1,res:0,dyn:0,shadow:0,pcss:0,ao:0,bloom:0,grade:0,aa:0,paint:0,softp:0,grass:0,surf:0,amb:0,detail:0,dist:0,particles:0,debris:0,flash:0},
+  medium:   {water:0,shdist:1,grdist:1,res:1,dyn:0,shadow:2,pcss:0,ao:1,bloom:1,grade:1,aa:1,paint:1,softp:1,grass:2,surf:1,amb:2,detail:1,dist:2,particles:1,debris:1,flash:1},
+  high:     {water:1,shdist:1,grdist:1,res:2,dyn:0,shadow:3,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:3,surf:1,amb:3,detail:1,dist:2,particles:2,debris:2,flash:1},
+  ultra:    {water:1,shdist:2,grdist:2,res:3,dyn:0,shadow:4,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:3,surf:1,amb:3,detail:1,dist:2,particles:2,debris:2,flash:1},
+  cinematic:{water:2,shdist:2,grdist:2,res:3,dyn:0,shadow:4,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:4,surf:1,amb:3,detail:1,dist:2,particles:3,debris:3,flash:1},
 };
 const GQ_NAME={low:'Low',medium:'Medium',high:'High',ultra:'Ultra',cinematic:'Cinematic',custom:'Custom'};
 const GQ=(()=>{let o=null;try{o=JSON.parse(store('wd_gfx2')||'null');}catch(e){}
