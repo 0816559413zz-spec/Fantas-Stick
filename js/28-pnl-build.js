@@ -238,20 +238,21 @@ function pnlGeo(p,cls,Lm,H,Tm,rec){
 }
 function pnlBuild(){
   PNV.list=[];if(!PNL.length)return;
-  const grp=addW(new THREE.Group()),rg=new THREE.DodecahedronGeometry(1,0);
+  const grp=addW(new THREE.Group()),rg=new THREE.DodecahedronGeometry(1,0);let zt=null,warm=false;   // zt = one shared blank damage texture for unbreakable one-piece panels • warm = a pile was made (shader warm-up)
   for(const p of PNL){
-    const n=p.st.length,data=new Uint8Array(n*4),tex=new THREE.DataTexture(data,p.nc,p.nr,THREE.RGBAFormat);
-    tex.magFilter=tex.minFilter=THREE.LinearFilter;tex.needsUpdate=true;
+    const n=p.st.length,solid=p.nb&&n===1;let data,tex;
+    if(solid){if(!zt){zt={data:new Uint8Array([0,0,0,255])};zt.tex=new THREE.DataTexture(zt.data,1,1,THREE.RGBAFormat);zt.tex.needsUpdate=true;}data=zt.data;tex=zt.tex;}
+    else{data=new Uint8Array(n*4);tex=new THREE.DataTexture(data,p.nc,p.nr,THREE.RGBAFormat);tex.magFilter=tex.minFilter=THREE.LinearFilter;tex.needsUpdate=true;}
     const Lm=p.hl*2*S3,Tm=p.ht*2*S3,cx=tx(p.x),cz=tz(p.y),mid=pnP3(p,0,p.Hp/2);
     const U={uDmg:{value:tex},uSz:{value:new THREE.Vector3(Lm,p.H,Tm)},uOff:{value:new THREE.Vector2(cx*p.c+cz*p.s,p.tl?p.H/2:p.zb+p.H/2)},uRec:{value:Math.min(0.12,Tm*0.4)},uTri:{value:p.tri?1:0},uTp:{value:new THREE.Vector3(...(p.tp||[1,0,1]))},uNHo:{value:Math.min(4,(p.d.ho||[]).length)},uHo:{value:[0,1,2,3].map(i=>{const h=(p.d.ho||[])[i]||[0,0,0,0];return new THREE.Vector4(h[0],h[1],h[2],h[3]);})}};
     const mat=pnlMat(p.mat);mat.userData.U=U;
     const rec=U.uRec.value,cls=pnlCls(p),m=new THREE.Mesh(pnlGeo(p,cls,Lm,p.H,Tm,rec),mat);m.position.set(tx(mid[0]),mid[2],tz(mid[1]));m.rotation.order='YXZ';m.rotation.y=-p.a;m.rotation.x=p.tl;m.castShadow=m.receiveShadow=true;
     grp.add(m);
     const e={p,m,tex,data,ver:-1,heap:null,rub:null,ck:cls.join(''),Lm,Tm,rec};
-    if(p.mode!=='g'&&!p.tl){
+    if(p.mode!=='g'&&!p.tl&&!p.nb){   // unbreakable panels never make rubble → no heap / rubble meshes
       const S=PNDEF.pile.sp*S3,W=Lm+2*S,D=Tm+2*S,hg=new THREE.PlaneGeometry(W,D,Math.max(2,Math.ceil(W/0.35)),12);hg.rotateX(-Math.PI/2);
       const hm=new THREE.Mesh(hg,new THREE.MeshStandardMaterial({color:PN_HEAP[p.mat]||'#7a6a5a',roughness:1,flatShading:true}));hm.position.set(cx,0,cz);hm.rotation.y=-p.a;hm.receiveShadow=true;hm.visible=false;grp.add(hm);
-      const rm=new THREE.InstancedMesh(rg,new THREE.MeshStandardMaterial({color:'#ffffff',roughness:0.95,flatShading:true}),n*6);rm.setMatrixAt(0,new THREE.Matrix4().makeScale(0,0,0));rm.setColorAt(0,new THREE.Color('#fff'));rm.count=PNV.list.length?0:1;   // first pile: 1 empty instance + colour → the map warm-up compiles the rubble shader (+ shadow) now, not on the first break (~0.4 s); one is enough (same program), the rest stay at 0 draws
+      const rm=new THREE.InstancedMesh(rg,new THREE.MeshStandardMaterial({color:'#ffffff',roughness:0.95,flatShading:true}),n*6);rm.setMatrixAt(0,new THREE.Matrix4().makeScale(0,0,0));rm.setColorAt(0,new THREE.Color('#fff'));rm.count=warm?0:1;warm=true;   // first pile: 1 empty instance + colour → the map warm-up compiles the rubble shader (+ shadow) now, not on the first break (~0.4 s); one is enough (same program), the rest stay at 0 draws
       rm.castShadow=rm.receiveShadow=true;rm.frustumCulled=false;grp.add(rm);
       e.heap=hm;e.rub=rm;}
     PNV.list.push(e);

@@ -416,8 +416,8 @@ makeSnow:475 makeFireflies:482 makeSnitch:489 fileMapFx:496
 §506 แผนที่จากไฟล์ Blender (guides/MAP-DESIGN.md)
 terrGeo:508 buildFileMap:516 fileMapLight:522 fileMapBody:539 replaceMeadowTufts:582 tickM:624 TRPAD:625 ARPAD:625 SHPAD:625 signTex:626 testSign:627 buildTest:634 buildRuins:739 buildPitch:764
 
-## js/28-pnl-build.js (325) — Breakable panels — view (state = PNL in js/12-pnl.js)
-PNV:7 PN_BATCH:8 PN_MI:9 PN_GLSL:10 pnlMat:66 PN_RUB:138 PN_HEAP:139 pnlCls:146 PN_ZU:154 pnlGeo:155 pnlBuild:239 pnlBatch:264 pnlBatSet:286 pnlSyncOne:291 pnlView:314 pnlFX:317
+## js/28-pnl-build.js (326) — Breakable panels — view (state = PNL in js/12-pnl.js)
+PNV:7 PN_BATCH:8 PN_MI:9 PN_GLSL:10 pnlMat:66 PN_RUB:138 PN_HEAP:139 pnlCls:146 PN_ZU:154 pnlGeo:155 pnlBuild:239 pnlBatch:265 pnlBatSet:287 pnlSyncOne:292 pnlView:315 pnlFX:318
 
 ## js/29-characters.js (441) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
 makeCloak:2 updateCloth:10 wandNamed:34 wandSparks:83
@@ -966,4 +966,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(118 files, 36246 lines)
+(118 files, 36247 lines)
