@@ -348,7 +348,7 @@ onfOutlineMat:4 onFireFX:6 statusFX:17 fx:44
 §251 overlay: เลือกบัฟ / สรุปผล
 choosePick:252 syncOverlays:257 showOver:278
 
-## js/27-world.js (601) — 
+## js/27-world.js (603) — 
 S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 PTG:15 gl:23
 §37 เงานุ่มแบบ PCSS (contact-hardening): ใกล้จุดสัมผัสคม ไกลจากวัตถุที่บั…
 PCSS:40 scene:67 cam:69 composer:70
@@ -357,13 +357,13 @@ rpass:74 fxScene:76 SOFTU:78 SOFT_GLSL:79 FXMATS:81 fxMat:82 softify:84 HAZE_U:8
 §140 TAA (ลบขอบหยักแบบสะสมหลายเฟรม) — กราฟิกสูงเท่านั้น • ปิดด้วย ?notaa
 TAA:143 TAA_FRAG:144 _taaH:159 taaWanted:160 taaBegin:161 taaEnd:169 taaFinish:170 taaResolve:172 AO_RT:182 fxPass:204 bloom:205 GRADEU:212 gradePass:233 aaPass:251
 §253 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
-GQ_OPT:256 GQ_PRE:276 GQ_NAME:283 GQ:284 gq:287 gqSave:288 gqPreset:289 gqSet:290 gqMode:293 gqSync:294 QUAL:295 QUAL_NAME:297 qDyn:298 qualPR:299 gqShadowSize:304 applyQuality:305 qualTick:331
-§347 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
-qualCS:351 CULL:352 cullTick:353 texCanvas:364 glowTex:365 stoneTex:366 runeTex:372 glowMats:380 glowMat:381 STONEM:383 stoneMat:384 shadowAll:385
-§388 clear midday sky (user refs 2026-11-24: anime key-art noon) — baked O…
-SKYC:393 skyBakeClear:395 skyBake:482 SKY:487 hemi:519 moonL:521 LDIR:525 setSky:526 SKYB:542 skyFollow:543
-§544 เงาตามผู้เล่น
-SHD:548 _shF:549 _shR:549 _shU:549 _shC:549 _shY:549 SHD_DM:553 shadowDepthSplit:554 shadowFollow:559 shadowSoft:579 LPOOL:581 MLS_N:587 MLS:587 mlsPoint:589 _mlsP:591 mlsInScene:592 mlsTick:593
+GQ_OPT:256 GQ_PRE:278 GQ_NAME:285 GQ:286 gq:289 gqSave:290 gqPreset:291 gqSet:292 gqMode:295 gqSync:296 QUAL:297 QUAL_NAME:299 qDyn:300 qualPR:301 gqShadowSize:306 applyQuality:307 qualTick:333
+§349 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
+qualCS:353 CULL:354 cullTick:355 texCanvas:366 glowTex:367 stoneTex:368 runeTex:374 glowMats:382 glowMat:383 STONEM:385 stoneMat:386 shadowAll:387
+§390 clear midday sky (user refs 2026-11-24: anime key-art noon) — baked O…
+SKYC:395 skyBakeClear:397 skyBake:484 SKY:489 hemi:521 moonL:523 LDIR:527 setSky:528 SKYB:544 skyFollow:545
+§546 เงาตามผู้เล่น
+SHD:550 _shF:551 _shR:551 _shU:551 _shC:551 _shY:551 SHD_DM:555 shadowDepthSplit:556 shadowFollow:561 shadowSoft:581 LPOOL:583 MLS_N:589 MLS:589 mlsPoint:591 _mlsP:593 mlsInScene:594 mlsTick:595
 
 ## js/28-city-build.js (386) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
@@ -640,7 +640,7 @@ RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rq
 ## js/49-cloth.js (203) — 
 CLOTH:10 CL_ROWS:26 CL_NC:26 CL_GAP:26 CL_IN:26 _clV:27 _clA:27 _clB:27 clPinK:29 clBind:31 cloakPanelGrid:33 cloakBodyIndices:47 stormCape:56 clothSetup:94 clTargets:124 clReset:128 clCapsule:132 _clO:136 clWorld:137 clWorldHit:145 clStep:150 clDraw:163 clothTick:184
 
-## js/50-grass.js (427) — 
+## js/50-grass.js (428) — 
 AIR:10 AIR_MAP:17 AIR_NG:20 airGust:21 airGustOff:26 airEnv:27 airGs:28 airMark:30 airForMap:33 _airV:34 airAt:35 airGv:41 airTick:42
 §45 ต่อเข้ากับเอฟเฟกต์เดิม (ไม่ต้องแก้ทุกสกิล): แสงวาบ = ลมกระโชก • วงคลื…
 CLW:54
@@ -651,9 +651,9 @@ SCAR:62 scarReset:64 scarPaint:71 grassScar:86
 §91 ไฟลามหญ้า (ภาพล้วน: ไม่มีดาเมจ ไม่ซิงก์ — แต่ละเครื่องลามไม่เหมือนกัน…
 FIRE:97 GR_FIRE:100 fireReset:102 fireBuild:104 fireLight:111 fireIgnite:113 fireFx:125 fireStep:130 fireTick:154
 §159 พื้นหญ้ามีชีวิต: สีเป็นหย่อม (เขียวเข้ม / แห้งเหลือง / ดินโผล่) + จุด…
-GR_NOISE:162 GR_LIVE:167 SNOWU:188 GR_SNOW:189 grLive:191 GR_GLSL_V:201 GR_BEGIN:206 grassMat:258 grassBuild:276 _grBasic:290 grassBake:291 grassCount:361 grassTick:366
-§404 สกิลลม → หญ้า (ภาพล้วน เรียกจาก windEfx js/68)
-WIND_GRASS:406 airWind:420
+GR_NOISE:162 GR_LIVE:167 SNOWU:188 GR_SNOW:189 grLive:191 GR_GLSL_V:201 GR_BEGIN:206 grassMat:258 grassBuild:276 _grBasic:290 grassBake:291 grassCount:361 grassTick:367
+§405 สกิลลม → หญ้า (ภาพล้วน เรียกจาก windEfx js/68)
+WIND_GRASS:407 airWind:421
 
 ## js/51-warmup.js (421) — 
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_SLICE:13 WARM_X:14 WARM_Y:14 warmKeep:16 warmStaticModels:22 glReady:31 warmCompile:32 warmDraw:35 WARM_SKIP:45 warmAssets:48 warmFx:58 warmNow:71 warmFxRun:79 warmFxEnd:82 warmGather:84 warmPaths:86 warmFrame:88 warmStep:90 preloadCharMat:158 warmTrCopy:161 warmCharVariants:164 warmQueue:183 WARM_LOBBY:189 warmLobbyTick:190 warmTick:197
@@ -970,4 +970,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(118 files, 36759 lines)
+(118 files, 36762 lines)
