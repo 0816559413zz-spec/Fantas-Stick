@@ -1,6 +1,26 @@
 {
- "next": 169,
+ "next": 170,
  "items": [
+  {
+   "id": 169,
+   "title": "FCS (fcs-file) โทนกลางวัน: ฟ้าใส + แดด",
+   "text": "เดิม: ฟ้าครึ้มเทา (กราฟิกต่ำ/ปิดภาพวาด) หรือหมอกเขียวอมฟ้า (สไตล์ภาพวาด) • ใหม่: ฟ้าใสสีฟ้า + เมฆขาว + แดดอุ่น หมอกฟ้าอ่อน ทั้งสองโหมด • กำแพงไม่ติดสีเขียวแล้ว (แสงฟ้าเป็นกลาง) • Map Builder → Backdrop → Look มีตัวเลือกใหม่ Clear Day",
+   "kind": "Map",
+   "who": "Look",
+   "status": "wait",
+   "created": "2026-11-24T13:00:00",
+   "updated": "2026-11-24T13:00:00",
+   "imgs": [],
+   "links": [
+    "/index.html?nosw&playmap=fcs-file&pm=siege",
+    "/shots/fcs_day_before.jpg",
+    "/shots/fcs_day_after.jpg",
+    "/shots/fcs_day_forest.jpg",
+    "/shots/fcs_day_nopaint.jpg"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
   {
    "id": 168,
    "title": "รอยต่อ Backdrop ↔ พื้นที่เล่น: ต้นไม้นอกขอบเป็นชนิดเดียวกับในแมพ (fcs-file)",

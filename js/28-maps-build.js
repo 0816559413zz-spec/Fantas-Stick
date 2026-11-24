@@ -19,7 +19,7 @@ function buildWorld(id){
   const FM=MAPS[id]&&MAPS[id].fm;
   if(typeof paintMap==='function')paintMap(id,FM);   // ลุคภาพวาด (js/77): ทับ sky/fog/look ของแมพ
   if(typeof lookMap==='function')lookMap(id,FM);   // พรีเซ็ตแสงของแมพนี้ (js/74-look.js)
-  setSky(FM?(FM.sky==='day'&&FM.look==='paint'?'day':FM.sky==='day'?'clear':FM.sky==='sunset'?'sunset':'night'):id==='pitch'||id==='meadow'||id==='ruins'||id==='test'||id==='fcs'?'sunset':'night');
+  setSky(FM?(FM.sky==='clear'?'clear':FM.sky==='day'&&FM.look==='paint'?'day':FM.sky==='day'?'clear':FM.sky==='sunset'?'sunset':'night'):id==='pitch'||id==='meadow'||id==='ruins'||id==='test'||id==='fcs'?'sunset':'night');
   const cached=WCACHE.get(wkey(id));
   if(cached){
     WCACHE.delete(wkey(id));

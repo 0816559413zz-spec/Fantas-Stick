@@ -13,7 +13,7 @@ export const BSURF = [
   { k: 'dirt', n: 'Dirt', c: '#6e5a40' }, { k: 'snow', n: 'Snow', c: '#e8edf0' },
 ];
 export const BD_PRESETS = [['coast', 'Sea-cliff headland (sea N/E/S)'], ['island', 'Island'], ['valley', 'Mountain valley'], ['plains', 'Hills & fields'], ['lake', 'Lakeside'], ['flat', 'Flat (sculpt from scratch)']];
-export const BD_LOOK = [['', 'Map sky'], ['overcast', 'Overcast (sea-cliff sky + fog)']];
+export const BD_LOOK = [['', 'Map sky'], ['overcast', 'Overcast (sea-cliff sky + fog)'], ['day', 'Clear Day (blue sky + sun)']];
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 
 export function bdNew(M, o = {}) {

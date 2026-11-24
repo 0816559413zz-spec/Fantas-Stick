@@ -808,18 +808,18 @@ BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:137 backdropHide:141
 
-## js/67-coast.js (337) — 
+## js/67-coast.js (338) — 
 COAST:10 BD_LOD:14
-§25 2D value noise (deterministic)
-cvN:26 cvF:28
-§29 overcast sky dome (shader: thick cloud deck on a flat layer, horizon …
-COAST_SKY:30 coastSky:31 backdropLook:57
-§68 land shape
-coastShape:69 coastH:94
-§107 height sources: one interface for the code coast (BACKDROP.fcs) and M…
-coastSrcProc:110 BD_SURF:116 bdB64:117 bdRle:118 bdHsh:119 bdGridSrc:120 coastGrid:155 bdCoast:165 coastTreePts:255 coastTreeMesh:263
-§299 near-edge detail bands (user 2026-11-23: backdrop next to the play ar…
-bdNearKit:304
+§26 2D value noise (deterministic)
+cvN:27 cvF:29
+§30 overcast sky dome (shader: thick cloud deck on a flat layer, horizon …
+COAST_SKY:31 coastSky:32 backdropLook:58
+§69 land shape
+coastShape:70 coastH:95
+§108 height sources: one interface for the code coast (BACKDROP.fcs) and M…
+coastSrcProc:111 BD_SURF:117 bdB64:118 bdRle:119 bdHsh:120 bdGridSrc:121 coastGrid:156 bdCoast:166 coastTreePts:256 coastTreeMesh:264
+§300 near-edge detail bands (user 2026-11-23: backdrop next to the play ar…
+bdNearKit:305
 
 ## js/68-darkness-view.js (1153) — 
 nightWaltzStrip:2 nightWaltzBorder:80 stDarkVeilGround:118 darkFxMesh:195 drawDarknessHud:201 drawDarkHudBar:220 darknessMarkView:227 darkWaveViews:237 darkActiveViews:237 darkViewRoot:238 darkViewTemp:245 darknessClear:257 darkDeathRoots:265 darkDeathClear:268 darkWorldAt:282 darkMarkWind:285 darkMarkLaunch:313 darkMarkContact:325 darkViewNow:338 darkFlowHud:338 darkIdleWeaponPose:339 darkBAGroundImpact:343 darkSettleWeapon:358 darkBlendWeapon:369 darkShowWeaponReturn:392 darkTrailHistory:399 darkDashView:438 darknessCharacter:484 darknessEfx:727 stDarkShieldInk:1024 stDarkVeilBlade:1067 stWardDrainPool:1104
@@ -966,4 +966,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(118 files, 36151 lines)
+(118 files, 36152 lines)

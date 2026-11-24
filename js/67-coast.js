@@ -19,7 +19,8 @@ const BD_LOD={on:!/[?&]nobdlod\b/.test(location.search),hi:[55,115],mid:[140,230
       main:66,      // mainland coast line, m east of the map's west edge (the forest end stands on the mainland, no water gap)
       heads:[{z:-1,off:330,L:440,dz:-70,r:58},{z:1,off:400,L:340,dz:60,r:64}],   // far headlands from the mainland coast (z side, distance from the map, length east, bend, half width)
       stacks:14},
-    look:{sky:1,fog:[COAST.fogC,COAST.fogN,COAST.fogF],hemi:['#dfe6ea','#4c5a44',0.95],sun:['#eef1f2',0.95]}};
+    look:{sky:1,fog:[COAST.fogC,COAST.fogN,COAST.fogF],hemi:['#dfe6ea','#4c5a44',0.95],sun:['#eef1f2',0.95]},
+    day:{fog:['#bfdcf4',320,1100],hemi:['#cfe6ff','#56703e',0.95],sun:['#fff4dc',1.5]}};   // bd.look 'day' = clear blue sky (map sky) + sun, fog = sky horizon colour
   BACKDROP.fcs=cs;BACKDROP['fcs-file']=cs;
 })();
 // ---------- 2D value noise (deterministic) ----------
@@ -54,7 +55,7 @@ function coastSky(){
   COAST_SKY=m;return m;
 }
 // map look (sky / fog / light) — every buildWorld (cached maps too), after setSky
-function backdropLook(id){const fm=MAPS[id]&&MAPS[id].fm,fb=fm&&fm.bd&&fm.bd.on?fm.bd:null,B=BACKDROP&&BACKDROP[id],L=fb?(fb.look==='overcast'?BACKDROP.fcs.look:null):B&&B.look;if(typeof FF!=='undefined'){FF.ovc=0;FF.base=null;FF.on=false;}
+function backdropLook(id){const fm=MAPS[id]&&MAPS[id].fm,fb=fm&&fm.bd&&fm.bd.on?fm.bd:null,B=BACKDROP&&BACKDROP[id],L=fb?(fb.look==='overcast'?BACKDROP.fcs.look:fb.look==='day'?BACKDROP.fcs.day:null):B&&B.look;if(typeof FF!=='undefined'){FF.ovc=0;FF.base=null;FF.on=false;}
   if(COAST_SKY)COAST_SKY.visible=false;SKY.mesh.visible=true;if(typeof paintOn==='function'&&paintOn(id))return;   // Painterly on: keep its day sky/fog/light (js/77)
   if(!L)return;   // forest fog blend re-captures its base from this look
   if(L.sky&&typeof FF!=='undefined'&&FF.sky&&FF.sky.parent===world){const U=FF.sky.material.uniforms;FF.ovc=1;   // castle map's own cloud sky → overcast blue-grey everywhere
