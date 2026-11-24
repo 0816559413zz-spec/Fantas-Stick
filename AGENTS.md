@@ -1,9 +1,8 @@
-# แนวทางสำหรับทุกแชทที่ทำงานในโปรเจกต์นี้
+# AGENTS.md
 
-- ภาษาตอบ/สไตล์/ขอบเขตงานของทุกแชทให้ยึด `guides/WORKFLOW-WITH-CLAUDE.md` (ค่าเริ่มต้น = อังกฤษสั้นๆ ตามที่ถูกถาม; ไทยเฉพาะเมื่อผู้ใช้ขอ; เรื่องนอกหัวข้อแยกไป Session อื่น) — ข้อนี้เหนือกว่าข้อเดิมที่ให้ตอบไทย
-- อ่าน `HANDOFF.md` ก่อนทำงาน และอ่าน `notes/PROJECT-DESIGN-DIRECTION.md` ก่อนคุยหรือทำงานออกแบบคลาส/สกิล/โหมด/แผนที่ เป็นบันทึกแนวทางที่ผู้ใช้ขอให้ทุกแชทใช้ร่วมกัน
-- ระหว่างคิดสกิล ให้คำนึงถึงบทบาทคลาสในโหมดบุกปราสาทและศักยภาพด้านพื้นที่/สิ่งแวดล้อม แต่รอคลาสเสร็จก่อน breakdown interaction รายละเอียด ไม่ล็อกระบบจากข้อเสนอเดิมที่ยังไม่เลือก
-- ลำดับงานล่าสุดคือเน้นคลาส/สกิล โครงโหมดมีพอแล้ว พักรายละเอียดผังปราสาท/ทางเชื่อมไว้จนผู้ใช้กลับมาคุยเอง
-- ยังไม่มีผังปราสาทที่ยืนยันแล้ว ใช้ภาพผังหยาบช่วยคุยเรื่องพื้นที่ และระบุว่าเป็นภาพอธิบายหรือผังที่อนุมัติแล้วให้ชัด
-- ยึดคำสั่งล่าสุดของผู้ใช้เหนือขั้นอัตโนมัติในคู่มือ: งานคอนเซปต์ไม่อนุญาตแก้เกม และไม่ commit/push อัตโนมัติ
-- รักษางานร่วมกับเซสชันอื่น อ่านสถานะก่อนแก้ และอย่าทับงานที่ไม่เกี่ยวข้อง
+Single source of rules = `CLAUDE.md` (all agents follow it). Do not duplicate rules here.
+
+- Language, style, scope: `guides/WORKFLOW-WITH-CLAUDE.md` (Thai by default, short, only what was asked; off-topic ideas go to another session).
+- Start: top of `HANDOFF.md` only (grep, never read whole), then `CODEMAP.md`. Before class/skill/mode/map design read `notes/PROJECT-DESIGN-DIRECTION.md`.
+- Latest user message beats the auto steps in the docs: concept-only work means no game edits and no auto commit/push.
+- Other sessions work in parallel: read status before editing, never overwrite unrelated work.

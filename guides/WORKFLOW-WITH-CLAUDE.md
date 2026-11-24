@@ -1,6 +1,6 @@
 # Workflow with Claude (applies to EVERY session)
 
-User-defined rules for all Claude sessions in this repo. They override the explain-as-you-go habits in older docs (CLAUDE.md rules 3 and 3b, AGENTS.md).
+User-defined rules for all Claude sessions in this repo (language, style, scope). `CLAUDE.md` points here; `AGENTS.md` points to `CLAUDE.md`. If an older doc disagrees, this file wins.
 
 ## 1. Stay on topic
 
