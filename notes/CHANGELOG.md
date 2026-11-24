@@ -1466,3 +1466,4 @@
 - 2026-11-24 Earth Rampart v3: bulky angular stone pillars, 14 m x 5.5 m, HP 600
 - 2026-11-24 Earth Rampart v4: 9 pillars ~18 m wide, cleaner shading, shader warm-up while aiming
 - 2026-11-24 Earth Rampart v5: no Stand, wall rises on its own after 0.4 s rumble
+- 2026-11-24 Earth Rampart cast anim: anticipation, accelerating palm slam, hold, overshoot yank; keyframe ease 'i'

@@ -784,7 +784,13 @@ function eRampTick(v,dt,now){
   for(let i=EV.rcall.length-1;i>=0;i--){const R=EV.rcall[i];R.t+=dt;const c=Math.cos(R.a),sn=Math.sin(R.a),T=RAMPART.v.lift;
     if(R.holo){R.holo.visible=!R.up;eRampPlace(R.holo,R.x,R.y,R.a);ERAMP.holoM.uniforms.t.value=now/1000;}
     if(!R.up&&R.t>T+0.6){R.up=true;R.tu=R.t;}   // safety if the rise event was missed
-    const strain=R.up?0:clamp(R.t/T,0,1);   // no Stand (user 2026-11-24): the ground rumbles along the line, then the wall rises on its own
+    const strain=R.up?0:clamp((R.t-0.18)/(T-0.18),0,1);   // no Stand (user 2026-11-24): the ground rumbles along the line, then the wall rises on its own
+    {const co=PM3.get(R.id);if(co&&!R.cx){R.cx=simOf(co.g.position);R.ca=Math.atan2(R.y-R.cx.y,R.x-R.cx.x);}}
+    if(R.cx){const px=R.cx.x+Math.cos(R.ca)*28,py=R.cy0??(R.cy0=R.cx.y+Math.sin(R.ca)*28);
+      if(!R.slam&&R.t>=0.18){R.slam=1;dfCracks(px,py,0.06,45,'#bfa57a',0.9);eChunks(px,py,0.2,5,140,6,0.16);burst(px,py,ECOL.dust,10,160,0.35,2.6,{h:0.2,vh:[1,3],g:6});ring(px,py,'#ffd27a',40,0.25,0.15);if(R.id===NET.myId)shake(0.25);}
+      if(R.slam&&!R.up){const u=clamp((R.t-0.2)/0.2,0,1),e=u*u*u,L=Math.hypot(R.x-px,R.y-py),hx=px+(R.x-px)*e,hy=py+(R.y-py)*e;   // ease-in: starts slow, rips to the wall
+        for(let k=0;k<3;k++){const q=Math.max(0,e-k*0.02);PARTS.push({x:px+(R.x-px)*q+rnd(-4,4),y:py+(R.y-py)*q+rnd(-4,4),h:0.12,vx:0,vy:0,vh:0.6,life:0.35,max:0.35,col:k?'#ffc94a':'#fff2c0',size:3.2-k*0.6,g:0});}
+        if((R.crk=(R.crk||0)+dt)>0.03&&L>1){R.crk=0;dfCracks(hx,hy,0.06,22,'#bfa57a',0.6);}}}
     if(!R.up){if(Math.random()<0.25+0.5*strain){const q=rnd(-1,1)*175;burst(R.x-sn*q,R.y+c*q,ECOL.dust,2,70,0.5,2.2,{h:0.1,vh:[0.5,2],g:5});}
       if(Math.random()<0.15*strain)eChunks(R.x-sn*rnd(-175,175),R.y+c*rnd(-175,175),0.1,1,90,4,0.12);if(R.t>0.2&&Math.random()<0.2)shake(0.06+0.1*strain);}
     if(R.up&&R.t-R.tu>0.2){if(R.holo)scene.remove(R.holo);EV.rcall.splice(i,1);}}}
