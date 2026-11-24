@@ -6,7 +6,7 @@
 // ภาพอย่างเดียว (ดาเมจ/จังหวะยิงของ host ไม่เปลี่ยน) • ทำงานกับโมเดลไฟล์: เรียกหลัง rigStd → แขนซ้าย/ขาตามโค้ด
 const CPOSE_T=0.46,_ce=t=>1-Math.pow(1-t,3),_cs=t=>t*t*(3-2*t),_cb=t=>{const u=t-1;return 1+2.5*u*u*u+1.5*u*u;};   // _cb = ฟาดเลยเป้านิดแล้วเด้งกลับ (มีน้ำหนัก)
 // ผู้ใช้ 2026-10-22 รอบ 2: "เหวี่ยงมากขึ้นกว่านี้หน่อย" → ขยายระยะท่าจากท่ายืนปกติ [แขนขวา x, z, บิดตัว, เอนตัว, แขนซ้าย x, z, (เอียงข้าง, ย่อตัว)]
-const _caJ=[0,0,0,0,0,0];
+const _caJ=[0,0,0,0,0,0,0,0],_caJ0=[0,0,0,0,0,0,0,0];
 const AMP_B=[1.25,1.35,1.75,1.6,1.3,1.3],AMP_S=[1.2,1.3,1.6,1.5,1.2,1.2,1.6,1.4];
 const CP_BEND=[0.13,0.05,0.06,0.09,0.04,0.07,-0.13];   // เอียงตัวตามทิศเหวี่ยงของแต่ละท่า (ยิงปกติ)
 //          [แขนขวา x, แขนขวา z, บิดตัว, เอนตัว, แขนซ้าย x, แขนซ้าย z] ของ ง้าง / ฟาด / ตามแรง
@@ -52,7 +52,7 @@ const CANIM={
   pullback:{d:0.65,st:0.6,tr:null,k:[[0.4,-0.9,-0.7,-0.6,-0.1,-1.3,-0.2,0.06,-0.12,'s'],[1,-1.2,-0.5,-0.4,-0.05,-1.45,-0.1,0.04,-0.08,'s']],tm:[0.3,1]},   // ดึงไม้ไปข้างหลัง มือซ้ายเล็ง เกร็งสั่น (ท่าชาร์จ: Railgun / Terra Auger)
   summon3:{d:0.8,st:0,tr:[0.3,0.75],k:[[0.3,-1.5,0.6,0,0.1,-1.5,-0.6,0,-0.15,'s'],[0.65,-2.2,-1.2,0,-0.15,-2.2,1.2,0,0.08,'o'],[1,-1.9,-1.0,0,-0.1,-1.9,1.0,0,0.04,'s']]},   // สองมือรวบหน้าอก แล้วกางออกเรียกของ (Mirror Legion)
   punchcmd:{d:0.55,st:1,tr:[0.3,0.6],k:[[0.3,-1.0,-0.6,-0.6,-0.1,-1.2,0.3,0.05,-0.1,'s'],[0.5,-1.65,0.05,0.5,0.25,0.2,0.7,-0.06,-0.14,'o'],[1,-1.55,0,0.3,0.12,0,0.6,-0.03,-0.08,'s']]},   // บิดตัวแล้วแทงไม้สั่งต่อย มือซ้ายดึงกลับ (Stonebreaker)
-  rampcast:{d:0.9,st:0,tr:[0.47,0.62],k:[[0.13,-0.75,-0.45,0.22,0.1,-2.3,0.7,0.04,-0.04,'s'],[0.2,-0.65,-0.35,0.12,0.24,-0.6,0.3,0,-0.12,'i'],[0.36,-0.6,-0.35,0.1,0.26,-0.56,0.3,0,-0.13,'s'],[0.44,-0.55,-0.3,0.1,0.28,-0.52,0.3,0,-0.14,'s'],[0.53,-2.85,-0.2,0,-0.06,-2.9,0.25,0,0.03,'o'],[1,-2.3,-0.15,0,-0.02,-2.3,0.2,0,0,'s']],tm:[0.36,0.46],j:[[0.13,0.45,0.35,1.1,-0.25,-0.18],[0.2,1.15,0.95,0.25,-0.62,-0.5],[0.44,1.25,1.05,0.35,-0.66,-0.55],[0.53,0.12,0.08,0.4,-0.06,-0.05],[1,0.05,0.04,0.25,0,0]]},   // Rampart: ตบพื้นแล้วยกขึ้น (เข่าย่อ ศอกซ้ายงอ)
+  rampcast:{d:0.9,st:0,tr:[0.47,0.62],k:[[0.13,-0.75,-0.45,0.22,0.1,-2.3,0.7,0.04,-0.04,'s'],[0.2,-0.65,-0.35,0.12,0.24,-0.6,0.3,0,-0.12,'i'],[0.36,-0.6,-0.35,0.1,0.26,-0.56,0.3,0,-0.13,'s'],[0.44,-0.55,-0.3,0.1,0.28,-0.52,0.3,0,-0.14,'s'],[0.53,-2.85,-0.2,0,-0.06,-2.9,0.25,0,0.03,'o'],[1,-2.3,-0.15,0,-0.02,-2.3,0.2,0,0,'s']],tm:[0.36,0.46],j:[[0.13,0.5,0.4,1.5,-0.4,0.15,0.14,-0.14],[0.2,1.2,1.0,0.75,-0.9,-0.05,0.22,-0.22],[0.44,1.3,1.1,0.8,-0.95,-0.08,0.22,-0.22],[0.53,0.25,0.18,0.6,-0.35,0.2,0.16,-0.16],[1,0.15,0.1,0.5,-0.25,0.15,0.12,-0.12]]},   // Rampart: ตบพื้นแล้วยกขึ้น (เข่าย่อ ศอกซ้ายงอ)
   ground:{d:0.6,st:0.5,tr:[0.3,0.6],k:[[0.35,-2.6,-0.3,0.2,-0.1,-0.8,0.6,0,0.05,'s'],[0.6,-0.5,-0.1,-0.1,0.45,-0.5,0.5,0,-0.3,'o'],[1,-0.6,-0.1,0,0.35,-0.5,0.5,0,-0.2,'s']]},   // ฟาดไม้ลงพื้นตรงหน้า ย่อตัว (Mud Swamp)
   clap:{d:0.6,st:0.4,tr:[0.3,0.6],k:[[0.35,-1.5,-1.3,0,-0.05,-1.5,1.3,0,-0.05,'s'],[0.55,-1.5,0.5,0,0.15,-1.5,-0.5,0,-0.15,'o'],[1,-1.4,0.35,0,0.1,-1.4,-0.35,0,-0.1,'s']],tm:[0.55,0.9]},   // กางแขนกว้างแล้วบีบเข้าหากัน (Tectonic Crush บีบ)
   burst:{d:0.55,st:0,tr:[0.3,0.65],k:[[0.35,-0.9,0.8,0,0.3,-0.9,-0.8,0,-0.25,'s'],[0.55,-2.0,-1.3,0,-0.25,-2.0,1.3,0,0.1,'o'],[1,-1.6,-1.0,0,-0.1,-1.6,1.0,0,0.03,'s']]},   // ห่อตัวแล้วระเบิดกางออก (Dust Burst)
@@ -115,11 +115,17 @@ function skillPose(o,p,dt,now){
   if(st>0.01&&(o.vsp||0)<0.6){o.legs[1].rotation.x=-0.42*st;o.legs[0].rotation.x=0.3*st;}
   const feet=SKFEET[o.caN];if(feet&&(o.vsp||0)<0.6){const fw=w*_cs(Math.min(1,u/0.16));o.legs[0].rotation.x=lerp(o.legs[0].rotation.x,feet[0],fw);o.legs[1].rotation.x=lerp(o.legs[1].rotation.x,feet[1],fw);o.legs[0].rotation.z=feet[2]*fw;o.legs[1].rotation.z=feet[3]*fw;}
   // joints (user 2026-11-24: crouch with the knees, not by sinking the whole body; bend the free elbow)
-  if(A.j){let i=0;while(i<A.j.length-1&&u>A.j[i][0])i++;const B=A.j[i],P0=i?A.j[i-1]:[0,0,0,0,0,0],f=_cs(clamp((u-P0[0])/Math.max(0.001,B[0]-P0[0]),0,1)),J=_caJ;
-    for(let n=1;n<6;n++)J[n]=lerp(P0[n],B[n],f);
-    if((o.vsp||0)<0.6){o.legs[0].rotation.x=lerp(o.legs[0].rotation.x,J[4],w);o.legs[1].rotation.x=lerp(o.legs[1].rotation.x,J[5],w);}
-    o.caJ=[J[1]*w,J[2]*w,J[3]*w];}
-  else o.caJ=null;
+  // joints (user 2026-11-24): crouch with the knees, bend the free elbow, natural staggered stance — on EVERY cast pose.
+  // Explicit A.j = [[u, kneeR, kneeL, elbowL, thighR, thighL, spreadR, spreadL], ...]; otherwise derived from the pose:
+  // body drop + lean → knee bend, left-arm height → elbow bend, plus a small default stagger/spread.
+  const J=_caJ,still=(o.vsp||0)<0.6;
+  if(A.j){let i=0;while(i<A.j.length-1&&u>A.j[i][0])i++;const B=A.j[i],P0=i?A.j[i-1]:_caJ0,f=_cs(clamp((u-P0[0])/Math.max(0.001,B[0]-P0[0]),0,1));
+    for(let n=1;n<8;n++)J[n]=lerp(P0[n]||0,B[n]||0,f);}
+  else{const dip=Math.max(0,-_caT[7]),lean=Math.max(0,_caT[3]),ax=_caT[4],k=clamp(0.15+dip*3.4+lean*0.7,0,1.35);
+    J[1]=k;J[2]=k*0.85;J[3]=ax<-2.3?0.45:ax<-1.0?0.6:0.85;J[4]=-0.12-k*0.5;J[5]=0.16-k*0.42;J[6]=0.12;J[7]=-0.12;}   // thigh ≈ half the knee bend = foot stays planted
+  if(still&&(A.j||!SKFEET[o.caN])){const fw=w*_cs(Math.min(1,u/0.12));o.legs[0].rotation.x=lerp(o.legs[0].rotation.x,J[4],fw);o.legs[1].rotation.x=lerp(o.legs[1].rotation.x,J[5],fw);
+    o.legs[0].rotation.z=lerp(o.legs[0].rotation.z,J[6],fw);o.legs[1].rotation.z=lerp(o.legs[1].rotation.z,J[7],fw);}
+  o.caJ=[(still?J[1]:J[1]*0.4)*w,(still?J[2]:J[2]*0.4)*w,J[3]*w];
   if(A.tr&&u>A.tr[0]&&u<A.tr[1]){if(!o.ctr){const col=CPCOL[getKit(p.id).path]||'#ffffff';o.ctr=trailNew({col:'#ffffff',col2:col,w:0.06,life:0.2,k:1.3});}
     o.tip.updateWorldMatrix(true,false);o.tip.getWorldPosition(_tv1);trailPoint(o.ctr,_tv1.x,_tv1.y,_tv1.z);}
   else if(o.ctr){trailStop(o.ctr);o.ctr=null;}

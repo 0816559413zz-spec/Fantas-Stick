@@ -31,13 +31,18 @@ rips to the target), the big result on the release.
 
 - Cast poses: `CANIM` in `js/35-sync.js`. Key = `[u, armR.x, armR.z, body twist, body lean(+fwd), armL.x, armL.z,
   body roll, body y, ease]`, `u` = 0..1 of `d` seconds. Eases: `'s'` smooth, `'i'` accelerate, `'o'` overshoot.
-- Joints: optional `j:[[u, kneeR, kneeL, elbowL, thighR, thighL], ...]` on a CANIM entry (smoothstep between keys).
-  Thigh pitch negative = forward. Knees → `dpKnees` (js/72), left elbow → `caElbowL` (js/35).
+- Joints: optional `j:[[u, kneeR, kneeL, elbowL, thighR, thighL, spreadR, spreadL], ...]` on a CANIM entry (smoothstep
+  between keys). Thigh pitch negative = forward. Knees → `dpKnees` (js/72), left elbow → `caElbowL` (js/35).
+- **Every cast pose gets joints automatically** when it has no `j`: knee bend from the pose's body drop + lean, left
+  elbow from arm height (0.45 overhead / 0.6 forward / 0.85 low), thigh ≈ half the knee bend (foot stays planted) with a
+  small stagger (right foot forward) and spread. Poses with an authored `SKFEET` keep their thighs, still get knees/elbow.
+- Stand **staggered and a bit wide**, not feet parallel (user 2026-11-24).
 - Skill → pose name: `SKANIM` in `js/35-sync.js`.
 
 ## 4. Settings that worked (log)
 
 - **Earth Rampart cast `rampcast`** (2026-11-24, user chose "slap the ground then lift"): d 0.9 s. Wind-up 0–0.12 s
   (left hand raised, knees 0.45), slam at 0.18 s with ease `'i'` (knees 1.15, thighs −0.6, lean 0.24, body y −0.12),
-  hold with tremble to 0.4 s, yank with `'o'` at 0.48 s (both arms up, knees straighten), settle. Gold line from the
+  hold with tremble to 0.4 s, yank with `'o'` at 0.48 s (both arms up, knees straighten), settle.
+  v2: left elbow 1.5 on the wind-up / 0.75 on the slam, stance right foot forward (thigh −0.9) left back, spread ±0.22. Gold line from the
   palm to the wall uses ease-in (slow then fast). Wall rises at 0.4 s.
