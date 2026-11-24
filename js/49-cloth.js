@@ -4,7 +4,7 @@
 //  ดู assets/src/student_build.py CL/GAP) → ตัดออกจากโมเดลของเรา แล้วจำลองเป็นจุดต่อกันด้วยแท่ง (verlet แบบ position-based)
 //  • แถวบนติดตัว (ตามตำแหน่งจริงของโมเดลที่ขยับตามกระดูก = ตามท่าเดิน/คาถา/ragdoll) • ชายผ้าห้อยอิสระ
 //  • ชนลำตัว / ขา / ต้นแขน / พื้น + ของในโลก (ลัง/หิน/ต้นไม้/บ้าน/กำแพงสายดิน/กำแพงน้ำแข็ง) → ตอน ragdoll ล้ม ผ้ากองลงพื้นตามตัว
-//  • คนอื่นยังใช้แอนิเมชันกระดูกผ้าเดิม (ประหยัดเครื่อง)
+//  • คนอื่น: ผ้าจำลองความละเอียดต่ำ (CLOTH_LITE) เฉพาะตอนอยู่ในจอและใกล้ ๆ • นอกจอ/ไกล = ผ้ากระดูกเดิม
 //  เรียกจาก render loop หลัง syncPlayers (js/37) • ตัวเลขข้างล่างเป็นค่าภาพล้วน ปรับได้ตามชอบ
 // =====================================================================
 const CLOTH={
@@ -24,6 +24,8 @@ const CLOTH={
   VMAX:30,        // ความเร็วผ้าเทียบกับตัวสูงสุด (หน่วย/วิ) — กันแค่กรณีพุ่งผิดปกติ
   SNAP:3,         // ตัวกระโดดไกลกว่านี้ในเฟรมเดียว (วาร์ป/เกิดใหม่) = รีเซ็ตผ้า
 };
+// Other players: low-res cloth, only while on screen + near (user 2026-11-24: far fewer faces, just enough to see it move)
+const CLOTH_LITE={ON:true,COLS:[0,4,8,12,16,20,24,28],IT:3,FAR:40};   // 7 rows x 8 cols = 84 faces/side (ours: 13x29 = 672)
 const CL_ROWS=[[0.3,1.6],[0.355,1.5],[0.4,1.3],[0.47,1.0],[0.58,0.7],[0.7,0.4],[0.8,0.1]],CL_NC=29,CL_GAP=0.95,CL_IN=0.014;
 const _clV=new THREE.Vector3(),_clA=new THREE.Vector3(),_clB=new THREE.Vector3();
 // ความแข็งที่ดึงกลับรูปเดิมของแต่ละแถว (ตามความสูงในโมเดล): ไหล่ติดแน่น → ชายผ้าอิสระ
@@ -117,7 +119,7 @@ function clothSetup(o){
   const B=n=>o.fileModel.getObjectByName(n);
   const C={o,outer,ref,rf,NR,N,pk,E:new Float64Array(E),mo,mi,P:new Float32Array(N*3),Q:new Float32Array(N*3),T:new Float32Array(N*3),Tm:new Float32Array(CL_ROWS.length*CL_NC*3),
     caps:[['hips','neck','TORSO'],['thigh_L','shin_L','LEG'],['shin_L','foot_L','LEG'],['thigh_R','shin_R','LEG'],['shin_R','foot_R','LEG'],['upper_arm_L','forearm_L','ARM'],['upper_arm_R','forearm_R','ARM'],['forearm_L','hand_L','FORE'],['forearm_R','hand_R','FORE']].map(([a,b,k])=>[B(a),B(b),k]).filter(c=>c[0]&&c[1]),
-    init:false,flip:false,t:0,acc:0,air:{x:0,z:0}};
+    NC:CL_NC,init:false,flip:false,t:0,acc:0,air:{x:0,z:0}};
   C.capV=C.caps.map(()=>[new THREE.Vector3(),new THREE.Vector3(),0]);
   o.g.userData.extra=(o.g.userData.extra||[]).concat([mo,mi]);   // disposeObj(o.g) ทิ้ง mesh ผ้าด้วย
   return C;}
@@ -125,7 +127,7 @@ function clothSetup(o){
 function clTargets(C){const P=C.outer.geometry.attributes.position,M=C.Tm;
   for(let k=0;k<C.ref.length;k++){_clV.fromBufferAttribute(P,C.ref[k]);C.outer.applyBoneTransform(C.ref[k],_clV);C.outer.localToWorld(_clV);M[k*3]=_clV.x;M[k*3+1]=_clV.y;M[k*3+2]=_clV.z;}
   for(let r=0;r<C.NR;r++){const f=C.rf[r],r0=Math.min(CL_ROWS.length-2,Math.floor(f)),k=f-r0;
-    for(let j=0;j<CL_NC;j++){const a=(r0*CL_NC+j)*3,b=((r0+1)*CL_NC+j)*3,i=(r*CL_NC+j)*3;for(let q=0;q<3;q++)C.T[i+q]=M[a+q]+(M[b+q]-M[a+q])*k;}}}
+    for(let j=0;j<C.NC;j++){const a=(r0*C.NC+j)*3,b=((r0+1)*C.NC+j)*3,i=(r*C.NC+j)*3;for(let q=0;q<3;q++)C.T[i+q]=M[a+q]+(M[b+q]-M[a+q])*k;}}}
 function clReset(C){
   C.P.set(C.T);C.Q.set(C.T);C.lp=null;C.air.x=C.air.z=0;C.acc=0;C.init=true;
 }
@@ -155,12 +157,12 @@ function clStep(C,h,gy,caps,bv,W){const P=C.P,Q=C.Q,T=C.T,pk=C.pk,E=C.E,N=C.N,g=
     let vx=(P[i]-Q[i])*D,vy=(P[i+1]-Q[i+1])*D,vz=(P[i+2]-Q[i+2])*D;const bx=bv.x*h,by=bv.y*h,bz=bv.z*h,rx=vx-bx,ry=vy-by,rz=vz-bz,vm=Math.sqrt(rx*rx+ry*ry+rz*rz),mx=CLOTH.VMAX*h;if(vm>mx){const s=mx/vm;vx=bx+rx*s;vy=by+ry*s;vz=bz+rz*s;}   // จำกัดความเร็วผ้าเทียบกับตัว (วิ่ง/พุ่งเร็วแค่ไหนผ้าก็ตามทัน)
     const wk=(1-k)*h*h,ax=C.air.x*wk,az=C.air.z*wk;Q[i]=P[i];Q[i+1]=P[i+1];Q[i+2]=P[i+2];P[i]+=vx+fl+CLW.x*wk+ax;P[i+1]+=vy+g;P[i+2]+=vz+fl+CLW.z*wk+az;   // CLW = ลม ณ ตัวเรา (js/50) • C.air = ลมปะทะตอนวิ่ง
     if(k>0)for(let q=0;q<3;q++)P[i+q]+=(T[i+q]-P[i+q])*k;}
-  for(let it=0;it<CLOTH.IT;it++){
+  const IT=C.it||CLOTH.IT;for(let it=0;it<IT;it++){
     for(let e=0;e<E.length;e+=4){const a=E[e]*3,b=E[e+1]*3,wa=pk[E[e]]>=1?0:1,wb=pk[E[e+1]]>=1?0:1;if(!(wa+wb))continue;
       const dx=P[b]-P[a],dy=P[b+1]-P[a+1],dz=P[b+2]-P[a+2],d=Math.sqrt(dx*dx+dy*dy+dz*dz)||1e-6,s=(d-E[e+2])/d*E[e+3]/(wa+wb);
       P[a]+=dx*s*wa;P[a+1]+=dy*s*wa;P[a+2]+=dz*s*wa;P[b]-=dx*s*wb;P[b+1]-=dy*s*wb;P[b+2]-=dz*s*wb;}
     const hitB=true;   // body collision every pass (was every other pass → arms/legs poked through)
-    for(let n=0;n<N;n++){if(pk[n]>=1)continue;const i=n*3;if(hitB)for(const c of caps)clCapsule(P,Q,i,c[0],c[1],c[2]);if(P[i+1]<gy){P[i+1]=gy;Q[i]=lerp(Q[i],P[i],0.6);Q[i+2]=lerp(Q[i+2],P[i+2],0.6);}if(W&&it===CLOTH.IT-1)clWorldHit(P,Q,i,W);}}}
+    for(let n=0;n<N;n++){if(pk[n]>=1)continue;const i=n*3;if(hitB)for(const c of caps)clCapsule(P,Q,i,c[0],c[1],c[2]);if(P[i+1]<gy){P[i+1]=gy;Q[i]=lerp(Q[i],P[i],0.6);Q[i+2]=lerp(Q[i+2],P[i+2],0.6);}if(W&&it===IT-1)clWorldHit(P,Q,i,W);}}}
 function clDraw(C){const po=C.mo.geometry.attributes.position,pi=C.mi.geometry.attributes.position;for(let n=0;n<C.N;n++)if(C.pk[n]>=1){const i=n*3;C.P[i]=C.T[i];C.P[i+1]=C.T[i+1];C.P[i+2]=C.T[i+2];}po.array.set(C.P);
   const jump=C.o.jumpLegs;
   if(jump?.weight>.01){
@@ -182,11 +184,17 @@ function clDraw(C){const po=C.mo.geometry.attributes.position,pi=C.mi.geometry.a
   const nm=C.mo.geometry.attributes.normal,A=pi.array,B=po.array;for(let i=0;i<C.N*3;i+=3){A[i]=B[i]-nm.array[i]*CL_IN;A[i+1]=B[i+1]-nm.array[i+1]*CL_IN;A[i+2]=B[i+2]-nm.array[i+2]*CL_IN;}
   pi.needsUpdate=true;C.mi.geometry.computeVertexNormals();}
 // ทุกเฟรม (หลัง syncPlayers): ผ้าของเราเอง
-function clothTick(dt){if(!CLOTH.ON||typeof NET==='undefined')return;const o=PM3.get(NET.myId);if(!o||!o.fileModel||o.stormCapeHidden)return;
+function clothTick(dt){if(!CLOTH.ON||typeof NET==='undefined')return;
+  if(CLOTH_LITE.ON)for(const [id,o] of PM3)if(id!==NET.myId)clLiteTick(o,dt);
+  const o=PM3.get(NET.myId);if(!o||!o.fileModel||o.stormCapeHidden)return;
   if(o.cloth===undefined)o.cloth=clothSetup(o);const C=o.cloth;if(!C)return;
   let vis=true;for(let n=C.outer;n;n=n.parent)if(!n.visible){vis=false;break;}
   C.mo.visible=C.mi.visible=vis&&!!o.g.parent;if(!C.mo.visible){C.init=false;return;}
   o.g.updateMatrixWorld(true);clTargets(C);
+  _clV.setFromMatrixPosition(o.g.matrixWorld);
+  clRun(C,dt,clWorld(_clV.x/S3+MW/2,_clV.z/S3+MH/2));clDraw(C);}
+// shared per-frame sim (targets already in C.T): reset/snap, body capsules, frame inertia, steps
+function clRun(C,dt,W){const o=C.o;
   const wj=o.wud!==undefined||(o.wld&&o.wld.t<0.15);if(!C.init||wj)clReset(C);   // Sonic Boom พุ่ง: ตัวย้ายแทบทันที ไม่ให้ผ้ารับรู้ความเร็ว ไม่งั้นปลิวค้างหลังจบ
   else{const i=0;if(Math.hypot(C.T[i]-C.P[i],C.T[i+1]-C.P[i+1],C.T[i+2]-C.P[i+2])>CLOTH.SNAP)clReset(C);}
   for(let i=0;i<C.caps.length;i++){const q=C.caps[i],c=C.capV[i];q[0].getWorldPosition(c[0]);q[1].getWorldPosition(c[1]);c[2]=CLOTH[q[2]];if(q[2]==='FORE')c[1].sub(c[0]).multiplyScalar(1+CLOTH.HAND/Math.max(c[1].length(),1e-3)).add(c[0]);}   // FORE: reach past the wrist to cover the hand + cuff
@@ -199,6 +207,52 @@ function clothTick(dt){if(!CLOTH.ON||typeof NET==='undefined')return;const o=PM3
   const bv=_clA.copy(dl).multiplyScalar((1-mv)/st);
   // ลมปะทะ: ความเร็วตัว (กรองนุ่ม) ดันผ้าไปข้างหลังคงที่ ไม่กระชาก
   const ak=1-Math.exp(-3.5*st);C.air.x+=(-dl.x/st*CLOTH.AIR-C.air.x)*ak;C.air.z+=(-dl.z/st*CLOTH.AIR-C.air.z)*ak;
-  const psx=_clV.x/S3+MW/2,psy=_clV.z/S3+MH/2,gy=GY(psx,psy)+0.02,W=clWorld(psx,psy);
-  C.acc=Math.min(C.acc+Math.min(dt,0.1),CLOTH.STEP*2);while(C.acc>=CLOTH.STEP){clStep(C,CLOTH.STEP,gy,C.capV,bv,W);C.acc-=CLOTH.STEP;}   // ≤2 ก้าวต่อเฟรม: เฟรมช้า = ไม่คำนวณผ้าเพิ่ม (เดิม 4 → ยิ่งช้ายิ่งหนัก)
-  clDraw(C);}
+  const gy=GY(_clV.x/S3+MW/2,_clV.z/S3+MH/2)+0.02;
+  C.acc=Math.min(C.acc+Math.min(dt,0.1),CLOTH.STEP*2);while(C.acc>=CLOTH.STEP){clStep(C,CLOTH.STEP,gy,C.capV,bv,W);C.acc-=CLOTH.STEP;}}   // ≤2 ก้าวต่อเฟรม: เฟรมช้า = ไม่คำนวณผ้าเพิ่ม (เดิม 4 → ยิ่งช้ายิ่งหนัก)
+
+// ---- other players: low-res cloth on the batched body (student_all_batch) ----
+// Panel triangles are cut from the batch only while the lite cloth shows; otherwise the bone cloak draws as before.
+function clLiteSetup(o){
+  let bm=null;o.fileModel.traverse(m=>{if(m.isSkinnedMesh&&m.name==='student_all_batch')bm=m;});if(!bm||!bm.geometry.index)return null;
+  const BG=bm.geometry,Pa=BG.attributes.position,Ca=BG.attributes.color,R0=CL_ROWS.length,full=new Array(R0*CL_NC).fill(-1),iref=new Array(R0*CL_NC).fill(-1);
+  const mark=cloakPanelGrid(Pa,0,full),mi=cloakPanelGrid(Pa,CL_IN,iref);for(let i=0;i<mark.length;i++)mark[i]|=mi[i];
+  if(full.some(i=>i<0)||iref[0]<0||!Ca)return null;
+  const cols=CLOTH_LITE.COLS,NC=cols.length,NR=R0,N=NR*NC,ref=[],rf=[],pk=new Float32Array(N);
+  for(let r=0;r<NR;r++){rf.push(r);for(let j=0;j<NC;j++){ref.push(full[r*CL_NC+cols[j]]);pk[r*NC+j]=clPinK(CL_ROWS[r][1]);}}
+  const E=[],bp=a=>clBind(Math.floor(a/NC),cols[a%NC]),add=(a,b,k)=>{const A=bp(a),B=bp(b);E.push(a,b,Math.hypot(A[0]-B[0],A[1]-B[1],A[2]-B[2]),k);};
+  for(let r=0;r<NR;r++)for(let j=0;j<NC;j++){const a=r*NC+j;
+    if(j+1<NC)add(a,a+1,1);if(r+1<NR)add(a,a+NC,1);
+    if(j+1<NC&&r+1<NR){add(a,a+NC+1,0.6);add(a+1,a+NC,0.6);}}
+  // one mesh: N outer verts (cloak colour) + N inner verts (house colour), vertex colours like the batch
+  const idx=[];for(let r=0;r<NR-1;r++)for(let j=0;j<NC-1;j++){const a=r*NC+j,b=a+1,c=a+NC,d=c+1;idx.push(a,b,c,b,d,c,N+c,N+d,N+b,N+c,N+b,N+a);}
+  const g=new THREE.BufferGeometry(),col=new Float32Array(N*6),ra=BG.attributes.aRough,me=BG.attributes.aMetal,R=new Float32Array(N*2),Mt=new Float32Array(N*2);
+  for(let n=0;n<N*2;n++){const v=n<N?ref[n]:iref[0];col[n*3]=Ca.getX(v);col[n*3+1]=Ca.getY(v);col[n*3+2]=Ca.getZ(v);R[n]=ra?ra.getX(v):1;Mt[n]=me?me.getX(v):0;}
+  g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(N*6),3));g.setAttribute('color',new THREE.BufferAttribute(col,3));
+  g.setAttribute('aRough',new THREE.BufferAttribute(R,1));g.setAttribute('aMetal',new THREE.BufferAttribute(Mt,1));g.setIndex(idx);
+  const m=new THREE.Mesh(g,matTwin(bm.material,'rigid'));m.frustumCulled=false;m.castShadow=bm.castShadow;m.receiveShadow=bm.receiveShadow;m.visible=false;scene.add(m);
+  o.g.userData.extra=(o.g.userData.extra||[]).concat([m]);   // disposeObj(o.g) removes it too
+  const B=n=>o.fileModel.getObjectByName(n);
+  const C={o,outer:bm,ref,rf,NR,N,NC,pk,E:new Float64Array(E),m,it:CLOTH_LITE.IT,P:new Float32Array(N*3),Q:new Float32Array(N*3),T:new Float32Array(N*3),Tm:new Float32Array(N*3),
+    full:BG.index,cut:new THREE.BufferAttribute(Uint32Array.from(cloakBodyIndices(BG.index,mark)),1),on:false,sgn:0,
+    caps:[['hips','neck','TORSO'],['thigh_L','shin_L','LEG'],['thigh_R','shin_R','LEG'],['upper_arm_L','hand_L','FORE'],['upper_arm_R','hand_R','FORE']].map(([a,b,k])=>[B(a),B(b),k]).filter(c=>c[0]&&c[1]),
+    init:false,t:0,acc:0,air:{x:0,z:0}};
+  C.capV=C.caps.map(()=>[new THREE.Vector3(),new THREE.Vector3(),0]);
+  return C;}
+// on = lite cloth drawn + panel cut from the batch • off = bone cloak (full index). Index checked by identity (stormCape may swap it)
+function clLiteShow(C,on){C.on=on;C.m.visible=on;if(!on)C.init=false;const want=on?C.cut:C.full;if(C.outer.geometry.index!==want)C.outer.geometry.setIndex(want);}
+function clLiteTick(o,dt){
+  if(!o.fileModel)return;
+  if(o.clothL===undefined){if(o.stormCapeHidden||o.g.natSleeves)return;o.clothL=clLiteSetup(o);}
+  const C=o.clothL;if(!C)return;
+  if(o.stormCapeHidden){if(C.on){C.on=false;C.m.visible=false;C.init=false;}return;}   // Storm cape owns the batch index meanwhile
+  let vis=!!o.g.parent&&!o.ghost&&!o.g.natSleeves;
+  if(vis)for(let n=C.outer;n;n=n.parent)if(!n.visible){vis=false;break;}
+  if(vis){_clV.setFromMatrixPosition(o.g.matrixWorld);vis=cam.position.distanceTo(_clV)<CLOTH_LITE.FAR&&viewDetailAt(_clV.x,_clV.y+1,_clV.z,1.4);}
+  clLiteShow(C,vis);if(!vis)return;
+  o.g.updateMatrixWorld(true);clTargets(C);clRun(C,dt,null);clLiteDraw(C);}
+function clLiteDraw(C){const N=C.N,g=C.m.geometry,A=g.attributes.position.array,P=C.P;
+  for(let n=0;n<N;n++)if(C.pk[n]>=1){const i=n*3;P[i]=C.T[i];P[i+1]=C.T[i+1];P[i+2]=C.T[i+2];}
+  A.set(P);A.set(P,N*3);g.computeVertexNormals();const nm=g.attributes.normal.array;
+  if(!C.sgn){const n=3*C.NC+(C.NC>>1),i=n*3;C.o.g.getWorldPosition(_clB);C.sgn=nm[i]*(P[i]-_clB.x)+nm[i+2]*(P[i+2]-_clB.z)<0?-1:1;}   // do outer normals face out?
+  const k=-C.sgn*CL_IN;for(let i=0;i<N*3;i++)A[N*3+i]=P[i]+nm[i]*k;
+  g.attributes.position.needsUpdate=true;g.computeVertexNormals();}
