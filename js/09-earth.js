@@ -217,9 +217,9 @@ const DUSTB=defSpell(EARTH,{id:'dustburst',v:{range:500,r:350,time:5,rWeak:200,t
 const AUGER={cd:14,v:{range:600,t2:2,t3:4.5,d1:20,d2:50,d3:120,r1:80,r2:110,r3:150,slow:0.15,cdCancel:7}};
 // ---------- สกิล 5: Rampart (ผู้ใช้ 2026-11-23 v2) — เลือกจุด (โฮโลแกรม) แล้วคลิกวาง: Stand ใหญ่โผล่ยื้อยกพื้น ~1 วิ
 // แล้วดึงกำแพงหินก้อนกลมเรียงต่อกันขึ้นมาทีเดียว (กว้าง ~10 ม. สูง ~4 ม.) บังกระสุน • ไม่มีดันแล้ว
-const RAMPART=defSpell(EARTH,{id:'rampart',v:{range:520,len:360,r:30,hgt:5.6,hp:700,life:5,lift:1.0,env:30},
-  vn:{range:'เลือกจุด • ไกลสุด',len:'กำแพง • กว้าง',hp:'กำแพง • HP',life:'กำแพง • อยู่นาน (วิ)',lift:'Stand ยื้อยก (วิ)'},
-  role:'control',n:'Rampart',ic:'🧱',cd:12,d:'เลือกจุดวางกำแพง (เห็นโฮโลแกรม) คลิกซ้าย = วาง • คลิกขวา/กดซ้ำ = ยกเลิก • Stand ใหญ่โผล่ยื้อยกพื้น ~1 วิ แล้วดึงกำแพงหินกว้าง ~18 ม. สูง ~5.5 ม. ขึ้นมา บังกระสุน (HP 700, 5 วิ)',
+const RAMPART=defSpell(EARTH,{id:'rampart',v:{range:520,len:360,r:30,hgt:5.6,hp:700,life:5,lift:0.4,env:30},
+  vn:{range:'เลือกจุด • ไกลสุด',len:'กำแพง • กว้าง',hp:'กำแพง • HP',life:'กำแพง • อยู่นาน (วิ)',lift:'หน่วงก่อนกำแพงขึ้น (วิ)'},
+  role:'control',n:'Rampart',ic:'🧱',cd:12,d:'เลือกจุดวางกำแพง (เห็นโฮโลแกรม) คลิกซ้าย = วาง • คลิกขวา/กดซ้ำ = ยกเลิก • พื้นสั่นแป๊บนึงแล้วกำแพงหินกว้าง ~18 ม. ดันขึ้นเอง สูง ~5.5 ม. ขึ้นมา บังกระสุน (HP 700, 5 วิ)',
   cast(p,S,i){if(p.aug||p.ramp||p.ecb||p.wr)return false;if(p.rmpAim){p.rmpAim=null;return false;}
     p.rmpAim={k:SLOTK[i],t:G.time,armed:!p.inp?.fire,s0:!!p.inp?.sh,seed:(Math.random()*1e6)|0};earthRampAimUpd(p);return false;}});
 function earthRampAimUpd(p){const A=p.rmpAim,o=aimPoint(p,RAMPART.v.range);let x=o.x,y=o.y;const d=Math.hypot(x-p.x,y-p.y);

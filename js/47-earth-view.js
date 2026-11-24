@@ -781,16 +781,13 @@ function eRampTick(v,dt,now){
   if(ra){if(!EV.rholo||EV.rholo.seed!==ra[3]){if(EV.rholo)scene.remove(EV.rholo.g);EV.rholo={seed:ra[3],g:eRampHolo(ra[3])};}
     const g=EV.rholo.g;g.visible=true;eRampPlace(g,ra[0],ra[1],ra[2]);ERAMP.holoM.uniforms.t.value=now/1000;}
   else if(EV.rholo){scene.remove(EV.rholo.g);EV.rholo=null;}
-  for(let i=EV.rcall.length-1;i>=0;i--){const R=EV.rcall[i];R.t+=dt;const c=Math.cos(R.a),sn=Math.sin(R.a),G=R.G,T=RAMPART.v.lift;
+  for(let i=EV.rcall.length-1;i>=0;i--){const R=EV.rcall[i];R.t+=dt;const c=Math.cos(R.a),sn=Math.sin(R.a),T=RAMPART.v.lift;
     if(R.holo){R.holo.visible=!R.up;eRampPlace(R.holo,R.x,R.y,R.a);ERAMP.holoM.uniforms.t.value=now/1000;}
     if(!R.up&&R.t>T+0.6){R.up=true;R.tu=R.t;}   // safety if the rise event was missed
-    const yk=R.up?Math.min(1,(R.t-R.tu)/0.16):0,strain=R.up?0:clamp((R.t-0.15)/(T-0.15),0,1);
-    G.g.position.copy(eW(R.x+c*115,R.y+sn*115,-0.9+0.5*Math.min(1,R.t/0.2)+0.6*yk));G.g.rotation.y=Math.atan2(c,sn);   // far side of the wall, facing the caster
-    standOp(G,R.up?Math.max(0,1-(R.t-R.tu-0.12)/0.3):Math.min(1,R.t/0.15));
-    standPose(G,{t:now/1000,lift:yk,strain,shake:R.up?0:strain});
+    const strain=R.up?0:clamp(R.t/T,0,1);   // no Stand (user 2026-11-24): the ground rumbles along the line, then the wall rises on its own
     if(!R.up){if(Math.random()<0.25+0.5*strain){const q=rnd(-1,1)*175;burst(R.x-sn*q,R.y+c*q,ECOL.dust,2,70,0.5,2.2,{h:0.1,vh:[0.5,2],g:5});}
       if(Math.random()<0.15*strain)eChunks(R.x-sn*rnd(-175,175),R.y+c*rnd(-175,175),0.1,1,90,4,0.12);if(R.t>0.2&&Math.random()<0.2)shake(0.06+0.1*strain);}
-    if(R.up&&R.t-R.tu>0.5){disposeObj(G.g);if(R.holo)scene.remove(R.holo);EV.rcall.splice(i,1);}}}
+    if(R.up&&R.t-R.tu>0.2){if(R.holo)scene.remove(R.holo);EV.rcall.splice(i,1);}}}
 function syncEarth(v,dt,now){
   for(const [id,s] of EV.st)if((s.sbSlab||s.fistCharge?.visible)&&!PM3.has(id)){eStonePrep(s,null);eFistCharge(s,null,null,0);}
   const seen=new Set();
@@ -802,7 +799,7 @@ function syncEarth(v,dt,now){
       else if(o.k!==3){burst(o.x,o.y,ECOL.dust,14,140,0.9,4,{h:0.3,vh:[1,4],g:3,smoke:true,grow:1.5});}}
     const age=(now-o.born)/1000;
     if(o.k===0||o.k===2)o.g.scale.y=Math.min(1,0.05+age/(o.k===0?0.22:0.3));
-    if(o.k===4){const u=Math.min(1,age/0.16),b=1+2.2*(u-1)**3+1.2*(u-1)**2;o.g.scale.y=Math.max(0.02,u<1?b:1);if(o.vein)o.vein.color.copy(ERAMP.vein).multiplyScalar(0.35+1.6*Math.max(0,1-age/0.9));}
+    if(o.k===4){const u=Math.min(1,age/0.3),b=1+2.2*(u-1)**3+1.2*(u-1)**2;o.g.scale.y=Math.max(0.02,u<1?b:1);if(o.vein)o.vein.color.copy(ERAMP.vein).multiplyScalar(0.35+1.6*Math.max(0,1-age/0.9));}
     if(o.k===3)o.mat.opacity=0.14+0.08*Math.sin(now/300);
     else if(w[7]!==o.hp&&o.mat){o.hp=w[7];for(const m of o.mats){if(!m.userData.c0)m.userData.c0=m.color.clone();m.color.copy(m.userData.c0).lerp(new THREE.Color('#5a4632'),1-w[7]/100);}burst(o.x,o.y,ECOL.dust,4,60,0.5,2,{h:rnd(0.5,o.h),g:4});}}
   for(const [id,o] of EV.es)if(!seen.has(id)){disposeObj(o.g);for(const m of o.mats)m.dispose();EV.es.delete(id);}
@@ -923,7 +920,7 @@ function earthEfx(ev){
     case 'esbwall':eDebris(x,y,H,26,240);ring(x,y,'#ffd86b',70,0.4,H);burst(x,y,'#ffe7a0',12,120,0.6,2.2,{h:H+0.8,g:0});shake(0.4);if(near)snd('boom',ev);return true;
     // ----- Tectonic Crush -----
     case 'ewallup':shake(0.35);if(near)snd('boom',ev);return true;
-    case 'erampcall':EV.rcall.push({t:0,x,y,a:ev.a,seed:ev.n,id:ev.id,G:makeStand(3.6,true),holo:eRampHolo(ev.n),up:false});if(near)snd('buff',{x,y,vol:0.5});return true;   // Rampart: Stand rises and starts heaving the ground
+    case 'erampcall':EV.rcall.push({t:0,x,y,a:ev.a,seed:ev.n,id:ev.id,holo:eRampHolo(ev.n),up:false});if(near)snd('buff',{x,y,vol:0.5});return true;   // Rampart: Stand rises and starts heaving the ground
     case 'erampup':{shake(0.55);if(near)snd('boom',ev);const c=Math.cos(ev.a),sn=Math.sin(ev.a);   // wall yanked up: one heavy burst of dust that clears fast
       for(let i=-4;i<=4;i++){const px=x-sn*i*44,py=y+c*i*44;burst(px,py,ECOL.dust,5,220,0.45,3.4,{h:0.4,vh:[2,7],g:7});eChunks(px,py,0.3,2,220,8,0.22);}
       for(let i=0;i<6;i++)smoke(x-sn*rnd(-100,100),y+c*rnd(-100,100),0.3,2,ECOL.dust,0.7,8,60);
