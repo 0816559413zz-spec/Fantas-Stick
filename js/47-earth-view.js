@@ -424,6 +424,7 @@ function earthFistForearm(o){
 // ---------- ทุกเฟรม: ผู้เล่นสายดิน (เรียกจาก syncPlayers) ----------
 function earthFX(o,p,pz,now,dt){
   o.eFistBend=null;
+  if(o.caN==='islecast'||o.isleHd){o.slHead=o.caN==='islecast'?-(o.cpb?o.cpb[2]:0)*0.9:0;o.isleHd=o.caN==='islecast';frostSlideHead(o);}   // side-on cast: head stays on the target
   const A=p.ea;if(!A){if(EV.st.has(p.id)){const s=EV.st.get(p.id);eStonePrep(s,null);eFistCharge(s,null,null,0);s.sbFollow=null;for(const k of ['stand','giant','cgiant'])if(s[k])standOp(s[k],0);for(const k of ['drill','augW','pil','wrWarn','wrRock'])if(s[k])s[k].visible=false;}return;}
   const s=eState(p.id),S=eStandOf(s),G2=eGiantOf(s),t=now/1000,fx=Math.cos(p.a),fy=Math.sin(p.a),rx=-fy,ry=fx,broken=A[0]>0,z0=(pz||0)-GY(p.x,p.y);   // ความสูงที่วาดจริงเหนือพื้น (snapshot ไม่มี p.z)
   if(!ETEX.slabM&&!EV.sw){EV.sw=1;setTimeout(()=>{const M=eSlabMats();if(typeof gl!=='undefined'&&gl.initTexture)for(const t of [M.face.map,M.face.normalMap,M.face.emissiveMap,M.side.map,M.side.normalMap])gl.initTexture(t);},300);}   // สร้างลายแผ่นหินไว้ก่อน (ไม่กระตุกตอนใช้ท่า)
@@ -806,8 +807,8 @@ function eRampTick(v,dt,now){
 // Terra Isle cast (user 2026-11-24): pull the wand back low (wind-up) → thrust it at the spot, accelerating (crack at 0.15 s)
 // → hold pointed, left palm pressing low, tremble while the ground rumbles → scoop both hands up with overshoot as the
 // isle comes out (0.5 s) → settle. Knees bend on the hold, straighten on the lift (joint keys j).
-CANIM.islecast={d:0.9,st:0,tr:[0.12,0.2],tm:[0.2,0.5],k:[[0.11,-0.5,-0.3,0.25,0.08,-0.6,0.5,0,-0.06,'s'],[0.17,-1.45,-0.05,0.05,0.18,-0.9,0.35,0,-0.1,'i'],[0.5,-1.4,-0.05,0.05,0.2,-0.75,0.4,0,-0.12,'s'],[0.6,-2.5,-0.1,0,-0.08,-2.4,0.35,0,0.03,'o'],[1,-2.0,-0.1,0,-0.03,-1.9,0.3,0,0,'s']],
-  j:[[0.11,0.5,0.4,1.0,-0.35,0.18,0.14,-0.14],[0.17,0.75,0.6,0.5,-0.55,0.1,0.18,-0.18],[0.5,0.85,0.7,0.55,-0.6,0.08,0.18,-0.18],[0.6,0.2,0.15,0.4,-0.25,0.15,0.14,-0.14],[1,0.12,0.1,0.45,-0.2,0.12,0.12,-0.12]]};
+CANIM.islecast={d:0.9,st:0,tr:[0.12,0.2],tm:[0.2,0.5],k:[[0.11,-0.5,-0.3,0.5,0.08,-0.6,0.5,0,-0.06,'s'],[0.17,-0.25,-1.18,0.8,0.12,-0.7,0.6,0,-0.1,'i'],[0.5,-0.2,-1.15,0.8,0.14,-0.65,0.65,0,-0.12,'s'],[0.6,-2.5,-0.1,0.25,-0.08,-2.4,0.35,0,0.03,'o'],[1,-2.0,-0.1,0.05,-0.03,-1.9,0.3,0,0,'s']],
+  j:[[0.11,0.5,0.4,1.0,-0.35,0.18,0.14,-0.14],[0.17,0.75,0.6,0.5,-0.55,0.1,0.22,-0.22],[0.5,0.85,0.7,0.55,-0.6,0.08,0.22,-0.22],[0.6,0.2,0.15,0.4,-0.25,0.15,0.14,-0.14],[1,0.12,0.1,0.45,-0.2,0.12,0.12,-0.12]]};
 SKANIM.terraisle='islecast';
 const EISLE={top:['#c99b62','#a66f3c','#8e9850','#d6b781','#a9603d'],mat:null,geo:new Map()};
 function eIsleGeo(seed){if(EISLE.geo.has(seed))return EISLE.geo.get(seed);
