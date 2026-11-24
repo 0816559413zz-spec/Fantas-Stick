@@ -1,5 +1,5 @@
 {
- "next": 183,
+ "next": 184,
  "items": [
   {
    "id": 180,
@@ -3785,6 +3785,23 @@
    "updated": "2026-11-24",
    "imgs": [],
    "links": [
+    "mapbuild.html"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 183,
+   "title": "Decor: รูปทรงใหม่ 6 แบบ + Texture 18 แบบ",
+   "text": "Map Builder → วางของ → หมวด Decor (game-drawn): มี Pyramid, Dome, Wedge, Arch, Battlements, Rock เพิ่ม และ Decor Box หมุนได้ทุกองศา. ช่อง Material มีวัสดุ ▦ 18 แบบ (อิฐ หิน หินอ่อน ไม้ กระเบื้อง หลังคาสเลต ฟาง ทองแดง ทอง เหล็ก กระจกสี ฯลฯ). ดูภาพรวมที่ shots/dk_sheet.png หรือวางของใน Map Builder (โหลดหน้าใหม่ก่อน)",
+   "kind": "Map",
+   "who": "Map Builder",
+   "status": "wait",
+   "created": "2026-11-24",
+   "updated": "2026-11-24",
+   "imgs": [],
+   "links": [
+    "/shots/dk_sheet.png",
     "mapbuild.html"
    ],
    "feedback": "",

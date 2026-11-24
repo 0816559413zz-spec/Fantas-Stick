@@ -177,13 +177,132 @@ function fcsCastleTick(){const t=performance.now()/1000;FCSC.uT.value=t;
   for(const f of FCSC.torch){const k=0.85+0.12*Math.sin(t*13+f.userData.ph)+0.08*Math.sin(t*23.7+f.userData.ph*2);f.scale.set(1.25*k,1.6*k,1);}}
 // ---------- room pieces: look (js/02-room-*.js view(K,V)) — V = shared builder, merged per material
 function fcsRoomsView(){const D=fcsDecoKit();for(const r of FCS_ROOMS)if(r.view&&r.K)try{r.view(r.K,D.V);}catch(e){console.error('room view',r.id,e);}D.done();}
+// @dk-begin — decor shapes + textured materials (2026-11-24). Map Builder runs this same block for its preview (mapbuild/app.js DK): keep it THREE-only.
+// dkGeo(o,seed): centred geometry (no yaw) + 'dkuv' attribute = surface coords in metres • dkMat(k): procedural texture per DK_TEX key (no image files)
+const DK_TEX={brick:[1,'#9c4a34',0.9,0],brickw:[1,'#c9b8a0',0.9,0],rubble:[3,'#8e8778',0.95,0],sand:[4,'#c8a571',0.92,0],marble:[5,'#e6e1d8',0.35,0],
+  plaster:[6,'#d8cdb4',0.95,0],plank:[7,'#7a5534',0.85,0],tiles:[8,'#a8583a',0.8,0],slate:[9,'#5b5f66',0.7,0],thatch:[10,'#a88a52',1,0],
+  copper:[11,'#6a9a88',0.6,0.3],gold:[12,'#d8b45a',0.4,0.55],rock:[13,'#7d776c',0.95,0],ironp:[14,'#6a6d72',0.55,0.35],stained:[15,'#ffffff',0.3,0],
+  timber:[16,'#d6c9ab',0.92,0],flag:[17,'#9a9488',0.9,0],mossy:[18,'#8a8676',0.95,0]};   // key: [pattern, colour, roughness, metalness]
+const DK_GLSL=`varying vec2 vDU;varying vec3 vDW;varying vec3 vDN;
+float dkH(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float dkN(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(dkH(i),dkH(i+vec2(1.,0.)),f.x),mix(dkH(i+vec2(0.,1.)),dkH(i+vec2(1.,1.)),f.x),f.y);}
+float dkF(vec2 p){return dkN(p)*0.5+dkN(p*2.03+3.1)*0.3+dkN(p*4.11+7.7)*0.2;}
+vec4 dkU(vec2 p,float w,float h,float st){float r=floor(p.y/h);float x=p.x+(st>=0.?mod(r,2.)*w*st:dkH(vec2(r,5.))*w);float b=floor(x/w);
+  vec2 q=vec2(fract(x/w)*w,fract(p.y/h)*h);return vec4(min(min(q.x,w-q.x),min(q.y,h-q.y)),dkH(vec2(b,r)),dkH(vec2(r*1.7,b+9.)),q.y/h);}   // x edge dist • y,z cell random • w height in row
+vec3 dkV(vec2 p){vec2 i=floor(p),f=fract(p);float d1=8.,d2=8.,id=0.;for(int y=-1;y<=1;y++)for(int x=-1;x<=1;x++){vec2 g=vec2(float(x),float(y));
+  vec2 o=vec2(dkH(i+g),dkH(i+g+17.3))*0.8+0.1;float d=length(g+o-f);if(d<d1){d2=d1;d1=d;id=dkH(i+g+3.7);}else if(d<d2)d2=d;}return vec3(d2-d1,id,d1);}   // x edge • y cell random • z centre dist
+float dkE(float e,float j,float fw){return smoothstep(j-fw,j+fw,e);}   // anti-aliased joint
+vec3 dkBrick(vec2 p,vec3 c,float nz,float fw){vec4 u=dkU(p,0.42,0.15,0.5);vec3 b=c*(0.72+0.5*u.y)*(0.85+0.3*nz);b=mix(b,b*vec3(0.7,0.74,0.8),step(0.88,u.z));
+  return mix(vec3(0.58,0.55,0.5)*(0.8+0.3*nz),b,dkE(u.x,0.014,fw));}`;
+const DK_FRAG=`vec2 p=vDU;vec3 wn=normalize(vDN);float fw=max(length(fwidth(p)),1e-4);float nz=dkF(p*1.7);vec3 c0=diffuseColor.rgb,c=c0,av=c0;float S=0.3,met=0.;
+#if DKM==1
+  c=dkBrick(p,c0,nz,fw);av=mix(c0,vec3(0.58,0.55,0.5),0.25);S=0.15;
+#elif DKM==3
+  {vec3 v=dkV(p*1.9);vec3 s=c0*(0.68+0.55*v.y)*(0.8+0.35*nz)*(1.05-0.3*v.z);c=mix(c0*0.42,s,dkE(v.x,0.07,fw*1.9));av=c0*0.85;S=0.5;}
+#elif DKM==4
+  {vec4 u=dkU(p,1.1,0.5,0.5);float er=dkF(p*3.3+u.y*7.);vec3 s=c0*(0.82+0.3*u.y)*(0.78+0.4*er);s*=1.-0.2*smoothstep(0.6,0.9,dkF(p*0.7));c=mix(c0*0.55,s,dkE(u.x,0.012,fw));S=0.5;}
+#elif DKM==5
+  {vec4 u=dkU(p,1.4,1.4,-1.);float v=abs(sin((p.x+p.y*0.6)*1.3+dkF(p*0.9+u.y*9.)*7.));float ve=1.-smoothstep(0.,0.1+fw*4.,v);
+  vec3 s=c0*(0.93+0.1*u.y);s=mix(s,c0*vec3(0.5,0.52,0.56),ve*0.6);c=mix(c0*0.7,s,dkE(u.x,0.006,fw));S=1.;}
+#elif DKM==6
+  {float f=dkF(p*0.45+11.);float pa=smoothstep(0.6,0.63,f);vec3 pl=c0*(0.88+0.18*nz)*(1.-0.18*dkF(p*0.22+vec2(0.,p.y*0.3)));
+  pl*=1.-0.3*(smoothstep(0.54,0.6,f)-pa);c=mix(pl,dkBrick(p,vec3(0.6,0.3,0.2),nz,fw),pa);S=0.4;}
+#elif DKM==7
+  {vec4 u=dkU(p.yx,2.6,0.22,0.37);float g=dkN(vec2(p.x*55.,p.y*1.4))*0.6+dkN(vec2(p.x*9.,p.y*0.5))*0.4;vec3 s=c0*(0.68+0.5*u.y)*(0.8+0.35*g);
+  c=mix(c0*0.3,s,dkE(u.x,0.008,fw));S=0.22;}
+#elif DKM==8||DKM==9
+  {float h=DKM==8?0.26:0.2,w=DKM==8?0.3:0.34;float r=floor(p.y/h);float x=p.x+mod(r,2.)*w*0.5;float tx=fract(x/w),ty=fract(p.y/h);float id=dkH(vec2(floor(x/w),r));
+  vec3 s=c0*(0.75+0.45*id)*(0.85+0.3*nz);
+#if DKM==8
+  s*=0.7+0.4*sin(tx*3.14159);
+#endif
+  s*=1.-0.5*smoothstep(0.65,1.,ty);float e=min(tx,1.-tx)*w;c=mix(s*0.35,s,dkE(e,0.012,fw));av=c0*0.8;S=h;}
+#elif DKM==10
+  {float ty=fract(p.y/0.45);float st=dkN(vec2(p.x*45.,p.y*3.))*0.7+dkN(vec2(p.x*12.,p.y))*0.3;c=c0*(0.55+0.6*st)*(0.85+0.3*nz);c*=1.-0.55*smoothstep(0.55,1.,ty);av=c0*0.75;S=0.45;}
+#elif DKM==11
+  {float e=min(fract(p.x/0.55),1.-fract(p.x/0.55))*0.55;float sk=dkN(vec2(p.x*8.,p.y*0.6));vec3 s=c0*(0.75+0.4*sk)*(0.9+0.2*nz);
+  s=mix(s,vec3(0.42,0.3,0.2),0.75*smoothstep(0.72,0.82,dkF(p*1.1)));c=mix(s*1.35,s,dkE(e,0.02,fw));met=0.15;S=0.55;}
+#elif DKM==12
+  c=c0*(0.85+0.2*dkN(vec2(p.x*2.,p.y*80.)))*(0.92+0.15*nz);
+#elif DKM==13
+  {float s=dkF(vec2(p.x*0.3,p.y*2.5)+dkF(p*0.5)*2.);c=c0*(0.68+0.5*s)*(0.82+0.32*dkF(p*4.));vec3 v=dkV(p*0.8);c*=mix(0.55,1.,dkE(v.x,0.04,fw*0.8));
+  float mo=smoothstep(0.45,0.8,wn.y)*smoothstep(0.4,0.6,dkF(p*0.9+5.));c=mix(c,vec3(0.25,0.32,0.15)*(0.8+0.4*nz),mo);S=0.8;}
+#elif DKM==14
+  {vec2 ce=vec2(1.2,0.8);vec4 u=dkU(p,1.2,0.8,0.);vec2 q=mod(p,ce);vec2 d=min(q,ce-q);float m=min(d.x,d.y),rv=0.;
+  if(m>0.03&&m<0.09){float al=d.x<d.y?q.y:q.x;float k=fract(al/0.16);rv=1.-smoothstep(0.012,0.02+fw,length(vec2((k-0.5)*0.16,m-0.06)));}
+  vec3 s=c0*(0.8+0.3*u.y)*(0.85+0.25*nz);s=mix(s,vec3(0.42,0.22,0.1),smoothstep(0.58,0.8,dkF(p*1.3+vec2(0.,p.y*0.5))));s=mix(s,s*1.6,rv);c=mix(s*0.4,s,dkE(u.x,0.012,fw));S=0.6;}
+#elif DKM==15
+  {vec3 v=dkV(p*1.7);float h=v.y*5.;vec3 col=h<1.?vec3(0.75,0.1,0.08):h<2.?vec3(0.1,0.2,0.7):h<3.?vec3(0.85,0.6,0.12):h<4.?vec3(0.12,0.45,0.18):vec3(0.5,0.15,0.5);
+  vec2 fr=fract(p/vec2(0.7,1.1));float gd=min(min(fr.x,1.-fr.x)*0.7,min(fr.y,1.-fr.y)*1.1);float le=dkE(v.x,0.045,fw*1.7)*dkE(gd,0.025,fw);
+  c=mix(vec3(0.04),col*0.25,le);totalEmissiveRadiance+=col*le*1.1*(0.8+0.3*nz);av=c;S=0.33;}
+#elif DKM==16
+  {vec2 pc=vec2(1.5,1.3);vec2 f=fract(p/pc);vec2 cid=floor(p/pc);float dx=min(f.x,1.-f.x)*pc.x,dy=min(f.y,1.-f.y)*pc.y;
+  float dg=dkH(cid)<0.35?(mod(cid.x,2.)<1.?abs(f.x-f.y):abs(f.x-(1.-f.y)))*0.9:9.;float bm=min(min(dx,dy),dg);float b=1.-dkE(bm,0.11,fw);
+  vec3 wd=vec3(0.15,0.1,0.065)*(0.8+0.4*dkN(vec2(p.x*20.,p.y*20.)));vec3 pl=c0*(0.88+0.18*nz);c=mix(pl,wd,b);av=mix(c0,wd,0.3);S=0.5;}
+#elif DKM==17
+  {vec3 v=dkV(p*1.1);vec3 s=c0*(0.8+0.35*v.y)*(0.85+0.3*nz);c=mix(c0*0.5,s,dkE(v.x,0.04,fw*1.1));S=0.9;}
+#elif DKM==18
+  {vec4 u=dkU(p,0.9,0.45,0.5);vec3 s=c0*(0.75+0.4*u.y)*(0.82+0.35*nz);s=mix(s*0.45,s,dkE(u.x,0.018,fw));
+  float mo=smoothstep(0.48,0.72,dkF(p*0.6+vec2(0.,vDW.y*0.2)))*(0.55+0.45*smoothstep(0.3,0.8,wn.y));c=mix(s,vec3(0.26,0.33,0.15)*(0.75+0.5*nz),mo*0.85);av=mix(c0,vec3(0.3,0.36,0.2),0.3);S=0.45;}
+#endif
+c=mix(c,av,smoothstep(S*0.35,S*1.2,fw));   // far: blend to the average (no shimmer)
+c*=0.9+0.2*dkN(vDW.xz*0.04+vDW.y*0.05);   // big-scale weathering
+diffuseColor.rgb=c;`;
+const DK_SHAPE=new Set(['box','cyl','cone','pyr','dome','wedge','arch','cren','rock']);
+const DK_MATS={};
+function dkMat(k){
+  if(DK_MATS[k])return DK_MATS[k];const T=DK_TEX[k];if(!T)return null;
+  const m=new THREE.MeshStandardMaterial({color:T[1],roughness:T[2],metalness:T[3]});m.defines={DKM:T[0]};
+  m.polygonOffset=true;m.polygonOffsetFactor=-2;m.polygonOffsetUnits=-4;   // deco tops sit coplanar with .glb walls/floors
+  m.onBeforeCompile=sh=>{
+    sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute vec2 dkuv;varying vec2 vDU;varying vec3 vDW;varying vec3 vDN;')
+      .replace('#include <begin_vertex>','#include <begin_vertex>\nvDU=dkuv;vDW=(modelMatrix*vec4(transformed,1.)).xyz;vDN=normalize(mat3(modelMatrix)*objectNormal);');
+    sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\n'+DK_GLSL).replace('#include <map_fragment>','#include <map_fragment>\n'+DK_FRAG);};
+  m.customProgramCacheKey=()=>'dk'+T[0];
+  return DK_MATS[k]=m;
+}
+// surface uv in metres: built-in uv × real size (keeps curved shapes seamless) • rows run horizontally on walls/roofs
+function dkUV(g,f){const uv=g.attributes.uv,n=g.attributes.normal,P=g.attributes.position,a=new Float32Array(uv.count*2);
+  for(let i=0;i<uv.count;i++){const r=f(uv.getX(i),uv.getY(i),i,P,n);a[i*2]=r[0];a[i*2+1]=r[1];}g.setAttribute('dkuv',new THREE.BufferAttribute(a,2));return g;}
+function dkTri(g){g=g.index?g.toNonIndexed():g;const P=g.attributes.position,a=new Float32Array(P.count*2),A=new THREE.Vector3(),B=new THREE.Vector3(),C=new THREE.Vector3(),N=new THREE.Vector3();   // per-triangle projection (rocks)
+  for(let i=0;i<P.count;i+=3){A.fromBufferAttribute(P,i);B.fromBufferAttribute(P,i+1);C.fromBufferAttribute(P,i+2);N.subVectors(C,B).cross(B.clone().sub(A)).normalize();
+    const top=Math.abs(N.y)>0.7,tl=Math.hypot(N.x,N.z)||1,tx=-N.z/tl,tz=N.x/tl;
+    for(let j=0;j<3;j++){const q=[A,B,C][j];a[(i+j)*2]=top?q.x:q.x*tx+q.z*tz;a[(i+j)*2+1]=top?q.z:q.y;}}
+  g.setAttribute('dkuv',new THREE.BufferAttribute(a,2));if(!g.attributes.uv)g.setAttribute('uv',new THREE.BufferAttribute(new Float32Array(P.count*2),2));return g;}
+function dkBox(sx,sy,sz,ox=0){const g=new THREE.BoxGeometry(sx,sy,sz),D=[[sz,sy],[sz,sy],[sx,sz],[sx,sz],[sx,sy],[sx,sy]];   // faces px nx py ny pz nz, 4 verts each
+  return dkUV(g,(u,v,i)=>{const d=D[i>>2];return [u*d[0]+ox,v*d[1]];});}
+function dkRev(g,R,L){return dkUV(g,(u,v,i,P,n)=>Math.abs(n.getY(i))>0.999?[P.getX(i),P.getZ(i)]:[u*Math.PI*2*R,v*L]);}   // cylinder/cone/sphere: around × along
+function dkGeo(o,seed){
+  const t=o.t,sx=o.sx||1,sy=o.sy||1,sz=o.sz||1,sd=seed||0;let g;
+  if(t==='box')g=dkBox(sx,sy,sz);
+  else if(t==='cyl'){const rt=o.rt!=null?o.rt:sx/2,rb=o.rb!=null?o.rb:sx/2;g=dkRev(new THREE.CylinderGeometry(rt,rb,sy,o.seg||8),(rt+rb)/2,Math.hypot(sy,rt-rb));}
+  else if(t==='cone'){const r=o.r!=null?o.r:sx/2;g=dkRev(new THREE.ConeGeometry(r,sy,o.seg||8,1,!!o.open),r/2,Math.hypot(sy,r));if(o.ry)g.rotateY(o.ry);if(o.ssx||o.ssz)g.scale(o.ssx||1,1,o.ssz||1);}
+  else if(t==='pyr'){g=new THREE.ConeGeometry(Math.SQRT1_2,sy,4,1);g.rotateY(Math.PI/4);g.scale(sx,1,sz);g=g.toNonIndexed();g.computeVertexNormals();g=dkRev(g,(sx+sz)/4*1.27,Math.hypot(sy,(sx+sz)/4));}
+  else if(t==='dome'){g=new THREE.SphereGeometry(0.5,24,8,0,Math.PI*2,0,Math.PI/2);g.translate(0,-0.25,0);g.scale(sx,sy*2,sz);g=dkRev(g,(sx+sz)/4,Math.PI*(sx+sz)/4);}
+  else if(t==='wedge'){const s=new THREE.Shape([new THREE.Vector2(-sz/2,-sy/2),new THREE.Vector2(sz/2,-sy/2),new THREE.Vector2(-sz/2,sy/2)]);   // slope falls toward -Z
+    g=new THREE.ExtrudeGeometry(s,{depth:sx,bevelEnabled:false});g.translate(0,0,-sx/2);g.rotateY(-Math.PI/2);g=dkTri(g);}
+  else if(t==='arch'){const ow=Math.min(o.ow||sx*0.5,sx-0.2),oh=Math.max(ow/2+0.1,Math.min(o.oh||sy*0.7,sy-0.15)),b=-sy/2,r=ow/2,yb=b+oh-r,pts=[[-sx/2,b],[-r,b],[-r,yb]];
+    for(let i=1;i<16;i++){const a=Math.PI-i/16*Math.PI;pts.push([Math.cos(a)*r,yb+Math.sin(a)*r]);}
+    pts.push([r,yb],[r,b],[sx/2,b],[sx/2,sy/2],[-sx/2,sy/2]);
+    g=new THREE.ExtrudeGeometry(new THREE.Shape(pts.map(p=>new THREE.Vector2(p[0],p[1]))),{depth:sz,bevelEnabled:false,curveSegments:1});g.translate(0,0,-sz/2);g=dkTri(g);}
+  else if(t==='cren'){const mw=Math.min(o.mw||1,sx),m=Math.max(1,Math.floor((sx/mw+1)/2)),st=m>1?(sx-mw)/(m-1):0,L=[];   // merlons, first and last on the ends
+    for(let i=0;i<m;i++){const x=m>1?-sx/2+mw/2+i*st:0,b=dkBox(mw,sy,sz,x);b.translate(x,0,0);L.push(b.toNonIndexed());}
+    g=L.length>1?mergeGeometries(L,false):L[0];L.forEach(b=>b!==g&&b.dispose());}
+  else if(t==='rock'){g=new THREE.IcosahedronGeometry(0.5,2);const P=g.attributes.position,v=new THREE.Vector3(),h=(x,y,z)=>{const s=Math.sin(x*12.9898+y*78.233+z*37.719+sd*7.13)*43758.5453;return s-Math.floor(s);};
+    for(let i=0;i<P.count;i++){v.fromBufferAttribute(P,i);const k=1+0.22*(h(Math.round(v.x*40),Math.round(v.y*40),Math.round(v.z*40))-0.5)+0.12*Math.sin(v.x*7+sd)*Math.cos(v.z*6+sd*2);
+      v.multiplyScalar(k);if(v.y<-0.3)v.y=-0.3-(v.y+0.3)*0.25;P.setXYZ(i,v.x,v.y,v.z);}   // flatter base sits on the ground
+    g.scale(sx,sy,sz);g.computeBoundingBox();const bb=g.boundingBox;g.translate(0,-(bb.min.y+bb.max.y)/2,0);g.computeVertexNormals();g=dkTri(g);}
+  if(!g)return null;
+  const D=g.attributes.dkuv;if(D&&sd){const ou=(sd*7.31)%13,ov=(sd*3.17)%11;for(let i=0;i<D.count;i++)D.setXY(i,D.getX(i)+ou,D.getY(i)+ov);}   // per-object offset: no stamped copies
+  return g;
+}
+// @dk-end
 // Map Builder decor (data.deco, MAP-STANDARD round 4): same builder; x,y px • h = lift above the ground (m) • a = yaw
 function fcsDecoFile(list){
   const D=fcsDecoKit(),V=D.V;
   for(const o of list)try{const x=tx(o.x),z=tz(o.y),y=GY(o.x,o.y)+(o.h||0),k=o.k||'stone';
-    if(o.t==='box')V.box(k,x,y,z,o.sx||1,o.sy||1,o.sz||1);
-    else if(o.t==='cyl')V.cyl(k,x,y,z,o.rt!=null?o.rt:(o.sx||1)/2,o.rb!=null?o.rb:(o.sx||1)/2,o.sy||1,o.seg);
-    else if(o.t==='cone')V.cone(k,x,y,z,o.r!=null?o.r:(o.sx||1)/2,o.sy||1,o.seg,{open:o.open,ry:o.ry,ssx:o.ssx,ssz:o.ssz});
+    if(DK_SHAPE.has(o.t)){const g=dkGeo(o,o.x*0.013+o.y*0.029);if(!g)continue;if(!DK_TEX[k])g.deleteAttribute('dkuv');   // same attributes per material group (merge)
+      if(o.t==='box'&&k==='lit'&&!o.a)hallWinRec(x,y,z,o.sx||1,o.sy||1,o.sz||1);if(o.a)g.rotateY(o.a);g.translate(x,y,z);V.geo(k,g);}
     else if(o.t==='banner'||o.t==='torch')V[o.t](x,GY(o.x,o.y)+(o.h||0),z,Math.sin(o.a||0),Math.cos(o.a||0));
     else if(o.t==='flag'||o.t==='post')V[o.t](x,y,z);
     else if(o.t==='roof')V.roof(x,y,z,o.sx||10,o.sz||8,o.sy||4,o.a||0);
@@ -197,6 +316,7 @@ function fcsDecoKit(){
   const G={},add=(k,g)=>(G[k]=G[k]||[]).push(g),bx=new THREE.BoxGeometry(1,1,1),lights=[],sprites=[],cloths=[],dn={};
   const V={
     box:(k,x,y,z,sx,sy,sz)=>{if(k==='lit')hallWinRec(x,y,z,sx,sy,sz);const g=bx.clone();g.scale(sx,sy,sz);g.translate(x,y,z);add(k,g);},
+    geo:(k,g)=>add(k,g),
     cyl:(k,x,y,z,rt,rb,h,seg)=>{const g=new THREE.CylinderGeometry(rt,rb,h,seg||8);g.translate(x,y,z);add(k,g);},
     roof:(cx,y,cz,w,d,h,rot)=>{rot=rot||0;const s=new THREE.Shape();s.moveTo(-d/2-0.6,0);s.lineTo(0,h);s.lineTo(d/2+0.6,0);s.lineTo(d/2+0.6,-0.6);s.lineTo(0,h-0.75);s.lineTo(-d/2-0.6,-0.6);s.lineTo(-d/2-0.6,0);
       const g=new THREE.ExtrudeGeometry(s,{depth:w+1.2,bevelEnabled:false});g.translate(0,0,-(w+1.2)/2);g.rotateY(Math.PI/2+rot);g.translate(cx,y,cz);add('roof',g);
@@ -222,7 +342,7 @@ function fcsDecoKit(){
     carpet:new THREE.MeshStandardMaterial({color:'#7a1a20',roughness:1}),floor:fcsCastleMat('f~','#b4a68e',{fr:1.3,fc:1.0,moss:0.35}),slit:new THREE.MeshBasicMaterial({color:'#17120e'})};
   for(const k in mats){const m=mats[k];m.polygonOffset=true;m.polygonOffsetFactor=-2;m.polygonOffsetUnits=-4;}
   for(const k in G){const geo=mergeGeometries(G[k].map(g=>g.index?g.toNonIndexed():g),false);G[k].forEach(g=>g.dispose());if(!geo)continue;
-    const m=new THREE.Mesh(geo,mats[k]||mats.stone);m.castShadow=k!=='lit'&&k!=='carpet'&&k!=='floor';m.receiveShadow=true;addW(m);}
+    const m=new THREE.Mesh(geo,mats[k]||dkMat(k)||mats.stone);m.castShadow=k!=='lit'&&k!=='carpet'&&k!=='floor';m.receiveShadow=true;addW(m);}
   bx.dispose();
   const gt=fcsGlowTex();
   for(const [x,y,z,s] of sprites){const fl=new THREE.Sprite(new THREE.SpriteMaterial({map:gt,color:'#ffb060',blending:THREE.AdditiveBlending,depthWrite:false,transparent:true}));

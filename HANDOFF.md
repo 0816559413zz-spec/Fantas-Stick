@@ -5,6 +5,10 @@
 
 ## Latest notes (newest first)
 
+**Decor shapes + textures (2026-11-24, Map Builder + `js/28-fcs-castle.js` block `@dk-begin…@dk-end`):** new decor Pyramid/Dome/Wedge/Arch/Battlements/Rock, Decor Box rotates freely, 18 procedural textured materials (`DK_TEX`, shader from the `dkuv` surface-metre attribute, far = average colour). Game and Map Builder share `dkGeo`/`dkMat` (the tool fetches the block). Still one merged draw per material. Tested: Map Builder preview + export + in game, no console errors. Sheet `shots/dk_sheet.png`. Review #183.
+
+**Map Builder siege loot-phase data (2026-11-24):** markers `sgHold`/`sgLoot`/`sgItem`/`brz`/`wind` exported (`siege.hold/loot/items`, `data.broom`, `data.wind`); the game stores them (`MAPS[id].fcs.hold/loot/items`, `.broomZ`, `.wind`) but does not play them yet.
+
 **Cloak less flutter + no clipping (2026-11-24, `js/49-cloth.js`, local player only):** calmer constants (DAMP 0.93, INERT 0.15/0.2, AIR 0.8, FLUT 0.4), stiffer top rows (`clPinK`), fatter body capsules (TORSO 0.24, LEG 0.13, ARM 0.13) + new forearm capsules `FORE` 0.17 extended past the wrist by `HAND` 0.14, body collision every pass. Other players still use the skinned cloak bones (can still clip).
 
 **Rules cleanup (2026-11-24, docs only):** HANDOFF split (this file = status only; log → `notes/HANDOFF-LOG.md`, old changelog → `notes/HANDOFF-CHANGELOG-OLD.md`). `CLAUDE.md` = 9 core rules + task router; `AGENTS.md` = pointer. Cause of "Claude ignores CLAUDE.md": HANDOFF too big to read, conflicting rules, too many rules.
