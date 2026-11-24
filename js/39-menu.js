@@ -8,30 +8,100 @@ $('#nameIn').value=store('wd_name')||('พ่อมด'+Math.floor(Math.random()
 $('#nameIn').addEventListener('change',()=>store('wd_name',myName()));
 function renderMyHouse(){const H=HOUSES[myLook.h];myColor=H.c;$('#myHouse').innerHTML=`${crestSVG(myLook.h,34,false)}<span><b style="color:var(--gold2)">${H.n}</b><br><small style="color:var(--mute)">${H.th} • ${H.tr}</small></span><span style="margin-left:auto;display:flex;gap:4px"><i class="dot" style="background:${H.c}"></i><i class="dot" style="background:${H.c2};border:1px solid rgba(255,255,255,.3)"></i></span>`;}
 renderMyHouse();
-// ----- หน้าสร้าง/แต่งตัวละคร (2 ขั้น: 1 หน้าตา → 2 เลือกบ้าน) -----
+// ----- หน้าสร้าง/แต่งตัวละคร (ผู้ใช้ 2026-11-24: แบบรูปภาพ — เลือกเพศด้านบน, ไอคอนหมวดวงโค้งซ้าย, การ์ดรูปตัวอย่างจากโมเดลจริงด้านขวา) -----
+//   crStep 1 = หน้าตา (แท็บ 0 ใบหน้า 1 ผม 2 ชุดคลุม 3 เนคไท 4 ไม้กายสิทธิ์) • 3 = เลือกคาถา • 4 = บ้าน (ไม่ได้ใช้แล้ว) • ขั้น 2 เดิม (ไม้) ย้ายมาเป็นแท็บ 4
 let crLib=0,crSaved=null,crKitSaved='0',crOpen=false,crStep=1,crTab=0,crFirst=false,crKitOnly=false,crSlot=0;
-const CRTABS=[['👤','ใบหน้า'],['💇','ผม'],['🧥','เสื้อคลุม'],['👔','เนคไท']];
-const sw_=(k,arr)=>`<div class="colors">${arr.map((c,i)=>{const L=lookLock(k,i);return L?`<div class="sw lk" title="ปลดล็อคที่เลเวล ${L}" style="background:${c}"><i>${L}</i></div>`:`<div class="sw ${myLook[k]===i?'on':''}" data-k="${k}" data-v="${i}" style="background:${c}"></div>`;}).join('')}</div>`;   // ของล็อก = เทา + เลขเลเวล (js/56)
+const CRI=d=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const CRTABS=[
+  [CRI('<circle cx="12" cy="11" r="7"/><circle cx="9.3" cy="10.5" r="1.1" fill="currentColor"/><circle cx="14.7" cy="10.5" r="1.1" fill="currentColor"/><path d="M9.5 14.2q2.5 1.8 5 0"/>'),'ใบหน้า'],
+  [CRI('<path d="M4.5 14c0-6 3.2-9.5 7.5-9.5s7.5 3.5 7.5 9.5"/><path d="M4.5 14c0 3 1 5.5 2.5 6.5M19.5 14c0 3-1 5.5-2.5 6.5"/><path d="M7.5 9.5q4.5 2.5 9 0"/>'),'ทรงผม'],
+  [CRI('<path d="M8 3.5l4 3 4-3 4.5 4-2.5 3-1.5-1v12h-9v-12l-1.5 1L3.5 7.5z"/>'),'ชุดคลุม'],
+  [CRI('<path d="M9.5 3.5h5l-1 3h-3z"/><path d="M10.5 6.5l-2 9 3.5 5 3.5-5-2-9"/>'),'เนคไท'],
+  [CRI('<path d="M5 19L16.5 7.5"/><path d="M18 3.5l.7 1.8 1.8.7-1.8.7L18 8.5l-.7-1.8-1.8-.7 1.8-.7z" fill="currentColor"/>'),'ไม้กายสิทธิ์']];
+const crWandTab=()=>crStep===1&&crTab===4;
+const sw_=(k,arr)=>`<div class="colors crSw">${arr.map((c,i)=>{const L=lookLock(k,i);return L?`<div class="sw lk" title="ปลดล็อคที่เลเวล ${L}" style="background:${c}"><i>${L}</i></div>`:`<div class="sw ${myLook[k]===i?'on':''}" data-k="${k}" data-v="${i}" style="background:${c}"></div>`;}).join('')}</div>`;   // ของล็อก = เทา + เลขเลเวล (js/56)
 const bt_=(k,arr)=>`<div class="opts">${arr.map((t,i)=>{const L=lookLock(k,i);return L?`<button class="obtn lk" disabled title="${typeof L==='number'?'ปลดล็อคที่เลเวล '+L:L}">🔒 ${t} <small>${typeof L==='number'?'Lv'+L:L}</small></button>`:`<button class="obtn ${myLook[k]===i?'on':''}" data-k="${k}" data-v="${i}">${t}</button>`;}).join('')}</div>`;
 const nameBox_=()=>`<label class="f" style="margin-top:0">ชื่อพ่อมด</label><input type="text" id="cName" maxlength="16" value="${esc($('#nameIn').value)}"><div class="orn" style="width:100%;margin:12px 0 4px"></div>`;
+// ----- รูปตัวอย่าง: เรนเดอร์โมเดลจริงด้วย WebGLRenderer เล็กแยกหนึ่งตัว → dataURL (แคชตามหน้าตา+มุมกล้อง) • ทำทีละรูปต่อรอบ หน้าไม่ค้าง • ปิดหน้าแต่งตัว = ทิ้งทั้งหมด -----
+const CRT={r:null,sc:null,cam:null,cache:new Map(),q:[],run:false};
+function crtSetup(){
+  if(CRT.r)return true;
+  if(!MODELS.ready.get('char_student')){loadModel('char_student').then(()=>{if(crOpen&&crStep===1)crRenderStep1();});return false;}
+  const r=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
+  r.setPixelRatio(1);r.setSize(192,192);r.outputColorSpace=THREE.SRGBColorSpace;r.useLegacyLights=true;r.setClearColor(0,0);
+  const sc=new THREE.Scene();sc.add(new THREE.HemisphereLight('#e4ebff','#3a3040',1.15));
+  const k=new THREE.DirectionalLight('#fff3df',1.7);k.position.set(1.6,2.4,3);sc.add(k);
+  const rim=new THREE.DirectionalLight('#a9c0ff',1.1);rim.position.set(-2.2,1.6,-2);sc.add(rim);
+  CRT.r=r;CRT.sc=sc;CRT.cam=new THREE.PerspectiveCamera(24,1,0.05,30);return true;
+}
+function crtDrop(){if(CRT.r){CRT.r.dispose();CRT.r.forceContextLoss();}CRT.r=CRT.sc=null;CRT.cache.clear();CRT.q.length=0;}
+const _ctv=new THREE.Vector3();
+function crtShot(L,shot){   // shot: head | eye | chest | body | wand
+  const cam=CRT.cam,v=_ctv;let obj,d=1.3,ox=0.2,oy=0.05;
+  if(shot==='wand'){   // ไม้ทั้งแบบประกอบเอง/สำเร็จรูป สร้างจากโค้ดเดียวกับในเกม (makeStudent) แล้วหยิบแค่กลุ่มไม้ + แสงปลายไม้
+    const o=makeStudent(L,'crthumb'),w=o.armR.children.find(c=>c.isGroup),tip=o.armR.children.find(c=>c.isSprite);
+    obj=new THREE.Group();const G=new THREE.Group();obj.add(G);if(w)G.add(w);if(tip)G.add(tip);G.position.y=0.88;obj.rotation.z=Math.PI*0.74;
+    CRT.sc.add(obj);v.set(0,0,0);d=1.25;ox=0;oy=0;
+  }else{
+    obj=modelInst('char_student');tintModel(obj,lookTint(L));fileVariants(obj,L);lookGender(obj,L);
+    const R=MODELS.ready.get('char_student');if(R&&R.animations.length){const A=makeAnimator(obj,R.animations);animPlay(A,'idle');A.mixer.update(0.4);}
+    CRT.sc.add(obj);obj.updateMatrixWorld(true);const B=n=>obj.getObjectByName(n);
+    if(shot==='eye'){B('head').localToWorld(v.set(0,0.15,0.24));d=0.62;ox=0;oy=0.02;}
+    else if(shot==='chest'){B('chest').getWorldPosition(v);v.y+=0.1;d=1.9;ox=0.25;}
+    else if(shot==='body'){B('hips').getWorldPosition(v);v.y+=0.42;d=4.9;ox=0.7;oy=0.2;}
+    else{B('head').getWorldPosition(v);v.y+=0.17;d=1.45;}
+  }
+  cam.position.set(v.x+ox,v.y+oy,v.z+d);cam.lookAt(v);
+  CRT.r.render(CRT.sc,cam);const url=CRT.r.domElement.toDataURL('image/png');
+  CRT.sc.remove(obj);obj.traverse(m=>{if(m.isSkinnedMesh&&m.skeleton)m.skeleton.dispose();});
+  return url;
+}
+function crtImg(L,shot){   // <img> ของรูปตัวอย่าง — ยังไม่มีในแคช = เข้าคิว แล้วใส่รูปให้เองเมื่อเสร็จ
+  const key=shot+':'+lookStr(L),u=CRT.cache.get(key);if(u)return `<img src="${u}" alt="" draggable="false">`;
+  if(!CRT.q.some(j=>j.key===key))CRT.q.push({key,L:Object.assign({},L),shot});crtPump();
+  return `<img data-ct="${key}" alt="" draggable="false">`;
+}
+function crtPump(){
+  if(CRT.run)return;CRT.run=true;
+  const step=()=>{
+    if(!crOpen||!CRT.q.length||!crtSetup()){CRT.run=false;return;}
+    const j=CRT.q.shift();let u='';try{u=crtShot(j.L,j.shot);}catch(e){console.warn('creator thumb',e);}
+    CRT.cache.set(j.key,u);for(const im of document.querySelectorAll('img[data-ct]'))if(im.dataset.ct===j.key){im.src=u;im.removeAttribute('data-ct');}
+    setTimeout(step,0);
+  };setTimeout(step,0);
+}
+const crVar=(k,i)=>Object.assign({},myLook,{[k]:i});
+function crGdHair(L){if(L.gd&&[0,4,10].includes(L.hs))L.hs=2;else if(!L.gd&&[2,3,6,7,9].includes(L.hs))L.hs=0;return L;}   // เปลี่ยนเพศ: ทรงผมเริ่มต้นที่เข้ากัน (ยังเปลี่ยนเองได้)
+function tile_(k,i,shot,label,L2){   // การ์ดรูป 1 ใบ (ของล็อก = เทา + 🔒 เลเวล)
+  const L=lookLock(k,i),on=myLook[k]===i,lk=L?`🔒 ${typeof L==='number'?'Lv'+L:L}`:'';
+  return `<button class="crTile ${on?'on':''} ${L?'lk':''}" ${L?'disabled':''} data-k="${k}" data-v="${i}" title="${esc(label||'')}">${crtImg(L2||crVar(k,i),shot)}${label||lk?`<span>${lk||label}</span>`:''}</button>`;
+}
+const grid_=(k,n,shot,names,cls,mk)=>`<div class="crGrid ${cls||''}">${Array.from({length:n},(_,i)=>tile_(k,i,shot,names?names[i]:'',mk?mk(i):null)).join('')}</div>`;
 function crPanelSet(html){
-  const cur=document.activeElement&&document.activeElement.id==='cName';
+  const cur=document.activeElement&&document.activeElement.id==='cName',sc=$('#crPanel').scrollTop;
   $('#crPanel').innerHTML=html;$('#crPanel').classList.toggle('wide',crStep===3);
+  if(crPanelSet.tab===crTab)$('#crPanel').scrollTop=sc;crPanelSet.tab=crTab;   // คลิกการ์ดแล้วไม่เด้งกลับขึ้นบนสุด
   if(cur&&$('#cName'))$('#cName').focus();
 }
-function crRenderStep1(){
-  if(crStep===2){crRenderWand();return;}
-  if(crStep===3){crRenderKit();return;}
-  $('#crTabs').innerHTML=CRTABS.map((t,i)=>`<button class="crTab ${crTab===i?'on':''}" data-tab="${i}"><span>${t[0]}</span>${t[1]}</button>`).join('');
-  const body=[
-    `<h3 class="sec">ใบหน้า</h3><p class="crnote">เลือกสีผิวและสีตาของคุณ</p><label class="f">สีผิว</label>${sw_('sk',SKINC)}<label class="f">สีตา</label>${sw_('ey',EYEC)}`,
-    `<h3 class="sec">ทรงผม</h3><p class="crnote">เลือกทรงและสีผม</p><label class="f">ทรงผม</label>${bt_('hs',HAIRSTY)}<label class="f">สีผม</label>${sw_('hr',HAIRC)}`,
-    `<h3 class="sec">เสื้อคลุม</h3><p class="crnote">ในหนังเสื้อคลุมเป็นสีดำ — สีบ้านที่เลือกในขั้นสุดท้ายจะโผล่ที่ซับใน เนคไท และผ้าพันคอ</p><label class="f">สีเสื้อคลุม</label>${sw_('cl',CLOAKC)}`,
-    `<h3 class="sec">เนคไท</h3><p class="crnote">สีของเนคไทจะตามบ้านที่คุณเลือก</p><label class="f">แบบเนคไท</label>${bt_('ti',TIESTY)}`][crTab];
-  crPanelSet(nameBox_()+body);
+function crRenderGender(){
+  $('#crGender').innerHTML=GENDERN.map((n,i)=>`<button class="crGen ${myLook.gd===i?'on':''}" data-k="gd" data-v="${i}">${crtImg(myLook.gd===i?myLook:crGdHair(crVar('gd',i)),'head')}<b>${n}</b><small>${i?'FEMALE':'MALE'}</small></button>`).join('');
 }
-function crRenderWand(){
-  crPanelSet(nameBox_()+`<h3 class="sec">ไม้กายสิทธิ์ของคุณ</h3><p class="crnote">ไม้กายสิทธิ์เป็นฝ่ายเลือกพ่อมด — แต่ที่นี่คุณเลือกเองได้เลย</p><label class="f">ไม้ (${WOODN[myLook.wd]})</label>${sw_('wd',WOODC)}<label class="f">แกนเวท (${WCOREN[myLook.wc]})</label>${sw_('wc',WCOREC)}<label class="f">ทรงด้าม</label>${bt_('ws',WANDSTY)}<label class="f">ไม้สำเร็จรูป (แทนแบบประกอบเองด้านบน • ไม้ธาตุ = ฆ่าด้วยธาตุนั้น • ✨ = มีประกาย)</label>${bt_('wn',WANDNN.map((n,i)=>i&&WANDN[i].spk?n+' ✨':n))}`);
+function crRenderStep1(){
+  if(crStep===3){crRenderKit();return;}
+  CRT.q.length=0;   // รูปของแท็บก่อนที่ยังไม่ได้ทำ = ทิ้ง (ถ้ายังต้องใช้ จะเข้าคิวใหม่ตอนวาดด้านล่าง)
+  $('#crTabs').innerHTML=CRTABS.map((t,i)=>`<button class="crTab ${crTab===i?'on':''}" data-tab="${i}" style="--i:${i}"><span>${t[0]}</span><b>${t[1]}</b></button>`).join('');
+  crRenderGender();
+  const H=(t,n)=>`<h3 class="sec">${t}</h3>${n?`<p class="crnote">${n}</p>`:''}`;
+  const body=[
+    ()=>H('ดวงตา','เลือกสีดวงตา • ลากที่ตัวละครเพื่อหมุน')+grid_('ey',EYEC.length,'eye',null,'eyes')+`<label class="f">สีผิว</label>${sw_('sk',SKINC)}`,
+    ()=>H('ทรงผม',myLook.gd?'ทรงยาว หางม้า เปียคู่ เหมาะกับตัวละครหญิง':'')+grid_('hs',HAIRSTY.length,'head',HAIRSTY)+`<label class="f">สีผม</label>${sw_('hr',HAIRC)}`,
+    ()=>H('ชุดคลุม','สีบ้านจะโผล่ที่ซับใน เนคไท และผ้าพันคอ'+(myLook.gd?' • ตัวละครหญิงใส่กระโปรงจีบ':''))+grid_('cl',CLOAKC.length,'body',null,'c4'),
+    ()=>H('เนคไท','สีของเนคไทตามบ้านของคุณ')+grid_('ti',TIESTY.length,'chest',TIESTY,'c2'),
+    ()=>H('ไม้กายสิทธิ์','ไม้กายสิทธิ์เป็นฝ่ายเลือกพ่อมด — แต่ที่นี่คุณเลือกเองได้เลย')
+      +`<label class="f">ทรงด้าม</label>`+grid_('ws',WANDSTY.length,'wand',WANDSTY,'c4',i=>Object.assign(crVar('ws',i),{wn:0}))
+      +`<label class="f">ไม้ (${WOODN[myLook.wd]})</label>${sw_('wd',WOODC)}<label class="f">แกนเวท (${WCOREN[myLook.wc]})</label>${sw_('wc',WCOREC)}`
+      +`<label class="f">ไม้สำเร็จรูป <small>(แทนแบบประกอบเอง • ไม้ธาตุ = ฆ่าด้วยธาตุนั้น • ✨ = มีประกาย)</small></label>`+grid_('wn',WANDN.length,'wand',WANDNN.map((n,i)=>i?(WANDN[i].spk?n+' ✨':n):'ประกอบเอง'),'c4')][crTab];
+  crPanelSet(nameBox_()+body());
 }
 // ----- ขั้น 3: สาย + ชุดคาถา -----
 const ROLE_COL={builder:'#ffb066',control:'#8fe0ff',finisher:'#ff7a8a',utility:'#9ad7a0',summon:'#ff9ad5',ult:'#ffe27a'};
@@ -147,7 +217,7 @@ function crRenderHouse(){
   $('#crInfo').style.setProperty('--ht',H.gl);
 }
 function crGo(n){
-  if(crStep===1||crStep===2)crSaveName();
+  if(crStep===1)crSaveName();
   crStep=n;const el=$('#creator');for(const k of [1,2,3,4]){el.classList.toggle('s'+k,n===k);const st=$('#crSt'+k);if(st)st.classList.toggle('on',n===k);}
   document.body.classList.toggle('crRot',n!==3);
   if(n===4){crRenderHouse();STAGE.switchT=0;}else crRenderStep1();
@@ -155,16 +225,16 @@ function crGo(n){
 }
 // ลากเมาส์/นิ้วบนฉากในหน้าสร้างตัวละคร = หมุนตัวละคร (ปล่อยแล้วหมุนต่ออีกนิดตามแรงเหวี่ยง)
 {let lx=0,lt=0;
- addEventListener('pointerdown',e=>{if(!crOpen||crStep===3||e.button>0||e.target.closest('button,input,select,textarea,label,a,.card,.crTabs,.crSteps,.crCrests,.crBar,.crInfo'))return;STAGE.drag=true;STAGE.rotV=0;lx=e.clientX;lt=performance.now();document.body.classList.add('crDrag');});
+ addEventListener('pointerdown',e=>{if(!crOpen||crStep===3||e.button>0||e.target.closest('button,input,select,textarea,label,a,.card,.crTabs,.crSteps,.crCrests,.crBar,.crInfo,.crGender,.crPanel'))return;STAGE.drag=true;STAGE.rotV=0;lx=e.clientX;lt=performance.now();document.body.classList.add('crDrag');});
  addEventListener('pointermove',e=>{if(!STAGE.drag)return;const dx=e.clientX-lx,t=performance.now(),d=Math.max(16,t-lt)/1000;STAGE.rotY+=dx*0.012;STAGE.rotV=clamp(lerp(STAGE.rotV,dx*0.012/d,0.5),-9,9);lx=e.clientX;lt=t;});
  addEventListener('pointerup',()=>{if(!STAGE.drag)return;STAGE.drag=false;document.body.classList.remove('crDrag');if(performance.now()-lt>80)STAGE.rotV=0;});}
 function crSaveName(){const c=$('#cName');if(c){const n=cleanName(c.value);$('#nameIn').value=n;store('wd_name',n);}}
 function crSetHouse(i){if(i===myLook.h&&crStep===4)return;myLook.h=i;STAGE.switchT=0;renderMyHouse();crRenderHouse();}
 function openCreator(first,step){
-  crSaved=lookStr(myLook);crKitSaved=myKit;ac();crFirst=!!first;crOpen=true;crTab=0;crSlot=0;crLib=parseKit(myKit).path;crKitOnly=step===3&&!first;   // creator = look + wand only (user 2026-11-24); step 3 = spell picker from lobby/menu
+  crSaved=lookStr(myLook);crKitSaved=myKit;ac();STAGE.cc=null;crFirst=!!first;crOpen=true;crTab=0;crSlot=0;crLib=parseKit(myKit).path;crKitOnly=step===3&&!first;   // creator = look + wand only (user 2026-11-24); step 3 = spell picker from lobby/menu
   $('#crTitle').textContent=crKitOnly?'เลือกสายและคาถา':first?'สร้างตัวละครของคุณ':'แต่งตัวละคร';
   $('#crCancel').classList.toggle('hidden',!!first);
-  $('#crSteps').classList.toggle('hidden',crKitOnly);
+  $('#crSteps').classList.add('hidden');   // ขั้นเดียวแล้ว (ไม้ = แท็บ 4)
   if(screen==='menu'){document.querySelector('.mprof').classList.add('hidden');document.querySelector('.mleft').classList.add('hidden');}
   document.body.classList.add('crOpenB');document.body.classList.toggle('crGame',screen==='game');
   $('#creator').classList.remove('hidden');crGo(step||1);
@@ -172,7 +242,7 @@ function openCreator(first,step){
 function closeCreator(save){
   if(save){crSaveName();lookClampLocks(myLook);store('wd_look',lookStr(myLook));if(crKitOnly)store('wd_kit2',myKit);if(JOINQ){const c=JOINQ;JOINQ='';setTimeout(()=>joinGame(c),300);}}
   else{myLook=parseLook(crSaved);myKit=crKitSaved;}
-  crOpen=false;STAGE.rotY=STAGE.rotV=0;document.body.classList.remove('crRot');renderMyHouse();$('#creator').classList.add('hidden');
+  crOpen=false;crtDrop();STAGE.rotY=STAGE.rotV=0;document.body.classList.remove('crRot');renderMyHouse();$('#creator').classList.add('hidden');
   if(screen==='menu'){document.querySelector('.mprof').classList.remove('hidden');document.querySelector('.mleft').classList.remove('hidden');}
   document.body.classList.remove('crOpenB','crGame');
 }
@@ -189,7 +259,9 @@ $('#creator').addEventListener('click',e=>{
   const ks=e.target.closest('[data-ks]');if(ks){crSlot=+ks.dataset.ks;crRenderKit();return;}
   const ksp=e.target.closest('[data-ksp]');if(ksp){crAssign(+ksp.dataset.ksp);return;}
   const t=e.target.closest('[data-k]');if(!t)return;
-  myLook[t.dataset.k]=+t.dataset.v;crRenderStep1();
+  const k=t.dataset.k,v=+t.dataset.v;
+  const old=myLook[k];myLook[k]=v;if(k==='gd'&&v!==old){crGdHair(myLook);snd('buff');}
+  crRenderStep1();
 });
 $('#creator').addEventListener('mouseover',e=>{
   const d=$('#kdesc');if(!d)return;const k=parseKit(myKit);
@@ -206,8 +278,6 @@ $('#creator').addEventListener('dragover',e=>{const t=e.target.closest('[data-ks
 $('#creator').addEventListener('dragleave',e=>{const t=e.target.closest('[data-ks]');if(t)t.classList.remove('drop');});
 $('#creator').addEventListener('drop',e=>{const t=e.target.closest('[data-ks]');if(!t)return;e.preventDefault();const si=+e.dataTransfer.getData('text/plain');if(!isNaN(si)){crSlot=+t.dataset.ks;crAssign(si);}});
 $('#crRand').onclick=()=>{const k={h:myLook.h,wd:myLook.wd,wc:myLook.wc,ws:myLook.ws};myLook=lookClampLocks(Object.assign(randLook(),k));crRenderStep1();};
-$('#crNext').onclick=()=>crGo(2);
-$('#crBack2').onclick=()=>crGo(1);
 $('#crKitOk').onclick=()=>{store('wd_kit2',myKit);closeCreator(true);lobbyKitSend();};
 $('#crOk').onclick=()=>closeCreator(true);
 $('#crCancel').onclick=()=>closeCreator(false);

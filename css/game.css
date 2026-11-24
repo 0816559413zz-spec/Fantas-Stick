@@ -564,3 +564,43 @@ body.crOpenB .mver{display:none}
 #devPanel .dvnote{padding:3px 8px;font-size:11px;color:#9aa3ad;line-height:1.5;word-break:break-all}
 #devPanel .dvrec,#devRecBadge{color:#ff5a5a;font-weight:700;white-space:nowrap}
 #devRecBadge{position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:61;font:700 13px monospace;background:rgba(0,0,0,.55);padding:3px 10px;border-radius:3px;pointer-events:none}
+/* ===== หน้าแต่งตัวแบบรูปภาพ (ผู้ใช้ 2026-11-24, js/39 crRenderStep1): เพศด้านบน • ไอคอนหมวดวงโค้งซ้าย • การ์ดรูปจากโมเดลจริงด้านขวา ===== */
+#creator .crSteps{display:none!important}
+#creator.s1 .crShade{background:linear-gradient(270deg,rgba(4,6,14,.88) 0,rgba(4,6,14,.6) 30%,transparent 52%),linear-gradient(90deg,rgba(4,6,14,.7) 0,transparent 22%),linear-gradient(0deg,rgba(2,3,8,.7),transparent 26%),linear-gradient(180deg,rgba(2,3,8,.5),transparent 16%)}
+#creator.s1 .crTabs{left:30px;top:50%;transform:translateY(-50%);gap:16px}
+#creator.s1 .crTabs::before{content:'';position:absolute;left:-150px;top:-60px;bottom:-60px;width:260px;border:1px solid rgba(243,220,148,.18);border-left:0;border-radius:0 50% 50% 0/0 50% 50% 0;pointer-events:none}
+#creator.s1 .crTab{width:56px;height:56px;padding:0;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:radial-gradient(circle at 50% 35%,#2a3557,#0c1226);color:#c9d2ea;margin-left:calc((var(--i) - 2) * (var(--i) - 2) * -7px + 28px);justify-content:center;transition:transform .15s,box-shadow .15s}
+#creator.s1 .crTab span{font-size:0;width:26px;height:26px}.crTab span svg{width:100%;height:100%}
+#creator.s1 .crTab b{position:absolute;left:66px;top:50%;transform:translateY(-50%);white-space:nowrap;font-size:13px;font-weight:500;padding:5px 14px;border-radius:20px;background:rgba(10,15,32,.9);border:1px solid var(--gold);color:var(--gold2);opacity:0;pointer-events:none;transition:opacity .15s}
+#creator.s1 .crTab:hover{transform:scale(1.07)}#creator.s1 .crTab:hover b{opacity:.85}
+#creator.s1 .crTab.on{border-color:var(--gold2);color:var(--gold2);background:radial-gradient(circle at 50% 35%,#4a5a8c,#16204a);box-shadow:0 0 0 4px rgba(243,220,148,.15),0 0 22px rgba(243,220,148,.4)}
+#creator.s1 .crTab.on b{opacity:1}
+.crGender{position:absolute;left:50%;top:18px;transform:translateX(-50%);display:flex;gap:12px;z-index:2}
+.crGen{display:flex;align-items:center;gap:10px;padding:4px 20px 4px 4px;border-radius:40px;background:rgba(9,14,30,.82);border:1px solid rgba(255,255,255,.16);color:var(--mute);text-align:left}
+.crGen img{width:46px;height:46px;border-radius:50%;background:linear-gradient(180deg,#56627e,#262d44);object-fit:cover}
+.crGen b{font-size:16px;font-weight:600;display:block;line-height:1.1}.crGen small{display:block;font-size:9px;letter-spacing:3px;font-family:var(--fd);opacity:.7}
+.crGen{display:grid;grid-template-columns:46px auto;grid-template-rows:auto auto;column-gap:10px;align-items:center}.crGen img{grid-row:1/3}
+.crGen.on{border-color:var(--gold2);color:var(--gold2);background:linear-gradient(180deg,rgba(60,74,120,.9),rgba(20,28,58,.9));box-shadow:0 0 18px rgba(243,220,148,.35)}
+#creator.s1 .crPanel{left:auto;right:26px;top:84px;width:min(420px,44vw);max-height:calc(100% - 172px);padding:16px 16px 18px;background:rgba(9,13,28,.74);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:14px}
+#creator.s1 .crBar{left:auto;right:26px;width:min(420px,44vw)}
+.crGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:10px 0 4px}
+.crGrid.c4{grid-template-columns:repeat(4,1fr);gap:7px}.crGrid.c2{grid-template-columns:repeat(2,1fr)}
+.crTile{position:relative;padding:0;aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.14);background:radial-gradient(circle at 50% 30%,#6b7896,#2c3450 75%);display:block;transition:transform .12s,box-shadow .12s}
+.crTile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.crTile img[data-ct]{background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.12) 50%,transparent 70%) 0 0/250% 100%;animation:crShim 1.1s linear infinite}
+@keyframes crShim{to{background-position:-250% 0}}
+.crTile span{position:absolute;left:0;right:0;bottom:0;padding:12px 4px 4px;font-size:11px;line-height:1.2;color:#e9e2cf;background:linear-gradient(0deg,rgba(4,6,14,.85),transparent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crTile:hover{transform:translateY(-2px);border-color:rgba(243,220,148,.6)}
+.crTile.on{border-color:var(--gold2);box-shadow:0 0 0 2px var(--gold2),0 0 16px rgba(243,220,148,.5)}
+.crTile.on::after{content:'✓';position:absolute;right:5px;top:4px;width:18px;height:18px;border-radius:50%;background:var(--gold2);color:#2a1d05;font-size:12px;line-height:18px;font-weight:700}
+.crTile.lk{filter:grayscale(.9) brightness(.55);cursor:not-allowed}.crTile.lk:hover{transform:none}
+.crGrid.eyes{grid-template-columns:repeat(4,1fr);gap:12px;padding:2px 4px}
+.crGrid.eyes .crTile{border-radius:50%;border-width:2px}
+.crGrid.eyes .crTile.on::after{display:none}
+.crPanel .crSw{gap:9px;padding:2px 2px 4px}
+.crPanel .crSw .sw{width:28px;height:28px;border-radius:50%;transform:none;border:2px solid rgba(255,255,255,.22)}
+.crPanel .crSw .sw:hover{transform:scale(1.12)}.crPanel .crSw .sw.on{transform:scale(1.12);border-color:var(--gold2);box-shadow:0 0 0 2px rgba(9,13,28,.9),0 0 0 4px var(--gold2)}
+.crPanel label.f small{color:var(--mute);font-size:11px}
+@media (max-width:760px){#creator.s1 .crPanel,#creator.s1 .crBar{width:auto;left:84px}.crGrid{grid-template-columns:repeat(3,1fr)}.crGender{top:70px}}
+.crGender{left:auto;right:140px;transform:none}
+@media (max-height:640px){#creator.s1 .crTabs{gap:9px;top:calc(50% + 24px)}#creator.s1 .crTab{width:46px;height:46px}#creator.s1 .crTab span{width:22px;height:22px}#creator.s1 .crTab b{left:56px}.crTop h2{font-size:26px}.crGen img{width:38px;height:38px}.crGen{grid-template-columns:38px auto}#creator.s1 .crPanel{top:72px;max-height:calc(100% - 150px)}}

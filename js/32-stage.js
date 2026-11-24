@@ -86,7 +86,7 @@ const POSES=[
   [-2.0,-0.1,-0.12,0.5,-0.02,0]];   // 4 = ท่าโชว์ไม้กายสิทธิ์ (ขั้นเลือกไม้กาย)
 function stageIdle(o,now,dt,i){
   o.joinT=Math.max(0,o.joinT-dt);
-  const lift=Math.min(1,o.joinT*1.2),h=(o.pid==='me-preview'&&crOpen&&(crStep===2||crStep===3))?4:(o.house|0),T=POSES[h];
+  const lift=Math.min(1,o.joinT*1.2),h=(o.pid==='me-preview'&&crOpen&&(crStep===3||crWandTab()))?4:(o.house|0),T=POSES[h];
   if(!o.pp)o.pp=T.slice();
   const k=1-Math.exp(-7*dt);for(let j=0;j<6;j++)o.pp[j]+=(T[j]-o.pp[j])*k;
   const P=o.pp,t=now/1000;
@@ -268,7 +268,11 @@ function renderStage(dt,now){
   // กล้อง: เมนู = ตัวเราอยู่ฝั่งขวา / ล็อบบี้ = มองทั้งแท่น
   const sway=Math.sin(now/5200)*0.15;
   if(lob){const mx=Math.max(0,...rows.map(r=>Math.abs(r.s.x)),...STAGE.empty.map(e=>Math.abs(e.x))),dist=clamp((mx+1.1)/(0.3*cam.aspect),6.5,13);cam.position.set(sway,1.5+dist*0.1,dist);cam.lookAt(0,1.45,0);}
-  else if(crOpen){const s3=crStep===4,sw=crStep===2||crStep===3;cam.position.set(-0.45+sway*0.4,s3?1.95:sw?1.85:1.8,s3?4.5:sw?3.2:3.9);cam.lookAt(-0.45,s3?1.2:sw?1.55:1.5,0);}
+  else if(crOpen){   // หน้าแต่งตัว (2026-11-24): ใบหน้า/ผม = ซูมหน้า • ชุด/เนคไท = ทั้งตัว • ไม้ = มือถือไม้ • ตัวละครอยู่ซ้ายกลาง แผงการ์ดอยู่ขวา • เลื่อนกล้องนุ่ม ๆ
+    const T=crStep===4?[-0.45,1.95,4.5,-0.45,1.2]:crStep===3?[-0.45,1.85,3.2,-0.45,1.55]:crTab<2?[0.5,2.3,1.75,0.5,2.18]:crTab===4?[0.95,2.05,3.1,0.95,1.8]:[1.05,1.65,4.6,1.05,1.32];
+    const C=STAGE.cc||(STAGE.cc={p:new THREE.Vector3(T[0],T[1],T[2]),l:new THREE.Vector3(T[3],T[4],0)}),k=1-Math.exp(-6*dt);
+    C.p.x+=(T[0]-C.p.x)*k;C.p.y+=(T[1]-C.p.y)*k;C.p.z+=(T[2]-C.p.z)*k;C.l.x+=(T[3]-C.l.x)*k;C.l.y+=(T[4]-C.l.y)*k;
+    cam.position.set(C.p.x+sway*(crTab<2&&crStep===1?0.08:0.4),C.p.y,C.p.z);cam.lookAt(C.l);}
   else{
     // หน้าแรก: กล้องโฉบจากมุมสูงไกลลงมาหาตัวละครตอนกดผ่านฉากเปิด (STAGE.introT 0→1) แล้วลอยช้าๆ
     const u=STAGE.introT<0?0:Math.min(1,STAGE.introT),e=1-Math.pow(1-u,3);

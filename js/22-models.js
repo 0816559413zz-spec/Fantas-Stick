@@ -181,7 +181,7 @@ function useFileModel(o,name,tint,look){
     if(!r||o.fileModel||!o.g.parent)return;
     const inst=modelInst(name);if(!inst)return;
     if(tint)tintModel(inst,tint);
-    if(look){fileVariants(inst,look);const off=[];inst.traverse(m=>{if(!m.visible&&/^(hair|tie|wand)_\d+$/.test(m.name))off.push(m);});for(const m of off)m.parent.remove(m);}   // ทรงที่ไม่ได้เลือก: ถอดทิ้ง (ซ่อนไว้ three ก็ยังคำนวณทุกเฟรม)
+    if(look){fileVariants(inst,look);if(name==='char_student')lookGender(inst,look);const off=[];inst.traverse(m=>{if(!m.visible&&/^(hair|tie|wand)_\d+$/.test(m.name))off.push(m);});for(const m of off)m.parent.remove(m);}   // ทรงที่ไม่ได้เลือก: ถอดทิ้ง (ซ่อนไว้ three ก็ยังคำนวณทุกเฟรม)
     if(name==='char_student'&&!new URLSearchParams(location.search).has('unbatchedStudent')){shareSkinSkeletons(inst);if(!(o.bat&&mergeStudent(inst)))batchStudentSkin(inst);}
     if(name==='char_student')inst.traverse(m=>{if(m.isMesh&&/^(tie_|wand_|hair_base|char_student_7$)/.test(m.name))m.castShadow=false;});
     if(name==='char_student')inst.traverse(m=>{if(m.isMesh&&!m.isSkinnedMesh)m.material=matTwin(m.material,'rigid');});   // ผม/เนคไท/ไม้ (ไม่ skinned) ใช้วัสดุแฝด: วัสดุเดียวกันอาจเป็น skinned ในตัวเราหรือคนอื่น (student_pal ใช้ร่วมทุกคน) → ไม่สลับทุกเฟรม   // ชิ้นเล็กไม่ทอดเงา: เงาแทบไม่เห็น แต่ต้องวาดใน shadow pass ทุกคน (OPTIMIZE §G)
@@ -205,6 +205,27 @@ function useFileModel(o,name,tint,look){
 function rigStage(o){for(const k of o.rig){if(k.al)continue;const r=k.c.rotation;r.y=0;if(k.leg)r.z=0;k.sx=k.sz=0;}}
 // ชิ้นที่ผู้เล่นเลือกได้: object ชื่อ hair_<ทรงผม> tie_<เนคไท> wand_<ไม้> → โชว์เฉพาะเลขที่ตรงกับหน้าตา
 function fileVariants(inst,look){const K={hair:'hs',tie:'ti',wand:'ws'};inst.traverse(m=>{const r=/^(hair|tie|wand)_(\d+)$/.exec(m.name);if(r)m.visible=+r[2]===look[K[r[1]]]&&!(r[1]==='wand'&&look.wn>0);});}
+// เพศ (look.gd, ผู้ใช้ 2026-11-24): โมเดลเดียวกันทั้งสองเพศ — หญิง = กระโปรงจีบที่สะโพก + ขนตา + แก้มชมพูที่หัว (ไม่มี Blender → ทำจากโค้ด)
+//   ตำแหน่งในแกนกระดูก head (y ขึ้น, z หน้า): ตา x ±0.087 y 0.165 หน้าผิว z ~0.25 • ของใช้ร่วมทุกตัว (keep) • กระโปรง/ขนตาถูกรวมเข้า mesh เดียว (mergeStudent) แก้มโปร่งแสงแยกไว้
+const GDX={};
+function gdParts(){if(GDX.skirt)return GDX;const K=o=>{o.userData.keep=true;return o;};
+  const g=new THREE.CylinderGeometry(0.235,0.35,0.4,32,1,true),P=g.attributes.position;
+  for(let i=0;i<P.count;i++){const x=P.getX(i),z=P.getZ(i),a=Math.atan2(z,x),f=((a/(Math.PI*2)*16)%1+1)%1,r=1+(P.getY(i)<0?0.07:0.02)*(Math.abs(f-0.5)*2-0.5);P.setX(i,x*r);P.setZ(i,z*r);}   // จีบ 16 ทบ ลึกขึ้นที่ชายกระโปรง
+  g.computeVertexNormals();GDX.skirt=K(g);
+  GDX.skirtM=K(new THREE.MeshStandardMaterial({name:'gd_skirt',color:'#3b3d48',roughness:0.85,side:THREE.DoubleSide}));
+  GDX.lash=K(new THREE.TorusGeometry(0.034,0.0068,5,14,Math.PI*0.8));GDX.flick=K(new THREE.ConeGeometry(0.008,0.032,4));
+  GDX.lashM=K(new THREE.MeshStandardMaterial({name:'gd_lash',color:'#160c10',roughness:0.6}));
+  GDX.blush=K(new THREE.CircleGeometry(0.03,16));GDX.blushM=K(new THREE.MeshBasicMaterial({name:'gd_blush',color:'#ff7a8a',transparent:true,opacity:0.35,depthWrite:false}));
+  return GDX;}
+function lookGender(inst,look){
+  if(!look||look.gd!==1)return;const P=gdParts(),hips=inst.getObjectByName('hips'),head=inst.getObjectByName('head');
+  const mk=(par,geo,mat,x,y,z)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=false;m.name='gd_part';par.add(m);return m;};
+  if(hips){const m=mk(hips,P.skirt,P.skirtM,0,-0.08,0);m.castShadow=true;}
+  if(head)for(const s of [-1,1]){const ex=s*0.087,ey=0.165,ez=0.236;
+    const a=mk(head,P.lash,P.lashM,ex,ey,ez);a.rotation.set(-0.25,0,Math.PI*0.1);             // ขนตาโค้งบนตา
+    const f=mk(head,P.flick,P.lashM,ex+s*0.036,ey+0.012,ez-0.004);f.rotation.z=-s*1.0;           // หางขนตาตวัดออกหางตา
+    const b=mk(head,P.blush,P.blushM,s*0.14,0.095,0.215);b.rotation.y=s*0.55;b.scale.y=0.6;b.renderOrder=2;}
+}
 function fileBroom(o){loadModel('char_broom').then(r=>{if(!r||!o.g.parent||!o.broom)return;const m=modelInst('char_broom');if(!m)return;for(const c of [...o.broom.children])o.broom.remove(c);o.broom.add(m);});}
 // แขนขาโค้ด (o.armR/armL/legs ที่คาถาต่างๆ จัดท่า) ↔ กระดูกโมเดลไฟล์
 //  • แขนขวา (ถือไม้) = ตามโค้ดเสมอ → ปลายไม้/ดาบน้ำแข็งที่ติดแขนโค้ดตรงกับมือโมเดล

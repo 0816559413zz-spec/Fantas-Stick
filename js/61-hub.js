@@ -423,7 +423,7 @@ const LOBBY_POSES=['spread','hero','duel','orb2','rest','cast'];
 function hubMakeChar(lk){
   const r=MODELS.ready.get('char_student');if(!r)return null;
   const inst=modelInst('char_student');if(!inst)return null;
-  const L=parseLook(lk);tintModel(inst,lookTint(L));fileVariants(inst,L);
+  const L=parseLook(lk);tintModel(inst,lookTint(L));fileVariants(inst,L);lookGender(inst,L);
   inst.traverse(m=>{if(m.isMesh){m.castShadow=true;m.frustumCulled=false;}});
   const g=new THREE.Group();g.add(inst);
   const B={};inst.traverse(o=>{if(o.isBone)B[o.name]=o;});
