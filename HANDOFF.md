@@ -8,6 +8,8 @@
 
 ## Latest notes (newest first)
 
+**Map Builder Road tool (2026-11-24, tool 🛣 key U):** click points → `dc_road` object (`pts` relative to x/z, `w`, `k`, `curb`). Shared `dkRoad(P,w,curb,yAt,seed)` in the `@dk-begin…@dk-end` block of `js/28-fcs-castle.js`: Catmull-Rom curve, ~1 m steps, draped on the ground, optional sandstone curbs. New DK textures `cobble` (19) and `dirtp` (20, wheel ruts). Export: `data.deco` item `{t:'road',p:[[px,py]…],w,k,curb}`; game `fcsDecoFile` builds it with `TW` heights, merged per material. Edit with Select: drag points, Alt+click adds, Delete removes. Tested in Map Builder + in game (test map removed).
+
 **Whole town kit 1.5× (2026-11-24, `tools/town-assets.mjs` `HS` in `add()`):** props, lamps, fences and roads/paving now also ×1.5 (roads/paving in x/z only, same thickness; steps scale fully). Names updated (Cobble Road 6x6, Plaza 12x12, Fence 6m…). Road pieces now snap on a 6 m grid. town-demo is 300×150, street scene stretched ×1.5, re-exported. Maps that already use town roads/props (fcs-file) need a check + re-export.
 
 **Town houses 1.5× bigger (2026-11-24, `tools/town-assets.mjs` `HS`):** the 16 town/* houses were real-life size (2.8–3 m floors) next to the game's ~4.5 m house floors; now scaled 1.5× (names: Cottage 7x7, Big 12x15, Wide 15x9). Props/roads/lamps unchanged. Placed instances grow automatically in Map Builder; a map's game .glb changes only after re-export (town-demo re-exported, catalog rows + 4 spawns moved; fcs-file not re-exported). Check maps for houses now overlapping.

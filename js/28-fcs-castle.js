@@ -182,7 +182,7 @@ function fcsRoomsView(){const D=fcsDecoKit();for(const r of FCS_ROOMS)if(r.view&
 const DK_TEX={brick:[1,'#9c4a34',0.9,0],brickw:[1,'#c9b8a0',0.9,0],rubble:[3,'#8e8778',0.95,0],sand:[4,'#c8a571',0.92,0],marble:[5,'#e6e1d8',0.35,0],
   plaster:[6,'#d8cdb4',0.95,0],plank:[7,'#7a5534',0.85,0],tiles:[8,'#a8583a',0.8,0],slate:[9,'#5b5f66',0.7,0],thatch:[10,'#a88a52',1,0],
   copper:[11,'#6a9a88',0.6,0.3],gold:[12,'#d8b45a',0.4,0.55],rock:[13,'#7d776c',0.95,0],ironp:[14,'#6a6d72',0.55,0.35],stained:[15,'#ffffff',0.3,0],
-  timber:[16,'#d6c9ab',0.92,0],flag:[17,'#9a9488',0.9,0],mossy:[18,'#8a8676',0.95,0]};   // key: [pattern, colour, roughness, metalness]
+  timber:[16,'#d6c9ab',0.92,0],flag:[17,'#9a9488',0.9,0],mossy:[18,'#8a8676',0.95,0],cobble:[19,'#8f897d',0.9,0],dirtp:[20,'#8c7152',1,0]};   // key: [pattern, colour, roughness, metalness]
 const DK_GLSL=`varying vec2 vDU;varying vec3 vDW;varying vec3 vDN;
 float dkH(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float dkN(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(dkH(i),dkH(i+vec2(1.,0.)),f.x),mix(dkH(i+vec2(0.,1.)),dkH(i+vec2(1.,1.)),f.x),f.y);}
@@ -244,6 +244,12 @@ const DK_FRAG=`vec2 p=vDU;vec3 wn=normalize(vDN);float fw=max(length(fwidth(p)),
 #elif DKM==18
   {vec4 u=dkU(p,0.9,0.45,0.5);vec3 s=c0*(0.75+0.4*u.y)*(0.82+0.35*nz);s=mix(s*0.45,s,dkE(u.x,0.018,fw));
   float mo=smoothstep(0.48,0.72,dkF(p*0.6+vec2(0.,vDW.y*0.2)))*(0.55+0.45*smoothstep(0.3,0.8,wn.y));c=mix(s,vec3(0.26,0.33,0.15)*(0.75+0.5*nz),mo*0.85);av=mix(c0,vec3(0.3,0.36,0.2),0.3);S=0.45;}
+#elif DKM==19
+  {vec4 u=dkU(p,0.3,0.24,0.5);float sh=smoothstep(0.,0.075,u.x);vec3 s=c0*(0.7+0.45*u.y)*(0.85+0.3*nz)*(0.62+0.48*sh);   // rounded setts
+  s=mix(s,vec3(0.36,0.4,0.27),0.5*smoothstep(0.62,0.8,dkF(p*0.8+3.))*(1.-sh));c=mix(vec3(0.33,0.3,0.26)*(0.8+0.3*nz),s,dkE(u.x,0.018,fw));av=c0*0.82;S=0.18;}
+#elif DKM==20
+  {float g=dkF(p*1.3)*0.6+dkF(p*5.)*0.4;vec3 s=c0*(0.72+0.5*g);float rt=exp(-pow((abs(p.x)-0.8)/0.2,2.));s*=1.-0.32*rt*(0.6+0.4*dkN(vec2(p.x*3.,p.y*0.8)));   // wheel ruts (road centre at x=0)
+  vec3 v=dkV(p*5.);float pb=(1.-dkE(v.z,0.14,fw*5.))*step(0.9,v.y);s=mix(s,c0*vec3(1.05,1.05,1.1)*(0.75+0.3*v.y),pb*0.7);s=mix(s,c0*0.6,0.35*smoothstep(0.55,0.75,dkF(p*0.35+9.)));c=s;av=c0*0.85;S=0.4;}
 #endif
 c=mix(c,av,smoothstep(S*0.35,S*1.2,fw));   // far: blend to the average (no shimmer)
 c*=0.9+0.2*dkN(vDW.xz*0.04+vDW.y*0.05);   // big-scale weathering
@@ -296,12 +302,37 @@ function dkGeo(o,seed){
   const D=g.attributes.dkuv;if(D&&sd){const ou=(sd*7.31)%13,ov=(sd*3.17)%11;for(let i=0;i<D.count;i++)D.setXY(i,D.getX(i)+ou,D.getY(i)+ov);}   // per-object offset: no stamped copies
   return g;
 }
+// dkRoad(P,w,curb,yAt,seed): road ribbon along a smooth curve through P=[[x,z]…] (Catmull-Rom, ~1 m steps), draped on yAt(x,z)
+// → {road, curb|null}: non-indexed, position/normal/uv/dkuv (dkuv x = across, 0 on the centre line • y = metres along)
+function dkRoad(P,w,curb,yAt,seed){
+  const n=P.length;if(n<2)return null;const S=[],cr=(a,b,c,d,t)=>{const t2=t*t,t3=t2*t;return [0,1].map(k=>0.5*(2*b[k]+(-a[k]+c[k])*t+(2*a[k]-5*b[k]+4*c[k]-d[k])*t2+(-a[k]+3*b[k]-3*c[k]+d[k])*t3));};
+  for(let i=0;i<n-1;i++){const a=P[Math.max(0,i-1)],b=P[i],c=P[i+1],d=P[Math.min(n-1,i+2)],m=Math.max(1,Math.ceil(Math.hypot(c[0]-b[0],c[1]-b[1])));for(let j=0;j<m;j++)S.push(cr(a,b,c,d,j/m));}
+  S.push(P[n-1]);const N=S.length,T=[],D=[0];
+  for(let i=0;i<N;i++){const a=S[Math.max(0,i-1)],b=S[Math.min(N-1,i+1)],l=Math.hypot(b[0]-a[0],b[1]-a[1])||1;T.push([(b[0]-a[0])/l,(b[1]-a[1])/l]);if(i)D.push(D[i-1]+Math.hypot(S[i][0]-S[i-1][0],S[i][1]-S[i-1][1]));}
+  const so=((seed||0)*7.31)%13,lift=0.05;
+  const strip=(prof,flip)=>{   // prof(i) → [[x,y,z,u],…] across one sample • quads between samples
+    const pos=[],uv=[],dk=[];let A=prof(0);
+    for(let i=1;i<N;i++){const B=prof(i);for(let c=0;c<A.length-1;c++){const q=[[A[c],D[i-1]],[A[c+1],D[i-1]],[B[c],D[i]],[A[c+1],D[i-1]],[B[c+1],D[i]],[B[c],D[i]]];
+        if(flip){const t=q[1];q[1]=q[2];q[2]=t;const t2=q[4];q[4]=q[5];q[5]=t2;}
+        for(const [v,d] of q){pos.push(v[0],v[1],v[2]);uv.push(v[3]/w+0.5,d/w);dk.push(v[3]+so,d);}}A=B;}
+    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+    g.setAttribute('dkuv',new THREE.Float32BufferAttribute(dk,2));g.computeVertexNormals();return g;};
+  const nc=Math.max(2,Math.ceil(w/1.2)),at=(i,s)=>{const x=S[i][0]-T[i][1]*s,z=S[i][1]+T[i][0]*s;return [x,yAt(x,z),z];};   // left normal = (-tz, tx)
+  const road=strip(i=>{const r=[];for(let c=0;c<=nc;c++){const s=-w/2+w*c/nc,q=at(i,s);r.push([q[0],q[1]+lift,q[2],s]);}return r;});
+  if(!curb)return {road,curb:null};
+  const cw=0.35,ch=0.16,L=[];
+  for(const sd of [1,-1])L.push(strip(i=>{const a=at(i,sd*w/2),b=at(i,sd*(w/2+cw)),top=Math.max(a[1],b[1])+ch;
+    return [[a[0],a[1]-0.05,a[2],0],[a[0],top,a[2],ch],[b[0],top,b[2],ch+cw],[b[0],b[1]-0.05,b[2],2*ch+cw]];},sd<0));
+  return {road,curb:mergeGeometries(L,false)};
+}
 // @dk-end
 // Map Builder decor (data.deco, MAP-STANDARD round 4): same builder; x,y px • h = lift above the ground (m) • a = yaw
 function fcsDecoFile(list){
   const D=fcsDecoKit(),V=D.V;
   for(const o of list)try{const x=tx(o.x),z=tz(o.y),y=GY(o.x,o.y)+(o.h||0),k=o.k||'stone';
-    if(DK_SHAPE.has(o.t)){const g=dkGeo(o,o.x*0.013+o.y*0.029);if(!g)continue;if(!DK_TEX[k])g.deleteAttribute('dkuv');   // same attributes per material group (merge)
+    if(o.t==='road'){const R=dkRoad((o.p||[]).map(q=>[tx(q[0]),tz(q[1])]),o.w||4,o.curb,(X,Z)=>TW(X,Z)+(o.h||0),o.x*0.013+o.y*0.029);if(!R)continue;   // Map Builder road (pts in map px)
+      if(!DK_TEX[k])R.road.deleteAttribute('dkuv');V.geo(k,R.road);if(R.curb)V.geo('sand',R.curb);}
+    else if(DK_SHAPE.has(o.t)){const g=dkGeo(o,o.x*0.013+o.y*0.029);if(!g)continue;if(!DK_TEX[k])g.deleteAttribute('dkuv');   // same attributes per material group (merge)
       if(o.t==='box'&&k==='lit'&&!o.a)hallWinRec(x,y,z,o.sx||1,o.sy||1,o.sz||1);if(o.a)g.rotateY(o.a);g.translate(x,y,z);V.geo(k,g);}
     else if(o.t==='banner'||o.t==='torch')V[o.t](x,GY(o.x,o.y)+(o.h||0),z,Math.sin(o.a||0),Math.cos(o.a||0));
     else if(o.t==='flag'||o.t==='post')V[o.t](x,y,z);

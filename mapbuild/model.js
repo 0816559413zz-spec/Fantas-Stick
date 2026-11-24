@@ -83,16 +83,17 @@ export const DECO_MAT = [['stone', 'castle stone'], ['dark', 'Dark Rock'], ['roo
   // textured (game js/28-fcs-castle.js DK_TEX, procedural, surface coords in metres)
   ['brick', '▦ Red Brick'], ['brickw', '▦ Pale Brick'], ['rubble', '▦ Rubble Stone'], ['sand', '▦ Sandstone Blocks'], ['marble', '▦ Marble'], ['mossy', '▦ Mossy Castle Stone'],
   ['flag', '▦ Flagstone Floor'], ['rock', '▦ Natural Rock (moss on top)'], ['plaster', '▦ Plaster (brick patches)'], ['timber', '▦ Half-Timber'], ['plank', '▦ Wood Planks'],
-  ['tiles', '▦ Clay Roof Tiles'], ['slate', '▦ Slate Roof'], ['thatch', '▦ Thatch'], ['copper', '▦ Copper Roof (patina)'], ['gold', '▦ Gold Trim'], ['ironp', '▦ Riveted Iron Plates'], ['stained', '▦ Stained Glass (glows)']];
-export const DECO_TEX = new Set(['brick', 'brickw', 'rubble', 'sand', 'marble', 'mossy', 'flag', 'rock', 'plaster', 'timber', 'plank', 'tiles', 'slate', 'thatch', 'copper', 'gold', 'ironp', 'stained']);
+  ['tiles', '▦ Clay Roof Tiles'], ['slate', '▦ Slate Roof'], ['thatch', '▦ Thatch'], ['copper', '▦ Copper Roof (patina)'], ['gold', '▦ Gold Trim'], ['ironp', '▦ Riveted Iron Plates'], ['stained', '▦ Stained Glass (glows)'], ['cobble', '▦ Cobblestones'], ['dirtp', '▦ Dirt Path (ruts)']];
+export const DECO_TEX = new Set(['brick', 'brickw', 'rubble', 'sand', 'marble', 'mossy', 'flag', 'rock', 'plaster', 'timber', 'plank', 'tiles', 'slate', 'thatch', 'copper', 'gold', 'ironp', 'stained', 'cobble', 'dirtp']);
 export const DECO_SHAPE = new Set(['dc_box', 'dc_cyl', 'dc_cone', 'dc_pyr', 'dc_dome', 'dc_wedge', 'dc_arch', 'dc_cren', 'dc_rock']);   // take a Material
 export const DECO_COL = { stone: '#c2b298', dark: '#8f8270', roof: '#5d6470', lit: '#ffc77a', wood: '#5a3f28', iron: '#2b2a2a', carpet: '#7a1a20', slit: '#17120e', floor: '#b4a68e', roof2: '#8c4a32', lit2: '#ffb15a',
   brick: '#9c4a34', brickw: '#c9b8a0', rubble: '#8e8778', sand: '#c8a571', marble: '#e6e1d8', mossy: '#7f826a', flag: '#9a9488', rock: '#7d776c', plaster: '#d8cdb4', timber: '#8a7a62',
-  plank: '#7a5534', tiles: '#a8583a', slate: '#58606c', thatch: '#a88a52', copper: '#5f9e8a', gold: '#c9a24a', ironp: '#4a4c50', stained: '#7a5aa8' };
+  plank: '#7a5534', tiles: '#a8583a', slate: '#58606c', thatch: '#a88a52', copper: '#5f9e8a', gold: '#c9a24a', ironp: '#4a4c50', stained: '#7a5aa8', cobble: '#8f897d', dirtp: '#8c7152' };
 Object.assign(OBJ, {
   dc_box: { n: 'Decor Box', cat: 'deco', c: '#c2b298' }, dc_cyl: { n: 'Decor Cylinder', cat: 'deco', c: '#c2b298' }, dc_cone: { n: 'Cone/Spire', cat: 'deco', c: '#5d6470' },
   dc_pyr: { n: 'Pyramid (square roof)', cat: 'deco', c: '#5d6470' }, dc_dome: { n: 'Dome', cat: 'deco', c: '#5f9e8a' }, dc_wedge: { n: 'Wedge / Ramp', cat: 'deco', c: '#c2b298' },
   dc_arch: { n: 'Arch (wall with opening)', cat: 'deco', c: '#c2b298' }, dc_cren: { n: 'Battlements (merlons)', cat: 'deco', c: '#c2b298' }, dc_rock: { n: 'Rock', cat: 'deco', c: '#7d776c' },
+  dc_road: { n: 'Road (drawn path)', cat: 'deco', c: '#8f897d' },
   dc_roof: { n: 'Gable Roof', cat: 'deco', c: '#5d6470' }, dc_flame: { n: 'Flame (torch/candle)', cat: 'deco', c: '#ffb060' }, dc_cloth: { n: 'Hanging Cloth/Banner', cat: 'deco', c: '#7a1418' },
   dc_shield: { n: 'Wall Shield', cat: 'deco', c: '#7a1a20' }, dc_chand: { n: 'Chandelier (lit)', cat: 'deco', c: '#ffb36a' },
   dc_banner: { n: 'Castle Wall Banner', cat: 'deco', c: '#9a1c20' }, dc_torch: { n: 'Wall Torch', cat: 'deco', c: '#ffb060' },
@@ -406,6 +407,8 @@ export function gameData(M, dim) {
     else if (o.t === 'wind') { const a = (o.dir || 0) * Math.PI / 180; wind.push(Object.assign(rect(o), { dx: r2(Math.sin(a)), dy: r2(Math.cos(a)), s: r2(o.str == null ? 8 : o.str) })); }   // push direction in map px axes (x right, y down)
     else if (o.t === 'lz') lz.push(Object.assign(rect(o), { top: r2(o.y == null ? 22 : o.y), k: r2(o.k == null ? 1 : o.k) }));   // indoor light zone (js/28-fcs-hall.js)
     else if (o.t === 'ceil') ceil.push(Object.assign(rect(o), { h: r2(o.y == null ? 21 : o.y) }, o.zmax != null ? { zmax: r2(o.zmax) } : {}));
+    else if (o.t === 'dc_road') { if ((o.pts || []).length > 1) { const cs = Math.cos(rot), sn = Math.sin(rot);   // drawn road: points -> absolute map px
+      deco.push(Object.assign({ t: 'road', x: X, y: Y, h: r2(o.y || 0), k: o.k || 'cobble', w: r2(o.w || 4), p: o.pts.map(q => [r1((o.x + q[0] * cs + q[1] * sn) * PX), r1((o.z - q[0] * sn + q[1] * cs) * PX)]) }, o.curb ? { curb: 1 } : {})); } }
     else if (isDeco(o.t)) { deco.push(Object.assign({ t: o.t.slice(3), x: X, y: Y, h: r2(o.y || 0) }, ...['k', 'sx', 'sy', 'sz', 'rt', 'rb', 'r', 'seg', 's', 'c', 'open', 'ry', 'ssx', 'ssz', 'ow', 'oh', 'mw'].filter(q => o[q] != null).map(q => ({ [q]: o[q] })), rot ? { a: +rot.toFixed(4) } : {}));
     if (isDeco(o.t) && o.col) { const d = dim(o); if (d && d.col) for (const c of objCircles(M, o, d)) put(c, null); } }   // decor box/cylinder with Collides ticked
     else if (isRP(o.t)) rprops.push(Object.assign({ k: o.t.slice(3), x: X, y: Y, a: +(-rot).toFixed(3) }, o.L ? { L: r1(o.L * PX) } : {}, o.y ? { z0: r2(o.y) } : {}));

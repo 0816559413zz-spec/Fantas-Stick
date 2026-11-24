@@ -21,7 +21,7 @@ const el = (tag, props, ...kids) => { const e = document.createElement(tag); if 
 // ================= state =================
 let M = null, online = false, dirty = false, saveT = 0, list = [];
 let tool = 'select', sel = null, msel = [];   // sel = {k:'wall'|'floor'|'obj', id, pt?} = primary (Inspector, gizmo) • msel = more items picked with Shift/Ctrl
-const opt = { smode: 'up', rad: 4, str: 4, soft: 1, hval: 2, surf: 0, wall: 0, wth: 1, wh: 3.5, wc: '#8a8478', wm: 'stone', wcurve: 0, wbrk: 0, floor: 0, fw: 4, fh: 3, fauto: 1, obj: 'spawn', cat: 'sys',
+const opt = { rk: 'cobble', rw: 4, rc: 0, smode: 'up', rad: 4, str: 4, soft: 1, hval: 2, surf: 0, wall: 0, wth: 1, wh: 3.5, wc: '#8a8478', wm: 'stone', wcurve: 0, wbrk: 0, floor: 0, fw: 4, fh: 3, fauto: 1, obj: 'spawn', cat: 'sys',
   rrot: 1, rscale: 0, dens: 3, snap: 0, part: 'wall', pp: {}, csnap: 1, psnap: 1, prim: { c: '#8a8478', sx: 2, sy: 2, sz: 2 }, pn: { pre: 0, mat: 'brick', m: 'p', thru: 1, sy: 3.6, T: 0.3, cs: 0.6, hp: 0, y: 0, draw: 'line', sides: 12 },
   bm: 'up', brad: 40, bstr: 4, bh: 0, bs: 1, btd: 200, sr: 6, sh: 20, bpre: 'coast', bseed: 1 };   // b* = backdrop tool
 const show = { steep: true, col: false, grid: false, sky: true, area: true, bd: true };
@@ -243,6 +243,11 @@ function areaMesh(o, g, c, h) {   // flat rect (phase) or slab at height (ceilin
 function decoMesh(o) {
   const g = new THREE.Group(), t = o.t.slice(3), c = t === 'cloth' ? (o.c || '#7a1418') : MD.DECO_COL[o.k || (t === 'roof' || t === 'cone' ? 'roof' : 'stone')] || '#c2b298';
   const add = (geo, m) => { const me = new THREE.Mesh(geo, m); me.userData.own = 1; me.castShadow = me.receiveShadow = true; g.add(me); return me; };
+  if (o.t === 'dc_road') {   // drawn road: same ribbon as the game (DK.dkRoad), built in the object's local frame
+    if (!DK || !o.pts || o.pts.length < 2) return g; const cs = Math.cos(o.rot || 0), sn = Math.sin(o.rot || 0), y0 = MD.gh(M, o.x, o.z) + (o.y || 0);
+    const yAt = (lx, lz) => MD.gh(M, clamp(o.x + lx * cs + lz * sn, 0, M.W), clamp(o.z - lx * sn + lz * cs, 0, M.H)) + (o.y || 0) - y0;
+    const R = DK.dkRoad(o.pts, o.w || 4, o.curb, yAt, o.x * 20 * 0.013 + o.z * 20 * 0.029); if (!R) return g; const k = o.k || 'cobble';
+    add(R.road, DK.DK_TEX[k] ? DK.dkMat(k) : mat(MD.DECO_COL[k] || '#8f897d')).castShadow = false; if (R.curb) add(R.curb, DK.dkMat('sand')); return g; }
   if (DK && MD.DECO_SHAPE.has(o.t)) {   // same geometry + textures as the game
     const k = o.k || (t === 'cone' || t === 'pyr' ? 'roof' : 'stone'), geo = DK.dkGeo(Object.assign({}, o, { t }), o.x * 20 * 0.013 + o.z * 20 * 0.029);
     if (geo) { let m = DK.DK_TEX[k] ? DK.dkMat(k) : mat(MD.DECO_COL[k] || '#c2b298', { emit: k === 'lit' || k === 'lit2' }); if (o.open) { m = m.clone(); m.side = THREE.DoubleSide; } add(geo, m); return g; } }
@@ -268,7 +273,7 @@ function ghostify(g) {   // vis 0 = collision only (not in the .glb): see-throug
 }
 let DK = null;   // game decor shapes + textures (js/28-fcs-castle.js @dk-begin…@dk-end)
 fetch('js/28-fcs-castle.js').then(r => r.text()).then(t => { const i = t.indexOf('// @dk-begin'), j = t.indexOf('// @dk-end'); if (i < 0 || j < 0) return;
-  DK = new Function('THREE', 'mergeGeometries', t.slice(i, j) + '\nreturn {dkGeo, dkMat, DK_TEX};')(THREE, mergeGeometries); if (M) { syncObjs(); updSel(); } }).catch(e => console.warn('DK', e));
+  DK = new Function('THREE', 'mergeGeometries', t.slice(i, j) + '\nreturn {dkGeo, dkMat, dkRoad, DK_TEX};')(THREE, mergeGeometries); if (M) { syncObjs(); updSel(); } }).catch(e => console.warn('DK', e));
 let FRPB = null;   // game room-prop builder (js/28-fcs-props.js frpBuild) → props look exactly like in the game
 fetch('js/28-fcs-props.js').then(r => r.text()).then(t => { const i = t.indexOf('function frpBuild('), j = t.indexOf('\nfunction ', i + 10); if (i < 0 || j < 0) return;
   FRPB = new Function('THREE', t.slice(i, j) + '\nreturn frpBuild;')(THREE); if (M) { syncObjs(); updSel(); } }).catch(() => {});
@@ -701,7 +706,7 @@ function protoObj(x, z) {
   else if (MD.isRP(t) && MD.RPK[t.slice(3)].L) o.L = 4;
   else if (MD.isDeco(t)) Object.assign(o, { box: { k: 'stone', sx: 2, sy: 2, sz: 2, y: 1, rot: 0 }, cyl: { k: 'stone', rt: 1, rb: 1, sy: 4, seg: 12, y: 2 }, cone: { k: 'roof', r: 2, sy: 3, seg: 8, y: 1.5 },
     pyr: { k: 'slate', sx: 4, sy: 3, sz: 4, y: 1.5 }, dome: { k: 'copper', sx: 4, sy: 2, sz: 4, y: 1 }, wedge: { k: 'stone', sx: 4, sy: 2, sz: 3, y: 1 },
-    arch: { k: 'stone', sx: 4, sy: 5, sz: 1, ow: 2, oh: 3.5, y: 2.5 }, cren: { k: 'stone', sx: 8, sy: 1, sz: 1, mw: 1, y: 0.5 }, rock: { k: 'rock', sx: 3, sy: 2, sz: 2.5, y: 0.8 },
+    arch: { k: 'stone', sx: 4, sy: 5, sz: 1, ow: 2, oh: 3.5, y: 2.5 }, cren: { k: 'stone', sx: 8, sy: 1, sz: 1, mw: 1, y: 0.5 }, rock: { k: 'rock', sx: 3, sy: 2, sz: 2.5, y: 0.8 }, road: { k: 'cobble', w: 4, pts: [[-6, 0], [6, 0]], y: 0 },
     roof: { sx: 12, sz: 8, sy: 4, y: 6 }, flame: { y: 2.5 }, cloth: { sx: 2, sy: 4, c: '#7a1418', y: 6 }, shield: { y: 3 }, chand: { y: 12 } }[t.slice(3)] || {});
   return o;
 }
@@ -720,6 +725,7 @@ function partPP(k) { const D = MD.PART[k], pp = opt.pp[k] || (opt.pp[k] = {}); f
 function snapPartTo(p) { const sn = opt.psnap && MD.snapPart(M, p); if (sn) { p.x = +(p.x + sn.dx).toFixed(3); p.z = +(p.z + sn.dz).toFixed(3); if (sn.base !== undefined) p.base = Math.abs(sn.base - MD.gh(M, p.x, p.z)) < 0.06 ? null : sn.base; } return !!sn; }
 function castleProto(h) { const k = opt.part, p = MD.partNew(k, Object.assign({}, partPP(k), { id: 0, rot: ghostRot, x: snapC(h.x), z: snapC(h.z), base: h.on === 'floor' ? +(Math.round(h.y * 20) / 20).toFixed(2) : null })); snapPartTo(p); return p; }
 function placePart(h) { pushUndo('o'); const p = castleProto(h); p.id = nid(); M.parts.push(p); syncPart(p); sel = { k: 'part', id: p.id }; updSel(); renderSide(); changed(); colDirty(); return p; }
+const isRoad = r => !!(r && r.k === 'obj' && (find(r) || {}).t === 'dc_road');
 let fdraft = null;   // free-shape part being drawn: {pts:[[x,z]…] world, base}
 function finishFree() {
   const d = fdraft; fdraft = null; drawLine(null); drawHandles();
@@ -730,8 +736,9 @@ function finishFree() {
 }
 function freeHandles() {   // vertex handles of the selected free-shape part (world map coords) or of the draft
   if (fdraft) return fdraft.pts.map(q => ({ x: q[0], z: q[1], y: (fdraft.base != null ? fdraft.base : MD.gh(M, q[0], q[1])) + 0.3 }));
-  const it = sel && sel.k === 'part' && find(sel); if (!it || !it.pts) return null;
+  const it = sel && (sel.k === 'part' || isRoad(sel)) && find(sel); if (!it || !it.pts) return null;
   const cs = Math.cos(it.rot || 0), sn = Math.sin(it.rot || 0), g0 = MD.gh(M, it.x, it.z), b = it.base != null ? it.base : g0;
+  if (it.t === 'dc_road') return it.pts.map(q => { const x = it.x + q[0] * cs + q[1] * sn, z = it.z - q[0] * sn + q[1] * cs; return { x, z, y: MD.gh(M, clamp(x, 0, M.W), clamp(z, 0, M.H)) + (it.y || 0) + 0.4 }; });
   return it.pts.map(q => ({ x: it.x + q[0] * cs + q[1] * sn, z: it.z - q[0] * sn + q[1] * cs, y: b + it.h + 0.3 }));
 }
 const toLocal = (it, x, z) => { const dx = x - it.x, dz = z - it.z, cs = Math.cos(it.rot || 0), sn = Math.sin(it.rot || 0); return [+(dx * cs - dz * sn).toFixed(3), +(dx * sn + dz * cs).toFixed(3)]; };
@@ -764,6 +771,11 @@ cv.addEventListener('pointerdown', e => {
     if (!draft) { pushUndo('o'); draft = { pts: [p], base: hover.on === 'floor' ? +hover.y.toFixed(2) : null, round: 1 }; need(); return; }
     const c = draft.pts[0], r = Math.hypot(p[0] - c[0], p[1] - c[1]); if (r < 0.5) return;
     draft.pts = pnRing(c, r); finishPnl(true);
+  }
+  else if (tool === 'road') {   // click points -> road (double-click / Enter = finish)
+    if (!hover) return; if (!draft) { pushUndo('o'); draft = { pts: [], base: null, h: 0 }; }
+    const p = [snapV(hover.x), snapV(hover.z)], l = draft.pts[draft.pts.length - 1]; if (l && Math.hypot(l[0] - p[0], l[1] - p[1]) < 0.3) return;
+    draft.pts.push(p); drawHandles(); need();
   }
   else if (tool === 'wall' || tool === 'pnl') {
     if (!hover) return;
@@ -800,7 +812,7 @@ cv.addEventListener('pointerdown', e => {
       if (!was) msel = []; else if (!same) { msel = msel.filter(q => !sameRef(q, p.ref)); if (sel) msel.push({ k: sel.k, id: sel.id }); }
       sel = { k: p.ref.k, id: p.ref.id };
       if (e.altKey && p.ref.k === 'wall') { insertWallPt(find(sel), p.p.x + M.W / 2, p.p.z + M.H / 2); }
-      else if (e.altKey && p.ref.k === 'part' && find(sel).pts) { insertFreePt(find(sel), p.p.x + M.W / 2, p.p.z + M.H / 2); }
+      else if (e.altKey && (p.ref.k === 'part' || isRoad(p.ref)) && find(sel).pts) { insertFreePt(find(sel), p.p.x + M.W / 2, p.p.z + M.H / 2); }
       else if (g && was && opt.dragMove !== 0) {   // drag only an item that was already selected (first click = select only) • Drag Move off = gizmo only
         drag = { k: 'move', gx: g.x, gz: g.z, moved: 0, group: selAll().map(q => { const it = find(q); return { k: q.k, it, o: it && q.k === 'wall' ? it.pts.map(v => v.slice()) : it ? [it.x, it.z] : null }; }).filter(q => q.it) }; }
       if (!same) renderSide(); updSel(); }
@@ -844,13 +856,13 @@ cv.addEventListener('pointermove', e => {
       else { it.x = clamp(snapV(q.o[0] + dx), 0, M.W); it.z = clamp(snapV(q.o[1] + dz), 0, M.H); }
       syncKind(q.k, it); }
     updSel(); }
-  else if (drag && drag.k === 'fpt') { setRay(e); const g = groundHit(); if (!g) return; if (!drag.moved) { pushUndo('o'); drag.moved = 1; } drag.it.pts[drag.i] = toLocal(drag.it, clamp(snapC(g.x), 0, M.W), clamp(snapC(g.z), 0, M.H)); syncPart(drag.it); }
+  else if (drag && drag.k === 'fpt') { setRay(e); const g = groundHit(); if (!g) return; if (!drag.moved) { pushUndo('o'); drag.moved = 1; } const rd = drag.it.t === 'dc_road', sn = rd ? snapV : snapC; drag.it.pts[drag.i] = toLocal(drag.it, clamp(sn(g.x), 0, M.W), clamp(sn(g.z), 0, M.H)); if (rd) { syncObj(drag.it); drawHandles(); } else syncPart(drag.it); }
   else if (drag && drag.k === 'pt') { setRay(e); const g = groundHit(); if (!g) return; if (!drag.moved) { pushUndo('o'); drag.moved = 1; } drag.w.pts[drag.i] = [clamp(snapV(g.x), 0, M.W), clamp(snapV(g.z), 0, M.H)]; syncWalls(); updSel(); }
   else if (drag && drag.k === 'box') boxDraw(drag, e);
   else if (drag && drag.k === 'ramp' && hover) drawLine([[drag.a.x, drag.a.z], [hover.x, hover.z]]);
   else if (drag && drag.k === 'floor' && hover) { const p = [[drag.a.x, drag.a.z], [hover.x, hover.z]]; drawLine(p); }
   else if (tool === 'pnl' && draft && draft.round && hover) { const c = draft.pts[0], r = Math.hypot(hover.x - c[0], hover.z - c[1]); if (r > 0.3) { const P = pnRing(c, r); P.push(P[0]); drawLine(P); } }
-  else if ((tool === 'wall' || tool === 'pnl') && draft && hover) drawLine([...draft.pts, [hover.x, hover.z]]);
+  else if ((tool === 'wall' || tool === 'pnl' || tool === 'road') && draft && hover) drawLine([...draft.pts, [hover.x, hover.z]]);
   else if (tool === 'castle' && fdraft && hover) { const l = [...fdraft.pts, [snapC(hover.x), snapC(hover.z)]]; if (l.length > 2) l.push(l[0]); if (fdraft.base != null) l.y = fdraft.base; drawLine(l); }
   need();
 });
@@ -865,7 +877,7 @@ cv.addEventListener('pointerup', e => {
   drag = null; need();
 });
 cv.addEventListener('pointerleave', () => { hover = null; need(); });
-cv.addEventListener('dblclick', () => { if ((tool === 'wall' || tool === 'pnl') && draft) { draft.pts.pop(); finishWall(false); } else if (tool === 'castle' && fdraft) { fdraft.pts.pop(); finishFree(); } });
+cv.addEventListener('dblclick', () => { if (tool === 'road' && draft) finishRoad(); else if ((tool === 'wall' || tool === 'pnl') && draft) { draft.pts.pop(); finishWall(false); } else if (tool === 'castle' && fdraft) { fdraft.pts.pop(); finishFree(); } });
 cv.addEventListener('wheel', e => { e.preventDefault();
   if (e.shiftKey && tool === 'bd') { opt.brad = clamp(Math.round(opt.brad * (e.deltaY > 0 ? 0.9 : 1.11)), 3, 400); renderOpts(); need(); return; }
   if (e.shiftKey && (tool === 'sculpt' || tool === 'paint' || tool === 'scatter')) { opt.rad = clamp(+(opt.rad * (e.deltaY > 0 ? 0.9 : 1.11)).toFixed(1), 0.5, 40); renderOpts(); need(); return; }
@@ -873,7 +885,15 @@ cv.addEventListener('wheel', e => { e.preventDefault();
   cam.dist *= e.deltaY > 0 ? 1.12 : 0.89; camApply(); }, { passive: false });
 
 function afterTerrain() { syncAll(); buildGrid(); changed(); }
+function finishRoad() {
+  const d = draft; draft = null; drawLine(null); drawHandles();
+  if (!d || d.pts.length < 2) { if (d) undo.pop(); need(); return; }
+  const xs = d.pts.map(q => q[0]), zs = d.pts.map(q => q[1]), cx = +((Math.min(...xs) + Math.max(...xs)) / 2).toFixed(2), cz = +((Math.min(...zs) + Math.max(...zs)) / 2).toFixed(2);
+  const o = { id: nid(), t: 'dc_road', x: cx, z: cz, y: 0, rot: 0, k: opt.rk, w: opt.rw, pts: d.pts.map(q => [+(q[0] - cx).toFixed(2), +(q[1] - cz).toFixed(2)]) }; if (opt.rc) o.curb = 1;
+  M.objs.push(o); syncObj(o); sel = { k: 'obj', id: o.id }; updSel(); renderSide(); changed(); drawHandles();
+}
 function finishWall(closed) {
+  if (tool === 'road') return finishRoad();
   if (tool === 'pnl') return finishPnl(closed);
   const d = draft; draft = null; drawLine(null);
   if (d && d.pts.length >= 2) { const P = MD.WALL_PRESET[opt.wall] || {}; const w = { id: nid(), pts: d.pts, th: opt.wth, h: opt.wh, c: opt.wc, m: opt.wm, closed: closed ? 1 : 0, curve: opt.wcurve ? 1 : 0, brk: opt.wbrk ? 1 : 0, base: d.base, n: P.n };
@@ -883,8 +903,8 @@ function finishWall(closed) {
 }
 function insertFreePt(it, x, z) {   // Alt+click on a free shape: add a vertex on the nearest edge
   const [lx, lz] = toLocal(it, x, z), P = it.pts, n = P.length; let bi = 0, bd = 1e9;
-  for (let i = 0; i < n; i++) { const a = P[i], b = P[(i + 1) % n], dx = b[0] - a[0], dz = b[1] - a[1], t = clamp(((lx - a[0]) * dx + (lz - a[1]) * dz) / (dx * dx + dz * dz || 1), 0, 1), d = Math.hypot(a[0] + dx * t - lx, a[1] + dz * t - lz); if (d < bd) { bd = d; bi = i; } }
-  pushUndo('o'); P.splice(bi + 1, 0, [lx, lz]); sel.pt = bi + 1; syncPart(it); changed(); colDirty(); renderSide();
+  for (let i = 0; i < (it.t === 'dc_road' ? n - 1 : n); i++) { const a = P[i], b = P[(i + 1) % n], dx = b[0] - a[0], dz = b[1] - a[1], t = clamp(((lx - a[0]) * dx + (lz - a[1]) * dz) / (dx * dx + dz * dz || 1), 0, 1), d = Math.hypot(a[0] + dx * t - lx, a[1] + dz * t - lz); if (d < bd) { bd = d; bi = i; } }
+  pushUndo('o'); P.splice(bi + 1, 0, [lx, lz]); sel.pt = bi + 1; if (it.t === 'dc_road') { syncObj(it); drawHandles(); } else syncPart(it); changed(); colDirty(); renderSide();
 }
 function insertWallPt(w, x, z) {
   let bi = 0, bd = 1e9; const n = w.pts.length, m = w.closed ? n : n - 1;
@@ -1111,8 +1131,8 @@ function editSel(fn) { const it = find(sel); if (!it) return; pushUndo('o'); fn(
 function resync() { const it = find(sel); if (sel && sel.k === 'room') { syncAll(); changed(); return; } if (sel && sel.k === 'obj' && it) syncObj(it); else if (sel && sel.k === 'part' && it) syncPart(it); else if (sel && sel.k === 'wall') syncWalls(); else syncFloors(); updSel(); changed(); colDirty(); }
 function delSel() { if (!sel) return;
   if (msel.length) { pushUndo('o'); for (const q of selAll()) M[KEYS[q.k]] = M[KEYS[q.k]].filter(v => v.id !== q.id); sel = null; msel = []; syncAll(); renderSide(); changed(); return; }   // multi
-  const w = sel.k === 'wall' && find(sel), fp = sel.k === 'part' && find(sel);
-  if (fp && fp.pts && sel.pt != null && fp.pts.length > 3) { pushUndo('o'); fp.pts.splice(sel.pt, 1); sel.pt = null; resync(); drawHandles(); return; }
+  const w = sel.k === 'wall' && find(sel), fp = (sel.k === 'part' || isRoad(sel)) && find(sel);
+  if (fp && fp.pts && sel.pt != null && fp.pts.length > (fp.t === 'dc_road' ? 2 : 3)) { pushUndo('o'); fp.pts.splice(sel.pt, 1); sel.pt = null; resync(); drawHandles(); return; }
   if (w && sel.pt != null && w.pts.length > 2) { pushUndo('o'); w.pts.splice(sel.pt, 1); sel.pt = null; resync(); return; }
   pushUndo('o'); const key = KEYS[sel.k]; M[key] = M[key].filter(v => v.id !== sel.id); sel = null; syncAll(); renderSide(); changed(); }
 function dupSel() {   // copies stay exactly where the originals are (move them with the gizmo) • all selected items are copied, the copies become the selection
@@ -1211,6 +1231,7 @@ const TOOLS = [['select', '⬚', 'Select', 'v', 'Click to select, drag to move �
   ['castle', '♜', 'Castle', 'c', 'Pick a piece, then click to place • , . rotate 45° (Shift = 15°) or Shift+wheel • piece ends snap together • click on top of a wall/walkway = place at that height • use Select to move/resize'],
   ['place', '◈', 'Place', 'o', 'Click to place • , . or Shift+wheel = rotate • can be placed on upper floors'],
   ['bd', '🌊', 'Backdrop', 'j', 'Backdrop = land/sea outside the play area (drawn in the game, no collision) • pick a mode in Settings, drag to sculpt/paint/plant • Shift = invert • Shift+wheel or [ ] = brush size • Sea Stack: click = add, Shift+click = remove'],
+  ['road', '🛣', 'Road', 'u', 'Click point by point along the road (smooth curve, follows the ground) • double-click/Enter = finish • Backspace = undo point • Esc = cancel • edit later with Select: drag the points, Alt+click = add a point'],
   ['scatter', '⁘', 'Scatter', 'g', 'Drag to scatter the chosen item (trees, rocks, grass) • Shift = remove items in the circle'],
 ];
 const HINT = Object.fromEntries(TOOLS.map(t => [t[0], t[4]]));
@@ -1231,6 +1252,10 @@ function renderOpts() {
     if (opt.smode === 'ramp') b.append(slider('Width', 'rad', 0.5, 20, 0.5, opt), check('Soft Edge', 'soft'), el('p', { class: 'note' }, 'Drag from the low point to the high point: the ground in between becomes a smooth ramp (width = 2 × this value)')); else brush();
     b.append(el('p', { class: 'note', html: 'Slopes steeper than ~58° (1.6 up per 1 across) can’t be walked up — shown red<br>jump height ~1.4' }));
   } else if (tool === 'paint') { b.append(h3('Paint'), el('div', { class: 'row' }, el('span', { style: 'flex:1' }, 'Current: ' + SURF[opt.surf].n), pickBtn('surf', v => { opt.surf = v; renderOpts(); }, 'a ground surface')), pal(SURF, opt.surf, i => { opt.surf = i; renderOpts(); })); brush(); b.append(el('p', { class: 'note' }, 'Green = the game grows 3D grass • mud/water/ice/lava are saved as special game surfaces')); }
+  else if (tool === 'road') {
+    b.append(h3('Road'), fld('Material', opt, 'rk', { type: 'select', items: MD.DECO_MAT.filter(m => MD.DECO_TEX.has(m[0])), get: () => opt.rk }), slider('Width (m)', 'rw', 1, 16, 0.5), check('Curbs (stone edges)', 'rc'),
+      el('p', { class: 'note' }, 'Click points along the way • the road bends smoothly through them and follows the ground • double-click or Enter = finish • crossings: let two roads meet and put a plaza piece on top'));
+  }
   else if (tool === 'wall') {
     b.append(h3('Wall Preset'), pal(MD.WALL_PRESET, opt.wall, i => { const P = MD.WALL_PRESET[i]; Object.assign(opt, { wall: i, wth: P.th, wh: P.h, wc: P.c, wm: P.m }); renderOpts(); }, 'one'),
       h3('Settings'), slider('Thickness', 'wth', 0.3, 4, 0.1), slider('Height', 'wh', 0.4, 14, 0.1), el('div', { class: 'row' }, el('label', null, 'Color'), el('input', { type: 'color', value: opt.wc, oninput: e => { opt.wc = e.target.value; } }), pickBtn('color', v => { opt.wc = v; renderOpts(); }, 'a colour')),
@@ -1310,6 +1335,8 @@ function fld(label, it, key, o = {}) {   // bound field: number / text / color /
 }
 function decoFields(it) {   // inspector rows for dc_* decor
   const t = it.t.slice(3), F = [];
+  if (t === 'road') return [fld('Material', it, 'k', { type: 'select', items: MD.DECO_MAT, get: () => it.k || 'cobble' }), fld('Width', it, 'w', { min: 0.5 }),
+    fld('Curbs (stone edges)', it, 'curb', { type: 'checkbox' }), el('p', { class: 'note' }, 'Drag the white points to bend the road • Alt+click the road = add a point • select a point + Delete = remove it')];
   const bx = ['box', 'pyr', 'dome', 'wedge', 'arch', 'cren', 'rock'].includes(t);
   if (MD.DECO_SHAPE.has(it.t)) F.push(fld('Material', it, 'k', { type: 'select', items: MD.DECO_MAT, get: () => it.k || (t === 'cone' || t === 'pyr' ? 'roof' : 'stone') }));
   if (bx || t === 'roof' || t === 'cloth') F.push(fld(t === 'roof' ? 'Length (ridge)' : t === 'cren' ? 'Length (row)' : 'Width', it, 'sx', { min: 0.05 }));

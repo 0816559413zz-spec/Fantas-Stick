@@ -1,5 +1,5 @@
 {
- "next": 186,
+ "next": 187,
  "items": [
   {
    "id": 180,
@@ -3838,6 +3838,24 @@
    "links": [
     "index.html?nosw&playmap=town-demo",
     "mapbuild.html"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 186,
+   "title": "Map Builder: เครื่องมือวาดถนน (Road)",
+   "text": "Map Builder (โหลดหน้าใหม่) → ปุ่ม 🛣 Road (หรือกด U) → คลิกวางจุดตามแนวถนน ดับเบิลคลิกเพื่อจบ ถนนโค้งนุ่ม แนบพื้น มีขอบหินให้เลือก ตั้งความกว้าง/วัสดุได้ (Cobblestones, Dirt Path ใหม่) แก้ทีหลังด้วย Select ลากจุดขาว / Alt+คลิกเพิ่มจุด. ภาพตัวอย่าง: shots/road_builder.jpg (ใน Tool), shots/road_game.jpg (ในเกม) — ต้องปิดเปิด Tools.bat ใหม่ก่อน",
+   "kind": "Map",
+   "who": "Map Builder",
+   "status": "wait",
+   "created": "2026-11-24",
+   "updated": "2026-11-24",
+   "imgs": [],
+   "links": [
+    "mapbuild.html",
+    "/shots/road_builder.jpg",
+    "/shots/road_game.jpg"
    ],
    "feedback": "",
    "reply": ""

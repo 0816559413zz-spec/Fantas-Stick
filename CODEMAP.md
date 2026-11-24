@@ -314,12 +314,12 @@ SMOKE_K:150 burst:151 smoke:164 ring:165 floatText:166 shake:167 weaponContactAg
 §225 เอฟเฟกต์คาถาใหม่
 ZV:226 COLB:226 WVV:226 GLV:226 ICEV:226 SLV:226 ULTV:226 OBV:226 _iceDisc:228 _iceEdge:229 _iceSpk:230 iceFloorMat:231 _icePlane:232 _icePathMat:233 _iceWvM:233 iceWvMat:235 _iceShardGeo:248 _isM:251 _isQ:251 _isP:251 _isS:251 _isY:251 iceShardTrail:252 _iceShardMat:257 makeIceFloor:258 ICE_WV:293 updateIceFloors:294 FLASHM:306 FLASHING:307 flashModel:308 endFlash:321 tickFlash:322 GHOSTM:324 SOLIDM:324 ghostOf:325 setGhost:331 hitSparks:339
 
-## js/20-vfx-pyro-storm.js (857) — Dragonfall (ภาพ)
+## js/20-vfx-pyro-storm.js (859) — Dragonfall (ภาพ)
 makeDfCircle:3 stormCircleCyan:20 DFV:25 dfCracks:26 updateDfCracks:36 _domeAim:37 domeChargeOrb:38 _spearUp:46 _spearDir:46 _spearA:46 _spearB:46 DOME_SPEAR_LEN:47 stormDomePath:48 stormDomeSpearFX:52 stormDomeHoverFX:83 stormDomeReadyFX:107 stormDomeGroundPoint:128 stormDomeFracture:131 stormDomeFloorPullFX:177 stormDomeFieldFX:204 stormDomePose:240 dragonfallFX:304
 §368 สายฟ้า (ภาพ)
-TBN:371 TBA:371 TBF:371 TBMAX:371 _tv:372 _tt:372 _ts:372 _tw:372 tbFalloff:375 tbLayer:378 TBL:384 TBO_MAX:386 tbOrbLayer:387 TBC:390 _tcc:391 domeCyan:392 domeGold:393 tbGet:394 TBLUE:397 TBFIRE:397 tboltB:398 tbolt:399 tboltP:409 tbWrite:410 updateBolts:418 LATER:452 STV:452 SBV:452 SDV:452 TSV:452 CLV:452 stTgPos:454 STCLAW:458
-§462 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
-clawGeo:465 clawRakes:470 updateClaws:484 later:492 stFade:493 stBeam:494 STHIT:500 STBASH:500 stBashLean:502 shellPt:509 updateStormV:510 _ev:558 GODPTS:560 bWorld:562 stormClawStop:566 CLAWFX:572 stormClawRangeFX:573 updateClawFX:603 stormClawSwipe:616 stormFX:664 STHUD:811 drawStormHud:812
+TBN:371 TBA:371 TBF:371 TBMAX:371 _tv:372 _tt:372 _ts:372 _tw:372 tbFalloff:375 tbLayer:378 TBL:384 TBO_MAX:386 tbOrbLayer:387 TBC:390 _tcc:391 domeCyan:392 domeGold:393 tbGet:394 TBLUE:397 TBFIRE:397 tboltB:398 tbolt:399 tboltP:411 tbWrite:412 updateBolts:420 LATER:454 STV:454 SBV:454 SDV:454 TSV:454 CLV:454 stTgPos:456 STCLAW:460
+§464 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
+clawGeo:467 clawRakes:472 updateClaws:486 later:494 stFade:495 stBeam:496 STHIT:502 STBASH:502 stBashLean:504 shellPt:511 updateStormV:512 _ev:560 GODPTS:562 bWorld:564 stormClawStop:568 CLAWFX:574 stormClawRangeFX:575 updateClawFX:605 stormClawSwipe:618 stormFX:666 STHUD:813 drawStormHud:814
 
 ## js/21-vfx-frost.js (228) — น้ำแข็ง (ภาพ): ชิ้นผลึก/หนาม/แผ่นน้ำแข็งชั่วคราว (โผล่ → ค้าง → หด) •…
 FRV:2 _cryG:3 _spkG:3 _plateG:3 _hexG:3 _iceFxM:4 _frostM:4 iceFxM:5 frostM:6 ICEP:8 _im4:8 _iq:8 _ie:8 _ip:8 _is:8 icePool:9 iceBit:10 iceChips:13 updateFRV:14 iceRing:24 chillFX:25 makeSlash:41 _wbGeo:49 crescentGeo:51 makeWaveBlade:54 WGH:68 updateSlashes:69 _glGeo:82 _glMat:82 _glMat2:82 makeGlacier:83 updateGlacierVis:114 updateOrbShots:123
@@ -384,10 +384,10 @@ SGV3:280 sgClearView:281 sgFileBuild:284 sgViewBuild:290 SGVZR:310 sgBarrier:313
 §354 HUD
 sgTop:355 sgHud:357
 
-## js/28-fcs-castle.js (402) — 
+## js/28-fcs-castle.js (433) — 
 FCSC:9 fcsCastleMat:10 fcsBannerTex:34 fcsGlowTex:44 fcsCastle:46 fcsCastleDressing:154 fcsCastleTick:175
 §178 room pieces: look (js/02-room-*.js view(K,V)) — V = shared builder, m…
-fcsRoomsView:179 DK_TEX:182 DK_GLSL:186 DK_FRAG:197 DK_SHAPE:251 DK_MATS:252 dkMat:253 dkUV:265 dkTri:267 dkBox:272 dkRev:274 dkGeo:275 fcsDecoFile:301 fcsDecoKit:315 MB_STYLE:359 _poOn:360 fileStyleScene:361 TORCH_BATCH:374 fcsTorchSync:375
+fcsRoomsView:179 DK_TEX:182 DK_GLSL:186 DK_FRAG:197 DK_SHAPE:257 DK_MATS:258 dkMat:259 dkUV:271 dkTri:273 dkBox:278 dkRev:280 dkGeo:281 dkRoad:307 fcsDecoFile:330 fcsDecoKit:346 MB_STYLE:390 _poOn:391 fileStyleScene:392 TORCH_BATCH:405 fcsTorchSync:406
 
 ## js/28-fcs-forest.js (261) — 
 FF:7 FF_X1:8 FF_NS:9 ffGroundTex:11 ffParts:33 fcsForest:40 ffMerge:125 ffDetail:133 fcsRuin:160 ffSkyMat:203 ffMist:231 ffMistFrame:248 fcsForestTick:250 FFC:261
@@ -539,23 +539,25 @@ _wpM:108 fileWeapon:109
 §117 Ice circle (Permafrost): ริบบิ้นแสงวนเป็นก้นหอยบนพื้น + ผลึกลอยหมุนรอ…
 SWIRL_FS:118 ICIRC:122 iceCircle:123 updateIceCircles:134
 
-## js/44-vfx-kit.js (405) — 
+## js/44-vfx-kit.js (417) — 
 §8 1) หางแสง
 TRMAX:11 TRPTS:11 TRAILS:11 _trL:12 trailLayer:13 trailNew:22 trailPoint:25 trailStop:28 _tv1:29 _tv2:29 _tv3:29 updateTrails:30
 §53 2) สูตรเอฟเฟกต์ = จานสี (ธาตุ) × แม่แบบ (ขนาด/ชนิด)
-VFXPAL:57 VFXTPL:74 VFXSIG:86 VFXSIGK:94 VFXR:96 _palCache:99 palOf:100 _pc:103 playFx:104 nearMe:114 fxLayer:115
-§147 3) ผูกเอฟเฟกต์ซ้อนชั้นกับเหตุการณ์ของทุกสาย (เพิ่มทับของเดิม ไม่ลบหน้…
-EFXAUG:149 PJPAL:168 pjPal:170 ULTCOL:171 efxAug:172 VFXAUG_ON:179 fxAug:180
-§201 3b) สนามรบ (designs/battlefield.md ขั้น 1, แบบ C): ทุกสกิลทิ้งควัน/ฝุ…
-BF_EL:204 BF_CLS:204 BF_EXTRA:206 BF:209 bfAfter:210 bfPlay:233
-§237 3c) สนามรบ ขั้น 2: รอยค้างบนพื้น + ซากรก ๆ (หายเองหลัง BF_LIFE วิ, เด…
-BF_LIFE:241 BFM:242 BF_MK:243 BF_MKA:243 BF_MKR:243 bfMarkMesh:244 _bfQ:252 _bfQ2:252 _bfN:252 _bfUp:252 _bfS:252 _bfP:252 _bfMx:252 bfMark:254 bfAge:263 updateBfMarks:276 BFRS:281 bfRestPool:282 bfRestAdd:287 bfBinAdd:294 bfBinBuild:298 bfRest:303 bfScatter:309 _rockMat:317 bfCollapse:319 updateBfRest:326 bfClear:333
-§337 3d) สนามรบ ขั้น 5: บรรยากาศตามความพังรอบตัว (designs/battlefield.md)
-BFA:341 bfWreck:342 updateBfAir:347 bfRumble:370 updateBf:373
-§376 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
-SCR:377 impactFrame:380 screenFlash:381 screenRadial:382 screenKick:383 screenHurt:384 _scv:385 updateScreenFx:386 updateVfxKit:405
+VFXPAL:57 VFXTPL:74 VFXSIG:86 VFXSIGK:94 VFXR:96 _palCache:99 palOf:100 _pc:103
+§104 VFX level of detail (user 2026-11-24 "6v6 FPS drops a lot", guides/OP…
+VLOD:108 vlodPrep:110 vlod:113 playFx:116 nearMe:126 fxLayer:127
+§159 3) ผูกเอฟเฟกต์ซ้อนชั้นกับเหตุการณ์ของทุกสาย (เพิ่มทับของเดิม ไม่ลบหน้…
+EFXAUG:161 PJPAL:180 pjPal:182 ULTCOL:183 efxAug:184 VFXAUG_ON:191 fxAug:192
+§213 3b) สนามรบ (designs/battlefield.md ขั้น 1, แบบ C): ทุกสกิลทิ้งควัน/ฝุ…
+BF_EL:216 BF_CLS:216 BF_EXTRA:218 BF:221 bfAfter:222 bfPlay:245
+§249 3c) สนามรบ ขั้น 2: รอยค้างบนพื้น + ซากรก ๆ (หายเองหลัง BF_LIFE วิ, เด…
+BF_LIFE:253 BFM:254 BF_MK:255 BF_MKA:255 BF_MKR:255 bfMarkMesh:256 _bfQ:264 _bfQ2:264 _bfN:264 _bfUp:264 _bfS:264 _bfP:264 _bfMx:264 bfMark:266 bfAge:275 updateBfMarks:288 BFRS:293 bfRestPool:294 bfRestAdd:299 bfBinAdd:306 bfBinBuild:310 bfRest:315 bfScatter:321 _rockMat:329 bfCollapse:331 updateBfRest:338 bfClear:345
+§349 3d) สนามรบ ขั้น 5: บรรยากาศตามความพังรอบตัว (designs/battlefield.md)
+BFA:353 bfWreck:354 updateBfAir:359 bfRumble:382 updateBf:385
+§388 4) เอฟเฟกต์ทั้งจอ (ค่าไปที่ GradePass ใน js/27-world.js)
+SCR:389 impactFrame:392 screenFlash:393 screenRadial:394 screenKick:395 screenHurt:396 _scv:397 updateScreenFx:398 updateVfxKit:417
 
-## js/45-fx-runtime.js (430) — 
+## js/45-fx-runtime.js (434) — 
 FXR:9 FXDEG:10
 §11 โหลด
 fxFetch:12 fxDefaults:13 fxBoot:14 fxOverrides:24 fxLoad:27 fxData:31
@@ -567,22 +569,22 @@ _fxw:64 fxAnchor:65 fxBase:68 fxLocal:71 fxDir:73 fxYawV:76 fxPos:77 fxPlace:78
 fxPlay:80 fxStart:81 fxStop:90 fxKill:91 fxClearAll:92 fxGate:94
 §96 ทุกเฟรม
 updateFx:97
-§113 สร้างชั้น
-fxN:114 fxSpawn:115 fxTick:149 fxEnd:160
-§167 อนุภาค
-_fxrnd:168 fxUnit:169 fxCone:170 fxEmit:172 fxPart:189
-§204 รูปทรง 3D
-FXGEO:205 fxMerge:206 fxRibbon:211 fxGeo:217 fxEnergyMat:237 fxWaterMat:252 fxToonWaterMat:265 fxWindShellMat:281 fxToonMat:290 fxArmorMat:300 fxArmorLines:311 fxMeshMake:328 fxMeshTick:352 fxFlipTex:367
-§372 หางแสง / รอยฟัน
-fxTrailTick:373
-§379 สายฟ้า
-fxBolt:380
-§386 ฟังก์ชันในโค้ดที่ไฟล์เรียกได้ (ชั้น t:"code")
-FXCODE:387
-§400 ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev)
-fxLoopName:402 blzFxName:403 fxLoopKeep:404 fshHitFx:406 fxBind:409
-§420 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
-fxTpl:422
+§116 สร้างชั้น
+fxN:117 VLOD_N:118 fxSpawn:119 fxTick:153 fxEnd:164
+§171 อนุภาค
+_fxrnd:172 fxUnit:173 fxCone:174 fxEmit:176 fxPart:193
+§208 รูปทรง 3D
+FXGEO:209 fxMerge:210 fxRibbon:215 fxGeo:221 fxEnergyMat:241 fxWaterMat:256 fxToonWaterMat:269 fxWindShellMat:285 fxToonMat:294 fxArmorMat:304 fxArmorLines:315 fxMeshMake:332 fxMeshTick:356 fxFlipTex:371
+§376 หางแสง / รอยฟัน
+fxTrailTick:377
+§383 สายฟ้า
+fxBolt:384
+§390 ฟังก์ชันในโค้ดที่ไฟล์เรียกได้ (ชั้น t:"code")
+FXCODE:391
+§404 ผูกกับ event ของเกม (assets/fx/bind.json) — เรียกจาก fx(ev)
+fxLoopName:406 blzFxName:407 fxLoopKeep:408 fshHitFx:410 fxBind:413
+§424 แม่แบบ playFx เป็นไฟล์ (assets/fx/tpl/*, sig/*, rec/*)
+fxTpl:426
 
 ## js/46-fx-make.js (356) — 
 FXMK:10 MKD:11 mkRng:12 mkHash:13 mkNoise:15 mkL:17 mkR2:18
@@ -885,7 +887,7 @@ BRM:9 BFW:12 BSK:13 BROOM_SK:19 broomVert:40 broomMove:53 broomStrike:72 broomSt
 §131 ฝั่งจอ
 broomHead:133 BBEAM:140 _bbGeo:141 broomView:142 broomMountFx:173 broomDismountFx:181 broomBeamFx:183 broomSkFx:199 broomStrikeFx:212 broomFlakFx:217 broomHud:222 broomHudT:223 broomTick:232
 
-## js/70-water-dragon.js (502) — 
+## js/70-water-dragon.js (504) — 
 WDG:7 wdgBuild:8 T:9 root:9 fixed:9 rings:10 sides:10 fastNormals:12 geoOf:21 skin:22 faceSkin:50 group:51 head:52 faceTime:54 groundY:54 faceMaterial:55 faceBlue:60 hornBlue:60 ridgeCyan:60 profile:62 headProfile:63 faceGeo:68 fp:68 fc:68 fi:68 faceRings:68 faceSides:68 navy:69 aqua:69 belly:69 flowHi:69 neckBlend:69 headStroke:81 eyePatch:82 waterCrest:97 bodyGeo:123 bodyP:123 bodyUV:123 indices:123 body:129 finShape:131 finGeo:132 finPos:134 finUV:134 finSkin:136 FIN_N:139 fins:139 _fM:140 _fQ:140 _fS:140 _fP:140 limbSkin:142 clawSkin:143 taperedLimb:144 arms:151 bodyLength:161 intro:161 settleWindow:161 tipHz:161 bodyBulk:161 bodyRadius:162 flight:164 quarters:165 step:165 dr:165 dy:165 spiralKnot:166 first:167 entry:167 crest:171 bank:174 corner:174 cruiseEntry:174 quarterHandle:177 leadLength:179 up:183 zAxis:183 yAxis:183 smooth:184 startAt:185 startD:185 startDistance:187 distanceToCruise:187 hoverSpeed:187 fastDuration:187 brakeDuration:187 startRamp:187 fastSpeed:188 progress:189
 §198 ทางบิน: ใช้ระยะทาง (เมตร) ไม่ใช่สัดส่วน เพื่อต่อทางพุ่งลงตอนเล็งเสร็จ…
 dive:199 PA:200 TA:201 DIVE_DOWN:203 DIVE_POUR:203 DIVE_STEP:203 diveDist:204 lastTime:205 lastHeadT:205 headRight:205 bodyState:205 filtered:205 shape:206 gate:260 rune:262 shadowMat:263 shadow:264 ringMat:265 ring:266 glyphMat:267 glyphHi:268 glyphPath:269 water:276 splashGeometry:279 lowWaveGeometry:280 splashBursts:281 pulse:287 outerRing:288 dropletMat:289 drops:289 transform:291 gateAt:292 sprayMaterial:314 spray:314 curlCurve:316 foamMaterial:317 foam:318 particles:319 foamParticles:319 rand:320 bodySprayAt:321 waveSegments:342 waveSheets:342 wavesAt:349 currentConfigs:364 currentMaterial:371 currentSegments:376 currentSides:376 currentMeshes:376 _cC:385 _cR:385 _cV:385 _cRad:385 currentPointTo:386 currentPoint:393 currentSpray:394 currentParticles:395 _cS:396 _cCos:397 _cSin:397 _cPow:397 currentsAt:398
@@ -975,4 +977,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(119 files, 36992 lines)
+(119 files, 37043 lines)
