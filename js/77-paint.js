@@ -30,7 +30,7 @@ function paintMap(id,FM){
     const src=(PAINT.on&&SET.paint)?o.back:B._pt0;for(const k of Object.keys(o.back)){if(Array.isArray(src[k]))B[k]=src[k].map(x=>Object.assign({},x));else Object.assign(B[k],src[k]);}}
 }
 // ไฟของแมพภาพวาด (เรียกท้าย buildWorld) — เงาได้สีจากแสงฟ้า (เขียวอมฟ้า) ส่วนโดนแดดอุ่นเหลือง
-function kuwOn(){return !!PAINT.cur&&PAINT.kuw>0&&QUAL.mode!=='low'&&!(QUAL.mode==='auto'&&QUAL.lvl>=1);}
+function kuwOn(){return !!PAINT.cur&&PAINT.kuw>0&&gq('paint')>0&&!qDyn(1);}
 function paintLights(id){
   if(!PAINT)return;PAINT.cur=paintOn(id)?id:null;
   if(PAINT.pass)PAINT.pass.enabled=kuwOn();
@@ -292,7 +292,7 @@ function paintShafts(){
 // ---------- ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเรียบที่สุด = ปื้นสีเรียบ ขอบคม ----------
 // PAINT.kuwQ: 'full' = 4×13 taps (QUAL high) • 'fast' = 4×4 bilinear taps, each tap averages a 2×2 texel block (auto)
 // • off on low and on auto once it steps down (QUAL.lvl>=1). One program per session (mode is fixed at entry).
-function kuwQ(){return QUAL.mode==='high'?'full':'fast';}
+function kuwQ(){return gq('paint')>=2?'full':'fast';}
 const KUW_LOOP={full:'float W=0.0;for(int j=0;j<=3;j++)for(int i=0;i<=3;i++){float d2=float(i*i+j*j);if(d2>10.5)continue;float w=exp(-d2/9.0);W+=w;vec2 o=vec2(float(i),float(j))*uPx*uR;',
   fast:'float W=0.0;for(int j=0;j<=1;j++)for(int i=0;i<=1;i++){vec2 t=vec2(float(i),float(j))*2.0+0.5;float d2=dot(t,t);float w=exp(-d2/9.0);W+=w;vec2 o=t*uPx*uR;'};
 function kuwMat(q){return new THREE.ShaderMaterial({uniforms:PAINT.KU,depthTest:false,depthWrite:false,name:'paint_kuwahara_'+q,

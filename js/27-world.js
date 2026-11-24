@@ -157,7 +157,7 @@ const TAA_FRAG='vec3 gd(vec3 v){float q=v.r+v.g+v.b;return (q>=0.0&&q<1e4)?v:vec
   'o+=(c-sm/9.0)*uSharp;'+   // ชดเชยความนุ่มของการสะสม
   'gl_FragColor=vec4(max(o,0.0),z);}';   // alpha = ความลึกตามแนวสายตา ไว้ให้เฟรมถัดไป
 const _taaH=(i,b)=>{let f=1,r=0;while(i>0){f/=b;r+=f*(i%b);i=Math.floor(i/b);}return r;};
-function taaWanted(){return TAA.on&&QUAL.mode==='high'&&screen==='game'&&rpass.scene===scene&&SOFTU.uSoftOn.value>0.5;}
+function taaWanted(){return TAA.on&&gq('aa')===2&&screen==='game'&&rpass.scene===scene&&SOFTU.uSoftOn.value>0.5;}
 function taaBegin(){
   TAA.jit=false;
   if(!taaWanted()){TAA.valid=0;return;}
@@ -251,30 +251,77 @@ class AAPass extends Pass{
 const aaPass=new AAPass();composer.addPass(aaPass);fxPass.gfx=GFX;
 
 // ---------- คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low = เครื่องช้า ----------
-const QUAL={mode:['auto','high','low'].includes(store('wd_gfx'))?store('wd_gfx'):'auto',scale:1,acc:0,n:0,good:0,frame:0,lvl:0,cpu:0,cacc:0,cs:0,clA:0};
+// Graphics settings (user 2026-11-24, guides/GRAPHICS-SETTINGS-PLAN.md): presets Low / Medium / High (default) / Ultra / Cinematic
+// + Custom = any option changed. Every feature reads gq('key') = level index. dyn = old "auto": qualTick lowers things on slow frames.
+const GQ_OPT=[   // [key, group, label, level names]
+  ['res','จอภาพ','ความละเอียด',['Low','Medium','High','Ultra']],
+  ['dyn','จอภาพ','ลดเองเมื่อเฟรมตก',['ปิด','เปิด']],
+  ['shadow','แสงและเงา','เงา',['ปิด','Low','Medium','High','Ultra']],
+  ['pcss','แสงและเงา','เงานุ่ม',['ปิด','เปิด']],
+  ['ao','แสงและเงา','เงาซอกมุม + ลำแสง',['ปิด','เปิด']],
+  ['bloom','ภาพรวม','แสงฟุ้ง (Bloom)',['ปิด','เปิด']],
+  ['grade','ภาพรวม','ปรับสีภาพ',['ปิด','เปิด']],
+  ['aa','ภาพรวม','ลบขอบหยัก',['ปิด','เร็ว','TAA']],
+  ['paint','ภาพรวม','ฟิลเตอร์ภาพวาด',['ปิด','เร็ว','เต็ม']],
+  ['softp','ภาพรวม','อนุภาคขอบนุ่ม',['ปิด','เปิด']],
+  ['grass','โลก','หญ้า',['ปิด','Low','Medium','High']],
+  ['surf','โลก','ผิววัสดุละเอียด',['ปิด','เปิด']],
+  ['amb','โลก','ฝุ่น/หมอกบรรยากาศ',['ปิด','Low','Medium','High']],
+  ['detail','โลก','ฉากไกล (โหลดแมพถัดไป)',['Low','High']],
+  ['dist','โลก','ระยะของชิ้นเล็ก',['ใกล้','กลาง','ไกล']],
+  ['particles','เอฟเฟกต์','อนุภาค',['Low','Medium','High','Cinematic']],
+  ['debris','เอฟเฟกต์','เศษซาก/รอยบนพื้น',['Low','Medium','High','Cinematic']],
+  ['flash','เอฟเฟกต์','แสงวาบเต็มจอ',['ปิด','เปิด']],
+];
+const GQ_PRE={
+  low:      {res:0,dyn:0,shadow:0,pcss:0,ao:0,bloom:0,grade:0,aa:0,paint:0,softp:0,grass:0,surf:0,amb:0,detail:0,dist:0,particles:0,debris:0,flash:0},
+  medium:   {res:1,dyn:0,shadow:2,pcss:0,ao:1,bloom:1,grade:1,aa:1,paint:1,softp:1,grass:2,surf:1,amb:2,detail:1,dist:2,particles:1,debris:1,flash:1},
+  high:     {res:2,dyn:0,shadow:3,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:3,surf:1,amb:3,detail:1,dist:2,particles:2,debris:2,flash:1},
+  ultra:    {res:3,dyn:0,shadow:4,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:3,surf:1,amb:3,detail:1,dist:2,particles:2,debris:2,flash:1},
+  cinematic:{res:3,dyn:0,shadow:4,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:3,surf:1,amb:3,detail:1,dist:2,particles:3,debris:3,flash:1},
+};
+const GQ_NAME={low:'Low',medium:'Medium',high:'High',ultra:'Ultra',cinematic:'Cinematic',custom:'Custom'};
+const GQ=(()=>{let o=null;try{o=JSON.parse(store('wd_gfx2')||'null');}catch(e){}
+  if(!o||!o.v){const old=store('wd_gfx');o={p:old==='low'?'low':'high'};o.v=Object.assign({},GQ_PRE[o.p]);}   // old saves: low stays low, auto/high → High (user: High = default)
+  o.v=Object.assign({},GQ_PRE.high,o.v);if(o.p!=='custom'&&!GQ_PRE[o.p])o.p='high';return o;})();
+function gq(k){return GQ.v[k]|0;}
+function gqSave(){store('wd_gfx2',JSON.stringify(GQ));}
+function gqPreset(p){if(!GQ_PRE[p])return;GQ.p=p;GQ.v=Object.assign({},GQ_PRE[p]);gqSync();}
+function gqSet(k,v){GQ.v[k]=v;GQ.p=Object.keys(GQ_PRE).find(p=>GQ_OPT.every(([q])=>GQ_PRE[p][q]===GQ.v[q]))||'custom';gqSync();}
+// QUAL.mode is kept for old code / test scripts: 'low' | 'auto' (dyn on) | 'high'. A script that sets QUAL.mode itself and calls
+// applyQuality() picks the matching preset (high → High, low → Low, auto → Medium + dyn).
+function gqMode(){return GQ.p==='low'?'low':gq('dyn')?'auto':'high';}
+function gqSync(){QUAL.mode=QUAL._m=gqMode();QUAL.scale=1;QUAL.lvl=0;QUAL.cs=0;}
+const QUAL={mode:'high',_m:'high',scale:1,acc:0,n:0,good:0,frame:0,lvl:0,cpu:0,cacc:0,cs:0,clA:0};
+gqSync();
 const QUAL_NAME={auto:'อัตโนมัติ',high:'สูง',low:'ประหยัด'};
+const qDyn=n=>gq('dyn')&&QUAL.lvl>=n;   // dyn mode stepped down to lvl ≥ n
 function qualPR(){
-  const dpr=window.devicePixelRatio||1;
-  if(QUAL.mode==='high')return Math.min(1.5,dpr);
-  if(QUAL.mode==='low')return Math.min(1,dpr)*0.7;
-  return Math.min(1,dpr)*QUAL.scale;
+  const dpr=window.devicePixelRatio||1,r=gq('res');
+  const b=r===0?Math.min(1,dpr)*0.7:r===1?Math.min(1,dpr):r===2?Math.min(1.5,dpr):Math.min(2,dpr*1.5);
+  return gq('dyn')?b*QUAL.scale:b;
 }
+function gqShadowSize(id){const s=gq('shadow');return s>=4?4096:s===3&&id!=='castle'&&id!=='greathall'?4096:2048;}
 function applyQuality(){
+  if(QUAL.mode!==QUAL._m){const m=QUAL.mode,lv=QUAL.lvl,sc=QUAL.scale;gqPreset(m==='low'?'low':m==='auto'?'medium':'high');if(m==='auto'){GQ.v.dyn=1;GQ.p='custom';gqSync();QUAL.lvl=lv;QUAL.scale=sc;}}   // set from outside (old scripts)
+  try{SMOKE_K=gq('particles')>=3?1:0.4;}catch(e){}   // Cinematic: smoke as before the 2026-11-18 cut
+  try{BF_LIFE=gq('debris')>=3?25:5;}catch(e){}        // Cinematic: ground marks / debris linger (before 2026-11-11 they stayed all match) • try: later files (TDZ at boot)
+  try{const ms=gqShadowSize(MAPID);if(moonL.shadow.mapSize.x!==ms){moonL.shadow.mapSize.set(ms,ms);if(moonL.shadow.map){moonL.shadow.map.dispose();moonL.shadow.map=null;}}shadowSoft();}catch(e){}
   const pr=qualPR();gl.setPixelRatio(pr);composer.setPixelRatio(pr);
   // เปิด/ปิดเงา = คอมไพล์ shader ใหม่ทุกตัว (ค้าง ~2 วิ) → ปิดจริงเฉพาะโหมดประหยัด • อัตโนมัติขั้น 2 แค่อัปเดตเงาห่างขึ้น (renderGame js/37)
-  const sh=QUAL.mode!=='low';
+  const sh=gq('shadow')>0;
   if(gl.shadowMap.enabled!==sh){
     gl.shadowMap.enabled=sh;
     for(const sc of [scene,typeof stage!=='undefined'?stage:null])if(sc)sc.traverse(o=>{if(o.material)[].concat(o.material).forEach(m=>m.needsUpdate=true);});
   }
-  bloom.enabled=QUAL.mode!=='low'&&!(QUAL.mode==='auto'&&QUAL.lvl>=1);
-  gradePass.enabled=QUAL.mode!=='low';
-  aaPass.enabled=GFX.aa&&QUAL.mode!=='low'&&!(QUAL.mode==='auto'&&QUAL.lvl>=2);
+  bloom.enabled=!!gq('bloom')&&!qDyn(1);
+  gradePass.enabled=!!gq('grade');
+  aaPass.enabled=GFX.aa&&gq('aa')>0&&!qDyn(2);
   // soft particles: ปิดเมื่อกราฟิกประหยัด หรืออัตโนมัติลดถึงขั้นปิดเงา (ประหยัดการก๊อปภาพเต็มจอ 1 ครั้ง)
-  const soft=QUAL.mode!=='low'&&!(QUAL.mode==='auto'&&QUAL.lvl>=2)?1:0;
+  const soft=gq('softp')&&!qDyn(2)?1:0;
   if(SOFTU.uSoftOn.value!==soft){SOFTU.uSoftOn.value=soft;for(const m of FXMATS)m.depthTest=!soft;}
   // เงาตามซอกมุม: สูง = เปิด / อัตโนมัติ = เปิดจนกว่าเครื่องเริ่มช้า (lvl≥1) / ประหยัด = ปิด (ทำงานเฉพาะตอน soft เปิด)
-  AOU.uAO.value=soft&&(QUAL.mode==='high'||QUAL.lvl<1)?AO_ON.strength:0;
+  AOU.uAO.value=soft&&gq('ao')&&!qDyn(1)?AO_ON.strength:0;
   if(typeof lookRays==='function')lookRays();   // ลำแสง: เปิดตามกราฟิกเหมือน AO
   if(typeof kuwOn==='function'&&PAINT&&PAINT.pass)PAINT.pass.enabled=kuwOn();   // painterly filter (js/77): off on low / auto lvl>=1
   if(typeof surfQuality==='function')surfQuality();   // ผิววัสดุ (js/76): สูง/อัตโนมัติต้น = เปิด
@@ -282,7 +329,7 @@ function applyQuality(){
 }
 // ปรับความละเอียดอัตโนมัติ: เฟรมช้า (<~40fps) ลดลงทีละขั้น / ลื่นต่อเนื่องค่อยเพิ่มกลับ
 function qualTick(dt){
-  if(QUAL.mode!=='auto'||(screen!=='game'&&screen!=='menu'&&screen!=='lobby')||dt>0.2)return;   // เมนู/ล็อบบี้ก็ลดเองได้ เครื่องอ่อนจะได้ไม่แลคตั้งแต่หน้าแรก
+  if(!gq('dyn')||(screen!=='game'&&screen!=='menu'&&screen!=='lobby')||dt>0.2)return;   // เมนู/ล็อบบี้ก็ลดเองได้ เครื่องอ่อนจะได้ไม่แลคตั้งแต่หน้าแรก
   QUAL.acc+=dt;QUAL.n++;QUAL.cacc+=QUAL.cpu;
   if(QUAL.acc<2)return;
   const avg=QUAL.acc/QUAL.n*1000,cpu=QUAL.cacc/QUAL.n;QUAL.acc=0;QUAL.n=0;QUAL.cacc=0;
@@ -301,7 +348,7 @@ function qualTick(dt){
 // คอขวดเครื่องอ่อนคือ CPU (สั่งวาด ~600 ครั้ง/เฟรม บนคอร์เดียว) ไม่ใช่ความละเอียด: ลดกราฟิกอย่างเดียวไม่ช่วย
 // ขั้น 1–2: ซ่อนของชิ้นเล็กไกลตา • เงาอัปเดตห่างขึ้น (js/37) • อนุภาคน้อยลง (vfxQual js/19) • ผ้าคลุมคำนวณไม่ทุกเฟรม (js/37)
 // ประหยัด = ขั้น 2 เสมอ • อัตโนมัติ = เพิ่มเองเมื่อ CPU ไม่ไหวหลังลดระดับภาพครบ (qualTick) • สูง = ปิด
-const qualCS=()=>QUAL.mode==='low'?2:QUAL.mode==='auto'?QUAL.cs:0;
+const qualCS=()=>Math.max(2-gq('dist'),gq('dyn')?QUAL.cs:0);   // CPU savers: small far props hidden + cloth every n frames
 const CULL={list:null,key:'',t:0,on:false};
 function cullTick(dt){
   const cs=qualCS();if(CULL.key!==builtKey){CULL.key=builtKey;CULL.list=null;CULL.on=false;}
@@ -515,7 +562,7 @@ function shadowFollow(){
   if(!SHD.on){   // แบบเดิม: คลุมทั้งแผนที่ แสงมองไปที่กลางแผนที่
     if(c.right!==ext){Object.assign(c,{left:-ext,right:ext,top:ext,bottom:-ext,near:1,far:400});c.updateProjectionMatrix();}
     moonL.target.position.set(0,0,0);moonL.position.copy(LDIR).multiplyScalar(133);moonL.target.updateMatrixWorld();shadowSoft(c);return;}
-  const r=Math.min(ext,QUAL.mode==='high'?SHD.rHigh:SHD.r);
+  const r=Math.min(ext,gq('shadow')>=3?SHD.rHigh:SHD.r);
   if(c.right!==r){Object.assign(c,{left:-r,right:r,top:r,bottom:-r,near:1,far:420});c.updateProjectionMatrix();}
   _shF.set(0,0,-1).applyQuaternion(cam.quaternion);_shF.y=0;if(_shF.lengthSq()<1e-6)_shF.set(0,0,-1);_shF.normalize();
   const x=cam.position.x+_shF.x*r*SHD.ahead,z=cam.position.z+_shF.z*r*SHD.ahead;
@@ -529,7 +576,7 @@ function shadowFollow(){
   shadowSoft(c);
 }
 // เงานุ่ม PCSS: เปิดเฉพาะกราฟิกสูง (radius = 10 + K, K = ขนาดแสง × ช่วงลึกกล้องเงา / ความกว้างกล้องเงา) • ปิด = 1 (วิธีเดิม)
-function shadowSoft(c){c=c||moonL.shadow.camera;moonL.shadow.radius=PCSS.on&&QUAL.mode==='high'?10+PCSS.size*(c.far-c.near)/Math.max(1,c.right-c.left):1;}
+function shadowSoft(c){c=c||moonL.shadow.camera;moonL.shadow.radius=PCSS.on&&gq('pcss')?10+PCSS.size*(c.far-c.near)/Math.max(1,c.right-c.left):1;}
 // ไฟชั่วคราวสำหรับคาถา (pool คงที่ ไม่ต้อง compile shader ใหม่)
 const LPOOL=[];
 for(let i=0;i<6;i++){const L=new THREE.PointLight('#ffffff',0,12,2);L.position.set(0,-100,0);scene.add(L);LPOOL.push(L);}

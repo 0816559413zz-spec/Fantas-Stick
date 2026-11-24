@@ -50,7 +50,7 @@ function surfSync(){const U=SURF.U,a=SURF.amp;
   U.uSfA.value.set(SURF.on&&SURF.q?1:0,0,SURF.near,Math.max(SURF.near+1,SURF.far));
   U.uSfB.value.set(1/Math.max(0.2,SURF.micro),1/Math.max(1,SURF.macro),0,SURF.bump);
   U.uSfC.value.set(a[0],a[1],a[2],a[3]);U.uSfD.value.set(SURF.colVar,SURF.roughVar,SURF.cavity,0);}
-function surfQuality(){if(!SURF)return;SURF.q=QUAL.mode==='low'?0:QUAL.mode==='high'?1:(QUAL.lvl>=2?0:1);surfSync();}   // เรียกจาก applyQuality (js/27)
+function surfQuality(){if(!SURF)return;SURF.q=gq('surf')&&!qDyn(2)?1:0;surfSync();}   // เรียกจาก applyQuality (js/27)
 // ----- ใส่ผิวเข้าวัสดุ -----
 const SURF_VS='varying vec3 vSfP;varying vec3 vSfN;\n';
 const SURF_VS_BODY=`

@@ -89,7 +89,7 @@ function bdTree(kind){const parts=[],put=(geo,col,y)=>{geo=geo.toNonIndexed();ge
 function buildBackdrop(id){const fm=MAPS[id]&&MAPS[id].fm;if(fm&&fm.bd&&fm.bd.on&&fm.bd.hg){const cg=bdCoast(id,{grid:fm.bd});world.add(cg);return cg;}   // Map Builder backdrop (js/67-coast bdGridSrc)
   const B=BACKDROP&&BACKDROP[id];if(!B)return;
   if(B.coast){const cg=bdCoast(id,B);world.add(cg);return cg;}   // sea cliffs (js/67-coast)
-  const g=new THREE.Group();g.name='backdrop';const hx=MW/2*S3+20,hz=MH/2*S3+17,sd=B.seed||1,low=QUAL.mode==='low';
+  const g=new THREE.Group();g.name='backdrop';const hx=MW/2*S3+20,hz=MH/2*S3+17,sd=B.seed||1,low=!gq('detail');
   const L2=new THREE.Vector2(LDIR.x,LDIR.z).normalize(),C=k=>new THREE.Color(k);
   // 1) เนินใกล้: ต่อจากขอบพื้น สูงขึ้นเรื่อย ๆ ไปข้างนอก (แสงจริง + หมอกฉาก → เข้ากับแผนที่)
   let nearH=null;

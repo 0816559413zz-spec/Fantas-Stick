@@ -142,7 +142,7 @@ function perfRows(){const S=perfStats(),I=gl.info,v=VIEW.cur,mem=performance.mem
     ['CPU',`${S.cpu.toFixed(1)} ms/เฟรม`+(NET.isHost&&screen==='game'?` (โฮสต์คำนวณเกม ${PERF.host.toFixed(1)})`:'')+` • ที่เหลือ ≈ รอการ์ดจอ/เบราว์เซอร์`],
     ['วาด',`${PERF.calls} draw call • ${(PERF.tris/1000).toFixed(0)}k สามเหลี่ยม`],
     ['GPU mem',`${I.programs?I.programs.length:0} shader • ${I.memory.geometries} geometry • ${I.memory.textures} texture`],
-    ['ภาพ',`${Math.round(sz.x*px)}×${Math.round(sz.y*px)} px (×${px.toFixed(2)}) • กราฟิก ${QUAL_NAME[QUAL.mode]}${QUAL.mode==='auto'?' ระดับ '+QUAL.lvl:''}`],
+    ['ภาพ',`${Math.round(sz.x*px)}×${Math.round(sz.y*px)} px (×${px.toFixed(2)}) • กราฟิก ${GQ_NAME[GQ.p]}${gq('dyn')?' ลดเอง ระดับ '+QUAL.lvl:''}`],
   ];
   if(mem)rows.push(['JS mem',`${(mem.usedJSHeapSize/1048576).toFixed(0)} / ${(mem.jsHeapSizeLimit/1048576).toFixed(0)} MB`]);
   if(screen==='game'&&v){

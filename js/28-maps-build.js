@@ -41,7 +41,7 @@ function buildWorld(id){
   const ext=Math.max(MW,MH)*S3/2+12;
   Object.assign(moonL.shadow.camera,{left:-ext,right:ext,top:ext,bottom:-ext,near:1,far:400});
   moonL.shadow.camera.updateProjectionMatrix();
-  const ms=id==='castle'||id==='greathall'||QUAL.mode!=='high'?2048:4096;
+  const ms=gqShadowSize(id);
   if(moonL.shadow.mapSize.x!==ms){moonL.shadow.mapSize.set(ms,ms);if(moonL.shadow.map){moonL.shadow.map.dispose();moonL.shadow.map=null;}}
 }
 function addW(o){world.add(o);return o;}

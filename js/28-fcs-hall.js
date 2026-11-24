@@ -37,7 +37,7 @@ function hallWindows(Z){const zAt=(x,z)=>Z.find(R=>x>R.x0-2&&x<R.x1+2&&z>R.z0-2&
   return out;}
 // ---- build (called once per world build, after the room view / file deco filled HALL.win)
 function hallBuild(id){const Z=hallZones(id),list=Z.length?hallWindows(Z):[];HALL.win=[];if(!Z.length)return;
-  const T=hallTex(),pp=[],pu=[],sp=[],su=[],sn=[],fp=[],fu=[],dA=[],dD=[],dO=[],dR=[],low=QUAL.mode==='low';
+  const T=hallTex(),pp=[],pu=[],sp=[],su=[],sn=[],fp=[],fu=[],dA=[],dD=[],dO=[],dR=[],low=!gq('detail');
   const quad=(P,U,a,b,c,d,ua,ub,uc,ud)=>{P.push(...a,...b,...c,...a,...c,...d);U.push(...ua,...ub,...uc,...ua,...uc,...ud);};
   const v3=(a,b,s)=>[a[0]+b[0]*s,a[1]+b[1]*s,a[2]+b[2]*s],UP=[0,1,0];
   // light travels along -LDIR (the map's sun / moon); keep it at least ~12° downward

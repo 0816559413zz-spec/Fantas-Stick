@@ -136,6 +136,15 @@ const SET_ICO=['<circle cx="12" cy="12" r="7"/><path d="M12 2.5v5M12 16.5v5M2.5 
   '<rect x="3" y="5" width="18" height="12" rx="1.5"/><path d="M9 21h6M12 17v4"/><path d="M6.5 14l3.5-4 2.5 2.5 2-2 3 3.5"/>','<rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 8.5h18M7 12.5h4M7 15.5h7"/><circle cx="17" cy="14" r="1.6"/>',
   '<rect x="2.5" y="6.5" width="19" height="11" rx="1.5"/><path d="M6 10h1M9 10h1M12 10h1M15 10h1M18 10h1M7.5 14h9"/>','<path d="M10 4H5.5v16H10"/><path d="M14 8l4 4-4 4M18 12H9"/>'];
 const SET_EN=['Mouse','Audio','Graphics','Display','Controls','Exit'];
+// Graphics tab: preset buttons + every option as segment buttons (changing one = Custom). Shader-changing options apply at once
+// (short hitch, user 2026-11-24).
+function gfxPanel(){
+  const pre=Object.keys(GQ_PRE).map(p=>`<button type="button" class="seg ${GQ.p===p?'on':''}" data-gqp="${p}">${GQ_NAME[p]}</button>`).join('')+(GQ.p==='custom'?'<button type="button" class="seg on">Custom</button>':'');
+  let h=`<label class="srow"><span>คุณภาพกราฟิก</span><div class="segs">${pre}</div></label><p class="crnote" style="margin:0 0 6px">High = ค่าเริ่มต้น • Cinematic = เอฟเฟกต์เต็ม ควันฟุ้ง ซากค้างบนพื้นนานขึ้น • ปรับแต่ละข้อด้านล่าง = Custom • บางข้อทำให้ภาพกระตุกครู่หนึ่งตอนเปลี่ยน</p>`,grp='';
+  for(const [k,g,lab,names] of GQ_OPT){if(g!==grp){grp=g;h+=`<h3 class="sec">${g}</h3>`;}
+    h+=`<label class="srow"><span>${lab}</span><div class="segs">${names.map((n,i)=>`<button type="button" class="seg ${gq(k)===i?'on':''}" data-gqo="${k}" data-v="${i}">${n}</button>`).join('')}</div></label>`;}
+  return h+'<h3 class="sec">อื่น ๆ</h3>';
+}
 function renderSettings(){
   const tabs=['เมาส์ & เป้าเล็ง','เสียง','ภาพ','หน้าจอ','ปุ่มกด'];
   let b='';
@@ -143,7 +152,7 @@ function renderSettings(){
     <h3 class="sec">เป้าเล็ง</h3>${setOpts('รูปแบบ','xh',['กากบาท','จุด','วงกลม','กากบาท+วง'])}${setOpts('สี','xhc',XHN)}${setRow('ขนาด','xhs',50,200,10,'%')}
     <div class="xhprev"><canvas id="xhPrev" width="120" height="70"></canvas></div>`;
   if(setTab===1)b=`${setRow('เสียงรวม','master',0,100,1,'%')}${setRow('เสียงเอฟเฟกต์','sfx',0,100,1,'%')}${setRow('เพลง','music',0,100,1,'%')}${setTog('เปิดเพลงประกอบ','_music')}<h3 class="sec">ไมค์ (คุยเสียง)</h3>${NET.online?'':'<p class="crnote">ใช้ได้ตอนเล่นออนไลน์กับเพื่อน</p>'}<div id="setVoice"></div>`;
-  if(setTab===2)b=`<label class="srow"><span>กราฟิก</span><select id="setGfx">${['auto','high','low'].map(m=>`<option value="${m}" ${QUAL.mode===m?'selected':''}>${QUAL_NAME[m]}${m==='auto'?' (ปรับเองให้ลื่น)':m==='high'?' (เครื่องแรง)':' (ลื่นสุด ไม่มีเงา)'}</option>`).join('')}</select></label>
+  if(setTab===2)b=gfxPanel()+`
     ${setTog('สไตล์ภาพวาด (Painterly)','paint')}<p class="crnote" style="margin:0 0 6px">มีผลตอนโหลดแมพถัดไป • ใช้กับแมพที่รองรับ (ป่า forest, ปราสาทบุกปราสาท)</p>
     ${setRow('มุมกว้างกล้อง (FOV)','fov',50,95,1,'°')}${setTog('กล้องสั่น','shake')}${setTog('แสดง FPS','fps')}${setTog('กราฟ FPS','fpsg')}${setTog('ข้อมูลประสิทธิภาพ (F3)','stats')}`;
   if(setTab===3)b=`${setTog('ตัวเลขดาเมจ','dmg')}${setTog('เครื่องหมายตอนยิงโดน','hitm')}${setTog('บอกทิศที่โดนยิง','dirm')}${setTog('แผนที่ย่อ','mini')}${setTog('ชื่อผู้เล่นเหนือหัว','names')}`;
@@ -169,19 +178,19 @@ $('#setReset').onclick=()=>{Object.assign(SET,SET_DEF,{keys:{}});saveSet();rebui
 $('#settings').addEventListener('click',e=>{
   if(e.target.closest('[data-sx="exit"]')||e.target.classList.contains('sxBg')){closeSettings();return;}
   const t=e.target.closest('[data-stab]');if(t){setTab=+t.dataset.stab;_rebind=null;renderSettings();$('#setBody').classList.remove('sxNew');void $('#setBody').offsetWidth;$('#setBody').classList.add('sxNew');return;}
+  const gp=e.target.closest('[data-gqp]');if(gp){gqPreset(gp.dataset.gqp);gqSave();applyQuality();renderSettings();return;}
+  const go=e.target.closest('[data-gqo]');if(go){gqSet(go.dataset.gqo,+go.dataset.v);gqSave();applyQuality();renderSettings();return;}
   const s=e.target.closest('[data-seg]');if(s){SET[s.dataset.seg]=+s.dataset.v;saveSet();renderSettings();return;}
   const k=e.target.closest('[data-bind]');if(k){_rebind=k.dataset.bind;renderSettings();return;}
 });
 $('#settings').addEventListener('input',e=>{
   const el=e.target,k=el.dataset&&el.dataset.set;
-  if(el.id==='setGfx'){QUAL.mode=el.value;QUAL.scale=1;QUAL.lvl=0;store('wd_gfx',QUAL.mode);applyQuality();return;}
   if(!k)return;
   if(k==='_music'){if(!!el.checked!==MUSIC.on){ac();toggleMusic();}return;}
   SET[k]=el.type==='checkbox'?(el.checked?1:0):+el.value;
   const sv=$('#setBody').querySelector(`[data-sv="${k}"]`);if(sv)sv.textContent=el.value+(k==='fov'?'°':'%');
   saveSet();applySettings();drawXhPrev();
 });
-$('#settings').addEventListener('change',e=>{if(e.target.id==='setGfx'){QUAL.mode=e.target.value;QUAL.scale=1;QUAL.lvl=0;store('wd_gfx',QUAL.mode);applyQuality();}});
 applySettings();
 // เพลงเริ่มได้หลังผู้ใช้คลิกครั้งแรก (กฎของเบราว์เซอร์)
 addEventListener('pointerdown',()=>ac(),{once:true});

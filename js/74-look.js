@@ -68,8 +68,8 @@ function lookApply(day){
 // ลำแสง: เปิดตามระดับกราฟิกเหมือน SSAO (สูง = เปิด / อัตโนมัติ = เปิดจนกว่าเครื่องเริ่มช้า / ประหยัด = ปิด)
 function lookRays(){
   if(!LOOK||LOOK.off||!LOOK.cur){AOU.uRay.value=0;return;}
-  const soft=QUAL.mode!=='low'&&!(QUAL.mode==='auto'&&QUAL.lvl>=2);
-  AOU.uRay.value=soft&&(QUAL.mode==='high'||QUAL.lvl<1)?LOOK.P[LOOK.cur].rays:0;
+  const soft=gq('softp')&&!qDyn(2);
+  AOU.uRay.value=soft&&gq('ao')&&!qDyn(1)?LOOK.P[LOOK.cur].rays:0;
 }
 const _lkV=new THREE.Vector3();
 // ทุกเฟรม (จาก FXPass): ตำแหน่งดวงจันทร์/อาทิตย์บนจอ + ความจางเมื่ออยู่นอกจอ/หลังกล้อง

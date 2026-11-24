@@ -36,7 +36,7 @@ function ambMesh(kind){
     fragmentShader:SOFT_GLSL+AMBX_F,transparent:true,depthWrite:false,blending:kind?THREE.NormalBlending:THREE.AdditiveBlending,side:THREE.DoubleSide}));
   const mesh=new THREE.Mesh(g,m);mesh.frustumCulled=false;mesh.renderOrder=kind?-2:-1;mesh.visible=false;mesh.userData.keep=true;fxScene.add(mesh);return mesh;}
 // ปริมาณตามกราฟิก (เหมือน SSAO/ลำแสง): สูง = เต็ม • อัตโนมัติ lvl0 = 0.6 / lvl1 = ฝุ่น 0.3 ไม่มีหมอก / lvl≥2 ปิด • ประหยัด = ปิด
-function ambQual(){if(QUAL.mode==='low')return [0,0];if(QUAL.mode==='high')return [1,1];return QUAL.lvl>=2?[0,0]:QUAL.lvl>=1?[0.3,0]:[0.6,0.6];}
+function ambQual(){const a=qDyn(2)?0:qDyn(1)?Math.min(1,gq('amb')):gq('amb');return [[0,0],[0.3,0],[0.6,0.6],[1,1]][a];}
 function ambFrame(){   // เรียกจาก FXPass.render ทุกเฟรม (js/27)
   const P=typeof LOOK!=='undefined'&&LOOK&&LOOK.cur?LOOK.P[LOOK.cur]:null,on=P&&!AMBX.off&&!LOOK.off&&screen==='game'&&!!world;
   if(!AMBX.dust){if(!on)return;AMBX.dust=ambMesh(0);AMBX.mist=ambMesh(1);}

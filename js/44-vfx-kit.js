@@ -238,8 +238,8 @@ function bfPlay(name,el,x,y,h,s,pal){if(combatVfxReduced()||!nearMe(x,y,1600))re
 // รอย = InstancedMesh เดียว ภาพ assets/fx/tex/bf_marks.png (4×2 ช่อง จาก tools/bf-mark-gen.py) • ทุกรอยเก็บ {x,y,el,r} ไว้ใน BFM.at (ไว้เปลี่ยนเป็นหลุมจริงทีหลัง)
 // ซาก = ชิ้นที่ตกนิ่งแล้ว (DEBRIS js/23, rockChunks js/42, bfScatter) ย้ายเข้า InstancedMesh ต่อ (geometry, วัสดุ) → วาดถูก ค้างได้เป็นพัน • สตูดิโอ VFX = ไม่ค้าง (หดหายแบบเดิม)
 // รอยและซากบนพื้นหายเองหลัง BF_LIFE วิ (จางหรือยุบลงพื้นใน BF_FADE วิสุดท้าย)
-const BF_LIFE=5,BF_FADE=2;
-const BFM={MAX:300,N:{high:300,auto:190,low:80},mesh:null,attr:null,n:0,head:0,at:[],grow:[]};
+let BF_LIFE=5;const BF_FADE=2;   // Cinematic sets 25 (applyQuality)
+const BFM={MAX:300,N:[80,190,300,300],mesh:null,attr:null,n:0,head:0,at:[],grow:[]};
 const BF_MK={fire:[0,1],storm:[2,3],earth:[4,5],ice:[6,7]},BF_MKA={fire:0.92,storm:0.88,earth:0.85,ice:0.82},BF_MKR={fire:1,storm:1.1,earth:1.05,ice:1.1};
 function bfMarkMesh(){if(BFM.mesh)return BFM.mesh;
   const t=new THREE.TextureLoader().load('assets/fx/tex/bf_marks.png?v='+(((FXR.index.tex||{}).bf_marks||{}).v||''));t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;t.userData.keep=true;
@@ -254,7 +254,7 @@ const _bfQ=new THREE.Quaternion(),_bfQ2=new THREE.Quaternion(),_bfN=new THREE.Ve
 function bfMark(x,y,el,s){const C=BF_MK[el];if(!C||FXSTUDIO.own)return;const M=bfMarkMesh();
   const r=(0.75+1.9*s)*BF_MKR[el],a=BF_MKA[el]*Math.min(1,0.6+0.3*s);
   for(let i=0;i<BFM.n;i++){const q=BFM.at[i];if(q&&!q.dead&&q.el===el&&q.r>=r*0.75&&Math.hypot(q.x-x,q.y-y)*S3<r*0.45){q.a=Math.min(1,q.a+0.2);q.t0=performance.now();if(!BFM.grow.includes(i))BFM.grow.push(i);return;}}
-  const cap=Math.min(BFM.MAX,BFM.N[QUAL.mode]||190);let i;if(BFM.n<cap)i=BFM.n++;else{i=BFM.head%cap;BFM.head=(BFM.head+1)%cap;}
+  const cap=Math.min(BFM.MAX,BFM.N[gq('debris')]);let i;if(BFM.n<cap)i=BFM.n++;else{i=BFM.head%cap;BFM.head=(BFM.head+1)%cap;}
   const d=r/S3,gx=(GY(x+d,y)-GY(x-d,y))/(2*r),gz=(GY(x,y+d)-GY(x,y-d))/(2*r);
   _bfN.set(-gx,1,-gz).normalize();_bfQ.setFromUnitVectors(_bfUp,_bfN);_bfQ2.setFromAxisAngle(_bfUp,Math.random()*6.283);_bfQ.multiply(_bfQ2);
   _bfMx.compose(_bfP.set(tx(x),GY(x,y)+0.015,tz(y)),_bfQ,_bfS.set(r*(Math.random()<0.5?-1:1),1,r));M.setMatrixAt(i,_bfMx);M.instanceMatrix.needsUpdate=true;
@@ -278,13 +278,13 @@ function updateBfMarks(dt){if((BFM.ageT=(BFM.ageT||0)-dt)<=0){BFM.ageT=0.1;bfAge
     q.a0=Math.min(q.a,q.a0+dt*2.2);BFM.attr.setZ(i,q.a0);if(q.a0>=q.a)BFM.grow.splice(k,1);}
   BFM.attr.needsUpdate=true;}
 // ซากนิ่ง: pool ต่อ (geometry, วัสดุ) • แต่ละ pool โตทีละเท่าจนถึงเพดานตามกราฟิก แล้ววนทับชิ้นเก่าสุด • จำนวน pool เกินเพดาน = ทิ้ง pool เก่าสุด
-const BFRS={N:{high:700,auto:420,low:120},P:{high:140,auto:90,low:30},M:{high:400,auto:250,low:80},pools:new Map(),smoke:[],bins:new Map(),big:[],dirty:false,reT:0,nCol:0};
+const BFRS={N:[120,420,700,1000],P:[30,90,140,180],M:[80,250,400,600],pools:new Map(),smoke:[],bins:new Map(),big:[],dirty:false,reT:0,nCol:0};
 function bfRestPool(geo,mat){const k=geo.uuid+'|'+mat.uuid;let p=BFRS.pools.get(k);if(p)return p;
-  const cap=8,M=new THREE.InstancedMesh(geo,mat,cap);M.count=0;M.frustumCulled=false;M.castShadow=QUAL.mode!=='low';M.receiveShadow=true;scene.add(M);
+  const cap=8,M=new THREE.InstancedMesh(geo,mat,cap);M.count=0;M.frustumCulled=false;M.castShadow=gq('debris')>0;M.receiveShadow=true;scene.add(M);
   p={k,M,cap,n:0,head:0};BFRS.pools.set(k,p);
-  if(BFRS.pools.size>(BFRS.P[QUAL.mode]||90)){const [k0,p0]=BFRS.pools.entries().next().value;scene.remove(p0.M);p0.M.dispose();BFRS.pools.delete(k0);}
+  if(BFRS.pools.size>(BFRS.P[gq('debris')])){const [k0,p0]=BFRS.pools.entries().next().value;scene.remove(p0.M);p0.M.dispose();BFRS.pools.delete(k0);}
   return p;}
-function bfRestAdd(geo,mat,mx){const p=bfRestPool(geo,mat),max=BFRS.N[QUAL.mode]||420;
+function bfRestAdd(geo,mat,mx){const p=bfRestPool(geo,mat),max=BFRS.N[gq('debris')];
   if(p.n>=p.cap&&p.cap<max){const cap=Math.min(max,p.cap*2),M=new THREE.InstancedMesh(geo,mat,cap);M.instanceMatrix.array.set(p.M.instanceMatrix.array);
     M.frustumCulled=false;M.castShadow=p.M.castShadow;M.receiveShadow=true;scene.remove(p.M);p.M.dispose();scene.add(M);p.M=M;p.cap=cap;}
   let i;if(p.n<p.cap)i=p.n++;else{i=p.head;p.head=(p.head+1)%p.cap;}
@@ -294,10 +294,10 @@ function bfRestAdd(geo,mat,mx){const p=bfRestPool(geo,mat),max=BFRS.N[QUAL.mode]
 function bfBinAdd(m){const g=m.geometry,key=m.material.uuid+'|'+Object.keys(g.attributes).sort().join(',')+'|'+(g.index?1:0);
   let b=BFRS.bins.get(key);if(!b)BFRS.bins.set(key,b={mat:m.material,geos:[],mesh:null});
   const c=g.clone();for(const k in c.morphAttributes)delete c.morphAttributes[k];c.applyMatrix4(m.matrixWorld);b.geos.push(c);BFRS.big.push({b,t:performance.now()});BFRS.dirty=true;
-  const max=BFRS.M[QUAL.mode]||250;while(BFRS.big.length>max){const o=BFRS.big.shift(),q=o.b.geos.shift();if(q)q.dispose();}}
+  const max=BFRS.M[gq('debris')];while(BFRS.big.length>max){const o=BFRS.big.shift(),q=o.b.geos.shift();if(q)q.dispose();}}
 function bfBinBuild(){BFRS.dirty=false;for(const b of BFRS.bins.values()){
   if(b.mesh){scene.remove(b.mesh);b.mesh.geometry.dispose();b.mesh=null;}if(!b.geos.length)continue;
-  const g=mergeGeometries(b.geos,false);if(!g)continue;b.mesh=new THREE.Mesh(g,b.mat);b.mesh.castShadow=QUAL.mode!=='low';b.mesh.receiveShadow=true;scene.add(b.mesh);}}
+  const g=mergeGeometries(b.geos,false);if(!g)continue;b.mesh=new THREE.Mesh(g,b.mat);b.mesh.castShadow=gq('debris')>0;b.mesh.receiveShadow=true;scene.add(b.mesh);}}
 // ย้ายวัตถุที่ตกนิ่งแล้ว (mesh หรือ group) เข้า pool แล้วเอาออกจากฉาก • คืน false = ไม่ค้าง (สตูดิโอ) ให้คนเรียกจัดการเอง
 // smo = จุดควันกรุ่น (ซากที่โดนไฟ) • big = ชิ้นรูปทรงไม่ซ้ำ → รวม mesh (bin) • ชิ้นวัสดุหลายแบบ (array) ใส่ไม่ได้ → ข้าม
 function bfRest(o,smo,big){if(FXSTUDIO.own||!BF.on)return false;
@@ -306,7 +306,7 @@ function bfRest(o,smo,big){if(FXSTUDIO.own||!BF.on)return false;
   if(smo&&BFRS.smoke.length<30){const q=simOf(o.position);BFRS.smoke.push({x:q.x,y:q.y,h:q.h,t:rnd(BF_LIFE-3,BF_LIFE),acc:Math.random()});}
   return true;}
 // เศษเล็กโปรยนิ่งรอบจุด (ไม่มีฟิสิกส์ — ใส่ pool ทันที): กรวด/หิน/ไม้/น้ำแข็ง ให้พื้นรก ๆ แบบสนามรบ • kind: 'rock' | 'ice' | 'char' | mats = [วัสดุ...]
-function bfScatter(x,y,R,n,kind,size){if(FXSTUDIO.own||!BF.on||!nearMe(x,y,1800))return;n=Math.round(n*(QUAL.mode==='low'?0.35:QUAL.mode==='high'?1:0.7));
+function bfScatter(x,y,R,n,kind,size){if(FXSTUDIO.own||!BF.on||!nearMe(x,y,1800))return;n=Math.round(n*[0.35,0.7,1,1.3][gq('debris')]);
   const mats=Array.isArray(kind)?kind:null,sz=size||1;
   for(let k=0;k<n;k++){const an=Math.random()*6.283,d=Math.sqrt(Math.random())*R,px=x+Math.cos(an)*d,py=y+Math.sin(an)*d;let geo,mat,s;
     if(kind==='ice'){geo=sGeo(THREE.OctahedronGeometry,1,0);mat=bldIceMat();s=rnd(0.06,0.18)*sz;_bfS.set(s,s*rnd(0.4,1.4),s);}
@@ -357,7 +357,7 @@ function updateBfAir(dt){const F=scene.fog;if(!F||FXSTUDIO.own)return;
   gl.toneMappingExposure=B.exp*(1-0.14*k);GRADEU.uSat.value=GFX.sat*(1-0.27*k);GRADEU.uVig.value=0.28+0.16*k;
   if(!game||k<0.03){bfRumble(0);return;}
   // เถ้าลอยรอบตัว (ถ่านไฟส้มปนถ้ามีรอยไหม้ใกล้)
-  const me=myPos();if(!me)return;BFA.ash+=dt*(QUAL.mode==='low'?10:26)*k;
+  const me=myPos();if(!me)return;BFA.ash+=dt*(gq('debris')?26:10)*k;
   if(BFA.ash>=1)vfxOnce(()=>{while(BFA.ash>=1){BFA.ash-=1;const x=me.x+rnd(-320,320),y=me.y+rnd(-320,320),e=Math.random()<0.25*BFA.fire;
     const wx=AIR.dir.x*AIR.str*40,wy=AIR.dir.y*AIR.str*40;
     PARTS.push(e?{x,y,h:rnd(0.2,2),vx:wx+rnd(-6,6),vy:wy+rnd(-6,6),vh:rnd(0.5,1.2),life:rnd(1.6,2.6),max:2.6,col:Math.random()<0.5?'#ff8a3a':'#ffb24a',size:rnd(1.4,2.2),g:-0.3,drag:0.6}
@@ -378,8 +378,8 @@ const SCR={fl:[],rad:null,chr:0,hurt:0,imp:null};
 // Impact frame (อนิเมะ): ภาพกลับขาว-ดำ + เส้นพุ่งออกจากจุด (wx,wy,wh) รวม 0.34 วิ — กลับ (0–40%) → วาบขาว (40–54%) → กลับอีกที (54–90%) → คืนภาพ
 // เรียกจากเหตุการณ์ของท่า (เช่น Eye of Heaven js/68) เฉพาะกับคนที่ควรเห็น • amt 0–1 ความแรง
 function impactFrame(amt,wx,wy,wh,T,id){SCR.imp={a:Math.max(0,Math.min(1,amt||1)),t:0,max:T||0.34,x:tx(wx),y:wh+GY(wx,wy),z:tz(wy),id};}   // id = ติดตามตัวละคร แบ่ง 3 เฟรมต้น/กลาง/ปลาย ไม่มีช่วงกลับภาพ
-function screenFlash(col,amt,life){if(QUAL.mode==='low')return;if(combatVfxReduced()){amt*=.55;life*=.68;}SCR.fl.push({c:new THREE.Color(col),a:amt,t:life,max:life});}
-function screenRadial(x,y,h,amt,life){if(QUAL.mode==='low')return;if(combatVfxReduced()){amt*=.55;life*=.68;}SCR.rad={x:tx(x),y:h+GY(x,y),z:tz(y),a:amt,t:life,max:life};}
+function screenFlash(col,amt,life){if(!gq('flash'))return;if(combatVfxReduced()){amt*=.55;life*=.68;}SCR.fl.push({c:new THREE.Color(col),a:amt,t:life,max:life});}
+function screenRadial(x,y,h,amt,life){if(!gq('flash'))return;if(combatVfxReduced()){amt*=.55;life*=.68;}SCR.rad={x:tx(x),y:h+GY(x,y),z:tz(y),a:amt,t:life,max:life};}
 function screenKick(amt){SCR.chr=Math.max(SCR.chr,amt);}
 function screenHurt(amt){SCR.hurt=Math.max(SCR.hurt,amt);}
 const _scv=new THREE.Vector3();

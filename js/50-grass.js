@@ -359,8 +359,8 @@ function grassBake(){
   airForMap();
   GRASS.bakeMs=+(performance.now()-t0).toFixed(1);}
 function grassCount(){
-  if(!GRASS.ON||QUAL.mode==='low'||(QUAL.mode==='auto'&&QUAL.lvl>=2))return [0,0];
-  const S=QUAL.mode==='high'?GRASS.S.high:QUAL.lvl>=1||QUAL.scale<0.8?GRASS.S.auto1:GRASS.S.auto;
+  const gl_=gq('grass');if(!GRASS.ON||!gl_||qDyn(2))return [0,0];
+  const S=gl_===1||qDyn(1)||gq('dyn')&&QUAL.scale<0.8?GRASS.S.auto1:gl_===2?GRASS.S.auto:GRASS.S.high;
   return [Math.min(GRASS.MAXN,Math.round(GRASS.DENS*S*S)),S];}
 // ทุกเฟรมในเกม: ลม + หญ้า + แรงลมให้ผ้าคลุม
 function grassTick(dt){
@@ -374,7 +374,7 @@ function grassTick(dt){
     else try{grassBake();}catch(e){console.error(e);GRASS.n=0;}}
   if(SCAR.clearNext||SCAR.key!==builtKey){SCAR.clearNext=false;SCAR.key=builtKey;scarReset();}
   if(SCAR.dirty&&SCAR.tex){SCAR.tex.needsUpdate=true;SCAR.dirty=false;}
-  SCAR.U.uGrLo.value=QUAL.mode==='low'||(QUAL.mode==='auto'&&QUAL.lvl>=2)?1:0;   // พื้นมีลาย: ปิดเมื่อกราฟิกต่ำ (เหมือนหญ้า)
+  SCAR.U.uGrLo.value=!gq('grass')||qDyn(2)?1:0;   // พื้นมีลาย: ปิดเมื่อกราฟิกต่ำ (เหมือนหญ้า)
   const [cnt,S]=grassCount();
   m.visible=cnt>0&&GRASS.n>20;
   {const me=typeof myPos==='function'?myPos():null;if(me){const w=airAt(tx(me.x),tz(me.y));CLW.x=w.x*CLW.K;CLW.z=w.z*CLW.K;}else CLW.x=CLW.z=0;}

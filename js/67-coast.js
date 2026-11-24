@@ -163,7 +163,7 @@ function coastGrid(hx0,hz0,sk,low){
   return {pts,rs};
 }
 function bdCoast(id,B){
-  const hx0=MW/2*S3,hz0=MH/2*S3,fm=MAPS[id]&&MAPS[id].fm,low=QUAL.mode==='low',sk=B.grid?0:fm&&fm.skirt>0?+fm.skirt:0;
+  const hx0=MW/2*S3,hz0=MH/2*S3,fm=MAPS[id]&&MAPS[id].fm,low=!gq('detail'),sk=B.grid?0:fm&&fm.skirt>0?+fm.skirt:0;
   const src=B.grid?bdGridSrc(B.grid,hx0,hz0,low):coastSrcProc(B,hx0,hz0,sk,low),SEA=src.sea!=null?src.sea:-1e4,S=src.S;
   const {pts,rs}=coastGrid(hx0,hz0,sk,low),NT=pts.length,NR=rs.length,N=NT*NR;
   const pos=new Float32Array(N*3),sea=new Float32Array(N*3),sdA=new Float32Array(N),ofA=new Float32Array(N),dA=new Float32Array(N),siA=new Uint8Array(N),o={};

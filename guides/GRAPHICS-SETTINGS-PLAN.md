@@ -78,10 +78,31 @@ advanced groups below (folded), a small live FPS / frame ms readout, and a tag o
 4. Auto mode steps through `GQ`; FPS limit.
 5. Ultra preset + gate configs per preset + 6v6 bench per preset (numbers in this file).
 
-## 4. Decisions for the user
+## 4. Decisions (user 2026-11-24)
 
-1. Presets: Low / Medium / High / Ultra + Auto — OK, or fewer?
-2. Which advanced options to show players (all of section 2, or a short list)?
-3. FPS limit options (30 / 60 / 120 / unlimited)?
-4. Default for new players: Auto (as now) or Medium?
-5. Shader-changing options mid-match: "applies at next load" (no hitch, recommended) or apply at once with a hitch?
+1. Presets: **Low / Medium / High (default, = the old "high") / Ultra / Cinematic / Custom**. The old Auto is no longer a
+   preset; it lives on as the option "ลดเองเมื่อเฟรมตก" (dyn, off by default).
+2. Detailed options, each with named levels (e.g. Particles Low / Medium / High / Cinematic).
+3. FPS limit: not needed: the browser already draws at the monitor's refresh rate (requestAnimationFrame).
+   A lower cap (30/60 to save laptop battery) can be added later if asked.
+4. Default for new players: High. Old saves: `low` stays Low, `auto`/`high` become High.
+5. Shader-changing options apply at once (short hitch is OK).
+
+**Cinematic** = the early, fuller effects: full combat VFX (`combatVfxReduced()` off, as before the 2026-11-22 readability
+cut), smoke ×1 (`SMOKE_K` 1, was cut to 0.4 on 2026-11-18), ground marks / debris / smouldering smoke linger 25 s (`BF_LIFE`,
+5 s otherwise; before 2026-11-11 they stayed all match), more debris (`BFM`/`BFRS` index 3) and particle cap 12000.
+
+## 5. Built (round 1, 2026-11-24)
+
+- js/27-world: `GQ_OPT` (18 options in 5 groups), `GQ_PRE` (5 presets), `GQ` saved in `wd_gfx2`, `gq(key)`, `gqPreset`,
+  `gqSet` (→ Custom unless it matches a preset), `qDyn(n)`, `qualPR` by `res`, `gqShadowSize`. `QUAL.mode` kept as
+  'low' | 'auto' | 'high' for old code and test scripts (setting it + `applyQuality()` picks the matching preset).
+- Every `QUAL.mode` check in js/19, 27, 28-fcs-hall, 28-maps-build, 37, 44, 50, 67-backdrop, 67-coast, 71, 74, 75, 76, 77 now
+  reads `gq()`.
+- Settings → Graphics tab (js/40 `gfxPanel`): preset buttons + every option as segment buttons, by group.
+- Checks: High = old high (same frame, mean pixel diff ~1/255 = particle noise); 5 presets switch with no errors
+  (Low: pixel ratio 0.7, no shadows; Ultra/Cinematic: 1.5, 4096 shadows); UI clicks → Custom + saved; High vs Cinematic
+  combat shots `shots/cinecmp.jpg`. `WD.GQ`, `WD.gq`, `WD.gqPreset`, `WD.gqSet` exposed for tests.
+
+Not done yet: gate configs per preset (Low / Cinematic), 6v6 bench per preset, entry preload compiles only the High variant
+(another preset compiles its shaders when chosen = the accepted short hitch).

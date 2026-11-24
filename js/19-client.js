@@ -20,7 +20,7 @@ const PARTS=[],TEXTS=[];let shakeA=0;
 const VFXB={k:1,on:false,up:1,cap:8000,mul:1,stat:{in:0,kept:0}};
 const combatFxParams=new URLSearchParams(location.search);
 const FULL_COMBAT_VFX=combatFxParams.has('fullvfx')||combatFxParams.has('studio');
-const combatVfxReduced=()=>screen==='game'&&!FULL_COMBAT_VFX;
+const combatVfxReduced=()=>screen==='game'&&!FULL_COMBAT_VFX&&gq('particles')<3;   // Cinematic = full combat VFX (as before the 2026-11-22 cut)
 const _apush=Array.prototype.push;
 PARTS.push=function(){
   const k=VFXB.k,reduced=combatVfxReduced();
@@ -30,7 +30,7 @@ PARTS.push=function(){
     _apush.call(this,p);VFXB.stat.kept++;
     if(k>1&&Math.random()<k-1){const q=Object.assign({},p);q.x+=rnd(-3,3);q.y+=rnd(-3,3);q.life*=rnd(0.6,1);_apush.call(this,q);VFXB.stat.kept++;}}
   return this.length;};
-function vfxQual(){const m=QUAL.mode,cs=qualCS();return cs>=2?{mul:0.35,cap:1200,up:1}:cs?{mul:0.5,cap:2500,up:1}:m==='high'?{mul:1,cap:8000,up:2}:QUAL.lvl>=1||QUAL.scale<0.8?{mul:0.7,cap:5000,up:1}:{mul:1,cap:8000,up:1.5};}
+function vfxQual(){const cs=gq('dyn')?QUAL.cs:0,p=gq('particles');if(cs>=2||p===0)return {mul:0.35,cap:1200,up:1};if(cs||qDyn(1)||p===1)return {mul:0.6,cap:4000,up:1};return p>=3?{mul:1,cap:12000,up:2}:{mul:1,cap:8000,up:2};}
 // เรียกต้น render ในเกม: ตั้งตัวคูณการปล่อยของเฟรมนี้
 function vfxBegin(dt){const q=vfxQual();VFXB.cap=q.cap;VFXB.mul=q.mul;VFXB.up=q.up;
   if(combatVfxReduced()){VFXB.cap=Math.min(VFXB.cap,2400);VFXB.mul*=.40;VFXB.up=1;}
@@ -146,7 +146,7 @@ function myPos(){const v=VIEW.cur;return v?v.P.find(p=>p.id===NET.myId):null;}
 // ---------- เอฟเฟกต์ ----------
 // อนุภาค: x,y = พิกัดเกม (px), h = ความสูง (หน่วย 3D), g = แรงโน้มถ่วง (ติดลบ = ลอยขึ้น), smoke = ควัน (ไม่เรืองแสง)
 // ควันทั้งเกม (ผู้ใช้ 2026-11-18 "ลดควันเยอะ ๆ"): ทุก burst ที่เป็นควัน + เอฟเฟกต์ Studio look smoke + หมอก คูณ SMOKE_K
-const SMOKE_K=0.4;let _bskD=0;
+let SMOKE_K=0.4;let _bskD=0;   // Cinematic sets 1 (applyQuality)
 function burst(x,y,col,n,sp,life,size,o){
   o=o||{};
   if(!_bskD&&combatVfxReduced()&&n>=6&&!o.hit)n=Math.max(3,Math.round(n*(o.smoke?.28:.40)));
