@@ -343,8 +343,8 @@ function shadowAll(o){o.traverse(m=>{if(m.isMesh){m.castShadow=true;m.receiveSha
 // cumulus: side-view clouds in (azimuth, elevation) space = smooth-union puffs + 3D-noise cauliflower edges + flat bases,
 //   lit by the real sun direction: crisp lit/shade split, lavender shade, darker base, silver rim when backlit
 // SKYC.k = sky brightness in game (keeps white clouds under the bloom threshold 0.86) • tune: SKYC.* then WD.skyBake() (re-bakes + refreshes the Look light) • cost: one draw at load (~ms), then a plain texture
-const SKYC={seed:20261124,groups:24,loose:18,k:0.8,sun:[74,100,-64],zen:'#1748a8',mid:'#3c80d8',hor:'#bfdcf4',horS:'#e6f2fb',halo:'#eef7ff',ground:'#9fbcd0',
-  hill:'#9dc2e2',hill2:'#86b0d6',lit:'#ffffff',shade:'#a7b4da',base:'#8e9ccb',rim:'#ffffff',cirrus:0.22};
+const SKYC={seed:20261124,groups:24,loose:18,k:0.88,sun:[74,100,-64],zen:'#1748a8',mid:'#3c80d8',hor:'#bfdcf4',horS:'#e6f2fb',halo:'#eef7ff',ground:'#9fbcd0',
+  hill:'#9dc2e2',hill2:'#86b0d6',lit:'#ffffff',shade:'#bcc7e6',base:'#a6b2db',rim:'#ffffff',cirrus:0.22};
 function skyBakeClear(){
   const C=SKYC,NC=64;let sd=C.seed;const R=()=>(sd=(sd*1664525+1013904223)>>>0)/4294967296,D=Math.PI/180;
   // clouds live on a flat layer (base altitude ~1, units = cloud-base heights) and are seen in perspective:
@@ -382,7 +382,7 @@ float cloudSdf(vec2 q,vec3 d,vec4 c,float ci,out float Y){
     s=smin(s,length(vec2(X,Y)-ct)-r,c.w*.16);}
   s=max(s,-Y);   // flat base
   if(s<c.w*.3){float up=smoothstep(0.,c.w*.35,Y),f=1./max(c.w*12.,.12);vec3 o=vec3(ci*.13,ci*.07,0.);   // cauliflower edges (per-cloud noise offset)
-    s+=(fbm(d*16.*f+o)-.5)*c.w*.42*(.3+.7*up)+(fbm(d*45.*f+o)-.5)*c.w*.12*up;}
+    s+=(fbm(d*16.*f+o)-.5)*c.w*.42*(.3+.7*up)+(fbm(d*45.*f+o)-.5)*c.w*.07*up;}
   return s;}
 // first cloud (list is near→far) from index 'from' that covers this pixel → idx (-1 = none)
 float frontCloud(vec2 q,vec3 d,int from,out int idx,out float vert,out float hh){idx=-1;vert=0.;hh=.1;
@@ -398,13 +398,14 @@ vec3 shadeCloud(vec2 q,vec3 d,float e,int from,out float a,out int idx){float ve
   float ph=q.x*6.2831853;vec3 tE=vec3(sin(ph),0.,cos(ph)),tN=vec3(cos(ph)*sin(e),cos(e),-sin(ph)*sin(e));
   vec2 L=vec2(dot(uSun,tE),dot(uSun,tN));L=length(L)>1e-3?normalize(L):vec2(0.,1.);
   float front=-dot(d,uSun),v01=clamp(vert/hh,0.,1.);
-  float shv=dot(n,L)*.5+v01*.62-.3+front*.25;float lit=smoothstep(-.02,.24,shv);
+  float shv=dot(n,L)*.5+v01*.62-.3+front*.25;float lit=smoothstep(-.14,.42,shv);   // soft lit→shade blend (fluffy)
   vec3 cc=mix(c_shade,c_lit,lit);
   float depth=clamp(-s/(hh*.3),0.,1.);cc=mix(cc,cc*.94,depth*(1.-lit));
   cc=mix(c_base,cc,smoothstep(0.,hh*.4,vert));
   float edge=(1.-smoothstep(0.,hh*.05,-s))*smoothstep(hh*.05,hh*.3,vert);   // rim on sides/top, not the flat basecc=mix(cc,c_rim,edge*(max(0.,dot(d,uSun))*.7+.12));
   cc=mix(cc,c_hor,(1.-smoothstep(0.,.18,e))*.45);
-  a=1.-smoothstep(-.0016,.0016,s);return cc;}
+  cc=mix(cc,c_lit,.28*(1.-depth));   // thin parts scatter light = brighter, softer look
+  a=1.-smoothstep(-max(.0016,hh*.07),.0016,s);return cc;}   // soft feathered edge
 void main(){
   vec2 q=vec2(vUv.x,(vUv.y-.5)*3.1415927);vec3 d=dirOf(q);float e=q.y;
   vec3 dh=normalize(vec3(d.x,0.,d.z)+1e-5),sh=normalize(vec3(uSun.x,0.,uSun.z));float az=dot(dh,sh)*.5+.5,t=clamp(e/1.5707963,0.,1.);
@@ -453,6 +454,16 @@ const SKY={};
   const sg2=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:hdr('#ffb070',0.48),opacity:0.47,transparent:true,fog:false,depthWrite:false,blending:THREE.AdditiveBlending}));sg2.scale.set(125,125,1);SKY.sun.add(sg2);
   const sc=new THREE.Mesh(new THREE.CircleGeometry(18,40),new THREE.MeshBasicMaterial({color:hdr('#ffd48e',0.91),fog:false}));SKY.sun.add(sc);
   SKY.sun.position.set(300,45,-420);sc.lookAt(-300,-45,420);SKY.sun.visible=false;scene.add(SKY.sun);SKY.sunG=sg2;SKY.sunC=sc;
+  // clear-sky sun (always faces the camera): white core + soft glow + faint rays (canvas texture); old disc/glow stay for sunset
+  const sunTex=texCanvas(512,512,(g,W)=>{const c=W/2;let sd=7;const R=()=>(sd=(sd*1664525+1013904223)>>>0)/4294967296;
+    g.globalCompositeOperation='lighter';
+    for(let i=0;i<9;i++){const a=i/9*Math.PI*2+R()*0.4,L=c*(0.5+R()*0.45),w=0.035+R()*0.04,f=g.createRadialGradient(c,c,0,c,c,L);   // soft wide rays fading out
+      f.addColorStop(0,'rgba(255,250,235,'+(0.07+R()*0.05)+')');f.addColorStop(1,'rgba(255,250,235,0)');g.fillStyle=f;
+      g.beginPath();g.moveTo(c,c);g.lineTo(c+Math.cos(a-w)*L,c+Math.sin(a-w)*L);g.lineTo(c+Math.cos(a+w)*L,c+Math.sin(a+w)*L);g.closePath();g.fill();}
+    const q=g.createRadialGradient(c,c,0,c,c,c);[[0,'rgba(255,255,255,1)'],[0.065,'rgba(255,255,252,1)'],[0.09,'rgba(255,250,235,0.85)'],[0.2,'rgba(255,244,220,0.38)'],[0.45,'rgba(255,240,220,0.1)'],[1,'rgba(255,240,220,0)']].forEach(([p,k])=>q.addColorStop(p,k));
+    g.fillStyle=q;g.fillRect(0,0,W,W);});
+  SKY.sunS=new THREE.Sprite(new THREE.SpriteMaterial({map:sunTex,color:hdr('#fffaf0',2.2),blending:THREE.AdditiveBlending,transparent:true,depthWrite:false,fog:false}));
+  SKY.sunS.scale.set(250,250,1);SKY.sunS.visible=false;SKY.sun.add(SKY.sunS);
 })();
 const hemi=new THREE.HemisphereLight('#8fa6ff','#2a1f1a',0.55);scene.add(hemi);
 scene.add(new THREE.AmbientLight('#404060',0.3));
@@ -467,6 +478,7 @@ function setSky(mode){
   SKY.mesh.material.map=clear?SKY.clear:noon?SKY.noon:day?SKY.sunset:SKY.night;SKY.mesh.material.color.setScalar(clear?SKYC.k:1);SKY.mesh.material.needsUpdate=true;   // white = original sky image (overcast maps tint later in js/28)
   SKY.stars.visible=!day;SKY.moon.visible=!day;SKY.sun.visible=day;
   moonL.intensity=day?0.82:1;
+  SKY.sunS.visible=clear;SKY.sunG.visible=SKY.sunC.visible=!clear;
   SKY.sunG.material.color.copy(hdr(clear?'#fff4d8':'#ffb070',0.48));SKY.sunC.material.color.copy(hdr(clear?'#fffbea':'#ffd48e',clear?1.4:0.91));   // white noon sun vs orange sunset sun
   if(noon){moonL.color.set('#fff0bc');moonL.position.set(74,100,-64);gl.toneMappingExposure=1.0;SKYB.sun.copy(moonL.position).normalize().multiplyScalar(520);}
   else if(day){moonL.color.set('#ffbe8a');moonL.position.set(80,45,-110);gl.toneMappingExposure=1.05;SKYB.sun.set(300,45,-420);}

@@ -340,7 +340,7 @@ onfOutlineMat:4 onFireFX:6 statusFX:17 fx:44
 §251 overlay: เลือกบัฟ / สรุปผล
 choosePick:252 syncOverlays:257 showOver:278
 
-## js/27-world.js (538) — โลก 3D (Three.js + Bloom) — 1 หน่วย 3D = 20 พิกเซลของระบบเกม
+## js/27-world.js (550) — โลก 3D (Three.js + Bloom) — 1 หน่วย 3D = 20 พิกเซลของระบบเกม
 S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 PTG:15 gl:23
 §37 เงานุ่มแบบ PCSS (contact-hardening): ใกล้จุดสัมผัสคม ไกลจากวัตถุที่บั…
 PCSS:40 scene:67 cam:69 composer:70
@@ -353,9 +353,9 @@ QUAL:254 QUAL_NAME:255 qualPR:256 applyQuality:262 qualTick:284
 §300 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
 qualCS:304 CULL:305 cullTick:306 texCanvas:317 glowTex:318 stoneTex:319 runeTex:325 glowMats:333 glowMat:334 STONEM:336 stoneMat:337 shadowAll:338
 §341 clear midday sky (user refs 2026-11-24: anime key-art noon) — baked O…
-SKYC:346 skyBakeClear:348 skyBake:430 SKY:435 hemi:457 moonL:459 LDIR:463 setSky:464 SKYB:479 skyFollow:480
-§481 เงาตามผู้เล่น
-SHD:485 _shF:486 _shR:486 _shU:486 _shC:486 _shY:486 SHD_DM:490 shadowDepthSplit:491 shadowFollow:496 shadowSoft:516 LPOOL:518 MLS_N:524 MLS:524 mlsPoint:526 _mlsP:528 mlsInScene:529 mlsTick:530
+SKYC:346 skyBakeClear:348 skyBake:431 SKY:436 hemi:468 moonL:470 LDIR:474 setSky:475 SKYB:491 skyFollow:492
+§493 เงาตามผู้เล่น
+SHD:497 _shF:498 _shR:498 _shU:498 _shC:498 _shY:498 SHD_DM:502 shadowDepthSplit:503 shadowFollow:508 shadowSoft:528 LPOOL:530 MLS_N:536 MLS:536 mlsPoint:538 _mlsP:540 mlsInScene:541 mlsTick:542
 
 ## js/28-city-build.js (386) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
@@ -960,4 +960,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(118 files, 35936 lines)
+(118 files, 35948 lines)
