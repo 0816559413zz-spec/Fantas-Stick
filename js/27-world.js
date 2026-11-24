@@ -258,6 +258,7 @@ const GQ_OPT=[   // [key, group, label, level names]
   ['dyn','จอภาพ','ลดเองเมื่อเฟรมตก',['ปิด','เปิด']],
   ['shadow','แสงและเงา','เงา',['ปิด','Low','Medium','High','Ultra']],
   ['pcss','แสงและเงา','เงานุ่ม',['ปิด','เปิด']],
+  ['shdist','แสงและเงา','ระยะเงา (ไกล = เงาเบลอขึ้น)',['ใกล้','ปกติ','ไกล','ไกลมาก']],
   ['ao','แสงและเงา','เงาซอกมุม + ลำแสง',['ปิด','เปิด']],
   ['bloom','ภาพรวม','แสงฟุ้ง (Bloom)',['ปิด','เปิด']],
   ['grade','ภาพรวม','ปรับสีภาพ',['ปิด','เปิด']],
@@ -265,6 +266,7 @@ const GQ_OPT=[   // [key, group, label, level names]
   ['paint','ภาพรวม','ฟิลเตอร์ภาพวาด',['ปิด','เร็ว','เต็ม']],
   ['softp','ภาพรวม','อนุภาคขอบนุ่ม',['ปิด','เปิด']],
   ['grass','โลก','หญ้า',['ปิด','Low','Medium','High','Cinematic']],
+  ['grdist','โลก','ระยะหญ้า',['ใกล้','ปกติ','ไกล','ไกลมาก']],
   ['surf','โลก','ผิววัสดุละเอียด',['ปิด','เปิด']],
   ['amb','โลก','ฝุ่น/หมอกบรรยากาศ',['ปิด','Low','Medium','High']],
   ['detail','โลก','ฉากไกล (โหลดแมพถัดไป)',['Low','High']],
@@ -274,16 +276,16 @@ const GQ_OPT=[   // [key, group, label, level names]
   ['flash','เอฟเฟกต์','แสงวาบเต็มจอ',['ปิด','เปิด']],
 ];
 const GQ_PRE={
-  low:      {res:0,dyn:0,shadow:0,pcss:0,ao:0,bloom:0,grade:0,aa:0,paint:0,softp:0,grass:0,surf:0,amb:0,detail:0,dist:0,particles:0,debris:0,flash:0},
-  medium:   {res:1,dyn:0,shadow:2,pcss:0,ao:1,bloom:1,grade:1,aa:1,paint:1,softp:1,grass:2,surf:1,amb:2,detail:1,dist:2,particles:1,debris:1,flash:1},
-  high:     {res:2,dyn:0,shadow:3,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:3,surf:1,amb:3,detail:1,dist:2,particles:2,debris:2,flash:1},
-  ultra:    {res:3,dyn:0,shadow:4,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:3,surf:1,amb:3,detail:1,dist:2,particles:2,debris:2,flash:1},
-  cinematic:{res:3,dyn:0,shadow:4,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:4,surf:1,amb:3,detail:1,dist:2,particles:3,debris:3,flash:1},
+  low:      {shdist:1,grdist:1,res:0,dyn:0,shadow:0,pcss:0,ao:0,bloom:0,grade:0,aa:0,paint:0,softp:0,grass:0,surf:0,amb:0,detail:0,dist:0,particles:0,debris:0,flash:0},
+  medium:   {shdist:1,grdist:1,res:1,dyn:0,shadow:2,pcss:0,ao:1,bloom:1,grade:1,aa:1,paint:1,softp:1,grass:2,surf:1,amb:2,detail:1,dist:2,particles:1,debris:1,flash:1},
+  high:     {shdist:1,grdist:1,res:2,dyn:0,shadow:3,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:3,surf:1,amb:3,detail:1,dist:2,particles:2,debris:2,flash:1},
+  ultra:    {shdist:2,grdist:2,res:3,dyn:0,shadow:4,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:3,surf:1,amb:3,detail:1,dist:2,particles:2,debris:2,flash:1},
+  cinematic:{shdist:2,grdist:2,res:3,dyn:0,shadow:4,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:4,surf:1,amb:3,detail:1,dist:2,particles:3,debris:3,flash:1},
 };
 const GQ_NAME={low:'Low',medium:'Medium',high:'High',ultra:'Ultra',cinematic:'Cinematic',custom:'Custom'};
 const GQ=(()=>{let o=null;try{o=JSON.parse(store('wd_gfx2')||'null');}catch(e){}
   if(!o||!o.v){const old=store('wd_gfx');o={p:old==='low'?'low':'high'};o.v=Object.assign({},GQ_PRE[o.p]);}   // old saves: low stays low, auto/high → High (user: High = default)
-  o.v=Object.assign({},GQ_PRE.high,o.v);if(o.p!=='custom'&&!GQ_PRE[o.p])o.p='high';return o;})();
+  o.v=Object.assign({},GQ_PRE[o.p]||GQ_PRE.high,o.v);if(o.p!=='custom'&&!GQ_PRE[o.p])o.p='high';return o;})();
 function gq(k){return GQ.v[k]|0;}
 function gqSave(){store('wd_gfx2',JSON.stringify(GQ));}
 function gqPreset(p){if(!GQ_PRE[p])return;GQ.p=p;GQ.v=Object.assign({},GQ_PRE[p]);gqSync();}
@@ -545,7 +547,7 @@ function skyFollow(){const p=cam.position;SKY.mesh.position.copy(p);SKY.stars.po
 // กล้องเงาครอบแค่พื้นที่รอบ ๆ ที่กล้องมอง (ไม่ใช่ทั้งแผนที่) → เงาคมขึ้นหลายเท่า โดยภาพเงาขนาดเท่าเดิม
 // r = ครึ่งความกว้างพื้นที่เงา (หน่วย 3D, ไม่เกินขนาดแผนที่) • ahead = ดันจุดกลางไปข้างหน้ากล้อง (สัดส่วนของ r)
 // ขยับเป็นขั้นเท่าพิกเซลเงาพอดี กันขอบเงาสั่นยิบ ๆ ตอนเดิน/หันกล้อง • on=false → กลับไปแบบคลุมทั้งแผนที่ (ตั้งใน buildWorld)
-const SHD={on:true,r:36,rHigh:48,ahead:0.5};
+const SHD={on:true,r:36,rHigh:48,ahead:0.5,distK:[0.75,1,1.4,1.9]};   // distK = option shdist (same map size: farther = softer)
 const _shF=new THREE.Vector3(),_shR=new THREE.Vector3(),_shU=new THREE.Vector3(),_shC=new THREE.Vector3(),_shY=new THREE.Vector3(0,1,0);
 // เงา: three ใช้ MeshDepthMaterial ตัวเดียวกับทุกชิ้นที่ทอดเงา → สลับ instanced / skinned / ธรรมดา = คำนวณ shader ใหม่ (getParameters) ทุกครั้งที่สลับ
 // (~17 ครั้งต่อเฟรมตอนสู้ 6v6, OPTIMIZE §R) → InstancedMesh / SkinnedMesh ใช้ depth material ของชนิดตัวเอง ภาพเงาเท่าเดิม • ข้ามชิ้นที่ต้องตัดขอบด้วย alpha (three ทำสำเนาให้เอง)
@@ -562,7 +564,7 @@ function shadowFollow(){
   if(!SHD.on){   // แบบเดิม: คลุมทั้งแผนที่ แสงมองไปที่กลางแผนที่
     if(c.right!==ext){Object.assign(c,{left:-ext,right:ext,top:ext,bottom:-ext,near:1,far:400});c.updateProjectionMatrix();}
     moonL.target.position.set(0,0,0);moonL.position.copy(LDIR).multiplyScalar(133);moonL.target.updateMatrixWorld();shadowSoft(c);return;}
-  const r=Math.min(ext,gq('shadow')>=3?SHD.rHigh:SHD.r);
+  const r=Math.min(ext,(gq('shadow')>=3?SHD.rHigh:SHD.r)*SHD.distK[gq('shdist')]);
   if(c.right!==r){Object.assign(c,{left:-r,right:r,top:r,bottom:-r,near:1,far:420});c.updateProjectionMatrix();}
   _shF.set(0,0,-1).applyQuaternion(cam.quaternion);_shF.y=0;if(_shF.lengthSq()<1e-6)_shF.set(0,0,-1);_shF.normalize();
   const x=cam.position.x+_shF.x*r*SHD.ahead,z=cam.position.z+_shF.z*r*SHD.ahead;

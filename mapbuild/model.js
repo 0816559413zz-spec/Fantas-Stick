@@ -50,6 +50,14 @@ export const OBJ = {
   sgA: { n: 'Attacker Spawn (per phase)', cat: 'mode', c: '#f0a04a', note: '1 per phase (the game puts 6 players around it)' },
   sgB: { n: 'Defender Spawn (per phase)', cat: 'mode', c: '#5aa0ff', note: '1 per phase' },
   phase: { n: 'Phase Play Area', cat: 'mode', c: '#f2d45e', note: 'rectangle (no rotation) • several per phase allowed' },
+  // loot phase between points (designs/castle-gameplay-concept.md 2026-11-24): after core N breaks both teams retreat into their Retreat Zone N,
+  // then fight over Loot Area N (item spawns N) • Break = N (after core N) • the game does not play this phase yet (data only)
+  sgHold: { n: 'Retreat Zone (after core N)', cat: 'mode', c: '#ff9a5a', note: 'rectangle • Team = who must gather here • Break N = after core N breaks • several per break allowed' },
+  sgLoot: { n: 'Loot Area (after core N)', cat: 'mode', c: '#ffd84a', note: 'rectangle • the contested area with items • aim for the middle between both teams' },
+  sgItem: { n: 'Item Spawn (after core N)', cat: 'mode', c: '#ffe08a', note: 'point inside the Loot Area • Tier 1–3 (item kinds: team gameplay decides)' },
+  // flying rules (any mode): Broom Zone = brooms allowed inside (box up to Top) • Wind Push = pushes players along Direction
+  brz: { n: 'Broom Zone', cat: 'mode', c: '#8ad0ff', note: 'rectangle + Top height • Team = who may fly here • outside = rider falls off (siege rule)' },
+  wind: { n: 'Wind Push Zone', cat: 'mode', c: '#b8f0e0', note: 'rectangle • Direction (deg, map compass like Rotation) + Strength • e.g. edges of floating islands' },
   // room helpers
   ceil: { n: 'Ceiling', cat: 'room', c: '#c77dff', note: 'keeps players/fliers/camera below the ceiling • roofed rooms ≥ 20 high' },
   lz: { n: 'Indoor Light Zone', cat: 'room', c: '#7fb0ff', note: 'camera inside = dim cool indoor light • glass / lit windows inside get sun beams • Height Above Ground = roof (camera above it = outdoor)' },
@@ -66,6 +74,8 @@ export const RPK = {
 };
 for (const k in RPK) OBJ['rp_' + k] = { n: RPK[k].n, cat: 'room', c: '#a07a56', rp: k };
 export const isRP = t => t.startsWith('rp_');
+// axis-aligned rectangle areas (size sx×sz, no rotation in the game)
+export const AREA = new Set(['phase', 'ceil', 'lz', 'sgHold', 'sgLoot', 'brz', 'wind']);
 // decor drawn by the game (MAP-STANDARD round 4): the same builder the code rooms use (js/28-fcs-castle.js fcsDecoKit) — no collision,
 // not in the .glb. k = material key: stone/dark (castle ashlar), roof, lit (glowing window), wood, iron, carpet, slit (dark opening)
 // y = lift of the shape centre above the ground (roof/cloth: base/top) • rot = yaw (roof ridge, cloth/shield facing)
@@ -372,13 +382,18 @@ export function gameData(M, dim) {
       const g = gh(M, x, z), h = top - 0.15 - g; if (h === h && h < 1e9 && h > TSTEP) put({ x, z, r, hgt: h }, null, { k: 'flr' }); }
   }
   const spawns = [], espawn = [], rings = [], tasks = [], props = [], houses = [], lights = [];
-  const sg = { cores: [], sp: { A: {}, B: {} }, phases: [], bw: [] }, ceil = [], lz = [], rprops = [], deco = [], pnl = [];
+  const sg = { cores: [], sp: { A: {}, B: {} }, phases: [], bw: [], hold: { A: {}, B: {} }, loot: {}, items: [] }, ceil = [], lz = [], rprops = [], deco = [], pnl = [], broom = [], wind = [];
   const rect = o => { const w = (o.sx || 1) * PX, d = (o.sz || 1) * PX; return { x0: r1(o.x * PX - w / 2), y0: r1(o.z * PX - d / 2), x1: r1(o.x * PX + w / 2), y1: r1(o.z * PX + d / 2) }; };
   for (const o of allObjs) {
     const X = r1(o.x * PX), Y = r1(o.z * PX), rot = o.rot || 0;
     if (o.t === 'core') sg.cores.push({ n: o.n || sg.cores.length + 1, x: X, y: Y, s: r1((o.s || 4) * PX) });
     else if (o.t === 'sgA' || o.t === 'sgB') sg.sp[o.t === 'sgA' ? 'A' : 'B'][o.ph || 1] = { x: X, y: Y };
     else if (o.t === 'phase') { const q = rect(o), k = (o.ph || 1) - 1; (sg.phases[k] = sg.phases[k] || []).push({ x1: q.x0, y1: q.y0, x2: q.x1, y2: q.y1 }); }
+    else if (o.t === 'sgHold') { const q = rect(o), T = o.tm === 'B' ? 'B' : 'A', k = o.ph || 1; (sg.hold[T][k] = sg.hold[T][k] || []).push({ x1: q.x0, y1: q.y0, x2: q.x1, y2: q.y1 }); }
+    else if (o.t === 'sgLoot') { const q = rect(o), k = o.ph || 1; (sg.loot[k] = sg.loot[k] || []).push({ x1: q.x0, y1: q.y0, x2: q.x1, y2: q.y1 }); }
+    else if (o.t === 'sgItem') sg.items.push({ ph: o.ph || 1, x: X, y: Y, t: Math.max(1, Math.min(3, Math.round(o.tier || 1))) });
+    else if (o.t === 'brz') broom.push(Object.assign(rect(o), { top: r2(o.top == null ? 60 : o.top), tm: o.tm === 'A' || o.tm === 'B' ? o.tm : '' }));   // tm '' = both teams
+    else if (o.t === 'wind') { const a = (o.dir || 0) * Math.PI / 180; wind.push(Object.assign(rect(o), { dx: r2(Math.sin(a)), dy: r2(Math.cos(a)), s: r2(o.str == null ? 8 : o.str) })); }   // push direction in map px axes (x right, y down)
     else if (o.t === 'lz') lz.push(Object.assign(rect(o), { top: r2(o.y == null ? 22 : o.y), k: r2(o.k == null ? 1 : o.k) }));   // indoor light zone (js/28-fcs-hall.js)
     else if (o.t === 'ceil') ceil.push(Object.assign(rect(o), { h: r2(o.y == null ? 21 : o.y) }, o.zmax != null ? { zmax: r2(o.zmax) } : {}));
     else if (isDeco(o.t)) { deco.push(Object.assign({ t: o.t.slice(3), x: X, y: Y, h: r2(o.y || 0) }, ...['k', 'sx', 'sy', 'sz', 'rt', 'rb', 'r', 'seg', 's', 'c', 'open', 'ry', 'ssx', 'ssz'].filter(q => o[q] != null).map(q => ({ [q]: o[q] })), rot ? { a: +rot.toFixed(4) } : {}));
@@ -431,7 +446,12 @@ export function gameData(M, dim) {
   if (M.style === 'forest-mist' && !M.look) data.look = 'gorge';   // forest look preset (js/74-look.js)
   if (deco.length) data.deco = deco;
   if (pnl.length) data.pnl = pnl;
+  if (!Object.keys(sg.hold.A).length && !Object.keys(sg.hold.B).length) delete sg.hold;
+  if (!Object.keys(sg.loot).length) delete sg.loot;
+  if (!sg.items.length) delete sg.items;
   if (sg.cores.length || sg.bw.length || sg.phases.length || Object.keys(sg.sp.A).length || Object.keys(sg.sp.B).length) data.siege = sg;
+  if (broom.length) data.broom = broom;
+  if (wind.length) data.wind = wind;
   if (ceil.length) data.ceil = ceil;
   if (lz.length) data.lz = lz;
   if (rprops.length) data.rprops = rprops;
@@ -468,6 +488,17 @@ export function check(M, G) {
         for (const [t, n] of [['A', 'attacker'], ['B', 'defender']]) if (!inA(S.sp[t][p])) add('warn', 'Siege phase ' + p + ': ' + n + ' spawn is outside the play area', [S.sp[t][p].x / PX, S.sp[t][p].y / PX]);
       }
       add(S.bw.length ? 'ok' : 'warn', 'Siege: target walls/gates ' + S.bw.length + ' pieces');
+      // loot phase (data only for now): every break 1..N-1 wants both retreat zones + a loot area with items inside it
+      const inR = (L, q) => (L || []).some(r => q.x >= r.x1 && q.x <= r.x2 && q.y >= r.y1 && q.y <= r.y2);
+      const H = S.hold || { A: {}, B: {} }, LT = S.loot || {}, IT = S.items || [];
+      if (Object.keys(H.A).length || Object.keys(H.B).length || Object.keys(LT).length || IT.length) for (let p = 1; p < N; p++) {
+        const miss = [!H.A[p] && 'attacker retreat zone', !H.B[p] && 'defender retreat zone', !LT[p] && 'loot area'].filter(Boolean);
+        const its = IT.filter(i => i.ph === p);
+        if (!its.length) miss.push('item spawns');
+        if (miss.length) { add('warn', 'Siege break ' + p + ' (after core ' + p + '): missing ' + miss.join(', ')); continue; }
+        for (const i of its) if (!inR(LT[p], i)) add('warn', 'Siege break ' + p + ': an item spawn is outside the loot area', [i.x / PX, i.y / PX]);
+        add('ok', 'Siege break ' + p + ': retreat zones + loot area + ' + its.length + ' item spawns');
+      }
     }
   }
   for (const q of G.ceil) if (q.zmax == null && q.h < 20) add('warn', 'Ceiling height ' + q.h + ' (roofed rooms should be ≥ 20 so fliers can play • under mezzanines set "Only for players lower than")', [(q.x0 + q.x1) / 2 / PX, (q.y0 + q.y1) / 2 / PX]);
@@ -526,8 +557,8 @@ export function roomExpand(M, inst, R) {
   const walls = R.walls.map(w => tag(Object.assign({}, w, { pts: w.pts.map(p => P(p[0], p[1])) }, w.base != null ? { base: +(w.base + g0).toFixed(2) } : {}), 'w'));
   const floors = R.floors.filter(f => !f.rf || inst.rfc).map(f => {   // rf = roof collision slab (house prefabs): only when the instance ticks 'Roof collision'
     const [x, z] = P(f.x, f.z); return tag(Object.assign({}, f, { x, z, rot: (f.rot || 0) + rot, y: +(f.y + g0).toFixed(2) }, f.y2 != null ? { y2: +(f.y2 + g0).toFixed(2) } : {}, f.yb != null ? { yb: +(f.yb + g0).toFixed(2) } : {}), 'f'); });
-  const swap = o => (o.t === 'phase' || o.t === 'ceil' || o.t === 'lz' || o.t === 'dc_box') && Math.abs(s) > 0.5;   // axis-aligned boxes: swap sizes on 90°/270°
-  const objs = R.objs.map(o => { const [x, z] = P(o.x, o.z); return tag(Object.assign({}, o, { x, z, rot: o.t === 'phase' || o.t === 'ceil' || o.t === 'lz' || o.t === 'dc_box' ? 0 : (o.rot || 0) + rot }, swap(o) ? { sx: o.sz, sz: o.sx } : {}, inst.nbk && o.t === 'pn_wall' ? { nb: 1 } : {},   // nbk = instance set Unbreakable
+  const swap = o => (AREA.has(o.t) || o.t === 'dc_box') && Math.abs(s) > 0.5;   // axis-aligned boxes: swap sizes on 90°/270°
+  const objs = R.objs.map(o => { const [x, z] = P(o.x, o.z); return tag(Object.assign({}, o, { x, z, rot: AREA.has(o.t) || o.t === 'dc_box' ? 0 : (o.rot || 0) + rot }, swap(o) ? { sx: o.sz, sz: o.sx } : {}, inst.nbk && o.t === 'pn_wall' ? { nb: 1 } : {},   // nbk = instance set Unbreakable
       o.t === 'dc_cone' && (o.ssx || o.ssz) && Math.abs(s) > 0.5 ? { ssx: o.ssz, ssz: o.ssx } : {}), 'o'); });
   const parts = (R.parts || []).map(p => { const [x, z] = P(p.x, p.z); return tag(Object.assign({}, p, { x, z, rot: (p.rot || 0) + rot }, p.base != null ? { base: +(p.base + g0).toFixed(2) } : {}), 'p'); });
   return { walls, floors, objs, parts };

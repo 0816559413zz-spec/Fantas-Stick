@@ -55,7 +55,7 @@ const CLW={x:0,z:0,K:9};
 
 // ---------- หญ้า ----------
 // DENS = ใบต่อตร.หน่วย • S = ขนาดผืนหญ้ารอบกล้อง (หน่วย 3D) ตามระดับกราฟิก • H = ความสูงใบ • MAXN = จำนวนสูงสุด
-const GRASS={ON:true,DENS:43,H:0.32,W:0.034,MAXN:320000,CAP:320000,gustK:1.8,pushK:2.2,S:{cine:44,high:40,auto:32,auto1:25},cineK:3,mesh:null,key:'',cache:new Map(),tex:null,box:null,bakeMs:0,n:0,trail:[],trLast:new WeakMap()};
+const GRASS={ON:true,DENS:43,H:0.32,W:0.034,MAXN:640000,CAP:640000,distK:[0.8,1,1.3,1.6],gustK:1.8,pushK:2.2,S:{cine:44,high:40,auto:32,auto1:25},cineK:3,mesh:null,key:'',cache:new Map(),tex:null,box:null,bakeMs:0,n:0,trail:[],trLast:new WeakMap()};
 // ---------- รอยสนามรบบนหญ้า + พื้น (อยู่ทั้งแมตช์ — designs/battlefield.md ขั้น 3) ----------
 // ภาพรอยขนาดเท่าแผนที่ (RES ช่อง/หน่วย): R = ไหม้ • G = น้ำแข็ง • B = ราบ/หาย • A = ทิศที่ล้ม (0..1 = 0..2π)
 // ล้างเมื่อเข้าหน้าเกม (แมตช์ใหม่ — setScreen js/19) / เปลี่ยนแผนที่ • ทุกเครื่องทาที่จุดเดียวกัน (มาจาก event ของโฮสต์) • ภาพล้วน ไม่แตะโปรโตคอล
@@ -361,7 +361,8 @@ function grassBake(){
 function grassCount(){
   const gl_=gq('grass');if(!GRASS.ON||!gl_||qDyn(2))return [0,0];
   const low=gl_===1||qDyn(1)||gq('dyn')&&QUAL.scale<0.8,S=low?GRASS.S.auto1:gl_===2?GRASS.S.auto:gl_===3?GRASS.S.high:GRASS.S.cine,K=!low&&gl_>=4?GRASS.cineK:1;   // Cinematic: 3x density (user 2026-11-24)
-  return [Math.min(GRASS.MAXN,Math.round(GRASS.DENS*K*S*S)),S];}
+  const D=S*GRASS.distK[gq('grdist')];   // option grdist: patch size, same density (blades x D^2)
+  return [Math.min(GRASS.MAXN,Math.round(GRASS.DENS*K*D*D)),D];}
 // ทุกเฟรมในเกม: ลม + หญ้า + แรงลมให้ผ้าคลุม
 function grassTick(dt){
   airTick(dt);

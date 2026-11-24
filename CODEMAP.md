@@ -13,18 +13,18 @@ CITY_MID:140 CITY_C2:140 cityModeData:141 mapArea:157 AREA:158 areaClamp:160
 ## js/02-citytest.js (28) — แมพทดสอบเมืองใหญ่ (กล่องเทา) — ใช้วัดความลื่นของเครื่องยนต์ก่อนสร้างเ…
 CITY_N:4 CITY_B:4 CITY_ROAD:4 genCityTest:5 cityTestProps:19
 
-## js/02-data.js (391) — 
+## js/02-data.js (393) — 
 W:4 H:4 PR:4 PILLARS:6 SPAWNF:7 mulberry:9 genForest:10 genPitch:27 genHogsmeade:36
 §54 แผนที่โล่ง 3 แบบ (ผู้ใช้: ป่ามืดไม่สนุก อยากได้ที่โล่งๆ)
 genMeadow:55 genLake:61 genRuins:66
 §73 Test Place (ห้องฝึก): พื้นโล่งไม่มีสิ่งกีดขวาง
 TEST_W:75 TEST_H:75 TEST_C:75 TEST_VIL:75 TEST_GW:77 TEST_Z:78 TEST_ST:85 TEST_PH:86 testWalls:88 testDummySpots:90 testFences:92 genTest:105 testProps:120 trZone:133 trBotPad:134 trFixSpots:136 trShow:138 genGreatHall:139 MAPS:147 MAP_OFF:160 PLAYMAP:161 RANDOM_MAPS:162 MAPID:163 MW:163 MH:163 OBS:163 setMapVars:164
 §165 แผนที่จากไฟล์ (Blender → assets/maps/<id>.json + .glb, สคริปต์ assets…
-FMAPS:168 b64i16:169 regFileMap:170 loadMapData:188 loadAllMapData:196 mapReady:199 modeMap:200 mapOkFor:201
-§202 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
-PROPDEF:206 PROP_OFF_MODES:213 PROP_USE:215 PROPS:216 PROPON:216 genProps:217
-§237 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
-HOUSES:239 HAIRC:244 HAIRSTY:246 WOODC:249 WOODN:250 WCOREC:251 WCOREN:252 WANDSTY:253 WANDN:258 WANDNN:273 EYEC:274 SKINC:275 CLOAKC:276 TIESTY:277 LOOKK:278 LOOKN:278 lookStr:279 parseLook:280 randLook:281 LOOKS:282 LOOKP:282 KITS:282 getKit:283 getLook:284 CREST_SH:285 CREST_PAT:286 starPts:291 CREST_ANI:293 crestSVG:299 houseColor:307 TEAMC:308 TEAMN:308 NOBROOM:310 ROOM_MAX:312 MODES:313 hostModeEnabled:325 PLAY:327 PDEF:328 EDEF:355 POOLS:368 CDK:378 BUFFS:381 BRAR:390 rollRar:391
+FMAPS:168 b64i16:169 regFileMap:170 loadMapData:190 loadAllMapData:198 mapReady:201 modeMap:202 mapOkFor:203
+§204 ของประกอบฉากที่พังได้ / ใช้ได้ (prop)
+PROPDEF:208 PROP_OFF_MODES:215 PROP_USE:217 PROPS:218 PROPON:218 genProps:219
+§239 ตัวละคร: บ้านฮอกวอตส์ + หน้าตา
+HOUSES:241 HAIRC:246 HAIRSTY:248 WOODC:251 WOODN:252 WCOREC:253 WCOREN:254 WANDSTY:255 WANDN:260 WANDNN:275 EYEC:276 SKINC:277 CLOAKC:278 TIESTY:279 LOOKK:280 LOOKN:280 lookStr:281 parseLook:282 randLook:283 LOOKS:284 LOOKP:284 KITS:284 getKit:285 getLook:286 CREST_SH:287 CREST_PAT:288 starPts:293 CREST_ANI:295 crestSVG:301 houseColor:309 TEAMC:310 TEAMN:310 NOBROOM:312 ROOM_MAX:314 MODES:315 hostModeEnabled:327 PLAY:329 PDEF:330 EDEF:357 POOLS:370 CDK:380 BUFFS:383 BRAR:392 rollRar:393
 
 ## js/02-fcs-data.js (3) — 
 FCS_DATA:3
@@ -36,7 +36,7 @@ fcsRoomK:17 roomWall:27 roomCol:36 roomFloor:38 roomCeil:44 fcsCeilAt:46 fcsCeil
 §55 breakable room props (user 2026-11-20): BRK groups (js/12-buildings.j…
 RPK:59 roomProp:67 roomsFromFile:77 roomsCur:89 RWH:91 roomWallEnv:92
 
-## js/02-fcs.js (252) — 
+## js/02-fcs.js (257) — 
 FCS_C:7 FCS_WH:8 genFcs:9
 §196 พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G…
 SGPH:197 SGTR:197 SG_SPR:198 sgFD:200 _sgAreaC:201 sgArea:202 _sgAreaT:209 sgAreaT:210 sgClamp:216 sgInArea:226 sgAttach:229 sgFromFile:239
@@ -87,7 +87,7 @@ SDOME_POSE:235 stormDomeCost:236 stormDomeDash:237 stormDomeCharge:238 stormDome
 ## js/09-darkness.js (463) — 
 DARKP:2 DARK_V:6 DARK_BA:7 DARK_LONG_DASH:8 DARK_CHASE_FLOW:9 DARK_MAW:10 DARK_VEIL_PULL_CLEAR:11 DARK_CHASE_T:12 DARK_WALTZ_ORB:13 darkFlow:14 darkOrbImmune:15 darkAlive:23 darkReset:24 darkState:25 darkEvent:26 darkAim:29 darkTarget:36 darkCone:40 darkBAFloor:47 darkBATargets:51 darkMoveHeading:68 darkClearCooldown:71 darkMark:75 darkReveal:82 darkQueue:83 darkGainFlow:84 darkKill:90 darkTick:93 darkShieldTick:127 darkShieldCrossAt:144 darkShieldCross:153 darkBeamStop:154 darkDash:163 darkBasic:186 DARK_MARK:216 darkWaveTick:233 DARK_CHASE:255 darkMoveWaltz:306 DARK_WALTZ:331 DARK_WARD:353 DARK_VEIL:368 DARK_ULT:376 darkUltBite:391 darkMoveChase:401 darkSnap:441 darkMarked:460
 
-## js/09-earth.js (416) — 
+## js/09-earth.js (422) — 
 EARTH:9 ERV:12
 §24 ตัวช่วย
 eOn:25 eStand:26 eNoStand:27 eSegD:29 eAdd:30 eCollide:32 eProjHit:53 eKill:56
@@ -98,25 +98,27 @@ EROCK:94 earthRockTick:95 earthRockSplash:96 earthBasic:101 earthFistStart:114 e
 §136 Dash: Stand Rampage / Rock Boost Escape
 EKICK:137 earthDash:139 earthRampEnd:174
 §179 สกิล 1: Stonebreaker
-earthStoneAim:180 STONEB:189
-§208 สกิล 2: Mud Swamp
-MUDS:209
-§213 สกิล 3: Tectonic Crush
-TECT:216
-§217 สกิล 3: Stone Barrage — ปาหินทั้งวงหลังตัวออกไปรัว ๆ (ไม่ตรงเป้า 100%…
-BARRAGE:218 earthBarrageTick:223 earthCrush:229
-§240 สกิล 4: Dust Burst
-DUSTB:242
-§243 สกิล 4: Terra Isle — Stand ต่อยจุ่มลงพื้นตรงจุดเล็งแล้วยกเกาะหินลอยขึ…
-ISLE:245 earthIsleTick:255
-§265 สกิล 5: Terra Auger
-AUGER:268
-§269 สกิล 5: Rampart (ผู้ใช้ 2026-11-23 v2) — เลือกจุด (โฮโลแกรม) แล้วคลิก…
-RAMPART:271 earthRampAimUpd:276 earthRampAimTick:278 earthRampPlace:284 eAugAim:296 earthAugFire:297 earthMound:308
-§311 อัลติ: Wrath — ชาร์จบนพื้น หินดันผู้เล่นขึ้นฟ้า Stand ปาเสาลงจุดเล็ง
-WRATH_READY_T:312 WRATH_THROW_SWING_T:313 WRATH_DRAW_T:314 WRATH:315 earthWrathAim:321 earthWrathFlightAngles:322 earthPillarThrow:328 earthPillarImpact:334 earthWrathTick:342 earthWrathEnd:366 E_WRS:370 earthSpikeTick:371
-§377 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
-updateEarth:378 earthSnapP:392 earthSnapW:408
+earthStoneAim:180 STONEB:190
+§191 สกิล 1: Stone Mark — ชาร์จไม้สั้น ๆ แล้วยิงเส้นสเปลหัก ๆ ถึงทันที (ไม…
+SMARK:193 earthMarkFire:199 earthStoneHit:207 earthStoneSnap:212
+§214 สกิล 2: Mud Swamp
+MUDS:215
+§219 สกิล 3: Tectonic Crush
+TECT:222
+§223 สกิล 3: Stone Barrage — ปาหินทั้งวงหลังตัวออกไปรัว ๆ (ไม่ตรงเป้า 100%…
+BARRAGE:224 earthBarrageTick:229 earthCrush:235
+§246 สกิล 4: Dust Burst
+DUSTB:248
+§249 สกิล 4: Terra Isle — Stand ต่อยจุ่มลงพื้นตรงจุดเล็งแล้วยกเกาะหินลอยขึ…
+ISLE:251 earthIsleTick:261
+§271 สกิล 5: Terra Auger
+AUGER:274
+§275 สกิล 5: Rampart (ผู้ใช้ 2026-11-23 v2) — เลือกจุด (โฮโลแกรม) แล้วคลิก…
+RAMPART:277 earthRampAimUpd:282 earthRampAimTick:284 earthRampPlace:290 eAugAim:302 earthAugFire:303 earthMound:314
+§317 อัลติ: Wrath — ชาร์จบนพื้น หินดันผู้เล่นขึ้นฟ้า Stand ปาเสาลงจุดเล็ง
+WRATH_READY_T:318 WRATH_THROW_SWING_T:319 WRATH_DRAW_T:320 WRATH:321 earthWrathAim:327 earthWrathFlightAngles:328 earthPillarThrow:334 earthPillarImpact:340 earthWrathTick:348 earthWrathEnd:372 E_WRS:376 earthSpikeTick:377
+§383 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
+updateEarth:384 earthSnapP:398 earthSnapW:414
 
 ## js/09-light.js (564) — 
 LIGHTP:8 LTV:12 lgOn:19 lightShieldPitch:20 lightShieldGauge:21 lightClearBond:22 lightReset:26 lightAlly:32 lightLinkPos:33 lightUnlink:34 lightReleaseAlly:52 lightBondTarget:59 lightBondTap:79 lightRecall:94
@@ -347,7 +349,7 @@ onfOutlineMat:4 onFireFX:6 statusFX:17 fx:44
 §251 overlay: เลือกบัฟ / สรุปผล
 choosePick:252 syncOverlays:257 showOver:278
 
-## js/27-world.js (601) — 
+## js/27-world.js (603) — 
 S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 PTG:15 gl:23
 §37 เงานุ่มแบบ PCSS (contact-hardening): ใกล้จุดสัมผัสคม ไกลจากวัตถุที่บั…
 PCSS:40 scene:67 cam:69 composer:70
@@ -356,13 +358,13 @@ rpass:74 fxScene:76 SOFTU:78 SOFT_GLSL:79 FXMATS:81 fxMat:82 softify:84 HAZE_U:8
 §140 TAA (ลบขอบหยักแบบสะสมหลายเฟรม) — กราฟิกสูงเท่านั้น • ปิดด้วย ?notaa
 TAA:143 TAA_FRAG:144 _taaH:159 taaWanted:160 taaBegin:161 taaEnd:169 taaFinish:170 taaResolve:172 AO_RT:182 fxPass:204 bloom:205 GRADEU:212 gradePass:233 aaPass:251
 §253 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
-GQ_OPT:256 GQ_PRE:276 GQ_NAME:283 GQ:284 gq:287 gqSave:288 gqPreset:289 gqSet:290 gqMode:293 gqSync:294 QUAL:295 QUAL_NAME:297 qDyn:298 qualPR:299 gqShadowSize:304 applyQuality:305 qualTick:331
-§347 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
-qualCS:351 CULL:352 cullTick:353 texCanvas:364 glowTex:365 stoneTex:366 runeTex:372 glowMats:380 glowMat:381 STONEM:383 stoneMat:384 shadowAll:385
-§388 clear midday sky (user refs 2026-11-24: anime key-art noon) — baked O…
-SKYC:393 skyBakeClear:395 skyBake:482 SKY:487 hemi:519 moonL:521 LDIR:525 setSky:526 SKYB:542 skyFollow:543
-§544 เงาตามผู้เล่น
-SHD:548 _shF:549 _shR:549 _shU:549 _shC:549 _shY:549 SHD_DM:553 shadowDepthSplit:554 shadowFollow:559 shadowSoft:579 LPOOL:581 MLS_N:587 MLS:587 mlsPoint:589 _mlsP:591 mlsInScene:592 mlsTick:593
+GQ_OPT:256 GQ_PRE:278 GQ_NAME:285 GQ:286 gq:289 gqSave:290 gqPreset:291 gqSet:292 gqMode:295 gqSync:296 QUAL:297 QUAL_NAME:299 qDyn:300 qualPR:301 gqShadowSize:306 applyQuality:307 qualTick:333
+§349 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
+qualCS:353 CULL:354 cullTick:355 texCanvas:366 glowTex:367 stoneTex:368 runeTex:374 glowMats:382 glowMat:383 STONEM:385 stoneMat:386 shadowAll:387
+§390 clear midday sky (user refs 2026-11-24: anime key-art noon) — baked O…
+SKYC:395 skyBakeClear:397 skyBake:484 SKY:489 hemi:521 moonL:523 LDIR:527 setSky:528 SKYB:544 skyFollow:545
+§546 เงาตามผู้เล่น
+SHD:550 _shF:551 _shR:551 _shU:551 _shC:551 _shY:551 SHD_DM:555 shadowDepthSplit:556 shadowFollow:561 shadowSoft:581 LPOOL:583 MLS_N:589 MLS:589 mlsPoint:591 _mlsP:593 mlsInScene:594 mlsTick:595
 
 ## js/28-city-build.js (386) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
@@ -602,7 +604,7 @@ WB:298 wbInit:299 wbBegin:309 wbEnd:310 fxWarpMake:311 fxWarpTick:324
 §332 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:335 fxVolLoad:336 fxVolTex:340 fxVolSet:343 fxVolReady:344 fxVolMake:345 fxVolTick:348 fxPreAssets:353 fxAssetsWait:355
 
-## js/47-earth-view.js (1182) — 
+## js/47-earth-view.js (1225) — 
 ECOL:9 EGUARD_BIG:14 EGUARD:14 EV:15 eW:16 EARTH_FIST_SCALE:17 eYaw:18
 §19 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
 ETEX:20 eTex:21 eFadeTex:35 eMat:37 eTMat:38 rockGeo:39 ROCKU:45 rockMesh:46 coneMesh:48 _eChunkM:50 eChunks:51
@@ -625,13 +627,13 @@ earthClear:698 eMergePartial:706 eMergeKids:711 eMakeSO:719
 §738 Rampart wall (user 2026-11-23 v2): fused rounded boulders, uneven top…
 ERAMP:739 eRng:740 eBlock:743 eRampGeo:758 eRampMats:774 eRampMesh:785 eRampHolo:789 eRampPlace:790 eRampTick:792
 §810 Terra Isle (user 2026-11-24, ref: floating island chunk): earthy top …
-ERING:832 earthRockRing:836 EISLE:853 eIsleGeo:854 eIsleTint:874 eIsleMesh:876 eIsleTick:880 syncEarth:888 earthFog:941 eMudScreen:944 _eOlMat:951 eOutlines:953 _eCamT:958 eAnim:959 eDebris:960 eWave:962 eAirWave:964 esbImpact:967
-§974 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
-earthEfx:975 eWindOut:1098 eAirCone:1104 eDrillFly:1106
-§1110 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
-earthMudZone:1111 earthMudSink:1118
-§1119 HUD ใต้เป้าเล็ง
-ESM:1121 eSmooth:1122 ESF:1125 eShieldFx:1126 eChips:1131 eShieldSegs:1134 eShieldNum:1148 eShieldArc:1152 drawEarthHud:1165
+ESTN:837 earthStoneVis:838 eStoneUpd:839 ERING:855 earthRockRing:859 EISLE:876 eIsleGeo:877 eIsleTint:897 eIsleMesh:899 eIsleTick:903 syncEarth:911 earthFog:965 eMudScreen:968 _eOlMat:975 eOutlines:977 _eCamT:982 eAnim:983 eDebris:984 eWave:986 eAirWave:988 esbImpact:991
+§998 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
+earthEfx:999 eWindOut:1141 eAirCone:1147 eDrillFly:1149
+§1153 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
+earthMudZone:1154 earthMudSink:1161
+§1162 HUD ใต้เป้าเล็ง
+ESM:1164 eSmooth:1165 ESF:1168 eShieldFx:1169 eChips:1174 eShieldSegs:1177 eShieldNum:1191 eShieldArc:1195 drawEarthHud:1208
 
 ## js/48-ragdoll.js (429) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 _ragFw:41 ragBones:42 ragBasis:49 ragTargets:57 ragStart:63 ragBack:96 ragFloor:97 ragStep:98 ragPose:170 ragWrite:185 ragRestore:197 ragEnd:201 ragTick:203 ragHideDead:250 clearDeathFades:259 deathClipMat:269 deathSlashSplit:276 DD_ALPHA:330 deathDissolve:331 deathVisualSync:405
@@ -639,7 +641,7 @@ RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rq
 ## js/49-cloth.js (203) — 
 CLOTH:10 CL_ROWS:26 CL_NC:26 CL_GAP:26 CL_IN:26 _clV:27 _clA:27 _clB:27 clPinK:29 clBind:31 cloakPanelGrid:33 cloakBodyIndices:47 stormCape:56 clothSetup:94 clTargets:124 clReset:128 clCapsule:132 _clO:136 clWorld:137 clWorldHit:145 clStep:150 clDraw:163 clothTick:184
 
-## js/50-grass.js (427) — 
+## js/50-grass.js (428) — 
 AIR:10 AIR_MAP:17 AIR_NG:20 airGust:21 airGustOff:26 airEnv:27 airGs:28 airMark:30 airForMap:33 _airV:34 airAt:35 airGv:41 airTick:42
 §45 ต่อเข้ากับเอฟเฟกต์เดิม (ไม่ต้องแก้ทุกสกิล): แสงวาบ = ลมกระโชก • วงคลื…
 CLW:54
@@ -650,9 +652,9 @@ SCAR:62 scarReset:64 scarPaint:71 grassScar:86
 §91 ไฟลามหญ้า (ภาพล้วน: ไม่มีดาเมจ ไม่ซิงก์ — แต่ละเครื่องลามไม่เหมือนกัน…
 FIRE:97 GR_FIRE:100 fireReset:102 fireBuild:104 fireLight:111 fireIgnite:113 fireFx:125 fireStep:130 fireTick:154
 §159 พื้นหญ้ามีชีวิต: สีเป็นหย่อม (เขียวเข้ม / แห้งเหลือง / ดินโผล่) + จุด…
-GR_NOISE:162 GR_LIVE:167 SNOWU:188 GR_SNOW:189 grLive:191 GR_GLSL_V:201 GR_BEGIN:206 grassMat:258 grassBuild:276 _grBasic:290 grassBake:291 grassCount:361 grassTick:366
-§404 สกิลลม → หญ้า (ภาพล้วน เรียกจาก windEfx js/68)
-WIND_GRASS:406 airWind:420
+GR_NOISE:162 GR_LIVE:167 SNOWU:188 GR_SNOW:189 grLive:191 GR_GLSL_V:201 GR_BEGIN:206 grassMat:258 grassBuild:276 _grBasic:290 grassBake:291 grassCount:361 grassTick:367
+§405 สกิลลม → หญ้า (ภาพล้วน เรียกจาก windEfx js/68)
+WIND_GRASS:407 airWind:421
 
 ## js/51-warmup.js (421) — 
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_SLICE:13 WARM_X:14 WARM_Y:14 warmKeep:16 warmStaticModels:22 glReady:31 warmCompile:32 warmDraw:35 WARM_SKIP:45 warmAssets:48 warmFx:58 warmNow:71 warmFxRun:79 warmFxEnd:82 warmGather:84 warmPaths:86 warmFrame:88 warmStep:90 preloadCharMat:158 warmTrCopy:161 warmCharVariants:164 warmQueue:183 WARM_LOBBY:189 warmLobbyTick:190 warmTick:197
@@ -969,4 +971,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(119 files, 36757 lines)
+(119 files, 36816 lines)
