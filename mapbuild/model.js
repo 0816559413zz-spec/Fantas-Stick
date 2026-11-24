@@ -161,9 +161,10 @@ export function wallPath(w) {   // control points → polyline (curve = Catmull-
 }
 // ---- breakable panels (pn_wall → data.pnl, game js/12-pnl.js) ----
 export const PN_MAT = [['brick', 'Brick'], ['plaster', 'Plaster (brick inside)'], ['stone', 'Rocks'], ['wood', 'Wood (burns)'], ['glass', 'Glass'], ['metal', 'Metal'],
-  ['timber', 'Plaster + Timber Frame'], ['roof', 'Tile Roof'], ['snowroof', 'Snow Roof'], ['litwin', 'Lit Window (glass)']];
-export const PN_HP = { brick: 60, plaster: 50, stone: 90, wood: 35, glass: 12, metal: 120, roof: 40, snowroof: 40, timber: 45, litwin: 10 };   // mirror PNDEF.mat in js/12-pnl.js
-export const PN_COL = { brick: '#b0603c', plaster: '#cfc6b4', stone: '#9a9488', wood: '#8a6440', glass: '#bfe4f0', metal: '#7c8288', roof: '#4a4e58', snowroof: '#e8eef4', timber: '#d8ccb4', litwin: '#ffcf80' };
+  ['timber', 'Plaster + Timber Frame'], ['roof', 'Tile Roof'], ['snowroof', 'Snow Roof'], ['litwin', 'Lit Window (glass)'],
+  ['field', 'Fieldstone'], ['moss', 'Mossy Stone'], ['oldbrick', 'Old Cracked Brick'], ['sand', 'Sandstone'], ['marble', 'Marble']];
+export const PN_HP = { brick: 60, plaster: 50, stone: 90, wood: 35, glass: 12, metal: 120, roof: 40, snowroof: 40, timber: 45, litwin: 10, field: 85, moss: 80, oldbrick: 45, sand: 75, marble: 100 };   // mirror PNDEF.mat in js/12-pnl.js
+export const PN_COL = { brick: '#b0603c', plaster: '#cfc6b4', stone: '#9a9488', wood: '#8a6440', glass: '#bfe4f0', metal: '#7c8288', roof: '#4a4e58', snowroof: '#e8eef4', timber: '#d8ccb4', litwin: '#ffcf80', field: '#8e887c', moss: '#6e7a5a', oldbrick: '#8a4a34', sand: '#d0b484', marble: '#e4e2dc' };
 export const PN_MODE = [['p', 'Holes + Rubble'], ['pn', 'Holes, No Rubble'], ['l', 'Peels in Layers'], ['g', 'Whole Panel']];   // pn → game m:'p' + np:1
 export const PN_PRESET = [
   { n: 'Brick Wall', mat: 'brick', m: 'p', sy: 3.6, T: 0.3, cs: 0.6 }, { n: 'Plaster Wall', mat: 'plaster', m: 'l', sy: 3.6, T: 0.3, cs: 0.5 },
