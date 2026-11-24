@@ -201,15 +201,15 @@ function earthMarkFire(p){const V=SMARK.v,h0=p.z+1.5,inp=p.inp||{},r=aimRay3(p,h
   const dx=ex-p.x,dy=ey-p.y,dh=(eh-h0)*20,L=Math.max(1,Math.hypot(dx,dy,dh));let best=null,bu=2;
   for(const t of foesOf(p.team)){if(t.dead||t.alive===false||t.downed)continue;const tx0=t.x-p.x,ty0=t.y-p.y,tz0=(cH(t)-h0)*20,u=(tx0*dx+ty0*dy+tz0*dh)/(L*L);if(u<0||u>1||u>=bu)continue;
     if(Math.hypot(tx0-dx*u,ty0-dy*u,tz0-dh*u)<=(t.r||PR)+V.w){bu=u;best=t;}}
-  if(best){ex=best.x;ey=best.y;eh=cH(best);best.stMk=G.time+V.mark;best.stS=[];best.stSrc=p.id;}
+  if(best){ex=best.x;ey=best.y;eh=cH(best);best.stMk=G.time+V.mark;best.stnS=[];best.stSrc=p.id;}
   emit({k:'efx',z:'esmf',x:Math.round(p.x),y:Math.round(p.y),h:h0,x2:Math.round(ex),y2:Math.round(ey),h2:Math.round(eh*10)/10,hit:best?1:0,id:p.id});}
 // a stone hit on a marked foe adds one layer; `need` layers inside `win` s = petrified (stun) and the mark is used up
 function earthStoneHit(t){if(!(t.stMk>G.time)||!t.alive&&t.alive!==undefined)return;const V=SMARK.v;
-  t.stS=(t.stS||[]).filter(x=>G.time-x<V.win);t.stS.push(G.time);
-  if(t.stS.length>=V.need){t.stS=[];t.stMk=0;addStun(t,V.stone);t.stoneT=G.time+Math.max(0.3,t.stun||V.stone);
+  t.stnS=(t.stnS||[]).filter(x=>G.time-x<V.win);t.stnS.push(G.time);
+  if(t.stnS.length>=V.need){t.stnS=[];t.stMk=0;addStun(t,V.stone);t.stoneT=G.time+Math.max(0.3,t.stun||V.stone);
     emit({k:'efx',z:'epetrify',x:Math.round(t.x),y:Math.round(t.y),h:cH(t)});}}
 // snapshot: 0 none • 1+layers while marked • +10 while petrified
-function earthStoneSnap(t){const m=t.stMk>G.time,s=t.stoneT>G.time;if(!m&&!s)return 0;return (m?1+(t.stS||[]).filter(x=>G.time-x<SMARK.v.win).length:0)+(s?10:0);}
+function earthStoneSnap(t){const m=t.stMk>G.time,s=t.stoneT>G.time;if(!m&&!s)return 0;return (m?1+(t.stnS||[]).filter(x=>G.time-x<SMARK.v.win).length:0)+(s?10:0);}
 
 // ---------- สกิล 2: Mud Swamp ----------
 const MUDS=defSpell(EARTH,{id:'mudswamp',v:{range:600,r:120,warn:0.5,time:5,slow:0.5},vn:{range:'ระยะเล็ง',r:'รัศมี',warn:'วงเตือน (วิ)',time:'อยู่นาน (วิ)',slow:'ศัตรู • ความเร็ว (เท่า)'},role:'control',n:'Mud Swamp',ic:'🟤',cd:12,d:'เล็งพื้นระยะ 600 วงเตือน 0.5 วิ แล้วเป็นบ่อโคลนรัศมี 120 นาน 5 วิ (โดนเฉพาะศัตรู)',fx:'ศัตรูในโคลน: ช้าลง 50% ใช้ Dash/กระโดดไม่ได้ ขาจมโคลน • ไม่มีดาเมจ • ใช้ได้แม้ Stand แตก',

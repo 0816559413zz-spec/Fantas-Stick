@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-24 — **Fix: Stone Mark showed a Storm shield bubble on the target.** The stone layer list used `t.stS`, the same field as the old Storm shield state, so the target looked shielded. Renamed to `t.stnS`.
 - 2026-11-24 — **Stone Mark v2** (user): charge 0.6 s with a growing gold orb at the wand tip, the line stays 0.5 s then fades, mark = solid gold ring + gold stone diamond above the head, stuck rocks bigger (r 0.25). Tested on a player-sized training bot (Storm): mark, 5 BA rocks, petrified 1 s.
 - 2026-11-24 — **Map Builder ready for the new siege flow (data only).** New `mode` markers: `sgHold` retreat zone (break N, team), `sgLoot` loot area, `sgItem` item spawn (tier 1–3), `brz` broom zone (top height, team), `wind` push zone (direction + strength). Export `siege.hold/loot/items`, `data.broom`, `data.wind`; checks warn per break when a team zone, loot area or items are missing or an item is outside the loot area. The game keeps the data (`MAPS[id].fcs.hold/loot/items`, `.broomZ`, `.wind`) but does not play it yet. Axis-aligned area types share `AREA` in mapbuild/model.js.
 - 2026-11-24 — Graphics settings: new options ระยะเงา (shadow area 0.75–1.9×) and ระยะหญ้า (grass patch 0.8–1.6×, same density); Ultra/Cinematic use ไกล. Grass cap 640k.
