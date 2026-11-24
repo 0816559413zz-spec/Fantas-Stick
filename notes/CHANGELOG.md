@@ -1463,3 +1463,4 @@
 - 2026-11-23 Earth Rampart v2: hologram aim, Stand heave, fused-boulder wall, no push (protocol v109)
 - 2026-11-24: breakable panel shapes — Triangle with movable apex (ap), Slanted Top (sh trap, hr), Round Tower draw mode in the Breakable Panel tool (ring of panels, one group)
 - 2026-11-24 Earth Rampart v3: bulky angular stone pillars, 14 m x 5.5 m, HP 600
+- 2026-11-24 Earth Rampart v4: 9 pillars ~18 m wide, cleaner shading, shader warm-up while aiming
