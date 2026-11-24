@@ -488,7 +488,7 @@
   "fcs-file": {
    "file": "maps/fcs-file.glb",
    "data": "maps/fcs-file.json",
-   "v": 60
+   "v": 65
   },
   "pnl-demo": {
    "file": "maps/pnl-demo.glb",
