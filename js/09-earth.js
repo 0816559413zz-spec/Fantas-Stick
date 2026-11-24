@@ -319,6 +319,7 @@ function earthMound(p,x,y,ult){if(!ult)for(const w of G.eso||[])if(w.k==='mound'
 const WRATH_READY_T=.24;
 const WRATH_THROW_SWING_T=.16;
 const WRATH_DRAW_T=1.6;
+const WRATH_HEAD=5;   // pillar height above the caster (m)
 const WRATH=defSpell(EARTH,{id:'wrath',v:{charge:.65,lift:.58,aimT:5,height:12,side:240,wind:WRATH_DRAW_T+WRATH_THROW_SWING_T,drop:.14,settle:.30,range:700,maxRange:900,r:400,hit:100,knock:900,pilHp:300,mud:8,mudSlow:0.5,every:2,spk:30,warn:0.5,sr:55,env:50},vn:{charge:'ชาร์จบนพื้น (วิ)',lift:'หินดันขึ้น (วิ)',aimT:'เวลาเลือกจุด (วิ)',height:'ความสูงจากจุดเริ่ม',side:'ขยับด้านข้าง • ความเร็ว',wind:'ง้าง (วิ)',drop:'เสาบิน (วิ)',settle:'คืนท่า (วิ)',range:'ระยะปาเสา (บอท)',maxRange:'ระยะปาเสาไกลสุด',r:'รัศมีบึงโคลน/แรงกระแทก',hit:'แรงกระแทก • ดาเมจ',knock:'แรงกระแทก • กระเด็น',pilHp:'เสา • HP',mud:'บึงโคลน • นาน (วิ)',mudSlow:'บึงโคลน • ความเร็วศัตรู (เท่า)',every:'หินแหลม • ทุก (วิ)',spk:'หินแหลม • ดาเมจ',warn:'หินแหลม • เตือน (วิ)',sr:'หินแหลม • รัศมี',env:'เสาตก • พังบ้าน/ของ (×ตัวคูณ)'},role:'ult',ult:true,n:'Wrath',ic:'🗿',cd:0,d:'ชาร์จบนพื้น แล้วหินดันขึ้นฟ้า • เล็งพื้นและคลิกให้ Stand ปาเสาลงจุดที่เลือก • เสาปักพื้น (HP 300) กระแทก 100 ดาเมจในรัศมี 400 แล้วเกิดบึงโคลน 8 วิ พร้อมหนามตามศัตรู',fx:'แรงกระแทก 100 + กระเด็น • บึงโคลนทำให้ศัตรูช้า 50% และใช้ Dash ไม่ได้ • หนามมีวงเตือน 0.5 วิ • ใช้ได้แม้ Stand แตก (Stand กลับมาทันที โล่เต็ม)',
   cast(p){if(p.fly||p.z>groundH(p.x,p.y,p.z)+.10)return false;
     if(p.aug)p.aug=null;if(p.ramp)earthRampEnd(p,true);p.crush=null;p.ecb=null;p.epn=null;p.esb=null;p.eHold=0;
@@ -327,9 +328,9 @@ const WRATH=defSpell(EARTH,{id:'wrath',v:{charge:.65,lift:.58,aimT:5,height:12,s
     emit({k:'efx',z:'ewrath',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}});
 function earthWrathAim(p){return aimPoint(p,p.bot?E_WRS.range:E_WRS.maxRange,false);}
 function earthWrathFlightAngles(x,y,ox,oy,oh,yaw){
-  // แนวเสาจากมือ Stand ซึ่งอยู่เยื้องขวาของผู้เล่น ไปยังจุดปัก
-  const c=Math.cos(yaw),s=Math.sin(yaw),dx=x-(ox+c*10-s*70),dy=y-(oy+s*10+c*70);
-  const dh=oh+3+terrT(ox,oy)-terrT(x,y);
+  // Wrath v3 (user 2026-11-24, no Stand): the pillar forms WRATH_HEAD m above the caster's head and flies from there
+  const dx=x-ox,dy=y-oy;
+  const dh=oh+WRATH_HEAD+terrT(ox,oy)-terrT(x,y);
   return [Math.atan2(dy,dx),Math.atan2(-dh*20,Math.hypot(dx,dy))];
 }
 function earthPillarThrow(p){const W=p.wr;if(!W||W.ph!=='aim')return;

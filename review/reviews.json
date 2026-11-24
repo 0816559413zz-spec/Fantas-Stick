@@ -3807,6 +3807,23 @@
    ],
    "feedback": "",
    "reply": ""
+  },
+  {
+   "id": 184,
+   "title": "Earth: Wrath ไม่มี Stand — ก่อเสาเหนือหัวแล้วปาเอง",
+   "text": "เลือก Earth กดอัลติ (X) → ลอยขึ้น เสาก่อเหนือหัว → คลิกจุด → ง้างช้า ฟาดไม้ เสาพุ่งลง • GIF shots/motion_earth_wrath.gif",
+   "kind": "Skill",
+   "who": "Earth",
+   "status": "wait",
+   "created": "2026-11-24T23:59:00",
+   "updated": "2026-11-24T23:59:00",
+   "imgs": [],
+   "links": [
+    "/shots/motion_earth_wrath.gif",
+    "/shots/earth_wrath_sheet.jpg"
+   ],
+   "feedback": "",
+   "reply": ""
   }
  ]
 }

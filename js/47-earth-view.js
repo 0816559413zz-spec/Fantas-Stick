@@ -317,92 +317,50 @@ function eWrathBoostRock(s,p,A,z0){
   rock.visible=true;rock.position.copy(eW(p.x,p.y,h));rock.scale.setScalar(lerp(.72,1,charge)*(1-.85*fall));
   rock.rotation.set(.35*fall,.23+.34*fall,-.55*fall);
 }
-function eWrathStand(s,S,p,A,t,z0){
+// Wrath v3 (user 2026-11-24): no Stand. From the rock boost on, the wand points at the sky and the pillar forms WRATH_HEAD m
+// above the head (rubble gathers in, it grows and rises into place) pointing at the target. Click: slow draw back (pillar
+// pulls back + up) → accelerating wand swing → pillar launches from above the head onto the spot → hold → settle.
+const WRATH_FORM=0.8;
+function eWrathPillar(s,p,A,t,z0){
   const [age,x,y,ox,oy,oh,yaw]=A[13],V=E_WRS,phase=A[3],throwing=phase===2;
+  if(!s.pil){s.pil=makePillar();scene.add(s.pil);}const P=s.pil;
+  const formT=phase===4?age:phase===1?V.lift+age:throwing?9:0,form=phase===3?0:eFistEase(clamp(formT/WRATH_FORM,0,1));
+  const drawT=Math.max(.01,V.wind-WRATH_THROW_SWING_T),draw=throwing?eFistEase(clamp(age/drawT,0,1)):0,sw0=throwing?clamp((age-drawT)/WRATH_THROW_SWING_T,0,1):0,sw=sw0*sw0;
   const drop=throwing?clamp((age-V.wind)/V.drop,0,1):0;
-  const rest=throwing?eFistEase((age-V.wind-V.drop)/V.settle):0;
-  const drawT=Math.max(.01,V.wind-WRATH_THROW_SWING_T);
-  const drawBack=throwing?eFistEase(age/drawT)*(1-eFistEase((age-drawT)/Math.max(.01,V.wind-drawT))):0;
-  const swing=throwing?eFistEase((age-drawT)/Math.max(.01,V.wind-drawT)):0,c=Math.cos(yaw),q=Math.sin(yaw);
-  const follow=throwing?eFistEase((age-V.wind)/V.drop):0;
-  const flight=throwing?earthWrathFlightAngles(x,y,ox,oy,oh,yaw):null;
-  const load=phase===3?eFistEase(age/V.charge):1;
-  S.g.position.copy(eW(ox-c*26-q*70,oy-q*26+c*70,(throwing?oh:z0)-2.6-.85*(1-load)));
-  S.g.scale.setScalar(2.6);
-  S.g.rotation.set(0,Math.PI/2-yaw,0);
-  standPose(S,{t,throwK:swing});
-  // หลังปล่อยให้ค้างปลายท่าไว้ตลอดการจาง แม้โมเดลเสาที่กำลังบินถูกซ่อนแล้ว
-  if(throwing&&s.wrReleased)S.body.position.y=s.wrReleaseY;
-  S.body.rotation.x+=.39*swing-.19*drawBack+.10*follow;
-  S.body.rotation.y+=.48*drawBack-.38*swing-.12*follow;
-  S.body.rotation.z-=.12*drawBack-.15*swing-.035*follow;
-  S.head.rotation.y=-S.body.rotation.y*.58;
-  S.L.up.rotation.x+=.98*swing;
-  S.L.up.rotation.z+=.23*drawBack;
-  // ใช้เวลาเส้นเดียวตั้งแต่หินเริ่มดันจนง้างเสร็จหลังถึงยอด
-  const airborne=phase===4?age:phase===1?V.lift+age:0;
-  const carry=throwing?0:1-eFistEase((airborne-.07)/(V.lift+WRATH_READY_T-.07));
-  if(carry>0){
-    const brace=Math.sin(Math.PI*eFistEase(airborne/V.lift));
-    S.L.up.rotation.x=lerp(S.L.up.rotation.x,-.70-1.18*brace,carry);
-    S.L.up.rotation.z=lerp(S.L.up.rotation.z,.43+.28*brace,carry);
-    S.L.fo.rotation.x=lerp(S.L.fo.rotation.x,-.73,carry);
-    S.body.rotation.set(lerp(S.body.rotation.x,.26-.46*brace,carry),lerp(S.body.rotation.y,-.10,carry),-.13*brace*carry);
-    S.head.rotation.x=-.29*brace*carry;
-  }
-  if(!s.pil){s.pil=makePillar();scene.add(s.pil);}
-  const P=s.pil;
-  P.visible=drop<1;
+  const bx=throwing?ox:p.x,by=throwing?oy:p.y,bh=throwing?oh:z0;
+  const dir=eWrathPillarDir(...earthWrathFlightAngles(x,y,bx,by,bh,yaw));
+  P.visible=form>0.01&&drop<1;
   if(!throwing)s.wrReleased=false;
-  // ท่าแขนขวาเดินแยกจากการแสดงผลเสา เพื่อให้ค้างท่าส่งแรงได้ถึงเฟรมสุดท้าย
-  const grip=new THREE.Vector3(lerp(1.36,1.52,carry),lerp(3.69,1.73,carry),lerp(-1.03,.56,carry));
-  grip.y=lerp(grip.y,2.86,swing)+.10*drawBack-.12*follow;
-  grip.z=lerp(grip.z,1.83,swing)-.17*drawBack+.16*follow;
-  const pole=new THREE.Vector3(q,-.45,-c);
-  eArmIK(S.R,S.body.localToWorld(grip),pole.normalize());
-  if(P.visible){
-    if(!throwing||!s.wrReleased){
-      S.R.fist.getWorldPosition(P.position);
-      // เสาหมุนรอบมือขวาในระนาบด้านข้าง; ค่อยหันเข้าแนวปล่อยหลังเหวี่ยงแขน
-      const sideYaw=yaw-.12,[aimYaw,pitch]=flight||[sideYaw,-.27];
-      const dir=eStoneDir(sideYaw+angDiff(aimYaw,sideYaw)*swing,lerp(lerp(-.08,1.08,carry)+.09*drawBack,pitch,swing));
-      P.lookAt(P.position.clone().add(dir));P.translateZ(1.2);
-      (s.wrFrom||(s.wrFrom=new THREE.Vector3())).copy(P.position);
-    }
-    if(drop>0){
-      const dir=eWrathPillarDir(...flight),planted=eW(x,y,0).addScaledVector(dir,-3.45),start=s.wrFrom;
-      if(!s.wrReleased){
-        s.wrReleased=true;
-        s.wrReleaseY=S.body.position.y;
-        const hand=S.R.fist.getWorldPosition(new THREE.Vector3());
-        eAirWave(hand,dir,2.45,'#ffd6a4',.96,.68);
-        const q=simOf(hand);
-        if(nearMe(q.x,q.y,1100))snd('whoosh',{x:q.x,y:q.y,vol:.87});
-        if(p.id===NET.myId)shake(2.0);
-      }
-      P.position.copy(start).lerp(planted,drop);
-      P.lookAt(P.position.clone().add(dir));
-    }
+  if(!throwing||!s.wrReleased){
+    const pos=eW(bx,by,bh+WRATH_HEAD-1.4*(1-form)),back=3.2*clamp(-dir.y,0,1)+1.8*draw*(1-sw);   // aimed steeply down: sits back along its axis so the tip stays over the head
+    pos.addScaledVector(dir,-back);pos.y+=0.9*draw*(1-sw)+0.08*Math.sin(t*2.2);
+    P.position.copy(pos);P.lookAt(pos.clone().add(dir));P.scale.setScalar(0.2+0.8*form);
+    (s.wrFrom||(s.wrFrom=new THREE.Vector3())).copy(pos);
+    if(form>0.01&&form<1){const q=simOf(pos),gh=GY(q.x,q.y);for(let k=0;k<3;k++){const a=Math.random()*6.28,r=50+Math.random()*50,dh=(Math.random()-0.3)*2.5,T=0.3;
+      PARTS.push({x:q.x+Math.cos(a)*r,y:q.y+Math.sin(a)*r,h:pos.y-gh+dh,vx:-Math.cos(a)*r/T,vy:-Math.sin(a)*r/T,vh:-dh/T,life:T,max:T,col:k?'#c9a36a':'#e8c07a',size:2.2,g:0});}
+      if(Math.random()<0.25)eChunks(q.x+rnd(-40,40),q.y+rnd(-40,40),pos.y-gh-1,1,60,3,0.18);}
   }
+  if(drop>0){const planted=eW(x,y,0).addScaledVector(dir,-3.45);
+    if(!s.wrReleased){s.wrReleased=true;eAirWave(s.wrFrom.clone().addScaledVector(dir,4.5),dir,2.45,'#ffd6a4',.96,.68);const q=simOf(s.wrFrom);if(nearMe(q.x,q.y,1100))snd('whoosh',{x:q.x,y:q.y,vol:.87});if(p.id===NET.myId)shake(2.0);}
+    P.position.copy(s.wrFrom).lerp(planted,drop*drop);P.lookAt(P.position.clone().add(dir));P.scale.setScalar(1);}
   if(phase===1&&p.id===NET.myId||throwing&&drop<1){
     if(!s.wrWarn)s.wrWarn=makeWarn(.56);
     const progress=throwing?clamp(age/(V.wind+V.drop),0,1):0;
     eWarnAt(s.wrWarn,x,y,V.r,phase===1?.065:lerp(.16,.96,progress));
     s.wrWarn.userData.r.material.opacity*=throwing?.55:.30;
   }else if(s.wrWarn)s.wrWarn.visible=false;
-  return load*(1-rest);
-}
+  return 0;}
 function eWrathPlayerPose(o,A){
   const V=E_WRS,age=A[13][0],phase=A[3],throwing=phase===2;
   const load=phase===3?eFistEase(age/V.charge):1;
   const rise=phase===4?eFistEase(age/V.lift):0;
-  const cast=throwing?eFistEase((age-Math.max(.01,V.wind-WRATH_THROW_SWING_T))/WRATH_THROW_SWING_T):0;
+  const cast=throwing?eFistEase((age-Math.max(.01,V.wind-WRATH_THROW_SWING_T))/WRATH_THROW_SWING_T):0,draw=throwing?eFistEase(age/Math.max(.01,V.wind-WRATH_THROW_SWING_T)):0;
   const weight=load*(throwing?1-eFistEase((age-V.wind-V.drop)/V.settle):1);
   const R=o.armR.rotation,L=o.armL.rotation;
-  R.x=lerp(R.x,phase===3?-.68:phase===4?lerp(-.68,-2.45,rise):lerp(-2.45,-1.34,cast),weight);
+  R.x=lerp(R.x,phase===3?-.68:phase===4?lerp(-.68,-2.45,rise):lerp(-2.45-0.45*draw,-1.2,cast),weight);
   R.z=lerp(R.z,-.30+.14*cast,weight);
   L.x=lerp(L.x,phase===3?-.59:lerp(-.82,-.30,cast),weight);L.z=lerp(L.z,.32,weight);
-  o.b.rotation.x+=weight*(phase===3?.27:phase===4?lerp(.27,-.18,rise):lerp(-.09,.24,cast));
+  o.b.rotation.x+=weight*(phase===3?.27:phase===4?lerp(.27,-.18,rise):lerp(-.09-.14*draw,.28,cast));
   o.b.rotation.y+=weight*lerp(.18,-.24,cast);
   o.b.position.y-=(phase===3?.23:phase===4?lerp(.23,0,rise):.045*cast)*weight;
   if(phase===3){o.legs[0].rotation.x-=.25*weight;o.legs[1].rotation.x+=.34*weight;}
@@ -464,7 +422,7 @@ function earthFX(o,p,pz,now,dt){
   if(broken&&Math.random()<0.08)burst(p.x+rnd(-15,15),p.y+rnd(-15,15),ECOL.dust,1,15,0.8,1.6,{h:pz+rnd(0.5,2),g:3});
   // ----- Stand ใหญ่: Wrath > BA ชาร์จ > โล่ -----
   let gop=0;const gp={t},wr=p.al&&A[13];
-  if(wr){gop=eWrathStand(s,G2,p,A,t,z0);eWrathBoostRock(s,p,A,z0);}
+  if(wr){gop=eWrathPillar(s,p,A,t,z0);eWrathBoostRock(s,p,A,z0);}
   else{
     if(s.pil)s.pil.visible=false;
     if(s.wrWarn)s.wrWarn.visible=false;
@@ -883,7 +841,7 @@ const ERING={geo:null,mat:null};
 // v2 (user 2026-11-24): bigger rocks; rocks are spaced evenly round the ring by how many there are. A refilled rock rises
 // in from the middle of the ring into its slot while the others slide over quickly to make room; a thrown rock leaves and
 // the rest close the gap. The ring keeps turning at the same speed the whole time.
-function earthRockRing(o,p,now,dt){const ek=p.ek;if(ek===undefined||!p.al){if(o.eRing)o.eRing.g.visible=false;return;}
+function earthRockRing(o,p,now,dt){const ek=p.ek;if(ek===undefined||!p.al||p.ea&&p.ea[13]&&p.ea[3]!==3){if(o.eRing)o.eRing.g.visible=false;return;}
   if(!ERING.geo){ERING.geo=new THREE.IcosahedronGeometry(0.17,0);ERING.mat=new THREE.MeshStandardMaterial({color:'#b89a72',roughness:0.95,flatShading:true});ERING.mat.userData.keep=true;}
   if(!o.eRing){const g=new THREE.Group();g.position.set(0,1.5,-0.45);o.g.add(g);const pool=[];
     for(let i=0;i<EROCK.max;i++){const m=new THREE.Mesh(ERING.geo,ERING.mat);m.castShadow=true;m.visible=false;g.add(m);pool.push({m,s:0.85+0.3*((i*37)%10)/10,ph:i*1.7});}

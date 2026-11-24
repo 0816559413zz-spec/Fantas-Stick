@@ -1,5 +1,7 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
+**Earth Wrath v3 (2026-11-24, no Stand):** `eWrathPillar` js/47 draws the pillar above the caster (`WRATH_HEAD` 5 m in js/09, used by `earthWrathFlightAngles`); host phases unchanged. Test tip: in headless render a tiny frame with the game camera before each step, a side camera hook changes the aim input.
+
 **Earth Stone Mark (2026-11-24, v112, tested on a player bot: mark → 5 BA rocks → petrified 1 s; charge 0.8 s + 0.35 s recovery, line lingers ~0.55 s with soft aura, gold diamond sigil over the head, layers = stone crust shader `eCoatMat`/`eCoatMake` on coat copies of body meshes, floor hit = `eStoneCrust`):** replaces Stonebreaker (stub `STONEB` kept for old slab code). Host js/09-earth.js `SMARK`, `earthMarkFire`, `earthStoneHit` (hooked in `earthRockSplash` + `SPELLS.ekickrock`), `earthStoneSnap` → snapshot `stn` (P, E). View js/47: `CANIM.stonemark`, efx `esmc` (charge sand), `esmf` (kinked TubeGeometry line — natFx Tube did not show in headless), `epetrify`, `eStoneUpd` (ring, stuck rocks, stone body material swap).
 > **Read order (short):** 1) this file top to §9 only as needed (use grep, never read it whole) 2) `CODEMAP.md` for code 3) rules: `CLAUDE.md` + `guides/WORKFLOW-WITH-CLAUDE.md`.
 > Older notes: `notes/HANDOFF-LOG.md` (session log), `notes/CHANGELOG.md` (changelog), `notes/HANDOFF-CHANGELOG-OLD.md`. After a task: add the new note at the top of "Latest notes" below; when it passes ~25 lines move the oldest entries to the top of `notes/HANDOFF-LOG.md`.
