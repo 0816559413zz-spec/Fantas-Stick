@@ -87,4 +87,11 @@ function lookRegister(name){const P=LOOK.P[name],sec='พรีเซ็ต "'+n
   for(const f of Object.keys(LOOK_F))tuneNum(['look','🌗 Look (พรีเซ็ตแสง)'],sec,'look.'+name+'.'+f,LOOK_F[f][0],()=>P[f],v=>{P[f]=v;lookRefresh();},{min:LOOK_F[f][1],max:LOOK_F[f][2],step:LOOK_F[f][3]});}
 for(const n of Object.keys(LOOK.P))lookRegister(n);
 if(SKY.day!==undefined)lookApply(SKY.day);   // setSky ran earlier (map already built at load) → apply now
-window.WD&&Object.assign(window.WD,{LOOK,lookPreset,lookRefresh,GFX});
+// debug: preview a light scenario on the current map (tools/tonelab-shots.js) — o = {sky:'night'|'sunset'|'day', look:preset, fog, lt} like a map file
+function lookTest(o){
+  globalThis.__lookMap=Object.assign({},globalThis.__lookMap,{fm:o.look||null});
+  setSky(o.sky||'sunset');
+  if(typeof fileMapLight==='function')fileMapLight({sky:o.sky,fog:o.fog,lt:o.lt});
+  return {look:LOOK.cur,exp:gl.toneMappingExposure,hemi:hemi.intensity};
+}
+window.WD&&Object.assign(window.WD,{LOOK,lookPreset,lookRefresh,lookTest,GFX});

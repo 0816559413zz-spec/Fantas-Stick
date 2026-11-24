@@ -494,6 +494,11 @@
    "file": "maps/pnl-demo.glb",
    "data": "maps/pnl-demo.json",
    "v": 1
+  },
+  "tonelab": {
+   "file": "maps/tonelab.glb",
+   "data": "maps/tonelab.json",
+   "v": 2
   }
  },
  "ptex": {}

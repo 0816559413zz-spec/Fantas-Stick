@@ -514,7 +514,13 @@ function terrGeo(get,nx,ny,c,step){
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('uv',new THREE.BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();return g;
 }
 function buildFileMap(id){
-  const F=MAPS[id].fm,T=TERR,night=F.sky!=='sunset'&&F.sky!=='day';
+  const F=MAPS[id].fm,T=TERR,night=fileMapLight(F);
+  const W=world,fb=addW(new THREE.Group());W.userData.fb=fb;   // fallback ground: kept out of batchStatic(world), else its merged floors outlive W.remove(fb) (black z-fight on roofs)
+  fileMapBody(id,F,T,night,W,fb);
+}
+// file-map sky/fog/hemi/sun (also used by WD.lookTest in js/74 to preview light scenarios) → returns night
+function fileMapLight(F){
+  const night=F.sky!=='sunset'&&F.sky!=='day';
   const fog=F.fog||(night?['#16223a',90,380]:['#d8a888',130,520]);
   scene.fog.color.set(fog[0]);scene.fog.near=+fog[1];scene.fog.far=+fog[2];
   if(night){hemi.color.set('#a8b8e8');hemi.groundColor.set('#2a3448');hemi.intensity=0.6;moonL.intensity=1.0;moonL.color.set('#c8d8ff');}
@@ -527,7 +533,9 @@ function buildFileMap(id){
     if(LT.sky){SKY.mesh.material.map=null;SKY.mesh.material.color.set(LT.sky);SKY.mesh.material.needsUpdate=true;SKY.sun.visible=false;}
     if(LT.exp)gl.toneMappingExposure=LT.exp;
   }
-  const W=world,fb=addW(new THREE.Group());W.userData.fb=fb;   // fallback ground: kept out of batchStatic(world), else its merged floors outlive W.remove(fb) (black z-fight on roofs)
+  return night;
+}
+function fileMapBody(id,F,T,night,W,fb){
   if(T){
     const tex=t=>{t=t.clone();t.repeat.set(1,1);t.needsUpdate=true;return t;};
     const gm=grLive(new THREE.MeshStandardMaterial({map:tex(grassTex(night?'#3d5a3a':'#4f8a38',11,1)),roughness:0.95,flatShading:false}));
