@@ -355,22 +355,22 @@ onfOutlineMat:4 onFireFX:6 statusFX:17 fx:44
 §251 overlay: เลือกบัฟ / สรุปผล
 choosePick:252 syncOverlays:257 showOver:278
 
-## js/27-world.js (607) — 
+## js/27-world.js (611) — โลก 3D (Three.js + Bloom) — 1 หน่วย 3D = 20 พิกเซลของระบบเกม
 S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 PTG:15 gl:23
 §37 เงานุ่มแบบ PCSS (contact-hardening): ใกล้จุดสัมผัสคม ไกลจากวัตถุที่บั…
 PCSS:40 scene:67 cam:69 composer:70
 §71 ท่อภาพ (post-processing): ฉาก → ชั้นเอฟเฟกต์นุ่ม (FXPass) → แสงฟุ้ง →…
 rpass:74 fxScene:76 SOFTU:78 SOFT_GLSL:79 FXMATS:81 fxMat:82 softify:84 HAZE_U:89 AOU:93 GFX:99 AO_ON:100 AO_HEAD:101 AO_CALC:105 AO_COPY:119
 §140 TAA (ลบขอบหยักแบบสะสมหลายเฟรม) — กราฟิกสูงเท่านั้น • ปิดด้วย ?notaa
-TAA:143 TAA_FRAG:144 _taaH:159 taaWanted:160 taaBegin:161 taaEnd:169 taaFinish:170 taaResolve:172 AO_RT:182 fxPass:207 bloom:208 GRADEU:215 gradePass:236 aaPass:254
-§256 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
-GQ_OPT:259 GQ_PRE:282 GQ_NAME:289 GQ:290 gq:293 gqSave:294 gqPreset:295 gqSet:296 gqMode:299 gqSync:300 QUAL:301 QUAL_NAME:303 qDyn:304 qualPR:305 gqShadowSize:310 applyQuality:311 qualTick:337
-§353 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
-qualCS:357 CULL:358 cullTick:359 texCanvas:370 glowTex:371 stoneTex:372 runeTex:378 glowMats:386 glowMat:387 STONEM:389 stoneMat:390 shadowAll:391
-§394 clear midday sky (user refs 2026-11-24: anime key-art noon) — baked O…
-SKYC:399 skyBakeClear:401 skyBake:488 SKY:493 hemi:525 moonL:527 LDIR:531 setSky:532 SKYB:548 skyFollow:549
-§550 เงาตามผู้เล่น
-SHD:554 _shF:555 _shR:555 _shU:555 _shC:555 _shY:555 SHD_DM:559 shadowDepthSplit:560 shadowFollow:565 shadowSoft:585 LPOOL:587 MLS_N:593 MLS:593 mlsPoint:595 _mlsP:597 mlsInScene:598 mlsTick:599
+TAA:143 TAA_FRAG:144 _taaH:159 taaWanted:160 taaBegin:161 taaEnd:169 taaFinish:170 taaQuad:172 taaWarm:175 taaResolve:177 AO_RT:186 fxPass:211 bloom:212 GRADEU:219 gradePass:240 aaPass:258
+§260 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
+GQ_OPT:263 GQ_PRE:286 GQ_NAME:293 GQ:294 gq:297 gqSave:298 gqPreset:299 gqSet:300 gqMode:303 gqSync:304 QUAL:305 QUAL_NAME:307 qDyn:308 qualPR:309 gqShadowSize:314 applyQuality:315 qualTick:341
+§357 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
+qualCS:361 CULL:362 cullTick:363 texCanvas:374 glowTex:375 stoneTex:376 runeTex:382 glowMats:390 glowMat:391 STONEM:393 stoneMat:394 shadowAll:395
+§398 clear midday sky (user refs 2026-11-24: anime key-art noon) — baked O…
+SKYC:403 skyBakeClear:405 skyBake:492 SKY:497 hemi:529 moonL:531 LDIR:535 setSky:536 SKYB:552 skyFollow:553
+§554 เงาตามผู้เล่น
+SHD:558 _shF:559 _shR:559 _shU:559 _shC:559 _shY:559 SHD_DM:563 shadowDepthSplit:564 shadowFollow:569 shadowSoft:589 LPOOL:591 MLS_N:597 MLS:597 mlsPoint:599 _mlsP:601 mlsInScene:602 mlsTick:603
 
 ## js/28-city-build.js (386) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
@@ -467,17 +467,17 @@ iceMat:10 iceRim:11 makeIceSword:12 makeIceAxe:31 makeKiteShield:47
 §59 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
 makeIceCrown:63 frostCrown:68 FWS:74 FWA:74 _fwM:75 _fwM2:75 _fwX:75 _fwY:75 _fwZ:75 _fwP:75 _fwS:75 _fwQ:75 _eo:76 _ei:76 _ss:76 fwAim:78 fwWeapons:79 FWP:81 FWT:81 fwChop:82 fwSweep:83 FF_RISE:84 fwIdle:85 fwSwing:88 FWL_N:100 fwLink:101 fwMat:104 SLIDE_POSE:107 _slQ:109 frostSlideHead:110 _slAx:116 frostWandLink:117 frostFX:125
 
-## js/35-sync.js (1168) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+## js/35-sync.js (1169) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 §2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
 CPOSE_T:7 _ce:7 _cs:7 _cb:7 _caJ:9 _caJ0:9 AMP_B:10 AMP_S:10 CP_BEND:11 CPOSE:13 _cpT:21 _cpR:21 CP_STEP:22 CPCOL:23 castStyle:24 castStart:25
 §26 ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเห…
 CANIM:31 SKFEET:87 SKANIM:89 skAnim:97 _caT:98 _caR:98 skillPose:99 _g2:139 wandTwoHand:140 characterPoseMix:147 characterStance:148 JUMP_LEGS:155 jumpLegPose:164 jumpCloakTurn:200 jumpCloakEuler:200 jumpCloakPose:201 readyBaseR:220 readyBaseL:220 castBaseR:221 castBaseL:221 jumpElbowPivot:222 clearJumpArms:223 jumpArmPose:229 _caEQ:238 _caEX:238 caElbowL:239 _caRQ:244 caElbowR:245 HEAD_DOWN:255 readyHeadTurn:256 readyHeadParent:256 readyHeadEuler:256 readyHeadPose:257 readyAllowed:273
 §278 Class stances (designs/class-stances.md, user 2026-11-24)
-STANCE_STYLE:285 STANCES:286 STANCE_PICK:306 stanceOf:307 _stQ:308 _stX:308 _stZ:308 stanceSpine:310 stanceSpineOff:314 STANCE_WAND:316 stanceWand:317 _swA:329 _swB:329 _swD:329 _swQ:329 _swQ2:329 _swP:329 stanceWandTip:330 _stV:342 _stV2:342 _stV3:342
-§343 Class look (always-on small VFX that tell the class, STANCES[..].fx)
-stBone:345 stLoc:346 stArmPt:347 ST_TEX:350 stTex:351 ST_MAT:359 stMat:360 stMatNew:361 stRibbon:375 stRibbonSet:377 ST_GEO:378 stBuild:379 _stF:406 _stH:406 stCyc:407 stanceFX:408 classStance:494 natureReadyEuler:516 natureReadyArm:516 readyStance:517 jumpShoulders:555 CBLOCK:571 CBLOCK_PATH:572 blockPose:573 castPose:579 lateSkillPose:585 castPose0:586 clearCharacterCast:614 hitRecoilPose:619 syncPlayers:628 syncEnemies:815 projGeo:855 tailGeo:856 _t1:857 makeProj:858 _a:879 _b:879 PJFX:881 syncProj:882 _awT:983 animateWorld:984
-§1025 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
-_v:1026 toScreen:1027 BURNC:1035 burnNum:1036 NAMETAG:1050 nameTag:1051 _hsO:1057 hudSight:1058 SIGHT:1071 sightA:1072 drawLabels:1076 TEXTAG:1111 textTag:1112 drawTexts:1116 HITM:1128 DIRI:1128 drawXh:1130 drawCrosshair:1140
+STANCE_STYLE:285 STANCES:286 STANCE_PICK:306 stanceOf:307 _stQ:308 _stX:308 _stZ:308 stanceSpine:310 stanceSpineOff:314 STANCE_WAND:316 stanceWand:317 _swA:329 _swB:329 _swD:329 _swQ:329 _swQ2:329 _swP:329 stanceWandTip:330 _stV:343 _stV2:343 _stV3:343
+§344 Class look (always-on small VFX that tell the class, STANCES[..].fx)
+stBone:346 stLoc:347 stArmPt:348 ST_TEX:351 stTex:352 ST_MAT:360 stMat:361 stMatNew:362 stRibbon:376 stRibbonSet:378 ST_GEO:379 stBuild:380 _stF:407 _stH:407 stCyc:408 stanceFX:409 classStance:495 natureReadyEuler:517 natureReadyArm:517 readyStance:518 jumpShoulders:556 CBLOCK:572 CBLOCK_PATH:573 blockPose:574 castPose:580 lateSkillPose:586 castPose0:587 clearCharacterCast:615 hitRecoilPose:620 syncPlayers:629 syncEnemies:816 projGeo:856 tailGeo:857 _t1:858 makeProj:859 _a:880 _b:880 PJFX:882 syncProj:883 _awT:984 animateWorld:985
+§1026 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
+_v:1027 toScreen:1028 BURNC:1036 burnNum:1037 NAMETAG:1051 nameTag:1052 _hsO:1058 hudSight:1059 SIGHT:1072 sightA:1073 drawLabels:1077 TEXTAG:1112 textTag:1113 drawTexts:1117 HITM:1129 DIRI:1129 drawXh:1131 drawCrosshair:1141
 
 ## js/36-modes-view.js (171) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 healTex:22 makeItem:23 syncModeObjs:39
@@ -657,7 +657,7 @@ CLOTH:10 CLOTH_LITE:28 CL_ROWS:29 CL_NC:29 CL_GAP:29 CL_IN:29 _clV:30 _clA:30 _c
 §229 other players: low-res cloth on the batched body (student_all_batch)
 clLiteSetup:231 clLiteShow:258 clLiteTick:259 clLiteDraw:270 clOuterNormals:277
 
-## js/50-grass.js (428) — 
+## js/50-grass.js (432) — ลม + หญ้า 3D (ภาพบนเครื่องตัวเองล้วน ไม่แตะโฮสต์/โปรโตคอล)
 AIR:10 AIR_MAP:17 AIR_NG:20 airGust:21 airGustOff:26 airEnv:27 airGs:28 airMark:30 airForMap:33 _airV:34 airAt:35 airGv:41 airTick:42
 §45 ต่อเข้ากับเอฟเฟกต์เดิม (ไม่ต้องแก้ทุกสกิล): แสงวาบ = ลมกระโชก • วงคลื…
 CLW:54
@@ -668,11 +668,11 @@ SCAR:62 scarReset:64 scarPaint:71 grassScar:86
 §91 ไฟลามหญ้า (ภาพล้วน: ไม่มีดาเมจ ไม่ซิงก์ — แต่ละเครื่องลามไม่เหมือนกัน…
 FIRE:97 GR_FIRE:100 fireReset:102 fireBuild:104 fireLight:111 fireIgnite:113 fireFx:125 fireStep:130 fireTick:154
 §159 พื้นหญ้ามีชีวิต: สีเป็นหย่อม (เขียวเข้ม / แห้งเหลือง / ดินโผล่) + จุด…
-GR_NOISE:162 GR_LIVE:167 SNOWU:188 GR_SNOW:189 grLive:191 GR_GLSL_V:201 GR_BEGIN:206 grassMat:258 grassBuild:276 _grBasic:290 grassBake:291 grassCount:361 grassTick:367
-§405 สกิลลม → หญ้า (ภาพล้วน เรียกจาก windEfx js/68)
-WIND_GRASS:407 airWind:421
+GR_NOISE:162 GR_LIVE:167 SNOWU:188 GR_SNOW:189 grLive:191 GR_GLSL_V:201 GR_BEGIN:206 grassMat:258 grassBuild:276 _grBasic:290 grassBake:291 grassCount:361 grassForMap:368 grassPrebake:371 grassTick:373
+§409 สกิลลม → หญ้า (ภาพล้วน เรียกจาก windEfx js/68)
+WIND_GRASS:411 airWind:425
 
-## js/51-warmup.js (424) — 
+## js/51-warmup.js (425) — อุ่นเครื่องช่วงนับถอยหลัง (ผู้ใช้ 2026-10-21: "ช่วงนับถอยหลังให้โหลดสิ่งที่ต้องใช้ — กดสก…
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_SLICE:13 WARM_X:14 WARM_Y:14 warmKeep:16 warmStaticModels:22 glReady:31 warmCompile:32 warmDraw:35 WARM_SKIP:45 warmAssets:48 warmFx:58 warmNow:71 warmFxRun:79 warmFxEnd:82 warmGather:84 warmPaths:86 warmFrame:88 warmStep:90 preloadCharMat:158 warmTrCopy:161 warmCharVariants:164 warmQueue:184 WARM_LOBBY:190 warmLobbyTick:191 warmTick:198
 §209 Entry loader (PRELOAD-STANDARD step 3, 2026-11-23)
 PRE:215 preloadReg:216 warmDissolve:218 preProg:227 preFin:228 preStart:230
@@ -681,9 +681,9 @@ WARM_REC_SKIP:249 warmRec:250 warmRecDump:252 WARM_EVFLAGS:253 WARM_EVX:254 WARM
 §277 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
 warmOutline:288
 §305 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
-GWARM:310 gameWarmTick:311 LMAP:344 lobbyMapTick:345 gameWarmFree:354
-§360 Shader never seen before mid-match: compile in the background, hide t…
-SHR:368 shrLights:372 IMZ:377 imzPre:384 imzPost:386 shrRoot:387 shrCollect:388 shrPending:394 shReadyPre:398 shReadyPost:419
+GWARM:310 gameWarmTick:311 LMAP:344 lobbyMapTick:345 gameWarmFree:355
+§361 Shader never seen before mid-match: compile in the background, hide t…
+SHR:369 shrLights:373 IMZ:378 imzPre:385 imzPost:387 shrRoot:388 shrCollect:389 shrPending:395 shReadyPre:399 shReadyPost:420
 
 ## js/52-social.js (172) — 
 §6 แชท: Enter = พิมพ์ / Enter อีกที = ส่ง / Esc = ปิด • ข้อความขึ้นมุมซ้…
@@ -990,4 +990,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(120 files, 37722 lines)
+(120 files, 37732 lines)

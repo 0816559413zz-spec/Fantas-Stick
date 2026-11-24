@@ -385,12 +385,13 @@ water +4.8 ms, storm +2.9, fire +2.6, frost +1.9, earth +1.7, wind +1.3. CPU pro
   = mostly the bone cloak (outer + inner) of other players (by design: far/off-screen fallback of `CLOTH_LITE`) + 5 mode pickups
   (5 meshes each); 53 instanced MeshStandard; 33 ShaderMaterial.
 - Already in place (checked, nothing to do): OBS spatial grid (`sgGrid`/`sgObs` js/12), fx sub-timers (`fx.zv` / `fx.particles` / `fx.shapes`).
-- **Open — countdown frame gap:** bench-entry play phase is clean (0 programs, max frame 22–46 ms) but the countdown still has one
-  0.7–1.1 s gap (siege fcs-file 987–1012 ms, valley 658–697 ms). JS profile of the countdown: hostStart 11 ms, warmDraw 116 ms CPU,
-  so the gap is a GPU-side stall from the 26–31 programs compiled for objects made by `hostStart` (props, mode visuals, grass + their
-  shadow/depth programs). Slicing `warmDraw` over frames was tried: gap unchanged and the step took 4–8 s → reverted. Next: build those
-  `hostStart` objects (or stand-ins with the same materials) in the lobby map build (`lobbyMapTick`) so their programs exist before
-  the countdown.
+- **Countdown frame gap (2026-11-25, partly fixed):** the 0.7–1.1 s gap was mostly CPU in the first countdown frame, not GPU:
+  `grassBake` (~0.4 s, top-down bake of the grass map) and the lazily-made TAA resolve shader (~115 ms `getProgramParameter`).
+  Both now run in the lobby once the next map is built (`lobbyMapTick` js/51 → `grassPrebake` js/50, `taaWarm` js/27).
+  bench-entry countdown: siege fcs-file programs 30 → 11, max gap 1031 → 493 ms; valley 658–697 → 384 ms; play still 0 programs.
+  Left: ~0.3–0.45 s in frames 0 and 3, mostly time outside JS (GPU process) plus player model builds (`makeStudent`/`useFileModel`,
+  already spread over frames); 11 programs from match-only objects (props `prop_crate`/`torch_batch`, frost weapon `ice_sword`,
+  Darkness waltz trail, siege visuals). Next: warm those materials in the lobby too.
 
 ## Benchmarks
 - 2026-11-22, combat readability A/B in Team PvP at 1000×560. All 11 classes cast the same 31 skills in an 80-frame test. The default combat presentation reduced median active particles from 2,650 to 1,220 and peak particles from 3,740 to 1,776. Median frame draw calls were 472 versus 461. Shard Storm's landing warning and active edge and Night Waltz's boundary rendered in both runs. `?fullvfx` keeps the original effects for comparison. This fixture measures effect load, not live match FPS.

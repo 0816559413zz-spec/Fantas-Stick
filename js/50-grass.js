@@ -363,6 +363,12 @@ function grassCount(){
   const low=gl_===1||qDyn(1)||gq('dyn')&&QUAL.scale<0.8,S=low?GRASS.S.auto1:gl_===2?GRASS.S.auto:gl_===3?GRASS.S.high:GRASS.S.cine,K=!low&&gl_>=4?GRASS.cineK:1;   // Cinematic: 3x density (user 2026-11-24)
   const D=S*GRASS.distK[gq('grdist')];   // option grdist: patch size, same density (blades x D^2)
   return [Math.min(GRASS.MAXN,Math.round(GRASS.DENS*K*D*D)),D];}
+// grass map for the built world (cached per map). Also run from the lobby once the next map is built (js/51 lobbyMapTick):
+// the bake is ~0.3-0.4 s of CPU and used to land in the first countdown frame
+function grassForMap(){GRASS.key=builtKey;const c=GRASS.cache.get(builtKey);
+  if(c){Object.assign(GRASS,{tex:c.tex,texH:c.texH,box:c.box,n:c.n});airForMap();if(c.tint&&world.userData.bdTint&&!world.userData.bdTinted)world.userData.bdTint(null,c.tint);}   // rebuilt backdrop, cached grass → same edge tint
+  else try{grassBake();}catch(e){console.error(e);GRASS.n=0;}}
+function grassPrebake(){if(!GRASS.ON||!world||world.userData.grPend||GRASS.key===builtKey)return false;if(!GRASS.mesh)grassBuild();grassForMap();return true;}
 // ทุกเฟรมในเกม: ลม + หญ้า + แรงลมให้ผ้าคลุม
 function grassTick(dt){
   airTick(dt);
@@ -370,9 +376,7 @@ function grassTick(dt){
   const m=GRASS.mesh;
   if(screen!=='game'||!world){m.visible=false;GRASS.trail.length=0;return;}   // ล้างรอยตอนเข้าแมตช์ใหม่ = setScreen (js/19)
   if(world.userData.grPend){m.visible=false;return;}   // รอ .glb พื้นจริง (js/28 buildFileMap) ก่อนถ่ายแผนที่หญ้า
-  if(GRASS.key!==builtKey){GRASS.key=builtKey;const c=GRASS.cache.get(builtKey);
-    if(c){Object.assign(GRASS,{tex:c.tex,texH:c.texH,box:c.box,n:c.n});airForMap();if(c.tint&&world.userData.bdTint&&!world.userData.bdTinted)world.userData.bdTint(null,c.tint);}   // rebuilt backdrop, cached grass → same edge tint
-    else try{grassBake();}catch(e){console.error(e);GRASS.n=0;}}
+  if(GRASS.key!==builtKey)grassForMap();
   if(SCAR.clearNext||SCAR.key!==builtKey){SCAR.clearNext=false;SCAR.key=builtKey;scarReset();}
   if(SCAR.dirty&&SCAR.tex){SCAR.tex.needsUpdate=true;SCAR.dirty=false;}
   SCAR.U.uGrLo.value=!gq('grass')||qDyn(2)?1:0;   // พื้นมีลาย: ปิดเมื่อกราฟิกต่ำ (เหมือนหญ้า)

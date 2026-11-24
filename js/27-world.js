@@ -169,11 +169,15 @@ function taaBegin(){
 function taaEnd(){if(cam.view&&cam.view.enabled)cam.clearViewOffset();}
 function taaFinish(){taaEnd();TAA.jit=false;}
 // ผสมภาพฉากกับประวัติ → คืนเท็กซ์เจอร์ผลลัพธ์ (หรือ null = ไม่ใช้ TAA เฟรมนี้)
+function taaQuad(){if(!TAA.quad)TAA.quad=new FullScreenQuad(new THREE.ShaderMaterial({uniforms:{tCur:{value:null},tHist:{value:null},tD:{value:null},uInvVP:{value:TAA.inv},uPrevVP:{value:TAA.prev},uPx:{value:new THREE.Vector2()},uAlpha:{value:0.1},uSharp:{value:0.25},uValid:{value:0},uNear:{value:0.1},uFar:{value:700}},
+    vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}',fragmentShader:TAA_FRAG,depthTest:false,depthWrite:false}));return TAA.quad;}
+// link the TAA program before the match (lobby, js/51): it was the first-countdown-frame stall (~115 ms getProgramParameter)
+function taaWarm(){if(!TAA.on||TAA.warm)return;TAA.warm=1;const rt=new THREE.WebGLRenderTarget(4,4,{type:THREE.HalfFloatType,depthBuffer:false}),prev=gl.getRenderTarget();
+  try{gl.setRenderTarget(rt);taaQuad().render(gl);}catch(e){console.warn('taa warm',e);}finally{gl.setRenderTarget(prev);rt.dispose();}}
 function taaResolve(r,read){
   if(!TAA.jit)return null;
   const w=read.width,h=read.height;
-  if(!TAA.quad)TAA.quad=new FullScreenQuad(new THREE.ShaderMaterial({uniforms:{tCur:{value:null},tHist:{value:null},tD:{value:null},uInvVP:{value:TAA.inv},uPrevVP:{value:TAA.prev},uPx:{value:new THREE.Vector2()},uAlpha:{value:0.1},uSharp:{value:0.25},uValid:{value:0},uNear:{value:0.1},uFar:{value:700}},
-    vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}',fragmentShader:TAA_FRAG,depthTest:false,depthWrite:false}));
+  taaQuad();
   if(TAA.w!==w||TAA.h!==h){for(const t of TAA.rt)if(t)t.dispose();TAA.rt=[0,1].map(()=>new THREE.WebGLRenderTarget(w,h,{type:THREE.HalfFloatType,depthBuffer:false}));TAA.w=w;TAA.h=h;TAA.valid=0;}
   const U=TAA.quad.material.uniforms;TAA.inv.copy(TAA.cur).invert();
   U.tCur.value=read.texture;U.tD.value=read.depthTexture;U.tHist.value=TAA.rt[1-TAA.i].texture;U.uPx.value.set(1/w,1/h);U.uAlpha.value=TAA.alpha;U.uSharp.value=TAA.sharp;U.uValid.value=TAA.valid;U.uNear.value=cam.near;U.uFar.value=cam.far;

@@ -329,7 +329,8 @@ function stanceWand(o,left){
 const _swA=new THREE.Vector3(),_swB=new THREE.Vector3(),_swD=new THREE.Vector3(),_swQ=new THREE.Quaternion(),_swQ2=new THREE.Quaternion(),_swP=new THREE.Vector3();
 function stanceWandTip(o,S){
   if(!o.wandL||!o.tip||!o.fileModel)return;const hL=stBone(o,'hand_L');const w=hL&&hL.children.find(c=>/^wand_/.test(c.name)&&c.visible);if(!w)return;
-  const E=w.userData.ends||(w.userData.ends=(()=>{w.geometry.computeBoundingBox();const b=w.geometry.boundingBox,cx=(b.min.x+b.max.x)/2,cz=(b.min.z+b.max.z)/2;
+  const wg=w.geometry||(w.getObjectByProperty('isMesh',true)||{}).geometry;if(!wg)return;   // wand may load as a Group
+  const E=w.userData.ends||(w.userData.ends=(()=>{wg.computeBoundingBox();const b=wg.boundingBox,cx=(b.min.x+b.max.x)/2,cz=(b.min.z+b.max.z)/2;
     return {grip:new THREE.Vector3(cx,b.max.y,cz),tip:new THREE.Vector3(cx,b.min.y,cz)};})());
   w.position.set(...STANCE_WAND.pos);w.quaternion.copy(w.userData.wR.q);w.updateWorldMatrix(true,false);
   if(S&&S.wandDir){const grip=_swA.copy(E.grip).applyMatrix4(w.matrixWorld),cur=_swB.copy(E.tip).applyMatrix4(w.matrixWorld).sub(grip).normalize();

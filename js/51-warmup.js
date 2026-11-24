@@ -347,7 +347,8 @@ function lobbyMapTick(dt){
   if((LMAP.t+=dt)<0.5)return;LMAP.t=0;
   if(NET.isHost&&G&&G.ph==='lobby'&&typeof hostMapNext==='function'){const id=hostMapNext(true);if(id&&id!==G.map){G.map=id;broadcastLobby();return;}}
   const id=LOBBY.map;if(id&&id!==LMAP.au){LMAP.au=id;audioPrefetch(id,LOBBY.mode);}
-  if(id&&id!==builtMap&&mapReady(id)){setMapVars(id);buildWorld(id);}}
+  if(id&&id!==builtMap&&mapReady(id)){setMapVars(id);buildWorld(id);return;}
+  if(id&&id===builtMap){grassPrebake();taaWarm();}}   // grass map bake (~0.4 s) here, not in the first countdown frame
 // ตัวละครอุ่นเครื่องหมดหน้าที่เมื่อแมตช์เริ่มวาดแล้ว (เชดเดอร์ถูก pinPrograms ตรึงไว้, geometry/วัสดุของไฟล์เป็น keep) → ทิ้งหลังเข้าเกม 2 วิ
 // เดิมเก็บไว้ตลอด + เพิ่มทุกลุคใหม่ (บอทสุ่มลุคทุกครั้งที่เติม) → ค้างในฉากหลายร้อย mesh, three ยังคำนวณ matrix ทุกเฟรม (OPTIMIZE §H)
 // รอบหน้าในห้องรอ gameWarmTick สร้างใหม่ตามคนที่อยู่จริง (GWARM.key='' บังคับให้อุ่นใหม่)
