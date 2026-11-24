@@ -829,27 +829,54 @@ CANIM.ekick={d:0.7,st:0,tr:null,k:[[0.12,-0.9,-0.6,0.1,0.2,-0.9,0.6,0,0.05,'s'],
 SKANIM.ekick='ekick';
 // Stone Mark cast (user 2026-11-24): draw the wand back beside the body (elbow bent, twist back, left arm out for balance) and
 // hold while sand gathers at the tip (0.45 s) → accelerating flick to point forward → hold → small overshoot → settle
-CANIM.stonemark={d:1.15,st:0,tr:[0.52,0.66],k:[[0.18,-0.35,-0.6,0.35,-0.02,-0.7,0.35,0,-0.04,'s'],[0.5,-0.45,-0.68,0.45,-0.03,-0.75,0.4,0,-0.06,'s'],[0.57,-1.6,-0.05,-0.18,0.08,-0.4,0.3,0,-0.02,'i'],[0.78,-1.55,-0.08,-0.15,0.07,-0.4,0.3,0,-0.02,'s'],[0.87,-1.42,-0.1,-0.08,0.05,-0.45,0.32,0,-0.01,'o'],[1,-1.0,-0.2,0,0,-0.4,0.3,0,0,'s']],   // v2: 0.6 s charge (fires at u≈0.52)
-  j:[[0.18,0.3,0.2,0.6,-0.15,0.1,0.1,-0.1],[0.5,0.38,0.25,0.65,-0.18,0.12,0.1,-0.1],[0.57,0.15,0.35,0.4,0.1,-0.25,0.1,-0.1],[1,0.1,0.1,0.4,0,0,0.08,-0.08]]};
+CANIM.stonemark={d:1.55,st:0,tr:[0.52,0.64],k:[[0.14,-0.35,-0.6,0.35,-0.02,-0.7,0.35,0,-0.04,'s'],[0.5,-0.48,-0.7,0.47,-0.03,-0.78,0.42,0,-0.07,'s'],[0.55,-1.6,-0.05,-0.18,0.08,-0.4,0.3,0,-0.02,'i'],[0.8,-1.55,-0.08,-0.15,0.07,-0.4,0.3,0,-0.02,'s'],[0.88,-1.42,-0.1,-0.08,0.05,-0.45,0.32,0,-0.01,'o'],[1,-1.0,-0.2,0,0,-0.4,0.3,0,0,'s']],   // v3: 0.8 s charge (fires at u~0.52), holds the point ~0.4 s
+  j:[[0.14,0.3,0.2,0.6,-0.15,0.1,0.1,-0.1],[0.5,0.4,0.25,0.65,-0.2,0.12,0.1,-0.1],[0.55,0.15,0.35,0.4,0.1,-0.25,0.1,-0.1],[1,0.1,0.1,0.4,0,0,0.08,-0.08]]};
 SKANIM.stonemark='stonemark';
-// Stone Mark target look: faint gold rune ring at the feet while marked, one rock stuck to the body per layer (pops in),
-// petrified = every body mesh swaps to a grey stone material until it ends
-const ESTN={geo:null,mat:null,body:null,ring:null,slots:[[0.3,1.2,0.18],[-0.33,1.5,0.06],[0.25,0.62,0.2],[-0.25,0.34,-0.14],[0.05,1.86,-0.25]]};
+// Stone Mark target look v3 (user 2026-11-24): no loose rocks — each layer spreads a stone crust over the body (a coat
+// copy of every body mesh, shader keeps noise < coverage so patches grow and join; 5 layers / petrified = full coat).
+// Mark = gold ring at the feet + gold stone diamond spinning above the head.
+const ESTN={body:null,ring:null,sig:null};
+function eCoatMat(r){const m=new THREE.MeshStandardMaterial({color:'#8c7f6c',roughness:1,metalness:0,flatShading:true});m.userData.keep=true;
+  const U=m.userData.u={uCov:{value:0},uS:{value:1.2/Math.max(0.05,r)},uD:{value:0.012*r}};
+  m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,U);
+    sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vCoP;uniform float uS,uD;')
+      .replace('#include <begin_vertex>','#include <begin_vertex>\nvCoP=position*uS;transformed+=normal*uD;');
+    sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vCoP;uniform float uCov;\n'+
+      'float cH3(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}\n'+
+      'float cN(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(mix(cH3(i),cH3(i+vec3(1,0,0)),f.x),mix(cH3(i+vec3(0,1,0)),cH3(i+vec3(1,1,0)),f.x),f.y),mix(mix(cH3(i+vec3(0,0,1)),cH3(i+vec3(1,0,1)),f.x),mix(cH3(i+vec3(0,1,1)),cH3(i+vec3(1,1,1)),f.x),f.y),f.z);}')
+      .replace('#include <color_fragment>','#include <color_fragment>\nfloat cn=cN(vCoP*3.)*0.6+cN(vCoP*9.)*0.4;if(cn>uCov)discard;float ed=smoothstep(uCov-0.06,uCov,cn);\n'+
+      'diffuseColor.rgb*=(0.72+0.45*cN(vCoP*24.))*(1.-0.35*ed);');};
+  m.customProgramCacheKey=()=>'eCoat';return m;}
+function eCoatMake(o){const L=[];o.g.updateMatrixWorld(true);const body=[];
+  o.g.traverse(m=>{if(!m.isMesh||m.userData.estn||!m.geometry||!m.geometry.attributes.normal)return;const M=m.material;if(Array.isArray(M)||M.transparent||M.blending===THREE.AdditiveBlending||M===ERING.mat)return;body.push(m);});
+  for(const m of body){const gm=m.geometry;if(!gm.boundingSphere)gm.computeBoundingSphere();const mat=eCoatMat(gm.boundingSphere.radius);let c;
+    if(m.isSkinnedMesh){c=new THREE.SkinnedMesh(gm,mat);c.bindMode=m.bindMode;c.bind(m.skeleton,m.bindMatrix);c.position.copy(m.position);c.quaternion.copy(m.quaternion);c.scale.copy(m.scale);m.parent.add(c);}
+    else{c=new THREE.Mesh(gm,mat);m.add(c);}
+    c.userData.estn=1;c.frustumCulled=false;c.castShadow=false;L.push({c,mat});}
+  return L;}
 function earthStoneVis(v,dt,now){for(const p of v.P||[])eStoneUpd(PM3.get(p.id),p.stn|0,dt,now);for(const e of v.E||[])eStoneUpd(EM3.get(e.id),e.stn|0,dt,now);}
 function eStoneUpd(o,n,dt,now){if(!o||!o.g)return;let S=o.estn;if(!n&&(!S||!S.on))return;
-  if(!ESTN.geo){ESTN.geo=new THREE.IcosahedronGeometry(0.25,0);ESTN.mat=new THREE.MeshStandardMaterial({color:'#9c8a6c',roughness:1,flatShading:true});
-    ESTN.body=new THREE.MeshStandardMaterial({color:'#8d877c',roughness:1,metalness:0,flatShading:true});ESTN.ring=new THREE.MeshBasicMaterial({color:'#e3a53c',transparent:true,opacity:0.75,depthWrite:false,side:THREE.DoubleSide,toneMapped:false});ESTN.sig=new THREE.MeshStandardMaterial({color:'#e9b44c',emissive:'#a8661a',emissiveIntensity:0.6,roughness:0.5,flatShading:true});ESTN.sig.userData.keep=true;
-    for(const m of [ESTN.mat,ESTN.body,ESTN.ring])m.userData.keep=true;}
-  if(!S){S=o.estn={g:new THREE.Group(),r:[],pet:false,on:false};S.g.userData.estn=1;o.g.add(S.g);
-    for(let i=0;i<ESTN.slots.length;i++){const m=new THREE.Mesh(ESTN.geo,ESTN.mat);m.userData.estn=1;m.castShadow=true;m.position.set(...ESTN.slots[i]);m.rotation.set(i*1.3,i*2.1,i*0.7);m.scale.setScalar(0.001);m.userData.k=0;S.g.add(m);S.r.push(m);}
+  if(!ESTN.ring){ESTN.body=new THREE.MeshStandardMaterial({color:'#8d877c',roughness:1,metalness:0,flatShading:true});ESTN.ring=new THREE.MeshBasicMaterial({color:'#e3a53c',transparent:true,opacity:0.75,depthWrite:false,side:THREE.DoubleSide,toneMapped:false});ESTN.sig=new THREE.MeshStandardMaterial({color:'#e9b44c',emissive:'#a8661a',emissiveIntensity:0.6,roughness:0.5,flatShading:true});
+    for(const m of [ESTN.body,ESTN.ring,ESTN.sig])m.userData.keep=true;}
+  if(!S){S=o.estn={g:new THREE.Group(),coat:null,cov:0,pet:false,on:false};S.g.userData.estn=1;o.g.add(S.g);
     const rg=new THREE.Mesh(new THREE.RingGeometry(0.42,0.52,32),ESTN.ring);rg.userData.estn=1;rg.rotation.x=-Math.PI/2;rg.position.y=0.05;S.g.add(rg);S.ring=rg;
-    const sg=new THREE.Mesh(new THREE.OctahedronGeometry(0.17,0),ESTN.sig);sg.userData.estn=1;sg.scale.set(0.8,1.3,0.8);sg.position.y=2.45;S.g.add(sg);S.sig=sg;}   // mark sigil: small gold stone diamond spinning above the head
-  S.on=n>0;const mk=n%10,pet=n>=10,lay=pet?ESTN.slots.length:Math.max(0,mk-1);
-  S.r.forEach((m,i)=>{const want=i<lay?1:0;m.userData.k+=(want-m.userData.k)*Math.min(1,dt*16);const k=m.userData.k;m.visible=k>0.02;m.scale.setScalar(Math.max(0.001,k*(1.15+0.25*Math.max(0,1-k)*4)*(0.85+0.12*i%3)));});
-  S.ring.visible=mk>0;S.ring.scale.setScalar(1+0.06*Math.sin(now/240));S.sig.visible=mk>0;S.sig.rotation.y=now/400;S.sig.position.y=2.45+0.06*Math.sin(now/300);S.sig.scale.setScalar(1+0.08*Math.max(0,lay));
+    const sg=new THREE.Mesh(new THREE.OctahedronGeometry(0.17,0),ESTN.sig);sg.userData.estn=1;sg.scale.set(0.8,1.3,0.8);sg.position.y=2.45;S.g.add(sg);S.sig=sg;}
+  S.on=n>0;const mk=n%10,pet=n>=10,lay=Math.max(0,mk-1),want=pet?1.05:lay>0?0.16+0.17*lay:0;
+  S.cov+=(want-S.cov)*Math.min(1,dt*(want>S.cov?7:3));
+  if(S.cov>0.01&&!S.coat)S.coat=eCoatMake(o);
+  if(S.coat){for(const C of S.coat){C.mat.userData.u.uCov.value=S.cov;if(C.c.material!==C.mat&&!S.pet)C.c.material=C.mat;}   // other code (hit flash) may swap materials
+    if(S.cov<=0.01&&want===0){for(const C of S.coat){C.c.parent&&C.c.parent.remove(C.c);C.mat.dispose();}S.coat=null;}}
+  S.ring.visible=mk>0;S.ring.scale.setScalar(1+0.06*Math.sin(now/240));S.sig.visible=mk>0;S.sig.rotation.y=now/400;S.sig.position.y=2.45+0.06*Math.sin(now/300);S.sig.scale.setScalar(1+0.08*lay);
   if(pet!==S.pet){S.pet=pet;o.g.traverse(m=>{if(!m.isMesh||m.userData.estn)return;
     if(pet){const M=m.material;if(Array.isArray(M)||M.transparent||M.blending===THREE.AdditiveBlending)return;m.userData.estnOm=M;m.material=ESTN.body;}
     else if(m.userData.estnOm){m.material=m.userData.estnOm;delete m.userData.estnOm;}});}}
+// ground hit: a flat irregular stone crust spreads where the line struck the floor, stays ~3 s then fades
+function eStoneCrust(x,y){const n=28,P=[0,0.03,0],I=[];for(let i=0;i<n;i++){const a=i/n*Math.PI*2,r=0.75+0.35*Math.random();P.push(Math.cos(a)*r*0.55,0.02+0.03*Math.random(),Math.sin(a)*r*0.55,Math.cos(a)*r,0.005,Math.sin(a)*r);}
+  for(let i=0;i<n;i++){const j=(i+1)%n,a=1+i*2,b=1+j*2;I.push(0,b,a,a,b,b+1,a,b+1,a+1);}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setIndex(I);g.computeVertexNormals();
+  const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:'#8c7f6c',roughness:1,flatShading:true,transparent:true,polygonOffset:true,polygonOffsetFactor:-2}));m.receiveShadow=true;
+  m.position.copy(eW(x,y,0.01));m.rotation.y=Math.random()*6.28;scene.add(m);
+  eAnim({g:m,life:3.4,end(){g.dispose();m.material.dispose();scene.remove(m);},fn(a){const t=a.t,u=Math.min(1,t/0.18);m.scale.set(u*(2-u),1,u*(2-u));m.material.opacity=t<2.8?1:Math.max(0,1-(t-2.8)/0.6);}});}
 // rock ring behind the back: 8 small faceted rocks on a slowly turning vertical circle; count follows the ammo (ek),
 // the refilling rock grows in place. One shared geometry, per-rock seed for size/tilt.
 const ERING={geo:null,mat:null};
@@ -1058,10 +1085,18 @@ function earthEfx(ev){
       const d=end.clone().sub(st),Lm=d.length(),side=V3(-d.z,0,d.x).normalize(),K=5,kink=[];
       for(let i=0;i<=K;i++){const u=i/K,e=i===0||i===K?0:Math.min(0.45,Lm*0.03)*(0.6+0.4*Math.random());kink.push(st.clone().addScaledVector(d,u).addScaledVector(side,(Math.random()-0.5)*2*e).add(V3(0,(Math.random()-0.5)*e,0)));}
       const path=new THREE.CurvePath();for(let i=0;i<K;i++)path.add(new THREE.LineCurve3(kink[i],kink[i+1]));
-      const g=new THREE.Group(),mc=new THREE.MeshBasicMaterial({color:'#fff0b8',transparent:true,toneMapped:false}),mo=new THREE.MeshBasicMaterial({color:'#b5802f',transparent:true,opacity:0.85,depthWrite:false});
-      const core=new THREE.Mesh(new THREE.TubeGeometry(path,K*8,0.05,6,false),mc),outer=new THREE.Mesh(new THREE.TubeGeometry(path,K*8,0.11,6,false),mo);
-      for(const m of [core,outer]){m.frustumCulled=false;g.add(m);}scene.add(g);
-      eAnim({g,life:0.85,end(){g.traverse(m=>{if(m.geometry)m.geometry.dispose();});mc.dispose();mo.dispose();scene.remove(g);},fn(a){const f=a.t<0.5?1:Math.max(0,1-(a.t-0.5)/0.35);mc.opacity=f;mo.opacity=0.85*f*f;}});
+      // v4 (user): no white core; a gold-brown body line inside a soft aura that fades out toward its edge (view-facing falloff shader)
+      const g=new THREE.Group(),mo=new THREE.MeshBasicMaterial({color:'#c48a34',transparent:true,opacity:1,depthWrite:false,toneMapped:false});
+      const auraMat=(col,op,pw)=>new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,uniforms:{uC:{value:new THREE.Color(col)},uO:{value:op},uP:{value:pw}},
+        vertexShader:'varying vec3 vN;varying vec3 vV;void main(){vec4 mv=modelViewMatrix*vec4(position,1.);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',
+        fragmentShader:'uniform vec3 uC;uniform float uO,uP;varying vec3 vN;varying vec3 vV;void main(){float k=pow(abs(dot(normalize(vN),normalize(vV))),uP);gl_FragColor=vec4(uC,k*uO);}'});
+      const ma=auraMat('#e2a94a',0.55,2.2),mb=auraMat('#f0c070',0.28,3.0);
+      const body=new THREE.Mesh(new THREE.TubeGeometry(path,K*8,0.045,6,false),mo),au1=new THREE.Mesh(new THREE.TubeGeometry(path,K*8,0.17,10,false),ma),au2=new THREE.Mesh(new THREE.TubeGeometry(path,K*8,0.34,10,false),mb);
+      for(const m of [au2,au1,body]){m.frustumCulled=false;g.add(m);}au2.renderOrder=1;au1.renderOrder=2;body.renderOrder=3;scene.add(g);
+      eAnim({g,life:0.95,end(){g.traverse(m=>{if(m.geometry)m.geometry.dispose();});mo.dispose();ma.dispose();mb.dispose();scene.remove(g);},fn(a){const t=a.t,f=t<0.55?1:Math.max(0,1-(t-0.55)/0.4),pu=1+0.1*Math.sin(t*24);
+        mo.opacity=f;ma.uniforms.uO.value=0.55*f*pu;mb.uniforms.uO.value=0.28*f*pu;
+        if(f>0.2)for(let k=0;k<2;k++){const w=path.getPoint(Math.random()),q=simOf(w);PARTS.push({x:q.x+rnd(-4,4),y:q.y+rnd(-4,4),h:w.y-GY(q.x,q.y)+rnd(-0.1,0.1),vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(0.2,0.9),life:0.5,max:0.5,col:Math.random()<0.5?'#e8b45a':'#c9a36a',size:1.4,g:-0.5});}}});
+      if(!ev.hit&&ev.h2<0.5)eStoneCrust(ev.x2,ev.y2);
       for(let i=1;i<K;i++){const q=simOf(kink[i]);burst(q.x,q.y,ECOL.dust,3,60,0.35,1.8,{h:kink[i].y-GY(q.x,q.y),vh:[-0.5,1],g:2});}
       const H2=ev.h2-0;burst(ev.x2,ev.y2,'#ffd27a',ev.hit?14:6,160,0.4,2.2,{h:H2,vh:[0,2],g:3});if(ev.hit){eChunks(ev.x2,ev.y2,H2,5,140,6,0.14);ring(ev.x2,ev.y2,'#ffcf6a',34,0.3,Math.max(0.1,H2-1));}
       if(near)snd('zap',{x,y,vol:0.35});if(mine)shake(0.12);return true;}

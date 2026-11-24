@@ -79,10 +79,20 @@ export const AREA = new Set(['phase', 'ceil', 'lz', 'sgHold', 'sgLoot', 'brz', '
 // decor drawn by the game (MAP-STANDARD round 4): the same builder the code rooms use (js/28-fcs-castle.js fcsDecoKit) — no collision,
 // not in the .glb. k = material key: stone/dark (castle ashlar), roof, lit (glowing window), wood, iron, carpet, slit (dark opening)
 // y = lift of the shape centre above the ground (roof/cloth: base/top) • rot = yaw (roof ridge, cloth/shield facing)
-export const DECO_MAT = [['stone', 'castle stone'], ['dark', 'Dark Rock'], ['roof', 'Roof'], ['lit', 'Lit Window'], ['wood', 'Wood'], ['iron', 'Metal'], ['carpet', 'Red Carpet'], ['slit', 'Dark Opening'], ['floor', 'Castle Floor Stone'], ['roof2', 'Red Roof (castle)'], ['lit2', 'Bright Lit Window (castle)']];
-export const DECO_COL = { stone: '#c2b298', dark: '#8f8270', roof: '#5d6470', lit: '#ffc77a', wood: '#5a3f28', iron: '#2b2a2a', carpet: '#7a1a20', slit: '#17120e', floor: '#b4a68e', roof2: '#8c4a32', lit2: '#ffb15a' };
+export const DECO_MAT = [['stone', 'castle stone'], ['dark', 'Dark Rock'], ['roof', 'Roof'], ['lit', 'Lit Window'], ['wood', 'Wood'], ['iron', 'Metal'], ['carpet', 'Red Carpet'], ['slit', 'Dark Opening'], ['floor', 'Castle Floor Stone'], ['roof2', 'Red Roof (castle)'], ['lit2', 'Bright Lit Window (castle)'],
+  // textured (game js/28-fcs-castle.js DK_TEX, procedural, surface coords in metres)
+  ['brick', '▦ Red Brick'], ['brickw', '▦ Pale Brick'], ['rubble', '▦ Rubble Stone'], ['sand', '▦ Sandstone Blocks'], ['marble', '▦ Marble'], ['mossy', '▦ Mossy Castle Stone'],
+  ['flag', '▦ Flagstone Floor'], ['rock', '▦ Natural Rock (moss on top)'], ['plaster', '▦ Plaster (brick patches)'], ['timber', '▦ Half-Timber'], ['plank', '▦ Wood Planks'],
+  ['tiles', '▦ Clay Roof Tiles'], ['slate', '▦ Slate Roof'], ['thatch', '▦ Thatch'], ['copper', '▦ Copper Roof (patina)'], ['gold', '▦ Gold Trim'], ['ironp', '▦ Riveted Iron Plates'], ['stained', '▦ Stained Glass (glows)']];
+export const DECO_TEX = new Set(['brick', 'brickw', 'rubble', 'sand', 'marble', 'mossy', 'flag', 'rock', 'plaster', 'timber', 'plank', 'tiles', 'slate', 'thatch', 'copper', 'gold', 'ironp', 'stained']);
+export const DECO_SHAPE = new Set(['dc_box', 'dc_cyl', 'dc_cone', 'dc_pyr', 'dc_dome', 'dc_wedge', 'dc_arch', 'dc_cren', 'dc_rock']);   // take a Material
+export const DECO_COL = { stone: '#c2b298', dark: '#8f8270', roof: '#5d6470', lit: '#ffc77a', wood: '#5a3f28', iron: '#2b2a2a', carpet: '#7a1a20', slit: '#17120e', floor: '#b4a68e', roof2: '#8c4a32', lit2: '#ffb15a',
+  brick: '#9c4a34', brickw: '#c9b8a0', rubble: '#8e8778', sand: '#c8a571', marble: '#e6e1d8', mossy: '#7f826a', flag: '#9a9488', rock: '#7d776c', plaster: '#d8cdb4', timber: '#8a7a62',
+  plank: '#7a5534', tiles: '#a8583a', slate: '#58606c', thatch: '#a88a52', copper: '#5f9e8a', gold: '#c9a24a', ironp: '#4a4c50', stained: '#7a5aa8' };
 Object.assign(OBJ, {
   dc_box: { n: 'Decor Box', cat: 'deco', c: '#c2b298' }, dc_cyl: { n: 'Decor Cylinder', cat: 'deco', c: '#c2b298' }, dc_cone: { n: 'Cone/Spire', cat: 'deco', c: '#5d6470' },
+  dc_pyr: { n: 'Pyramid (square roof)', cat: 'deco', c: '#5d6470' }, dc_dome: { n: 'Dome', cat: 'deco', c: '#5f9e8a' }, dc_wedge: { n: 'Wedge / Ramp', cat: 'deco', c: '#c2b298' },
+  dc_arch: { n: 'Arch (wall with opening)', cat: 'deco', c: '#c2b298' }, dc_cren: { n: 'Battlements (merlons)', cat: 'deco', c: '#c2b298' }, dc_rock: { n: 'Rock', cat: 'deco', c: '#7d776c' },
   dc_roof: { n: 'Gable Roof', cat: 'deco', c: '#5d6470' }, dc_flame: { n: 'Flame (torch/candle)', cat: 'deco', c: '#ffb060' }, dc_cloth: { n: 'Hanging Cloth/Banner', cat: 'deco', c: '#7a1418' },
   dc_shield: { n: 'Wall Shield', cat: 'deco', c: '#7a1a20' }, dc_chand: { n: 'Chandelier (lit)', cat: 'deco', c: '#ffb36a' },
   dc_banner: { n: 'Castle Wall Banner', cat: 'deco', c: '#9a1c20' }, dc_torch: { n: 'Wall Torch', cat: 'deco', c: '#ffb060' },
@@ -396,7 +406,7 @@ export function gameData(M, dim) {
     else if (o.t === 'wind') { const a = (o.dir || 0) * Math.PI / 180; wind.push(Object.assign(rect(o), { dx: r2(Math.sin(a)), dy: r2(Math.cos(a)), s: r2(o.str == null ? 8 : o.str) })); }   // push direction in map px axes (x right, y down)
     else if (o.t === 'lz') lz.push(Object.assign(rect(o), { top: r2(o.y == null ? 22 : o.y), k: r2(o.k == null ? 1 : o.k) }));   // indoor light zone (js/28-fcs-hall.js)
     else if (o.t === 'ceil') ceil.push(Object.assign(rect(o), { h: r2(o.y == null ? 21 : o.y) }, o.zmax != null ? { zmax: r2(o.zmax) } : {}));
-    else if (isDeco(o.t)) { deco.push(Object.assign({ t: o.t.slice(3), x: X, y: Y, h: r2(o.y || 0) }, ...['k', 'sx', 'sy', 'sz', 'rt', 'rb', 'r', 'seg', 's', 'c', 'open', 'ry', 'ssx', 'ssz'].filter(q => o[q] != null).map(q => ({ [q]: o[q] })), rot ? { a: +rot.toFixed(4) } : {}));
+    else if (isDeco(o.t)) { deco.push(Object.assign({ t: o.t.slice(3), x: X, y: Y, h: r2(o.y || 0) }, ...['k', 'sx', 'sy', 'sz', 'rt', 'rb', 'r', 'seg', 's', 'c', 'open', 'ry', 'ssx', 'ssz', 'ow', 'oh', 'mw'].filter(q => o[q] != null).map(q => ({ [q]: o[q] })), rot ? { a: +rot.toFixed(4) } : {}));
     if (isDeco(o.t) && o.col) { const d = dim(o); if (d && d.col) for (const c of objCircles(M, o, d)) put(c, null); } }   // decor box/cylinder with Collides ticked
     else if (isRP(o.t)) rprops.push(Object.assign({ k: o.t.slice(3), x: X, y: Y, a: +(-rot).toFixed(3) }, o.L ? { L: r1(o.L * PX) } : {}, o.y ? { z0: r2(o.y) } : {}));
     else if (o.t === 'spawn' || o.t === 'spawnR' || o.t === 'spawnB') { const s = { x: X, y: Y, a: +Math.atan2(Math.cos(rot), Math.sin(rot)).toFixed(3) }; if (o.t !== 'spawn') s.t = o.t === 'spawnR' ? 1 : 0; spawns.push(s); }
@@ -557,8 +567,8 @@ export function roomExpand(M, inst, R) {
   const walls = R.walls.map(w => tag(Object.assign({}, w, { pts: w.pts.map(p => P(p[0], p[1])) }, w.base != null ? { base: +(w.base + g0).toFixed(2) } : {}), 'w'));
   const floors = R.floors.filter(f => !f.rf || inst.rfc).map(f => {   // rf = roof collision slab (house prefabs): only when the instance ticks 'Roof collision'
     const [x, z] = P(f.x, f.z); return tag(Object.assign({}, f, { x, z, rot: (f.rot || 0) + rot, y: +(f.y + g0).toFixed(2) }, f.y2 != null ? { y2: +(f.y2 + g0).toFixed(2) } : {}, f.yb != null ? { yb: +(f.yb + g0).toFixed(2) } : {}), 'f'); });
-  const swap = o => (AREA.has(o.t) || o.t === 'dc_box') && Math.abs(s) > 0.5;   // axis-aligned boxes: swap sizes on 90°/270°
-  const objs = R.objs.map(o => { const [x, z] = P(o.x, o.z); return tag(Object.assign({}, o, { x, z, rot: AREA.has(o.t) || o.t === 'dc_box' ? 0 : (o.rot || 0) + rot }, swap(o) ? { sx: o.sz, sz: o.sx } : {}, inst.nbk && o.t === 'pn_wall' ? { nb: 1 } : {},   // nbk = instance set Unbreakable
+  const swap = o => AREA.has(o.t) && Math.abs(s) > 0.5;   // axis-aligned boxes: swap sizes on 90°/270°
+  const objs = R.objs.map(o => { const [x, z] = P(o.x, o.z); return tag(Object.assign({}, o, { x, z, rot: AREA.has(o.t) ? 0 : (o.rot || 0) + rot }, swap(o) ? { sx: o.sz, sz: o.sx } : {}, inst.nbk && o.t === 'pn_wall' ? { nb: 1 } : {},   // nbk = instance set Unbreakable
       o.t === 'dc_cone' && (o.ssx || o.ssz) && Math.abs(s) > 0.5 ? { ssx: o.ssz, ssz: o.ssx } : {}), 'o'); });
   const parts = (R.parts || []).map(p => { const [x, z] = P(p.x, p.z); return tag(Object.assign({}, p, { x, z, rot: (p.rot || 0) + rot }, p.base != null ? { base: +(p.base + g0).toFixed(2) } : {}), 'p'); });
   return { walls, floors, objs, parts };

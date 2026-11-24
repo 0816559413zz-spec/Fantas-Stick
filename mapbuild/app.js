@@ -216,7 +216,9 @@ const isKit = o => o.t.startsWith('kit:'), kitId = o => o.t.slice(4), isPrim = o
 const tiltOk = o => !!o && !!o.t && (isKit(o) || isPrim(o) || o.t === 'poly');   // visual objects that may tilt (rx/rz, look only: game collision stays the rot footprint)
 const isVisual = o => isKit(o) || isPrim(o);   // exported into the .glb (everything else is a marker the game fills in itself)
 function dim(o) {   // footprint for collision (model.js objCircles)
-  if (o.t === 'dc_box' || o.t === 'dc_cyl') {   // decor: centred on its height (game V.box/V.cyl) • collision only when ticked (col 1)
+  if (MD.DECO_SHAPE.has(o.t) && o.t !== 'dc_arch') {   // decor: centred on its height (game dkGeo) • collision only when ticked (col 1)
+    if (o.t === 'dc_cone') return { ex: o.r || 0.5, ez: o.r || 0.5, h: o.sy || 1, yo: -(o.sy || 1) / 2, col: o.col ? 1 : 0, brk: 0, m: 'stone', cs: 0.92 };
+    if (o.t === 'dc_dome' || o.t === 'dc_rock') return { ex: (o.sx || 1) / 2, ez: (o.sz || 1) / 2, h: o.sy || 1, yo: -(o.sy || 1) / 2, col: o.col ? 1 : 0, brk: 0, m: 'stone', cs: 0.92 };
     const sy = o.sy || 1, cy = o.t === 'dc_cyl', r = cy ? Math.max(o.rt != null ? o.rt : (o.sx || 1) / 2, o.rb != null ? o.rb : (o.sx || 1) / 2) : 0;
     return { ex: cy ? r : (o.sx || 1) / 2, ez: cy ? r : (o.sz || 1) / 2, h: sy, yo: -sy / 2, col: o.col ? 1 : 0, brk: 0, m: 'stone', cs: cy ? 0.92 : 1 }; }
   if (isPrim(o)) { const sx = o.sx || 1, sz = o.sz || 1, round = o.t === 'cyl' || o.t === 'ball' || o.t === 'cone'; return { ex: sx / 2, ez: sz / 2, h: (o.sy || 1) * (o.t === 'ball' ? 0.84 : 1), col: o.col == null ? 1 : o.col, brk: 0, m: o.m || 'stone', cs: round ? 0.92 : 1 }; }
@@ -241,6 +243,9 @@ function areaMesh(o, g, c, h) {   // flat rect (phase) or slab at height (ceilin
 function decoMesh(o) {
   const g = new THREE.Group(), t = o.t.slice(3), c = t === 'cloth' ? (o.c || '#7a1418') : MD.DECO_COL[o.k || (t === 'roof' || t === 'cone' ? 'roof' : 'stone')] || '#c2b298';
   const add = (geo, m) => { const me = new THREE.Mesh(geo, m); me.userData.own = 1; me.castShadow = me.receiveShadow = true; g.add(me); return me; };
+  if (DK && MD.DECO_SHAPE.has(o.t)) {   // same geometry + textures as the game
+    const k = o.k || (t === 'cone' || t === 'pyr' ? 'roof' : 'stone'), geo = DK.dkGeo(Object.assign({}, o, { t }), o.x * 20 * 0.013 + o.z * 20 * 0.029);
+    if (geo) { let m = DK.DK_TEX[k] ? DK.dkMat(k) : mat(MD.DECO_COL[k] || '#c2b298', { emit: k === 'lit' || k === 'lit2' }); if (o.open) { m = m.clone(); m.side = THREE.DoubleSide; } add(geo, m); return g; } }
   if (t === 'box') add(new THREE.BoxGeometry(o.sx || 1, o.sy || 1, o.sz || 1), mat(c));
   else if (t === 'cyl') add(new THREE.CylinderGeometry(o.rt != null ? o.rt : 0.5, o.rb != null ? o.rb : 0.5, o.sy || 1, o.seg || 8), mat(c));
   else if (t === 'cone') { const geo = new THREE.ConeGeometry(o.r != null ? o.r : 0.5, o.sy || 1, o.seg || 8, 1, !!o.open); if (o.ry) geo.rotateY(o.ry); if (o.ssx || o.ssz) geo.scale(o.ssx || 1, 1, o.ssz || 1); const m = add(geo, mat(c)); if (o.open) { m.material = m.material.clone(); m.material.side = THREE.DoubleSide; } }
@@ -261,6 +266,9 @@ function ghostify(g) {   // vis 0 = collision only (not in the .glb): see-throug
   g.traverse(m => { if (!m.isMesh) return; const k = m.material.uuid; let gm = ghostMats.get(k); if (!gm) { gm = m.material.clone(); gm.transparent = true; gm.opacity = 0.22; gm.depthWrite = false; ghostMats.set(k, gm); } m.material = gm; m.castShadow = false; });
   return g;
 }
+let DK = null;   // game decor shapes + textures (js/28-fcs-castle.js @dk-begin…@dk-end)
+fetch('js/28-fcs-castle.js').then(r => r.text()).then(t => { const i = t.indexOf('// @dk-begin'), j = t.indexOf('// @dk-end'); if (i < 0 || j < 0) return;
+  DK = new Function('THREE', 'mergeGeometries', t.slice(i, j) + '\nreturn {dkGeo, dkMat, DK_TEX};')(THREE, mergeGeometries); if (M) { syncObjs(); updSel(); } }).catch(e => console.warn('DK', e));
 let FRPB = null;   // game room-prop builder (js/28-fcs-props.js frpBuild) → props look exactly like in the game
 fetch('js/28-fcs-props.js').then(r => r.text()).then(t => { const i = t.indexOf('function frpBuild('), j = t.indexOf('\nfunction ', i + 10); if (i < 0 || j < 0) return;
   FRPB = new Function('THREE', t.slice(i, j) + '\nreturn frpBuild;')(THREE); if (M) { syncObjs(); updSel(); } }).catch(() => {});
@@ -335,7 +343,7 @@ function objMesh(o) {
   else if (OBJ[o.t]) { g = markerMesh(o); if (o.t === 'house') g.scale.set(o.sx || 1, 1, o.sz || 1); }
   else { g = new THREE.Group(); g.add(new THREE.Mesh(pg('box'), helpMat('#f06a6a', 0.6))); }
   const lift = o.t === 'ring' ? Math.max(1, o.y || 6) : o.t === 'light' ? (o.y == null ? 2.2 : o.y) : o.t === 'ceil' ? (o.y == null ? 21 : o.y) : o.t === 'lz' ? (o.y == null ? 22 : o.y) : (o.y || 0);
-  g.position.set(o.x, MD.gh(M, o.x, o.z) + lift, o.z); g.rotation.y = MD.AREA.has(o.t) || o.t === 'dc_box' ? 0 : o.rot || 0;   // areas + decor boxes are axis-aligned in the game
+  g.position.set(o.x, MD.gh(M, o.x, o.z) + lift, o.z); g.rotation.y = MD.AREA.has(o.t) ? 0 : o.rot || 0;   // areas are axis-aligned in the game
   if (tiltOk(o) && (o.rx || o.rz)) g.rotation.set(o.rx || 0, o.rot || 0, o.rz || 0, 'YXZ');   // yaw first, then tilt
   if (o.vis === 0) ghostify(g);
   if (!show.area) g.traverse(m => { if (m.userData.area) m.visible = false; });
@@ -345,7 +353,8 @@ function objMesh(o) {
 const objNode = new Map();
 // decor boxes (dc_box, thousands on a castle map): one InstancedMesh per material, picked by instanceId (userData.ids)
 const boxInst = new Map(), _bm4 = new THREE.Matrix4(), _bq = new THREE.Quaternion(), _bv = new THREE.Vector3(), _bs = new THREE.Vector3();
-const boxMat4 = o => _bm4.compose(_bv.set(o.x, MD.gh(M, o.x, o.z) + (o.y || 0), o.z), _bq, _bs.set(o.sx || 1, o.sy || 1, o.sz || 1));
+const _bY = new THREE.Vector3(0, 1, 0), boxMat4 = o => _bm4.compose(_bv.set(o.x, MD.gh(M, o.x, o.z) + (o.y || 0), o.z), _bq.setFromAxisAngle(_bY, o.rot || 0), _bs.set(o.sx || 1, o.sy || 1, o.sz || 1));
+const instBox = o => o.t === 'dc_box' && !MD.DECO_TEX.has(o.k);   // textured boxes get their own mesh (uv in metres)
 const boxGeo = new THREE.BoxGeometry(1, 1, 1);
 function syncBoxes(list) {
   boxInst.clear(); const by = new Map();
@@ -354,10 +363,10 @@ function syncBoxes(list) {
     im.userData = { ids: L.map(o => o.id), refs: L.map(o => refOfItem(o, 'obj')) }; L.forEach((o, i) => { im.setMatrixAt(i, boxMat4(o)); boxInst.set(o.id, { im, i }); }); im.computeBoundingSphere(); gObjs.add(im); }
 }
 function syncObj(o) {
-  if (o.t === 'dc_box') { const e = boxInst.get(o.id); if (e && e.im.material === mat(MD.DECO_COL[o.k || 'stone'] || '#c2b298', { emit: o.k === 'lit' || o.k === 'lit2' })) { e.im.setMatrixAt(e.i, boxMat4(o)); e.im.instanceMatrix.needsUpdate = true; e.im.computeBoundingSphere(); } else syncObjs(); if (sel && sel.k === 'obj' && sel.id === o.id) updSel(); need(); return; }
+  if (instBox(o)) { const e = boxInst.get(o.id); if (e && e.im.material === mat(MD.DECO_COL[o.k || 'stone'] || '#c2b298', { emit: o.k === 'lit' || o.k === 'lit2' })) { e.im.setMatrixAt(e.i, boxMat4(o)); e.im.instanceMatrix.needsUpdate = true; e.im.computeBoundingSphere(); } else syncObjs(); if (sel && sel.k === 'obj' && sel.id === o.id) updSel(); need(); return; }
   const old = objNode.get(o.id); if (old) gObjs.remove(old); const g = objMesh(o); objNode.set(o.id, g); gObjs.add(g); if (sel && sel.k === 'obj' && sel.id === o.id) updSel(); need(); }
 function syncObjs() { for (const c of [...gObjs.children]) gObjs.remove(c); objNode.clear(); const all = M.objs.concat(RX.objs), boxes = [];
-  for (const o of all) { if (o.t === 'dc_box') { boxes.push(o); continue; } const g = objMesh(o); objNode.set(o.id, g); gObjs.add(g); }
+  for (const o of all) { if (instBox(o)) { boxes.push(o); continue; } const g = objMesh(o); objNode.set(o.id, g); gObjs.add(g); }
   syncBoxes(boxes); }
 // castle parts → groups of meshes (prim objs + floor slabs generated by MD.expandParts); each group carries ref {k:'part'}
 const partNode = new Map();
@@ -645,7 +654,7 @@ function drawHandles() {
   pts.forEach((p, i) => { const m = new THREE.Mesh(new THREE.SphereGeometry(0.32, 10, 8), helpMat(sel && sel.pt === i && !draft ? '#ffffff' : ACC)); m.material.depthTest = false; m.renderOrder = 12; m.position.set(p[0], (w.base != null ? w.base : MD.gh(M, p[0], p[1])) + (w.h || opt.wh) + 0.2, p[1]); gHandles.add(m); });
 }
 function selNodes(sel, it) {   // scene nodes of one selected item (for its box)
-  const bxN = sel.k === 'obj' && it.t === 'dc_box' ? (() => { const m = new THREE.Mesh(boxGeo); m.applyMatrix4(boxMat4(it)); root.add(m); setTimeout(() => root.remove(m), 0); return m; })() : null;
+  const bxN = sel.k === 'obj' && instBox(it) ? (() => { const m = new THREE.Mesh(boxGeo); m.applyMatrix4(boxMat4(it)); root.add(m); setTimeout(() => root.remove(m), 0); return m; })() : null;
   return bxN ? [bxN] : sel.k === 'obj' ? [objNode.get(it.id)] : sel.k === 'part' ? [partNode.get(it.id)] : sel.k === 'room' ? [gWalls, gFloors, gObjs, gParts].flatMap(g => g.children.filter(c => c.userData.ref && c.userData.ref.k === 'room' && c.userData.ref.id === it.id)) : (sel.k === 'wall' ? gWalls : gFloors).children.filter(c => c.userData.ref.id === it.id);
 }
 let mBoxes = [];
@@ -687,6 +696,8 @@ function protoObj(x, z) {
   else if (t === 'lz') Object.assign(o, { sx: 30, sz: 20, y: 22, k: 1, rot: 0 });
   else if (MD.isRP(t) && MD.RPK[t.slice(3)].L) o.L = 4;
   else if (MD.isDeco(t)) Object.assign(o, { box: { k: 'stone', sx: 2, sy: 2, sz: 2, y: 1, rot: 0 }, cyl: { k: 'stone', rt: 1, rb: 1, sy: 4, seg: 12, y: 2 }, cone: { k: 'roof', r: 2, sy: 3, seg: 8, y: 1.5 },
+    pyr: { k: 'slate', sx: 4, sy: 3, sz: 4, y: 1.5 }, dome: { k: 'copper', sx: 4, sy: 2, sz: 4, y: 1 }, wedge: { k: 'stone', sx: 4, sy: 2, sz: 3, y: 1 },
+    arch: { k: 'stone', sx: 4, sy: 5, sz: 1, ow: 2, oh: 3.5, y: 2.5 }, cren: { k: 'stone', sx: 8, sy: 1, sz: 1, mw: 1, y: 0.5 }, rock: { k: 'rock', sx: 3, sy: 2, sz: 2.5, y: 0.8 },
     roof: { sx: 12, sz: 8, sy: 4, y: 6 }, flame: { y: 2.5 }, cloth: { sx: 2, sy: 4, c: '#7a1418', y: 6 }, shield: { y: 3 }, chand: { y: 12 } }[t.slice(3)] || {});
   return o;
 }
@@ -905,7 +916,7 @@ const isVisualType = t => t.startsWith('kit:') || (OBJ[t] && OBJ[t].cat === 'pri
 let gmode = 'translate', gz = null;   // 'hand' | 'translate' | 'rotate' | 'scale'
 const yawOf = q => 2 * Math.atan2(q.y, q.w), r2 = v => +v.toFixed(2), r3 = v => +v.toFixed(3);
 const sns = v => { const st = opt.snap ? opt.snap / 2 : 0; return st ? Math.max(st, +(Math.round(v / st) * st).toFixed(3)) : r2(v); };   // gizmo sizes snap to half the grid step
-const flatRot = it => MD.AREA.has(it.t) || it.t === 'dc_box';   // axis-aligned in the game
+const flatRot = it => MD.AREA.has(it.t);   // axis-aligned in the game
 const isDeco = it => OBJ[it.t] && OBJ[it.t].cat === 'deco';
 function gScaleKind(k, it) {   // how [3] size maps onto this item: 'u' uniform s, 'p' panel L/sy/T, 'L' length, 'xyz' / 'xz' sizes, 'f' floor, 'w' wall, 'fp' free shape, 'cp' castle part, null = none
   if (k === 'room') return null; if (k === 'wall') return 'w'; if (k === 'floor') return 'f'; if (k === 'part') return it.pts ? 'fp' : 'cp';
@@ -1295,10 +1306,14 @@ function fld(label, it, key, o = {}) {   // bound field: number / text / color /
 }
 function decoFields(it) {   // inspector rows for dc_* decor
   const t = it.t.slice(3), F = [];
-  if (t === 'box' || t === 'cyl' || t === 'cone') F.push(fld('Material', it, 'k', { type: 'select', items: MD.DECO_MAT, get: () => it.k || 'stone' }));
-  if (t === 'box' || t === 'roof' || t === 'cloth') F.push(fld(t === 'roof' ? 'Length (ridge)' : 'Width', it, 'sx', { min: 0.05 }));
+  const bx = ['box', 'pyr', 'dome', 'wedge', 'arch', 'cren', 'rock'].includes(t);
+  if (MD.DECO_SHAPE.has(it.t)) F.push(fld('Material', it, 'k', { type: 'select', items: MD.DECO_MAT, get: () => it.k || (t === 'cone' || t === 'pyr' ? 'roof' : 'stone') }));
+  if (bx || t === 'roof' || t === 'cloth') F.push(fld(t === 'roof' ? 'Length (ridge)' : t === 'cren' ? 'Length (row)' : 'Width', it, 'sx', { min: 0.05 }));
   if (t !== 'flame' && t !== 'shield' && t !== 'chand') F.push(fld('Height', it, 'sy', { min: 0.05 }));
-  if (t === 'box' || t === 'roof') F.push(fld(t === 'roof' ? 'Width' : 'Depth', it, 'sz', { min: 0.05 }));
+  if (bx || t === 'roof') F.push(fld(t === 'roof' ? 'Width' : t === 'arch' || t === 'cren' ? 'Thickness' : 'Depth', it, 'sz', { min: 0.05 }));
+  if (t === 'arch') F.push(fld('Opening Width', it, 'ow', { min: 0.2 }), fld('Opening Height', it, 'oh', { min: 0.2 }));
+  if (t === 'cren') F.push(fld('Merlon Width (gap = same)', it, 'mw', { min: 0.2 }));
+  if (t === 'cyl' || t === 'cone') F.push(fld('Sides (3 = triangle, 4 = square...)', it, 'seg', { min: 3, step: 1 }));
   if (t === 'cyl') F.push(fld('Top Radius', it, 'rt', { min: 0 }), fld('Bottom Radius', it, 'rb', { min: 0 }));
   if (t === 'cone') F.push(fld('Radius', it, 'r', { min: 0.05 }));
   if (t === 'cloth') F.push(fld('Color', it, 'c', { type: 'color' }));

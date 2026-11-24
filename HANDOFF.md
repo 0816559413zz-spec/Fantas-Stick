@@ -1,18 +1,21 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
+**Earth Stone Mark (2026-11-24, v112, tested on a player bot: mark → 5 BA rocks → petrified 1 s; charge 0.8 s + 0.35 s recovery, line lingers ~0.55 s with soft aura, gold diamond sigil over the head, layers = stone crust shader `eCoatMat`/`eCoatMake` on coat copies of body meshes, floor hit = `eStoneCrust`):** replaces Stonebreaker (stub `STONEB` kept for old slab code). Host js/09-earth.js `SMARK`, `earthMarkFire`, `earthStoneHit` (hooked in `earthRockSplash` + `SPELLS.ekickrock`), `earthStoneSnap` → snapshot `stn` (P, E). View js/47: `CANIM.stonemark`, efx `esmc` (charge sand), `esmf` (kinked TubeGeometry line — natFx Tube did not show in headless), `epetrify`, `eStoneUpd` (ring, stuck rocks, stone body material swap).
 > **Read order (short):** 1) this file top to §9 only as needed (use grep, never read it whole) 2) `CODEMAP.md` for code 3) rules: `CLAUDE.md` + `guides/WORKFLOW-WITH-CLAUDE.md`.
 > Older notes: `notes/HANDOFF-LOG.md` (session log), `notes/CHANGELOG.md` (changelog), `notes/HANDOFF-CHANGELOG-OLD.md`. After a task: add the new note at the top of "Latest notes" below; when it passes ~25 lines move the oldest entries to the top of `notes/HANDOFF-LOG.md`.
 
 ## Latest notes (newest first)
 
 **Other players get a low-res cloak cloth (2026-11-24, `js/49-cloth.js` `CLOTH_LITE`):** 7 rows x 8 cols (84 faces/side vs ours 672), only while on screen (`viewDetailAt`) and within 40 m of the camera; otherwise the old bone cloak. Panel triangles are cut from `student_all_batch` only while shown (index swapped by identity; Storm cape keeps priority). No world collision, 3 solver passes, one mesh (outer + lining via vertex colours, `matTwin(bodyMat,"rigid")`). Shared sim now `clRun`.
+**Decor shapes + textures (2026-11-24, Map Builder + `js/28-fcs-castle.js` block `@dk-begin…@dk-end`):** new decor Pyramid/Dome/Wedge/Arch/Battlements/Rock, Decor Box rotates freely, 18 procedural textured materials (`DK_TEX`, shader from the `dkuv` surface-metre attribute, far = average colour). Game and Map Builder share `dkGeo`/`dkMat` (the tool fetches the block). Still one merged draw per material. Tested: Map Builder preview + export + in game, no console errors. Sheet `shots/dk_sheet.png`. Review #183.
+
+**Map Builder siege loot-phase data (2026-11-24):** markers `sgHold`/`sgLoot`/`sgItem`/`brz`/`wind` exported (`siege.hold/loot/items`, `data.broom`, `data.wind`); the game stores them (`MAPS[id].fcs.hold/loot/items`, `.broomZ`, `.wind`) but does not play them yet.
 
 **Cloak less flutter + no clipping (2026-11-24, `js/49-cloth.js`, local player only):** calmer constants (DAMP 0.93, INERT 0.15/0.2, AIR 0.8, FLUT 0.4), stiffer top rows (`clPinK`), fatter body capsules (TORSO 0.24, LEG 0.13, ARM 0.13) + new forearm capsules `FORE` 0.17 extended past the wrist by `HAND` 0.14, body collision every pass. Other players still use the skinned cloak bones (can still clip).
 
 **Rules cleanup (2026-11-24, docs only):** HANDOFF split (this file = status only; log → `notes/HANDOFF-LOG.md`, old changelog → `notes/HANDOFF-CHANGELOG-OLD.md`). `CLAUDE.md` = 9 core rules + task router; `AGENTS.md` = pointer. Cause of "Claude ignores CLAUDE.md": HANDOFF too big to read, conflicting rules, too many rules.
 
 
-**Earth Stone Mark (2026-11-24, v112, tested on a player bot: mark → 5 BA rocks → petrified 1 s; charge 0.6 s, line lingers 0.5 s, gold diamond sigil over the head):** replaces Stonebreaker (stub `STONEB` kept for old slab code). Host js/09-earth.js `SMARK`, `earthMarkFire`, `earthStoneHit` (hooked in `earthRockSplash` + `SPELLS.ekickrock`), `earthStoneSnap` → snapshot `stn` (P, E). View js/47: `CANIM.stonemark`, efx `esmc` (charge sand), `esmf` (kinked TubeGeometry line — natFx Tube did not show in headless), `epetrify`, `eStoneUpd` (ring, stuck rocks, stone body material swap).
 
 **Next session — Nature cast review (2026-11-24):** Review the raised left elbow, thorn wrap, and left-hand cast transitions across the full Nature kit. The in-game review is `shots/nature-every-skill.gif` on the capture machine. It covers the two-hit whip, turret, both Dash examples, Lotus heal and buff, relocation, Wood Ball, Wood Wall, and World Tree. Nature's shield is disabled in the current build. Use the existing VFX Studio GIF Export for the next Studio preview, as documented in `guides/WORKFLOW-WITH-CLAUDE.md`. Further pose and VFX changes are deferred until the user resumes the review.
 
