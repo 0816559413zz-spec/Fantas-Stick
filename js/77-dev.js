@@ -6,6 +6,7 @@ const DEV={on:false,open:false,key:'',bp:-1,bl:1,bn:1,ov:null,ovK:'',k:{},fc:{on
 DEV.cfg=Object.assign({god:0,nocd:0,ult:0,spd:1,fast:0,ts:1,omap:0,pause:0,freeze:0,col:0,zon:0,broom:0,noend:1,sbots:1},(()=>{try{return JSON.parse(store('wd_devcfg')||'{}');}catch(e){return {};}})());
 DEV.cfg.pause=0;
 try{const q=new URLSearchParams(location.search).get('dev');if(q==='1')store('wd_dev','1');else if(q==='0')store('wd_dev','');DEV.on=store('wd_dev')==='1';}catch(e){}
+if(/[?&]mbcam=/.test(location.search))DEV.on=true;   // Map Builder game view: dev on for this page only (not remembered)
 const devOn=()=>DEV.on&&NET.isHost&&!NET.online&&screen==='game'&&!!G&&G.ph!=='lobby';
 const devOff=()=>DEV.on&&NET.isHost&&!NET.online;   // dev + offline host (also true in lobby)
 const devSoloOk=()=>devOff()&&!!DEV.solo;   // set only while devStartMode runs
@@ -31,6 +32,12 @@ function devTick(){
 const devGod=t=>DEV.on&&DEV.cfg.god&&t.id===NET.myId&&devOn();
 const devFreeze=()=>DEV.on&&DEV.cfg.freeze&&devOn();
 // ---- กล้องอิสระ ----
+// Map Builder "มุมมองเกม" (mapbuild/app.js gameView): index.html?...&playmap=<id>&mbcam=x,y,z,yaw,pitch[&mbclean=1]
+// → when the match is running, jump into the free camera at that pose (world metres, same frame as the builder) • mbclean = hide HUD/menus, only the 3D view
+const MBCAM=(new URLSearchParams(location.search).get('mbcam')||'').split(',').map(Number);
+let mbcamDone=MBCAM.length!==5||MBCAM.some(v=>!Number.isFinite(v));
+if(/[?&]mbclean=1(&|$)/.test(location.search)){const st=document.createElement('style');st.textContent='body>*:not(#gl){display:none!important}';document.head.appendChild(st);}   // own <style>: html class gets reset elsewhere
+function devMbCam(){if(mbcamDone||!devOn())return;mbcamDone=true;devFcToggle(true);const F=DEV.fc;F.x=MBCAM[0];F.y=MBCAM[1];F.z=MBCAM[2];yaw=MBCAM[3];pitch=MBCAM[4];}
 function devFcToggle(on){
   const F=DEV.fc;on=on===undefined?!F.on:!!on;if(on===F.on)return;
   F.on=on;DEV.k={};if(on&&DEV.orb)DEV.orb.on=false;

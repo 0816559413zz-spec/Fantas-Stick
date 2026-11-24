@@ -473,7 +473,7 @@
   "castle-demo": {
    "file": "maps/castle-demo.glb",
    "data": "maps/castle-demo.json",
-   "v": 3
+   "v": 6
   },
   "siege-demo": {
    "file": "maps/siege-demo.glb",

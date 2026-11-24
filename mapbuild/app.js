@@ -1051,6 +1051,7 @@ addEventListener('keydown', e => {
   if (e.ctrlKey || e.metaKey) return;
   if (k === 'q' || k === 'w' || k === 'e' || k === 'r' || (k === 't' && !e.shiftKey)) { setGizmo({ q: 'hand', w: 'translate', e: 'rotate', r: 'scale', t: 'resize' }[k]); return; }   // Unity transform tools
   const T = TOOLS.find(t => t[3] === k); if (T) { setTool(T[0]); return; }
+  if (k === 'escape' && $('gv').classList.contains('on')) { gameViewClose(); return; }
   if (k === 'escape' && pickArm) { pickOff(); need(); return; }
   if (k === 'escape') { if (fdraft) { fdraft = null; undo.pop(); drawLine(null); drawHandles(); } else if (draft) { draft = null; undo.pop(); drawLine(null); drawHandles(); } else { sel = null; renderSide(); updSel(); } need(); }
   else if (k === 'enter' && fdraft) finishFree();
@@ -1492,6 +1493,20 @@ async function exportGame() {
   catch (e) { console.error(e); stat('Couldn’t export: ' + e.message, 'err'); return false; }
 }
 
+// ================= game view (real game in an iframe at the editor camera; game side: js/77-dev.js devMbCam) =================
+async function gameView() {
+  if (!M || !M.id) { stat('No map id yet', 'err'); return; }
+  const d = new THREE.Vector3(); camera.getWorldDirection(d);   // builder world = game world (metres, map centre at origin)
+  const pose = [camera.position.x, camera.position.y, camera.position.z, Math.atan2(d.z, d.x), -Math.asin(clamp(d.y, -1, 1))].map(v => +v.toFixed(3));
+  const gv = $('gv'); gv.classList.add('on'); $('gvStat').textContent = 'Exporting…';
+  const old = gv.querySelector('iframe'); if (old) old.remove();
+  if (!await exportGame()) { $('gvStat').textContent = 'Export failed'; return; }
+  $('gvStat').textContent = 'Loading game…';
+  const f = el('iframe', { src: 'index.html?nosw&mbclean=1&playmap=' + M.id + '&mbcam=' + pose.join(',') + '&t=' + Date.now(), allow: 'fullscreen' });
+  f.onload = () => { $('gvStat').textContent = ''; }; gv.append(f);
+}
+function gameViewClose() { const gv = $('gv'); gv.classList.remove('on'); const f = gv.querySelector('iframe'); if (f) f.remove(); cv.focus(); need(); }
+
 // ================= loop =================
 let dirtyView = true, last = performance.now();
 function need() { dirtyView = true; }
@@ -1529,6 +1544,7 @@ $('mapSel').onchange = e => openMap(e.target.value);
 for (const b of document.querySelectorAll('#gbar [data-g]')) b.onclick = () => setGizmo(b.dataset.g);
 $('snapSel').value = String(opt.snap); $('snapSel').onchange = e => { opt.snap = +e.target.value; placeGizmo(); };
 $('hq').oninput = renderHier;
+$('vGame').onclick = gameView; $('gvRe').onclick = gameView; $('gvX').onclick = gameViewClose;
 $('vTop').onclick = () => { cam.pitch = 1.55; cam.yaw = 0; camApply(); }; $('vFit').onclick = fit; $('vShot').onclick = shotPNG;
 { let dm = 1; try { dm = localStorage.getItem('mb-dragmove') === '0' ? 0 : 1; } catch (_) {} opt.dragMove = dm; $('oDrag').checked = !!dm; }
 $('oDrag').onchange = e => { opt.dragMove = e.target.checked ? 1 : 0; try { localStorage.setItem('mb-dragmove', String(opt.dragMove)); } catch (_) {} };
@@ -1538,7 +1554,7 @@ $('oArea').onchange = e => { show.area = e.target.checked; gObjs.traverse(m => {
 $('oGrid').onchange = e => { show.grid = e.target.checked; buildGrid(); need(); };
 $('oSky').onchange = e => { show.sky = e.target.checked; applySky(); };
 addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
-window.__mb = { get M() { return M; }, get RX() { return RX; }, loadRooms, MD, opt, placePart, syncParts, partNode, gParts, castleProto, cam, camApply, setTool, gameData, buildExport, exportGame, save, setMap, syncAll, need, kitTpl, KIT, get sel() { return sel; }, set sel(v) { sel = v; renderSide(); updSel(); }, pushUndo, changed, colDirty, updTerrain, afterTerrain, applyRamp, makeFloor, placeObj, doUndo };
+window.__mb = { get M() { return M; }, gameView, gameViewClose, get RX() { return RX; }, loadRooms, MD, opt, placePart, syncParts, partNode, gParts, castleProto, cam, camApply, setTool, gameData, buildExport, exportGame, save, setMap, syncAll, need, kitTpl, KIT, get sel() { return sel; }, set sel(v) { sel = v; renderSide(); updSel(); }, pushUndo, changed, colDirty, updTerrain, afterTerrain, applyRamp, makeFloor, placeObj, doUndo };
 (async () => {
   renderTools(); $('hint').textContent = HINT[tool];
   await Promise.all([loadKit(), refreshList()]);

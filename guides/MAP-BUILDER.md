@@ -103,6 +103,12 @@ Tool: ศูนย์รวม Tool → **Map Builder** • โค้ด: `mapbu
 - ตัวอย่าง: `node tools/castle-sample.mjs` → `maps/build/castle-demo.json` (กำแพงรอบ 4 หอ ประตู ตึกใหญ่ บันได ทางลาด สะพาน) — ส่งเข้าเกมแล้วเป็นแผนที่ `castle-demo` (`index.html?nosw&dev=1&playmap=castle-demo`)
 - ยังไม่มี: ตึกกลวง/ห้องข้างใน (ตัวตึกทึบ), ซุ้มโค้งจริง (ใช้ประตู = คานเหนือช่อง), กำแพงโค้ง/กำแพงลาดตามพื้นชัน • โหมดบุกปราสาท (`siege`) ยังอ่านแผนที่นี้ไม่ได้ (ดูข้อจำกัดด้านบน)
 
+## Game View (ดูแบบในเกม) — ปุ่ม 🎮 Game View บนแถบ Scene, 2026-11-24
+- กดแล้ว: ส่งแผนที่เข้าเกมก่อน (เหมือน ⬆ Export) → เปิดเกมจริงใน iframe ทับช่อง Scene ที่มุมกล้องตอนนั้น (แสง/หมอก/shader/ท้องฟ้าเหมือนในเกม) ไม่มี HUD
+- ในหน้าต่าง: คลิกแล้วลากหมุนกล้อง • WASD บิน • Space/Ctrl ขึ้น/ลง • Shift เร็ว • ล้อเมาส์ = ความเร็ว • ↻ Refresh = ส่งใหม่+เปิดที่มุมกล้อง editor ปัจจุบัน • ✕ Close / Esc = ปิด
+- URL ฝั่งเกม: `index.html?nosw&playmap=<id>&mbcam=x,y,z,yaw,pitch&mbclean=1` • `mbcam` เปิด Dev (หน้านี้เท่านั้น ไม่จำ) + กล้องอิสระ (`devMbCam` ใน js/77, เรียกจาก js/37) • `mbclean=1` ซ่อนทุกอย่างใน body ยกเว้น `#gl`
+- โค้ด: `gameView`/`gameViewClose` ใน `mapbuild/app.js`, `#gv` ใน `mapbuild.html`
+
 ## Backdrop (ฉากหลังนอกพื้นที่เล่น) — เครื่องมือ 🌊 (ปุ่ม J) 2026-11-22
 - ต้นฉบับ `bd` ใน `maps/build/<id>.json` (โค้ด `mapbuild/backdrop.js`) → ส่งเข้าเกมเป็น `data.bd` → เกมวาดใน `js/67-coast.js` (`bdGridSrc` + `bdCoast`) ไม่มีที่ชน
 - ตาราง 5 ม. ครอบแผนที่ + 600 ม. ทุกด้าน (`x0,z0,nx,ny,c,E`) • `hg` ความสูง (int16 หน่วย 0.1 ม.) • `sf` ผิว (`BSURF`, 0 = อัตโนมัติ: ชัน=หิน ริมน้ำ=ทราย สูง>110=หิมะ) • `tr` ความหนาแน่นต้นไม้ 0–255 (`sf`/`tr` = run-length base64)
