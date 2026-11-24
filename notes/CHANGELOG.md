@@ -1496,3 +1496,4 @@
 - 2026-11-24 Terra Isle cast animation (thrust → hold → scoop up) + gold streak; faster rise (~0.8 s)
 - 2026-11-24 Terra Isle cast v2: side-on body, arm points forward, head on target
 - 2026-11-24 Terra Isle cast animation approved by user (chat)
+- 2026-11-24 Rampart v6: exact-model hologram, smooth rise from the ground, sink on expiry, side-on cast

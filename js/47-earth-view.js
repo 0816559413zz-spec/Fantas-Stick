@@ -12,7 +12,7 @@ const ECOL={stone:'#8f7a5c',dark:'#5e4d38',dust:'#b39a74',glow:'#ffcf6a',mud:'#5
 // แขนกัน (R) พับศอกบังหน้า: fist = จุดกำปั้น [หน้า px, ขวา px, สูง] • elbow = ทิศศอก [ซ้าย, หน้า, ลง]
 // larm = แขน L (จาง) ง้างหมัดเก็บไว้ข้างเอว แบบนักสู้ [ต้นแขน x (+ = ศอกไปหลัง), กาง z, ศอก x] • lo = ท่อนล่างจางเป็นทราย [สูง (คูณ), ตำแหน่ง y] ให้หายเร็วขึ้น
 const EGUARD_BIG=/[?&]eshield=big/.test(location.search),EGUARD=EGUARD_BIG?{sc:1.8,back:80,side:14,z:0.05,lean:0.8,fist:[14,12,1.95],elbow:[0.8,1,0.3],larm:[-0.4,0.1,-1.97],lo:[0.5,1.37]}:{sc:1.55,back:69,side:12,z:0.2,lean:0.8,fist:[14,12,1.85],elbow:[0.8,1,0.3],larm:[-0.4,0.1,-1.97],lo:[0.5,1.37]};
-var EV={st:new Map(),es:new Map(),anims:[],fog:null,crush:[],rcall:[],rholo:null,icall:[]};
+var EV={st:new Map(),es:new Map(),anims:[],fog:null,crush:[],rcall:[],rholo:null,icall:[],rsink:[]};
 const eW=(x,y,h)=>new THREE.Vector3(tx(x),(h||0)+GY(x,y),tz(y));
 const EARTH_FIST_SCALE=1.9;
 const eYaw=(x1,y1,x2,y2)=>Math.atan2(x2-x1,y2-y1);
@@ -424,7 +424,7 @@ function earthFistForearm(o){
 // ---------- ทุกเฟรม: ผู้เล่นสายดิน (เรียกจาก syncPlayers) ----------
 function earthFX(o,p,pz,now,dt){
   o.eFistBend=null;
-  if(o.caN==='islecast'||o.isleHd){o.slHead=o.caN==='islecast'?-(o.cpb?o.cpb[2]:0)*0.9:0;o.isleHd=o.caN==='islecast';frostSlideHead(o);}   // side-on cast: head stays on the target
+  {const side=o.caN==='islecast'||o.caN==='rampcast';if(side||o.isleHd){o.slHead=side?-(o.cpb?o.cpb[2]:0)*0.9:0;o.isleHd=side;frostSlideHead(o);}}   // side-on cast: head stays on the target
   const A=p.ea;if(!A){if(EV.st.has(p.id)){const s=EV.st.get(p.id);eStonePrep(s,null);eFistCharge(s,null,null,0);s.sbFollow=null;for(const k of ['stand','giant','cgiant'])if(s[k])standOp(s[k],0);for(const k of ['drill','augW','pil','wrWarn','wrRock'])if(s[k])s[k].visible=false;}return;}
   const s=eState(p.id),S=eStandOf(s),G2=eGiantOf(s),t=now/1000,fx=Math.cos(p.a),fy=Math.sin(p.a),rx=-fy,ry=fx,broken=A[0]>0,z0=(pz||0)-GY(p.x,p.y);   // ความสูงที่วาดจริงเหนือพื้น (snapshot ไม่มี p.z)
   if(!ETEX.slabM&&!EV.sw){EV.sw=1;setTimeout(()=>{const M=eSlabMats();if(typeof gl!=='undefined'&&gl.initTexture)for(const t of [M.face.map,M.face.normalMap,M.face.emissiveMap,M.side.map,M.side.normalMap])gl.initTexture(t);},300);}   // สร้างลายแผ่นหินไว้ก่อน (ไม่กระตุกตอนใช้ท่า)
@@ -773,12 +773,15 @@ function eRampMats(){if(ERAMP.mat)return;
   ERAMP.mat=new THREE.MeshStandardMaterial({color:'#b7a083',vertexColors:true,roughness:0.95,metalness:0,flatShading:true});ERAMP.mat.userData.keep=true;
   ERAMP.mat2=new THREE.MeshStandardMaterial({color:'#b19a7c',vertexColors:true,roughness:0.95,metalness:0,flatShading:true});ERAMP.mat2.userData.keep=true;
   ERAMP.veinM=new THREE.MeshBasicMaterial({color:ERAMP.vein.clone()});ERAMP.veinM.userData.keep=true;
+  const gh=m=>{const g=m.clone();g.transparent=true;g.opacity=0.42;g.depthWrite=false;if(g.emissive){g.emissive=new THREE.Color('#ffcf70');g.emissiveIntensity=0.32;}g.userData.keep=true;return g;};
+  ERAMP.gMat=gh(ERAMP.mat);ERAMP.gMat2=gh(ERAMP.mat2);ERAMP.gVein=new THREE.MeshBasicMaterial({color:ERAMP.vein.clone(),transparent:true,opacity:0.6,depthWrite:false});ERAMP.gVein.userData.keep=true;
   ERAMP.holoM=new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,uniforms:{t:{value:0},a:{value:1},c:{value:new THREE.Color(hdr('#ffd27a',1.2))}},
+    // overlay on the ghost: rim + slow scanlines only (kept faint so the real rock shapes read)
     vertexShader:'varying vec3 vN,vV,vW;void main(){vec4 w=modelMatrix*vec4(position,1.0);vW=w.xyz;vN=normalize(normalMatrix*normal);vec4 m=modelViewMatrix*vec4(position,1.0);vV=normalize(-m.xyz);gl_Position=projectionMatrix*m;}',
     fragmentShader:'uniform float t,a;uniform vec3 c;varying vec3 vN,vV,vW;void main(){float f=1.0-abs(dot(vN,vV));float rim=pow(f,2.2);float scan=0.55+0.45*smoothstep(0.35,0.5,fract(vW.y*3.2-t*1.4));'+
-      'float fl=0.88+0.12*sin(t*37.0)*sin(t*13.0);gl_FragColor=vec4(c*(0.10+0.85*rim)*scan*fl*a,1.0);}'});ERAMP.holoM.userData.keep=true;}
+      'float fl=0.88+0.12*sin(t*37.0)*sin(t*13.0);gl_FragColor=vec4(c*(0.04+0.5*rim)*scan*fl*a,1.0);}'});ERAMP.holoM.userData.keep=true;}
 function eRampMesh(seed,holo){eRampMats();const G=eRampGeo(seed),g=new THREE.Group();
-  if(holo){g.add(new THREE.Mesh(G.all,ERAMP.holoM));}
+  if(holo){const a=new THREE.Mesh(G.rock,ERAMP.gMat),b=new THREE.Mesh(G.rock2,ERAMP.gMat2),c=new THREE.Mesh(G.vein,ERAMP.gVein),f=new THREE.Mesh(G.all,ERAMP.holoM);a.renderOrder=b.renderOrder=c.renderOrder=5;f.renderOrder=6;g.add(a,b,c,f);}   // exact model, ghosted
   else{const a=new THREE.Mesh(G.rock,ERAMP.mat),b=new THREE.Mesh(G.rock2,ERAMP.mat2),vm=ERAMP.veinM.clone(),c=new THREE.Mesh(G.vein,vm);a.castShadow=a.receiveShadow=b.castShadow=b.receiveShadow=true;g.add(a,b,c);g.userData.vein=vm;}
   return g;}
 function eRampHolo(seed){const g=eRampMesh(seed,true);const warm=eRampMesh(seed,false);warm.scale.setScalar(1e-4);g.add(warm);g.visible=false;scene.add(g);return g;}   // tiny real copy = rock shaders compile while aiming, so the wall never pops in a frame late
@@ -810,6 +813,8 @@ function eRampTick(v,dt,now){
 CANIM.islecast={d:0.9,st:0,tr:[0.12,0.2],tm:[0.2,0.5],k:[[0.11,-0.5,-0.3,0.5,0.08,-0.6,0.5,0,-0.06,'s'],[0.17,-0.25,-1.18,0.8,0.12,-0.7,0.6,0,-0.1,'i'],[0.5,-0.2,-1.15,0.8,0.14,-0.65,0.65,0,-0.12,'s'],[0.6,-2.5,-0.1,0.25,-0.08,-2.4,0.35,0,0.03,'o'],[1,-2.0,-0.1,0.05,-0.03,-1.9,0.3,0,0,'s']],
   j:[[0.11,0.5,0.4,1.0,-0.35,0.18,0.14,-0.14],[0.17,0.75,0.6,0.5,-0.55,0.1,0.22,-0.22],[0.5,0.85,0.7,0.55,-0.6,0.08,0.22,-0.22],[0.6,0.2,0.15,0.4,-0.25,0.15,0.14,-0.14],[1,0.12,0.1,0.45,-0.2,0.12,0.12,-0.12]]};
 SKANIM.terraisle='islecast';
+// Rampart cast v3 (user 2026-11-24): side-on like Terra Isle — body turns so the slapping left side leads, head on target
+if(CANIM.rampcast){const T=[-0.25,-0.55,-0.55,-0.55,-0.1,0];CANIM.rampcast.k.forEach((k,i)=>{k[3]=T[Math.min(i,T.length-1)];});}
 const EISLE={top:['#c99b62','#a66f3c','#8e9850','#d6b781','#a9603d'],mat:null,geo:new Map()};
 function eIsleGeo(seed){if(EISLE.geo.has(seed))return EISLE.geo.get(seed);
   const R=eRng(seed),rad=ISLE.v.r*S3,n=24,o1=R()*10,o2=R()*10,Z=EISLE.top.map(c=>new THREE.Color(c)),pts=[];
@@ -857,10 +862,15 @@ function syncEarth(v,dt,now){
     const age=(now-o.born)/1000;
     if(o.k===0||o.k===2)o.g.scale.y=Math.min(1,0.05+age/(o.k===0?0.22:0.3));
     if(o.k===5){const th=(w[11]||0)/100;o.ih=o.ih===undefined?th:o.ih+(th-o.ih)*Math.min(1,dt*10);const em=Math.min(1,age/0.3),ee=em*em*(3-2*em);o.g.position.copy(eW(o.x,o.y,o.ih-4.5*(1-ee)));}   // rises out of the ground as the Stand pulls
-    if(o.k===4){const u=Math.min(1,age/0.3),b=1+2.2*(u-1)**3+1.2*(u-1)**2;o.g.scale.y=Math.max(0.02,u<1?b:1);if(o.vein)o.vein.color.copy(ERAMP.vein).multiplyScalar(0.35+1.6*Math.max(0,1-age/0.9));}
+    if(o.k===4){const u=Math.min(1,age/0.32),e=u*u*(3-2*u);o.g.position.copy(o.base);o.g.position.y-=RAMPART.v.hgt*1.05*(1-e);if(o.vein)o.vein.color.copy(ERAMP.vein).multiplyScalar(0.35+1.6*Math.max(0,1-age/0.9));}
     if(o.k===3)o.mat.opacity=0.14+0.08*Math.sin(now/300);
     else if(w[7]!==o.hp&&o.mat){o.hp=w[7];for(const m of o.mats){if(!m.userData.c0)m.userData.c0=m.color.clone();m.color.copy(m.userData.c0).lerp(new THREE.Color('#5a4632'),1-w[7]/100);}burst(o.x,o.y,ECOL.dust,4,60,0.5,2,{h:rnd(0.5,o.h),g:4});}}
-  for(const [id,o] of EV.es)if(!seen.has(id)){disposeObj(o.g);for(const m of o.mats)m.dispose();EV.es.delete(id);}
+  for(const [id,o] of EV.es)if(!seen.has(id)){EV.es.delete(id);
+    if(o.k===4){EV.rsink.push({o,t:0});continue;}   // Rampart sinks instead of popping
+    disposeObj(o.g);for(const m of o.mats)m.dispose();}
+  for(let i=EV.rsink.length-1;i>=0;i--){const S=EV.rsink[i],o=S.o;S.t+=dt;const u=Math.min(1,S.t/0.45);o.g.position.copy(o.base);o.g.position.y-=RAMPART.v.hgt*1.1*u*u;
+    if(Math.random()<0.7){const a=o.g.rotation.y,q=rnd(-1,1)*RAMPART.v.len/2;burst(o.x+Math.sin(a)*q,o.y+Math.cos(a)*q,ECOL.dust,3,140,0.5,2.6,{h:0.2,vh:[1,3],g:5});}
+    if(u>=1){disposeObj(o.g);for(const m of o.mats)m.dispose();EV.rsink.splice(i,1);}}
   // Tectonic Crush: Stand ใหญ่หลังกำแพง ออกแรงช้า ๆ (หินสั่น ฝุ่นออก) แล้วหนีบปังทีเดียว
   for(let i=EV.crush.length-1;i>=0;i--){const C=EV.crush[i];C.t+=dt;const c=Math.cos(C.a),sn=Math.sin(C.a),nx=-sn,ny=c;
     const G=C.G;G.g.position.copy(eW(C.x+c*178,C.y+sn*178,-0.6));G.g.rotation.y=Math.atan2(-c,-sn);
