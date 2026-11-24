@@ -128,6 +128,7 @@ function Whip(length=WHIP_L,curled=false){const tube=Tube(WHIP_N,7,M.bark),th=Th
   const pulse=curled?Tube(WHIP_N,5,ADD('#ffffff',{vertexColors:true})):null;
   const vineDark=new T.Color('#19371a'),vineLight=new T.Color(curled?'#59833b':'#5c9a2e');
   const chargeColor=new T.Color(curled?'#b6ff63':'#b6e45a');
+  const wandRotation=new T.Quaternion(),wandDirection=V3(),sectionDirection=V3();
   if(pulse)pulse.castShadow=false;
   return {tube,th,trail,upd(o,t,sw){ // sw = {t0, dir(+1 ซ้าย→ขวา), aimYaw}
       const st=t-sw.t0,show=st>0&&st<(curled?.78:.82);tube.visible=th.visible=show;if(pulse)pulse.visible=false;
@@ -136,15 +137,12 @@ function Whip(length=WHIP_L,curled=false){const tube=Tube(WHIP_N,7,M.bark),th=Th
       const curl=curled?1-ease((st-.06)/.23):0;
       // มุมโคน (เทียบทิศที่หัน): ง้าง→กวาด→เลยไปนิด
       const brake=s<0?.31:.29;
-      const ang=(x)=>{if(curled){const q=phase(x,.04,brake);
-          const sweep=lerp(s<0?1.49:1.55,s<0?-1.27:-1.30,q*q*q*(q*(q*6-15)+10));
-          return s*(sweep+.54*ease(phase(x,brake-.02,brake+.24))-.06*Math.sin(Math.PI*phase(x,brake,brake+.10)));
-        }const a=1.45*s,b=-1.45*s;if(x<.1)return lerp(a*.85,a,x/.1);const k=(x-.1)/.36;if(k<1)return lerp(a,b,ease(k));const z=x-.46;return b+(-.22*s)*Math.sin(z*14)*Math.exp(-z*6);};
-      const armYaw=ang(st);
-      const armWeight=curled?ease(phase(st,0,.07))*(1-ease(phase(st,.52,.78))):1;
-      o.armR.rotation.set(lerp(o.armR.rotation.x,-1.25+.25*Math.sin(Math.min(1,st/.46)*Math.PI),armWeight),armYaw*.55*armWeight,lerp(o.armR.rotation.z,0,armWeight));
-      o.b.rotation.y=armYaw*.28*armWeight;
-      const P0=tipW(o),yaw=o.g.rotation.y,pts=[P0.clone()],seg=length*grow/(WHIP_N-1);let p=P0.clone();
+      const ang=x=>{if(curled)return nwSwingAngle(x,s);
+        const a=1.45*s,b=-1.45*s;if(x<.1)return lerp(a*.85,a,x/.1);const k=(x-.1)/.36;if(k<1)return lerp(a,b,ease(k));const z=x-.46;return b+(-.22*s)*Math.sin(z*14)*Math.exp(-z*6);};
+      // The rig chose the pose. Match the vine's first section to the wand tip and direction.
+      const P0=sw.wand?sw.wand.localToWorld(V3().copy(sw.wandEnd)):tipW(o);
+      const yaw=o.g.rotation.y,pts=[P0.clone()],seg=length*grow/(WHIP_N-1);let p=P0.clone();
+      if(curled)wandDirection.set(0,-1,0).applyQuaternion((sw.wand||o.wandG).getWorldQuaternion(wandRotation));
       for(let i=1;i<WHIP_N;i++){const u=i/(WHIP_N-1),delay=(curled?(s<0?.18:.17):WHIP_LAG)*u;
         // แต่ละช่วงสะบัดคนละจังหวะตามระยะจากมือ แล้วดีดกลับเบา ๆ
         const bendAge=st-brake-delay+.035;
@@ -154,7 +152,9 @@ function Whip(length=WHIP_L,curled=false){const tube=Tube(WHIP_N,7,M.bark),th=Th
         const a=yaw+ang(Math.max(0,st-delay))*1.08+s*(curl*(s<0?3.8:4.0)*u*u-bend);
         const pitch=-.06-.22*u*u+.06*Math.sin(u*9-st*20)*(1-u)
           +(curled?curl*.35*Math.sin(u*Math.PI)*Math.sin(u*5.5+st*3)+u*(.21*snap-.14*release):0),cp=Math.cos(pitch);
-        p=p.clone().add(V3(Math.sin(a)*cp,Math.sin(pitch),Math.cos(a)*cp).multiplyScalar(seg));if(p.y<O.y+.12)p.y=O.y+.12;pts.push(p);}
+        sectionDirection.set(Math.sin(a)*cp,Math.sin(pitch),Math.cos(a)*cp);
+        if(curled&&u<.23)sectionDirection.lerp(wandDirection,1-ease(phase(u,1/(WHIP_N-1),.23))).normalize();
+        p=p.clone().addScaledVector(sectionDirection,seg);if(p.y<O.y+.12)p.y=O.y+.12;pts.push(p);}
       const rad=(u)=>(.085*(1-u)+.018)*(.6+.4*grow);
       tube.set(pts,rad,(u,c)=>curled?c.copy(vineDark).lerp(vineLight,.22+.24*u+.10*Math.sin(u*36)):
         c.set('#4a3218').lerp(vineLight,Math.min(1,u*1.4)).lerp(chargeColor,Math.max(0,u-.7)*1.8));

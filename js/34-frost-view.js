@@ -114,6 +114,14 @@ function frostSlideHead(o){
     h.base.copy(q);q.multiply(_slQ.setFromAxisAngle(_slAx,a*0.5));h.ap.copy(q);}
 }
 const _slAx=new THREE.Vector3(0,1,0);
+function frostWandLink(o,now){
+  // เส้นด้ายเวท ปลายไม้ → ด้ามอาวุธ (+ ประกายไหลไปตามเส้น)
+  if(!o.fwLk?.visible)return;
+  _tv1.copy(o.tipW);o.fw.g.getWorldPosition(_tv2);const A=o.fwLk.geometry.attributes.position,ar=A.array,amp=o.fwStrike?0.03:0.08;
+  for(let i=0;i<FWL_N;i++){const t=i/(FWL_N-1),w=Math.sin(t*Math.PI);ar[i*3]=lerp(_tv1.x,_tv2.x,t)+Math.sin(now/90+t*9)*w*amp;ar[i*3+1]=lerp(_tv1.y,_tv2.y,t)+Math.sin(now/70+t*7)*w*amp+w*0.15;ar[i*3+2]=lerp(_tv1.z,_tv2.z,t)+Math.cos(now/80+t*8)*w*amp;}
+  A.needsUpdate=true;o.fwLk.material.opacity=o.fwStrike?0.65:0.28+0.1*Math.sin(now/200);
+  if(Math.random()<0.45){const t=Math.random(),q=simOf(_tv3.lerpVectors(_tv1,_tv2,t));PARTS.push({x:q.x,y:q.y,h:q.h+Math.sin(t*Math.PI)*0.15,vx:(_tv2.x-_tv1.x)*50,vy:(_tv2.z-_tv1.z)*50,vh:(_tv2.y-_tv1.y)*2.5,life:0.3,max:0.3,col:Math.random()<0.5?'#ffffff':'#bfeaff',size:1.2,g:0});}
+}
 function frostFX(o,p,pz,now,dt){
   const F=p.fr;
   if(!F){if(o.fw)o.fw.g.visible=false;if(o.fwLk)o.fwLk.visible=false;if(o.ishield)o.ishield.visible=false;if(o.cryoM)o.cryoM.visible=false;if(o.cryoFx){fxKill(o.cryoFx);o.cryoFx=null;}if(o.fwx)o.fwx.forEach(c=>{c.g.visible=false;c.on=0;});return;}
@@ -185,16 +193,12 @@ function frostFX(o,p,pz,now,dt){
   o.fwStrike=fwOn&&P.strike;
   const sm=(o.swT>0||o.grDown>0||o.grUp>0||o.mlcT>0)?Math.min(1,dt*30):Math.min(1,dt*10);
   fa.ax+=(ax-fa.ax)*sm;fa.az+=(az-fa.az)*sm;fa.by+=(by-fa.by)*sm;fa.bx+=(bx-fa.bx)*sm;
-  if((melee&&!o.caN||rpose)&&!p.fl){o.armR.rotation.x=fa.ax;o.armR.rotation.z=fa.az;o.b.rotation.y=fa.by;if(Math.abs(fa.bx)>0.01)o.b.rotation.x+=fa.bx;
+  const meleeAction=melee&&(p.sh||o.swT>0||o.grDown>0||o.grUp>0||o.slamT>0||o.mlcT>0||(flags&32));
+  if((meleeAction&&!o.caN||rpose)&&!p.fl){o.armR.rotation.x=fa.ax;o.armR.rotation.z=fa.az;o.b.rotation.y=fa.by;if(Math.abs(fa.bx)>0.01)o.b.rotation.x+=fa.bx;
     if(rpose){o.armL.rotation.x=lerp(-0.2,-1.6,o.grUp>0?1:0.5);o.armL.rotation.z=0.25;}
     if(melee&&!p.sh){const act=o.swT>0||o.grDown>0||(flags&32)||o.mlcT>0;o.armL.rotation.x=act?-0.75:-0.4;o.armL.rotation.z=act?0.8:0.35;}}   // มือซ้ายกางทรงตัวตอนร่าย
   else o.b.rotation.y*=0.8;
-  // เส้นด้ายเวท ปลายไม้ → ด้ามอาวุธ (+ ประกายไหลไปตามเส้น)
-  if(fwOn&&o.fwLk){o.tip.getWorldPosition(_tv1);o.fw.g.getWorldPosition(_tv2);const A=o.fwLk.geometry.attributes.position,ar=A.array,amp=o.fwStrike?0.03:0.08;
-    for(let i=0;i<FWL_N;i++){const t=i/(FWL_N-1),w=Math.sin(t*Math.PI);ar[i*3]=lerp(_tv1.x,_tv2.x,t)+Math.sin(now/90+t*9)*w*amp;ar[i*3+1]=lerp(_tv1.y,_tv2.y,t)+Math.sin(now/70+t*7)*w*amp+w*0.15;ar[i*3+2]=lerp(_tv1.z,_tv2.z,t)+Math.cos(now/80+t*8)*w*amp;}
-    A.needsUpdate=true;o.fwLk.visible=true;o.fwLk.material.opacity=o.fwStrike?0.65:0.28+0.1*Math.sin(now/200);
-    if(Math.random()<0.45){const t=Math.random(),q=simOf(_tv3.lerpVectors(_tv1,_tv2,t));PARTS.push({x:q.x,y:q.y,h:q.h+Math.sin(t*Math.PI)*0.15,vx:(_tv2.x-_tv1.x)*50,vy:(_tv2.z-_tv1.z)*50,vh:(_tv2.y-_tv1.y)*2.5,life:0.3,max:0.3,col:Math.random()<0.5?'#ffffff':'#bfeaff',size:1.2,g:0});}}
-  else if(o.fwLk)o.fwLk.visible=false;
+  if(o.fwLk)o.fwLk.visible=!!fwOn;
   // รอยฟัน = ริบบิ้นติดใบดาบ/ขวาน ทุกเฟรมที่กำลังฟัน (ผู้ใช้ 2026-10-20: รอยต้องตามดาบ • ขวานต้องดูหนักและต่างจากดาบ ไม่ใช่แค่หนากว่า)
   //   ดาบ = ปาดสว่างคม: ริบบิ้นขาว-ฟ้าตามใบ + คลื่นฟ้าจางยื่นเลยปลายใบ + ประกายจากปลาย
   //   ขวาน = ปาดหนัก: ริบบิ้นน้ำเงินเข้ม + ทิ้งแนวผลึกน้ำแข็งตามทางที่หัวขวานผ่าน (ค้างแล้วร่วงแตก) + หมอกหนา + จบท่าแล้วพื้นร้าว/เศษน้ำแข็ง

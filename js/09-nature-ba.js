@@ -63,23 +63,59 @@ function natureWhipBasic(p,inp,canSwing){
   p.cd.basic=p.cdMax.basic=NATURE_WHIP.cooldown*(p.baHaste>G.time?1/(1+NAT.lotusHaste):1);
 }
 
+const NATURE_READY_YAW=-Math.PI/4;
 const NW_RINGS=27,NW_SIDES=7;
+const nwCounterTurn=new THREE.Quaternion(),nwAimTurn=new THREE.Quaternion(),nwArmAim=new THREE.Vector3();
+const nwRootAim=new THREE.Vector3(),nwUp=new THREE.Vector3(0,1,0);
 const nwPhase=(t,start,end)=>clamp((t-start)/(end-start),0,1);
 const nwEase=x=>x*x*(3-2*x);
 function nwSwingAngle(t,side){
   const brake=side<0?.31:.29;
   const q=nwPhase(t,.04,brake);
-  const sweep=lerp(1.55,-1.30,q*q*q*(q*(q*6-15)+10));
+  const sweep=lerp(side<0?1.49:1.55,side<0?-1.27:-1.30,q*q*q*(q*(q*6-15)+10));
   return side*(sweep+.54*nwEase(nwPhase(t,brake-.02,brake+.24))-.06*Math.sin(Math.PI*nwPhase(t,brake,brake+.10)));
 }
-function natureWhipPose(o,swing){
-  const t=swing.age;
-  const weight=nwEase(nwPhase(t,0,.07))*(1-nwEase(nwPhase(t,.52,NATURE_WHIP.duration)));
-  const angle=nwSwingAngle(t,swing.side);
-  o.armR.rotation.x=lerp(o.armR.rotation.x,-1.25+.25*Math.sin(Math.min(1,t/.46)*Math.PI),weight);
-  o.armR.rotation.y=angle*.55*weight;
-  o.armR.rotation.z=lerp(o.armR.rotation.z,0,weight);
-  o.b.rotation.y=angle*.28*weight;
+function nwRightRelease(t,side){
+  return side>0?nwEase(nwPhase(t,.17,.32))*(1-nwEase(nwPhase(t,.42,.65))):0;
+}
+function natureWhipPose(o,swing,native){
+  const t=swing.age,entry=nwEase(nwPhase(t,0,.07));
+  const carry=swing.carry;
+  const weight=(carry?1:entry)*(1-nwEase(nwPhase(t,.52,NATURE_WHIP.duration)));
+  const sweep=nwSwingAngle(t,swing.side);
+  const angle=carry?lerp(carry.angle,sweep,entry):sweep;
+  const pitch=-1.25+.25*Math.sin(Math.min(1,t/.46)*Math.PI);
+  const arm=o.armR.rotation,twist=angle*.28;
+  arm.x=native&&carry?lerp(carry.pitch,pitch,entry):lerp(arm.x,pitch,native?1:weight);
+  arm.y=angle*.55*(native?1:weight);
+  if(native){
+    const moveLeft=nwEase(nwPhase(angle,-.28,1.05));
+    const delayed=nwSwingAngle(Math.max(0,t-.042),swing.side);
+    const followAngle=carry?lerp(carry.angle,delayed,entry):delayed;
+    const open=nwRightRelease(t,swing.side);
+    const release=carry?lerp(carry.release,open,entry):open;
+    swing.freeOut=nwEase(nwPhase(followAngle,-.38,1.07))*weight;
+    swing.freeBack=release*weight;
+    const snap=Math.sin(Math.PI*nwPhase(t,.18,.36))*weight;
+    const settle=Math.sin(Math.PI*nwPhase(t,.36,.56))*weight;
+    swing.headYaw=.10*followAngle*weight;
+    swing.headPitch=.055*snap-.023*settle;
+    swing.headRoll=swing.side*(.056*snap-.020*settle);
+    arm.z=-.57*release;
+    o.b.rotation.y=NATURE_READY_YAW*(1-moveLeft*weight)-.022*release;
+    // Follow the whip with the chest while preserving the right arm's aiming arc.
+    o.armR.quaternion.premultiply(nwCounterTurn.setFromAxisAngle(nwUp,twist-o.b.rotation.y));
+    // Aim the casting arm down the original whip sweep, from the wind-up onward.
+    const aimYaw=angle*1.08-o.b.rotation.y;
+    nwArmAim.set(0,-.973,.23).normalize().applyQuaternion(o.armR.quaternion);
+    nwRootAim.set(Math.sin(aimYaw)*.997,-.07,Math.cos(aimYaw)*.997).normalize();
+    nwAimTurn.identity().slerp(nwCounterTurn.setFromUnitVectors(nwArmAim,nwRootAim),.80);
+    o.armR.quaternion.premultiply(nwAimTurn);
+  }else{
+    arm.z=lerp(arm.z,0,weight);
+    o.b.rotation.y=twist*weight;
+  }
+  return weight;
 }
 function natureWhipVisualMake(o){
   const geo=new THREE.BufferGeometry();
@@ -103,6 +139,27 @@ function natureWhipVisualMake(o){
     spike:new THREE.Object3D(),up:new THREE.Vector3(0,1,0),
     worldA:new THREE.Vector3(),worldB:new THREE.Vector3(),swing:null,trail:null,lastSample:-Infinity};
 }
+const nwWandTipWorld=new THREE.Vector3();
+function natureWhipWand(o,v){
+  if(o.wnG||!o.fileModel)return;
+  if(v.wandModel!==o.fileModel){
+    v.wandModel=o.fileModel;v.wand=null;
+    o.fileModel.traverse(mesh=>{
+      if(!mesh.isMesh||!/^wand_\d+$/.test(mesh.name))return;
+      const geometry=mesh.geometry;
+      if(!geometry.boundingBox)geometry.computeBoundingBox();
+      const bounds=geometry.boundingBox;
+      v.wand=mesh;
+      v.wandEnd=bounds.getCenter(new THREE.Vector3());
+      v.wandEnd.y=bounds.min.y;
+    });
+  }
+  if(v.wand&&o.caER?.on){
+    // Let the glow use the visible wand too. The elbow layer restores the tip next frame.
+    v.wand.localToWorld(nwWandTipWorld.copy(v.wandEnd));
+    o.tip.position.copy(o.armR.worldToLocal(nwWandTipWorld));
+  }
+}
 function natureWhipView(o,swing){   // exact preview whip: natFx().Whip (tools/nature-preview.js SKS.whip)
   let v=o.natureWhipView;
   if(!swing){if(v&&v.idle<25){v.idle++;v.w.upd(o,-1,{t0:0,dir:1});}return;}
@@ -110,7 +167,9 @@ function natureWhipView(o,swing){   // exact preview whip: natFx().Whip (tools/n
   if(!v){const w=F.Whip(NATURE_WHIP.range*S3,true);v=o.natureWhipView={w,vine:w.tube,start:null,sw:null,idle:0};}
   v.idle=0;
   if(v.start!==swing.start){v.start=swing.start;v.sw={t0:0,dir:swing.side,shed:0};}
+  natureWhipWand(o,v);
   const sw=v.sw,q=simOf(o.g.position);F.O.y=GY(q.x,q.y);
+  sw.wand=v.wand;sw.wandEnd=v.wandEnd;
   const r=v.w.upd(o,Math.max(.0001,swing.age),sw);
   if(r){
     const burst=[[.42,3],[.49,3],[.56,3]][sw.shed];

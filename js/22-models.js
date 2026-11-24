@@ -212,6 +212,9 @@ function fileBroom(o){loadModel('char_broom').then(r=>{if(!r||!o.g.parent||!o.br
 const _rq=new THREE.Quaternion(),_rq2=new THREE.Quaternion(),_rq3=new THREE.Quaternion();
 function rigBind(o,inst){
   const qbi=o.b.getWorldQuaternion(new THREE.Quaternion()).invert();
+  const head=inst.getObjectByName('head');
+  if(head)o.readyHeadRest=qbi.clone().multiply(head.getWorldQuaternion(new THREE.Quaternion()));
+  o.readyLeftForearm=inst.getObjectByName('forearm_L')?.quaternion.clone();
   o.rig=[[o.armR,'upper_arm_R',1],[o.armL,'upper_arm_L',0],[o.legs[0],'thigh_R',0],[o.legs[1],'thigh_L',0]].map(([c,n,al])=>{
     const bone=inst.getObjectByName(n);if(!c||!bone)return null;
     const rel=qbi.clone().multiply(bone.getWorldQuaternion(new THREE.Quaternion()));   // แกนกระดูกตอนยืนตรง เทียบ o.b (แขนขาโค้ดหมุน 0 = แกน o.b)

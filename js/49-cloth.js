@@ -92,6 +92,7 @@ function stormCape(o,hidden){
 }
 // เตรียมผ้า: หาจุดแผงผ้าในโมเดล (ตามรูปทรงตอนสร้าง) → ตัดสามเหลี่ยมแผงออกจาก geometry ของเรา → สร้าง mesh ผ้าจำลอง
 function clothSetup(o){
+  if(o.g.natSleeves)natSleeveRestore(o.g);
   const ms=[];o.fileModel.traverse(m=>{if(m.isSkinnedMesh&&(m.material.name==='tint_cloak'||m.material.name==='tint_house'))ms.push(m);});
   const outer=ms.find(m=>m.material.name==='tint_cloak'),inner=ms.find(m=>m.material.name==='tint_house');if(!outer||!inner)return null;
   const R0=CL_ROWS.length,ref=new Array(R0*CL_NC).fill(-1),grid=new Map();

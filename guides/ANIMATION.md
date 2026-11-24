@@ -7,11 +7,11 @@ Read this before making or changing any cast pose, skill motion or movement pose
 
 - **Crouch with the knees.** Thighs forward + knees bent, then only a small body drop. Do not lower the whole
   body with straight legs (the feet sink into the floor and it looks like sliding down).
-- **Bend the free elbow.** Arms are not straight sticks unless the move is a full reach. The wand (right) hand follows
-  the code arm, so bend only the free (left) elbow on the bone.
+- **Bend both elbows.** Keep the joints visible through the motion. The right elbow layer rotates the wand and its tip
+  with the forearm so the grip stays attached.
 - **Torso leans a little** into a low move (forward when reaching down, back on a big upward yank). Small angles:
   the cast system multiplies them (`AMP_S` in `js/35-sync.js`), so a lean of 0.25 already reads as a clear bend.
-- **Head and chest** face the cursor unless the move says otherwise. If the body turns side-on, turn the head back.
+- **Head** follows aim while the torso keeps the stance or the authored skill twist.
 - Check every pose **from the side with the cloak hidden** (the robe hides the legs), then from the game camera.
 
 ## 2. Timing (the user's top priority)
@@ -38,10 +38,22 @@ rips to the target), the big result on the release.
   small stagger (right foot forward) and spread. Poses with an authored `SKFEET` keep their thighs, still get knees/elbow.
 - Stand **staggered and a bit wide**, not feet parallel (user 2026-11-24).
 - Skill → pose name: `SKANIM` in `js/35-sync.js`.
-- **Always-on arm/leg layer** (render loop after `rigSync`, js/35-sync.js): elbows rest bent (left 0.45, right 0.35;
-  less while walking because the walk/run clip already bends them); right elbow bends the `forearm_R` bone and carries
-  the wand around the elbow pivot (`caElbowR`), so the wand stays in the hand. Standing still: right foot ~0.14 forward,
-  left a little back, feet slightly apart, soft knees (0.14 / 0.10). Walk/run clips already flex knees — don't add more.
+- **Shared ready stance** (`readyStance` in `js/35-sync.js`): torso at 40° with the right shoulder and foot leading,
+  left foot back, and soft knees. Keep the right elbow low with the wand grip near the chin. The free arm follows
+  breathing at rest and swings gently with the stride. A forward run lean keeps the wand up.
+- **Transitions**: use ready as the base for the jump balance and landing layers. Shared basic and skill poses
+  blend out of and back into that base over their existing wind-up and follow-through. Airborne casts keep the
+  leg animation while the skill steers the upper body. Class-specific pose writers keep priority.
+- **Nature**: face 45° right, with the left elbow forward and slightly raised and the hand folded diagonally below the chest and the right hand holding the
+  wand low and slightly away from the thigh. The free hand drops just above the hip while running. Blend from
+  the bind forearm orientation for the run bend. On basic whip, turn toward center for the leftward sweep and
+  back to 45° for the rightward sweep. Let the free elbow stay bent while the arm follows the turn, and open the
+  wand arm outward on the rightward follow-through. Give the head a small delayed turn and recoil. Let the wand
+  lead along the swing arc and match the first vine segment to the equipped wand’s actual tip and direction.
+- **Nature hands**: use the left hand for seeds, walls, plant relocation and World Tree. Use the right wand
+  for Wood Ball and the whip. Faceted vines cinch the left sleeve and grade from bark brown at the shoulder through moss at the elbow to green at the wrist. Two tapered strands start together at the shoulder and divide into the upper wrap. Keep the thorns short and away from the shoulder start. They carry one small flower on a stem.
+  The green orb follows the center of the palm with visible lag through movement and casts.
+- The local head follows yaw and camera pitch. Other characters use shared yaw.
 
 ## 4. Settings that worked (log)
 

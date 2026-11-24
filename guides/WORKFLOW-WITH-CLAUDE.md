@@ -42,3 +42,8 @@ Keep this table updated when a new system or doc appears.
 - Comments: short, English, just enough for Claude to understand. The user does not read code.
 - Commit messages and project docs (`HANDOFF.md`, `notes/`): normal, English or existing style.
 - Existing end-of-task steps still apply (`node tools/check.js`, `node tools/codemap.js`, HANDOFF/CHANGELOG, commit, push).
+
+## 4. VFX previews
+
+- Use VFX Studio's existing GIF Export for Studio previews. For automated exports, use `node tools/headless.js --fx <group/effect> --gif <name>`. Add `--from`, `--to`, `--fps` or `--gif-width` when the preview needs a specific range or size.
+- Use the Studio's **🎮 ท่า** control when checking an effect against a game cast. Use an in-game capture only when the requested gameplay or pose cannot be shown in Studio. For long captures, write frames as they are captured so the browser can return a small result.

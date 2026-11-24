@@ -18,11 +18,11 @@ const CPOSE=[
   [[-3.05,-0.15,-0.15,-0.15,-0.3,0.4],[-0.9,0.05,0.1,0.25,0.3,0.6],[-1.2,-0.05,0.05,0.1,0.1,0.45]],
   [[-1.2,-0.7,-0.5,-0.05,-0.4,0.4],[-1.7,-0.1,0.35,0.15,0.4,0.7],[-1.6,-0.15,0.15,0.08,0.2,0.5]],
   [[-2.2,0.55,0.45,-0.04,-0.3,0.7],[-1.35,-0.55,-0.3,0.12,-0.5,0.25],[-1.45,-0.35,-0.1,0.05,-0.3,0.35]]];   // 6 = ฟันย้อนมือ (backhand) จากบนซ้ายไปขวา — สลับกับท่า 0 ให้ยิงปกติเหวี่ยงซ้าย-ขวา
-const _cpT=[0,0,0,0,0,0],_cpR=[0,0,0,0,0,0],CGUARD=[-1.05,-0.3,0.18,0.04,-0.35,0.45];   // ท่าการ์ด: แขนขวา x/z บิดตัว เอนตัว แขนซ้าย x/z
+const _cpT=[0,0,0,0,0,0],_cpR=[0,0,0,0,0,0];
 const CP_STEP=[0,0,0.7,1,0.4,0.8,0.3];   // ก้าวขา (ยืนนิ่ง) ของแต่ละท่า
 const CPCOL=['#ffb347','#bfeaff','#ffe27a','#c9a46a','#c9a46a','#c9a46a','#d8b46a'];   // สีหางแสงปลายไม้ตามสาย (pyro frost storm … earth)
 function castStyle(t,n){if(t==='iceboulder')return [0,6][n%2];   /* Frost ยิงไกลเสริม: มือเดียว สลับฟาดขวา-ย้อนซ้าย (ผู้ใช้ 2026-11-16 ไม่เอาสองมือ) */if(t==='pfire'||t==='pfireb')return 3;if(t==='icicle'||t==='b_frost')return [0,6,2][n%3];return [0,6,2,0,6,1][n%6];}   // ยิงปกติ: ฟันขวา→ย้อนมือซ้าย→แทง... สลับไปมา
-function castStart(o,t,style){o.castN=(o.castN|0)+1;o.cpS=style===undefined?castStyle(t,o.castN):style;o.cpT=CPOSE_T;o.cgd=2;o.caN=null;}
+function castStart(o,t,style){o.castN=(o.castN|0)+1;o.cpS=style===undefined?castStyle(t,o.castN):style;o.cpT=CPOSE_T;o.caN=null;}
 // ---------- ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเหวี่ยงไม้คทา ... บิดเอวบิดตัว ... ท่าใหญ่ใช้ 2 มือ")
 // host ส่ง event {k:'sk',id,s:สกิล} ตอนร่ายสำเร็จ → SKANIM เลือกท่า • สกิลที่มีท่าของตัวเองในไฟล์สายอยู่แล้ว (Kindle, Dragonfall,
 // Ignition Snap, Railgun, Triple Strike, ร่างเทพ, Frost ลอยอาวุธ, สายดินสั่ง Stand) ไม่ใส่ที่นี่ — ไฟล์สายรันทีหลังจึงทับท่านี้อยู่แล้ว
@@ -30,9 +30,10 @@ function castStart(o,t,style){o.castN=(o.castN|0)+1;o.cpS=style===undefined?cast
 // แขน x: ติดลบ = ยกไปหน้า/ขึ้น (-1.57 ชี้ตรง, -3 ชูเหนือหัว) • แขนขวา z บวก = ข้ามตัวไปซ้าย • แขนซ้าย z ลบ = ข้ามตัวไปขวา
 const CANIM={
   staffup:{d:0.42,st:0.7,tr:[0.2,0.7],k:[[0.35,-2.9,-0.1,0.2,-0.14,-0.5,0.2,0,0.06,'o'],[0.7,-3.05,0,0,-0.18,-0.45,0.2,0,0.1,'s'],[1,-1.3,0.1,0,0,-0.3,0.15,0,0,'s']]},   // Lightning: staff thrown up as it grows
-  natthrow:{d:0.62,st:0,tr:null,k:[[0.36,-0.45,0.22,0.6,-0.14,0.85,0.25,0.06,-0.14,'s'],[0.62,-0.55,0.12,-0.75,0.24,-2.35,-0.32,-0.07,-0.02,'o'],[1,-0.4,0.1,-0.25,0.1,-1.05,-0.2,0,-0.06,'s']]},   // Nature: left hand throws the seed, stick stays out of the way
-  natraise:{d:0.85,st:0,tr:null,k:[[0.3,-2.95,0.05,0.05,-0.14,-0.5,0.2,0,0.04,'s'],[0.75,-3.05,0.02,0,-0.18,-0.45,0.2,0,0.08,'s'],[1,-1.1,0.1,0,0,-0.3,0.15,0,0,'s']]},   // Nature: stick held high to move plants / grow the wall
-  natsummon:{two:1,d:1.3,st:1,tr:[0.3,0.75],k:[[0.25,0.32,-0.22,0.1,0.2,0.32,0.22,0,-0.2,'s'],[0.58,-3.0,0.12,0,-0.2,-3.0,-0.12,0,0.1,'s'],[0.72,-3.05,0.1,0,-0.24,-3.05,-0.1,0,0.12,'s'],[0.86,-0.8,0.2,0,0.3,-0.8,-0.2,0,-0.24,'o'],[1,-0.8,0.15,0,0.16,-0.8,-0.15,0,-0.12,'s']],tm:[0.45,0.7]},   // Nature ult: gather low, both hands overhead, then call the tree down
+  natthrow:{d:.62,st:0,k:[[.22,.12,-.40,-.45,.08,-.65,.48,.05,-.04,'s'],[.38,.12,-.39,-.05,.16,-1.66,.16,-.06,-.03,'o'],[.66,.11,-.37,-.12,.10,-1.2,.35,-.04,-.035,'s'],[1,.12,-.40,-.48,0,-.25,.28,0,0,'s']]},
+  natraise:{d:.85,st:0,k:[[.21,.14,-.40,-.44,.22,-.62,.49,.07,-.11,'s'],[.48,.10,-.37,-.12,.06,-2.04,.23,-.08,-.04,'o'],[.72,.13,-.38,-.19,.04,-1.36,.28,-.04,-.035,'s'],[1,.13,-.40,-.47,0,-.25,.28,0,0,'s']]},
+  natsummon:{d:1.3,st:.62,tm:[.45,.64],k:[[.25,.15,-.41,-.49,.17,-.44,.46,.07,-.13,'s'],[.58,.12,-.37,-.37,-.13,-2.55,.39,-.04,-.04,'s'],[.70,.08,-.39,-.06,.21,-1.36,.27,-.09,-.12,'o'],[.88,.12,-.39,-.28,.06,-.85,.32,-.04,-.035,'s'],[1,.13,-.4,-.48,0,-.25,.28,0,0,'s']]},
+  natspell:{d:.66,st:.25,tr:[.14,.43],k:[[.15,-1.43,-.47,-.56,-.07,-.25,.27,.07,-.03,'s'],[.33,-1.01,-.06,-.24,.23,-.39,.31,-.06,-.07,'o'],[.62,-.88,-.19,-.36,.10,-.38,.32,-.02,-.04,'s'],[1,.10,-.39,-.48,0,-.25,.27,0,0,'s']]},
   sweep:{two:1,d:0.6,st:0.5,tr:[0.2,0.7],k:[[0.25,-1.5,0.9,0.6,0.05,-0.6,0.9,0.05,-0.05,'s'],[0.55,-1.5,-1.2,-0.7,0.1,-1.3,0.2,-0.08,-0.12,'o'],[1,-1.3,-0.9,-0.5,0.05,-0.8,0.5,-0.04,-0.08,'s']]},   // กวาดกว้างแนวนอน (Ring of Embers)
   powerup:{d:0.7,st:0,tr:null,k:[[0.35,0.3,-0.5,0,0.35,0.3,0.5,0,-0.2,'s'],[0.6,-0.9,-1.3,0,-0.2,-0.9,1.3,0,0.05,'o'],[1,-0.6,-0.9,0,-0.1,-0.6,0.9,0,0,'s']],tm:[0.05,0.35]},   // ย่อเกร็ง แล้วกางแขนอกผาย (เพิ่มพลังตัวเอง)
   // Inferno Nova (ผู้ใช้ 2026-11-14): ย่อรวบพลัง → ชูไม้ตรงขึ้นฟ้าค้างไว้ระหว่างปลายไม้ชาร์จ (0.8 วิ) → ดันขึ้นสุดตอนระเบิด แขนซ้ายกางออก → คืนท่า
@@ -90,18 +91,20 @@ const SKANIM={ringofembers:'sweep',blazeform:'fireflare',colossus:'novaup',kindl
   thunderline:'line',speedsiphon:'staffup',stormorbs:'orbs',stormdome:'dome',triplestrike:'skycall',godlightning:'godcall',
   stonebreaker:'punchcmd',mudswamp:'ground',tectoniccrush:'dome',tectoniccrush_2:'clap',dustburst:'burst',terraauger:'pullback',rampart:'rampcast',wrath:'ultraise',
   riptide:'wavecast',tidecaller:'tidecall',aquacage:'cagecast',abyssalbeam:'pullback',moonwater:'moonarts',dragondeep:'dragoncall',dragondeep_dive:'dragoncommand',voidspheres:'windvoid',aegisgale_push:'wallpush',aegisgale_place:'ground',featherwing_2:'wingflick',eyeofheaven:'heavenslam'};
-Object.assign(SKANIM,{poisondart:'natthrow',bloom:'natthrow',sporecloud:'natthrow',vinelash:'natraise',thornburst:'natraise',worldtree:'natsummon',radiantsovereign:'novaup',lgrecall:'pullback'});
+Object.assign(SKANIM,{poisondart:'natthrow',bloom:'natthrow',sporecloud:'natspell',vinelash:'natraise',thornburst:'natraise',worldtree:'natsummon',radiantsovereign:'novaup',lgrecall:'pullback'});
 SKANIM.railgun_release='railrelease';SKANIM.terraauger_release='ground';
 SKFEET.rendfar=[-0.75,0.5,0.1,-0.08];   /* ขาหน้าก้าวออกไปด้านหน้า ขาหลังยันหลัง ให้ท่าก้มดูมีน้ำหนักตามฟิสิกส์ (ผู้ใช้ 2026-11-16) */SKANIM.dragonfall_land='dragonland';SKFEET.dragonland=[-0.8,0.3,0.12,-0.1];SKFEET.wingflick=[-0.45,0.3,0.12,-0.12];
-function skAnim(ev){const o=PM3.get(ev.id);let n=SKANIM[ev.s];if(ev.s==='glacierrend'){const v=VIEW.cur&&VIEW.cur.P.find(q=>q.id===ev.id);if(v&&v.fr&&v.fr[0]!==0)n='rendfar';}if(!o||!n)return;if(ev.s==='stormdome'&&!ev.g)return;o.caN=n;o.caT=0;o.cpT=0;o.cgd=2.2;}
+function skAnim(ev){const o=PM3.get(ev.id);let n=SKANIM[ev.s];if(ev.s==='glacierrend'){const v=VIEW.cur&&VIEW.cur.P.find(q=>q.id===ev.id);if(v&&v.fr&&v.fr[0]!==0)n='rendfar';}if(!o||!n)return;if(ev.s==='stormdome'&&!ev.g)return;o.caN=n;o.caT=0;o.cpT=0;}
 const _caT=[0,0,0,0,0,0,0,0],_caR=[0,0,0,0,0,0,0,0];
 function skillPose(o,p,dt,now){
   const A=CANIM[o.caN];if(!A){o.caN=null;o.caJ=null;return false;}
-  o.caT+=dt;const u=o.caT/A.d;if(u>=1){o.caN=null;o.caJ=null;o.b.rotation.z=0;return false;}
+  o.caT+=dt;const u=o.caT/A.d;if(u>=1){o.caN=null;o.caJ=null;o.castPoseWeight=0;o.b.rotation.z=0;return false;}
   const R=o.armR.rotation,L=o.armL.rotation,c=o.cpb||(o.cpb=[R.x,R.z,o.b.rotation.y,0,L.x,L.z,0,0]);
   const rest=_caR;rest[0]=R.x;rest[1]=R.z;rest[2]=o.b.rotation.y;rest[3]=0;rest[4]=L.x;rest[5]=L.z;rest[6]=0;rest[7]=0;
   if(o.caT<=dt)for(let i=0;i<8;i++)c[i]=rest[i];
-  const w=_cs(Math.min(1,u/0.06))*(u<0.76?1:1-_cs((u-0.76)/0.24));
+  const settle=u<0.76?1:1-_cs((u-0.76)/0.24);
+  const w=_cs(Math.min(1,u/0.06))*settle;
+  o.castPoseWeight=_cs(Math.min(1,o.caT/.075))*settle;
   let j=0;while(j<A.k.length-1&&u>A.k[j][0])j++;
   const K=A.k[j],P=j?A.k[j-1]:null,u0=P?P[0]:0,f=Math.min(1,(u-u0)/Math.max(0.001,K[0]-u0)),e=K[9]==='o'?_cb(f):K[9]==='i'?f*f*f:_cs(f);
   for(let i=0;i<8;i++){const a=lerp(P?P[i+1]:rest[i],K[i+1],e);_caT[i]=lerp(rest[i],rest[i]+(a-rest[i])*AMP_S[i],w);}
@@ -151,21 +154,20 @@ function characterStance(o,P,feet,w){
 // Lower-body layer after casting poses. The arms, wand and torso stay with the skill.
 const JUMP_LEGS={
   // Thigh pitch R/L, spread R/L, knee bend R/L, cloak lift, arm pitch, elbow bend, shoulder lift, arm spread.
-  push: [-.27,.29,-.13,.11,.28,.16,.40,-.08,1.08,.045,.38],
+  push: [-.27,.29,-.13,.11,.28,.16,.40,-1.04,1.62,.075,.38],
   tuck: [-.92,.36,-.43,.39,.64,.42,.98,-.07,1.53,.16,1.48],
   crest:[-.68,.22,-.39,.35,.48,.40,.79,-.07,1.53,.15,1.43],
   fall: [-.46,.16,-.34,.30,.36,.34,.54],
   reach:[-.20,.05,-.18,.16,.15,.21,.31,-.04,.75,.025,.41],
   land: [-.43,-.28,-.12,.11,.54,.57,.15,-.07,.61,0,.20]
 };
-function jumpLegPose(o,p,dt,locked){
+function jumpLegPose(o,p,dt,locked,phase,hover){
   if(locked||p.dn||p.fl||p.st||p.gh||p.ds||p.df||p.hv||p.co||o.dp||o.wsl||o.rag){o.jumpLegs=null;return 0;}
-  const phase=p.ja||0;
   if(!phase&&!o.jumpLegs)return 0;
   const J=o.jumpLegs||(o.jumpLegs={phase:0,time:0,p:Float32Array.from(JUMP_LEGS.push),weight:0,land:0});
   if(!phase&&J.phase){
     // A movement skill can take over before the character touches down.
-    if(p.z>groundH(p.x,p.y,p.z)+.11){o.jumpLegs=null;return 0;}
+    if(p.z>groundH(p.x,p.y,p.z)+hover+.11){o.jumpLegs=null;return 0;}
     if(J.phase===2)J.land=.17;
   }
   if(phase)J.land=0;
@@ -215,68 +217,112 @@ function jumpCloakPose(o,lift){
     k.applied.copy(rotation);
   }
 }
-const jumpArmBaseR=new THREE.Quaternion(),jumpArmBaseL=new THREE.Quaternion();
-const jumpElbowAxis=new THREE.Vector3(1,0,0),jumpElbowTurn=new THREE.Quaternion();
+const readyBaseR=new THREE.Quaternion(),readyBaseL=new THREE.Quaternion();
+const castBaseR=new THREE.Quaternion(),castBaseL=new THREE.Quaternion();
 const jumpElbowPivot=new THREE.Vector3(0,-.32,0);
 function clearJumpArms(o){
   const a=o.jumpArms;
   if(!a?.applied)return;
-  for(const k of a.elbows)if(k.bone.quaternion.equals(k.after))k.bone.quaternion.copy(k.before);
   for(const k of a.shoulders)if(k.position.equals(k.after))k.position.copy(k.before);
-  o.wandG.position.copy(a.wandPos);o.wandG.quaternion.copy(a.wandRot);o.tip.position.copy(a.tipPos);
   a.applied=false;
 }
-// Only use the airborne balance pose when the skill pipeline left both arms free.
-function jumpArmPose(o,p,weight,casting){
-  if(!weight||!o.rig||casting||p.sh||o.emo||o.faW>0||o.sbArmIn>.02||o.eFistBend!=null||o.natFaR>0||o.natFaL>0||
-    !o.armR.quaternion.equals(jumpArmBaseR)||!o.armL.quaternion.equals(jumpArmBaseL))return 0;
+function jumpArmPose(o,weight){
+  if(!weight||!o.rig)return;
   for(const [arm,side] of [[o.armR,-1],[o.armL,1]]){
     const r=arm.rotation;
     r.x=lerp(r.x,o.jumpLegs.p[7],weight);
     r.z=lerp(r.z,side*o.jumpLegs.p[10],weight);
   }
-  return weight;
 }
-// cast-pose left elbow bend (free hand only — the wand hand follows the code arm), restores the clip pose first
+// Free-arm elbow bend. Restore the base bone pose before layering it again.
 const _caEQ=new THREE.Quaternion(),_caEX=new THREE.Vector3(1,0,0);
-function caElbowL(o,a){const m=o.fileModel;if(!m)return;let k=o.caEL;if(!k||k.m!==m){const b=m.getObjectByName('forearm_L');k=o.caEL=b?{b,m,base:new THREE.Quaternion(),ap:new THREE.Quaternion(),on:false}:{m};}
+function caElbowL(o,a,restWeight=0){const m=o.fileModel;if(!m)return;let k=o.caEL;if(!k||k.m!==m){const b=m.getObjectByName('forearm_L');k=o.caEL=b?{b,m,base:new THREE.Quaternion(),ap:new THREE.Quaternion(),on:false}:{m};}
   if(!k.b)return;const q=k.b.quaternion;if(k.on&&q.equals(k.ap))q.copy(k.base);if(Math.abs(a)<0.003){k.on=false;return;}
-  k.base.copy(q);q.multiply(_caEQ.setFromAxisAngle(_caEX,-a));k.ap.copy(q);k.on=true;}
-const _caRQ=new THREE.Quaternion(),_caRV=new THREE.Vector3();
+  k.base.copy(q);
+  if(restWeight&&o.readyLeftForearm)q.slerp(o.readyLeftForearm,restWeight);
+  q.multiply(_caEQ.setFromAxisAngle(_caEX,-a));k.ap.copy(q);k.on=true;}
+const _caRQ=new THREE.Quaternion();
 function caElbowR(o,a){const m=o.fileModel;if(!m)return;let k=o.caER;
-  if(!k||k.m!==m){const b=m.getObjectByName('forearm_R');k=o.caER=b?{b,m,base:new THREE.Quaternion(),ap:new THREE.Quaternion(),on:false,wp:new THREE.Vector3(),wq:new THREE.Quaternion(),tp:new THREE.Vector3(),awp:new THREE.Vector3(),awq:new THREE.Quaternion(),atp:new THREE.Vector3()}:{m};}
+  if(!k||k.m!==m){const b=m.getObjectByName('forearm_R');k=o.caER=b?{b,m,base:new THREE.Quaternion(),ap:new THREE.Quaternion(),on:false,wp:new THREE.Vector3(),wq:new THREE.Quaternion(),tp:new THREE.Vector3(),awp:new THREE.Vector3(),awq:new THREE.Quaternion()}:{m};}
   if(!k.b)return;const q=k.b.quaternion,W=o.wandG,T=o.tip;
   if(k.on){if(q.equals(k.ap))q.copy(k.base);if(W.position.equals(k.awp)&&W.quaternion.equals(k.awq)){W.position.copy(k.wp);W.quaternion.copy(k.wq);T.position.copy(k.tp);}}
   if(Math.abs(a)<0.003){k.on=false;return;}
   k.base.copy(q);k.wp.copy(W.position);k.wq.copy(W.quaternion);k.tp.copy(T.position);
   _caRQ.setFromAxisAngle(_caEX,-a);q.multiply(_caRQ);k.ap.copy(q);
   W.position.sub(jumpElbowPivot).applyQuaternion(_caRQ).add(jumpElbowPivot);W.quaternion.premultiply(_caRQ);
-  T.position.sub(jumpElbowPivot).applyQuaternion(_caRQ).add(jumpElbowPivot);T.getWorldPosition(o.tipW||(o.tipW=new THREE.Vector3()));
-  k.awp.copy(W.position);k.awq.copy(W.quaternion);k.atp.copy(T.position);k.on=true;}
-function jumpElbowPose(o,weight){
+  T.position.sub(jumpElbowPivot).applyQuaternion(_caRQ).add(jumpElbowPivot);
+  k.awp.copy(W.position);k.awq.copy(W.quaternion);k.on=true;}
+const readyHeadTurn=new THREE.Quaternion(),readyHeadParent=new THREE.Quaternion(),readyHeadEuler=new THREE.Euler();
+function readyHeadPose(o,weight,isMe,whip){
+  if(!o.readyHeadRest||!weight)return;
+  const head=o.lgHead??(o.lgHead=o.fileModel.getObjectByName('head'));
+  if(!head)return;
+  const lookPitch=isMe?clamp(pitch-.3,-.39,.45):0;
+  const target=readyHeadTurn.setFromEuler(readyHeadEuler.set(lookPitch+(whip?.headPitch||0),
+    whip?.headYaw||0,whip?.headRoll||0)).multiply(o.readyHeadRest);
+  target.premultiply(o.g.getWorldQuaternion(readyHeadParent));
+  head.parent.getWorldQuaternion(readyHeadParent).invert();
+  target.premultiply(readyHeadParent);
+  o.readyHeadBefore=(o.readyHeadBefore||new THREE.Quaternion()).copy(head.quaternion);
+  head.quaternion.slerp(target,weight);
+  o.readyHeadAfter=(o.readyHeadAfter||new THREE.Quaternion()).copy(head.quaternion);
+  o.readyHeadApplied=true;
+}
+
+function readyAllowed(o,p,now){
+  return !(p.dk?.[3]>0||now-(o.darkShieldAt??-Infinity)<.6||p.fl||p.dn||p.st||p.gh||
+    p.rt||p.ds||p.df||p.hv||p.co||o.dp||o.wsl||o.rag||o.emo||
+    p.fr&&(p.fr[3]&1)||p.wn&&p.wn[5]>=1||Math.abs(o.lgHeadYaw||0)>.005);
+}
+const natureReadyEuler=new THREE.Euler(),natureReadyArm=new THREE.Quaternion();
+function readyStance(o,v,now,weight,nature,whip,whipWeight){
+  const stride=clamp(v.sp/6,0,1),step=Math.sin(o.walk),forward=clamp(v.lvz/4,0,1),lean=(.06+.15*forward)*stride;
+  const t=(now*.00028+(o.readyBreath??=(now*.00013)%1))%1;
+  const breath=t<.34?_cs(t/.34):t<.46?1:t<.84?1-_cs((t-.46)/.38):0;
+  const sway=nature?step*stride:0;
+  if(whipWeight==null)o.b.rotation.y=lerp(o.b.rotation.y,nature?NATURE_READY_YAW:40*Math.PI/180,weight);
+  o.b.rotation.x=lerp(o.b.rotation.x,nature?lean*.65*(1-(whipWeight||0)):lean,weight);
+  const rise=nature?.033*step*step:.045*Math.abs(step);
+  o.b.position.y=lerp(o.b.position.y,-.045+.019*breath*(1-stride)+rise*stride,weight);
+  if(nature){
+    const freeOut=whip?.freeOut||0,freeBack=whip?.freeBack||0;
+    o.b.rotation.z=lerp(o.b.rotation.z,.037*sway+.052*(freeOut-freeBack),weight);
+    o.b.position.x=lerp(o.b.position.x,.048*sway,weight);
+    const rightWeight=weight*(1-(whipWeight||0));
+    const right=natureReadyEuler.set(lerp(-.13,.29,stride)-.025*sway,0,lerp(-.40,-.35,stride)+.034*sway);
+    o.armR.quaternion.slerp(natureReadyArm.setFromEuler(right),rightWeight);
+    const left=o.armL.rotation;
+    left.set(lerp(left.x,lerp(-.51,.16,stride)-.09*sway-.025*breath+.38*freeOut+.12*freeBack,weight),
+      lerp(left.y,lerp(-.68,.10,stride)+.08*sway+1.22*freeOut-.14*freeBack,weight),
+      lerp(left.z,lerp(.27,.31,stride)+.041*sway+.42*freeOut+.09*freeBack,weight));
+    o.readyElbowL=lerp(1.30+.04*breath,1.24-.095*sway,stride)-.48*freeOut+.06*freeBack;
+    o.readyElbowR=lerp(.28,.20,stride);
+  }else{
+    o.armR.rotation.set(lerp(o.armR.rotation.x,-1.06-lean*.9-.022*breath,weight),0,lerp(o.armR.rotation.z,.27,weight));
+    o.armL.rotation.set(lerp(o.armL.rotation.x,.11+.055*breath*(1-stride)-.23*step*stride,weight),0,
+      lerp(o.armL.rotation.z,.21+.035*breath+.045*step*stride,weight));
+    o.readyElbowL=.73+.11*breath-.13*step*stride;
+    o.readyElbowR=1.76+lean*.75;
+  }
+  for(let side=0;side<2;side++){
+    const leg=o.legs[side].rotation,base=side?.27:-.39;
+    leg.x=lerp(leg.x,base*(1-stride*.72)+(side?step:-step)*stride*(nature?.58:.53),weight);
+    leg.z=lerp(leg.z,side?.18:-.19,weight);
+  }
+}
+function jumpShoulders(o,weight){
+  const lift=o.jumpLegs.p[9]*weight;
+  if(lift<.003)return;
   const a=o.jumpArms||(o.jumpArms={
-    elbows:['forearm_R','forearm_L'].map(n=>o.fileModel.getObjectByName(n)).filter(Boolean)
-      .map(bone=>({bone,before:new THREE.Quaternion(),after:new THREE.Quaternion()})),
     shoulders:[o.armR,o.armL,...o.rig.filter(k=>!k.leg).map(k=>k.bone)]
       .map(({position})=>({position,before:new THREE.Vector3(),after:new THREE.Vector3()})),
-    wandPos:o.wandG.position.clone(),wandRot:o.wandG.quaternion.clone(),tipPos:o.tip.position.clone(),applied:false
+    applied:false
   });
-  jumpElbowTurn.setFromAxisAngle(jumpElbowAxis,-o.jumpLegs.p[8]*weight);
-  for(const k of a.elbows){
-    k.before.copy(k.bone.quaternion);
-    k.bone.quaternion.multiply(jumpElbowTurn);
-    k.after.copy(k.bone.quaternion);
-  }
-  const lift=o.jumpLegs.p[9]*weight;
   for(const k of a.shoulders){
     k.before.copy(k.position);
     k.position.y+=lift;k.position.x*=1-lift*.55;
     k.after.copy(k.position);
   }
-  o.wandG.position.copy(a.wandPos).sub(jumpElbowPivot).applyQuaternion(jumpElbowTurn).add(jumpElbowPivot);
-  o.wandG.quaternion.copy(a.wandRot).premultiply(jumpElbowTurn);
-  o.tip.position.copy(a.tipPos).sub(jumpElbowPivot).applyQuaternion(jumpElbowTurn).add(jumpElbowPivot);
-  o.tip.getWorldPosition(o.tipW);
   a.applied=true;
 }
 // ยกโล่ (คลิกขวาค้าง): ไม้ขวางหน้าอก มือซ้ายดันออก ย่อตัวรับแรง หายใจ/สั่นนิด ๆ — สายดินใช้ Stand กันเลยไม่ใส่
@@ -290,21 +336,20 @@ function blockPose(o,p,dt,now){
 }
 function castPose(o,p,v,dt,now){
   if(o.emo&&!o.caN&&!(o.cpT>0)){o.vsp=v.sp;if(emotePose(o,p,dt))return;}   // อีโมต (js/52)
-  if(o.caN){if(p.fl||p.dn){o.caN=null;o.b.rotation.z=0;if(o.ctr){trailStop(o.ctr);o.ctr=null;}}else{o.vsp=v.sp;o.cgd=Math.max(0,(o.cgd||0)-dt);blockPose(o,p,dt,now);return;}}   // ท่าสกิลเล่นทีหลัง (lateSkillPose)
+  if(o.caN){if(p.fl||p.dn){o.caN=null;o.b.rotation.z=0;if(o.ctr){trailStop(o.ctr);o.ctr=null;}}else{o.vsp=v.sp;blockPose(o,p,dt,now);return;}}   // ท่าสกิลเล่นทีหลัง (lateSkillPose)
   castPose0(o,p,v,dt,now);blockPose(o,p,dt,now);
 }
 // เรียกหลังไฟล์สาย (pyroFX/stormFX/frostFX/earthFX) → ท่าสกิลทับท่าค้างของสายได้ แล้วคืนท่าเดิมตอนจบ
 function lateSkillPose(o,p,dt,now){if(o.caN&&!p.fl&&!p.dn)skillPose(o,p,dt,now);}
 function castPose0(o,p,v,dt,now){
   const R=o.armR.rotation,L=o.armL.rotation,c=o.cpa||(o.cpa=[R.x,R.z,0,0,L.x,L.z]);o.vsp=v.sp;
-  if(p.fl||p.dn){o.cpT=0;o.cgd=0;o.gw=0;if(o.ctr){trailStop(o.ctr);o.ctr=null;}return;}
-  // ท่าตั้งการ์ด (ดวลในหนัง): หลังร่าย 2 วิ ถือไม้ยกไว้หน้าไหล่ขวา ตัวเฉียงข้าง มือซ้ายกางออก • ค่อย ๆ เข้า/ออก
-  if(o.cgd>0)o.cgd-=dt;o.gw=(o.gw||0)+((o.cgd>0?1:0)-(o.gw||0))*Math.min(1,dt*(o.cgd>0?8:3));const gw=o.gw,G=CGUARD;
-  if(gw>0.005){R.x=lerp(R.x,G[0],gw);R.z=lerp(R.z,G[1],gw);o.b.rotation.y+=G[2]*gw;o.b.rotation.x+=G[3]*gw;L.x=lerp(L.x,G[4],gw);L.z=lerp(L.z,G[5],gw);}
+  if(p.fl||p.dn){o.cpT=0;if(o.ctr){trailStop(o.ctr);o.ctr=null;}return;}
   if(!(o.cpT>0)){if(o.bz){o.b.rotation.z=0;o.bz=0;}c[0]=R.x;c[1]=R.z;c[2]=o.b.rotation.y;c[3]=0;c[4]=L.x;c[5]=L.z;if(o.ctr){trailStop(o.ctr);o.ctr=null;}return;}
   o.cpT-=dt;const k=1-Math.max(0,o.cpT)/CPOSE_T,K=CPOSE[o.cpS|0]||CPOSE[0];
   // host ปล่อยลูกเวททันทีที่กด → ง้างสั้นมาก (0.06 วิ) แล้วฟาดทันที (0.1 วิ) ให้ลูกเวทออกตอนไม้ฟาด • ตามแรงยาว
-  const k0=0.10,k1=0.30,hold=0.42,w=Math.min(1,k/0.04)*(k<0.62?1:1-_cs((k-0.62)/0.38));
+  const k0=0.10,k1=0.30,hold=0.42,settle=k<0.62?1:1-_cs((k-0.62)/0.38);
+  const w=Math.min(1,k/0.04)*settle;
+  o.castPoseWeight=_cs(Math.min(1,k*CPOSE_T/.06))*settle;
   const T=_cpT,rest=_cpR;rest[0]=R.x;rest[1]=R.z;rest[2]=o.b.rotation.y;rest[3]=0;rest[4]=L.x;rest[5]=L.z;
   for(let i=0;i<6;i++){let a;
     if(k<k0)a=lerp(rest[i],K[0][i],_ce(k/k0));
@@ -325,7 +370,7 @@ function castPose0(o,p,v,dt,now){
   else if(o.ctr){trailStop(o.ctr);o.ctr=null;}
 }
 function clearCharacterCast(o){
-  o.caN=null;o.cpT=0;o.castT=0;o.cgd=0;o.gw=0;o.bz=1;o.wBeamPose=null;o.wnPose=null;
+  o.caN=null;o.cpT=0;o.castT=0;o.caJ=null;o.bz=1;o.wBeamPose=null;o.wnPose=null;
   if(o.ctr){trailStop(o.ctr);o.ctr=null;}
   if(o.wWings){const d=o.wWings.userData;d.ul=d.fk=-1;}
 }
@@ -344,8 +389,9 @@ function syncPlayers(P,mode,now,dt){
     seen.add(p.id);
     let o=PM3.get(p.id);
     if(!o){o=makeStudent(getLook(p.id),p.id);PM3.set(p.id,o);o.bat=p.id!==NET.myId;{const L=getLook(p.id);useFileModel(o,'char_student',lookTint(L),L);}}
-    const posePath=getKit(p.id).path;
+    const posePath=getKit(p.id).path,nature=posePath===NATUREP;
     // ทำก่อนทางแยกคนตาย: ช่วง ragdoll ไม่เดินนาฬิกาท่าร่าย มิฉะนั้นจะเล่นท่าเดิมต่อเมื่อเกิดใหม่
+    if(!p.al||p.dn)o.readyWeight=0;
     if(!p.al||p.dn||o.posePath!==undefined&&o.posePath!==posePath||p.st&&!o.poseStunned)clearCharacterCast(o);
     if(!p.al||p.dn)o.recoilT=undefined;
     if(!p.al&&!(o.deathImpact&&o.flashT>0))endFlash(o);
@@ -366,11 +412,18 @@ function syncPlayers(P,mode,now,dt){
     {const A=broomHead(o,p,dt);g.rotation.y=Math.atan2(Math.cos(A),Math.sin(A));}   // บิน = หันตามไม้กวาด (js/69)
     const v=localVel(o,x,z,dt,g.rotation.y);
     clearJumpArms(o);
+    if(o.caER?.on)caElbowR(o,0);
+    if(o.caEL?.on)caElbowL(o,0);
+    if(o.readyHeadApplied){
+      const h=o.lgHead;
+      if(h.quaternion.equals(o.readyHeadAfter))h.quaternion.copy(o.readyHeadBefore);
+      o.readyHeadApplied=false;
+    }
     o.darkScythe?.resetLiveHandPose();
-    if(!p.al){o.jumpLegs=null;jumpCloakPose(o,0);const l=LGV.st.get(p.id);if(l)lgClear(l);if(o.natureWhipView)natureWhipView(o,null);if(ragTick(o,p,v,dt,now))ragHideDead(o,p,now);continue;}   // ตาย = ragdoll ค้างจนเกิดใหม่ (js/48)
+    if(!p.al){natHandGearTick(o,false,dt,now);o.jumpLegs=null;jumpCloakPose(o,0);const l=LGV.st.get(p.id);if(l)lgClear(l);if(o.natureWhipView)natureWhipView(o,null);if(ragTick(o,p,v,dt,now))ragHideDead(o,p,now);continue;}   // ตาย = ragdoll ค้างจนเกิดใหม่ (js/48)
     o.hitT=Math.max(0,(o.hitT||0)-dt);
     o.b.position.set(0,0,0);o.b.rotation.set(0,0,0);   // one-frame pose offsets must not build up (body drifted back / stayed tilted)
-    if(o.darkGear?.visible)o.armR.rotation.y=0;   // BA wand twist is applied fresh each frame
+    if(o.darkGear?.visible||nature||o.natureWhipView?.vine.visible)o.armR.rotation.y=0;   // BA wand twist is applied fresh each frame
     const hoverPose=!!p.lt?.[0]&&!!p.lt[4]&&!p.fl&&!p.dn;
     if(o.anim)animTick(o,{down:!!p.dn,fly:!!p.fl,sp:hoverPose||p.wn&&p.wn[5]>=1||(p.fr&&p.fr[3]&1)?0:v.sp,castT:o.castT,hitT:o.hitT},dt,isMe?1:!detail&&!o.castT&&!o.hitT&&!p.ds?3:animLod(g));
     if(!o.fileModel)updateCloth(o.cloak,v.lvx,v.lvz,v.sp*(p.fl?1.4:1),now,dt);   // มีโมเดลไฟล์ = ผ้าคลุมโค้ดซ่อนอยู่ (ผ้าจริงคือ js/49)
@@ -391,7 +444,7 @@ function syncPlayers(P,mode,now,dt){
       o.broom.rotation.x=-0.1+Math.sin(now/300)*0.04;o.broom.rotation.z=clamp(-v.lvx*0.02,-0.4,0.4);
       if(detail&&Math.random()<0.8){const ha=o.fhS!==undefined?o.fhS:p.a,bx=p.x-Math.cos(ha)*30,by=p.y-Math.sin(ha)*30;PARTS.push({x:bx+rnd(-4,4),y:by+rnd(-4,4),h:(p.z||0)+0.8+rnd(-0.1,0.1),vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(-0.3,0.3),life:0.6,max:0.6,col:Math.random()<0.5?'#ffe9a8':'#ffffff',size:1.6,g:0.5});}
     }else{
-      const wfly=hoverPose||p.wn&&p.wn[5]>=1;if(!wfly)o.walk+=dt*v.sp*0.8;   // บิน Featherwing: ไม่ก้าวขา ไม่มีเสียงเท้า
+      const wfly=hoverPose||p.wn&&p.wn[5]>=1;if(!wfly)o.walk+=dt*Math.min(v.sp,10)*(nature?.64:.68);   // บิน Featherwing: ไม่ก้าวขา ไม่มีเสียงเท้า
       const sw=wfly?0:Math.sin(o.walk)*Math.min(1,v.sp/5);
       if(p.dn){o.b.rotation.x=-1.4;o.b.position.y=0.4;}
       else{o.b.rotation.x=p.ds?0.4:wfly?0:Math.min(0.12,v.sp*0.01);o.b.position.y=wfly?0:Math.abs(Math.cos(o.walk))*0.05*Math.min(1,v.sp/5);}
@@ -402,10 +455,11 @@ function syncPlayers(P,mode,now,dt){
       o.armR.rotation.x=o.cpT>0?-0.35+sw*0.4:lerp(-0.35+sw*0.4,-1.55,ck);o.armR.rotation.z=-0.12;o.b.rotation.y=0;
     }
     if(o.rig)rigStd(o);
-    const jumpArmsCandidate=p.ja||o.jumpLegs;
     const casting=!!(o.caN||o.cpT>0||o.castT>0);
-    if(jumpArmsCandidate){jumpArmBaseR.copy(o.armR.quaternion);jumpArmBaseL.copy(o.armL.quaternion);}
+    readyBaseR.copy(o.armR.quaternion);readyBaseL.copy(o.armL.quaternion);
+    o.castPoseWeight=null;o.caJ=null;
     castPose(o,p,v,dt,now);
+    if(o.castPoseWeight!=null){castBaseR.copy(o.armR.quaternion);castBaseL.copy(o.armL.quaternion);}
     o.ends.forEach((E,i)=>{E.rotation.x=-clamp(v.lvz*0.07,0,1.2)+Math.sin(now*0.012+i*1.7)*0.08*(1+v.sp*0.15);E.rotation.z=clamp(v.lvx*0.04,-0.6,0.6);});
     o.shield.visible=!!(p.sh&&!p.fr)||!!(p.fm&(128|16384));   // Frost Sword Guard: no bubble (own half-dome)
     const fireSh=p.sh&&getKit(p.id).path===0;
@@ -425,7 +479,6 @@ function syncPlayers(P,mode,now,dt){
     else if(isMe){o.ring.visible=true;o.ring.material.color.set('#ffffff');}
     else o.ring.visible=false;
     o.tip.scale.setScalar(0.3+0.08*Math.sin(now/120)+(o.castT>0?0.4:0))*((p.cg||0)>0?0.4:1);
-    if(detail&&o.wspk&&p.al)wandSparks(o,dt);   // ไม้สำเร็จรูปที่มีประกาย (js/29)
     const pz=o.zs;
     pyroFX(o,p,pz,now,dt);
     stormFX(o,p,pz,now,dt);
@@ -433,7 +486,7 @@ function syncPlayers(P,mode,now,dt){
     frostFX(o,p,pz,now,dt);
     earthFX(o,p,pz,now,dt);
     windFX(o,p,pz,now,dt);waterFX(o,p,pz,now,dt);lightFX(o,p,pz,now,dt,v);
-    lateSkillPose(o,p,dt,now);if(o.tip){o.tip.updateWorldMatrix(true,false);(o.tipW||(o.tipW=new THREE.Vector3())).setFromMatrixPosition(o.tip.matrixWorld);o.tipWT=performance.now();}   // ปลายไม้หลังใส่ท่าครบ (fx att:'wand' / กระสุนเริ่มที่ไม้ อ่านค่านี้)
+    if(o.caN){lateSkillPose(o,p,dt,now);castBaseR.copy(o.armR.quaternion);castBaseL.copy(o.armL.quaternion);}
     if(o.novaT>0||o.nvFx||o.nvFx2)pyroNovaCharge(o,dt,now);if(o.mlcT>0||o.mlcX)frostMlCast(o,p,dt,now);
     waterCharacterPose(o,p,dt,now);windCharacterPose(o,p,dt,now,v);windLatePose(o,p,dt);stormBowView(o,p,dt,now);stormStaffView(o,p,dt,now);dashPose(o,p,dt,now);   // ท่าพุ่ง (js/72) ทับท่าอื่นตอนพุ่ง
     natHookPose(o);natEmpPose(o);   // Nature Dash / thorn line poses must run before rigSync or the rigged arm never sees them
@@ -442,30 +495,67 @@ function syncPlayers(P,mode,now,dt){
     const whipImpact=o.weaponContact?.kind==='whip'&&o.weaponContact.swing===whip?.[0]?o.weaponContact:null;
     const activeWhip=whip&&!p.dn&&!p.fl&&!whip[4]?{start:whip[0],
       age:weaponImpactAge(whipImpact,whip[1],NATURE_WHIP.impact,o.whipStart===whip[0]?o.whipRawAge:0),side:whip[2],angle:whip[3]}:null;
+    let whipWeight;
+    if(activeWhip){
+      if(o.whipStart!==activeWhip.start){
+        const gap=activeWhip.start-o.whipStart;
+        o.whipCarry=nature&&gap>=NATURE_WHIP.follow-.02&&gap<=NATURE_WHIP.window+.02&&o.whipRawAge>=NATURE_WHIP.follow-.10?
+          {angle:nwSwingAngle(gap,o.whipSide),pitch:-1.25+.25*Math.sin(Math.min(1,gap/.46)*Math.PI),
+            release:nwRightRelease(gap,o.whipSide)}:null;
+      }
+      activeWhip.carry=o.whipCarry;
+      whipWeight=natureWhipPose(o,activeWhip,nature);
+      o.whipSide=activeWhip.side;
+    }
     if(whip){o.whipStart=whip[0];o.whipRawAge=whip[1];}
-    if(activeWhip)natureWhipPose(o,activeWhip);
-    else if(o.natureWhipView?.vine.visible)o.armR.rotation.y=0;
-    hitRecoilPose(o,dt);
     lightHeadPose(o);
-    const jumpWeight=jumpLegPose(o,p,dt,domeKnee);
-    const jumpArmWeight=jumpArmPose(o,p,jumpWeight,casting||activeWhip);
+    // Light settles into its resting hover above the floor. That height is not a fall.
+    const hover=posePath===LIGHTP?LTV.baFloat:0;
+    const airPhase=hover&&p.ja===2&&p.z<=groundH(p.x,p.y,p.z)+hover+.06?0:p.ja||0;
+    const authoredElbows=o.faW>0.002||o.sbArmIn>.02||o.eFistBend!=null||!!(o.natFaR||o.natFaL||o.natWrist);
+    const sharedCast=o.castPoseWeight!=null&&o.armR.quaternion.equals(castBaseR)&&o.armL.quaternion.equals(castBaseL);
+    // Blend through ready while a shared cast winds up or settles; airborne balance stays layered over it.
+    const armsFree=!casting&&o.armR.quaternion.equals(readyBaseR)&&o.armL.quaternion.equals(readyBaseL);
+    let ready=0;
+    if(!domeKnee&&!authoredElbows&&readyAllowed(o,p,now)){
+      if(activeWhip){if(nature)ready=1;}
+      else if(sharedCast&&!p.sh)ready=1-o.castPoseWeight;
+      else if(armsFree||o.bkw>.005)ready=1-(o.bkw||0);
+    }
+    const rightReady=ready*(activeWhip?1-whipWeight:1);
+    o.readyWeight=rightReady;
+    if(ready)readyStance(o,v,now,ready,nature,activeWhip,whipWeight);
+    const jumpWeight=jumpLegPose(o,p,dt,domeKnee,airPhase,hover);
+    const liftOff=airPhase===1?_cs(clamp((o.jumpLegs?.time||0)/.105,0,1)):1;
+    const jumpArmWeight=p.sh||activeWhip?0:jumpWeight*ready*liftOff;
+    jumpArmPose(o,jumpArmWeight);
+    hitRecoilPose(o,dt);
     if(o.rig){
-      rigSync(o,dt,false,jumpWeight,jumpArmWeight);windForearm(o);stormBowForearm(o);earthFistForearm(o);natForearmR(o);
+      rigSync(o,dt,false,Math.max(jumpWeight,ready),Math.max(jumpArmWeight,ready));windForearm(o);stormBowForearm(o);earthFistForearm(o);natForearmR(o);
       if(domeKnee)dpKnees(o,0,domeKnee);
-      else if(jumpWeight)dpKnees(o,o.jumpLegs.p[4]*jumpWeight,o.jumpLegs.p[5]*jumpWeight);
-      // natural arms everywhere (user 2026-11-24): elbows never fully straight (walk/run clips already bend knees + elbows, so less there)
-      const wk=!p.fl&&!p.dn&&!o.caN&&(v.sp||0)>0.6?Math.min(1,v.sp/5):0,sw=Math.sin(o.walk||0);
-      if(o.caJ)dpKnees(o,o.caJ[0],o.caJ[1]);
-      else if(!wk&&!p.fl&&!p.dn&&!jumpWeight&&!domeKnee&&Math.abs(o.legs[0].rotation.x)<0.2&&Math.abs(o.legs[1].rotation.x)<0.2){   // relaxed stance when nothing else poses the legs: one foot a little forward, slightly apart, soft knees
-        o.stK=Math.min(1,(o.stK||0)+dt*4);const k=o.stK;dpKnees(o,0.14*k,0.1*k);}
-      else o.stK=0;
-      if(!jumpArmWeight){caElbowL(o,o.caJ?o.caJ[2]:0.45*(1-0.6*wk));caElbowR(o,o.caJ?o.caJR:0.35*(1-0.6*wk));}
-      if(jumpArmWeight)jumpElbowPose(o,jumpArmWeight);
+      else if(jumpWeight||o.caJ||ready){
+        const kneeR=(o.caJ?.[0]||0)+.18*ready,kneeL=(o.caJ?.[1]||0)+.13*ready;
+        dpKnees(o,lerp(kneeR,o.jumpLegs?.p[4]||0,jumpWeight),lerp(kneeL,o.jumpLegs?.p[5]||0,jumpWeight));
+      }
+      if(!authoredElbows){
+        const walkBend=1-0.6*(!p.fl&&!p.dn&&!o.caN&&v.sp>.6?Math.min(1,v.sp/5):0);
+        const left=sharedCast&&o.caJ&&!activeWhip?o.caJ[2]+(o.readyElbowL||0)*ready:lerp(.45*walkBend,o.readyElbowL||0,ready);
+        const right=sharedCast&&o.caJ&&!activeWhip?o.caJR+(o.readyElbowR||0)*rightReady:lerp(.35*walkBend,o.readyElbowR||0,rightReady);
+        const airElbow=o.jumpLegs?.p[8]||0;
+        const lowArm=nature?ready*(1-jumpArmWeight)*clamp(v.sp/6,0,1):0;
+        caElbowL(o,lerp(left,airElbow,jumpArmWeight),lowArm);
+        caElbowR(o,lerp(right,airElbow,jumpArmWeight));
+      }
+      if(jumpArmWeight)jumpShoulders(o,jumpArmWeight);
+      if(ready)readyHeadPose(o,ready,isMe,nature?activeWhip:null);
     }
     jumpCloakPose(o,jumpWeight?(o.jumpLegs.p[6]*jumpWeight):0);
     if(activeWhip||o.natureWhipView)natureWhipView(o,activeWhip);
-    natureCharacter(o,p,now,detail);
+    natureCharacter(o,p,now,dt,detail);
     darknessCharacter(o,p,myP,now);
+    o.tip.getWorldPosition(o.tipW||(o.tipW=new THREE.Vector3()));o.tipWT=performance.now();
+    frostWandLink(o,now);
+    if(detail&&o.wspk)wandSparks(o,dt);
     if(ragTick(o,p,v,dt,now))o.tip.scale.setScalar(0.001);   // ล้ม/กระแทกแรง = ragdoll (js/48)
     if(detail){
       if(p.bn&&Math.random()<0.7)burst(p.x,p.y,'#ff6a2a',1,30,0.45,3.5,{h:pz+rnd(0.3,1.8),vh:[1,2.5],g:-1});

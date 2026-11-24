@@ -66,7 +66,7 @@ function natTrail(a,b,{color='#67ae3e',size=.047,lift=.36,life=.35,pull=false,hi
   });
 }
 function natSeed(ev,spore=false){
-  if(ev.z==='nature_seed'&&ev.id!=null&&!ev.thrown){const o=PM3.get(ev.id),t=ev.t||.27,lag=Math.min(.22,t*.55);if(o)later(lag,()=>{const q=simOf(o.armL.localToWorld(natV(0,-.62,0)));natSeed({...ev,thrown:1,x:q.x,y:q.y,h:q.h-GY(q.x,q.y),t:t-lag});});else natSeed({...ev,thrown:1});return;}
+  if(ev.z==='nature_seed'&&ev.id!=null&&!ev.thrown){const o=PM3.get(ev.id),t=ev.t||.27,lag=Math.min(.22,t*.55);if(o)later(lag,()=>{const q=simOf(natPlantHand(o,natV()));natSeed({...ev,thrown:1,x:q.x,y:q.y,h:q.h-GY(q.x,q.y),t:t-lag});});else natSeed({...ev,thrown:1});return;}
   const a=natWorld(ev.x,ev.y,ev.h),b=natWorld(ev.x2,ev.y2,ev.h2),g=new THREE.Group();
   natMesh(new THREE.SphereGeometry(spore?.12:.15,9,7),natStd(spore?'#e8eb67':'#80652c',{
     emissive:spore?'#83aa18':'#466b14',emissiveIntensity:.8}),g);
@@ -363,8 +363,197 @@ function natShieldMake(o){
   };
   return g;
 }
-function natureCharacter(o,p,now,detail=true){
+const natHandLight=natStd('#45df35',{emissive:'#1fb62d',emissiveIntensity:1.15});
+natHandLight.userData.keep=true;
+const natBarkWrap=natStd('#ffffff',{roughness:.93,flatShading:true,vertexColors:true});
+natBarkWrap.userData.keep=true;
+const natWrapProfile=new URLSearchParams(location.search).get('natureWrap')==='first'?'first':'latest';
+const natWrapShapes=new Map();
+// Each strip has independent heights and faceted bends, sampled in its sleeve bone's space.
+const NAT_WRAP={
+  first:{
+    upper:[[.105,.329,.15,5.05,.026],[.139,.291,2.74,-3.77,.021]],
+    lower:[[-.012,.291,5.20,4.83,.025],[.055,.279,.90,-4.20,.019]],
+  },
+  latest:{
+    upper:[[-.038,.328,.30,5.96,.036],[-.023,.302,.44,-5.25,.031],
+      [.102,.254,2.42,-3.70,.024],[.118,.290,-1.64,4.25,.023],
+      [.136,.305,.92,-4.12,.020],[.151,.281,-.18,3.81,.019]],
+    lower:[[-.012,.301,5.20,4.83,.027],[.038,.289,.90,-4.42,.024],
+      [.081,.267,3.03,3.92,.018],[.104,.258,4.51,-3.50,.017]],
+  },
+};
+function natSleeveRestore(root){
+  const sleeves=root.natSleeves;
+  if(!sleeves)return;
+  for(const {mesh,original,fitted} of sleeves){mesh.geometry=original;fitted.dispose();}
+  delete root.natSleeves;
+}
+function natSleeveFit(o){
+  if(o.g.natSleeves)return;
+  const sleeves=o.g.natSleeves=[];
+  o.fileModel.traverse(mesh=>{
+    if(!mesh.isSkinnedMesh||!['tint_cloak','tint_house'].includes(mesh.material.name)&&mesh.name!=='student_all_batch')return;
+    const original=mesh.geometry,attr=original.attributes;
+    const bones=mesh.skeleton.bones,upper=bones.findIndex(b=>b.name==='upper_arm_L'),lower=bones.findIndex(b=>b.name==='forearm_L');
+    if(upper<0||lower<0)return;
+    const toBone=mesh.skeleton.boneInverses[lower].clone().multiply(mesh.bindMatrix),fromBone=toBone.clone().invert();
+    const v=natV(),p=natV(),weights=attr.skinWeight,joints=attr.skinIndex;
+    let fitted;
+    for(let i=0;i<attr.position.count;i++){
+      let amount=0;
+      for(let j=0;j<4;j++){
+        const b=joints.getComponent(i,j);
+        if(b===upper||b===lower)amount+=weights.getComponent(i,j);
+      }
+      if(amount<.5)continue;
+      p.fromBufferAttribute(attr.position,i);v.copy(p).applyMatrix4(toBone);
+      if(v.y<-.245||v.y>.36)continue;
+      const pinch=amount*natEase(natPhase(v.y,-.245,-.11));
+      const r=Math.hypot(v.x,v.z),target=lerp(.103,.084,natPhase(v.y,.02,.29));
+      if(r<=target)continue;
+      const scale=lerp(1,target/r,pinch);v.x*=scale;v.z*=scale;v.applyMatrix4(fromBone);
+      if(!fitted){fitted=original.clone();fitted.userData={};}
+      fitted.attributes.position.setXYZ(i,v.x,v.y,v.z);
+    }
+    if(!fitted)return;
+    fitted.computeBoundingBox();fitted.computeBoundingSphere();
+    mesh.geometry=fitted;sleeves.push({mesh,original,fitted});
+  });
+}
+function natBarkStrips(strips,radii,armOffset){
+  const parts=[],bark=new THREE.Color('#71452b'),moss=new THREE.Color('#69723a');
+  const leaf=new THREE.Color('#448135'),shade=new THREE.Color();
+  const colorAlongArm=y=>{
+    const height=armOffset+y;
+    return shade.copy(bark).lerp(moss,natEase(natPhase(height,.21,.43)))
+      .lerp(leaf,natEase(natPhase(height,.32,.56)));
+  };
+  const colorize=(geo,colorAt)=>{
+    const pos=geo.attributes.position,C=new Float32Array(pos.count*3);
+    for(let i=0;i<pos.count;i++)colorAt(i).toArray(C,i*3);
+    geo.setAttribute('color',new THREE.BufferAttribute(C,3));return geo;
+  };
+  for(const [index,[start,end,angle,turn,width]] of strips.entries()){
+    const layer=index*.005;
+    const shoulderRoot=armOffset===0&&start<.025;
+    const point=t=>{
+      const wobble=shoulderRoot?lerp(.24,1,natEase(natPhase(t,.05,.33))):1;
+      const a=angle+turn*t+wobble*(.26*Math.sin(t*9+.4)+.14*Math.sin(t*17+angle));
+      const y=lerp(start,end,t),shoulder=shoulderRoot?.025*(1-natEase(natPhase(y,0,.11))):0;
+      const r=lerp(radii[0],radii[1],clamp(y/.31,0,1))+.005*Math.sin(a*3.1)+layer+shoulder;
+      return natV(Math.cos(a)*r,y,Math.sin(a)*r);
+    };
+    const n=15,positions=[],uv=[],idx=[];
+    const points=Array.from({length:n+1},(_,i)=>point(i/n));
+    for(let i=0;i<=n;i++){
+      const t=i/n,p=points[i],radial=natV(p.x,0,p.z).normalize();
+      const tangent=points[Math.min(i+1,n)].clone().sub(points[Math.max(i-1,0)]).normalize();
+      const across=natV().crossVectors(tangent,radial).normalize();
+      const taper=(shoulderRoot?.11:.26)+(shoulderRoot?.89:.74)*Math.sin(Math.PI*t)**.52;
+      const w=width*taper*(.98+.085*Math.sin(t*22)),d=w*.35;
+      for(const [side,outer] of [[-1,-1],[-1,1],[1,1],[1,-1]]){
+        const v=p.clone().addScaledVector(across,side*w).addScaledVector(radial,outer*d);
+        positions.push(v.x,v.y,v.z);uv.push(t,outer);
+      }
+      if(i===n)continue;
+      for(let j=0;j<4;j++){
+        const k=i*4+j,q=i*4+(j+1)%4;
+        idx.push(k,q,k+4,q,q+4,k+4);
+      }
+    }
+    idx.push(0,3,1,1,3,2,n*4,n*4+1,n*4+3,n*4+1,n*4+2,n*4+3);
+    const branch=new THREE.BufferGeometry();
+    branch.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+    branch.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+    branch.setIndex(idx);branch.computeVertexNormals();
+    parts.push(colorize(branch,i=>colorAlongArm(branch.attributes.position.getY(i))
+      .multiplyScalar(i%4===1||i%4===2?1.14:.82)));
+    const thorns=armOffset===0?(index%2===0?[.67]:[.56]):(index%2===0?[.35,.76]:[.64]);
+    for(const t of thorns){
+      const p=point(t),dir=natV(p.x,.072+.035*t,p.z).normalize();
+      const length=.046+.011*Math.sin(t*11+angle)+(armOffset===0?0:.009);
+      const thorn=new THREE.ConeGeometry(Math.max(.011,width*.56),length,4,1);
+      colorize(thorn,i=>colorAlongArm(p.y)
+        .multiplyScalar(.91+.25*natPhase(thorn.attributes.position.getY(i),-length/2,length/2)));
+      thorn.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(natV(0,1,0),dir));
+      const lift=length*.26;
+      thorn.translate(p.x+dir.x*lift,p.y+dir.y*lift,p.z+dir.z*lift);parts.push(thorn);
+    }
+  }
+  const result=mergeGeometries(parts,false);
+  for(const g of parts)g.dispose();
+  result.userData.keep=true;
+  return result;
+}
+function natHandGearMake(profile=natWrapProfile){
+  let shapes=natWrapShapes.get(profile);
+  if(!shapes){
+    const {upper,lower}=NAT_WRAP[profile],petals=Array.from({length:5},(_,i)=>{
+      const angle=i*Math.PI*2/5;
+      return new THREE.SphereGeometry(1,7,4).scale(.027,.043,.020).rotateZ(angle)
+        .translate(-.031*Math.sin(angle),.031*Math.cos(angle),0);
+    });
+    const flower=mergeGeometries(petals,false);
+    petals.forEach(g=>g.dispose());flower.userData.keep=true;
+    shapes={upper:natBarkStrips(upper,[.124,.104],0),lower:natBarkStrips(lower,[.106,.092],.32),flower};
+    natWrapShapes.set(profile,shapes);
+  }
+  const upper=new THREE.Group(),wrap=new THREE.Group(),orb=new THREE.Group();
+  upper.name='Nature upper-arm thorn weave';wrap.name='Nature forearm thorn weave';orb.name='Nature palm light';
+  natMesh(shapes.upper,natBarkWrap,upper);
+  natMesh(shapes.lower,natBarkWrap,wrap);
+  const flower=new THREE.Group();
+  flower.name='Nature wrist flower';flower.position.set(.054,.253,-.084);
+  flower.rotation.y=2.53;
+  const bloom=new THREE.Group();bloom.position.set(0,.032,.063);flower.add(bloom);
+  const stem=natMesh(sGeo(THREE.CylinderGeometry,.008,.010,.076,6),natPlantM.stem,flower);
+  stem.position.set(0,.016,.031);stem.rotation.x=1.08;
+  for(const side of [-1,1]){
+    const leaf=natMesh(natLeaf,natPlantM.leaf,flower);
+    leaf.position.set(side*.027,.012,.045);leaf.scale.set(.086,.11,.055);leaf.rotation.z=side*.55;
+  }
+  natMesh(shapes.flower,natPlantM.petalIn,bloom);
+  natMesh(sGeo(THREE.SphereGeometry,.017,8,5),natPlantM.core,bloom).position.z=.012;
+  wrap.add(flower);
+  natMesh(sGeo(THREE.IcosahedronGeometry,.073,2),natHandLight,orb);
+  const glow=natGlow('#33df4c',.36,orb);
+  glow.material.opacity=.49;
+  return {upper,wrap,orb,glow,target:natV(),offset:natV(),fresh:true,profile};
+}
+function natPlantHand(o,out){
+  const hand=o.fileModel?.getObjectByName('hand_L');
+  return hand?hand.localToWorld(out.set(0,.044,.014)):o.armL.localToWorld(out.set(0,-.62,0));
+}
+function natHandGearTick(o,show,dt,now){
+  let gear=o.natHandGear;
+  if(!show){
+    if(gear){gear.upper.visible=gear.wrap.visible=gear.orb.visible=false;gear.fresh=true;natSleeveRestore(o.g);}
+    return;
+  }
+  if(!gear){
+    const upper=o.fileModel?.getObjectByName('upper_arm_L'),forearm=o.fileModel?.getObjectByName('forearm_L');
+    const hand=o.fileModel?.getObjectByName('hand_L');
+    if(!upper||!forearm||!hand)return;
+    gear=o.natHandGear=natHandGearMake();
+    gear.hand=hand;upper.add(gear.upper);forearm.add(gear.wrap);o.g.add(gear.orb);
+  }
+  natSleeveFit(o);
+  const {upper,wrap,orb,glow,target,offset}=gear;
+  upper.visible=wrap.visible=orb.visible=true;
+  gear.hand.localToWorld(target.set(0,.086,-.127-.007*Math.sin(now*.006)));
+  o.g.worldToLocal(target);
+  if(gear.fresh){orb.position.copy(target);gear.fresh=false;}
+  else{
+    orb.position.lerp(target,1-Math.exp(-Math.min(dt,.06)*7.7));
+    offset.copy(orb.position).sub(target);
+    if(offset.lengthSq()>.32*.32)orb.position.copy(target).add(offset.setLength(.32));
+  }
+  glow.scale.setScalar(.36+.017*Math.sin(now*.007));
+}
+function natureCharacter(o,p,now,dt,detail=true){
   const native=getKit(p.id).path===NATUREP;
+  natHandGearTick(o,native&&p.al,dt,now);
   if(native&&p.sh&&p.al&&!p.dn){
     if(!o.natShield)o.natShield=natShieldMake(o);
     o.natShield.visible=true;o.shield.visible=false;
@@ -554,7 +743,7 @@ function natHook(ev,student){
       if(ev.hit&&st>=HIT&&!hit){hit=true;sparks(tg,18,4.2,'#f2ffac','#6fd449',{life:.72,size:1.45});leaves(tg,9,2.7,{dir:side.clone().multiplyScalar(.9),life:.7,size:1.35});}
     }
     hookTrail.push(trailSample);
-  },()=>{for(const o of parts)F.drop(o);if(student){if(!student.natHookCast?.foe)student.natHookCast=null;student.cgd=0;}});
+  },()=>{for(const o of parts)F.drop(o);if(student&&!student.natHookCast?.foe)student.natHookCast=null;});
 }
 // Coil around the hooked target, SKS.dash: helix from legs to chest, 3 s; an ally gets hooked barbs and a heal rim climbing every .5 s; an enemy gets purple thorns with poison sparks.
 function natCoil(ev){
@@ -590,7 +779,7 @@ function natForearmR(o){if(o.nfa===undefined){const a=o.g.getObjectByName('forea
   if(!o.nfa){o.natFaR=o.natFaL=o.natWrist=0;return;}
   for(const B of o.nfa){const [bone,q0,key,ang]=B,w=o[key]||0;o[key]=0;if(w>.002){_nfQ.setFromAxisAngle(_nfX,ang*w);bone.quaternion.copy(q0).multiply(_nfQ);B[4]=1;}else if(B[4]){bone.quaternion.copy(q0);B[4]=0;}}}
 // Empowered swing poses and effects.
-function natEmpPose(o){const E=o.natEmpC;if(!E)return;E.t+=1/60;const t=E.t,e=natEase,ph=natPhase;if(t>1.05){o.natEmpC=null;o.cgd=0;return;}const R=o.armR.rotation,L=o.armL.rotation;
+function natEmpPose(o){const E=o.natEmpC;if(!E)return;E.t+=1/60;const t=E.t,e=natEase,ph=natPhase;if(t>1.05){o.natEmpC=null;return;}const R=o.armR.rotation,L=o.armL.rotation;
   if(E.k==='slam'){const up=e(ph(t,0,.24)),down=e(ph(t,.26,.36)),rec=e(ph(t,.55,.95)),w=1-rec,dip=down*(1-rec);
     R.set(lerp(lerp(-.2,-3.05,up),-.85,down),0,lerp(.1,-.15,up));L.set(lerp(lerp(-.1,-2.9,up),-.75,down),0,lerp(-.1,.15,up));R.x=lerp(-.2,R.x,w);L.x=lerp(-.1,L.x,w);o.b.rotation.x+=lerp(-.28*up,.52,down)*w;o.b.position.y-=.24*dip;o.legs[0].rotation.x+=-.5*dip;o.legs[1].rotation.x+=.4*dip;o.natFaR=.6*up*(1-down);}
   else{if(!E.r0)E.r0=[R.x,R.y,R.z,L.x,L.y,L.z];const r0=E.r0,ch=e(ph(t,0,.26)),up=e(ph(t,.3,.46)),rec=e(ph(t,.75,1.05)),w=1-rec;   // charge: crouch, wand low toward the ground ahead • release: swing the wand up as the thorns rise
@@ -693,7 +882,7 @@ function natWhipHit(ev){const F=natFx(),{V3,leaves,sparks,SPK}=F,p=natWorld(ev.x
 function natBallRange(P){const F=natFx(),{T}=F,R=100*S3,r=F.ring(.965,1,'#e9ff8a',.95),d=new T.Mesh(new T.CircleGeometry(1,48),new T.MeshBasicMaterial({color:'#b8e04a',transparent:true,opacity:.2,depthWrite:false}));d.rotation.x=-Math.PI/2;F.add(d);d.frustumCulled=false;r.position.set(P.x,P.y+.06,P.z);d.position.set(P.x,P.y+.05,P.z);F.clip(.72,t=>{const e=natOut(Math.min(1,t/.1));r.scale.setScalar(R*e);d.scale.setScalar(R*e);const f=1-natEase(natPhase(t,.56,.72));r.material.opacity=.95*f;d.material.opacity=.2*f;},()=>{F.drop(r);F.drop(d);});}
 // Calling the ultimate: energy winds up around the caster, then a beam drops the tree onto the chosen spot.
 function natSummon(ev){const F=natFx(),{V3,sparks,leaves,dirt,Tube,ADD,T}=F,o=ev.id!=null?PM3.get(ev.id):null,end=natWorld(ev.x2,ev.y2,ev.h2),fb=natWorld(ev.x,ev.y,ev.h),mat=ADD('#ffffff',{vertexColors:true}),beam=Tube(24,6,mat);beam.castShadow=false;beam.visible=false;let hit=false,beat=0;const FIRE=.9,c1=new T.Color('#eaffb0'),c2=new T.Color('#3df06a');
-  F.clip(1.55,t=>{const b=o?o.g.position:fb,tip=o?o.tip.getWorldPosition(V3()):b.clone().add(V3(0,2.4,0));
+  F.clip(1.55,t=>{const b=o?o.g.position:fb,tip=o?natPlantHand(o,V3()):b.clone().add(V3(0,2.4,0));
     if(t<FIRE&&t>=beat){beat=t+.035;const k=t/FIRE,a=t*9,r=2.4*(1-k*.75);for(let i=0;i<2;i++){const A=a+i*Math.PI;const p=b.clone().add(V3(Math.cos(A)*r,.2+k*2.4,Math.sin(A)*r));sparks(p,2,.5,'#eaffb0','#3df06a',{g:-1.4,life:1,size:1.5});leaves(p,1,.8,{life:.8,size:1.1});}}
     if(t>=FIRE&&!hit){hit=true;F.O.y=end.y;natShock(end,'#7dff6a',24,.8,.32);natShock(end,'#3df06a',12,.55,.32);dirt(end,46,7,{size:2,spread:4});leaves(end,44,6);sparks(end.clone().add(V3(0,.4,0)),44,6,'#f7ffc0','#5ee64a',{dir:V3(0,2.6,0),life:1,size:1.7});F.O.y=b.y;natShock(b,'#7dff6a',7,.5,.4);shake(0.45);}
     beam.visible=t>=FIRE-.08&&t<FIRE+.42;if(beam.visible){const q=natPhase(t,FIRE-.08,FIRE+.06),f=1-natEase(natPhase(t,FIRE+.18,FIRE+.42)),pts=[];const top=end.clone().add(V3(0,9,0));for(let i=0;i<24;i++){const u=i/23,p=tip.clone().lerp(top,Math.min(1,u*2)).lerp(end,Math.max(0,u*2-1));p.y+=Math.sin(u*Math.PI)*2.2;p.x+=Math.sin(u*16+t*30)*.08;pts.push(p);}beam.set(pts,u=>(.05+.16*(1-Math.abs(u-.5)*2)*q)*f+.012,(u,c)=>c.copy(c1).lerp(c2,u).multiplyScalar(.45*f));}
@@ -769,7 +958,7 @@ function natureEvent(ev){
     case 'nature_seed':natSeed(ev);break;
     case 'nature_spore_gain':case 'nature_spore_send':natSeed(ev,true);break;
     case 'nature_hook':{
-      const student=PM3.get(ev.id);if(student){castStart(student,'vine',1);student.cgd=0;student.gw=0;}   // no guard stance after the Dash (user 2026-11-14)
+      const student=PM3.get(ev.id);if(student)castStart(student,'vine',1);
       natHook(ev,student);
       snd('whoosh',{x,y,vol:.45});break;
     }
@@ -900,6 +1089,7 @@ preloadReg('nature',()=>{
     catch(e){console.warn('warm nature',name,e);}}
   // summoned plants (lotus with bubble + auras, turret ground/wall, seed ball): built by the plant sync, not by events
   for(const k of ['lotus','turret','turretW','ball'])try{const v=natPlantView({k:k==='turretW'?'turret':k,wall:k==='turretW'});if(v&&v.g)out.push(v.g);}catch(e){console.warn('warm nature plant',k,e);}
+  const hands=natHandGearMake();out.push(hands.upper,hands.wrap,hands.orb);
   return out;
 },()=>{   // particle pools (leaf/spark/dirt/puff/chip): InstancedMesh + instanceColor; the pools sit at count 0 (hidden) until a skill fires
   const F=natFx(),M4=new THREE.Matrix4(),W=new THREE.Color('#fff');
