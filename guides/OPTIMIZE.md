@@ -359,6 +359,16 @@ water +4.8 ms, storm +2.9, fire +2.6, frost +1.9, earth +1.7, wind +1.3. CPU pro
 - Whole-bench totals are noisy on this PC while other sessions run (baseline moved 9.4 → 7.5 ms between runs): compare
   function times from profiles, not totals. Not VFX but big: cloth (capes) `clothTick` 10–18 % of CPU in the 6v6 bench.
 
+**Cloth (2026-11-24, js/49):** was 10.3 % of CPU in the 6v6 bench (own cloth ~0.6 ms, 11 lite cloths ~1 ms).
+- `clTargets`: skinned pin targets from `skeleton.boneMatrices` + cached bind-space positions instead of
+  `applyBoneTransform` (4 matrix products per vertex) → 15× faster, same result (max diff 4e-6 m; `CLOTH.slowT` = old).
+- Lite (others') draw: one normal pass over the outer sheet, inner = negated (`clOuterNormals`; was 2 full
+  `computeVertexNormals`); own inner sheet = negated outer normals.
+- Lite sim at 30 Hz (`CLOTH_LITE.FARH`, damping squared, velocity rescaled on switch) beyond `NEAR` 8 m or outside the
+  nearest `NFULL` 4; body follow + draw stay every frame.
+- Result: cloth 10.3 % → 6.6 % of CPU (machine was ~35 % slower during the 2nd profile, so about −35–40 %). Left: own
+  cloth sim (`clStep` IT 6, 377 points) kept as is for the look.
+
 ## Benchmarks
 
 - 2026-11-22, combat readability A/B in Team PvP at 1000×560. All 11 classes cast the same 31 skills in an 80-frame test. The default combat presentation reduced median active particles from 2,650 to 1,220 and peak particles from 3,740 to 1,776. Median frame draw calls were 472 versus 461. Shard Storm's landing warning and active edge and Night Waltz's boundary rendered in both runs. `?fullvfx` keeps the original effects for comparison. This fixture measures effect load, not live match FPS.

@@ -25,7 +25,7 @@ const CLOTH={
   SNAP:3,         // ตัวกระโดดไกลกว่านี้ในเฟรมเดียว (วาร์ป/เกิดใหม่) = รีเซ็ตผ้า
 };
 // Other players: low-res cloth, only while on screen + near (user 2026-11-24: far fewer faces, just enough to see it move)
-const CLOTH_LITE={ON:true,COLS:[0,4,8,12,16,20,24,28],IT:3,FAR:40};   // 7 rows x 8 cols = 84 faces/side (ours: 13x29 = 672)
+const CLOTH_LITE={ON:true,COLS:[0,4,8,12,16,20,24,28],IT:3,FAR:40,NEAR:8,FARH:1/30,NFULL:4};   // NFULL: only the nearest N others step at 60 Hz   // NEAR (m): closer = 60 Hz sim, else FARH steps (6v6 CPU 2026-11-24; body follow stays every frame)   // 7 rows x 8 cols = 84 faces/side (ours: 13x29 = 672)
 const CL_ROWS=[[0.3,1.6],[0.355,1.5],[0.4,1.3],[0.47,1.0],[0.58,0.7],[0.7,0.4],[0.8,0.1]],CL_NC=29,CL_GAP=0.95,CL_IN=0.014;
 const _clV=new THREE.Vector3(),_clA=new THREE.Vector3(),_clB=new THREE.Vector3();
 // ความแข็งที่ดึงกลับรูปเดิมของแต่ละแถว (ตามความสูงในโมเดล): ไหล่ติดแน่น → ชายผ้าอิสระ
@@ -124,8 +124,20 @@ function clothSetup(o){
   o.g.userData.extra=(o.g.userData.extra||[]).concat([mo,mi]);   // disposeObj(o.g) ทิ้ง mesh ผ้าด้วย
   return C;}
 // ตำแหน่งเป้าของทุกจุด (ตามโมเดลที่ขยับตามกระดูกตอนนี้) → C.T
-function clTargets(C){const P=C.outer.geometry.attributes.position,M=C.Tm;
-  for(let k=0;k<C.ref.length;k++){_clV.fromBufferAttribute(P,C.ref[k]);C.outer.applyBoneTransform(C.ref[k],_clV);C.outer.localToWorld(_clV);M[k*3]=_clV.x;M[k*3+1]=_clV.y;M[k*3+2]=_clV.z;}
+// pin targets = skinned positions of the panel vertices. Same math as applyBoneTransform + localToWorld, but with the
+// skeleton's bone matrices (skeleton.update once) and the bind-space positions cached (6v6 CPU 2026-11-24: was 4 matrix
+// products per vertex). CLOTH.slowT = old path (compare)
+const _clM=new THREE.Matrix4();
+function clTargets(C){const SM=C.outer,G=SM.geometry,M=C.Tm,n=C.ref.length;
+  if(CLOTH.slowT||!SM.skeleton||!G.attributes.skinIndex){const P=G.attributes.position;
+    for(let k=0;k<n;k++){_clV.fromBufferAttribute(P,C.ref[k]);SM.applyBoneTransform(C.ref[k],_clV);SM.localToWorld(_clV);M[k*3]=_clV.x;M[k*3+1]=_clV.y;M[k*3+2]=_clV.z;}}
+  else{if(C.baseG!==G){C.baseG=G;const P=G.attributes.position,SI=G.attributes.skinIndex,SW=G.attributes.skinWeight;C.base=new Float32Array(n*3);C.si=new Uint16Array(n*4);C.sw=new Float32Array(n*4);
+      for(let k=0;k<n;k++){const v=C.ref[k];_clV.fromBufferAttribute(P,v).applyMatrix4(SM.bindMatrix);C.base[k*3]=_clV.x;C.base[k*3+1]=_clV.y;C.base[k*3+2]=_clV.z;for(let q=0;q<4;q++){C.si[k*4+q]=SI.getComponent(v,q);C.sw[k*4+q]=SW.getComponent(v,q);}}}
+    SM.skeleton.update();const B=SM.skeleton.boneMatrices,e=_clM.multiplyMatrices(SM.matrixWorld,SM.bindMatrixInverse).elements,BA=C.base,SI=C.si,SW=C.sw;
+    for(let k=0;k<n;k++){const x=BA[k*3],y=BA[k*3+1],z=BA[k*3+2];let ox=0,oy=0,oz=0;
+      for(let q=0;q<4;q++){const w=SW[k*4+q];if(w===0)continue;const o=SI[k*4+q]*16;
+        ox+=w*(B[o]*x+B[o+4]*y+B[o+8]*z+B[o+12]);oy+=w*(B[o+1]*x+B[o+5]*y+B[o+9]*z+B[o+13]);oz+=w*(B[o+2]*x+B[o+6]*y+B[o+10]*z+B[o+14]);}
+      M[k*3]=e[0]*ox+e[4]*oy+e[8]*oz+e[12];M[k*3+1]=e[1]*ox+e[5]*oy+e[9]*oz+e[13];M[k*3+2]=e[2]*ox+e[6]*oy+e[10]*oz+e[14];}}
   for(let r=0;r<C.NR;r++){const f=C.rf[r],r0=Math.min(CL_ROWS.length-2,Math.floor(f)),k=f-r0;
     for(let j=0;j<C.NC;j++){const a=(r0*C.NC+j)*3,b=((r0+1)*C.NC+j)*3,i=(r*C.NC+j)*3;for(let q=0;q<3;q++)C.T[i+q]=M[a+q]+(M[b+q]-M[a+q])*k;}}}
 function clReset(C){
@@ -150,7 +162,7 @@ function clWorldHit(P,Q,i,W){const sx=P[i]/S3+MW/2,sy=P[i+2]/S3+MH/2,zh=P[i+1]-G
   for(const q of W.s){if(zh>=q[5])continue;const e=eSegD(x,y,{x1:q[0],y1:q[1],x2:q[2],y2:q[3]}),m=q[4]+r;if(e.d<m&&e.d>0.001){x=e.qx+(x-e.qx)/e.d*m;y=e.qy+(y-e.qy)/e.d*m;}}
   if(PNL.length){_clO.x=x;_clO.y=y;if(pnlCollide(_clO,r,Math.max(0,zh))){x=_clO.x;y=_clO.y;}}   // breakable panels / houses
   if(x!==sx||y!==sy){const ax=(x-sx)*S3,az=(y-sy)*S3;P[i]+=ax;P[i+2]+=az;Q[i]+=ax;Q[i+2]+=az;}}
-function clStep(C,h,gy,caps,bv,W){const P=C.P,Q=C.Q,T=C.T,pk=C.pk,E=C.E,N=C.N,g=CLOTH.G*h*h,D=CLOTH.DAMP;C.t+=h;
+function clStep(C,h,gy,caps,bv,W){const P=C.P,Q=C.Q,T=C.T,pk=C.pk,E=C.E,N=C.N,g=CLOTH.G*h*h,D=h>CLOTH.STEP*1.5?CLOTH.DAMP*CLOTH.DAMP:CLOTH.DAMP;C.t+=h;   // 30 Hz step: damping per second kept
   for(let n=0;n<N;n++){const i=n*3,k=pk[n];
     if(k>=1){P[i]=Q[i]=T[i];P[i+1]=Q[i+1]=T[i+1];P[i+2]=Q[i+2]=T[i+2];continue;}
     const fl=(1-k)*CLOTH.FLUT*h*h*Math.sin(C.t*7+n*0.37);
@@ -182,10 +194,13 @@ function clDraw(C){const po=C.mo.geometry.attributes.position,pi=C.mi.geometry.a
   if(!C.flip){C.flip=true;const nm=C.mo.geometry.attributes.normal,n=Math.floor(C.N/2)+3*CL_NC,i=n*3;_clA.set(C.P[i],0,C.P[i+2]);C.o.g.getWorldPosition(_clB);_clA.x-=_clB.x;_clA.z-=_clB.z;
     if(nm.getX(n)*_clA.x+nm.getZ(n)*_clA.z<0){const gi=C.mo.geometry.index.array.slice().reverse(),go=C.mi.geometry.index.array.slice().reverse();C.mo.geometry.setIndex(Array.from(gi));C.mi.geometry.setIndex(Array.from(go));C.mo.geometry.computeVertexNormals();}}
   const nm=C.mo.geometry.attributes.normal,A=pi.array,B=po.array;for(let i=0;i<C.N*3;i+=3){A[i]=B[i]-nm.array[i]*CL_IN;A[i+1]=B[i+1]-nm.array[i+1]*CL_IN;A[i+2]=B[i+2]-nm.array[i+2]*CL_IN;}
-  pi.needsUpdate=true;C.mi.geometry.computeVertexNormals();}
+  pi.needsUpdate=true;{const gi=C.mi.geometry;let ni=gi.attributes.normal;if(!ni){ni=new THREE.BufferAttribute(new Float32Array(C.N*3),3);gi.setAttribute('normal',ni);}
+    const D=ni.array,S=nm.array;for(let i=0;i<C.N*3;i++)D[i]=-S[i];ni.needsUpdate=true;}}   // inner sheet = reversed winding of a parallel surface → negated outer normals (was a 2nd computeVertexNormals)
 // ทุกเฟรม (หลัง syncPlayers): ผ้าของเราเอง
+const _clRank=[];
 function clothTick(dt){if(!CLOTH.ON||typeof NET==='undefined')return;
-  if(CLOTH_LITE.ON)for(const [id,o] of PM3)if(id!==NET.myId)clLiteTick(o,dt);
+  if(CLOTH_LITE.ON){const R=_clRank;R.length=0;for(const [id,o] of PM3)if(id!==NET.myId&&o.g){_clV.setFromMatrixPosition(o.g.matrixWorld);o.clD=cam.position.distanceToSquared(_clV);R.push(o);}
+    R.sort((a,b)=>a.clD-b.clD);for(let i=0;i<R.length;i++){R[i].clRank=i;clLiteTick(R[i],dt);}}
   const o=PM3.get(NET.myId);if(!o||!o.fileModel||o.stormCapeHidden)return;
   if(o.cloth===undefined)o.cloth=clothSetup(o);const C=o.cloth;if(!C)return;
   let vis=true;for(let n=C.outer;n;n=n.parent)if(!n.visible){vis=false;break;}
@@ -208,7 +223,8 @@ function clRun(C,dt,W){const o=C.o;
   // ลมปะทะ: ความเร็วตัว (กรองนุ่ม) ดันผ้าไปข้างหลังคงที่ ไม่กระชาก
   const ak=1-Math.exp(-3.5*st);C.air.x+=(-dl.x/st*CLOTH.AIR-C.air.x)*ak;C.air.z+=(-dl.z/st*CLOTH.AIR-C.air.z)*ak;
   const gy=GY(_clV.x/S3+MW/2,_clV.z/S3+MH/2)+0.02;
-  C.acc=Math.min(C.acc+Math.min(dt,0.1),CLOTH.STEP*2);while(C.acc>=CLOTH.STEP){clStep(C,CLOTH.STEP,gy,C.capV,bv,W);C.acc-=CLOTH.STEP;}}   // ≤2 ก้าวต่อเฟรม: เฟรมช้า = ไม่คำนวณผ้าเพิ่ม (เดิม 4 → ยิ่งช้ายิ่งหนัก)
+  const H=C.h||CLOTH.STEP;if(C.hl&&C.hl!==H){const r=H/C.hl,P=C.P,Q=C.Q;for(let i=0;i<C.N*3;i++)Q[i]=P[i]-(P[i]-Q[i])*r;}C.hl=H;   // step size changed: keep velocity per second
+  C.acc=Math.min(C.acc+Math.min(dt,0.1),H*2);while(C.acc>=H-1e-6){clStep(C,H,gy,C.capV,bv,W);C.acc-=H;}}   // ≤2 ก้าวต่อเฟรม: เฟรมช้า = ไม่คำนวณผ้าเพิ่ม (เดิม 4 → ยิ่งช้ายิ่งหนัก)
 
 // ---- other players: low-res cloth on the batched body (student_all_batch) ----
 // Panel triangles are cut from the batch only while the lite cloth shows; otherwise the bone cloak draws as before.
@@ -247,12 +263,21 @@ function clLiteTick(o,dt){
   if(o.stormCapeHidden){if(C.on){C.on=false;C.m.visible=false;C.init=false;}return;}   // Storm cape owns the batch index meanwhile
   let vis=!!o.g.parent&&!o.ghost&&!o.g.natSleeves;
   if(vis)for(let n=C.outer;n;n=n.parent)if(!n.visible){vis=false;break;}
-  if(vis){_clV.setFromMatrixPosition(o.g.matrixWorld);vis=cam.position.distanceTo(_clV)<CLOTH_LITE.FAR&&viewDetailAt(_clV.x,_clV.y+1,_clV.z,1.4);}
+  let cd=0;if(vis){_clV.setFromMatrixPosition(o.g.matrixWorld);cd=cam.position.distanceTo(_clV);vis=cd<CLOTH_LITE.FAR&&viewDetailAt(_clV.x,_clV.y+1,_clV.z,1.4);}
+  C.h=cd>CLOTH_LITE.NEAR||(o.clRank|0)>=CLOTH_LITE.NFULL?CLOTH_LITE.FARH:CLOTH.STEP;
   clLiteShow(C,vis);if(!vis)return;
   o.g.updateMatrixWorld(true);clTargets(C);clRun(C,dt,null);clLiteDraw(C);}
 function clLiteDraw(C){const N=C.N,g=C.m.geometry,A=g.attributes.position.array,P=C.P;
   for(let n=0;n<N;n++)if(C.pk[n]>=1){const i=n*3;P[i]=C.T[i];P[i+1]=C.T[i+1];P[i+2]=C.T[i+2];}
-  A.set(P);A.set(P,N*3);g.computeVertexNormals();const nm=g.attributes.normal.array;
+  A.set(P);clOuterNormals(C,g);const nm=g.attributes.normal.array;
   if(!C.sgn){const n=3*C.NC+(C.NC>>1),i=n*3;C.o.g.getWorldPosition(_clB);C.sgn=nm[i]*(P[i]-_clB.x)+nm[i+2]*(P[i+2]-_clB.z)<0?-1:1;}   // do outer normals face out?
-  const k=-C.sgn*CL_IN;for(let i=0;i<N*3;i++)A[N*3+i]=P[i]+nm[i]*k;
-  g.attributes.position.needsUpdate=true;g.computeVertexNormals();}
+  const k=-C.sgn*CL_IN;for(let i=0;i<N*3;i++){A[N*3+i]=P[i]+nm[i]*k;nm[N*3+i]=-nm[i];}   // inner sheet: offset + reversed winding = negated normal
+  g.attributes.position.needsUpdate=true;g.attributes.normal.needsUpdate=true;}
+// normals of the outer sheet only (first 6 of every 12 indices), same math as computeVertexNormals (was run twice per frame on both sheets)
+function clOuterNormals(C,g){const N=C.N,P=g.attributes.position.array,I=g.index.array;let NA=g.attributes.normal;
+  if(!NA){NA=new THREE.BufferAttribute(new Float32Array(N*6),3);g.setAttribute('normal',NA);}const A=NA.array;A.fill(0,0,N*3);
+  for(let q=0;q<I.length;q+=12)for(let t=q;t<q+6;t+=3){const a=I[t]*3,b=I[t+1]*3,c=I[t+2]*3;
+    const cx=P[c]-P[b],cy=P[c+1]-P[b+1],cz=P[c+2]-P[b+2],ax=P[a]-P[b],ay=P[a+1]-P[b+1],az=P[a+2]-P[b+2];
+    const nx=cy*az-cz*ay,ny=cz*ax-cx*az,nz=cx*ay-cy*ax;A[a]+=nx;A[a+1]+=ny;A[a+2]+=nz;A[b]+=nx;A[b+1]+=ny;A[b+2]+=nz;A[c]+=nx;A[c+1]+=ny;A[c+2]+=nz;}
+  for(let i=0;i<N*3;i+=3){const x=A[i],y=A[i+1],z=A[i+2],l=Math.sqrt(x*x+y*y+z*z)||1;A[i]=x/l;A[i+1]=y/l;A[i+2]=z/l;}}
+if(window.WD)Object.assign(window.WD,{CLOTH,CLOTH_LITE,clTargets});   // tests
