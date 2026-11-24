@@ -338,36 +338,92 @@ function stoneMat(rx,ry,tint){const k=rx+'|'+ry+'|'+(tint||'');if(STONEM[k])retu
 function shadowAll(o){o.traverse(m=>{if(m.isMesh){m.castShadow=true;m.receiveShadow=true;}});}
 
 // ท้องฟ้า: กลางคืน (ปราสาท/ป่า) หรือ พระอาทิตย์ตก (สนามควิดดิช)
+// ---- clear midday sky (user refs 2026-11-24: anime key-art noon) — baked ONCE into a 2048x1024 equirect texture on the GPU ----
+// sky: deep blue zenith → pale horizon, brighter around/under the sun, deeper on the far side, hazy far hills, faint cirrus
+// cumulus: side-view clouds in (azimuth, elevation) space = smooth-union puffs + 3D-noise cauliflower edges + flat bases,
+//   lit by the real sun direction: crisp lit/shade split, lavender shade, darker base, silver rim when backlit
+// tune: SKYC.* then WD.skyBake() (re-bakes + refreshes the Look light) • cost: one draw at load (~ms), then a plain texture
+const SKYC={seed:20261124,n:30,sun:[74,100,-64],zen:'#1748a8',mid:'#3c80d8',hor:'#bfdcf4',horS:'#e6f2fb',halo:'#eef7ff',ground:'#9fbcd0',
+  hill:'#9dc2e2',hill2:'#86b0d6',lit:'#ffffff',shade:'#a7b4da',base:'#8e9ccb',rim:'#ffffff',cirrus:0.22};
+function skyBakeClear(){
+  const C=SKYC,NC=40;let sd=C.seed;const R=()=>(sd=(sd*1664525+1013904223)>>>0)/4294967296,D=Math.PI/180;
+  const cl=[];   // x = u (0..1), y = base elevation, z = half width, w = height (radians)
+  for(let i=0;i<C.n&&cl.length<NC;i++){const big=i<C.n*0.4,e=(big?3+R()*10:1+Math.pow(R(),1.3)*28)*D,h=(big?6+R()*6:1.5+R()*3)*D*(1+e*1.2);cl.push(new THREE.Vector4(R(),e,h*(1.0+R()*1.2),h));}
+  while(cl.length<NC)cl.push(new THREE.Vector4(0,0,0,0));
+  const col=k=>new THREE.Color(C[k]),U={uC:{value:cl},uSun:{value:new THREE.Vector3(...C.sun).normalize()},uCir:{value:C.cirrus}};
+  for(const k of ['zen','mid','hor','horS','halo','ground','hill','hill2','lit','shade','base','rim'])U['c_'+k]={value:col(k)};
+  const mat=new THREE.ShaderMaterial({uniforms:U,depthTest:false,depthWrite:false,
+    vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',
+    fragmentShader:`#define NC ${NC}
+uniform vec4 uC[NC];uniform vec3 uSun;uniform float uCir;
+uniform vec3 c_zen,c_mid,c_hor,c_horS,c_halo,c_ground,c_hill,c_hill2,c_lit,c_shade,c_base,c_rim;varying vec2 vUv;
+float h11(float n){return fract(sin(n)*43758.5453);}
+float n3(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);float n=dot(i,vec3(1.,57.,113.));
+  return mix(mix(mix(h11(n),h11(n+1.),f.x),mix(h11(n+57.),h11(n+58.),f.x),f.y),mix(mix(h11(n+113.),h11(n+114.),f.x),mix(h11(n+170.),h11(n+171.),f.x),f.y),f.z);}
+float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<5;i++){s+=a*n3(p);p=p*2.07+vec3(1.7,9.2,3.1);a*=.5;}return s;}
+float smin(float a,float b,float k){float h=clamp(.5+.5*(b-a)/k,0.,1.);return mix(b,a,h)-k*h*(1.-h);}
+vec3 dirOf(vec2 q){float ph=q.x*6.2831853,e=q.y;return vec3(-cos(ph)*cos(e),sin(e),sin(ph)*cos(e));}
+// signed distance to the nearest cloud (radians); vert = height above that cloud base, hh = cloud height
+float clouds(vec2 q,out float vert,out float hh){float best=1.;vert=0.;hh=.1;
+  for(int i=0;i<NC;i++){vec4 c=uC[i];if(c.w<=0.)continue;
+    float du=q.x-c.x;du-=floor(du+.5);float X=du*6.2831853*cos(q.y),Y=q.y-c.y;
+    if(abs(X)>c.z*1.5+c.w||Y<-.02||Y>c.w*2.2)continue;
+    float s=1.,ci=float(i)*31.7;
+    for(int k=0;k<15;k++){float fk=float(k),a=h11(ci+fk),b=h11(ci+fk+17.),r2=h11(ci+fk+33.);vec2 ct;float r;
+      if(k<10){float t=fk/9.;ct.x=(t-.5)*1.7*c.z+(a-.5)*.2*c.z;r=c.w*(.28+.55*sin(3.1416*t))*(.75+.5*b);ct.y=r*(.35+.45*r2);}
+      else{ct.x=(a-.5)*c.z*.9;r=c.w*(.3+.28*b);ct.y=c.w*(.6+.55*r2);}
+      s=smin(s,length(vec2(X,Y)-ct)-r,c.w*.16);}
+    s=max(s,-Y);   // flat base
+    if(s<best){best=s;vert=Y;hh=c.w;}}
+  return best;}
+float cloudsN(vec2 q,out float vert,out float hh){float s=clouds(q,vert,hh);if(s>.06)return s;
+  vec3 d=dirOf(q);float up=smoothstep(0.,hh*.35,vert);
+  s+=(fbm(d*16./max(hh*12.,.35))-.5)*hh*.42*(.3+.7*up)+(fbm(d*45./max(hh*12.,.35))-.5)*hh*.12*up;return s;}
+void main(){
+  vec2 q=vec2(vUv.x,(vUv.y-.5)*3.1415927);vec3 d=dirOf(q);float e=q.y;
+  vec3 dh=normalize(vec3(d.x,0.,d.z)+1e-5),sh=normalize(vec3(uSun.x,0.,uSun.z));float az=dot(dh,sh)*.5+.5,t=clamp(e/1.5707963,0.,1.);
+  vec3 sky=mix(mix(c_hor,c_horS,az*az),c_mid,smoothstep(0.,.2,t));sky=mix(sky,c_zen*mix(.9,1.05,az),smoothstep(.14,.8,t));
+  float sd=max(dot(d,uSun),0.);sky=mix(sky,c_halo,pow(sd,6.)*.45+pow(sd,48.)*.35);
+  if(e<0.)sky=mix(mix(c_hor,c_horS,az*.6),c_ground,smoothstep(0.,.25,-e));
+  float ci=smoothstep(.56,.82,fbm(vec3(d.x*2.5,d.y*14.,d.z*2.5)+fbm(d*6.)*.8))*smoothstep(.25,.6,e)*uCir;sky=mix(sky,c_lit,ci);
+  float hn=fbm(dh*5.),hn2=fbm(dh*11.+7.);
+  if(e>-.02){float h1=(.4+2.8*hn*hn)*.01745,h2=(.1+1.6*hn2)*.01745;
+    if(e<h1)sky=mix(sky,c_hill,.85);if(e<h2)sky=mix(sky,c_hill2,.9);}
+  vec3 col=sky;
+  if(e>0.){float vert,hh;float s=cloudsN(q,vert,hh);
+    if(s<.004){float ep=max(.003,hh*.04),v2,h2;
+      vec2 g=vec2(cloudsN(q+vec2(ep/(6.2831853*cos(e)),0.),v2,h2)-s,cloudsN(q+vec2(0.,ep),v2,h2)-s);vec2 n=-normalize(g+1e-7);
+      float ph=q.x*6.2831853;vec3 tE=vec3(sin(ph),0.,cos(ph)),tN=vec3(cos(ph)*sin(e),cos(e),-sin(ph)*sin(e));
+      vec2 L=vec2(dot(uSun,tE),dot(uSun,tN));L=length(L)>1e-3?normalize(L):vec2(0.,1.);
+      float front=-dot(d,uSun),v01=clamp(vert/hh,0.,1.);
+      float shv=dot(n,L)*.5+v01*.62-.3+front*.25;float lit=smoothstep(-.02,.24,shv);
+      vec3 cc=mix(c_shade,c_lit,lit);
+      float depth=clamp(-s/(hh*.3),0.,1.);cc=mix(cc,cc*.94,depth*(1.-lit));
+      cc=mix(c_base,cc,smoothstep(0.,hh*.4,vert));
+      float edge=1.-smoothstep(0.,hh*.05,-s);cc=mix(cc,c_rim,edge*(max(0.,dot(d,uSun))*.7+.12));
+      cc=mix(cc,c_hor,(1.-smoothstep(0.,.18,e))*.45);
+      float px=.0016,a=1.-smoothstep(-px,px,s);col=mix(sky,cc,a);}}
+  gl_FragColor=vec4(col,1.);}`});
+  const rt=new THREE.WebGLRenderTarget(2048,1024,{generateMipmaps:true,minFilter:THREE.LinearMipmapLinearFilter,magFilter:THREE.LinearFilter,colorSpace:THREE.SRGBColorSpace,depthBuffer:false});
+  rt.texture.wrapS=THREE.RepeatWrapping;
+  const sc=new THREE.Scene(),cm=new THREE.OrthographicCamera(-1,1,1,-1,0,1),geo=new THREE.PlaneGeometry(2,2),m=new THREE.Mesh(geo,mat);m.frustumCulled=false;sc.add(m);
+  const prev=gl.getRenderTarget(),tm=gl.toneMapping;gl.toneMapping=THREE.NoToneMapping;gl.setRenderTarget(rt);gl.render(sc,cm);gl.setRenderTarget(prev);gl.toneMapping=tm;
+  geo.dispose();mat.dispose();
+  rt.texture.userData.rt=rt;return rt.texture;
+}
+// debug: re-bake after changing SKYC (frees the old texture, updates the sky mesh + Look light)
+function skyBake(o){Object.assign(SKYC,o||{});const old=SKY.clear;SKY.clear=skyBakeClear();
+  if(SKY.mesh.material.map===old){SKY.mesh.material.map=SKY.clear;SKY.mesh.material.needsUpdate=true;}
+  if(old&&old.userData.rt)old.userData.rt.dispose();
+  if(typeof LOOK!=='undefined'&&LOOK){for(const k of Object.keys(LOOK.env))if(k.startsWith('clear|')){LOOK.env[k].dispose();delete LOOK.env[k];}lookRefresh();}
+  return SKY.clear;}
 const SKY={};
 (function(){
   const grad=(stops)=>texCanvas(4,256,(g)=>{const r=g.createLinearGradient(0,0,0,256);stops.forEach(([p,c])=>r.addColorStop(p,c));g.fillStyle=r;g.fillRect(0,0,4,256);});
   SKY.night=grad([[0,'#03050f'],[0.45,'#141a3a'],[0.52,'#3a2f55'],[0.6,'#151a33'],[1,'#08090f']]);
   SKY.sunset=grad([[0,'#16234f'],[0.3,'#4a3f86'],[0.44,'#c06a8a'],[0.5,'#ff9a5a'],[0.53,'#ffd08a'],[0.6,'#6a4a5a'],[1,'#2a2030']]);
   SKY.noon=grad([[0,'#6fb6d4'],[0.3,'#a4dcd0'],[0.44,'#d6f0c8'],[0.5,'#f2f8cc'],[0.54,'#a8d49a'],[0.62,'#5f9a5c'],[1,'#2f5a3a']]);   // กลางวันในป่า (ลุคภาพวาด js/77): ฟ้าอมเขียว ขอบฟ้าสว่างนวล
-  // clear midday (anime key-art look, user ref 2026-11-24): deep blue zenith → pale horizon, faint far hills, puffy cumulus
-  // equirect on the sky sphere: canvas y = 512*(1 - elev/90) above the horizon (y=512), wraps on x
-  SKY.clear=texCanvas(2048,1024,(g,W,H)=>{
-    let sd=20261124;const R=()=>(sd=(sd*1664525+1013904223)>>>0)/4294967296,hz=H/2,ey=e=>hz-e/90*hz;
-    const r=g.createLinearGradient(0,0,0,H);
-    [[0,'#1a4fae'],[0.2,'#2665c2'],[0.36,'#3b7fd6'],[0.45,'#6aa6e6'],[0.485,'#a6cdf0'],[0.5,'#cde4f5'],[0.53,'#a9c6da'],[1,'#7f9bb0']].forEach(([p,c])=>r.addColorStop(p,c));
-    g.fillStyle=r;g.fillRect(0,0,W,H);
-    const wrap=(x,f)=>{for(const o of [-W,0,W])f(x+o);};
-    // far hills: two hazy silhouette bands just above the horizon
-    for(const [c,amp,base,fr] of [['#a8c9e6',3.2,0.6,7],['#8db6d8',1.9,0.15,13]]){
-      g.fillStyle=c;g.beginPath();g.moveTo(0,hz+2);
-      const ph=R()*9;for(let x=0;x<=W;x+=8){const t=x/W*Math.PI*2,e=base+amp*(0.5+0.3*Math.sin(t*fr/3+ph)+0.2*Math.sin(t*fr+ph*2)+0.12*Math.sin(t*fr*2.7));g.lineTo(x,ey(Math.max(0,e)));}
-      g.lineTo(W,hz+2);g.closePath();g.fill();}
-    // cumulus: puffs with bright tops + blue-grey flat bases
-    const cloud=(cx,e,w,h)=>{const base=ey(e),n=6+Math.floor(w/22),P=[];
-      for(let i=0;i<n;i++){const u=i/(n-1),rr=h*(0.35+0.65*Math.sin(Math.PI*u))*(0.7+R()*0.5);P.push([cx+(u-0.5)*w+(R()-0.5)*w*0.12,base-rr*(0.45+R()*0.5),rr]);}
-      wrap(0,o=>{g.save();g.beginPath();g.rect(cx-w+o,base-h*3,w*2,h*3+2);g.clip();
-        for(const [x,y,rr] of P){g.fillStyle='rgba(150,178,214,0.9)';g.beginPath();g.arc(x+o,y+rr*0.18,rr,0,7);g.fill();}
-        for(const [x,y,rr] of P){const q=g.createRadialGradient(x+o-rr*0.2,y-rr*0.35,rr*0.1,x+o,y,rr);q.addColorStop(0,'rgba(255,255,255,1)');q.addColorStop(0.7,'rgba(246,250,255,0.95)');q.addColorStop(1,'rgba(220,234,250,0)');
-          g.fillStyle=q;g.beginPath();g.arc(x+o,y-rr*0.08,rr*0.92,0,7);g.fill();}
-        g.restore();});};
-    for(let i=0;i<16;i++){const e=3+Math.pow(R(),1.6)*34,s=1/Math.cos(e*Math.PI/180);cloud(R()*W,e,(60+R()*150)*s*(1+e/30),(14+R()*16)*(1+e/18));}
-    for(let i=0;i<7;i++){const e=1.2+R()*3,x=R()*W;cloud(x,e,40+R()*90,6+R()*6);}   // small low clouds along the horizon
-  });
+  SKY.clear=skyBakeClear();   // clear midday sky, baked once on the GPU (skyBakeClear above)
   SKY.mesh=new THREE.Mesh(new THREE.SphereGeometry(600,32,16),new THREE.MeshBasicMaterial({map:SKY.night,side:THREE.BackSide,fog:false,depthWrite:false}));
   scene.add(SKY.mesh);
   const n=1500,pos=new Float32Array(n*3);

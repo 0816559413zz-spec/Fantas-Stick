@@ -98,4 +98,4 @@ function lookTest(o){
   if(typeof fileMapLight==='function')fileMapLight({sky:o.sky,fog:o.fog,lt:o.lt});
   return {look:LOOK.cur,exp:gl.toneMappingExposure,hemi:hemi.intensity};
 }
-window.WD&&Object.assign(window.WD,{LOOK,lookPreset,lookRefresh,lookTest,GFX});
+window.WD&&Object.assign(window.WD,{LOOK,lookPreset,lookRefresh,lookTest,GFX,SKYC,skyBake});
