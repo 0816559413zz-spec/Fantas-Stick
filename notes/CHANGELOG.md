@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-24 — Painterly filter no longer eats skill particles: FXPass (js/27) runs the Kuwahara filter on the scene first, then draws particles on top (`PAINT.fxAfter`, false = old order). Sparks/small dots visible again; cost same. Shots `shots/kuwzoom.jpg`. Gate: 1 open item not from this change (Nature thorn weave material compiles mid-match on meadow, 618 ms).
 - 2026-11-24 — **Stone Mark crust thinner per layer** (user: too much): coverage 0.25 → 0.40 for layers 1–4, full body only when petrified.
 - 2026-11-24 — **Other players' cloaks move too (low-res cloth)** (user: only when visible, far fewer faces, just enough to see it move). `js/49-cloth.js` `CLOTH_LITE`: 7x8 grid on the batched body, simulated only on screen and within 40 m; off screen / far = old bone cloak. Tested with a bot: idle, moving, off-screen toggle.
 - 2026-11-24 — **Stone Mark v3** (user): layers are a stone crust over the skin (coat copy of each body mesh, noise-threshold shader `eCoatMat`, coverage 0.33 → 0.84 by layer, full when petrified) instead of loose rocks; line has no white core, gold-brown body inside a soft view-facing falloff aura; a line that hits the floor leaves a stone crust (`eStoneCrust`, ~3 s); charge 0.8 s and 0.35 s post-shot recovery (`p.esmPost`, no BA).

@@ -309,12 +309,18 @@ function kuwMat(q){return new THREE.ShaderMaterial({uniforms:PAINT.KU,depthTest:
         'vec3 b=(m0*a0+m1*a1+m2*a2+m3*a3)/(a0+a1+a2+a3);'+
         'b=b/max(1.0-dot(b,LW),0.02);if(!(b.r+b.g+b.b>=0.0))b=src;'+
         'gl_FragColor=vec4(mix(src,b,uK),1.0);}'});}
+// PAINT.fxAfter (user 2026-11-24 "skill particles fewer/gone with Painterly"): FXPass (js/27) filters the scene with paintKuw before
+// drawing particles, so sparks/small dots stay sharp • false = old order (filter over everything, here in PaintPass)
+PAINT.fxAfter=true;
+function paintRT(w,h){const t=PAINT.rt||(PAINT.rt=new THREE.WebGLRenderTarget(w,h,{type:THREE.HalfFloatType,depthBuffer:false}));if(t.width!==w||t.height!==h)t.setSize(w,h);return t;}
+function paintKuw(r,tex,target,w,h){const P=PAINT.pass;P.q.material=P.mat();const U=PAINT.KU;U.tDiffuse.value=tex;U.uPx.value.set(1/w,1/h);U.uR.value=PAINT.kuwR*Math.max(1,h/720);U.uK.value=typeof screen==='string'&&screen!=='game'?0:PAINT.kuw;
+  r.setRenderTarget(target);P.q.render(r);}
 class PaintPass extends Pass{
   constructor(){super();this.needsSwap=true;this.M={};this.q=new FullScreenQuad(this.mat());}
   mat(){const q=PAINT.kuwQ||kuwQ();return this.M[q]||(this.M[q]=kuwMat(q));}
-  render(r,write,read){this.q.material=this.mat();const U=PAINT.KU;U.tDiffuse.value=read.texture;U.uPx.value.set(1/read.width,1/read.height);U.uR.value=PAINT.kuwR*Math.max(1,read.height/720);U.uK.value=typeof screen==='string'&&screen!=='game'?0:PAINT.kuw;
-    PAINT.T.value=performance.now()*0.001;ptWindTick();paintGrass();
-    r.setRenderTarget(this.renderToScreen?null:write);this.q.render(r);}
+  render(r,write,read){PAINT.T.value=performance.now()*0.001;ptWindTick();paintGrass();
+    this.needsSwap=!PAINT.fxAfter;if(PAINT.fxAfter)return;   // filter already done inside FXPass
+    paintKuw(r,read.texture,this.renderToScreen?null:write,read.width,read.height);}
 }
 PAINT.pass=new PaintPass();PAINT.pass.enabled=false;
 // entry preload: draw the filter once into a tiny target so its program is linked before the first paint map

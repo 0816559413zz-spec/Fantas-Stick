@@ -188,7 +188,8 @@ class FXPass extends Pass{
   setSize(w,h){AO_RT.setSize(Math.max(1,w>>1),Math.max(1,h>>1));AOU.uAORes.value.set(AO_RT.width,AO_RT.height);}
   render(r,write,read){const ac=r.autoClear;r.autoClear=false;
     if(typeof ffMistFrame==='function')ffMistFrame();   // หมอกป่า fcs (js/28): โชว์เฉพาะตอนอยู่แมพนั้น
-    if(!SOFTU.uSoftOn.value){this.needsSwap=false;r.setRenderTarget(read);r.render(fxScene,cam);r.autoClear=ac;return;}
+    const kw=PAINT.pass&&PAINT.pass.enabled&&PAINT.fxAfter;   // painterly filter (js/77) on the scene only, particles drawn after it (else it smooths sparks away)
+    if(!SOFTU.uSoftOn.value){if(kw){this.needsSwap=true;paintKuw(r,read.texture,write,read.width,read.height);r.setRenderTarget(write);}else{this.needsSwap=false;r.setRenderTarget(read);}r.render(fxScene,cam);r.autoClear=ac;return;}
     // นุ่ม: ก๊อปภาพฉากไปอีกแผ่น แล้ววาดเอฟเฟกต์ทับโดยอ่านความลึกจากแผ่นเดิม (อ่าน+เขียนแผ่นเดียวกันไม่ได้)
     this.needsSwap=true;SOFTU.uDepth.value=read.depthTexture;SOFTU.uRes.value.set(read.width,read.height);SOFTU.uNear.value=cam.near;SOFTU.uFar.value=cam.far;
     const th=Math.tan(cam.fov*Math.PI/360);AOU.uTan.value.set(th*cam.aspect,th);
@@ -199,7 +200,9 @@ class FXPass extends Pass{
     AOU.uHazeD.value.y=GFX.hazeH;if(typeof lookRaysFrame==='function')lookRaysFrame();if(typeof ambFrame==='function')ambFrame();   // ฝุ่น/หมอกลอย (js/75)
     AOU.uRim.value=GFX.rim;AOU.uRimCol.value.copy(moonL.color).multiplyScalar(GFX.rim);AOU.uHazeD.value.z=GFX.rimZ;
     const ta=taaResolve(r,read),src=ta||read.texture;   // TAA: ภาพฉากที่ผสมประวัติแล้ว (กราฟิกสูง)
-    this.cp.material.uniforms.t.value=src;HAZE_U.uScene.value=src;r.setRenderTarget(write);this.cp.render(r);taaEnd();if(typeof blobPre==='function')blobPre();r.render(fxScene,cam);if(typeof blobFire==='function')blobFire(r,write);r.autoClear=ac;}   // blob = ไฟก้อนหลอมรวม (js/77)
+    this.cp.material.uniforms.t.value=src;HAZE_U.uScene.value=src;
+    if(kw){const t=paintRT(read.width,read.height);r.setRenderTarget(t);this.cp.render(r);paintKuw(r,t.texture,write,read.width,read.height);}else{r.setRenderTarget(write);this.cp.render(r);}
+    r.setRenderTarget(write);taaEnd();if(typeof blobPre==='function')blobPre();r.render(fxScene,cam);if(typeof blobFire==='function')blobFire(r,write);r.autoClear=ac;}   // blob = ไฟก้อนหลอมรวม (js/77)
 }
 const fxPass=new FXPass();composer.addPass(fxPass);
 const bloom=new UnrealBloomPass(new THREE.Vector2(512,512),0.72,0.5,0.86);
