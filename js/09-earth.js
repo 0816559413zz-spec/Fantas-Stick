@@ -134,6 +134,8 @@ function earthFistBreak(pr){
 }
 
 // ---------- Dash: Stand Rampage / Rock Boost Escape ----------
+const EKICK={cd:5,back:950,up:6,dmg:20,range:520,hold:0.22,cdUp:8,launch:22,upR:60,upKnock:350};
+SPELLS.ekickrock={hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');const o=G.players[pr.owner];knock(t,o?o.x:pr.x-pr.vx,o?o.y:pr.y-pr.vy,300);}};
 function earthDash(p,inp,pr,dt,setCd){
   if(p.ramp){const R=p.ramp;R.t-=dt;
     p.dashX=Math.cos(p.ang);p.dashY=Math.sin(p.ang);p.dash=0.05;p.dashSp=ERV.rampSp;p.eRamp=p.id;p.shieldOn=false;
@@ -145,6 +147,21 @@ function earthDash(p,inp,pr,dt,setCd){
     if(pr.sp||R.t<=0||p.stun>0)earthRampEnd(p,p.stun>0);
     return true;}
   if(p.aug||p.wr)return false;
+  // Shift v2 (user 2026-11-24): no Stand Rampage. In the air: tap Shift = conjure a rock, kick it forward (20 dmg) and
+  // push yourself backward. On the ground: hold Shift = a rock column launches you high (reaches a Terra Isle).
+  {const air=p.z>groundH(p.x,p.y,p.z)+0.3,K=EKICK;
+    if(pr.sp&&air&&!(p.eKickCd>G.time)&&!(p.mudT>0)&&!(p.stun>0)){const a=p.ang,dx=Math.cos(a),dy=Math.sin(a);
+      p.eKickCd=G.time+K.cd;p.vx=-dx*K.back;p.vy=-dy*K.back;p.vz=Math.max(p.vz||0,K.up);
+      shoot(p,'eslab',{sp:'ekickrock',dmg:K.dmg,quiet:1,h:p.z+0.6,life:K.range/PDEF.eslab.spd});
+      emit({k:'efx',z:'ekick',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});emit({k:'sk',id:p.id,s:'ekick'});}
+    if(!air&&inp.dh&&!(p.eLaunchCd>G.time)&&!(p.mudT>0)&&!(p.stun>0)){p.eLH=(p.eLH||0)+dt;
+      if(p.eLH>=K.hold){p.eLH=0;p.eLaunchCd=G.time+K.cdUp;p.vz=K.launch;p.z+=0.05;
+        for(const t of foesIn(p.team,p.x,p.y,K.upR,p.z+3))knock(t,p.x,p.y,K.upKnock);
+        emit({k:'efx',z:'elaunch',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}}
+    else p.eLH=0;
+    const r=Math.max(0,(p.eKickCd||0)-G.time);p.cd.dodge=r;p.cdMax.dodge=K.cd;}
+  return false;
+  // (old Stand Rampage / Rock Boost below kept dormant)
   if(!pr.sp||p.cd.dodge>0||p.mudT>0||p.z>groundH(p.x,p.y,p.z)+0.3)return false;
   if(p.stdB>0){   // Rock Boost Escape: หินดันตัวพุ่งไปข้างหน้า ~400 + ศัตรูรอบจุดเริ่ม (120) กระเด็น ไม่มีดาเมจ
     let dx,dy;if(typeof inp.mx==='number'&&Math.hypot(inp.mx,inp.my)>0.1){dx=inp.mx;dy=inp.my;const l=Math.hypot(dx,dy);dx/=l;dy/=l;}else{dx=Math.cos(p.ang);dy=Math.sin(p.ang);}

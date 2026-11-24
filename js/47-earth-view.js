@@ -423,7 +423,8 @@ function earthFistForearm(o){
 }
 // ---------- ทุกเฟรม: ผู้เล่นสายดิน (เรียกจาก syncPlayers) ----------
 function earthFX(o,p,pz,now,dt){
-  o.eFistBend=null;earthRockRing(o,p,now,dt);
+  o.eFistBend=null;
+  if(o.caN==='ekick'){o.vsp=0;o.wsl=1;o.ekickL=1;}else if(o.ekickL){o.wsl=0;o.ekickL=0;}earthRockRing(o,p,now,dt);
   {const side=o.caN==='islecast'||o.caN==='rampcast';if(side||o.isleHd){o.slHead=side?-(o.cpb?o.cpb[2]:0)*0.9:0;o.isleHd=side;frostSlideHead(o);}}   // side-on cast: head stays on the target
   const A=p.ea;if(!A){if(EV.st.has(p.id)){const s=EV.st.get(p.id);eStonePrep(s,null);eFistCharge(s,null,null,0);s.sbFollow=null;for(const k of ['stand','giant','cgiant'])if(s[k])standOp(s[k],0);for(const k of ['drill','augW','pil','wrWarn','wrRock'])if(s[k])s[k].visible=false;}return;}
   const s=eState(p.id),S=eStandOf(s),G2=eGiantOf(s),t=now/1000,fx=Math.cos(p.a),fy=Math.sin(p.a),rx=-fy,ry=fx,broken=A[0]>0,z0=(pz||0)-GY(p.x,p.y);   // ความสูงที่วาดจริงเหนือพื้น (snapshot ไม่มี p.z)
@@ -820,6 +821,11 @@ SKANIM.erockthrow='erockthrow';
 // the ring empties in a rapid volley, then settle
 CANIM.stonebarrage={d:0.95,st:0,tr:null,tm:[0.25,0.62],k:[[0.15,-0.6,-0.4,0.25,0.04,-0.7,0.6,0,-0.05,'s'],[0.25,-1.55,-0.1,-0.08,0.14,-1.5,0.1,0,-0.1,'i'],[0.62,-1.5,-0.1,-0.08,0.15,-1.45,0.12,0,-0.1,'s'],[1,-1.1,-0.15,0,0.03,-0.8,0.3,0,0,'s']]};
 SKANIM.stonebarrage='stonebarrage';
+// Shift kick (user 2026-11-24): tuck in the air, body tilts back, right leg kicks the rock out, flies back still tilted,
+// straightens to almost upright as it lands. [u,kR,kL,elbowL,thighR,thighL,spR,spL] joint keys drive the legs.
+CANIM.ekick={d:0.7,st:0,tr:null,k:[[0.12,-0.9,-0.6,0.1,0.2,-0.9,0.6,0,0.05,'s'],[0.24,-1.3,-0.4,0,-0.45,-1.25,0.5,0,0.02,'i'],[0.72,-1.2,-0.45,0,-0.4,-1.15,0.55,0,0,'s'],[1,-0.6,-0.3,0,-0.06,-0.6,0.35,0,0,'s']],
+  j:[[0.12,1.35,1.35,0.9,-0.95,-0.95,0.1,-0.1],[0.24,0.05,1.1,0.6,-1.4,-0.35,0.08,-0.08],[0.72,0.1,1.0,0.6,-1.25,-0.3,0.08,-0.08],[1,0.2,0.25,0.45,-0.2,0.1,0.1,-0.1]]};
+SKANIM.ekick='ekick';
 // rock ring behind the back: 8 small faceted rocks on a slowly turning vertical circle; count follows the ammo (ek),
 // the refilling rock grows in place. One shared geometry, per-rock seed for size/tilt.
 const ERING={geo:null,mat:null};
@@ -1016,6 +1022,10 @@ function earthEfx(ev){
     case 'esbwall':eDebris(x,y,H,26,240);ring(x,y,'#ffd86b',70,0.4,H);burst(x,y,'#ffe7a0',12,120,0.6,2.2,{h:H+0.8,g:0});shake(0.4);if(near)snd('boom',ev);return true;
     // ----- Tectonic Crush -----
     case 'ewallup':shake(0.35);if(near)snd('boom',ev);return true;
+    case 'ekick':{const c=Math.cos(ev.a),sn=Math.sin(ev.a);eChunks(x+c*30,y+sn*30,H+0.4,8,220,8,0.2);burst(x+c*24,y+sn*24,ECOL.dust,12,200,0.35,2.4,{h:H+0.5,vh:[0,3],g:4});if(mine)shake(0.25);if(near)snd('boom',{x,y,vol:0.4});return true;}
+    case 'elaunch':{dfCracks(x,y,0.06,50,'#a98a62',1);eChunks(x,y,0.2,12,220,10,0.24);burst(x,y,ECOL.dust,20,240,0.5,3.2,{h:0.2,vh:[3,9],g:7});ring(x,y,'#e3c690',50,0.3,0.15);
+      {const g=rockMesh(0.9,2.2,0.9,0.12,3,eTMat('cliff','#c9b394'));g.position.copy(eW(x,y,-2.2));scene.add(g);eAnim({g,life:0.9,fn(a){const t=a.t;g.position.y=GY(x,y)+(t<0.12?-2.2+2.4*(t/0.12):t<0.5?0.2:0.2-2.6*((t-0.5)/0.4));}});}
+      if(near)snd('boom',{x,y,vol:0.5});shake(0.3);return true;}
     case 'erockthrow':{if(near)snd('whoosh',{x,y,vol:0.35});return true;}
     case 'erockbar':{if(near)snd('buff',{x,y,vol:0.4});burst(x,y,ECOL.dust,8,120,0.4,2.2,{h:1.4,vh:[0,2],g:2});return true;}
     case 'erockboom':{burst(x,y,ECOL.dust,10,170,0.4,2.6,{h:Math.max(0.2,H),vh:[1,3],g:6});eChunks(x,y,Math.max(0.2,H),5,170,6,0.16);ring(x,y,'#e3c690',34,0.25,Math.max(0.15,H));if(H<0.6)dfCracks(x,y,0.06,26,'#a98a62',0.6);if(near)snd('boom',{x,y,vol:0.35});return true;}

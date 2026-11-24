@@ -1,5 +1,5 @@
 {
- "next": 177,
+ "next": 178,
  "items": [
   {
    "id": 171,
@@ -3691,6 +3691,23 @@
     "/shots/town_scene_street.jpg",
     "/shots/town_scene_eye.jpg",
     "/mapbuild.html?id=town-demo"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 177,
+   "title": "Earth: Shift ใหม่ (ถีบหินกลางอากาศ / ค้างพุ่งขึ้น)",
+   "text": "กระโดดแล้วกด Shift: เสกหินถีบออกไปข้างหน้า 20 ดาเมจ ตัวพุ่งถอยหลัง (ตัวเอียง ขาถีบ แล้วกลับมาเกือบตรงตอนลง) • ค้าง Shift บนพื้น: เสาหินดันพุ่งขึ้นสูง ขึ้นเกาะได้ • ทดสอบแล้ว: ถีบแล้วพุ่งถอยหลัง ~8 ม. • พุ่งขึ้นสูงสุด ~8 ม.",
+   "kind": "Skill",
+   "who": "Earth",
+   "status": "wait",
+   "created": "2026-11-24T23:00:00",
+   "updated": "2026-11-24T23:30:00",
+   "imgs": [],
+   "links": [
+    "/shots/motion_earth_kick.gif",
+    "/shots/earth_kick_sheet.jpg"
    ],
    "feedback": "",
    "reply": ""

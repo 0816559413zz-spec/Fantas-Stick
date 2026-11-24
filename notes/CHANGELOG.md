@@ -1515,3 +1515,4 @@
 - 2026-11-24 Earth Stone Barrage replaces Tectonic Crush: rapid volley of the whole rock ring with sway, fast refill; rocks render as rocks
 - 2026-11-24 Stone Barrage: ring refills in 1 s (was 2)
 - 2026-11-24 Earth rock damage 15 → 10 per stone (BA + Stone Barrage); Stone Barrage approved
+- 2026-11-24 Earth Shift v2: air rock kick (back-launch, 20 dmg forward) + hold to launch up; Rampage removed (untested in game: no network)
