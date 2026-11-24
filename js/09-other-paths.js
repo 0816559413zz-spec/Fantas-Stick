@@ -150,7 +150,7 @@ const SDOME=defSpell(2,{id:'stormdome',v:{cost:4,godCost:3,range:600,rise:6,fly:
   cast(p,S){
     if(p.sdome||p.dfall)return false;
     if(!stSpend(p,stormDomeCost(p)))return false;
-    const g0=groundH(p.x,p.y),q=aimPoint(p,S.v.range),god=p.god>0;
+    const g0=groundH(p.x,p.y,p.z),q=aimPoint(p,S.v.range),god=p.god>0;
     p.sdome={ph:1,t:god?0.35:SDOME_POSE.charge+SDOME_POSE.lift,z0:p.z,g0,H:g0+S.v.rise,tx:q.x,ty:q.y,god};
     p.stS=null;p.hover=0;p.vz=0;p.beam=0;
     if(god)emit({k:'efx',z:'sdrise',x:p.x,y:p.y,h:p.z,id:p.id,g:1});

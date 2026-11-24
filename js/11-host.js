@@ -459,7 +459,7 @@ function updatePlayer(p,dt,acting){
   }
   if(p.cryo>0){if(pr.q)castSlot(p,0);if(pr.e)castSlot(p,1);if(pr.r)castSlot(p,2);if(pr.f)castSlot(p,3);return;}
   if(p.dfall||(p.sdome&&!stormDomeDash(p))||p.shk>0||(p.mudT>0&&!p.ramp)){}else if(B.dash){if(B.dash(p,inp,pr,dt,setCd))return;}
-  else if(pr.sp&&p.cd.dodge<=0&&p.z<0.5){
+  else if(pr.sp&&p.cd.dodge<=0&&p.z-groundH(p.x,p.y,p.z)<0.5){   // height above the floor under you (bridges/wall tops count as ground)
     let dx=mx,dy=my;if(!dx&&!dy){dx=Math.cos(p.ang);dy=Math.sin(p.ang);}
     p.dash=0.18;p.dashX=dx;p.dashY=dy;p.inv=0.24;p.shieldOn=false;setCd('dodge',2.5*cdr);
     emit({k:'dash',x:p.x,y:p.y});

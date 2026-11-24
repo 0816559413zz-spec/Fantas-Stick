@@ -70,7 +70,7 @@ function pyroDash(p,inp,pr,dt,setCd){
     p.dchg=0;p.fpath={x:p.x,y:p.y};
     return false;
   }
-  if(pr.sp&&p.cd.dodge<=0&&p.z<0.5){p.dchgOn=true;p.dchg=0;p.shieldOn=false;return true;}
+  if(pr.sp&&p.cd.dodge<=0&&p.z-groundH(p.x,p.y,p.z)<0.5){p.dchgOn=true;p.dchg=0;p.shieldOn=false;return true;}
   return false;
 }
 // ทางไฟจาก Dash (ผู้ใช้ 2026-10-22): ค้าง 3 วิ • ศัตรูเหยียบเข้า = burn +1 stack (ต่อการเข้า 1 ครั้ง) • ยืนบนทาง = 10 ดาเมจ/วิ
@@ -113,7 +113,7 @@ const KINDLE=defSpell(0,{id:'kindle',v:{shots:1,sideDmg:10,sideSpd:0.82,bow:70,m
 const DRAGONF=defSpell(0,{id:'dragonfall',v:{range:600,rise:6,fly:3,r:120,dmg:20,slow:0.7,slowT:1.2,burn:1,env:60},vn:{range:'ระยะเล็งจุดลง',rise:'บินสูง',fly:'บินนาน (วิ)',r:'รัศมีกระแทก',dmg:'ดาเมจกระแทก',slow:'ความเร็วคนโดน (เท่า)',slowT:'ช้านาน (วิ)',burn:'Burning ที่ใส่',env:'ดาเมจใส่บ้าน/ของ'},role:'builder',n:'Dragonfall',ic:'🐉',cd:13,d:'ทะยานขึ้นฟ้าด้วยเปลวไฟ แล้วบินควบคุมได้ 3 วิ (WASD เคลื่อนช้าๆ • Space ขึ้น / C ลง เล็กน้อย) — จุดที่เล็งคือจุดลง มีวงเตือนบนพื้นตามเป้าเล็งให้ทุกคนเห็น • คลิกยิง = ดิ่งกระแทกทันที • ครบ 3 วิ = ดิ่งลงจุดเล็งล่าสุดอัตโนมัติ',fx:'กระแทกวงรัศมี 120: 20 ดาเมจ +1 Burning + ช้าลง 30% 1.2 วิ (โดนครั้งเดียวต่อคน) • ไม่อมตะระหว่างบิน • โดนสตัน/แช่แข็งระหว่างบิน = ร่วงลงเฉยๆ ไม่กระแทก • ระหว่างบิน: ยิงปกติได้ แต่ใช้โล่/พุ่ง/คาถาอื่นไม่ได้',
   cast(p,S){
     if(p.dfall||p.colos>0)return false;
-    const g0=groundH(p.x,p.y),q=aimPoint(p,S.v.range);
+    const g0=groundH(p.x,p.y,p.z),q=aimPoint(p,S.v.range);
     p.dfall={ph:1,t:0.35,g0,H:g0+S.v.rise,tx:q.x,ty:q.y};
     p.shieldOn=false;p.dchgOn=false;p.hover=0;p.vz=0;
     emit({k:'efx',z:'dfrise',x:p.x,y:p.y,h:p.z,id:p.id});
