@@ -1486,3 +1486,4 @@
 - 2026-11-24 Terra Isle v2: no top props, smooth single pointed underside, Stand beside the spot with a visible pull, isle emerges with the pull
 - 2026-11-24 Terra Isle v3: 2-3 short points underneath, fast ease-out rise when stood on
 - 2026-11-24 Terra Isle: Stand bends over and plunges one hand, then pulls the isle up
+- 2026-11-24 Terra Isle: Stand removed, ground cracks then the isle rises on its own at 0.5 s

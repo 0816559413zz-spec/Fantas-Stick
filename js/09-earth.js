@@ -211,9 +211,9 @@ function earthCrush(p){const T=p.tec;p.crush=null;if(!T)return;
 const DUSTB={v:{range:500,r:350,time:5,rWeak:200,timeWeak:3,delay:0.6,cloud:3}};
 // ---------- สกิล 4: Terra Isle — Stand ต่อยจุ่มลงพื้นตรงจุดเล็งแล้วยกเกาะหินลอยขึ้นมา (ลอยต่ำ กระโดดขึ้นได้)
 // มีคนยืนบน = เกาะค่อย ๆ ลอยสูงขึ้น • ทุกคนยืนได้ • มี HP • อยู่ 12 วิ
-const ISLE=defSpell(EARTH,{id:'terraisle',v:{range:600,r:72,h0:1.25,hMax:6.5,rise:2.4,hp:350,life:12,punch:0.5,lift:0.8,env:20},
+const ISLE=defSpell(EARTH,{id:'terraisle',v:{range:600,r:72,h0:1.25,hMax:6.5,rise:2.4,hp:350,life:12,punch:0.15,lift:0.5,env:20},
   vn:{range:'ระยะเล็ง',r:'เกาะ • รัศมี',h0:'เกาะ • ลอยตอนเกิด (ม.)',hMax:'เกาะ • สูงสุด (ม.)',rise:'มีคนยืน • ความไวลอยขึ้น (ไล่ช้าลงใกล้สูงสุด)',hp:'เกาะ • HP',life:'อยู่นาน (วิ)'},
-  role:'utility',n:'Terra Isle',ic:'🏝',cd:14,d:'ชี้จุด: Stand ต่อยจุ่มลงพื้นแล้วยกเกาะหินลอยขึ้นมา (ลอยต่ำ กระโดดขึ้นได้) • มีคนยืนบนเกาะ = ค่อย ๆ ลอยสูงขึ้น (สูงสุด ~6.5 ม.) • ทุกคนยืนได้ บังกระสุนด้านล่าง • HP 350 อยู่ 12 วิ',
+  role:'utility',n:'Terra Isle',ic:'🏝',cd:14,d:'ชี้จุด: พื้นแตกสั่นแป๊บนึงแล้วเกาะหินลอยขึ้นมาเอง (ลอยต่ำ กระโดดขึ้นได้) • มีคนยืนบนเกาะ = ค่อย ๆ ลอยสูงขึ้น (สูงสุด ~6.5 ม.) • ทุกคนยืนได้ บังกระสุนด้านล่าง • HP 350 อยู่ 12 วิ',
   cast(p,S){if(p.aug||p.ramp||p.ecb||p.wr)return false;const V=S.v,o=aimPoint(p,V.range),x=o.x,y=o.y,seed=(Math.random()*1e6)|0,team=p.team,id=p.id;
     if(p.isle){const old=(G.eso||[]).find(q=>q.id===p.isle);if(old)eKill(old);}
     emit({k:'efx',z:'eislecall',x:Math.round(x),y:Math.round(y),h:groundH(x,y,0),a:Math.round(Math.atan2(y-p.y,x-p.x)*100)/100,n:seed,id});

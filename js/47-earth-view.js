@@ -830,17 +830,11 @@ function eIsleTint(g,c,mul,keep){const P=g.attributes.position,old=g.attributes.
 function eIsleMesh(seed){if(!EISLE.mat){EISLE.mat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:0.95,metalness:0,side:THREE.DoubleSide});EISLE.mat.userData.keep=true;}
   const m=new THREE.Mesh(eIsleGeo(seed),EISLE.mat);m.castShadow=m.receiveShadow=true;return m;}
 // Stand punch: big Stand rises, cocks a fist high, slams it into the ground (accelerating), holds/strains, then yanks up
-function eIsleTick(dt,now){for(let i=EV.icall.length-1;i>=0;i--){const R=EV.icall[i];R.t+=dt;const c=Math.cos(R.a),sn=Math.sin(R.a),G=R.G,t=R.t;
-    const P=ISLE.v.punch,L=ISLE.v.lift,px=-sn,py=c;   // perpendicular: Stand stands to the right of the spot
-    // lift curve: raise fist (0..0.25) → slam down, accelerating (to P) → grip + strain (to L) → pull up with overshoot (L..L+0.35)
-    // one hand (user 2026-11-24): lean down + cock (0..0.2) → plunge, accelerating (to P) → strain in the ground (to L) → pull up (L..L+0.35)
-    const lean=t<0.2?_cs(t/0.2)*0.6:t<P?0.6+0.4*Math.pow((t-0.2)/(P-0.2),2):1,cock=t<0.2?_cs(t/0.2):t<P?1-Math.pow((t-0.2)/(P-0.2),3):0;
-    const strain=t>=P&&t<L?1:0,pull=t<L?0:Math.min(1,(t-L)/0.35),reach=t<L?0:_cb(pull);
-    G.g.position.copy(eW(R.x+px*85-c*20,R.y+py*85-sn*20,-0.5+0.35*Math.min(1,t/0.2)-0.3*strain+0.2*pull));G.g.rotation.y=Math.atan2(-px,-py);
-    standOp(G,t<L+0.55?Math.min(1,t/0.15):Math.max(0,1-(t-L-0.55)/0.3));standPose(G,{t:now/1000,one:1,lean:lean*(1-_cs(pull)),cock,reach,shake:strain});
-    if(!R.hit&&t>=P){R.hit=1;dfCracks(R.x,R.y,0.06,90,'#a98a62',1);eChunks(R.x,R.y,0.2,10,200,8,0.2);burst(R.x,R.y,ECOL.dust,18,220,0.5,3,{h:0.2,vh:[1,4],g:6});ring(R.x,R.y,'#ffd27a',60,0.3,0.15);shake(0.45);}
-    if(strain&&Math.random()<0.5)burst(R.x+rnd(-60,60),R.y+rnd(-60,60),ECOL.dust,2,80,0.4,2,{h:0.1,vh:[0.5,2],g:5});
-    if(t>L+0.95){disposeObj(G.g);EV.icall.splice(i,1);}}}
+// no Stand (user 2026-11-24): ground cracks at the spot, rumbles with dust, then the isle comes up on its own
+function eIsleTick(dt,now){for(let i=EV.icall.length-1;i>=0;i--){const R=EV.icall[i];R.t+=dt;const t=R.t,P=ISLE.v.punch,L=ISLE.v.lift;
+    if(!R.hit&&t>=P){R.hit=1;dfCracks(R.x,R.y,0.06,90,'#a98a62',1);eChunks(R.x,R.y,0.2,8,180,7,0.18);ring(R.x,R.y,'#ffd27a',60,0.3,0.15);shake(0.3);}
+    if(R.hit&&t<L){const k=(t-P)/Math.max(0.01,L-P);if(Math.random()<0.4+0.5*k)burst(R.x+rnd(-60,60),R.y+rnd(-60,60),ECOL.dust,2,90,0.4,2,{h:0.1,vh:[0.5,2],g:5});if(Math.random()<0.25)shake(0.05+0.1*k);}
+    if(t>L+0.2)EV.icall.splice(i,1);}}
 function syncEarth(v,dt,now){
   for(const [id,s] of EV.st)if((s.sbSlab||s.fistCharge?.visible)&&!PM3.has(id)){eStonePrep(s,null);eFistCharge(s,null,null,0);}
   const seen=new Set();
@@ -974,7 +968,7 @@ function earthEfx(ev){
     case 'esbwall':eDebris(x,y,H,26,240);ring(x,y,'#ffd86b',70,0.4,H);burst(x,y,'#ffe7a0',12,120,0.6,2.2,{h:H+0.8,g:0});shake(0.4);if(near)snd('boom',ev);return true;
     // ----- Tectonic Crush -----
     case 'ewallup':shake(0.35);if(near)snd('boom',ev);return true;
-    case 'eislecall':EV.icall.push({t:0,x,y,a:ev.a,id:ev.id,G:makeStand(1.9,true)});if(near)snd('buff',{x,y,vol:0.5});return true;   // Terra Isle: Stand punch
+    case 'eislecall':EV.icall.push({t:0,x,y,a:ev.a,id:ev.id});if(near)snd('buff',{x,y,vol:0.5});return true;   // Terra Isle: Stand punch
     case 'eisleup':{shake(0.4);if(near)snd('boom',ev);burst(x,y,ECOL.dust,24,260,0.5,3.4,{h:0.3,vh:[2,7],g:7});eChunks(x,y,0.3,10,240,9,0.24);for(let i=0;i<5;i++)smoke(x+rnd(-60,60),y+rnd(-60,60),0.3,2,ECOL.dust,0.7,8,50);return true;}
     case 'erampcall':EV.rcall.push({t:0,x,y,a:ev.a,seed:ev.n,id:ev.id,holo:eRampHolo(ev.n),up:false});if(near)snd('buff',{x,y,vol:0.5});return true;   // Rampart: Stand rises and starts heaving the ground
     case 'erampup':{shake(0.55);if(near)snd('boom',ev);const c=Math.cos(ev.a),sn=Math.sin(ev.a);   // wall yanked up: one heavy burst of dust that clears fast
