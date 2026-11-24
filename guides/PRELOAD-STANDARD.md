@@ -298,6 +298,10 @@ ablate fcs rows use `map:'fcs-file',mode:'siege'` — tdm can't load fcs-file).
   Gate: 3/4 PASS; tdm shift5 picked map `greathall` → 2 × 44 ms outline shell `dclip` variant (#ffb659, thickness .035) on the
   student rig — not from the fins; open item (that outline × darkness-clip combo is not in `warmCharVariants`).
 
+**Step 4 status (round 5, 2026-11-24 night):** Nature hand gear (Darkness tint + fade copies), fire volume in death dissolve,
+outline shells × slash-split clip → gate PASS 4/4 + lake. Open: the countdown's 0.7–1.1 s gap (programs of `hostStart` objects),
+see `guides/OPTIMIZE.md` §X.
+
 ## 7. Work order
 
 | Step | Work | Done when |

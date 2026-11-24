@@ -172,6 +172,7 @@ function warmCharVariants(){
     ['darkClip',src=>deathClipMat(stDarkTintMat(src,false,one,one),one4),()=>true],   // slash-split death of a Darkness-tinted body   // Darkness tint over a hit flash
     ['darkFClip',()=>deathClipMat(stDarkTintMat(flash,false,one,one),one4),()=>true],   // slash-split death while hit-flashed under the Darkness tint
     ...WARM.cvx,   // registered body overlays (preloadCharMat: class outline shells etc.)
+    ...WARM.cvx.map(([n,mk,ok])=>['c'+n,src=>deathClipMat(mk(src),one4),ok]),   // slash-split death of a body still wearing a shell (gate 2026-11-24: outline × dclip on greathall)
     ...WARM.cvx.flatMap(([n,mk,ok])=>[['d'+n,src=>stDarkTintMat(mk(src),false,one,one),ok],['dS'+n,src=>stDarkTintMat(mk(src),true,one,one),ok]])];   // Darkness tint copies every material of the model, shells included
   const roots=[...PM3.values(),...GWARM.chars.values()];
   for(const o of roots){const r=o&&o.g;if(!r||!o.fileModel)continue;   // whole actor: body + wand + darkness gear (scythe) etc.
@@ -278,6 +279,7 @@ function preTick(){if(PRE.st!==1)return;
 // These code-created materials are not covered by the FX JSON layer scan.
 // Keep them in the same scene as the real effect (different lighting = different programs).
 WARM.reg.pyro=[()=>{const m=fireVol([{c:[0,0,0],ax:[1,0],hx:1,hz:1,h:2}]);fxScene.add(m);return m;},
+  ()=>{const g=new THREE.Group();g.add(fireVol([{c:[0,0,0],ax:[1,0],hx:1,hz:1,h:2}]));const d=warmDissolve(g);scene.add(d);return d;},   // burning player dies: death dissolve copies the fire volume into the main scene (gate 2026-11-24, lake)
   ()=>{const out=[new THREE.Mesh(_hzPlane,hazeMat(0)),new THREE.Mesh(_hzRing,hazeMat(1))];for(const m of out)fxScene.add(m);return out;},
   ()=>[new THREE.Mesh(_fbGeo,fireMat({mode:'ball'})),makeFireBall(),makeFireTail()],
 ];
@@ -344,7 +346,8 @@ function lobbyMapTick(dt){
   if(!LOBBY||LOBBY.ph!=='lobby'||screen!=='lobby')return;
   if((LMAP.t+=dt)<0.5)return;LMAP.t=0;
   if(NET.isHost&&G&&G.ph==='lobby'&&typeof hostMapNext==='function'){const id=hostMapNext(true);if(id&&id!==G.map){G.map=id;broadcastLobby();return;}}
-  const id=LOBBY.map;if(id&&id!==builtMap&&mapReady(id)){setMapVars(id);buildWorld(id);}}
+  const id=LOBBY.map;if(id&&id!==LMAP.au){LMAP.au=id;audioPrefetch(id,LOBBY.mode);}
+  if(id&&id!==builtMap&&mapReady(id)){setMapVars(id);buildWorld(id);}}
 // ตัวละครอุ่นเครื่องหมดหน้าที่เมื่อแมตช์เริ่มวาดแล้ว (เชดเดอร์ถูก pinPrograms ตรึงไว้, geometry/วัสดุของไฟล์เป็น keep) → ทิ้งหลังเข้าเกม 2 วิ
 // เดิมเก็บไว้ตลอด + เพิ่มทุกลุคใหม่ (บอทสุ่มลุคทุกครั้งที่เติม) → ค้างในฉากหลายร้อย mesh, three ยังคำนวณ matrix ทุกเฟรม (OPTIMIZE §H)
 // รอบหน้าในห้องรอ gameWarmTick สร้างใหม่ตามคนที่อยู่จริง (GWARM.key='' บังคับให้อุ่นใหม่)

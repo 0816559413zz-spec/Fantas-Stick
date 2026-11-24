@@ -369,8 +369,30 @@ water +4.8 ms, storm +2.9, fire +2.6, frost +1.9, earth +1.7, wind +1.3. CPU pro
 - Result: cloth 10.3 % → 6.6 % of CPU (machine was ~35 % slower during the 2nd profile, so about −35–40 %). Left: own
   cloth sim (`clStep` IT 6, 377 points) kept as is for the look.
 
-## Benchmarks
+## X. Night session 2026-11-24 (user picked groups A + B)
 
+- **Shader gate** baseline 2/4 FAIL: Nature forearm/upper-arm thorn weave with the Darkness body tint (456 ms, fcs-file) and its
+  see-through fade (576 ms, valley); later a burning player's fire volume inside the death dissolve (134 ms, lake). All three
+  preloaded (js/68-nature-view `preloadReg('nature')`, js/51 `WARM.reg.pyro`), plus outline shells × slash-split clip (`c<name>`
+  variants of `WARM.cvx`, the open greathall item of PRELOAD-STANDARD §6). After: PASS 4/4 (siege ×2, tdm pitch / greathall) and lake PASS.
+- **Lobby audio prefetch:** `audioPrefetch` (js/18) creates the map's music `<audio>` (preload=auto) and decodes its ambience
+  while players wait; key choice shared with `wantTrack`/`ambTick` (`mapTrack`, `ambKey`).
+- **Particle triangle budget:** fx-check prints one line per studio model used as `look:"model"` particles above 300 tris
+  (estimate from `fxLintMesh`; water_blob runs 960 / 224 tris in game through its LOD, the estimate says 4,096). Nothing changed.
+- **6v6 meadow (headless NVIDIA, 1080p High, REP 4):** CPU 14.3 ms median / 20.5–20.9 p95, GPU 8.2–9 ms, ~525 draws. Profile: three
+  render ~77 % (renderBufferDirect 48 %, updateMatrixWorld 11 %), game JS small: syncPlayers 4.4 %, updateZV 3.4 %, cloth 2.5 %,
+  water dragon 1.9 %, drawHUD 1.3 %, **drawLabels < 0.8 %** (not worth changing). Biggest draw groups: 90 unnamed MeshStandard pieces
+  = mostly the bone cloak (outer + inner) of other players (by design: far/off-screen fallback of `CLOTH_LITE`) + 5 mode pickups
+  (5 meshes each); 53 instanced MeshStandard; 33 ShaderMaterial.
+- Already in place (checked, nothing to do): OBS spatial grid (`sgGrid`/`sgObs` js/12), fx sub-timers (`fx.zv` / `fx.particles` / `fx.shapes`).
+- **Open — countdown frame gap:** bench-entry play phase is clean (0 programs, max frame 22–46 ms) but the countdown still has one
+  0.7–1.1 s gap (siege fcs-file 987–1012 ms, valley 658–697 ms). JS profile of the countdown: hostStart 11 ms, warmDraw 116 ms CPU,
+  so the gap is a GPU-side stall from the 26–31 programs compiled for objects made by `hostStart` (props, mode visuals, grass + their
+  shadow/depth programs). Slicing `warmDraw` over frames was tried: gap unchanged and the step took 4–8 s → reverted. Next: build those
+  `hostStart` objects (or stand-ins with the same materials) in the lobby map build (`lobbyMapTick`) so their programs exist before
+  the countdown.
+
+## Benchmarks
 - 2026-11-22, combat readability A/B in Team PvP at 1000×560. All 11 classes cast the same 31 skills in an 80-frame test. The default combat presentation reduced median active particles from 2,650 to 1,220 and peak particles from 3,740 to 1,776. Median frame draw calls were 472 versus 461. Shard Storm's landing warning and active edge and Night Waltz's boundary rendered in both runs. `?fullvfx` keeps the original effects for comparison. This fixture measures effect load, not live match FPS.
 
 - 2026-11-22, local Team PvP before/after against `f9cb5d40`. Counting render submissions in the Darkness scythe subtree across the same BA sequence, the peak went from 87 to 72 on High and from 72 to 48 on Low. Trail embers and spin spray now draw in at most two batches per pass, with their spawn poses reused through the swing. Reduced detail halves decorative ink and drop counts, while the blade trail, tip flecks and scythe flame sheet still render. Radiance Shard Storm showed five orbiting shards on High and three on Low. Both ground meshes showed in both modes. These figures isolate the changed effects and do not estimate total match FPS.

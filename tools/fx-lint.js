@@ -53,7 +53,8 @@
       const W = m => out.push({ lv: 'warn', at, msg: m });
       if (L.t === 'emit') { const b = num(g('burst'), 0) * (fx.k || 1); if (b > 80) W(`burst ${Math.round(b)} เม็ด เกินงบ (≤ 80 ต่อครั้ง)`); if (num(g('rate'), 0) > 200) W('rate เกิน 200 เม็ด/วิ'); if (g('from') === 'mesh' && !fx.layers.some(q => q.id === g('of') && q.t === 'mesh')) out.push({ lv: 'err', at: at + '.of', msg: 'from:"mesh" ต้องชี้ไปที่ชั้น mesh (of)' });
         texRef(g('fb'), at + '.fb');
-        if (g('look') === 'model' && ctx.meshes && !ctx.meshes.has(g('model'))) out.push({ lv: 'err', at: at + '.model', msg: g('model') ? `ไม่มีโมเดล assets/fx/mesh/${g('model')}.mesh.json` : 'look:"model" ต้องใส่ชื่อโมเดล (model)' }); }
+        if (g('look') === 'model' && ctx.meshes && !ctx.meshes.has(g('model'))) out.push({ lv: 'err', at: at + '.model', msg: g('model') ? `ไม่มีโมเดล assets/fx/mesh/${g('model')}.mesh.json` : 'look:"model" ต้องใส่ชื่อโมเดล (model)' });
+        { const tr = g('look') === 'model' && ctx.meshTris && ctx.meshTris[g('model')]; if (tr > 300) out.push({ lv: 'warn', at, tris: g('model'), msg: `โมเดล ${g('model')} ≈ ${tr} สามเหลี่ยมต่อเม็ด — หนักเกินสำหรับอนุภาค (≤ 300; เม็ดละโมเดลเต็ม × จำนวนเม็ด)` }); } }
       if (L.t === 'light') { lights++; if (num(g('int'), 2) > 2.5) W(`ไฟจุด int ${num(g('int'), 2)} แรงเกิน (≤ 2.5) — พื้นจะสว่างจ้า`); }
       if (L.t === 'flash' && num(g('size'), 2.5) > 6) W('แฟลชใหญ่เกิน 6 ม. — เสี่ยงจอขาว');
       if (L.t === 'halo' && num(g('size'), 5) > 14) W('ฮาโลใหญ่เกิน 14 ม. — เสี่ยงจอขาว');
@@ -109,6 +110,7 @@
       const n = num(g('n'), 1), base = { poly: (Array.isArray(g('f')) ? g('f').reduce((t, f) => t + (Array.isArray(f) ? f.length : 4), 0) : 12) * Math.pow(4, Math.min(3, num(g('sub'), 0))), shard: 12, crown: 14 * n * num(g('rings'), 1), cluster: 14 * n, burst: 10 * n, blade: 8 * num(g('seg'), 40), fan: 2 * n * num(g('seg'), 12), spiral: 2 * num(g('seg'), 96), tube: 2 * num(g('sides'), 8) * num(g('seg'), 24), ribbon: 2 * num(g('seg'), 32), lathe: 2 * 6 * num(g('seg'), 32), sphere: 4 * num(g('seg'), 12) ** 2, cyl: 2 * num(g('sides'), 16) * num(g('segs'), 1), torus: 2 * num(g('sides'), 10) * num(g('seg'), 40), disc: 2 * num(g('seg'), 48), star: 4 * n, box: 12 }[P.k] || 50;
       est += base * Math.max(1, num(g('arr'), 1)) * (g('mir') ? 2 : 1);
     });
+    out.est = Math.round(est);   // rough triangle count (fx-check feeds it to the particle budget below)
     if (est > 30000) out.push({ lv: 'warn', at: 'parts', msg: `ประมาณ ${Math.round(est)} สามเหลี่ยม — หนักเกิน (≤ 30000; ลด seg / จำนวน / ทำซ้ำ)` });
     return out;
   }

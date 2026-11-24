@@ -1090,6 +1090,11 @@ preloadReg('nature',()=>{
   // summoned plants (lotus with bubble + auras, turret ground/wall, seed ball): built by the plant sync, not by events
   for(const k of ['lotus','turret','turretW','ball'])try{const v=natPlantView({k:k==='turretW'?'turret':k,wall:k==='turretW'});if(v&&v.g)out.push(v.g);}catch(e){console.warn('warm nature plant',k,e);}
   const hands=natHandGearMake();out.push(hands.upper,hands.wrap,hands.orb);
+  // the gear rides on the body, so the Darkness body tint (opaque + soft) reaches it too (gate 2026-11-24: 456 ms on fcs-file)
+  {const one={value:1},tint=[];for(const r of [hands.upper,hands.wrap,hands.orb])r.traverse(m=>{if(m.isMesh&&m.material&&!m.material.isShaderMaterial)tint.push(m);});
+    for(const m of tint)for(const soft of [false,true])try{const c=new THREE.Mesh(m.geometry,stDarkTintMat(m.material,soft,one,one));c.frustumCulled=false;out.push(c);}catch(e){console.warn('warm nature tint',e);}
+    // gear fades in/out by turning its shared materials transparent (gate 2026-11-24: 576 ms on valley)
+    for(const m of tint)if(!m.material.transparent)try{const c=new THREE.Mesh(m.geometry,warmTrCopy(m.material));c.frustumCulled=false;out.push(c);}catch(e){console.warn('warm nature fade',e);}}
   return out;
 },()=>{   // particle pools (leaf/spark/dirt/puff/chip): InstancedMesh + instanceColor; the pools sit at count 0 (hidden) until a skill fires
   const F=natFx(),M4=new THREE.Matrix4(),W=new THREE.Color('#fff');

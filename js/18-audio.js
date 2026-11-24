@@ -145,9 +145,11 @@ function playBuf(n,d){
 }
 // เสียงบรรยากาศวนลูปตามแผนที่ (ปราสาท = จิ้งหรีดกลางคืน / ป่า = ป่าลึก)
 const AMB={windBuf:null,cur:null,layer:null,bufs:{},failed:{}};
+const ambKey=id=>id==='forest'||id==='hogsmeade'||id==='meadow'||id==='lake'?'forest':id==='castle'||id==='ruins'?'castle':null;
+function ambLoad(k){if(k&&AC&&!AMB.bufs[k]&&!AMB.failed[k]){AMB.bufs[k]='loading';loadBuf(`audio/amb/${k}.ogg`).then(b=>{AMB.bufs[k]=b;}).catch(()=>{AMB.failed[k]=1;delete AMB.bufs[k];});}}
 function ambTick(){
-  const k=screen==='game'?(MAPID==='forest'||MAPID==='hogsmeade'||MAPID==='meadow'||MAPID==='lake'?'forest':MAPID==='castle'||MAPID==='ruins'?'castle':null):null;
-  if(k&&!AMB.bufs[k]&&!AMB.failed[k]){AMB.bufs[k]='loading';loadBuf(`audio/amb/${k}.ogg`).then(b=>{AMB.bufs[k]=b;}).catch(()=>{AMB.failed[k]=1;delete AMB.bufs[k];});}
+  const k=screen==='game'?ambKey(MAPID):null;
+  ambLoad(k);
   const want=k&&AMB.bufs[k]&&AMB.bufs[k]!=='loading'?k:null;
   if(want===AMB.cur)return;
   if(AMB.layer){const L=AMB.layer,t=AC.currentTime;L.g.gain.setTargetAtTime(0,t,0.6);L.s.stop(t+3);AMB.layer=null;}
@@ -186,7 +188,14 @@ function wantTrack(){
   if(v.mode==='imp')return 'imp';
   if(v.mode==='race'||v.mode==='quid')return 'pitch';
   if(v.E&&v.E.some(e=>EDEF[e.t]&&EDEF[e.t].boss))return 'boss';
-  return MAPID==='forest'||MAPID==='hogsmeade'||MAPID==='lake'?'forest':MAPID==='pitch'||MAPID==='meadow'||MAPID==='ruins'?'pitch':'castle';
+  return mapTrack(MAPID);
+}
+const mapTrack=id=>id==='forest'||id==='hogsmeade'||id==='lake'?'forest':id==='pitch'||id==='meadow'||id==='ruins'?'pitch':'castle';
+// Lobby: start buffering the picked map's music + ambience before the match (called from lobbyMapTick, js/51)
+function audioPrefetch(id,mode){
+  if(!AC||!MUSIC.bus||!id)return;ambLoad(ambKey(id));
+  if(MY.list.length)return;const k=mode==='imp'?'imp':mode==='race'||mode==='quid'?'pitch':mapTrack(id);
+  if(!MUSF.failed[k])musicEl(k);   // new <audio> with preload=auto starts downloading at once
 }
 // คืนค่า true ถ้าเพลงจากไฟล์ (หรือ "เพลงของฉัน") ดูแลอยู่ → ไม่ต้องเล่นเพลงสังเคราะห์
 function fileMusicTick(){
