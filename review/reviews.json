@@ -1,5 +1,5 @@
 {
- "next": 173,
+ "next": 174,
  "items": [
   {
    "id": 171,
@@ -3614,6 +3614,24 @@
    "links": [
     "/shots/motion_earth_barrage.gif",
     "/shots/earth_barrage_sheet.jpg"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 173,
+   "title": "Backdrop สวยขึ้น + พรีเซ็ต Alpine Valley",
+   "text": "ทุกแมพที่มี Backdrop: หมอกฟ้าระยะไกล (ภูเขาไกลเป็นสีฟ้าแต่ยังมีด้านสว่าง/เงา) • หิมะบนยอดตาม Snowline (ขอบหยัก หน้าผาชันเป็นหินมีร่องหิมะ) • ทุ่งสูงสีเขียวสด หินสูงสีเทาฟ้า • Backdrop ไกล (Reach >1300 ม.) mesh ละเอียดขึ้น ไม่มีลายยืด • Map Builder → Backdrop → Preset 'Alpine Valley' (ยอดเขาหิมะทรงพีระมิด + แม่น้ำคดเคี้ยว + ป่าบนไหล่เขา; ตั้ง Reach 2000 ม. / กริด 10 ม. ให้เอง) • ตั้ง Snowline ได้ในแผง Look • Backdrop ไม่ลด FPS ในเทส",
+   "kind": "Map",
+   "who": "Backdrop",
+   "status": "wait",
+   "created": "2026-11-24T16:00:00",
+   "updated": "2026-11-24T16:00:00",
+   "imgs": [],
+   "links": [
+    "/shots/bd_alpine_valley.png",
+    "/shots/bd_alpine_high.png",
+    "/shots/bd_alpine_town.png"
    ],
    "feedback": "",
    "reply": ""

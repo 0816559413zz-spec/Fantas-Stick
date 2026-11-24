@@ -12,13 +12,13 @@ export const BSURF = [
   { k: 'field', n: 'Field', c: '#7d8650' }, { k: 'rock', n: 'Rock', c: '#6a645c' }, { k: 'sand', n: 'Sand', c: '#c8b88a' },
   { k: 'dirt', n: 'Dirt', c: '#6e5a40' }, { k: 'snow', n: 'Snow', c: '#e8edf0' },
 ];
-export const BD_PRESETS = [['coast', 'Sea-cliff headland (sea N/E/S)'], ['island', 'Island'], ['valley', 'Mountain valley'], ['plains', 'Hills & fields'], ['lake', 'Lakeside'], ['flat', 'Flat (sculpt from scratch)']];
+export const BD_PRESETS = [['coast', 'Sea-cliff headland (sea N/E/S)'], ['island', 'Island'], ['valley', 'Mountain valley'], ['alpine', 'Alpine Valley (snow peaks + river)'], ['plains', 'Hills & fields'], ['lake', 'Lakeside'], ['flat', 'Flat (sculpt from scratch)']];
 export const BD_LOOK = [['', 'Map sky'], ['overcast', 'Overcast (sea-cliff sky + fog)'], ['day', 'Clear Day (blue sky + sun)']];
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 
 export function bdNew(M, o = {}) {
   const E = o.E || 600, c = o.c || 5, nx = Math.round((M.W + 2 * E) / c) + 1, ny = Math.round((M.H + 2 * E) / c) + 1, n = nx * ny;
-  return { on: 1, E, c, nx, ny, x0: -E, z0: -E, hg: new Float32Array(n), sf: new Uint8Array(n), tr: new Uint8Array(n), st: [], sea: null, look: '', seed: 1, pre: 'flat' };
+  return { on: 1, E, c, nx, ny, x0: -E, z0: -E, hg: new Float32Array(n), sf: new Uint8Array(n), tr: new Uint8Array(n), st: [], sea: null, look: '', seed: 1, pre: 'flat', snow: 110 };
 }
 export function bdClone(B) { return B ? Object.assign({}, B, { hg: B.hg.slice(), sf: B.sf.slice(), tr: B.tr.slice(), st: B.st.map(s => Object.assign({}, s)) }) : null; }
 // bilinear height of the raw grid (map coords)
@@ -45,7 +45,7 @@ export function rleE(u8) { const o = []; for (let i = 0; i < u8.length;) { const
 export function rleD(s, n) { const b = b64d(s), u = new Uint8Array(n); let p = 0; for (let i = 0; i + 1 < b.length && p < n; i += 2) { u.fill(b[i + 1], p, Math.min(n, p + b[i])); p += b[i]; } return u; }
 export function bdPack(B) {
   if (!B) return null; const h = new Int16Array(B.hg.length); for (let i = 0; i < h.length; i++) h[i] = clamp(Math.round(B.hg[i] * 10), -32767, 32767);
-  return { on: B.on ? 1 : 0, E: B.E, c: B.c, nx: B.nx, ny: B.ny, x0: B.x0, z0: B.z0, sea: B.sea, look: B.look || '', seed: B.seed || 1, pre: B.pre || '',
+  return { on: B.on ? 1 : 0, E: B.E, c: B.c, nx: B.nx, ny: B.ny, x0: B.x0, z0: B.z0, sea: B.sea, look: B.look || '', seed: B.seed || 1, pre: B.pre || '', snow: B.snow != null ? B.snow : 110,
     st: B.st.map(s => ({ x: +s.x.toFixed(1), z: +s.z.toFixed(1), r: +s.r.toFixed(1), h: +s.h.toFixed(1) })),
     hg: b64e(new Uint8Array(h.buffer)), sf: rleE(B.sf), tr: rleE(B.tr) };
 }
@@ -59,7 +59,7 @@ export const BD_REACH = [300, 600, 1000, 1500, 2000, 3000, 4000], BD_CELL = [5, 
 export const bdCells = (M, E, c) => (Math.round((M.W + 2 * E) / c) + 1) * (Math.round((M.H + 2 * E) / c) + 1);
 export function bdResize(B, M, E, c) {
   const N = bdNew(M, { E, c }), x1 = B.x0 + (B.nx - 1) * B.c, z1 = B.z0 + (B.ny - 1) * B.c;
-  for (const k of ['on', 'sea', 'look', 'seed', 'pre']) N[k] = B[k];
+  for (const k of ['on', 'sea', 'look', 'seed', 'pre', 'snow']) N[k] = B[k];
   N.st = B.st.map(s => Object.assign({}, s));
   for (let j = 0; j < N.ny; j++) for (let i = 0; i < N.nx; i++) {
     const x = N.x0 + i * c, z = N.z0 + j * c, k = j * N.nx + i; N.hg[k] = bdRaw(B, x, z);
@@ -89,7 +89,7 @@ function cliffY(d, top, sea, x, z, sd) {
 // fills B (keeps on/E/c/look) with a preset • M = map (W/H) • seed = variation
 export function bdGen(B, M, pre, seed = 1) {
   const hx = M.W / 2, hz = M.H / 2, sd = seed * 31 + 7, n = B.nx * B.ny;
-  B.pre = pre; B.seed = seed; B.st = []; B.sf.fill(0); B.tr.fill(0); B.sea = null;
+  B.pre = pre; B.seed = seed; B.st = []; B.sf.fill(0); B.tr.fill(0); B.sea = null; B.snow = 110;
   const each = f => { for (let j = 0; j < B.ny; j++) for (let i = 0; i < B.nx; i++) { const X = B.x0 + i * B.c - hx, Z = B.z0 + j * B.c - hz; f(j * B.nx + i, X, Z); } };   // X/Z = metres from the map centre
   const out = (X, Z) => Math.max(Math.abs(X) - hx, Math.abs(Z) - hz);
   if (pre === 'coast') {
@@ -125,11 +125,34 @@ export function bdGen(B, M, pre, seed = 1) {
       if (pre === 'lake') { const d = Math.hypot((X - lx) / 1.6, Z - lz) - 170 - (fbm(X * 0.01, Z * 0.01, sd + 8) - 0.5) * 80; if (d < 40) y = Math.min(y, d < 0 ? -1.5 - Math.min(8, -d * 0.12) : -1.5 + d * 0.06); }
       B.hg[k] = y; const tk = fbm(X * 0.008, Z * 0.008, sd + 301, 3);
       if (e > 18 && y > 0.5 && tk > 0.56) B.tr[k] = Math.min(255, (tk - 0.5) * 2.2 * 255 | 0); else if (e > 30 && vn(X * 0.012, Z * 0.018, sd + 94) > 0.6) B.sf[k] = 3; });
+  } else if (pre === 'alpine') {
+    // painted alpine valley (user ref 2026-11-24): map on a green valley floor (runs along X), a winding river past the +Z edge,
+    // steep green walls both sides, a big snowy pyramid peak far past +X, more snow peaks around • sizes scale with reach E
+    const E = B.E, sea = -2; B.sea = sea; B.snow = 520; B.look = B.look || 'day';
+    const rz = X => hz + 95 + 45 * Math.sin(X * 0.0045 + sd) + 25 * Math.sin(X * 0.011 + sd * 2);   // river centre (Z) along the valley
+    const pyr = (X, Z, px, pz, R, H, a) => { const dx = X - px, dz = Z - pz, c = Math.cos(a), s = Math.sin(a), p = Math.max(Math.abs(dx * c - dz * s), Math.abs(dx * s + dz * c)) * 1.18 + Math.hypot(dx, dz) * 0.15;   // 4-face pyramid, soft edges
+      const t = Math.max(0, 1 - p / R); if (!t) return 0; const g = 1 - Math.abs(fbm(X * 0.011, Z * 0.011, sd + 73, 4) * 2 - 1);   // g = gully/rib pattern (ridged noise)
+      return H * Math.pow(t, 1.25) * (0.86 + 0.28 * fbm(X * 0.006, Z * 0.006, sd + 71, 4)) - H * 0.09 * g * g * Math.sqrt(t) * (1 - t * t); };   // carved ribs + couloirs on the faces, sharp summit
+    const pk = [[hx + E * 0.68, -E * 0.08, E * 0.42, Math.min(1150, E * 0.5), 0.5]];   // dominant peak (x, z, radius, height, turn)
+    for (let i = 0; i < 7; i++) { const a = (i / 7) * Math.PI * 2 + hsh(i, sd + 81) * 0.6, r = E * (0.62 + hsh(i, sd + 82) * 0.3); pk.push([Math.cos(a) * r * 1.1, Math.sin(a) * r, E * (0.22 + hsh(i, sd + 83) * 0.12), Math.min(800, E * (0.24 + hsh(i, sd + 84) * 0.14)), hsh(i, sd + 85) * 3]); }
+    each((k, X, Z) => {
+      const ex = Math.max(0, Math.abs(X) - hx), zr = rz(X), bank = Z > 0 ? Math.max(0, Z - zr - 70) : Math.max(0, -Z - hz - 60),   // wall start: past the river (+Z) / map edge (-Z)
+        ridge = 1 - Math.abs(fbm(X * 0.0035, Z * 0.0035, sd + 5, 5) * 2 - 1),
+        wall = sst(0, 650, bank) * (230 + 230 * ridge) + sst(0, 120, bank) * (fbm(X * 0.02, Z * 0.02, sd + 9, 3) - 0.4) * 30,
+        floor = 1.2 + sst(0, E, ex) * 70 + (fbm(X * 0.012, Z * 0.012, sd + 6, 3) - 0.5) * 3 * sst(0, 40, out(X, Z));
+      let y = floor + wall; for (const P of pk) y = Math.max(y, pyr(X, Z, P[0], P[1], P[2], P[3], P[4]));
+      const dr = Math.abs(Z - zr) - 14 - 6 * fbm(X * 0.01, 1, sd + 12);   // river channel (only past the map, never inside it)
+      if (out(X, Z) > 8 && dr < 34) y = Math.min(y, dr < 0 ? sea - 1.2 - Math.min(2.5, -dr * 0.25) : sea + 0.3 + dr * 0.09 + (dr > 12 ? (dr - 12) * 0.05 : 0));
+      B.hg[k] = y; const e = out(X, Z), tk = fbm(X * 0.009, Z * 0.009, sd + 301, 3), sl = sst(10, 30, y) * (1 - sst(260, 340, y));   // trees: lower slopes, thin out up high
+      if (e > 15 && y > sea + 2 && tk > 0.47 && (sl > 0.2 || (y < 12 && tk > 0.62))) B.tr[k] = Math.min(255, (tk - 0.42) * 2.4 * 255 * Math.max(0.35, sl) | 0);
+      else if (e > 25 && y > sea + 1 && y < 14 && vn(X * 0.012, Z * 0.018, sd + 94) > 0.58) B.sf[k] = 3; });   // meadow / field patches on the floor
+    for (let i = 0; i < 10; i++) { const X = (hsh(i, sd + 50) * 2 - 1) * (hx + 400), Z = rz(X) + (hsh(i, sd + 51) - 0.5) * 30; if (Math.abs(X) < hx + 20) continue;   // boulders in the river
+      B.st.push({ x: X + hx, z: Z + hz, r: 2 + hsh(i, sd + 52) * 3, h: 1.5 + hsh(i, sd + 53) * 2.5 }); }
   } else { B.hg.fill(0); }
   return B;
 }
 // shared auto-surface rule (editor preview; the game adds noise / strata on top)
-export function bdAuto(B, y, slope) { if (slope > 1.0) return 4; if (B.sea != null && y < B.sea + 1.4) return 5; if (y > 120) return 7; return 1; }
+export function bdAuto(B, y, slope) { if (slope > 1.0) return 4; if (B.sea != null && y < B.sea + 1.4) return 5; if (y > (B.snow != null ? +B.snow : 110) + 10) return 7; return 1; }
 // tree positions from the density grid → flat [x, z, scale, …] (map coords) • yAt(x,z) = shown height • same rule in js/67-coast.js bdGridSrc.trees
 export function bdTreePts(B, M, yAt, cap) {
   const P = [], sea = B.sea != null ? B.sea : -1e9;

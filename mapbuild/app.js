@@ -546,7 +546,8 @@ function bdStackClick(inv) {
   const [i0, j0, i1, j1] = bdRange(h.x, h.z, 60); updBd(i0, j0, i1, j1); bdStacks(); changed();
 }
 function bdCreate(pre, seed) {
-  pushUndo('b'); const B = M.bd ? Object.assign(BD.bdNew(M, { E: M.bd.E, c: M.bd.c }), { look: M.bd.look }) : BD.bdNew(M, { E: opt.bE || 600, c: opt.bc || 5 }); BD.bdGen(B, M, pre, seed); M.bd = B; buildBd(); applySky(); renderOpts(); changed();
+  pushUndo('b'); let E = M.bd ? M.bd.E : opt.bE || 600, c = M.bd ? M.bd.c : opt.bc || 5; if (pre === 'alpine') { E = Math.max(2000, E); c = Math.max(10, c); }   // far peaks need reach; 10 m grid keeps it light
+  const B = Object.assign(BD.bdNew(M, { E, c }), M.bd ? { look: M.bd.look } : {}); BD.bdGen(B, M, pre, seed); M.bd = B; buildBd(); applySky(); renderOpts(); changed();
 }
 function bdOpts(b) {   // Settings panel of the Backdrop tool
   const B = M.bd;
@@ -574,6 +575,7 @@ function bdOpts(b) {   // Settings panel of the Backdrop tool
   const lv = el('input', { class: 'tl-in', type: 'number', step: 0.5, value: B.sea != null ? B.sea : (opt.seaL != null ? opt.seaL : -2), style: 'width:70px', onchange: e => { pushUndo('b'); opt.seaL = +e.target.value; if (B.sea != null) B.sea = opt.seaL; bdAfter(); } });
   b.append(h3('Water'), el('div', { class: 'row' }, el('label', { class: 'chk' }, sea, 'Sea / lake level'), lv), el('p', { class: 'note' }, 'Everything lower than this level is water (waves + foam on the shore in the game)'),
     h3('Look'), el('div', { class: 'row' }, el('label', null, 'Sky'), el('select', { class: 'tl-sel', onchange: e => { pushUndo('b'); B.look = e.target.value; changed(); }, html: BD.BD_LOOK.map(([k, n]) => `<option value="${k}"${k === (B.look || '') ? ' selected' : ''}>${n}</option>`).join('') })),
+    el('div', { class: 'row' }, el('label', null, 'Snowline'), el('select', { class: 'tl-sel', onchange: e => { pushUndo('b'); B.snow = +e.target.value; buildBd(); changed(); }, html: [...new Set([60, 110, 200, 300, 400, 520, 700, 9999, B.snow != null ? +B.snow : 110])].sort((x, y) => x - y).map(v => `<option value="${v}"${v === (B.snow != null ? +B.snow : 110) ? ' selected' : ''}>${v > 5000 ? 'no snow' : v + ' m'}</option>`).join('') })),   // height where snow starts (game + preview)
     check('Show Backdrop', 'bd', show, () => { gBd.visible = show.bd; applySky(); camApply(); }),
     check('Use in Game', 'on', B, () => changed()),
     el('button', { class: 'tl-btn', style: 'width:100%;margin-top:6px', onclick: () => { if (!confirm('Delete the backdrop? (Undo works)')) return; pushUndo('b'); M.bd = null; buildBd(); applySky(); renderOpts(); changed(); } }, '✕ Delete Backdrop'));

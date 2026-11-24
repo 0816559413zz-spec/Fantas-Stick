@@ -54,6 +54,18 @@ function coastSky(){
   m.onBeforeRender=()=>{m.position.copy(cam.position);U.uT.value=performance.now()/1000;if(scene.fog)U.uFog.value.copy(scene.fog.color);};
   COAST_SKY=m;return m;
 }
+// aerial perspective (user ref 2026-11-24, painted alpine valley): with distance colours cool toward a sky blue but keep their light/shade,
+// so far lit snow stays bright and far shade turns blue • haze = fog colour × BD_AIR.k (per frame) • before the scene fog • chained onto earlier patches
+const BD_AIR={U:{uAirC:{value:new THREE.Color()},uAirD:{value:new THREE.Vector2(180,1400)}},k:[0.62,0.74,0.95],a:0.6};
+function bdAerial(m){
+  const prior=m.onBeforeCompile,def=THREE.Material.prototype.onBeforeCompile,pk=m.customProgramCacheKey,pkDef=THREE.Material.prototype.customProgramCacheKey;
+  m.onBeforeCompile=function(sh,r){if(prior&&prior!==def)prior.call(this,sh,r);Object.assign(sh.uniforms,BD_AIR.U);
+    sh.fragmentShader=sh.fragmentShader.replace('0.45*smoothstep(0.5,0.9,vGU)','0.45*smoothstep(0.5,0.9,vGU)*(1.0-smoothstep(250.0,600.0,length(vViewPosition)))');   // grLive soft-normal only near: far peaks keep their lit/shaded faces
+    sh.fragmentShader='uniform vec3 uAirC;uniform vec2 uAirD;\n'+sh.fragmentShader.replace('#include <fog_fragment>',
+      '{float ad=length(vViewPosition),aa=(1.0-exp(-max(ad-uAirD.x,0.0)/uAirD.y))*'+BD_AIR.a.toFixed(2)+';gl_FragColor.rgb=mix(gl_FragColor.rgb,gl_FragColor.rgb*vec3(0.74,0.84,1.0)*0.8+uAirC*0.42,aa);}\n#include <fog_fragment>');};
+  m.customProgramCacheKey=function(){return (pk&&pk!==pkDef?pk.call(this):(prior&&prior!==def?prior.toString().length:''))+'|bdair';};
+  return m;}
+function bdAirTick(){if(scene.fog){const c=BD_AIR.U.uAirC.value.copy(scene.fog.color);c.r*=BD_AIR.k[0];c.g*=BD_AIR.k[1];c.b*=BD_AIR.k[2];}BD_AIR.U.uAirD.value.set(250,Math.max(1600,cam.far*0.8));}
 // how far the backdrop reaches from the map centre (m): Map Builder bd.E past the edge • camera far / sea fade / look fog follow it (default 700 m camera)
 function bdReach(id){const fm=MAPS[id]&&MAPS[id].fm,b=fm&&fm.bd&&fm.bd.on&&fm.bd.hg?fm.bd:null;return b?Math.max(MW,MH)*S3/2+(+b.E||600):0;}
 function bdFar(id){const R=bdReach(id);return Math.min(6000,Math.max(700,R+150));}
@@ -64,7 +76,7 @@ function backdropLook(id){const vf=bdFar(id);if(cam.far!==vf){cam.far=vf;cam.upd
   if(L.sky&&typeof FF!=='undefined'&&FF.sky&&FF.sky.parent===world){const U=FF.sky.material.uniforms;FF.ovc=1;   // castle map's own cloud sky → overcast blue-grey everywhere
     U.uK.value=1;FF.sky.visible=false;}   // its cloud sky is replaced by the coast sky dome (FF.ovc still hides the sun)
   if(L.sky){const k=coastSky();if(k.parent!==scene)scene.add(k);k.visible=true;SKY.mesh.visible=false;SKY.sun.visible=false;SKY.moon.visible=false;SKY.stars.visible=false;}
-  if(L.fog){const s=Math.max(1,vf/700);scene.fog.color.set(L.fog[0]);scene.fog.near=L.fog[1]*s;scene.fog.far=L.fog[2]*s;}   // far reach → look fog stretched with the camera
+  if(L.fog){const s=Math.max(1,vf/700);scene.fog.color.set(L.fog[0]);scene.fog.near=L.fog[1]*s;scene.fog.far=L.fog[2]*s*Math.min(2,1+(s-1)*0.4);}   // far reach → look fog stretched with the camera (thinner: bdAerial gives the blue distance)
   if(L.fog&&typeof BFA!=='undefined'){const F=scene.fog;BFA.key=builtKey;BFA.base={c:F.color.clone(),near:F.near,far:F.far,exp:gl.toneMappingExposure,bg:scene.background&&scene.background.isColor?scene.background.clone():null};}   // js/44 battlefield air rewrites the fog every frame from its snapshot → snapshot this look
   if(L.hemi){hemi.color.set(L.hemi[0]);hemi.groundColor.set(L.hemi[1]);hemi.intensity=L.hemi[2];}
   if(L.sun){moonL.color.set(L.sun[0]);moonL.intensity=L.sun[1];}
@@ -144,7 +156,7 @@ function bdGridSrc(J,hx0,hz0,low){
       if(e<-1.5){o.sd=-50;o.d=-50;o.w=0;o.si=0;return edge(x,z)-3;}   // under the real map ground
       let y=raw(x,z);const sl=Math.max(Math.abs(raw(x+c*0.5,z)-raw(x-c*0.5,z)),Math.abs(raw(x,z+c*0.5)-raw(x,z-c*0.5)))/c;
       y=stk(x,z,y,o);o.sd=Math.min(bil(sd,x,z),o.ds);o.d=-1e3;
-      o.w=Math.min(1,Math.max(0,(sl-0.8)/0.8))*(sea!=null?Math.min(1,Math.max(0,(y-sea+3)/5)):1);
+      o.w=Math.min(1,Math.max(0,(sl-0.8)/0.8))*(sea!=null?Math.min(1,Math.max(0,(y-sea+3)/5)):1)*(1-Math.min(1,Math.max(0,(e-120)/130)));   // cliff ribs near only (far rows too sparse → streaks)
       o.si=sf[Math.min(ny-1,Math.max(0,Math.round((z-Z0)/c)))*nx+Math.min(nx-1,Math.max(0,Math.round((x-X0)/c)))];return y;},
     trees(){const P=[],cap=low?1200:4500,o={},yAt=(x,z)=>src.h(x,z,o),sl=sea!=null?sea:-1e9,nt=Math.min(32,Math.max(2,Math.round(2*(c/5)*(c/5))));   // tries per cell: same trees per m² on a coarse grid
       for(let j=0;j<ny&&P.length<cap*4;j++)for(let i=0;i<nx;i++){const k=j*nx+i,t=tr[k];if(!t)continue;
@@ -157,13 +169,13 @@ function bdGridSrc(J,hx0,hz0,low){
 }
 // ring grid around the play area: t = along a rounded rect perimeter, r = outward along its normal
 function coastGrid(hx0,hz0,sk,low,reach){
-  const bx=hx0+sk-2,bz=hz0+sk-2,rc=22,hd=BD_LOD.on&&!low,sp=low?7:hd?3:4.5,ca=low?16:hd?32:24,pts=[];
+  const bx=hx0+sk-2,bz=hz0+sk-2,rc=22,hd=BD_LOD.on&&!low,sp=low?7:hd?3:4.5,ca=Math.max(low?16:hd?32:24,Math.round((reach||0)/(low?60:30))),pts=[],cap=reach>1300?(low?70:45):80;   // far reach: more corner rays + finer far rows (peak silhouettes)
   const side=(ax,az,bx2,bz2,nx,nz)=>{const L=Math.hypot(bx2-ax,bz2-az),n=Math.max(2,Math.round(L/sp));for(let i=0;i<n;i++){const t=i/n;pts.push([ax+(bx2-ax)*t,az+(bz2-az)*t,nx,nz]);}};
   const arc=(cx,cz,a0)=>{for(let i=0;i<ca;i++){const a=a0+i/ca*Math.PI/2,c=Math.cos(a),s=Math.sin(a);pts.push([cx+c*rc,cz+s*rc,c,s]);}};
   // clockwise in screen (x right, z down): north edge (-z) west→east, NE corner, east edge, SE, south east→west, SW, west, NW
   side(-bx+rc,-bz,bx-rc,-bz,0,-1);arc(bx-rc,-bz+rc,-Math.PI/2);side(bx,-bz+rc,bx,bz-rc,1,0);arc(bx-rc,bz-rc,0);
   side(bx-rc,bz,-bx+rc,bz,0,1);arc(-bx+rc,bz-rc,Math.PI/2);side(-bx,bz-rc,-bx,-bz+rc,-1,0);arc(-bx+rc,-bz+rc,Math.PI);
-  const rs=[];let r=0;const rEnd=Math.max(1300,(reach||0)+120);while(r<rEnd){rs.push(r);r+=r<62?(low?2.8:1.6):r<110?(low?5:3.5):Math.min(80,3.5*Math.pow(1.12,(r-110)/6));}   // finer rows over the cliff face and its base
+  const rs=[];let r=0;const rEnd=Math.max(1300,(reach||0)+120);while(r<rEnd){rs.push(r);r+=r<62?(low?2.8:1.6):r<110?(low?5:3.5):Math.min(cap,3.5*Math.pow(1.12,(r-110)/6),reach>1300?(low?18:11)+Math.max(0,r-750)*0.03:1e9);}   // finer rows over the cliff face and its base
   return {pts,rs};
 }
 function bdCoast(id,B){
@@ -183,8 +195,8 @@ function bdCoast(id,B){
   const nrm=lg.attributes.normal,col=new Float32Array(N*3),c=new THREE.Color(),Q=h=>new THREE.Color(h),
     G1=Q('#4b6b33'),G2=Q('#5f8040'),G3=Q('#3a542c'),FD=Q('#7d8650'),FB=Q('#6e6e4a'),DT=Q('#8f8a78'),
     R1=Q('#4d4943'),R2=Q('#7a736b'),R3=Q('#35332f'),MO=Q('#4f663a'),WET=Q('#262524'),SA=Q('#b9a97c'),SN=Q('#e4e9ec'),PS=BD_SURF.map(Q),
-    XC=B.grid?(BD_LOD.on?1e9:-1e9):-189,hd=BD_LOD.on&&!low,tv=[];   // XC = castle side starts (forest end west of it) — code coast only (Map Builder maps: edge grass takes the map ground colour instead, bdTint) • tv = edge grass vertices
-  for(let k=0;k<N;k++){const x=pos[k*3],y=pos[k*3+1],z=pos[k*3+2],ny=nrm.getY(k),n=cvN(x*0.08,z*0.08,91),n2=cvN(x*0.013,z*0.013,92),of=ofA[k];
+    XC=B.grid?(BD_LOD.on?1e9:-1e9):-189,hd=BD_LOD.on&&!low,tv=[],SNY=B.grid&&B.grid.snow!=null?+B.grid.snow:110,GL=Q('#8aac44'),RB=Q('#4c525e');   // SNY = snowline (bd.snow) • GL sunny high meadow • RB cool grey high rock • XC = castle side starts (forest end west of it) — code coast only (Map Builder maps: edge grass takes the map ground colour instead, bdTint) • tv = edge grass vertices
+  for(let k=0;k<N;k++){const x=pos[k*3],y=pos[k*3+1],z=pos[k*3+2],ny=nrm.getY(k),q=1/(1+Math.max(0,Math.max(Math.abs(x)-hx0,Math.abs(z)-hz0)-150)/120),n=cvN(x*0.08*q,z*0.08*q,91),n2=cvN(x*0.013,z*0.013,92),of=ofA[k];   // q: fine noise slows down far out (sparse vertices → no streaks)
     if(siA[k]){c.copy(PS[siA[k]]||PS[1]).multiplyScalar(0.9+0.2*n);if(ny<0.6&&siA[k]!==4)c.lerp(R2,0.35);if(y<SEA+2.5)c.lerp(WET,0.6);}   // painted in Map Builder
     else if(ny>0.8&&y>SEA+6){c.copy(G1).lerp(G2,n2*0.8).lerp(G3,n*0.35);   // grass
       const e=Math.max(Math.abs(x)-hx0,Math.abs(z)-hz0);   // m outside the map edge
@@ -193,18 +205,21 @@ function bdCoast(id,B){
       if(e<9&&x>XC)c.lerp(DT,(1-Math.max(0,e)/9)*0.55);   // worn ground next to the castle's stone yard
       if(dA[k]>-6&&dA[k]<-2.5)c.lerp(G3,0.35);
       if(hd&&e<BD_LOD.tint)tv.push(k);
-      if(y>110)c.lerp(SN,Math.min(1,(y-110)/25));}   // snow up high
+      if(y>25)c.lerp(GL,Math.min(0.5,(y-25)/170)*(0.4+0.6*n2));}   // high meadows lighter and warmer
     else if(ny>0.8&&y>SEA-3){c.copy(SA).multiplyScalar(0.92+0.16*n);if(y<SEA+0.6)c.lerp(WET,0.35);}   // beach / shallows
-    else{const band=0.5+0.5*Math.sin(y*0.9+n*2.5),st=cvN((x+z)*0.6,y*0.04,96);
+    else{const band=0.5+0.5*Math.sin(y*0.9*Math.max(q,0.06)+n*2.5),st=cvN((x+z)*0.6*q,y*0.04,96);
       c.copy(R1).lerp(R2,band*0.5+st*0.25).lerp(R3,cvN(x*0.03,z*0.03+y*0.05,93)*0.45);
       c.multiplyScalar(Math.min(1.18,Math.max(0.55,1+of*0.09)));   // recessed = shaded, buttresses lit
       if(ny>0.45&&y>SEA+4)c.lerp(MO,(ny-0.45)*1.6*(0.5+n*0.5));   // moss on ledges
-      if(y<SEA+2.5)c.lerp(WET,0.7);}   // wet rock at the waterline
+      if(y<SEA+2.5)c.lerp(WET,0.7);
+      if(y>60)c.lerp(RB,Math.min(0.7,(y-60)/250));}   // wet rock at the waterline • big mountains: cool grey rock
+    if(y>SNY-60){const sn=cvN(x*0.02,z*0.02,97),ks=Math.min(1,Math.max(0,(y-SNY+(sn-0.5)*90)/35))*Math.min(1,Math.max(0,(ny-0.3+(cvN(x*0.05,z*0.05+y*0.02,98)-0.5)*0.55)/0.2));if(ks>0)c.lerp(SN,ks);}   // snow cap: ragged line; steep faces stay rock with snow streaks
     col[k*3]=c.r;col[k*3+1]=c.g;col[k*3+2]=c.b;}
   lg.setAttribute('color',new THREE.BufferAttribute(col,3));
   const lmat=!hd?new THREE.MeshLambertMaterial({vertexColors:true}):grLive(new THREE.MeshStandardMaterial({vertexColors:true,roughness:0.95,metalness:0}),BD_LOD.live);
   if(hd&&typeof surfApply==='function')surfApply(lmat,true);   // play-area ground detail (js/50 grLive + js/76 surface) — both fade out with camera distance
-  const lm=new THREE.Mesh(lg,lmat);lm.name='coastLand';g.add(lm);
+  bdAerial(lmat);   // distance haze (blue far ridges)
+  const lm=new THREE.Mesh(lg,lmat);lm.name='coastLand';lm.onBeforeRender=bdAirTick;g.add(lm);
   // sea (same grid, flat at sea level, sd = distance to the shore for foam / shallow colour)
   const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.BufferAttribute(sea,3));sg.setAttribute('sd',new THREE.BufferAttribute(sdA,1));sg.setIndex(idx);
   const U={uT:{value:0},uDeep:{value:new THREE.Color('#174652')},uShal:{value:new THREE.Color('#3a9490')},uSky:{value:new THREE.Color('#c6cdd0')},uFoam:{value:new THREE.Color('#eef2f1')},
@@ -277,7 +292,7 @@ function coastTreeMesh(P,low,round){   // round = broadleaf blobs (maps whose fo
    :ffMerge([[new THREE.CylinderGeometry(0.2,0.32,2.4,4),'#4a3828',M(1.2)],
     [new THREE.ConeGeometry(2.5,5.4,sides),'#1c2f1d',M(4.2),'#2c4829'],
     [new THREE.ConeGeometry(1.8,5.4,sides),'#243c25',M(6.8),'#3d5f35']]);
-  const mat=new THREE.MeshLambertMaterial({vertexColors:true});
+  const mat=bdAerial(new THREE.MeshLambertMaterial({vertexColors:true}));
   const m=new THREE.Matrix4(),q=new THREE.Quaternion(),v=new THREE.Vector3(),sc=new THREE.Vector3(),cl=new THREE.Color(),Y=new THREE.Vector3(0,1,0);
   for(let i=0;i<P.length;i+=4){
     const key=Math.floor(P[i]/180)+','+Math.floor(P[i+1]/180);
