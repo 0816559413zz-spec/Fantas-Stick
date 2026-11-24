@@ -197,9 +197,9 @@ const MUDS=defSpell(EARTH,{id:'mudswamp',v:{range:600,r:120,warn:0.5,time:5,slow
 // Tectonic Crush replaced by Stone Barrage (user 2026-11-24) — same SPELL_LIST slot; TECT stub keeps old crush code parsing
 const TECT={v:{len:300,gap:240,hp:200,crush2:80,crush1:40,push:1.0,slide:0.06,knock1:900,envUp:20,envCrush:40}};
 // ---------- สกิล 3: Stone Barrage — ปาหินทั้งวงหลังตัวออกไปรัว ๆ (ไม่ตรงเป้า 100% ส่ายนิด ๆ) แล้ววงเติมเต็มเร็วในไม่กี่วิ
-const BARRAGE=defSpell(EARTH,{id:'stonebarrage',v:{gap:0.045,spread:0.09,wob:1.6,refill:2.0},
+const BARRAGE=defSpell(EARTH,{id:'stonebarrage',v:{gap:0.045,spread:0.09,wob:1.6,refill:1.0},
   vn:{gap:'ห่างระหว่างก้อน (วิ)',spread:'กระจาย (เรเดียน)',wob:'ส่ายกลางอากาศ',refill:'เติมเต็มวงใน (วิ)'},
-  role:'finisher',n:'Stone Barrage',ic:'🪨',cd:9,d:'ปาหินทั้งวงหลังตัวออกไปรัว ๆ ตามจุดเล็ง (ส่ายนิด ๆ ไม่ตรงเป้าทุกก้อน) ก้อนละ 15 ระเบิดกระจาย • แล้ววงหินเติมเต็มใน ~2 วิ',
+  role:'finisher',n:'Stone Barrage',ic:'🪨',cd:9,d:'ปาหินทั้งวงหลังตัวออกไปรัว ๆ ตามจุดเล็ง (ส่ายนิด ๆ ไม่ตรงเป้าทุกก้อน) ก้อนละ 15 ระเบิดกระจาย • แล้ววงหินเติมเต็มใน ~1 วิ',
   cast(p,S){if(p.aug||p.ramp||p.ecb||p.wr||p.erBar)return false;earthRockTick(p,0);const n=Math.max(1,Math.floor(p.erk||0));p.erBar={left:n,t:0};
     emit({k:'efx',z:'erockbar',x:Math.round(p.x),y:Math.round(p.y),h:p.z,n,id:p.id});}});
 function earthBarrageTick(p,dt){const B=p.erBar;if(!B)return;B.t-=dt;
