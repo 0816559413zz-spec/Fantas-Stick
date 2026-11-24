@@ -105,6 +105,19 @@ function bdSplit(geo,idx,P,NT,NR,keep){
     if(!si.length)continue;const g2=new THREE.BufferGeometry();for(const k in geo.attributes)g2.setAttribute(k,geo.attributes[k]);g2.setIndex(si);
     g2.boundingBox=bb.clone().expandByScalar(2);g2.boundingSphere=g2.boundingBox.getBoundingSphere(new THREE.Sphere());out.push(g2);}
   return out;}
+// far trees sit on the land mesh as drawn (far rows are 45–80 m apart → hills flatter than the source heights → trees floated, user 2026-11-24)
+// P = [x,z,y,s]… • triangles binned in 24 m cells • only trees > 60 m past the edge (near rows are dense, kit trees there)
+function bdSnapTrees(P,pos,idx,hx0,hz0){
+  if(!P||!P.length)return;const C=24,bins=new Map(),key=(i,j)=>i*100003+j;
+  const need=new Set();for(let k=0;k<P.length;k+=4)if(Math.max(Math.abs(P[k])-hx0,Math.abs(P[k+1])-hz0)>60)need.add(key(Math.floor(P[k]/C),Math.floor(P[k+1]/C)));
+  if(!need.size)return;
+  for(let t=0;t<idx.length;t+=3){const a=idx[t]*3,b=idx[t+1]*3,c=idx[t+2]*3;
+    const i0=Math.floor(Math.min(pos[a],pos[b],pos[c])/C),i1=Math.floor(Math.max(pos[a],pos[b],pos[c])/C),j0=Math.floor(Math.min(pos[a+2],pos[b+2],pos[c+2])/C),j1=Math.floor(Math.max(pos[a+2],pos[b+2],pos[c+2])/C);
+    for(let i=i0;i<=i1;i++)for(let j=j0;j<=j1;j++){const k=key(i,j);if(!need.has(k))continue;let L=bins.get(k);if(!L)bins.set(k,L=[]);L.push(t);}}
+  for(let k=0;k<P.length;k+=4){const x=P[k],z=P[k+1];if(Math.max(Math.abs(x)-hx0,Math.abs(z)-hz0)<=60)continue;const L=bins.get(key(Math.floor(x/C),Math.floor(z/C)));if(!L)continue;
+    for(const t of L){const a=idx[t]*3,b=idx[t+1]*3,c=idx[t+2]*3,x1=pos[a],z1=pos[a+2],x2=pos[b],z2=pos[b+2],x3=pos[c],z3=pos[c+2],d=(z2-z3)*(x1-x3)+(x3-x2)*(z1-z3);if(Math.abs(d)<1e-9)continue;
+      const u=((z2-z3)*(x-x3)+(x3-x2)*(z-z3))/d,v=((z3-z1)*(x-x3)+(x1-x3)*(z-z3))/d,w=1-u-v;if(u<-1e-4||v<-1e-4||w<-1e-4)continue;
+      P[k+2]=u*pos[a+1]+v*pos[b+1]+w*pos[c+1];break;}}}
 // how far the backdrop reaches from the map centre (m): Map Builder bd.E past the edge • camera far / sea fade / look fog follow it (default 700 m camera)
 function bdReach(id){const fm=MAPS[id]&&MAPS[id].fm,b=fm&&fm.bd&&fm.bd.on&&fm.bd.hg?fm.bd:null;return b?Math.max(MW,MH)*S3/2+(+b.E||600):0;}
 function bdFar(id){const R=bdReach(id);return Math.min(6000,Math.max(700,R+150));}
@@ -299,7 +312,7 @@ function bdCoast(id,B){
       }`});
   const seaTick=()=>{U.uT.value=performance.now()/1000;if(scene.fog)U.uFogC.value.copy(scene.fog.color);U.uL.value.copy(LDIR);};
   for(const sg2 of seaGs){const so=new THREE.Mesh(sg2,sm);so.name='coastSea';so.userData.noBatch=1;so.visible=src.sea!=null;so.onBeforeRender=seaTick;g.add(so);}
-  const TP=src.trees();let tr=coastTreeMesh(TP,low);if(tr)g.add(tr);
+  const TP=src.trees();bdSnapTrees(TP,pos,idx,hx0,hz0);let tr=coastTreeMesh(TP,low);if(tr)g.add(tr);
   for(const q of g.children){q.castShadow=q.receiveShadow=false;}
   if(hd)bdNearKit(g,TP,src,hx0,hz0,(far,round)=>{if(tr){g.remove(tr);tr.children[0]&&tr.children[0].geometry.dispose();}tr=coastTreeMesh(far,low,round);if(tr)g.add(tr);},typeof world!=='undefined'?world:null);
   if(typeof world!=="undefined"&&world){const ho={},W=world;W.userData.bdH=src.hq||((x,z)=>src.h(x,z,ho));world.userData.bdM=hd?BD_LOD.grass:0;
