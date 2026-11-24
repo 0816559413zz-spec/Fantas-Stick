@@ -78,7 +78,7 @@ function hud4Draw(me,v){
   natPlantHud(me,v);
   H4.drawn=true;if(H4.el.hidden)H4.el.hidden=false;
   const Q=H4.q,t=performance.now();
-  h4Set('hs',Math.max(0.62,Math.min(1.15,SH/900,SW/1400)).toFixed(3),s=>H4.el.style.setProperty('--hs',s));
+  h4Set('hs',Math.max(0.62,Math.min(1.15,SH/900,SW/1400)).toFixed(3),s=>H4.el.style.setProperty('--hs',s));hlApplyDom();   // HUD Editor layout (js/66-hudlay)
   // เลือด: ช่องละ 25 (เลือดสูงสุดเกิน 300 → ช่องละ 50) + เลือดเสริม (xh) ต่อท้ายเป็นช่องฟ้า
   const per=me.mh>300?50:25,nh=Math.ceil(me.mh/per),xh=me.xh|0,nx=Math.ceil(xh/per),N=nh+nx;
   if(H4.segN!==N){H4.segN=N;Q.seg.innerHTML=Array.from({length:N},(_,i)=>`<b class="${i>=nh?'x':''}" style="height:${Math.max(14,26-i*(12/Math.max(1,N-1)))}px"><u></u><i></i></b>`).join('');H4.seg=[...Q.seg.children].map(b=>[b.firstChild,b.lastChild]);}
@@ -171,7 +171,7 @@ function h4CardWire(root){let drag=null;
     drag={S:H4.q.slots.find(q=>q.el===el),x:ev.clientX,y:ev.clientY,moved:false};el.setPointerCapture(ev.pointerId);});
   root.addEventListener('pointermove',ev=>{if(!drag)return;const dx=ev.clientX-drag.x,dy=ev.clientY-drag.y;
     if(!drag.moved&&Math.hypot(dx,dy)>6){drag.moved=true;drag.S.el.classList.add('drag');}
-    if(drag.moved){const s=parseFloat(getComputedStyle(root).getPropertyValue('--hs'))||1;drag.S.fc.style.transform=`translate(${(dx/s).toFixed(0)}px,${(dy/s).toFixed(0)}px) scale(1.06)`;}});
+    if(drag.moved){const s=(parseFloat(getComputedStyle(root).getPropertyValue('--hs'))||1)*hlGet('right').s;drag.S.fc.style.transform=`translate(${(dx/s).toFixed(0)}px,${(dy/s).toFixed(0)}px) scale(1.06)`;}});
   const up=ev=>{if(!drag)return;const S=drag.S,moved=drag.moved,me=SKORD.indexOf(S.ci),to=posAt(ev.clientX,ev.clientY);drag=null;S.el.classList.remove('drag');S.fc.style.transform='';
     if(moved){if(to>=0)h4Swap(me,to);h4Pick(null);}
     else if(H4.pick!=null&&H4.pick!==me){h4Swap(H4.pick,me);h4Pick(null);}else h4Pick(H4.pick===me?null:me);};
@@ -223,4 +223,5 @@ function h4PfRead(){if(!H4PF.pend)return;H4PF.pend=false;const N=H4PF.N;
     if(H4PF.cv&&H4PF.cv.isConnected)H4PF.cv.getContext('2d').putImageData(H4PF.img,0,0);
   }catch(e){}}
 // กรอบแผนที่ย่อ (พิกัดจอ px) — js/38 drawMinimap วาดลงตรงนี้ • ตรงกับ .h4Me/.h4Map ใน css (left 24, bottom 24, กว้าง 176 × --hs)
-function h4MapBox(){const hs=Math.max(0.62,Math.min(1.15,SH/900,SW/1400)),S=176*hs;return {x:24*hs,y:SH-24*hs-S,S};}
+// follows the 'left' block of the HUD Editor layout (scaled around the screen's bottom-left like .h4L)
+function h4MapBox(){const hs=Math.max(0.62,Math.min(1.15,SH/900,SW/1400)),L=hlGet('left'),k=L.s,S=176*hs*k;return {x:24*hs*k+L.x*hs,y:SH-(24*hs+176*hs)*k+L.y*hs,S,hide:!!L.hide};}

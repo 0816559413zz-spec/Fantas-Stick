@@ -678,6 +678,27 @@ function nameTag(txt,col){const key=col+'|'+txt;let c=NAMETAG.get(key);if(c)retu
   const d=Math.min(2,DPR||1);c=document.createElement('canvas');const g=c.getContext('2d');g.font='600 13px Kanit,sans-serif';const w=Math.ceil(g.measureText(txt).width)+6;
   c.width=Math.ceil(w*d);c.height=Math.ceil(20*d);c._w=w;c._h=20;g.scale(d,d);g.font='600 13px Kanit,sans-serif';g.textAlign='center';g.textBaseline='alphabetic';
   g.fillStyle='rgba(0,0,0,0.65)';g.fillText(txt,w/2+1,16);g.fillStyle=col;g.fillText(txt,w/2,15);NAMETAG.set(key,c);return c;}
+// Enemy tags hide behind walls (user 2026-11-24): camera → target segment vs terrain, obstacles/Map Builder walls, panels, city.
+// Starts past our own player (camera may sit inside a wall). true = clear.
+const _hsO=[];
+function hudSight(x,y,h,me){
+  const o=cam.position,x0=o.x/S3+MW/2,y0=o.z/S3+MH/2,dx=x-x0,dy=y-y0,L2=dx*dx+dy*dy;if(L2<1)return true;
+  const L=Math.sqrt(L2),t0=me?clamp(((me.x-x0)*dx+(me.y-y0)*dy)/L2,0,0.95):0,t1=Math.max(t0,1-12/L);
+  const wa=o.y,wb=GY(x,y)+h,ax=x0+dx*t0,ay=y0+dy*t0,aw=wa+(wb-wa)*t0,bx=x0+dx*t1,by=y0+dy*t1,bw=wa+(wb-wa)*t1;
+  if(bldRay(ax,ay,aw-GY(ax,ay),bx,by,bw-GY(bx,by)))return false;
+  const obs=sgNear(sgObs(),(ax+bx)/2,(ay+by)/2,L*(t1-t0)/2+10,_hsO),n=Math.max(1,Math.ceil(L*(t1-t0)/10));
+  for(let i=0;i<=n;i++){const t=i/n,px=ax+(bx-ax)*t,py=ay+(by-ay)*t,wy=aw+(bw-aw)*t;
+    if(TERR&&terrSolid(px,py,wy-terrT(px,py)))return false;
+    for(const q of obs){if(q.bi!==undefined||q.k==='tfence'||q.bot>=q.hgt)continue;const g0=GY(q.x,q.y),lo=q.top!==undefined?-50:g0+(q.bot||0),hi=q.top!==undefined?q.top:g0+(q.hgt||9);
+      if(wy>=lo&&wy<hi&&obsD2(q,px,py)<q.r*q.r)return false;}}
+  return true;
+}
+// per-target cached sight (re-check every ~0.1 s, staggered) + smooth fade • returns alpha 0..1
+const SIGHT=new Map();
+function sightA(id,x,y,h,me){const now=performance.now();let s=SIGHT.get(id);
+  if(!s){if(SIGHT.size>160)SIGHT.clear();s={a:1,v:true,t:0,l:now};SIGHT.set(id,s);}
+  if(now>=s.t){s.v=hudSight(x,y,h,me);s.t=now+80+Math.random()*60;}
+  const dt=Math.min(0.1,(now-s.l)/1000);s.l=now;s.a+=((s.v?1:0)-s.a)*Math.min(1,dt*14);return s.a;}
 function drawLabels(P,E,v,me,spk){
   if(!SET.names){const team=teamOn(v);P=P.filter(p=>team&&me&&p.tm===me.tm);}
   cx.textAlign='center';
@@ -689,16 +710,19 @@ function drawLabels(P,E,v,me,spk){
     const d=me?Math.hypot(e.x-me.x,e.y-me.y):0;if(d>1500)continue;
     const s=toScreen(e.x,(o.hs||0)+o.h+0.4,e.y);if(!s)continue;
     if(EDEF[e.t]&&EDEF[e.t].boss)continue;
+    const va=sightA('e'+e.id,e.x,e.y,(o.hs||0)+o.h*0.8,me);if(va<0.02)continue;cx.globalAlpha=va;
     const bw=e.t==='troll'?90:44;
     cx.fillStyle='rgba(0,0,0,0.6)';cx.fillRect(s[0]-bw/2,s[1],bw,5);
     cx.fillStyle='#ff5a5a';cx.fillRect(s[0]-bw/2,s[1],bw*clamp(e.hp/e.mh,0,1),5);
   }
+  cx.globalAlpha=1;
   const meGh=!!(me&&me.gh),mates=ROLE&&ROLE.role==='imp'?ROLE.mates:[];
   for(const p of P){
     if(!p.al||p.id===NET.myId)continue;
     if(p.gh&&!meGh)continue;
     if(p.dk?.[0]&&me&&p.tm!==me.tm)continue;
     const s=toScreen(p.x,(p.z||0)+2.55,p.y);if(!s)continue;
+    {const ally=me&&((teamOn(v)&&p.tm===me.tm)||mates.includes(p.id)),va=ally?1:sightA(p.id,p.x,p.y,(p.z||0)+2.1,me);if(va<0.02)continue;cx.globalAlpha=va;}   // enemies behind walls: no name/HP bar
     {const tg=nameTag((p.aw?'📶 ':'')+p.n+(p.hb?' 🔴':''),teamOn(v)?TEAMC[p.tm]:mates.includes(p.id)?'#ff6b6b':'#ffffff');cx.drawImage(tg,s[0]-tg._w/2,s[1]-23,tg._w,tg._h);}   // 📶 = เน็ตหลุด รอต่อกลับ
     if(v.mode==='imp')continue;
     if(spk.has(p.id)){cx.font='14px sans-serif';cx.fillText('🔊',s[0]+cx.measureText(p.n).width/2+16,s[1]-8);}
@@ -707,6 +731,7 @@ function drawLabels(P,E,v,me,spk){
     cx.fillStyle=hr>0.5?'#5be37d':hr>0.25?'#ffc94d':'#ff5a5a';cx.fillRect(s[0]-bw/2,s[1]-2,bw*hr,6);
     if(p.dn){cx.fillStyle='#ff9a9a';cx.font='600 13px Kanit,sans-serif';cx.fillText(`ล้ม! ไปยืนข้างๆ เพื่อชุบ ${Math.round(p.rv/2.5*100)}%`,s[0],s[1]+40);}
   }
+  cx.globalAlpha=1;
 }
 // ตัวเลขดาเมจ/ข้อความลอย: วาดลงแผ่นเล็กครั้งเดียวแล้วแปะซ้ำ (fillText 2 ครั้งต่อข้อความต่อเฟรม กินเวลามากสุดในโค้ด HUD ตอนสู้กันนัว ๆ)
 const TEXTAG=new Map();

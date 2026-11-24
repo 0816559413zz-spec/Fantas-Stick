@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HUD Editor - Fantas Stick</title>
+<!--
+  HUD Editor (user 2026-11-24) — open via Tools.bat / http://localhost:<port>/hudedit.html (needs tools/serve.py to save).
+  Loads the real game in an iframe (index.html?hudedit), starts a match, and draws drag boxes over each HUD block.
+  Drag = move, mouse wheel = scale, panel = exact X/Y/scale/opacity/hide. Save writes assets/hud/layout.json (/api/save);
+  every game reads that file at start (js/66-hudlay.js). Blocks: HUDL_DEF in js/66-hudlay.js — add a block there + its box selector here.
+-->
+<link rel="stylesheet" href="hub/tool-ui.css">
+<script src="hub/tool-sound.js"></script>
+<style>
+html,body{margin:0;height:100%;overflow:hidden}
+#app{display:grid;grid-template-rows:auto 1fr;height:100%}
+.tl-bar{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg1);border-bottom:1px solid var(--ln);flex-wrap:wrap}
+.tl-bar h1{margin:0 6px 0 0;font-size:14px;font-weight:600}.sp{flex:1}
+#msg{color:var(--tx2);max-width:460px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#main{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:0}
+#side{background:var(--bg1);border-right:1px solid var(--ln);display:flex;flex-direction:column;min-height:0;overflow-y:auto}
+#side h3{font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;margin:12px 12px 4px}
+#blocks{padding:0 6px}
+.blk{display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:var(--r);cursor:pointer;border:1px solid transparent}
+.blk:hover{background:var(--hov)}.blk.on{background:var(--accBg);border-color:var(--acc)}
+.blk span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.blk.ch span::after{content:' ●';color:var(--swarn);font-size:10px}
+.blk .eye{background:none;border:0;color:var(--tx2);cursor:pointer;font-size:13px;padding:0 2px}.blk.hid span{color:var(--tx3);text-decoration:line-through}
+#props{padding:0 12px 12px}
+.pr{display:grid;grid-template-columns:62px 1fr 58px;gap:6px;align-items:center;margin:6px 0}
+.pr label{color:var(--tx2)}.pr input[type=range]{width:100%;accent-color:var(--acc)}
+.pr input[type=number]{width:100%;background:var(--bg0);color:var(--tx);border:1px solid var(--ln2);border-radius:3px;padding:2px 4px;font:12px var(--fu)}
+#props .row2{display:flex;gap:6px;margin-top:8px}
+#help{color:var(--tx3);font-size:12px;padding:0 12px 12px;line-height:1.6}
+#ref{padding:0 12px 12px;display:flex;flex-direction:column;gap:6px}
+#ref .pr{grid-template-columns:62px 1fr}
+#stageWrap{position:relative;overflow:hidden;background:var(--bg0);display:flex;align-items:center;justify-content:center}
+#stage{position:relative;flex:none;outline:1px solid var(--ln2)}
+#game{position:absolute;left:0;top:0;border:0;transform-origin:0 0;background:#000}
+#refImg{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none;display:none}
+#ov{position:absolute;inset:0;cursor:default}
+.box{position:absolute;border:1px dashed rgba(143,185,255,.55);border-radius:2px;cursor:move}
+.box:hover{border-color:var(--acc2);background:rgba(74,140,255,.06)}
+.box.on{border:1.5px solid var(--acc);background:rgba(74,140,255,.1)}
+.box.hid{border:1.5px solid var(--serr);background:repeating-linear-gradient(45deg,rgba(240,106,106,.22) 0 6px,transparent 6px 12px)}
+.box b{position:absolute;left:-1px;top:-18px;font:500 11px var(--ui);background:var(--acc);color:#fff;padding:1px 5px;border-radius:2px;white-space:nowrap;display:none}
+.box.on b,.box:hover b{display:block}
+.box.hid b{background:var(--serr)}
+#load{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,10,10,.85);font-size:14px;z-index:5;text-align:center;padding:20px}
+#load.hide{display:none}
+#ovOff #ov{pointer-events:none}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="tl-bar">
+    <a class="tl-home" href="hub.html" title="กลับศูนย์รวม Tool">◂ Tool</a><h1>▦ HUD Editor</h1>
+    <select id="res" class="tl-sel" title="ขนาดจอที่จำลอง">
+      <option value="1280x720">1280 × 720</option><option value="1366x768">1366 × 768</option><option value="1600x900" selected>1600 × 900</option><option value="1920x1080">1920 × 1080</option><option value="1024x768">1024 × 768 (4:3)</option>
+    </select>
+    <select id="mode" class="tl-sel" title="โหมดที่ใช้ดู HUD">
+      <option value="train">ห้องฝึก</option><option value="tdm">TDM (มีรูปตัวละคร)</option><option value="ffa">FFA</option><option value="siege">บุกปราสาท</option>
+    </select>
+    <button id="bStart" class="tl-btn" title="เริ่มแมตช์ใหม่ในเกมด้านล่าง">▶ เริ่ม</button>
+    <button id="bBox" class="tl-btn on" title="แสดง/ซ่อนกรอบลาก (ซ่อน = ดู HUD ล้วน)">▢ กรอบ</button>
+    <span class="sp"></span><span id="msg"></span><span data-tool-sound></span>
+    <button id="bSave" class="tl-btn pri" title="Ctrl+S">💾 เซฟ</button><button id="bDl" class="tl-btn" title="ดาวน์โหลด layout.json">⬇</button><button id="bRst" class="tl-btn" title="คืนทุกชิ้นเป็นตำแหน่งเดิม">↺ คืนทั้งหมด</button>
+  </div>
+  <div id="main">
+    <div id="side">
+      <h3>ชิ้นส่วน HUD</h3><div id="blocks"></div>
+      <h3 id="pTitle">—</h3><div id="props"></div>
+      <h3>ภาพอ้างอิง</h3>
+      <div id="ref"><input type="file" id="refF" accept="image/*" class="tl-in"><div class="pr"><label>จาง</label><input type="range" id="refA" min="0" max="1" step="0.05" value="0.5"></div><button id="refX" class="tl-btn">ลบภาพ</button></div>
+      <div id="help">ลากกรอบ = ย้าย • ล้อเมาส์บนกรอบ = ย่อ/ขยาย • ลูกศร = ขยับทีละ 1 (Shift = 10) • 👁 = ซ่อนชิ้นนั้นในเกม<br>เซฟ = เขียน assets/hud/layout.json แล้วบอก Claude ให้ commit+push</div>
+    </div>
+    <div id="stageWrap"><div id="stage"><iframe id="game"></iframe><img id="refImg" alt=""><div id="ov"></div></div><div id="load">กำลังเปิดเกม…</div></div>
+  </div>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+// box = how the editor measures each block in the game page (DOM selectors, or canvas boxes recorded by hlBox in js/66-hudlay.js)
+const BOX={left:{sel:'.h4Me'},right:{sel:'.h4Cd,.h4Ic'},ult:{sel:'.h4UX'},top:{cv:1},feed:{cv:1}};
+const RNG={x:[-1600,1600,1],y:[-1000,1000,1],s:[0.3,3,0.01],o:[0,1,0.05]};
+let W=null,GW=null,items={},file='{}',sel='left',last={},sc=1,RW=1600,RH=900;
+const def=()=>({x:0,y:0,s:1,o:1,hide:0});
+const it=id=>items[id]||def();
+const isCh=id=>{const L=it(id);return L.x||L.y||L.s!==1||L.o!==1||L.hide;};
+function msg(t,c){const m=$('#msg');m.textContent=t;m.style.color=c?`var(${c})`:'';m.title=t;}
+function json(){const out={};for(const id in items)if(isCh(id))out[id]=items[id];return JSON.stringify({_about:'HUD layout — edit in hudedit.html (HUD Editor). x/y = offset in HUD px (scaled with screen), s = scale, o = opacity, hide = 1 hides the block.',v:1,items:out},null,1)+'\n';}
+const dirty=()=>json()!==file;
+function push(){if(W)W.hlSet({items});renderList();}
+// ---------- game iframe ----------
+function fit(){const r=$('#stageWrap').getBoundingClientRect();sc=Math.min((r.width-24)/RW,(r.height-24)/RH,1);
+  const f=$('#game');f.style.width=RW+'px';f.style.height=RH+'px';f.style.transform=`scale(${sc})`;$('#stage').style.width=RW*sc+'px';$('#stage').style.height=RH*sc+'px';}
+function boot(){$('#load').classList.remove('hide');$('#load').textContent='กำลังเปิดเกม…';const f=$('#game');f.src='index.html?nosw&nointro&hudedit&t='+Date.now();W=null;
+  let n=0;const iv=setInterval(()=>{n++;let w=null;try{w=f.contentWindow;}catch(e){}
+    if(!(w&&w.WD&&w.WD.hlSet&&w.document.querySelector('#btnSolo'))){if(n>300){clearInterval(iv);$('#load').textContent='❌ เปิดเกมไม่ได้ — เปิดหน้านี้ผ่าน Tools.bat (python tools/serve.py)';}return;}
+    clearInterval(iv);GW=w;W=w.WD;W.HUDL.demo=true;
+    {const st=w.document.createElement('style');st.textContent='#creator,#gpuTip,#intro{display:none!important}';w.document.head.appendChild(st);}   // popups that would cover the HUD
+    fetch('assets/hud/layout.json',{cache:'no-cache'}).then(r=>r.ok?r.json():{}).catch(()=>({})).then(j=>{items={};for(const id in (j.items||{}))items[id]=Object.assign(def(),j.items[id]);file=json();push();renderProps();start();});},100);}
+function start(){if(!GW)return;const w=GW,d=w.document,mode=$('#mode').value;$('#load').classList.remove('hide');$('#load').textContent='กำลังเริ่มแมตช์…';
+  try{if(w.WD.screen!=='lobby')d.querySelector('#btnSolo').click();}catch(e){}
+  setTimeout(()=>{try{const G=w.WD.G;if(G.ph&&G.ph!=='lobby'&&w.WD.hostToLobby)w.WD.hostToLobby();
+      if(mode!=='train'&&Object.keys(G.players).length<2){w.WD.addPlayer('hb1','Bot1','#e33');w.WD.addPlayer('hb2','Bot2','#3be');w.WD.broadcastLobby();}
+      G.mode=mode;w.WD.hostStart();
+      setTimeout(()=>$('#load').classList.add('hide'),1500);msg('เริ่ม '+$('#mode').selectedOptions[0].text+' แล้ว — ลากกรอบสีฟ้าเพื่อย้าย HUD');}
+    catch(e){$('#load').classList.add('hide');msg('เริ่มแมตช์ไม่ได้: '+e.message,'--serr');}},700);}
+// ---------- boxes ----------
+function measure(id){const B=BOX[id];if(!W)return null;
+  if(B.cv){const b=W.HUDL.box[id];return b?{x:b[0],y:b[1],w:b[2],h:b[3]}:null;}
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;const root=GW.document.getElementById('h4');if(!root||root.hidden)return null;
+  for(const e of root.querySelectorAll(B.sel)){const r=e.getBoundingClientRect();if(r.width<2||r.height<2)continue;x0=Math.min(x0,r.left);y0=Math.min(y0,r.top);x1=Math.max(x1,r.right);y1=Math.max(y1,r.bottom);}
+  return x1>x0?{x:x0,y:y0,w:x1-x0,h:y1-y0}:null;}
+function drawBoxes(){const ov=$('#ov');if(!W){ov.innerHTML='';return;}
+  for(const id in W.HUDL_DEF){const m=measure(id);if(m&&!it(id).hide)last[id]=m;const r=last[id];let el=ov.querySelector(`[data-id="${id}"]`);
+    if(!r){if(el)el.style.display='none';continue;}
+    if(!el){el=document.createElement('div');el.className='box';el.dataset.id=id;el.innerHTML=`<b>${W.HUDL_DEF[id].n}</b>`;ov.appendChild(el);}
+    el.style.display='';el.style.left=r.x*sc+'px';el.style.top=r.y*sc+'px';el.style.width=r.w*sc+'px';el.style.height=r.h*sc+'px';
+    el.classList.toggle('on',id===sel);el.classList.toggle('hid',!!it(id).hide);}}
+(function loop(){try{drawBoxes();}catch(e){}requestAnimationFrame(loop);})();
+// drag / wheel on the overlay
+let drag=null;
+$('#ov').addEventListener('pointerdown',e=>{const b=e.target.closest('.box');if(!b)return;select(b.dataset.id);const L=it(sel);drag={id:sel,x:e.clientX,y:e.clientY,ox:L.x,oy:L.y,lx:last[sel]&&last[sel].x,ly:last[sel]&&last[sel].y};$('#ov').setPointerCapture(e.pointerId);e.preventDefault();});
+$('#ov').addEventListener('pointermove',e=>{if(!drag||!W)return;const k=W.hudHs(),L=items[drag.id]=Object.assign(def(),it(drag.id));
+  L.x=Math.round(drag.ox+(e.clientX-drag.x)/sc/k);L.y=Math.round(drag.oy+(e.clientY-drag.y)/sc/k);
+  if(L.hide&&last[drag.id]){last[drag.id].x=drag.lx+(e.clientX-drag.x)/sc;last[drag.id].y=drag.ly+(e.clientY-drag.y)/sc;}
+  push();renderProps(true);});
+$('#ov').addEventListener('pointerup',()=>{drag=null;});
+$('#ov').addEventListener('wheel',e=>{const b=e.target.closest('.box');if(!b)return;e.preventDefault();select(b.dataset.id);const L=items[sel]=Object.assign(def(),it(sel));
+  L.s=+Math.min(3,Math.max(0.3,L.s*(e.deltaY<0?1.06:1/1.06))).toFixed(3);push();renderProps(true);},{passive:false});
+addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.code==='KeyS'){e.preventDefault();save();return;}
+  if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;const d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];if(!d)return;
+  e.preventDefault();const st=e.shiftKey?10:1,L=items[sel]=Object.assign(def(),it(sel));L.x+=d[0]*st;L.y+=d[1]*st;push();renderProps(true);});
+// ---------- side panel ----------
+function select(id){sel=id;renderList();renderProps();}
+function renderList(){if(!W)return;$('#blocks').innerHTML=Object.keys(W.HUDL_DEF).map(id=>`<div class="blk${id===sel?' on':''}${isCh(id)?' ch':''}${it(id).hide?' hid':''}" data-id="${id}"><button class="eye" title="ซ่อน/แสดงในเกม">${it(id).hide?'🚫':'👁'}</button><span>${W.HUDL_DEF[id].n}</span></div>`).join('');}
+const LBL={x:'X',y:'Y',s:'ขนาด',o:'ความทึบ'};
+function renderProps(valsOnly){if(!W)return;const L=it(sel);$('#pTitle').textContent=W.HUDL_DEF[sel].n;
+  if(valsOnly&&$('#props').dataset.id===sel){for(const k in RNG){const r=$(`#props [data-k="${k}"]`);r.querySelector('[type=range]').value=L[k];r.querySelector('[type=number]').value=L[k];}return;}
+  $('#props').dataset.id=sel;
+  $('#props').innerHTML=Object.keys(RNG).map(k=>{const [a,b,s]=RNG[k];return `<div class="pr" data-k="${k}"><label>${LBL[k]}</label><input type="range" min="${a}" max="${b}" step="${s}" value="${L[k]}"><input type="number" min="${a}" max="${b}" step="${s}" value="${L[k]}"></div>`;}).join('')+
+    `<div class="row2"><button class="tl-btn" id="pRst">↺ คืนชิ้นนี้</button><button class="tl-btn" id="pHide">${L.hide?'แสดงในเกม':'ซ่อนในเกม'}</button></div>`;}
+$('#props').addEventListener('input',e=>{const r=e.target.closest('.pr');if(!r||e.target.value===''||!isFinite(+e.target.value))return;const k=r.dataset.k,L=items[sel]=Object.assign(def(),it(sel));L[k]=+e.target.value;
+  r.querySelectorAll('input').forEach(i=>{if(i!==e.target)i.value=L[k];});push();});
+$('#props').addEventListener('click',e=>{if(e.target.id==='pRst'){delete items[sel];push();renderProps();}else if(e.target.id==='pHide')toggleHide(sel);});
+function toggleHide(id){const L=items[id]=Object.assign(def(),it(id));L.hide=L.hide?0:1;push();renderProps();}
+$('#blocks').addEventListener('click',e=>{const b=e.target.closest('.blk');if(!b)return;if(e.target.classList.contains('eye'))toggleHide(b.dataset.id);else select(b.dataset.id);});
+// ---------- save / misc ----------
+function save(){msg('กำลังเซฟ…');const body=json();
+  fetch('/api/save?path=assets/hud/layout.json',{method:'POST',body}).then(r=>r.json()).then(j=>{
+    if(j&&j.ok){file=body;msg('✅ เซฟลง assets/hud/layout.json แล้ว — บอก Claude ให้ commit+push','--sok');}else msg('❌ เซฟไม่ได้: '+((j&&j.err)||'?')+' — ใช้ ⬇ แทน','--serr');})
+  .catch(()=>msg('❌ เซฟไม่ได้ — ต้องเปิดผ่าน Tools.bat (serve.py) • ใช้ ⬇ แทน','--serr'));}
+$('#bSave').onclick=save;
+$('#bDl').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([json()],{type:'application/json'}));a.download='layout.json';a.click();msg('ดาวน์โหลดแล้ว — วางทับ assets/hud/layout.json');};
+$('#bRst').onclick=()=>{if(!Object.keys(items).length)return;if(!confirm('คืนทุกชิ้นเป็นตำแหน่งเดิม? (ยังไม่เซฟจนกว่าจะกดเซฟ)'))return;items={};push();renderProps();msg('คืนตำแหน่งเดิมทั้งหมดแล้ว — กดเซฟเพื่อบันทึก');};
+$('#bStart').onclick=start;
+$('#bBox').onclick=()=>{const on=$('#bBox').classList.toggle('on');$('#ov').style.display=on?'':'none';};
+$('#res').onchange=()=>{[RW,RH]=$('#res').value.split('x').map(Number);fit();last={};setTimeout(()=>{try{GW.dispatchEvent(new Event('resize'));}catch(e){}},50);};
+$('#refF').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=$('#refImg');im.src=URL.createObjectURL(f);im.style.display='block';im.style.opacity=$('#refA').value;};
+$('#refA').oninput=e=>{$('#refImg').style.opacity=e.target.value;};
+$('#refX').onclick=()=>{const im=$('#refImg');im.style.display='none';im.removeAttribute('src');$('#refF').value='';};
+addEventListener('resize',fit);
+addEventListener('beforeunload',e=>{if(dirty()){e.preventDefault();e.returnValue='';}});
+fit();boot();
+</script>
+</body>
+</html>

@@ -112,10 +112,11 @@ function drawHUD(v,me,P){
   else if(v.mode==='siege')top=sgTop(v);
   else if(v.mode==='imp'){const r=ROLE?(ROLE.role==='imp'?'🐍 คุณคือ'+ROLE.title:'⚡ คุณคือนักเรียน'):'';top=`${r}   •   ภารกิจ ${M.td||0}/${M.tt||0}`;}
   else top=`${TEAMN[0]} ${v.ts[0]}   —   ${v.ts[1]} ${TEAMN[1]}   •   ⏱ ${fmtTime(v.tm)}`;
-  cx.font='600 16px Kanit,sans-serif';
-  const tw=cx.measureText(top).width+56;
-  plate(SW/2-tw/2,12,tw,34);
-  cx.fillStyle='#efe6cf';cx.fillText(top,SW/2,35);
+  if(hlBegin('top',SW/2,12)){   // HUD Editor block (js/66-hudlay)
+    cx.font='600 16px Kanit,sans-serif';
+    const tw=cx.measureText(top).width+56;
+    plate(SW/2-tw/2,12,tw,34);
+    cx.fillStyle='#efe6cf';cx.fillText(top,SW/2,35);hlEnd();hlBox('top',SW/2,12,SW/2-tw/2,12,tw,34);}
   // หลอดเลือดบอส
   const boss=v.E.find(e=>EDEF[e.t]&&EDEF[e.t].boss&&e.hp>0);
   if(boss)drawBossBar(boss);
@@ -123,12 +124,13 @@ function drawHUD(v,me,P){
   // kill feed
   // (ข้อความใหม่เลื่อนเข้าจากขวา • ข้อความที่มีชื่อเรา = ตัวทอง) • ห้องฝึก: เลื่อนลงให้พ้นปุ่ม "จบการฝึก" ใต้แผนที่ย่อ
   cx.textAlign='right';cx.font='14px Kanit,sans-serif';
-  {const F=HUDF.feed,y0=58+(v.mode==='train'?46:0);for(const k of [...F.keys()])if(!v.feed.includes(k))F.delete(k);
-  v.feed.forEach((f,i)=>{if(!F.has(f))F.set(f,now);const k=Math.min(1,(now-F.get(f))/220),e=1-Math.pow(1-k,3),w=cx.measureText(f).width+30,y=y0+i*28,ox=(1-e)*60,mine=me&&f.includes(me.n);
-    cx.globalAlpha=e;const g=cx.createLinearGradient(SW-12-w,0,SW-12,0);g.addColorStop(0,'rgba(7,11,24,0)');g.addColorStop(0.18,HN);g.addColorStop(1,mine?'rgba(60,44,12,0.9)':HN);
+  if(hlBegin('feed',SW-12,58)){const F=HUDF.feed,y0=58+(v.mode==='train'?46:0),fo=hlGet('feed').o,feed=HUDL.demo&&!v.feed.length?HL_DEMO_FEED:v.feed;for(const k of [...F.keys()])if(!feed.includes(k))F.delete(k);
+  let fw=0;feed.forEach(f=>{fw=Math.max(fw,cx.measureText(f).width+30);});hlBox('feed',SW-12,58,SW-12-fw,y0,fw,feed.length*28-4);
+  feed.forEach((f,i)=>{if(!F.has(f))F.set(f,now);const k=Math.min(1,(now-F.get(f))/220),e=1-Math.pow(1-k,3),w=cx.measureText(f).width+30,y=y0+i*28,ox=(1-e)*60,mine=me&&f.includes(me.n);
+    cx.globalAlpha=e*fo;const g=cx.createLinearGradient(SW-12-w,0,SW-12,0);g.addColorStop(0,'rgba(7,11,24,0)');g.addColorStop(0.18,HN);g.addColorStop(1,mine?'rgba(60,44,12,0.9)':HN);
     cx.fillStyle=g;cx.fillRect(SW-12-w+ox,y,w,24);cx.fillStyle=mine?HG2:HG;cx.fillRect(SW-14+ox,y,2,24);
     if(k<1){cx.fillStyle=`rgba(243,220,148,${0.35*(1-k)})`;cx.fillRect(SW-12-w+ox,y,w,24);}
-    cx.fillStyle=mine?HG2:'#efe6cf';cx.fillText(f,SW-24+ox,y+17);cx.globalAlpha=1;});}
+    cx.fillStyle=mine?HG2:'#efe6cf';cx.fillText(f,SW-24+ox,y+17);cx.globalAlpha=fo;});hlEnd();}
 
   // ข้อความกลางจอ
   cx.textAlign='center';
@@ -167,7 +169,7 @@ function drawHUD(v,me,P){
   if(me&&me.fl&&!showBoard)big(`🧹 บินอยู่ (สูง ${me.z.toFixed(0)} ม.)  •  W เร่ง  •  เมาส์ เลี้ยว/เงยขึ้น-ก้มลง  •  คลิก ยิงลำแสง${broomHud(me)}  •  B ลง`,SH-150,15,'#ffe9a8');
   if(me&&me.rt)big('🕸️ ติดใยแมงมุม! ขยับไม่ได้ชั่วคราว',SH*0.62,20,'#e8e8f0');
   if(me)drawBottom(me,v);
-  if(me&&!showBoard&&SET.mini&&!h4PfMode(v))drawMinimap(v,me,P);   // FFA/TDM = รูปตัวละครแทน (js/66)
+  if(me&&!showBoard&&SET.mini&&!h4PfMode(v)){const L=hlGet('left');if(!L.hide){cx.save();cx.globalAlpha=L.o;drawMinimap(v,me,P);cx.restore();}}   // FFA/TDM = รูปตัวละครแทน (js/66) • follows HUD Editor 'left' block
   if(showBoard)drawBoard(v,P);
 }
 function raceRankClient(P){

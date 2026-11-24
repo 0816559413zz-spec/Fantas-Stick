@@ -1,0 +1,5 @@
+{
+ "_about": "HUD layout — edit in hudedit.html (HUD Editor). x/y = offset in HUD px (scaled with screen), s = scale, o = opacity, hide = 1 hides the block.",
+ "v": 1,
+ "items": {}
+}

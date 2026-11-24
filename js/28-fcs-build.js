@@ -359,12 +359,13 @@ function sgHud(v,me,big){
   const atk=me.tm===0,F=sgFD(),k=F.cores[S.ph-1];
   // แถบเลือดแกนทั้ง 3 (ใต้แถบบน)
   const bw=Math.min(110,(SW-80)/S.n-10),x0=SW/2-(bw+10)*S.n/2;
-  for(let i=0;i<S.n;i++){const x=x0+i*(bw+10),r=S.hp[i]/S.mx,act=i===S.ph-1;
+  if(hlBegin('top',SW/2,12))   // follows the HUD Editor 'top' block
+  {for(let i=0;i<S.n;i++){const x=x0+i*(bw+10),r=S.hp[i]/S.mx,act=i===S.ph-1;
     cx.fillStyle='rgba(8,10,20,0.7)';cx.fillRect(x,52,bw,12);cx.fillStyle=S.hp[i]<=0?'#555':act&&S.atk?'#ff6a5a':act?'#7fc0ff':'#4a5a70';cx.fillRect(x+1,53,(bw-2)*r,10);
     if(act){cx.strokeStyle=HG2;cx.lineWidth=1.5;cx.strokeRect(x-1,51,bw+2,14);}
-    cx.font='600 11px Kanit,sans-serif';cx.textAlign='center';cx.fillStyle='#efe6cf';cx.fillText(S.hp[i]<=0?'แตกแล้ว':'แกน '+(i+1),x+bw/2,78);}
+    cx.font='600 11px Kanit,sans-serif';cx.textAlign='center';cx.fillStyle='#efe6cf';cx.fillText(S.hp[i]<=0?'แตกแล้ว':'แกน '+(i+1),x+bw/2,78);}hlEnd();}
   cx.textAlign='center';
-  big(`คุณเป็น${atk?SG_TEAM[0]:SG_TEAM[1]} (${TEAMN[me.tm]||''})`,96,14,atk?'#8fc8ff':'#ff9a9a');
+  if(hlBegin('top',SW/2,12)){big(`คุณเป็น${atk?SG_TEAM[0]:SG_TEAM[1]} (${TEAMN[me.tm]||''})`,96,14,atk?'#8fc8ff':'#ff9a9a');hlEnd();}
   if(S.atk)big('⚠️ แกนกำลังถูกร่ายทำลาย',SH*0.2,18,'#ff8a7a');
   // เครื่องหมายแกนบนจอ
   if(k&&me.al){const s=toScreen(k.x,(GY(k.x,k.y)||0)+4,k.y),d=Math.round(Math.hypot(k.x-me.x,k.y-me.y)/20);

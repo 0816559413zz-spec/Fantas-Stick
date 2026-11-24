@@ -22,6 +22,14 @@
      "sound": true
     },
     {
+     "id": "hudedit",
+     "icon": "▦",
+     "name": "HUD Editor",
+     "desc": "ลากวางตำแหน่ง ย่อ/ขยาย ซ่อน HUD บนเกมจริง ลองหลายขนาดจอ วางภาพอ้างอิงทับได้ เซฟลง assets/hud/layout.json",
+     "url": "hudedit.html",
+     "sound": true
+    },
+    {
      "id": "storyboard",
      "icon": "🎬",
      "name": "Storyboard VFX",

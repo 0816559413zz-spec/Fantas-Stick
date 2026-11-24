@@ -1,7 +1,7 @@
 # เซิร์ฟเวอร์ทดสอบในเครื่อง (ใช้แทน python -m http.server ได้เลย): python tools/serve.py [พอร์ต=8765]
 # เสิร์ฟไฟล์ทั้งโฟลเดอร์เหมือนเดิม + ช่องทางสำหรับ VFX Studio (studio.html):
 #   GET  /api/fx-list               → รายชื่อเอฟเฟกต์ + โมเดล (mesh) + ภาพ (tex) ทั้งหมด + เวลาแก้ล่าสุด (ไลบรารี / โหลดใหม่อัตโนมัติเมื่อไฟล์เปลี่ยน)
-#   POST /api/save?path=<ไฟล์>      → บันทึกไฟล์ (อนุญาตเฉพาะ assets/fx/**.fx.json, bind.json, mesh/<ชื่อ>.mesh.json, tex/<ชื่อ>.tex.json|.png, vol/<ชื่อ>.vol.json|.bin, assets/vfx/<ชื่อ>.glb|.png) แล้วรัน fx-check
+#   POST /api/save?path=<ไฟล์>      → บันทึกไฟล์ (อนุญาตเฉพาะ assets/tune.json, assets/hud/layout.json, assets/fx/**.fx.json, bind.json, mesh/<ชื่อ>.mesh.json, tex/<ชื่อ>.tex.json|.png, vol/<ชื่อ>.vol.json|.bin, assets/vfx/<ชื่อ>.glb|.png) แล้วรัน fx-check
 #   POST /api/photo?name=<ชื่อ>     → โหมดถ่ายรูปในเกม (js/79-photo.js): PNG ลง photos/<ชื่อ>.png (git-ignored)
 #   POST /api/shot?name=<ชื่อ>      → เก็บภาพ (data URL หรือไบต์ PNG/JPEG) ลง shots/<ชื่อ>.png|.jpg (git-ignore) ให้ Claude เปิดดูด้วย Read
 #   GET/POST /api/bugs              → โน้ตปัญหา (bugs.html): bugs/bugs.json + เขียน bugs/BUGS.md ให้ Claude อ่าน + ลบรูปที่ไม่ใช้แล้ว
@@ -36,7 +36,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 FXD = os.path.join(ROOT, 'assets', 'fx')
 SAVE_OK = [re.compile(r'^assets/fx/[a-z0-9_\-/]+\.fx\.json$'), re.compile(r'^assets/fx/bind\.json$'), re.compile(r'^assets/vfx/[a-z0-9_\-]+\.(glb|png)$'),
            re.compile(r'^assets/fx/mesh/[a-z0-9_\-]+\.mesh\.json$'), re.compile(r'^assets/fx/tex/[a-z0-9_\-]+\.(tex\.json|png)$'),
-           re.compile(r'^assets/fx/vol/[a-z0-9_\-]+\.(vol\.json|bin)$'), re.compile(r'^assets/tune\.json$')]
+           re.compile(r'^assets/fx/vol/[a-z0-9_\-]+\.(vol\.json|bin)$'), re.compile(r'^assets/tune\.json$'), re.compile(r'^assets/hud/layout\.json$')]   # HUD Editor (hudedit.html)
 
 def asset_list(sub, ext):
     out = {}
@@ -732,6 +732,7 @@ class H(SimpleHTTPRequestHandler):
             os.makedirs(os.path.dirname(p), exist_ok=True)
             with open(p, 'wb') as f: f.write(data)
             chk = ''
+            if rel.startswith('assets/hud/'): return self._json(200, {'ok': True, 'path': rel, 'check': ''})   # HUD layout: not an fx file, skip fx-check
             try:
                 r = subprocess.run(['node', os.path.join(ROOT, 'tools', 'fx-check.js'), '--quiet'], cwd=ROOT, capture_output=True, text=True, encoding='utf-8', timeout=30)
                 chk = (r.stdout + r.stderr).strip()

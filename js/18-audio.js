@@ -3,7 +3,7 @@
 // =====================================================================
 let AC=null,MASTER=null,SFXBUS=null,REVERB=null,NB=null,WIND=null;
 // เกมที่ฝังใน Tool (?studio / ?tunetool): ปิดเสียงเป็นค่าเริ่มต้น เปิดได้ด้วยปุ่มเสียงของ Tool (hub/tool-sound.js, คีย์ fs_tool_sound) • กฎ: guides/TOOL-UI-RULES.md
-const TOOL_CTX=/[?&](studio|tunetool)(&|=|$)/.test(location.search);
+const TOOL_CTX=/[?&](studio|tunetool|hudedit)(&|=|$)/.test(location.search);
 function toolSoundOn(){try{return localStorage.getItem('fs_tool_sound')==='1';}catch(e){return false;}}
 function masterGain(){return TOOL_CTX&&!toolSoundOn()?0:SET.master/100;}
 function toolSoundApply(){if(AC&&MASTER)MASTER.gain.setTargetAtTime(masterGain(),AC.currentTime,0.05);}

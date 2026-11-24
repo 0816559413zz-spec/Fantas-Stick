@@ -51,8 +51,9 @@
 /* ดิน: ฝุ่นหินหนา ๆ หมุนช้า */
 .h4Au.rock .fl{background:repeating-conic-gradient(from 0deg,var(--c1) 0 14deg,var(--c0) 20deg,var(--c2) 26deg,transparent 34deg 45deg);filter:blur(3px);animation:h4Spin 11s linear infinite}
 .h4Au.rock .fl.b{background:repeating-conic-gradient(from 8deg,var(--c2) 0 5deg,transparent 9deg 40deg);filter:blur(1px);animation:h4Spin 7s linear infinite reverse}
-.h4L{left:0;transform-origin:0 100%;transform:scale(var(--hs))}
-.h4R{right:0;width:600px;height:300px;transform-origin:100% 100%;transform:scale(var(--hs))}
+.h4L{left:0;transform-origin:0 100%;transform:scale(calc(var(--hs)*var(--Ls,1)));translate:calc(var(--Lx,0)*var(--hs)*1px) calc(var(--Ly,0)*var(--hs)*1px);opacity:var(--Lo,1)}   /* --L*/--R*/--U* = HUD Editor layout (js/66-hudlay) */
+#h4.hlL .h4L,#h4.hlR .h4R,#h4.hlU .h4UX{display:none}
+.h4R{right:0;width:600px;height:300px;transform-origin:100% 100%;transform:scale(calc(var(--hs)*var(--Rs,1)));translate:calc(var(--Rx,0)*var(--hs)*1px) calc(var(--Ry,0)*var(--hs)*1px);opacity:var(--Ro,1)}
 .h4Sh{position:absolute;bottom:0;width:640px;height:340px}
 .h4L .h4Sh{left:0;background:radial-gradient(ellipse at 0% 100%,rgba(6,9,20,.55),transparent 65%)}
 .h4R .h4Sh{right:0;height:300px;background:radial-gradient(ellipse at 100% 100%,rgba(6,9,20,.55),transparent 65%)}
@@ -264,7 +265,7 @@
 @keyframes h4Bob{from{translate:0 -4px;rotate:-12deg}to{translate:0 4px;rotate:14deg}}
 
 /* ---------- ไพ่อัลติกลางจอ (ผู้ใช้ 2026-11-01): ธาตุเติมจากล่างตาม --p • เต็ม = พลิก (โลโก้ + ออร่าธาตุ) • แถบเกจใต้ไพ่ ---------- */
-.h4UX{position:absolute;left:50%;bottom:calc(30px*var(--hs));width:126px;height:176px;margin-left:-63px;transform-origin:50% 100%;transform:scale(var(--hs));perspective:800px;pointer-events:auto}
+.h4UX{position:absolute;left:50%;bottom:calc(30px*var(--hs));width:126px;height:176px;margin-left:-63px;transform-origin:50% 100%;transform:scale(calc(var(--hs)*var(--Us,1)));translate:calc(var(--Ux,0)*var(--hs)*1px) calc(var(--Uy,0)*var(--hs)*1px);opacity:var(--Uo,1);perspective:800px;pointer-events:auto}
 .h4UX .flip{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .85s cubic-bezier(.3,1.35,.5,1)}
 .h4UX.full .flip{transform:rotateY(180deg)}
 .h4UX .face{position:absolute;inset:0;border-radius:12px;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-sizing:border-box}
@@ -289,7 +290,7 @@
 .h4UX .gb b::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.7) 50%,transparent 70%);background-size:200% 100%;animation:h4UXsh 1.6s linear infinite}
 .h4UX .gb .tk{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 calc(10% - 1px),rgba(0,0,0,.6) calc(10% - 1px) 10%)}
 .h4UX.full .gb b{background:linear-gradient(90deg,var(--c1),#fff,var(--c1));animation:h4UXrd .6s ease-in-out infinite alternate}
-.h4UX.dim{opacity:.6}
+.h4UX.dim{opacity:calc(.6*var(--Uo,1))}
 .h4UX.used .flip{animation:h4UXuse .7s ease-out}
 .h4UX .h4UXuse{position:absolute;inset:0;pointer-events:none}
 .h4UX .h4UXuse .bits{position:absolute;left:50%;top:40%;width:0;height:0}
