@@ -23,6 +23,7 @@
 #   GET/POST /api/mb?id=<id>        → อ่าน/บันทึกไฟล์ต้นฉบับ maps/build/<id>.json (รูปแบบ: guides/MAP-BUILDER.md)
 #   POST /api/mb-export?id=<id>     → ส่งเข้าเกม: {data, glb(base64)} → assets/maps/<id>.json + .glb + เพิ่ม/ขยับเลข v ใน assets/manifest.json
 #   GET  /api/mb-ver?id=<id>       → เลข v ของแผนที่: ในเครื่อง (manifest) / commit ล่าสุด / บน GitHub (origin/main, fetch ทุก 1 นาที)
+#   POST /api/mb-publish?id=<id>    → commit + push เฉพาะไฟล์ของแผนที่นี้ (ต้นฉบับ + ห้อง prefab + assets/maps/<id>.* + รายการใน manifest) บน origin/main ด้วย index ชั่วคราว (&dry=1 = ไม่ push)
 #   POST /api/mb-unexport?id=<id>   → ถอดแผนที่ออกจากเกม (ลบไฟล์ใน assets/maps + รายการใน manifest) เฉพาะแผนที่ที่มีต้นฉบับใน maps/build/
 #   POST /api/mb-del?id=<id>        → ถอดออกจากเกม + ย้ายต้นฉบับไป maps/build/_deleted/
 #   POST /api/mb-asset?name=<ชื่อ>&label=&cat= → เพิ่ม Asset เอง: เก็บ .glb ลง assets/mapkit/ + ลงทะเบียนใน assets/mapkit/kit.json (user)
@@ -545,6 +546,63 @@ def mb_ver(mid):  # map version: on this machine (manifest file) / last commit (
     r = git('show', 'origin/main:assets/manifest.json'); remote = v_of(r.stdout) if r.returncode == 0 else None
     return {'ok': True, 'local': local, 'head': head, 'remote': remote, 'fetched': _mbv['t'], 'err': err}
 
+MB_PUB_LOCK = __import__('threading').Lock()
+def mb_publish(mid, dry=False):
+    """Export → GitHub: one commit holding only this map (source + room prefabs it uses + assets/maps/<id>.* + its manifest entry),
+    built on origin/main with a temporary index (other local changes are never included), then pushed. dry = build, don't push."""
+    with MB_PUB_LOCK:
+        f = git('fetch', '--quiet', 'origin', 'main')
+        if f.returncode != 0:
+            return {'ok': False, 'err': 'ต่อ GitHub ไม่ได้: ' + (f.stderr or '').strip()[-200:]}
+        _mbv['t'] = time.time()
+        if git('merge-base', '--is-ancestor', 'HEAD', 'origin/main').returncode != 0:
+            n = git('rev-list', '--count', 'origin/main..HEAD').stdout.strip()
+            return {'ok': False, 'err': 'ในเครื่องมี %s commit ที่ยังไม่ได้ push (ให้ Claude จัดการก่อน)' % n}
+        base = git('rev-parse', 'origin/main').stdout.strip(); head = git('rev-parse', 'HEAD').stdout.strip()
+        src = os.path.join(MBD, mid + '.json')
+        try: m = json.load(open(src, encoding='utf-8')); man = json.load(open(MANP, encoding='utf-8'))
+        except Exception as e: return {'ok': False, 'err': str(e)}
+        ent = (man.get('maps') or {}).get(mid)
+        if not ent: return {'ok': False, 'err': 'ยังไม่ได้ Export แผนที่นี้'}
+        paths = ['maps/build/%s.json' % mid, 'assets/maps/%s.json' % mid, 'assets/maps/%s.glb' % mid]
+        for r in sorted({x.get('ref') for x in m.get('rooms') or [] if x.get('ref')}):
+            if re.fullmatch(r'[a-z0-9_\-]+', r) and os.path.exists(os.path.join(MBD, r + '.json')): paths.append('maps/build/%s.json' % r)
+        r = git('show', base + ':assets/manifest.json')
+        try: bm = json.loads(r.stdout) if r.returncode == 0 else {'v': 1}
+        except Exception: return {'ok': False, 'err': 'manifest บน GitHub อ่านไม่ได้'}
+        bm.setdefault('maps', {})[mid] = ent
+        tmp = os.path.join(ROOT, '.git', 'mb-publish.index'); env = dict(os.environ, GIT_INDEX_FILE=tmp)
+        def gi(*a, inp=None):
+            return subprocess.run(['git', *a], cwd=ROOT, env=env, input=inp, capture_output=True)
+        try:
+            if gi('read-tree', base).returncode != 0: return {'ok': False, 'err': 'read-tree ไม่ได้'}
+            a = gi('add', '-f', '--', *paths)
+            if a.returncode != 0: return {'ok': False, 'err': 'add ไม่ได้: ' + a.stderr.decode('utf-8', 'replace')[-200:]}
+            blob = gi('hash-object', '-w', '--stdin', inp=(json.dumps(bm, ensure_ascii=False, indent=1) + '\n').encode('utf-8')).stdout.decode().strip()
+            gi('update-index', '--add', '--cacheinfo', '100644,%s,assets/manifest.json' % blob)
+            tree = gi('write-tree').stdout.decode().strip()
+            if tree == git('rev-parse', base + '^{tree}').stdout.strip():
+                return {'ok': True, 'same': True, 'v': ent.get('v')}
+            msg = 'Map %s: publish v%s from Map Builder' % (mid, ent.get('v'))
+            c = gi('commit-tree', tree, '-p', base, '-m', msg)
+            if c.returncode != 0: return {'ok': False, 'err': 'commit ไม่ได้: ' + c.stderr.decode('utf-8', 'replace')[-200:]}
+            sha = c.stdout.decode().strip()
+        finally:
+            if os.path.exists(tmp): os.remove(tmp)
+        files = [p for p in paths] + ['assets/manifest.json']
+        if dry:
+            return {'ok': True, 'dry': True, 'sha': sha, 'files': files, 'v': ent.get('v')}
+        p = git('push', 'origin', sha + ':refs/heads/main')
+        if p.returncode != 0:
+            return {'ok': False, 'err': 'push ไม่ได้ (มีคน push พร้อมกัน? กดอีกครั้ง): ' + p.stderr.strip()[-200:]}
+        git('fetch', '--quiet', 'origin', 'main')
+        local = 'updated'
+        if head == base:   # nothing else to bring in: move HEAD, keep the working tree, sync the index for our files
+            git('update-ref', 'HEAD', sha, head); git('reset', '-q', sha, '--', *files)
+        elif git('merge', '--ff-only', '--quiet', sha).returncode != 0:
+            local = 'behind'   # local edits block the fast-forward; the push already landed
+        return {'ok': True, 'sha': sha[:7], 'files': files, 'v': ent.get('v'), 'local': local}
+
 def mb_manifest(fn):  # แก้ส่วน "maps" ของ assets/manifest.json (คงรูปแบบย่อหน้า 1 ช่องเดิม)
     man = json.load(open(MANP, encoding='utf-8'))
     r = fn(man.setdefault('maps', {}))
@@ -587,6 +645,8 @@ def mb_post(self, u, q):
         return self._json(200, {'ok': True, 'id': mid})
     if not os.path.exists(src):  # กันเขียนทับ/ลบแผนที่ที่ปั้นจาก Blender
         return self._json(400, {'ok': False, 'err': 'ไม่มีต้นฉบับ maps/build/%s.json (บันทึกก่อน)' % mid})
+    if u.path == '/api/mb-publish':
+        return self._json(200, mb_publish(mid, dry=q.get('dry', ['0'])[0] == '1'))
     if u.path == '/api/mb-export':
         try:
             b = json.loads(self._body().decode('utf-8')); d = b['data']; glb = base64.b64decode(b['glb'])
@@ -908,7 +968,7 @@ class H(SimpleHTTPRequestHandler):
             return self._json(200, {'ok': True, 'id': mid})
         if u.path in ('/api/sketch', '/api/sketch-del', '/api/sketch-img'):
             return sk_post(self, u, q)
-        if u.path in ('/api/mb', '/api/mb-export','/api/mb-unexport', '/api/mb-del', '/api/mb-asset'):
+        if u.path in ('/api/mb', '/api/mb-export', '/api/mb-publish','/api/mb-unexport', '/api/mb-del', '/api/mb-asset'):
             return mb_post(self, u, q)
         if u.path == '/api/map-del':
             mid = q_id(u)

@@ -8,6 +8,8 @@
 
 ## Latest notes (newest first)
 
+**Map Builder ⬆ Export now publishes (2026-11-24, `POST /api/mb-publish` in tools/serve.py):** Export = export + one commit with only this map (`maps/build/<id>.json`, room prefabs it uses, `assets/maps/<id>.json/.glb`, its single `assets/manifest.json` entry), built on `origin/main` with a temporary index and pushed (= GitHub Pages deploy). Other local changes are never included. Refuses if this PC has unpushed commits. If local edits block the fast-forward the push still lands and this PC stays behind (pull later). ▶ Play / Game View only export. `&dry=1` builds without pushing. Tested with dry runs only.
+
 **Backdrop trees fix (2026-11-24, `mapbuild/backdrop.js` `bdTreePts` + `js/67-coast.js` `trees()`):** painted backdrop trees past the cap (game 4,500 / low 1,200) were taken in row order, so on big forests (Cliff Side Castle ≈ 74k painted) only the first rows showed and new painting elsewhere never appeared. Now thinned evenly everywhere (keep factor = cap / expected). Editor uses the game's tries-per-cell and cap 4,500; Trees brush shows painted count vs the cap.
 
 **First-run flow (2026-11-24, user):** title logo reads FTS (was FTA). Character creator = looks + wand only (2 steps, confirm on step 2; `js/39-menu.js`); the element/spell and house steps are gone from it. A new player's spell picker (`skwOpen`) opens by itself the first time they enter a game room (no `wd_kit2` yet; `js/62-hub-ui.js` `HUI.kitAsked`). House (`myLook.h`) still exists internally (scarf colors, crests). Planned next: element select screen before each match (mockups in claude.ai artifact, not in the game yet); element is picked once per match, no swap at spawn.

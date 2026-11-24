@@ -1549,6 +1549,13 @@ async function exportGame() {
   catch (e) { console.error(e); stat('Couldn’t export: ' + e.message, 'err'); return false; }
 }
 
+async function exportPublish() {   // ⬆ Export = export + commit/push only this map's files to GitHub (Play / Game View only export)
+  if (!await exportGame()) return; const st = $('stat').textContent; stat(st + ' • Pushing…');
+  try { const r = await (await fetch('/api/mb-publish?id=' + M.id, { method: 'POST' })).json(); if (!r.ok) throw new Error(r.err);
+    stat(r.same ? st + ' • GitHub already has v' + r.v : st + ' • Pushed v' + r.v + ' (' + r.sha + ')' + (r.local === 'behind' ? ' • this PC not pulled yet' : ''), 'ok'); }
+  catch (e) { stat(st + ' • Not pushed: ' + e.message, 'err'); }
+  refreshVer();
+}
 // ================= game view (real game in an iframe at the editor camera; game side: js/77-dev.js devMbCam) =================
 async function gameView() {
   if (!M || !M.id) { stat('No map id yet', 'err'); return; }
@@ -1594,7 +1601,7 @@ async function shotPNG() {
 }
 
 // ================= boot =================
-$('bNew').onclick = newDlg; $('bSave').onclick = save; $('bUndo').onclick = doUndo; $('bRedo').onclick = doRedo; $('bExport').onclick = exportGame; $('ver').onclick = refreshVer; setInterval(refreshVer, 120000);
+$('bNew').onclick = newDlg; $('bSave').onclick = save; $('bUndo').onclick = doUndo; $('bRedo').onclick = doRedo; $('bExport').onclick = exportPublish; $('ver').onclick = refreshVer; setInterval(refreshVer, 120000);
 $('bPlay').onclick = async () => { const w = window.open('about:blank', 'mb_play'); if (await exportGame()) w.location = 'index.html?nosw&playmap=' + M.id + (M.modes.length === 1 && M.modes[0] === 'siege' ? '&pm=siege' : '') + '&t=' + Date.now(); else w.close(); };
 $('mapSel').onchange = e => openMap(e.target.value);
 for (const b of document.querySelectorAll('#gbar [data-g]')) b.onclick = () => setGizmo(b.dataset.g);
