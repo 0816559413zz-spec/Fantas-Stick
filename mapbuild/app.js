@@ -282,6 +282,14 @@ function markerMesh(o) {
   if (o.t === 'sgA' || o.t === 'sgB') { add(new THREE.CylinderGeometry(4, 4, 0.1, 28), helpMat(c, 0.35), 0, 0.06, 0); add(new THREE.CylinderGeometry(0.08, 0.08, 2.6, 6), helpMat(c), 0, 1.3, 0); const l = labelSprite((o.t === 'sgA' ? 'Atk ' : 'Def ') + (o.ph || 1), c); l.position.y = 3.2; g.add(l); return g; }
   if (o.t === 'phase') { areaMesh(o, g, c, 0.15); const l = labelSprite('Phase ' + (o.ph || 1), c); l.position.y = 2.6; g.add(l); return g; }
   if (o.t === 'ceil') { areaMesh(o, g, c, 0); return g; }
+  if (o.t === 'sgHold' || o.t === 'sgLoot') { const tc = o.t === 'sgHold' ? (o.tm === 'B' ? '#5aa8ff' : '#ff6a5a') : c; areaMesh(o, g, tc, 0.2); const l = labelSprite(o.t === 'sgHold' ? (o.tm === 'B' ? 'Def' : 'Atk') + ' retreat ' + (o.ph || 1) : 'Loot ' + (o.ph || 1), tc); l.position.y = 2.8; g.add(l); return g; }
+  if (o.t === 'sgItem') { add(new THREE.CylinderGeometry(1.2, 1.2, 0.1, 20), helpMat(c, 0.5), 0, 0.06, 0); add(new THREE.BoxGeometry(0.8, 0.8, 0.8), mat(c, { emit: 1 }), 0, 1.2, 0).rotation.set(0.6, 0.6, 0); const l = labelSprite('Item ' + (o.ph || 1) + ' T' + (o.tier || 1), c); l.position.y = 2.6; g.add(l); return g; }
+  if (o.t === 'brz') { const tc = o.tm === 'A' ? '#ff8a7a' : o.tm === 'B' ? '#7ab8ff' : c, top = o.top == null ? 60 : o.top; areaMesh(o, g, tc, 0.1);   // floor rect + wire box up to Top
+    const bx = new THREE.BoxGeometry(o.sx || 1, top, o.sz || 1), e = noPick(new THREE.LineSegments(new THREE.EdgesGeometry(bx), new THREE.LineBasicMaterial({ color: tc, transparent: true, opacity: 0.45 }))); e.position.y = top / 2; e.userData.area = 1; g.add(e);
+    const l = labelSprite('Broom ' + (o.tm === 'A' ? 'Atk' : o.tm === 'B' ? 'Def' : 'all'), tc); l.position.y = 3; g.add(l); return g; }
+  if (o.t === 'wind') { areaMesh(o, g, c, 0.3); const a = (o.dir || 0) * Math.PI / 180, L = Math.max(3, Math.min(o.sx || 1, o.sz || 1) * 0.4), ar = new THREE.Group();   // arrow = push direction
+    const sh = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.2, L), helpMat(c)); sh.position.z = L / 2; ar.add(sh); const hd = new THREE.Mesh(new THREE.ConeGeometry(1.2, 2.4, 12), helpMat(c)); hd.rotation.x = Math.PI / 2; hd.position.z = L + 1.2; ar.add(hd);
+    ar.traverse(m => m.isMesh && noPick(m)); ar.position.y = 1.5; ar.rotation.y = a; g.add(ar); const l = labelSprite('Wind ' + (o.str == null ? 8 : o.str), c); l.position.y = 3.4; g.add(l); return g; }
   if (o.t === 'lz') { areaMesh(o, g, c, 0); const l = labelSprite('Indoor light', c); l.position.y = 1.4; g.add(l); return g; }   // drawn at its Top height
   if (D.rp) { const R = MD.RPK[D.rp], L = R.L ? Math.max(0.3, o.L || 4) : R.w, w = R.L ? R.w : R.w; const lk = rpLook(o, D.rp); if (lk) { g.add(lk); return g; }
     const b = add(new THREE.BoxGeometry(L, R.h, w), mat(R.col ? c : '#b89a76'), 0, R.h / 2, 0); b.castShadow = true; return g; }
@@ -327,7 +335,7 @@ function objMesh(o) {
   else if (OBJ[o.t]) { g = markerMesh(o); if (o.t === 'house') g.scale.set(o.sx || 1, 1, o.sz || 1); }
   else { g = new THREE.Group(); g.add(new THREE.Mesh(pg('box'), helpMat('#f06a6a', 0.6))); }
   const lift = o.t === 'ring' ? Math.max(1, o.y || 6) : o.t === 'light' ? (o.y == null ? 2.2 : o.y) : o.t === 'ceil' ? (o.y == null ? 21 : o.y) : o.t === 'lz' ? (o.y == null ? 22 : o.y) : (o.y || 0);
-  g.position.set(o.x, MD.gh(M, o.x, o.z) + lift, o.z); g.rotation.y = o.t === 'phase' || o.t === 'ceil' || o.t === 'lz' || o.t === 'dc_box' ? 0 : o.rot || 0;   // areas + decor boxes are axis-aligned in the game
+  g.position.set(o.x, MD.gh(M, o.x, o.z) + lift, o.z); g.rotation.y = MD.AREA.has(o.t) || o.t === 'dc_box' ? 0 : o.rot || 0;   // areas + decor boxes are axis-aligned in the game
   if (tiltOk(o) && (o.rx || o.rz)) g.rotation.set(o.rx || 0, o.rot || 0, o.rz || 0, 'YXZ');   // yaw first, then tilt
   if (o.vis === 0) ghostify(g);
   if (!show.area) g.traverse(m => { if (m.userData.area) m.visible = false; });
@@ -670,6 +678,11 @@ function protoObj(x, z) {
   else if (t === 'core') Object.assign(o, { n: M.objs.filter(q => q.t === 'core').length + 1, s: 4 });
   else if (t === 'sgA' || t === 'sgB') o.ph = 1;
   else if (t === 'phase') Object.assign(o, { ph: 1, sx: 40, sz: 40, rot: 0 });
+  else if (t === 'sgHold') Object.assign(o, { ph: 1, tm: 'A', sx: 20, sz: 14, rot: 0 });
+  else if (t === 'sgLoot') Object.assign(o, { ph: 1, sx: 30, sz: 30, rot: 0 });
+  else if (t === 'sgItem') Object.assign(o, { ph: 1, tier: 1 });
+  else if (t === 'brz') Object.assign(o, { sx: 60, sz: 60, top: 60, tm: '', rot: 0 });
+  else if (t === 'wind') Object.assign(o, { sx: 20, sz: 20, dir: 0, str: 8, rot: 0 });
   else if (t === 'ceil') Object.assign(o, { sx: 20, sz: 20, y: 21, rot: 0 });
   else if (t === 'lz') Object.assign(o, { sx: 30, sz: 20, y: 22, k: 1, rot: 0 });
   else if (MD.isRP(t) && MD.RPK[t.slice(3)].L) o.L = 4;
@@ -892,12 +905,12 @@ const isVisualType = t => t.startsWith('kit:') || (OBJ[t] && OBJ[t].cat === 'pri
 let gmode = 'translate', gz = null;   // 'hand' | 'translate' | 'rotate' | 'scale'
 const yawOf = q => 2 * Math.atan2(q.y, q.w), r2 = v => +v.toFixed(2), r3 = v => +v.toFixed(3);
 const sns = v => { const st = opt.snap ? opt.snap / 2 : 0; return st ? Math.max(st, +(Math.round(v / st) * st).toFixed(3)) : r2(v); };   // gizmo sizes snap to half the grid step
-const flatRot = it => it.t === 'phase' || it.t === 'ceil' || it.t === 'lz' || it.t === 'dc_box';   // axis-aligned in the game
+const flatRot = it => MD.AREA.has(it.t) || it.t === 'dc_box';   // axis-aligned in the game
 const isDeco = it => OBJ[it.t] && OBJ[it.t].cat === 'deco';
 function gScaleKind(k, it) {   // how [3] size maps onto this item: 'u' uniform s, 'p' panel L/sy/T, 'L' length, 'xyz' / 'xz' sizes, 'f' floor, 'w' wall, 'fp' free shape, 'cp' castle part, null = none
   if (k === 'room') return null; if (k === 'wall') return 'w'; if (k === 'floor') return 'f'; if (k === 'part') return it.pts ? 'fp' : 'cp';
   if (isKit(it) || it.t === 'core') return 'u'; if (it.t === 'pn_wall') return 'p'; if (MD.isRP(it.t) && it.L) return 'L';
-  if (isPrim(it) || isDeco(it)) return 'xyz'; if (it.t === 'house' || it.t === 'phase' || it.t === 'ceil' || it.t === 'lz') return 'xz'; return null;
+  if (isPrim(it) || isDeco(it)) return 'xyz'; if (it.t === 'house' || MD.AREA.has(it.t)) return 'xz'; return null;
 }
 function placeGizmo() {
   if (gz) return; const it = tool === 'select' && gmode !== 'hand' && sel && sel.pt == null ? find(sel) : null;
@@ -1092,10 +1105,10 @@ function dupSel() {   // copies stay exactly where the originals are (move them 
   for (const q of selAll()) { const it = find(q); if (!it) continue; const c = JSON.parse(JSON.stringify(it)); c.id = nid(); M[KEYS[q.k]].push(c); out.push({ k: q.k, id: c.id }); }
   sel = out[0] || null; msel = out.slice(1); syncAll(); renderSide(); changed(); }
 function rotSel(a) { if (!find(sel)) return; if (sel.k === 'room') { editSel(it => { it.rot = +((((it.rot || 0) + Math.sign(a) * Math.PI / 2) % 6.2832 + 6.2832) % 6.2832).toFixed(4); }); return; } editSel(it => { if (it.pts && sel.k === 'wall') { const cx = it.pts.reduce((s, p) => s + p[0], 0) / it.pts.length, cz = it.pts.reduce((s, p) => s + p[1], 0) / it.pts.length, c = Math.cos(a), s = Math.sin(a); it.pts = it.pts.map(p => { const x = p[0] - cx, z = p[1] - cz; return [+(cx + x * c + z * s).toFixed(2), +(cz - x * s + z * c).toFixed(2)]; }); } else it.rot = +(((it.rot || 0) + a) % 6.2832).toFixed(4); }); }
-function scaleSel(k) { if (!find(sel)) return; editSel(it => { if (sel.k === 'obj') { if (isKit(it)) it.s = +((it.s || 1) * k).toFixed(2); else if (isPrim(it) || it.t === 'house' || it.t === 'phase' || it.t === 'ceil' || it.t === 'lz') { it.sx = +((it.sx || 1) * k).toFixed(2); it.sz = +((it.sz || 1) * k).toFixed(2); if (isPrim(it)) it.sy = +((it.sy || 1) * k).toFixed(2); } else if (it.t === 'core') it.s = +((it.s || 4) * k).toFixed(2); else if ((MD.isRP(it.t) || it.t === 'pn_wall') && it.L) it.L = +(it.L * k).toFixed(2); } else if (sel.k === 'part' && it.pts) { it.pts = it.pts.map(q => [+(q[0] * k).toFixed(3), +(q[1] * k).toFixed(3)]); it.h = +clamp(it.h * k, 0.5, 40).toFixed(2); } else if (sel.k === 'part') { const D = MD.PART[it.k], q = D.main, mn = D.p[q][1], mx = D.p[q][2]; it[q] = +clamp(it[q] * k, mn, mx).toFixed(2); } else if (sel.k === 'floor') { it.w = +(it.w * k).toFixed(2); it.d = +(it.d * k).toFixed(2); } else it.h = +(it.h * k).toFixed(2); }); }
+function scaleSel(k) { if (!find(sel)) return; editSel(it => { if (sel.k === 'obj') { if (isKit(it)) it.s = +((it.s || 1) * k).toFixed(2); else if (isPrim(it) || it.t === 'house' || MD.AREA.has(it.t)) { it.sx = +((it.sx || 1) * k).toFixed(2); it.sz = +((it.sz || 1) * k).toFixed(2); if (isPrim(it)) it.sy = +((it.sy || 1) * k).toFixed(2); } else if (it.t === 'core') it.s = +((it.s || 4) * k).toFixed(2); else if ((MD.isRP(it.t) || it.t === 'pn_wall') && it.L) it.L = +(it.L * k).toFixed(2); } else if (sel.k === 'part' && it.pts) { it.pts = it.pts.map(q => [+(q[0] * k).toFixed(3), +(q[1] * k).toFixed(3)]); it.h = +clamp(it.h * k, 0.5, 40).toFixed(2); } else if (sel.k === 'part') { const D = MD.PART[it.k], q = D.main, mn = D.p[q][1], mx = D.p[q][2]; it[q] = +clamp(it[q] * k, mn, mx).toFixed(2); } else if (sel.k === 'floor') { it.w = +(it.w * k).toFixed(2); it.d = +(it.d * k).toFixed(2); } else it.h = +(it.h * k).toFixed(2); }); }
 function snapGround() {   // End: move the selection so its lowest point meets the LOWEST ground under its footprint (sinks into slopes, no gap below)
   const it = find(sel), b = selBox && selBox.box; if (!it || !b || b.isEmpty() || sel.k === 'floor' || sel.k === 'room') return;
-  if (sel.k === 'obj' && (it.t === 'ring' || it.t === 'light' || it.t === 'ceil' || it.t === 'lz' || it.t === 'phase')) return;
+  if (sel.k === 'obj' && (it.t === 'ring' || it.t === 'light' || MD.AREA.has(it.t))) return;
   const d = sel.k === 'obj' ? (it.t === 'pn_wall' ? { ex: (it.L || 4) / 2, ez: (it.T || 0.3) / 2 } : dim(it)) : null, pts = [];
   if (d && !it.rx && !it.rz && !it.tl) { const c = Math.cos(it.rot || 0), sn = Math.sin(it.rot || 0);   // true (rotated) footprint
     for (let i = 0; i <= 6; i++) for (let j = 0; j <= 6; j++) { const lx = (i / 3 - 1) * d.ex, lz = (j / 3 - 1) * d.ez; pts.push([it.x + lx * c + lz * sn, it.z - lx * sn + lz * c]); } }
@@ -1317,7 +1330,13 @@ function renderSide() {
         ...(MD.isDeco(it.t) ? decoFields(it) : []), ...(it.t === 'pn_wall' ? pnFields(it) : []),
         it.t === 'core' ? fld('Core Number (order)', it, 'n', { min: 1, step: 1 }) : null, it.t === 'core' ? fld('Core Size', it, 's', { min: 1 }) : null,
         it.t === 'sgA' || it.t === 'sgB' || it.t === 'phase' ? fld('Phase', it, 'ph', { min: 1, step: 1 }) : null,
-        it.t === 'phase' || it.t === 'ceil' || it.t === 'lz' ? fld('Width (X)', it, 'sx', { min: 1 }) : null, it.t === 'phase' || it.t === 'ceil' || it.t === 'lz' ? fld('Length (Z)', it, 'sz', { min: 1 }) : null,
+        it.t === 'sgHold' || it.t === 'sgLoot' || it.t === 'sgItem' ? fld('Break (after core N)', it, 'ph', { min: 1, step: 1 }) : null,
+        it.t === 'sgHold' ? fld('Team', it, 'tm', { type: 'select', items: [['A', 'Attackers'], ['B', 'Defenders']], get: () => it.tm === 'B' ? 'B' : 'A' }) : null,
+        it.t === 'sgItem' ? fld('Tier (1-3)', it, 'tier', { min: 1, max: 3, step: 1 }) : null,
+        it.t === 'brz' ? fld('Who may fly', it, 'tm', { type: 'select', items: [['', 'Both teams'], ['A', 'Attackers only'], ['B', 'Defenders only']], get: () => it.tm || '' }) : null,
+        it.t === 'brz' ? fld('Top (m above ground)', it, 'top', { get: () => it.top == null ? 60 : it.top, min: 2 }) : null,
+        it.t === 'wind' ? fld('Direction (deg, 0 = +Z)', it, 'dir', { get: () => it.dir || 0, step: 15 }) : null, it.t === 'wind' ? fld('Strength', it, 'str', { get: () => it.str == null ? 8 : it.str, min: 0 }) : null,
+        MD.AREA.has(it.t) ? fld('Width (X)', it, 'sx', { min: 1 }) : null, MD.AREA.has(it.t) ? fld('Length (Z)', it, 'sz', { min: 1 }) : null,
         it.t === 'lz' ? fld('Indoor strength (0-1)', it, 'k', { get: () => it.k == null ? 1 : it.k, min: 0, max: 1, step: 0.05 }) : null,
         it.t === 'ceil' ? fld('Only for players lower than (m)', it, 'zmax', { nullable: 1, ph: 'everyone', min: 0 }) : null,
         MD.isRP(it.t) && MD.RPK[it.t.slice(3)].L ? fld('Length', it, 'L', { min: 0.3 }) : null,

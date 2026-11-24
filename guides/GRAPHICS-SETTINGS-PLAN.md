@@ -108,5 +108,10 @@ cut), smoke ×1 (`SMOKE_K` 1, was cut to 0.4 on 2026-11-18), ground marks / debr
   249,744 blades vs 68,800 on High (cap `MAXN`/`CAP` raised to 320k). Cost seen: +0.1–0.4 ms GPU (headless NVIDIA, 1080p).
   Shots `shots/grasscmp.jpg`. Cinematic preset uses it.
 
+- Distance options (user 2026-11-24): **ระยะเงา** `shdist` (ใกล้/ปกติ/ไกล/ไกลมาก = shadow area × `SHD.distK` 0.75/1/1.4/1.9,
+  same shadow map so farther = softer) and **ระยะหญ้า** `grdist` (patch × `GRASS.distK` 0.8/1/1.3/1.6, same density so
+  blades × size²; cap raised to 640k). High = ปกติ (old look), Ultra/Cinematic = ไกล. Cinematic + ไกลมาก = 639k blades.
+  Old saves get the saved preset's value. Shots `shots/distcmp.jpg`. Uniforms/counts only: no shader change.
+
 Not done yet: gate configs per preset (Low / Cinematic), 6v6 bench per preset, entry preload compiles only the High variant
 (another preset compiles its shaders when chosen = the accepted short hitch).

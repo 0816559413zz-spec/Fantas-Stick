@@ -179,6 +179,8 @@ function regFileMap(id,e,d){
   if(d.ceil)MAPS[id].ceil=d.ceil.map(q=>({x0:q.x0,y0:q.y0,x1:q.x1,y1:q.y1,h:q.h,zmax:q.zmax==null?Infinity:q.zmax}));   // room ceilings (fcsCeilAt)
   if(d.pnl)MAPS[id].pnl=d.pnl;   // breakable panels (js/12-pnl)
   roomsFromFile(MAPS[id],d,id);   // breakable room props + stone wall faces (js/02-fcs-rooms.js) — MAP-STANDARD round 3
+  if(d.broom)MAPS[id].broomZ=d.broom.map(q=>({x0:q.x0,y0:q.y0,x1:q.x1,y1:q.y1,top:q.top==null?60:q.top,tm:q.tm||''}));   // broom zones (top = m above ground) — stored, broom rules not wired yet
+  if(d.wind)MAPS[id].wind=d.wind.map(q=>({x0:q.x0,y0:q.y0,x1:q.x1,y1:q.y1,dx:q.dx||0,dy:q.dy||0,s:q.s==null?8:q.s}));   // wind push zones — stored, push not wired yet
   if(d.siege)sgFromFile(MAPS[id],d,id);   // Map Builder siege map (js/02-fcs.js) — MAP-STANDARD round 2
   const ri=RANDOM_MAPS.indexOf(id);
   if(d.random===0){if(ri>=0)RANDOM_MAPS.splice(ri,1);}else if(ri<0&&!MAP_OFF.has(id))RANDOM_MAPS.push(id);
