@@ -31,8 +31,9 @@ LOOK.P.sand=Object.assign({},LOOK.P.dusk,{tone:1,exp:0.95,con:1.24,hemi:0.18,spl
 // meadow = sunset grass: less flat fill + a bit more contrast/split tone
 LOOK.P.meadow=Object.assign({},LOOK.P.dusk,{hemi:0.18,con:1.16,split:0.15});
 // clear = clear blue midday (file maps sky:'day', user ref 2026-11-24 anime key art): bright, saturated greens, blue-tinted shade, light haze
-LOOK.P.clear=Object.assign({},LOOK.P.dusk,{sky:'clear',warm:true,env:0.45,tr:0.9,tg:1.0,tb:1.12,hemi:0.42,amb:0.08,exp:0.92,con:1.1,split:0.08,sat:1.22,tone:0,rays:0.2,haze:0.3,hazeK:1.2,hazeH:0.05,
-  dust:0.25,dustS:0.6,dustK:0.8,mist:0.15,mistA:0.05,mistS:1,mistH:2.0,mistL:0.3,mistK:1.0,flow:1,lo:[0.92,0.97,1.1],hi:[1.04,1.02,0.97]});
+// 2026-11-24 user picked the "warm" variant (Tone Lab dayvar): warmer highlights, lighter blue shade, more saturation
+LOOK.P.clear=Object.assign({},LOOK.P.dusk,{sky:'clear',warm:true,env:0.45,tr:0.9,tg:1.0,tb:1.12,hemi:0.5,amb:0.08,exp:0.97,con:1.04,split:0.08,sat:1.32,tone:0,rays:0.2,haze:0.3,hazeK:1.2,hazeH:0.05,
+  dust:0.25,dustS:0.6,dustK:0.8,mist:0.15,mistA:0.05,mistS:1,mistH:2.0,mistL:0.3,mistK:1.0,flow:1,lo:[0.9,0.98,1.12],hi:[1.08,1.04,0.9]});
 LOOK.map={lake:'snow',ruins:'sand',meadow:'meadow'};
 function lookPreset(name,from,over){LOOK.P[name]=Object.assign({},LOOK.P[from],over||{});if(typeof lookRegister==='function')lookRegister(name);return LOOK.P[name];}
 // แมพนี้ใช้พรีเซ็ตไหน (ถูกเรียกจาก js/28 ก่อน setSky) — เก็บใน globalThis เพราะ setSky รันก่อนไฟล์นี้ตอนโหลดโมดูลครั้งแรก
