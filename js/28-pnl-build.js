@@ -4,10 +4,18 @@
 // Holes/recesses are real geometry (pnlGeo: greedy-merged faces, rebuilt only when a cell changes depth) — the shader only paints (aPk = surface kind).
 // Pattern coordinates are world-continuous (along the wall + world height) so neighbouring panels line up.
 // Rubble: dusty heap strip + instanced chunks at the foot of broken cells (same heights as pnlMoundH).
-const PNV={list:[],mats:new Map()};
+const PNV={list:[],mats:new Map(),bat:[]};
+const PN_BATCH=!/[?&]nopnlbatch/.test(location.search);   // intact panels of one material = one mesh (6v6 CPU 2026-11-24: 126 draws + shadows -> ~10); ?nopnlbatch = one mesh each
 const PN_MI={brick:0,plaster:1,stone:2,wood:3,glass:4,metal:5,roof:6,snowroof:7,timber:8,litwin:9};
 const PN_GLSL=`
-uniform sampler2D uDmg;uniform vec3 uSz;uniform vec2 uOff;uniform float uRec;uniform float uTri;uniform vec3 uTp;uniform vec4 uHo[4];uniform float uNHo;
+#ifdef PNB
+varying vec4 vPO;varying float vPZ;
+#define uOff vPO.xy
+#define uSz vec3(vPO.zw,vPZ)
+#else
+uniform sampler2D uDmg;uniform vec3 uSz;uniform vec2 uOff;
+#endif
+uniform float uRec;uniform float uTri;uniform vec3 uTp;uniform vec4 uHo[4];uniform float uNHo;
 float pnH(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float pnN(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(pnH(i),pnH(i+vec2(1.,0.)),f.x),mix(pnH(i+vec2(0.,1.)),pnH(i+vec2(1.,1.)),f.x),f.y);}
 // running-bond units: x edge distance, y id hash, zw unit centre (q space)
@@ -24,7 +32,11 @@ vec4 pnU(vec2 q){
   return pnUnit(q,0.12,0.34);
 #endif
 }
+#ifdef PNB
+vec3 pnF(vec2 lp){return vec3(0.);}   // batched = intact
+#else
 vec3 pnF(vec2 lp){return texture2D(uDmg,clamp((lp+uSz.xy*0.5)/uSz.xy,0.001,0.999)).rgb;}
+#endif
 // material depth at local (x,y): 0 intact • uRec outer skin gone • 9 through
 float pnM(vec2 lp){
   if(uTri>0.5){float t=lp.x/uSz.x+0.5,f=t<uTp.y?uTp.x+(1.-uTp.x)*t/max(uTp.y,1e-4):1.+(uTp.z-1.)*(t-uTp.y)/max(1.-uTp.y,1e-4);if(lp.y+uSz.y*0.5>uSz.y*f)return 9.;}   // shaped top (triangle / slanted)
@@ -38,13 +50,13 @@ float pnM(vec2 lp){
   if(f.g+(pnN(lp*3.7+5.)-0.5)*0.6>0.5)return uRec;
   return 0.;
 }`;
-function pnlMat(mat){
+function pnlMat(mat,bat){
   const mi=PN_MI[mat]??0;
   const m=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:mi===4||mi===9?0.15:mi===5?0.55:0.92,metalness:mi===5?0.4:0,transparent:mi===4,opacity:mi===4?0.55:1});
-  m.defines={PNM:mi};
+  m.defines=bat?{PNM:mi,PNB:1}:{PNM:mi};m.userData.U={};
   m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,m.userData.U);
-    sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute float aPk;varying vec3 vLP;varying float vPk;')
-      .replace('#include <begin_vertex>','#include <begin_vertex>\nvLP=position;vPk=aPk;');
+    sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute float aPk;varying vec3 vLP;varying float vPk;'+(bat?'attribute vec3 aLP;attribute vec4 aPO;attribute float aPZ;varying vec4 vPO;varying float vPZ;':''))
+      .replace('#include <begin_vertex>','#include <begin_vertex>\n'+(bat?'vLP=aLP;vPO=aPO;vPZ=aPZ;':'vLP=position;')+'vPk=aPk;');
     sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vLP;varying float vPk;'+PN_GLSL)
       .replace('#include <map_fragment>',`#include <map_fragment>
 int pk=int(vPk+0.5);vec2 lp=vLP.xy;float dep=uSz.z*0.5-abs(vLP.z),pnGlow=0.;   // pk 0 outer surface • 1 recess floor • 2 cut face (real geometry, pnlGeo)
@@ -86,7 +98,7 @@ if(pk==0){float cr=smoothstep(0.35,0.85,fd.r+(nz-0.5)*0.45);vec2 w=q*1.4+vec2(pn
 diffuseColor.rgb=pow(max(c,vec3(0.)),vec3(2.2));`)   // palette written in sRGB → linear
       .replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\n#if PNM==9\ntotalEmissiveRadiance=vec3(1.,0.6,0.26)*1.4*pnGlow;\n#endif');
   };
-  m.customProgramCacheKey=()=>'pnl'+mi;
+  m.customProgramCacheKey=()=>'pnl'+mi+(bat?'b':'');
   return m;
 }
 const PN_RUB={roof:['#4a4e58','#3a3e48','#5a5e68'],snowroof:['#e8eef4','#4a4e58','#cfd8e0'],timber:['#d8ccb4','#5a3e28','#9a5a3c'],litwin:['#ffd89a','#cfeef8'],brick:['#8a4a32','#a85a3a','#7c7468','#6a3a28'],plaster:['#bdb5a5','#9a5a3c','#8c8478','#a8a090'],stone:['#8a857a','#6e6a62','#9a948a'],wood:['#6a4a2c','#4a3420','#7a5a38'],glass:['#cfeef8'],metal:['#6a6e72','#55585c']};
@@ -210,11 +222,43 @@ function pnlBuild(){
       e.heap=hm;e.rub=rm;}
     PNV.list.push(e);
   }
+  if(PN_BATCH)pnlBatch(grp);
+}
+// Intact panels (every cell st 0 -> damage field 0, shape from geometry only) are merged per material into one mesh in group space;
+// per-panel values the shader needs ride on vertex attributes (aLP local pos, aPO = uOff.xy + size.xy, aPZ thickness).
+// A panel leaves the batch on its first damage (its vertex range collapses to a point) and draws with its own mesh/material.
+function pnlBatch(grp){
+  PNV.bat=[];const by=new Map();
+  for(const e of PNV.list){const k=e.m.material.defines.PNM;if(!by.has(k))by.set(k,[]);by.get(k).push(e);}
+  const nm=new THREE.Matrix3();
+  for(const [mi,L] of by){if(L.length<2)continue;
+    let nv=0,ni=0;for(const e of L){nv+=e.m.geometry.attributes.position.count;ni+=e.m.geometry.index.count;}
+    const P=new Float32Array(nv*3),N=new Float32Array(nv*3),K=new Float32Array(nv),LP=new Float32Array(nv*3),PO=new Float32Array(nv*4),PZ=new Float32Array(nv),I=new Uint32Array(ni),v=new THREE.Vector3();
+    let o=0,io=0;
+    for(const e of L){const g=e.m.geometry,gp=g.attributes.position,gn=g.attributes.normal,gk=g.attributes.aPk,U=e.m.material.userData.U;
+      e.m.updateMatrix();nm.getNormalMatrix(e.m.matrix);
+      for(let i=0;i<gp.count;i++){const j=o+i;v.fromBufferAttribute(gp,i);LP[j*3]=v.x;LP[j*3+1]=v.y;LP[j*3+2]=v.z;v.applyMatrix4(e.m.matrix);P[j*3]=v.x;P[j*3+1]=v.y;P[j*3+2]=v.z;
+        v.fromBufferAttribute(gn,i).applyMatrix3(nm).normalize();N[j*3]=v.x;N[j*3+1]=v.y;N[j*3+2]=v.z;K[j]=gk.getX(i);
+        PO[j*4]=U.uOff.value.x;PO[j*4+1]=U.uOff.value.y;PO[j*4+2]=U.uSz.value.x;PO[j*4+3]=U.uSz.value.y;PZ[j]=U.uSz.value.z;}
+      const gi=g.index.array;for(let i=0;i<gi.length;i++)I[io+i]=gi[i]+o;
+      e.bat={o,n:gp.count,on:true};o+=gp.count;io+=gi.length;}
+    const g=new THREE.BufferGeometry();
+    g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('normal',new THREE.BufferAttribute(N,3));g.setAttribute('aPk',new THREE.BufferAttribute(K,1));
+    g.setAttribute('aLP',new THREE.BufferAttribute(LP,3));g.setAttribute('aPO',new THREE.BufferAttribute(PO,4));g.setAttribute('aPZ',new THREE.BufferAttribute(PZ,1));g.setIndex(new THREE.BufferAttribute(I,1));
+    g.computeBoundingSphere();g.computeBoundingBox();
+    const bm=new THREE.Mesh(g,pnlMat(L[0].p.mat,true));bm.name='pnl_batch';bm.castShadow=bm.receiveShadow=true;bm.userData.P0=P.slice();grp.add(bm);PNV.bat.push(bm);
+    for(const e of L){e.bat.m=bm;e.m.visible=false;}}
+}
+function pnlBatSet(e,on){   // put a panel back in / take it out of its batch (collapsed vertices = no triangles drawn)
+  const b=e.bat;if(!b||b.on===on)return;b.on=on;const A=b.m.geometry.attributes.position,P0=b.m.userData.P0;
+  if(on)A.array.set(P0.subarray(b.o*3,(b.o+b.n)*3),b.o*3);else A.array.fill(0,b.o*3,(b.o+b.n)*3);
+  A.addUpdateRange(b.o*3,b.n*3);A.needsUpdate=true;
 }
 function pnlSyncOne(e){
   const p=e.p,d=e.data;e.ver=p.ver;let alive=false;
   for(let k=0;k<p.st.length;k++){const s=p.st[k];d[k*4]=s>=1?255:0;d[k*4+1]=s>=2?255:0;d[k*4+2]=s>=3?255:0;d[k*4+3]=255;if(s<3)alive=true;}
   e.tex.needsUpdate=true;e.m.visible=alive;
+  if(e.bat){let intact=true;for(let k=0;k<p.st.length;k++)if(p.st[k]){intact=false;break;}pnlBatSet(e,intact);if(intact)e.m.visible=false;}
   if(alive){const cls=pnlCls(p),ck=cls.join('');if(ck!==e.ck){e.ck=ck;e.m.geometry.dispose();e.m.geometry=pnlGeo(p,cls,e.Lm,p.H,e.Tm,e.rec);}}   // depth changed → rebuild this panel only
   if(!e.heap)return;
   const ph=pnPileCols(p);e.heap.visible=!!ph;if(!ph){e.rub.count=0;return;}

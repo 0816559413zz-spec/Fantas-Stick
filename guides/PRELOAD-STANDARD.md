@@ -284,7 +284,15 @@ ablate fcs rows use `map:'fcs-file',mode:'siege'` — tdm can't load fcs-file).
 - Result: CPU **21.0 → 19.0 ms median, p95 30.4 → 27.9**, draws 849 → ~700, getParameters 2.1% → 1.2%.
 - Gate after: PASS 4/4, 0 mid-match shaders (3 slow frames in siege shift0 while other headless runs shared the GPU).
 - Left (bigger jobs): water dragon fins (38 ExtrudeGeometry per dragon, `finSkin` ShaderMaterial — needs instancing in the
-  fxTexMat shader), 126 breakable panels (own material + DataTexture each — merge into atlas/instances), matrix freezing (risky).
+  fxTexMat shader), matrix freezing (risky).
+- **Breakable panel batch (round 2, `pnlBatch` js/28-pnl-build, `?nopnlbatch` off):** intact panels of one material = one mesh
+  (shader `PNB`: per-panel offset/size ride on vertex attributes `aLP`/`aPO`/`aPZ`, damage field = 0). First damage collapses the
+  panel's vertex range in the batch and shows its own mesh (as before); a new match puts intact panels back.
+  fcs-file 6v6 siege (2 runs each): panel draws 88 → 3, CPU median 16.9/17.3 → 16.3/15.8 ms, p95 ~25 → ~23.
+  Practice map `test` 6v6 tdm: panel draws 97 → 15, all draws 1511 → 1323, CPU 17.5 → 16.1 ms. Look identical (`shots/pnlcmp.jpg`,
+  intact + hit). `WD.PNV` exposed for tests. Gate PASS 4/4 after.
+  Trap seen: a broken `assets/manifest.json` (conflict markers) silently drops fcs-file to the code map `fcs` (no panels) and
+  breaks model loads → the gate then shows ~20 mid-match shaders per config. Check `map fcs-file` in the gate line.
 
 ## 7. Work order
 
