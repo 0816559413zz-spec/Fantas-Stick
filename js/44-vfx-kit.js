@@ -354,7 +354,7 @@ function updateBfAir(dt){const F=scene.fog;if(!F||FXSTUDIO.own)return;
   const L=Math.max(0.02,B.c.r*0.3+B.c.g*0.59+B.c.b*0.11),hz=BFA.c.copy(BFA.HZ).multiplyScalar(Math.min(1.6,L/0.38+0.12));
   F.color.copy(B.c).lerp(hz,0.5*k);F.near=B.near*(1-0.6*k);F.far=B.far*(1-0.28*k);
   if(B.bg&&scene.background&&scene.background.isColor)scene.background.copy(B.bg).lerp(hz,0.5*k);
-  gl.toneMappingExposure=B.exp*(1-0.14*k);GRADEU.uSat.value=1.1-0.3*k;GRADEU.uVig.value=0.28+0.16*k;
+  gl.toneMappingExposure=B.exp*(1-0.14*k);GRADEU.uSat.value=GFX.sat*(1-0.27*k);GRADEU.uVig.value=0.28+0.16*k;
   if(!game||k<0.03){bfRumble(0);return;}
   // เถ้าลอยรอบตัว (ถ่านไฟส้มปนถ้ามีรอยไหม้ใกล้)
   const me=myPos();if(!me)return;BFA.ash+=dt*(QUAL.mode==='low'?10:26)*k;

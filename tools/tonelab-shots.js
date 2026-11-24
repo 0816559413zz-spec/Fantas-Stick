@@ -6,7 +6,7 @@ const O = window.__tl || {}, TAG = O.tag || 'base', CW = O.w || 300;
 const ZW = 30, GAP = 2, COLS = 4;   // must match tools/tonelab-map.mjs
 const ZONES = ['grass', 'forest', 'dry', 'dirt', 'sand', 'snow', 'ice', 'water', 'lava', 'castle', 'indoor', 'moss'];
 const SCEN = {
-  night: { sky: 'night', look: 'night' }, dusk: { sky: 'sunset', look: 'dusk' }, noon: { sky: 'day', look: 'dusk' },
+  clear: { sky: 'clear', look: 'clear' }, night: { sky: 'night', look: 'night' }, dusk: { sky: 'sunset', look: 'dusk' }, noon: { sky: 'day', look: 'dusk' },
   meadow: { sky: 'sunset', look: 'meadow' }, sand: { sky: 'sunset', look: 'sand' }, snow: { sky: 'night', look: 'snow' },
   gorge: { sky: 'sunset', look: 'gorge', lt: { hemi: ['#d4d9d2', '#4a4636', 0.55], sun: ['#fff0d2', 1.9, [25, 40, -95]], sky: '#cdd3cd', exp: 1.0 } },
 };

@@ -35,9 +35,9 @@ function paintLights(id){
   if(!PAINT)return;PAINT.cur=paintOn(id)?id:null;
   if(PAINT.pass)PAINT.pass.enabled=kuwOn();
   paintGrass();paintVfx();
-  if(!PAINT.cur){GRADEU.uSat.value=1.1;PTG.x=0;return;}
+  if(!PAINT.cur){PTG.x=0;return;}   // saturation: Look preset (js/74 GFX.sat)
   hemi.color.set('#86dcea');hemi.groundColor.set('#4f9a58');const mo=PAINT.maps[PAINT.cur]||{};hemi.intensity=mo.hemi!==undefined?mo.hemi:LOOK.P.paint.hemi;   // per-map overrides: sun / hemi / exp / ground
-  moonL.color.set('#fff0bc');moonL.intensity=mo.sun!==undefined?mo.sun:PAINT.sun;if(mo.exp!==undefined)gl.toneMappingExposure=mo.exp;GRADEU.uSat.value=PAINT.sat;
+  moonL.color.set('#fff0bc');moonL.intensity=mo.sun!==undefined?mo.sun:PAINT.sun;if(mo.exp!==undefined)gl.toneMappingExposure=mo.exp;GFX.sat=GRADEU.uSat.value=PAINT.sat;
   PAINT.KU.uK.value=PAINT.kuw;PTG.x=PAINT.cel;
 }
 // ---------- VFX สีสด (ทดลอง): บนแมพสว่าง เอฟเฟกต์เรืองแสงเดิมซีดเป็นขาว-เหลืองอ่อน → ดันความสด + กดสีซีดให้เข้ม, ไฟไล่ เหลือง→ส้ม→แดง→ม่วงแดง, แสงฟุ้งเบาลง ----------

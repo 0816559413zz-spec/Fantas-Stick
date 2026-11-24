@@ -96,7 +96,7 @@ const AOU={uAO:{value:0},uR:{value:1.4},uFade:{value:new THREE.Vector2(35,70)},u
 // ภาพสวยขึ้น (ทำในขั้นก๊อปภาพของ FXPass เลย แทบไม่กินแรงเพิ่ม • ทำงานเมื่อเปิด soft = ไม่ใช่โหมดประหยัด):
 //  rim = ไฟขอบ: ขอบวัตถุใกล้ ๆ ที่ข้างหลังไกลกว่ามาก (เช่นตัวละครบนพื้น) สว่างขึ้นเหมือนโดนแสงจันทร์/แดดจากด้านหลัง → ตัวละครเด่น (สีตามแสงหลัก) • rimZ = ไกลสุดที่มีไฟขอบ
 //  haze = หมอกบาง ๆ ตามระยะ (ของไกลจางเข้าหาสีหมอกของแผนที่ → ฉากมีมิติ) • hazeK = ความหนา (เทียบกับ fog.far ของแผนที่) • aa = ลบขอบหยัก (FXAA)
-const GFX={rim:0.17,rimZ:22,haze:0.55,hazeK:1.4,hazeH:0.06,aa:true};   // haze/hazeK/hazeH ถูกทับด้วยพรีเซ็ต Look (js/74)
+const GFX={sat:1.1,rim:0.17,rimZ:22,haze:0.55,hazeK:1.4,hazeH:0.06,aa:true};   // haze/hazeK/hazeH ถูกทับด้วยพรีเซ็ต Look (js/74)
 const AO_ON={strength:2.2};
 const AO_HEAD='uniform sampler2D tD;uniform vec2 uRes;uniform float uNear;uniform float uFar;uniform float uAO;uniform float uR;uniform vec2 uFade;uniform vec2 uTan;varying vec2 vUv;'+
   'float lz(vec2 uv){float d=texture2D(tD,uv).x;return (uNear*uFar)/(uFar-d*(uFar-uNear));}'+
@@ -344,6 +344,30 @@ const SKY={};
   SKY.night=grad([[0,'#03050f'],[0.45,'#141a3a'],[0.52,'#3a2f55'],[0.6,'#151a33'],[1,'#08090f']]);
   SKY.sunset=grad([[0,'#16234f'],[0.3,'#4a3f86'],[0.44,'#c06a8a'],[0.5,'#ff9a5a'],[0.53,'#ffd08a'],[0.6,'#6a4a5a'],[1,'#2a2030']]);
   SKY.noon=grad([[0,'#6fb6d4'],[0.3,'#a4dcd0'],[0.44,'#d6f0c8'],[0.5,'#f2f8cc'],[0.54,'#a8d49a'],[0.62,'#5f9a5c'],[1,'#2f5a3a']]);   // กลางวันในป่า (ลุคภาพวาด js/77): ฟ้าอมเขียว ขอบฟ้าสว่างนวล
+  // clear midday (anime key-art look, user ref 2026-11-24): deep blue zenith → pale horizon, faint far hills, puffy cumulus
+  // equirect on the sky sphere: canvas y = 512*(1 - elev/90) above the horizon (y=512), wraps on x
+  SKY.clear=texCanvas(2048,1024,(g,W,H)=>{
+    let sd=20261124;const R=()=>(sd=(sd*1664525+1013904223)>>>0)/4294967296,hz=H/2,ey=e=>hz-e/90*hz;
+    const r=g.createLinearGradient(0,0,0,H);
+    [[0,'#1a4fae'],[0.2,'#2665c2'],[0.36,'#3b7fd6'],[0.45,'#6aa6e6'],[0.485,'#a6cdf0'],[0.5,'#cde4f5'],[0.53,'#a9c6da'],[1,'#7f9bb0']].forEach(([p,c])=>r.addColorStop(p,c));
+    g.fillStyle=r;g.fillRect(0,0,W,H);
+    const wrap=(x,f)=>{for(const o of [-W,0,W])f(x+o);};
+    // far hills: two hazy silhouette bands just above the horizon
+    for(const [c,amp,base,fr] of [['#a8c9e6',3.2,0.6,7],['#8db6d8',1.9,0.15,13]]){
+      g.fillStyle=c;g.beginPath();g.moveTo(0,hz+2);
+      const ph=R()*9;for(let x=0;x<=W;x+=8){const t=x/W*Math.PI*2,e=base+amp*(0.5+0.3*Math.sin(t*fr/3+ph)+0.2*Math.sin(t*fr+ph*2)+0.12*Math.sin(t*fr*2.7));g.lineTo(x,ey(Math.max(0,e)));}
+      g.lineTo(W,hz+2);g.closePath();g.fill();}
+    // cumulus: puffs with bright tops + blue-grey flat bases
+    const cloud=(cx,e,w,h)=>{const base=ey(e),n=6+Math.floor(w/22),P=[];
+      for(let i=0;i<n;i++){const u=i/(n-1),rr=h*(0.35+0.65*Math.sin(Math.PI*u))*(0.7+R()*0.5);P.push([cx+(u-0.5)*w+(R()-0.5)*w*0.12,base-rr*(0.45+R()*0.5),rr]);}
+      wrap(0,o=>{g.save();g.beginPath();g.rect(cx-w+o,base-h*3,w*2,h*3+2);g.clip();
+        for(const [x,y,rr] of P){g.fillStyle='rgba(150,178,214,0.9)';g.beginPath();g.arc(x+o,y+rr*0.18,rr,0,7);g.fill();}
+        for(const [x,y,rr] of P){const q=g.createRadialGradient(x+o-rr*0.2,y-rr*0.35,rr*0.1,x+o,y,rr);q.addColorStop(0,'rgba(255,255,255,1)');q.addColorStop(0.7,'rgba(246,250,255,0.95)');q.addColorStop(1,'rgba(220,234,250,0)');
+          g.fillStyle=q;g.beginPath();g.arc(x+o,y-rr*0.08,rr*0.92,0,7);g.fill();}
+        g.restore();});};
+    for(let i=0;i<16;i++){const e=3+Math.pow(R(),1.6)*34,s=1/Math.cos(e*Math.PI/180);cloud(R()*W,e,(60+R()*150)*s*(1+e/30),(14+R()*16)*(1+e/18));}
+    for(let i=0;i<7;i++){const e=1.2+R()*3,x=R()*W;cloud(x,e,40+R()*90,6+R()*6);}   // small low clouds along the horizon
+  });
   SKY.mesh=new THREE.Mesh(new THREE.SphereGeometry(600,32,16),new THREE.MeshBasicMaterial({map:SKY.night,side:THREE.BackSide,fog:false,depthWrite:false}));
   scene.add(SKY.mesh);
   const n=1500,pos=new Float32Array(n*3);
@@ -357,7 +381,7 @@ const SKY={};
   SKY.sun=new THREE.Group();
   const sg2=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:hdr('#ffb070',0.48),opacity:0.47,transparent:true,fog:false,depthWrite:false,blending:THREE.AdditiveBlending}));sg2.scale.set(125,125,1);SKY.sun.add(sg2);
   const sc=new THREE.Mesh(new THREE.CircleGeometry(18,40),new THREE.MeshBasicMaterial({color:hdr('#ffd48e',0.91),fog:false}));SKY.sun.add(sc);
-  SKY.sun.position.set(300,45,-420);sc.lookAt(-300,-45,420);SKY.sun.visible=false;scene.add(SKY.sun);
+  SKY.sun.position.set(300,45,-420);sc.lookAt(-300,-45,420);SKY.sun.visible=false;scene.add(SKY.sun);SKY.sunG=sg2;SKY.sunC=sc;
 })();
 const hemi=new THREE.HemisphereLight('#8fa6ff','#2a1f1a',0.55);scene.add(hemi);
 scene.add(new THREE.AmbientLight('#404060',0.3));
@@ -367,10 +391,12 @@ scene.add(moonL);scene.add(moonL.target);
 // ทิศจากพื้นไปหาแสงหลัก (setSky ตั้ง) — shadowFollow ใช้วางแสงตามผู้เล่น
 const LDIR=new THREE.Vector3(-55,95,-70).normalize();
 function setSky(mode){
-  const noon=mode==='day',day=noon||mode==='sunset';   // 'day' = high-noon sky (Painterly look js/77)
-  SKY.mesh.material.map=noon?SKY.noon:day?SKY.sunset:SKY.night;SKY.mesh.material.color.set('#ffffff');SKY.mesh.material.needsUpdate=true;   // white = original sky image (overcast maps tint later in js/28)
+  const clear=mode==='clear',noon=mode==='day'||clear,day=noon||mode==='sunset';   // 'day' = painterly forest noon (js/77) • 'clear' = clear blue midday (file maps sky:'day')
+  SKY.mode=mode;
+  SKY.mesh.material.map=clear?SKY.clear:noon?SKY.noon:day?SKY.sunset:SKY.night;SKY.mesh.material.color.set('#ffffff');SKY.mesh.material.needsUpdate=true;   // white = original sky image (overcast maps tint later in js/28)
   SKY.stars.visible=!day;SKY.moon.visible=!day;SKY.sun.visible=day;
   moonL.intensity=day?0.82:1;
+  SKY.sunG.material.color.copy(hdr(clear?'#fff4d8':'#ffb070',0.48));SKY.sunC.material.color.copy(hdr(clear?'#fffbea':'#ffd48e',clear?1.4:0.91));   // white noon sun vs orange sunset sun
   if(noon){moonL.color.set('#fff0bc');moonL.position.set(74,100,-64);gl.toneMappingExposure=1.0;SKYB.sun.copy(moonL.position).normalize().multiplyScalar(520);}
   else if(day){moonL.color.set('#ffbe8a');moonL.position.set(80,45,-110);gl.toneMappingExposure=1.05;SKYB.sun.set(300,45,-420);}
   else{moonL.color.set('#c4d2ff');moonL.position.set(-55,95,-70);gl.toneMappingExposure=1.1;}

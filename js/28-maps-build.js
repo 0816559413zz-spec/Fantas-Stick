@@ -19,7 +19,7 @@ function buildWorld(id){
   const FM=MAPS[id]&&MAPS[id].fm;
   if(typeof paintMap==='function')paintMap(id,FM);   // ลุคภาพวาด (js/77): ทับ sky/fog/look ของแมพ
   if(typeof lookMap==='function')lookMap(id,FM);   // พรีเซ็ตแสงของแมพนี้ (js/74-look.js)
-  setSky(FM?(FM.sky==='day'&&FM.look==='paint'?'day':FM.sky==='sunset'||FM.sky==='day'?'sunset':'night'):id==='pitch'||id==='meadow'||id==='ruins'||id==='test'||id==='fcs'?'sunset':'night');
+  setSky(FM?(FM.sky==='day'&&FM.look==='paint'?'day':FM.sky==='day'?'clear':FM.sky==='sunset'?'sunset':'night'):id==='pitch'||id==='meadow'||id==='ruins'||id==='test'||id==='fcs'?'sunset':'night');
   const cached=WCACHE.get(wkey(id));
   if(cached){
     WCACHE.delete(wkey(id));
@@ -520,10 +520,11 @@ function buildFileMap(id){
 }
 // file-map sky/fog/hemi/sun (also used by WD.lookTest in js/74 to preview light scenarios) → returns night
 function fileMapLight(F){
-  const night=F.sky!=='sunset'&&F.sky!=='day';
-  const fog=F.fog||(night?['#16223a',90,380]:['#d8a888',130,520]);
+  const night=F.sky!=='sunset'&&F.sky!=='day'&&F.sky!=='clear',clear=(F.sky==='day'||F.sky==='clear')&&F.look!=='paint';
+  const fog=F.fog||(night?['#16223a',90,380]:clear?['#bcd6ec',140,650]:['#d8a888',130,520]);
   scene.fog.color.set(fog[0]);scene.fog.near=+fog[1];scene.fog.far=+fog[2];
   if(night){hemi.color.set('#a8b8e8');hemi.groundColor.set('#2a3448');hemi.intensity=0.6;moonL.intensity=1.0;moonL.color.set('#c8d8ff');}
+  else if(clear){hemi.color.set('#c4dcff');hemi.groundColor.set('#6a8a3e');hemi.intensity=LOOK.P.clear.hemi;moonL.intensity=1.8;moonL.color.set('#fff3dc');}   // clear midday: blue sky fill, warm-white sun
   else{hemi.color.set('#ffe0b8');hemi.groundColor.set('#4a5a2a');hemi.intensity=0.75;moonL.intensity=1.5;moonL.color.set('#fff0dc');}
   // แสง/ฟ้าเฉพาะแมพ (ฟิลด์ "lt" ในไฟล์แมพ): hemi:[สีฟ้า,สีพื้น,แรง] • sun:[สี,แรง,[x,y,z]ทิศแสง] • sky:'#สี' = ฟ้าครึ้มสีเดียว (ไม่มีดวงอาทิตย์) • exp = ความสว่างภาพ
   const LT=F.lt;

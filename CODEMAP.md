@@ -340,7 +340,7 @@ onfOutlineMat:4 onFireFX:6 statusFX:17 fx:44
 §251 overlay: เลือกบัฟ / สรุปผล
 choosePick:252 syncOverlays:257 showOver:278
 
-## js/27-world.js (441) — 
+## js/27-world.js (467) — 
 S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 PTG:15 gl:23
 §37 เงานุ่มแบบ PCSS (contact-hardening): ใกล้จุดสัมผัสคม ไกลจากวัตถุที่บั…
 PCSS:40 scene:67 cam:69 composer:70
@@ -351,9 +351,9 @@ TAA:143 TAA_FRAG:144 _taaH:159 taaWanted:160 taaBegin:161 taaEnd:169 taaFinish:1
 §253 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
 QUAL:254 QUAL_NAME:255 qualPR:256 applyQuality:262 qualTick:284
 §300 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
-qualCS:304 CULL:305 cullTick:306 texCanvas:317 glowTex:318 stoneTex:319 runeTex:325 glowMats:333 glowMat:334 STONEM:336 stoneMat:337 shadowAll:338 SKY:341 hemi:362 moonL:364 LDIR:368 setSky:369 SKYB:382 skyFollow:383
-§384 เงาตามผู้เล่น
-SHD:388 _shF:389 _shR:389 _shU:389 _shC:389 _shY:389 SHD_DM:393 shadowDepthSplit:394 shadowFollow:399 shadowSoft:419 LPOOL:421 MLS_N:427 MLS:427 mlsPoint:429 _mlsP:431 mlsInScene:432 mlsTick:433
+qualCS:304 CULL:305 cullTick:306 texCanvas:317 glowTex:318 stoneTex:319 runeTex:325 glowMats:333 glowMat:334 STONEM:336 stoneMat:337 shadowAll:338 SKY:341 hemi:386 moonL:388 LDIR:392 setSky:393 SKYB:408 skyFollow:409
+§410 เงาตามผู้เล่น
+SHD:414 _shF:415 _shR:415 _shU:415 _shC:415 _shY:415 SHD_DM:419 shadowDepthSplit:420 shadowFollow:425 shadowSoft:445 LPOOL:447 MLS_N:453 MLS:453 mlsPoint:455 _mlsP:457 mlsInScene:458 mlsTick:459
 
 ## js/28-city-build.js (386) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
@@ -397,7 +397,7 @@ frpBuild:27 fcsPropsBuild:75 fcsPropsView:101 fcsRoomBrkFx:110 FRP_DEB:111 frpDe
 §139 wall hit marks (event 'rwh'): decal quads on the wall face, ring buff…
 frpMarkTex:140 fcsWallHit:144
 
-## js/28-maps-build.js (831) — สร้างแผนที่
+## js/28-maps-build.js (832) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:47 _prewarmed:49 prewarmShaders:50 batchStatic:69 makeCandles:94 updateCandles:103 buildCastle:112 buildHogsmeade:178 buildGreatHall:253 buildForest:323
 §420 ทุ่งหญ้าฮอกวอตส์ (เย็น)
 ringTrees:421 grassTex:430 buildMeadow:431
@@ -408,7 +408,7 @@ buildLake:451
 §474 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน guides…
 makeSnow:475 makeFireflies:482 makeSnitch:489 fileMapFx:496
 §506 แผนที่จากไฟล์ Blender (guides/MAP-DESIGN.md)
-terrGeo:508 buildFileMap:516 fileMapLight:522 fileMapBody:538 replaceMeadowTufts:580 tickM:622 TRPAD:623 ARPAD:623 SHPAD:623 signTex:624 testSign:625 buildTest:632 buildRuins:737 buildPitch:762
+terrGeo:508 buildFileMap:516 fileMapLight:522 fileMapBody:539 replaceMeadowTufts:581 tickM:623 TRPAD:624 ARPAD:624 SHPAD:624 signTex:625 testSign:626 buildTest:633 buildRuins:738 buildPitch:763
 
 ## js/28-pnl-build.js (247) — Breakable panels — view (state = PNL in js/12-pnl.js)
 PNV:7 PN_MI:8 PN_GLSL:9 pnlMat:41 PN_RUB:92 PN_HEAP:93 pnlCls:100 PN_ZU:108 pnlGeo:109 pnlBuild:193 pnlSyncOne:214 pnlView:236 pnlFX:239
@@ -890,10 +890,10 @@ tuneOpenF:96 tuneFmt:97 tuneRow:98 tuneRefresh:101 tuneMsg:109 tuneToggle:110 tu
 §138 API สำหรับเครื่องมือแยก tune.html (เปิดเกมใน iframe แล้วเรียกผ่าน WD)
 tuneDump:139 tuneSetKey:140
 
-## js/74-look.js (97) — 
-LOOK:17 lookPreset:34 lookMap:36 lookName:37 lookEnvFor:38 lookApply:48 lookRays:64 _lkV:69 lookRaysFrame:71 lookRefresh:78
-§79 ลงทะเบียนในเครื่องมือปรับค่า (js/73-tune.js): 1 หมวด "🌗 Look" แยกส่ว…
-LOOK_F:80 lookRegister:86 lookTest:91
+## js/74-look.js (101) — 
+LOOK:17 lookPreset:37 lookMap:39 lookName:40 lookEnvFor:41 lookApply:51 lookRays:68 _lkV:73 lookRaysFrame:75 lookRefresh:82
+§83 ลงทะเบียนในเครื่องมือปรับค่า (js/73-tune.js): 1 หมวด "🌗 Look" แยกส่ว…
+LOOK_F:84 lookRegister:90 lookTest:95
 
 ## js/75-ambient.js (52) — 
 AMBX:9 AMBX_V:10 AMBX_F:24 ambMesh:27 ambQual:39 ambFrame:40
@@ -958,4 +958,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(118 files, 35775 lines)
+(118 files, 35806 lines)

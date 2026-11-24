@@ -35,7 +35,7 @@ Tool: ศูนย์รวม Tool → **Map Builder** • โค้ด: `mapbu
 | `hg` | ความสูงพื้น int16 หน่วย ซม. เข้ารหัส base64 (เรียง `j*nx+i`) |
 | `sf` | พื้นผิวต่อจุด uint8 base64 = index ใน `SURF` (`model.js`) — `mud/water/ice/lava` ถูกส่งเป็น `env` ของเกมด้วย |
 | `look`, `lt` | (ไม่บังคับ แก้ไฟล์ตรง ๆ — ยังไม่มีช่องใน Editor) `look` = ชื่อพรีเซ็ต Look (js/74-look.js เช่น `gorge`) • `lt` = `{hemi:[ฟ้า,พื้น,แรง], sun:[สี,แรง,[x,y,z]], sky:'#สี' ฟ้าครึ้มสีเดียว, exp}` แสง/ฟ้าเฉพาะแมพ (js/28 `buildFileMap`) — ตัวอย่าง `maps/build/gorge.json` |
-| `sky`, `fog [สี,เริ่ม,สุด]`, `music`, `weather`, `fx[]`, `modes[]`, `random`, `autoProps`, `skirt` | ค่าของแผนที่ (ความหมายตาม MAP-DESIGN §3) • `skirt` = พื้นยื่นเลยขอบเล่น (ม.) กันเห็นขอบลอย |
+| `sky` (`day` = ฟ้าเที่ยงสีฟ้าใส+เมฆ `SKY.clear` + พรีเซ็ต Look `clear` ตั้งแต่ 2026-11-24), `fog [สี,เริ่ม,สุด]`, `music`, `weather`, `fx[]`, `modes[]`, `random`, `autoProps`, `skirt` | ค่าของแผนที่ (ความหมายตาม MAP-DESIGN §3) • `skirt` = พื้นยื่นเลยขอบเล่น (ม.) กันเห็นขอบลอย |
 | `walls[]` | `{id, pts:[[x,z]…], th, h, c, m, closed, curve, brk, base}` — `curve` = โค้งผ่านจุด (Catmull-Rom) • `brk` = พังได้ แตกเป็นช่วงละ ~4 ม. • `base` = ความสูงฐานแบบตายตัว (กำแพง/ราวบนชั้นบน; `null` = ตั้งตามพื้น) • `m` = วัสดุตอนพัง `stone/wood/ice` |
 | `floors[]` | พื้นชั้นบน `{id, x, z, w, d, rot, y, y2, th, c, steps}` — สี่เหลี่ยมหมุนได้ ผิวบนสูง `y` ที่ปลาย −d และ `y2` ที่ปลาย +d (ต่างกัน = ทางลาด) • `steps` = หน้าตาเป็นขั้นบันได (การชนยังเป็นทางลาดเรียบ) |
 | `objs[]` | `{id, t, x, z, y, rot, …}` — `y` = ยกจากพื้น |

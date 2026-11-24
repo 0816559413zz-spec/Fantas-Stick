@@ -30,18 +30,21 @@ LOOK.P.snow=Object.assign({},LOOK.P.night,{tone:1,env:0.5,exp:0.9,con:1.22,split
 LOOK.P.sand=Object.assign({},LOOK.P.dusk,{tone:1,exp:0.95,con:1.24,hemi:0.18,split:0.16,haze:0.45});
 // meadow = sunset grass: less flat fill + a bit more contrast/split tone
 LOOK.P.meadow=Object.assign({},LOOK.P.dusk,{hemi:0.18,con:1.16,split:0.15});
+// clear = clear blue midday (file maps sky:'day', user ref 2026-11-24 anime key art): bright, saturated greens, blue-tinted shade, light haze
+LOOK.P.clear=Object.assign({},LOOK.P.dusk,{sky:'clear',warm:true,env:0.45,tr:0.9,tg:1.0,tb:1.12,hemi:0.42,amb:0.08,exp:0.92,con:1.1,split:0.08,sat:1.22,tone:0,rays:0.2,haze:0.3,hazeK:1.2,hazeH:0.05,
+  dust:0.25,dustS:0.6,dustK:0.8,mist:0.15,mistA:0.05,mistS:1,mistH:2.0,mistL:0.3,mistK:1.0,flow:1,lo:[0.92,0.97,1.1],hi:[1.04,1.02,0.97]});
 LOOK.map={lake:'snow',ruins:'sand',meadow:'meadow'};
 function lookPreset(name,from,over){LOOK.P[name]=Object.assign({},LOOK.P[from],over||{});if(typeof lookRegister==='function')lookRegister(name);return LOOK.P[name];}
 // แมพนี้ใช้พรีเซ็ตไหน (ถูกเรียกจาก js/28 ก่อน setSky) — เก็บใน globalThis เพราะ setSky รันก่อนไฟล์นี้ตอนโหลดโมดูลครั้งแรก
 function lookMap(id,FM){globalThis.__lookMap={id,fm:FM&&FM.look};}
-function lookName(day){const w=globalThis.__lookMap||{};return (w.fm&&LOOK.P[w.fm]&&w.fm)||(LOOK.map[w.id]&&LOOK.P[LOOK.map[w.id]]&&LOOK.map[w.id])||(day?'dusk':'night');}
+function lookName(day){const w=globalThis.__lookMap||{};return (w.fm&&LOOK.P[w.fm]&&w.fm)||(LOOK.map[w.id]&&LOOK.P[LOOK.map[w.id]]&&LOOK.map[w.id])||(SKY.mode==='clear'?'clear':day?'dusk':'night');}
 function lookEnvFor(name){
   const P=LOOK.P[name],key=name+'|'+[P.sky,P.env,P.tr,P.tg,P.tb].join(',');
   if(LOOK.env[key])return LOOK.env[key];
   for(const k of Object.keys(LOOK.env))if(k.startsWith(name+'|')){LOOK.env[k].dispose();delete LOOK.env[k];}   // ค่าเก่าของพรีเซ็ตเดียวกัน (ลากสไลเดอร์) ทิ้ง
   if(!LOOK.pm)LOOK.pm=new THREE.PMREMGenerator(gl);
   const s=new THREE.Scene(),k=P.env;
-  const mat=new THREE.MeshBasicMaterial({map:P.sky==='noon'?SKY.noon:P.sky==='sunset'?SKY.sunset:SKY.night,side:THREE.BackSide,color:new THREE.Color(k*P.tr,k*P.tg,k*P.tb),fog:false});
+  const mat=new THREE.MeshBasicMaterial({map:P.sky==='clear'?SKY.clear:P.sky==='noon'?SKY.noon:P.sky==='sunset'?SKY.sunset:SKY.night,side:THREE.BackSide,color:new THREE.Color(k*P.tr,k*P.tg,k*P.tb),fog:false});
   const geo=new THREE.SphereGeometry(50,32,16);s.add(new THREE.Mesh(geo,mat));
   const rt=LOOK.pm.fromScene(s,0,0.1,200);geo.dispose();mat.dispose();
   return LOOK.env[key]=rt;}
@@ -57,6 +60,7 @@ function lookApply(day){
   if(P.warm){GRADEU.uLo.value.set(1-sp*0.4,1-sp*0.5,1+sp*0.6);GRADEU.uHi.value.set(1+sp*0.7,1+sp*0.15,1-sp*0.7);}   // เงาอมม่วงน้ำเงิน ไฮไลต์อมส้ม
   else{GRADEU.uLo.value.set(1-sp*0.7,1-sp*0.1,1+sp);GRADEU.uHi.value.set(1+sp*0.3,1+sp*0.1,1-sp*0.2);}   // เงาอมน้ำเงินเข้ม
   if(P.lo&&P.hi){GRADEU.uLo.value.set(P.lo[0],P.lo[1],P.lo[2]);GRADEU.uHi.value.set(P.hi[0],P.hi[1],P.hi[2]);}   // ย้อมสีกำหนดเอง (ลุคภาพวาด js/77)
+  GFX.sat=GRADEU.uSat.value=P.sat||1.1;
   gl.toneMapping=P.tone?THREE.AgXToneMapping:THREE.ACESFilmicToneMapping;
   GFX.haze=P.haze;GFX.hazeK=P.hazeK;GFX.hazeH=P.hazeH;lookRays();
 }
@@ -82,8 +86,8 @@ const LOOK_F={env:['ความแรงแสงฟ้า (IBL)',0,8,0.1],tr:[
   rays:['ลำแสงจันทร์/อาทิตย์ (god rays, 0 = ปิด)',0,2,0.01],haze:['หมอกตามระยะ • ความเข้ม',0,1,0.01],hazeK:['หมอกตามระยะ • ความหนา',0,4,0.05],hazeH:['หมอก • ต่ำหนากว่าสูง (ยิ่งมากยิ่งต่างมาก)',0,0.4,0.005],
   dust:['ฝุ่นลอย • ปริมาณ (0–1)',0,1,0.01],dustS:['ฝุ่นลอย • ขนาด ×',0.2,4,0.05],dustK:['ฝุ่นลอย • ความสว่าง',0,3,0.05],
   mist:['หมอกลอยต่ำ • ปริมาณ (0–1)',0,1,0.01],mistA:['หมอกลอยต่ำ • ความทึบ',0,0.3,0.005],mistS:['หมอกลอยต่ำ • ขนาด ×',0.3,3,0.05],mistH:['หมอกลอยต่ำ • ความสูงชั้นหมอก',0.3,8,0.1],mistL:['หมอกลอยต่ำ • ผสมสีแสงหลัก (0 = สีหมอกล้วน)',0,1,0.01],mistK:['หมอกลอยต่ำ • ความสว่าง',0.3,4,0.05],flow:['ฝุ่น/หมอก • ความเร็วลอยตามลม ×',0,4,0.05],
-  split:['ย้อมสีเงา/ไฮไลต์',0,0.4,0.01],tone:['โทนสี 0 = ACES สดคม / 1 = AgX นุ่มสมจริง',0,1,1]};
-function lookRegister(name){const P=LOOK.P[name],sec='พรีเซ็ต "'+name+'" ('+(P.sky==='sunset'?'ฟ้าเย็น':'ฟ้ากลางคืน')+')';
+  split:['ย้อมสีเงา/ไฮไลต์',0,0.4,0.01],sat:['ความสดของสี (saturation)',0.5,1.8,0.01],tone:['โทนสี 0 = ACES สดคม / 1 = AgX นุ่มสมจริง',0,1,1]};
+function lookRegister(name){const P=LOOK.P[name];if(P.sat===undefined)P.sat=1.1;const sec='พรีเซ็ต "'+name+'" ('+(P.sky==='sunset'?'ฟ้าเย็น':'ฟ้ากลางคืน')+')';
   for(const f of Object.keys(LOOK_F))tuneNum(['look','🌗 Look (พรีเซ็ตแสง)'],sec,'look.'+name+'.'+f,LOOK_F[f][0],()=>P[f],v=>{P[f]=v;lookRefresh();},{min:LOOK_F[f][1],max:LOOK_F[f][2],step:LOOK_F[f][3]});}
 for(const n of Object.keys(LOOK.P))lookRegister(n);
 if(SKY.day!==undefined)lookApply(SKY.day);   // setSky ran earlier (map already built at load) → apply now
