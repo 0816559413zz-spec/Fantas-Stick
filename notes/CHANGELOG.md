@@ -1499,3 +1499,4 @@
 - 2026-11-24 Rampart v6: exact-model hologram, smooth rise from the ground, sink on expiry, side-on cast
 - 2026-11-24 Rampart v7: slower cast (1.4 s), longer hold, wall at 0.75 s
 - 2026-11-24 Earth Rampart approved by user (chat)
+- 2026-11-24 Earth BA: rock ring ammo (8), splash 15 every 0.7 s, refill one per 1.8 s, minimal pips; Stand punch + charged slam removed (protocol v111)

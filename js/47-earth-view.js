@@ -423,7 +423,7 @@ function earthFistForearm(o){
 }
 // ---------- ทุกเฟรม: ผู้เล่นสายดิน (เรียกจาก syncPlayers) ----------
 function earthFX(o,p,pz,now,dt){
-  o.eFistBend=null;
+  o.eFistBend=null;earthRockRing(o,p,now,dt);
   {const side=o.caN==='islecast'||o.caN==='rampcast';if(side||o.isleHd){o.slHead=side?-(o.cpb?o.cpb[2]:0)*0.9:0;o.isleHd=side;frostSlideHead(o);}}   // side-on cast: head stays on the target
   const A=p.ea;if(!A){if(EV.st.has(p.id)){const s=EV.st.get(p.id);eStonePrep(s,null);eFistCharge(s,null,null,0);s.sbFollow=null;for(const k of ['stand','giant','cgiant'])if(s[k])standOp(s[k],0);for(const k of ['drill','augW','pil','wrWarn','wrRock'])if(s[k])s[k].visible=false;}return;}
   const s=eState(p.id),S=eStandOf(s),G2=eGiantOf(s),t=now/1000,fx=Math.cos(p.a),fy=Math.sin(p.a),rx=-fy,ry=fx,broken=A[0]>0,z0=(pz||0)-GY(p.x,p.y);   // ความสูงที่วาดจริงเหนือพื้น (snapshot ไม่มี p.z)
@@ -813,6 +813,20 @@ function eRampTick(v,dt,now){
 CANIM.islecast={d:0.9,st:0,tr:[0.12,0.2],tm:[0.2,0.5],k:[[0.11,-0.5,-0.3,0.5,0.08,-0.6,0.5,0,-0.06,'s'],[0.17,-0.25,-1.18,0.8,0.12,-0.7,0.6,0,-0.1,'i'],[0.5,-0.2,-1.15,0.8,0.14,-0.65,0.65,0,-0.12,'s'],[0.6,-2.5,-0.1,0.25,-0.08,-2.4,0.35,0,0.03,'o'],[1,-2.0,-0.1,0.05,-0.03,-1.9,0.3,0,0,'s']],
   j:[[0.11,0.5,0.4,1.0,-0.35,0.18,0.14,-0.14],[0.17,0.75,0.6,0.5,-0.55,0.1,0.22,-0.22],[0.5,0.85,0.7,0.55,-0.6,0.08,0.22,-0.22],[0.6,0.2,0.15,0.4,-0.25,0.15,0.14,-0.14],[1,0.12,0.1,0.45,-0.2,0.12,0.12,-0.12]]};
 SKANIM.terraisle='islecast';
+// Earth BA throw (user 2026-11-24): quick wand flick toward the aim — tiny wind-up, accelerating snap, short follow-through
+CANIM.erockthrow={d:0.36,st:0,tr:[0.25,0.6],k:[[0.25,-0.55,-0.35,0.18,0.02,-0.45,0.35,0,-0.02,'s'],[0.5,-1.55,-0.1,-0.12,0.1,-0.5,0.4,0,-0.04,'i'],[1,-1.25,-0.15,-0.05,0.04,-0.45,0.35,0,0,'s']]};
+SKANIM.erockthrow='erockthrow';
+// rock ring behind the back: 8 small faceted rocks on a slowly turning vertical circle; count follows the ammo (ek),
+// the refilling rock grows in place. One shared geometry, per-rock seed for size/tilt.
+const ERING={geo:null,mat:null};
+function earthRockRing(o,p,now,dt){const ek=p.ek;if(ek===undefined||!p.al){if(o.eRing)o.eRing.visible=false;return;}
+  if(!ERING.geo){ERING.geo=new THREE.IcosahedronGeometry(0.16,0);ERING.mat=new THREE.MeshStandardMaterial({color:'#b89a72',roughness:0.95,flatShading:true});ERING.mat.userData.keep=true;}
+  if(!o.eRing){const g=new THREE.Group();g.position.set(0,1.45,-0.42);o.g.add(g);o.eRing={g,r:[],visible:true};
+    for(let i=0;i<EROCK.max;i++){const m=new THREE.Mesh(ERING.geo,ERING.mat);m.castShadow=true;const s=0.8+0.4*((i*37)%10)/10;m.userData={s,ph:i*1.7};m.scale.setScalar(s);g.add(m);o.eRing.r.push(m);}}
+  const R=o.eRing;R.g.visible=true;const rot=now/2600,n=EROCK.max;
+  for(let i=0;i<n;i++){const m=R.r[i],a=rot+i/n*Math.PI*2,f=clamp(ek-i,0,1),u=m.userData;m.visible=f>0.02;
+    m.position.set(Math.cos(a)*0.55,Math.sin(a)*0.55+Math.sin(now/420+u.ph)*0.03,0);m.rotation.set(now/900+u.ph,now/1300+u.ph,0);m.scale.setScalar(u.s*(f>=1?1:0.35+0.5*f));}}
+
 // Rampart cast v3 (user 2026-11-24): side-on like Terra Isle — body turns so the slapping left side leads, head on target
 if(CANIM.rampcast){const T=[-0.25,-0.55,-0.55,-0.55,-0.1,0];CANIM.rampcast.k.forEach((k,i)=>{k[3]=T[Math.min(i,T.length-1)];});CANIM.rampcast.d=1.4;}   // v7: slower — slam 0.28 s, longer hold, lift 0.75 s (user: rose too soon after the slam)
 const EISLE={top:['#c99b62','#a66f3c','#8e9850','#d6b781','#a9603d'],mat:null,geo:new Map()};
@@ -988,6 +1002,8 @@ function earthEfx(ev){
     case 'esbwall':eDebris(x,y,H,26,240);ring(x,y,'#ffd86b',70,0.4,H);burst(x,y,'#ffe7a0',12,120,0.6,2.2,{h:H+0.8,g:0});shake(0.4);if(near)snd('boom',ev);return true;
     // ----- Tectonic Crush -----
     case 'ewallup':shake(0.35);if(near)snd('boom',ev);return true;
+    case 'erockthrow':{if(near)snd('whoosh',{x,y,vol:0.35});return true;}
+    case 'erockboom':{burst(x,y,ECOL.dust,10,170,0.4,2.6,{h:Math.max(0.2,H),vh:[1,3],g:6});eChunks(x,y,Math.max(0.2,H),5,170,6,0.16);ring(x,y,'#e3c690',34,0.25,Math.max(0.15,H));if(H<0.6)dfCracks(x,y,0.06,26,'#a98a62',0.6);if(near)snd('boom',{x,y,vol:0.35});return true;}
     case 'eislecall':EV.icall.push({t:0,x,y,a:ev.a,id:ev.id});if(near)snd('buff',{x,y,vol:0.5});return true;   // Terra Isle: Stand punch
     case 'eisleup':{shake(0.4);if(near)snd('boom',ev);burst(x,y,ECOL.dust,24,260,0.5,3.4,{h:0.3,vh:[2,7],g:7});eChunks(x,y,0.3,10,240,9,0.24);for(let i=0;i<5;i++)smoke(x+rnd(-60,60),y+rnd(-60,60),0.3,2,ECOL.dust,0.7,8,50);return true;}
     case 'erampcall':EV.rcall.push({t:0,x,y,a:ev.a,seed:ev.n,id:ev.id,holo:eRampHolo(ev.n),up:false});if(near)snd('buff',{x,y,vol:0.5});return true;   // Rampart: Stand rises and starts heaving the ground

@@ -327,6 +327,7 @@ function killProj(pr){if(pr.type==='wshp'&&!pr.dead){pr.dead=true;if(pr.life>0)w
   pr.dead=true;
   if(pr.type==='nature_pea'){naturePeaSplash(pr);return;}
   if(pr.type==='efist'||pr.type==='efistc'){earthFistBreak(pr);return;}
+  if(pr.type==='erockb'){earthRockSplash(pr);return;}
   if(pr.type==='fire')explode(pr);
   else if(pr.type==='iceboulder')frostBoom(pr);
   else if(pr.type==='pfireb')pyroBigBoom(pr);

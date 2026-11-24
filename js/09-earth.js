@@ -15,7 +15,7 @@ PATHS[EARTH].vn={sh:'โล่ Stand • HP',shDelay:'โล่ • เริ่
   cbHold:'หมัดชาร์จ • กดค้างกี่วิเริ่มชาร์จ',cbCharge:'หมัดชาร์จ • ชาร์จ (วิ)',cbDmg:'หมัดชาร์จ • ดาเมจตรง',cbR:'เศษหมัดชาร์จ • ระยะ',cbShardDmg:'เศษหมัดชาร์จ • ดาเมจต่อเป้า',cbStun:'หมัดชาร์จ • สตัน (วิ)',cbCd:'หมัดชาร์จ • คูลดาวน์ (วิ)',cbSlow:'หมัดชาร์จ • ความเร็วเดินตอนชาร์จ (เท่า)',
   rampT:'Rampage • วิ่งนาน (วิ)',rampSp:'Rampage • ความเร็ว',rampDmg:'Rampage • ชนดาเมจ',rampStun:'Rampage • ชนสตัน (วิ)',rampKnock:'Rampage • ชนกระเด็น',rampCd:'Rampage • คูลดาวน์ (วิ)',slamR:'Rampage จบ • รัศมีทุบ',slamDmg:'Rampage จบ • ดาเมจ',slamStun:'Rampage จบ • สตัน (วิ)',
   boostDist:'Rock Boost • ระยะ',boostR:'Rock Boost • รัศมีผลัก',boostKnock:'Rock Boost • แรงผลัก',boostCd:'Rock Boost • คูลดาวน์ (วิ)',env:'ทุกสกิล • ตัวคูณพังบ้าน/ของ'};
-Object.assign(PDEF,{erock:{spd:1100,r:6,dmg:5,life:0.55,col:'#c9a36a'},eslab:{spd:1800,r:24,dmg:25,life:0.39,col:'#d8b47a'}});
+Object.assign(PDEF,{erockb:{spd:1250,r:9,dmg:15,life:0.62,col:'#c9a36a'},erock:{spd:1100,r:6,dmg:5,life:0.55,col:'#c9a36a'},eslab:{spd:1800,r:24,dmg:25,life:0.39,col:'#d8b47a'}});
 Object.assign(PDEF,{
   efist:{spd:1150,r:13,col:'#b69160'},
   efistc:{spd:1380,r:27,col:'#d2a970'},
@@ -89,13 +89,25 @@ function earthBreak(p){p.ehp=0;p.stdB=ERV.standOff;p.shieldOn=false;p.shieldE=0;
 function earthReset(p){p.ehp=ERV.sh;p.stdB=0;p.eShT=0;p.epn=null;p.esb=null;p.aug=null;p.ramp=null;p.crush=null;p.ecb=null;p.ecbCd=0;p.eHold=0;p.mudT=0;p.eRamp=null;if(p.wr)earthWrathEnd(p);}
 
 // ---------- ท่าพื้นฐาน (คลิกซ้าย) ----------
+// BA (user 2026-11-24): no Stand. A ring of rocks floats behind the back; each shot throws one (splash), the ring refills
+// one rock at a time. Hold = keep throwing every `rate` s while rocks last. No charged attack any more.
+const EROCK={max:8,rate:0.7,refill:1.8,splash:34,dmg:15};
+function earthRockTick(p,dt){if(p.erk===undefined)p.erk=EROCK.max;if(p.erk<EROCK.max)p.erk=Math.min(EROCK.max,p.erk+dt/EROCK.refill);}
+function earthRockSplash(pr){if(pr.splashed)return;pr.splashed=1;const o=G.players[pr.owner];if(!o)return;
+  for(const t of foesIn(o.team,pr.x,pr.y,EROCK.splash,pr.h+3)){const z=t.isE?(t.h||0):(t.z||0);if(Math.abs(z+1-pr.h)<2.6)aoeHit(o,t,EROCK.dmg);}
+  damageEnv(pr.x,pr.y,EROCK.splash,6*ERV.env,pr.owner,'rock',Math.max(0.3,pr.h));
+  emit({k:'efx',z:'erockboom',x:Math.round(pr.x),y:Math.round(pr.y),h:Math.round(pr.h*10)/10});}
+SPELLS.erockb={hit(pr){earthRockSplash(pr);}};
 function earthBasic(p,inp,dt,setCd){
-  const prev=p.eFirePrv;p.eFirePrv=inp.fire;
+  const prev=p.eFirePrv;p.eFirePrv=inp.fire;earthRockTick(p,dt);
   if(p.rmpAim)return;if(p.rmpNoFire){if(inp.fire)return;p.rmpNoFire=0;}   // Rampart placing click must not punch
   if(p.aug||p.ramp||p.ecb)return;
   if(p.wr){if(p.wr.ph==='aim'&&p.wr.t>=WRATH_READY_T&&inp.fire&&!prev)earthPillarThrow(p);return;}
-  if(p.stdB>0){p.eHold=0;if(inp.fire&&p.cd.basic<=0){shoot(p,'erock',{sp:'b_earth'});setCd('basic',ERV.rockCd);}return;}
-  // มี Stand: แตะ (ปล่อยก่อน 0.25 วิ) = หมัด Stand • ค้าง 0.25 วิ = เริ่มชาร์จทุบ (ถ้าคูลดาวน์ 6 วิ ยังไม่ครบ ปล่อยแล้วเป็นหมัดปกติ)
+  if(inp.fire&&p.cd.basic<=0&&p.erk>=1){p.erk-=1;const slot=Math.floor(p.erk);shoot(p,'erockb',{sp:'erockb',hand:1});setCd('basic',EROCK.rate);
+    emit({k:'efx',z:'erockthrow',x:Math.round(p.x),y:Math.round(p.y),h:p.z,n:slot,id:p.id});emit({k:'sk',id:p.id,s:'erockthrow'});}
+  return;
+  // (old Stand punch / charged slam below kept dormant)
+  // มี Stand: แตะ (ปล่อยก่อน 0.25 วิ) = หมัด Stand • ค้าง 0.25 วิ = เริ่มชาร์จทุบ (ถ้าคูลดาวน์ 6 วิ ยังไม่ครบ ปล่อยแลวเป็นหมัดปกติ)
   if(inp.fire){if(p.eHold>=0)p.eHold=(p.eHold||0)+dt;if(p.eHold>=ERV.cbHold&&!(p.ecbCd>0)){p.eHold=-1;earthCBStart(p);}return;}
   const h=p.eHold||0;p.eHold=0;if(h>0&&p.cd.basic<=0){p.epn=earthFistStart(p);emit({k:'efx',z:'epunch',x:p.x,y:p.y,h:p.z,id:p.id});setCd('basic',ERV.punchCd);}
 }
@@ -378,7 +390,7 @@ function earthSnapW(){return {ES:(G.eso||[]).map(w=>[w.id,{tec:0,pil:1,mound:2,d
   ED:(G.edust||[]).map(d=>[d.id,Math.round(d.x),Math.round(d.y),d.r,Math.round(d.t*10)/10,d.team,d.boom?1:0,d.boom?d.ids:0])};}
 
 // ท่าพื้นฐาน + โล่ + Dash ของสาย (PBASIC ต้องอยู่ช่องที่ 6 = ลำดับใน PATHS)
-PBASIC.push({id:'b_earth',type:'erock',n:'หมัดหิน Stand / หินเล็ก',d:'คลิก = Stand เล็กด้านหน้าส่งกำปั้นหินตามแนวเล็ง 3 มิติ ระยะ 500 ดาเมจ 10 ทุก 0.8 วิ • กดค้าง = Stand ใหญ่ด้านหลังง้างชาร์จ 2 วิ แล้วยิงหมัดใหญ่ ดาเมจตรง 50 + ผลักถอยเล็กน้อย เศษหินพุ่งเป็นกรวยด้านหลังเป้า ดาเมจ 20 ต่อเป้า คูลดาวน์ 6 วิ เดินช้า 40% • Stand แตก = ยิงหินเล็ก 5 ดาเมจ ทุก 0.35 วิ',
+PBASIC.push({id:'b_earth',type:'erockb',n:'วงหินปา',d:'วงหิน 8 ก้อนลอยหลังตัว • คลิก/ค้าง = ปาหินทีละก้อนทุก 0.7 วิ ระเบิดกระจาย 15 ดาเมจ (รัศมี ~1.7 ม.) • หินเติมเองทีละก้อน ~1.8 วิ • เดิม: คลิก = Stand เล็กด้านหน้าส่งกำปั้นหินตามแนวเล็ง 3 มิติ ระยะ 500 ดาเมจ 10 ทุก 0.8 วิ • กดค้าง = Stand ใหญ่ด้านหลังง้างชาร์จ 2 วิ แล้วยิงหมัดใหญ่ ดาเมจตรง 50 + ผลักถอยเล็กน้อย เศษหินพุ่งเป็นกรวยด้านหลังเป้า ดาเมจ 20 ต่อเป้า คูลดาวน์ 6 วิ เดินช้า 40% • Stand แตก = ยิงหินเล็ก 5 ดาเมจ ทุก 0.35 วิ',
   shd:'โล่ Stand Barrier: Stand ยกโล่หินใหญ่ กันได้รอบตัว 300 HP (มากที่สุดในทุกสาย) • ไม่ได้ใช้ 3 วิ ฟื้น 20/วิ • โล่แตก = Stand หาย 10 วิ (ยิงหินเล็กแทนหมัด, Dash เป็น Rock Boost, สกิลที่ใช้ Stand ใช้ไม่ได้) แล้วกลับมาพร้อมโล่เต็ม 300',
   dsd:'Stand Rampage (Shift): ขี่ Stand วิ่งชาร์จตามทิศเล็ง 1.2 วิ (~600) กด Shift อีกครั้งหยุดก่อน • ชนศัตรู 15 + กระเด็นเล็กน้อย • จบด้วยทุบพื้น 20 + ผลักเล็กน้อย รัศมี 150 • ทะลุกำแพง/เสาของเรา พังของศัตรู • คูลดาวน์ 8 วิ • Stand แตก = Rock Boost Escape: หินดันพุ่ง ~400 ศัตรูรอบจุดเริ่ม (120) กระเด็น คูลดาวน์ 6 วิ',
   hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');},tick:earthBasic,dash:earthDash});

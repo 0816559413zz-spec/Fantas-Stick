@@ -386,3 +386,6 @@
 .h4UX.e-light .fr{background:radial-gradient(circle at 50% 35%,#fff 0,#fffbe2 40%,#ffe58a 100%);box-shadow:0 0 16px rgba(255,226,90,.9),0 0 36px rgba(255,214,60,.5),inset 0 0 16px rgba(255,236,150,.9)}
 /* Darkness ult aura: no fire flipbook */
 #h4[data-el=darkness] .h4Au .fm,.h4UX.e-darkness .fm{display:none}   /* user: no fire around the Darkness ult card */
+/* Earth rock ammo pips (2026-11-24): minimal, under the crosshair */
+#h4Ammo{position:fixed;left:50%;top:calc(50% + 26px);transform:translateX(-50%);display:flex;gap:3px;pointer-events:none;z-index:5}
+#h4Ammo i{width:5px;height:5px;border-radius:1px;background:#e9d2a6;box-shadow:0 0 2px rgba(0,0,0,.6);transition:opacity .12s}

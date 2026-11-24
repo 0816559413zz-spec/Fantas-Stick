@@ -89,6 +89,9 @@ function hud4Draw(me,v){
   for(let i=0;i<nx;i++){const f=clamp((xh-i*per)/per,0,1);h4Set('s'+(nh+i),f.toFixed(3),x=>H4.seg[nh+i][1].style.width=x*100+'%');}
   h4Set('hp',hpv,x=>Q.hp.textContent=x);h4Set('mh',me.mh,x=>Q.mh.textContent='/ '+x);h4Set('xh',xh,x=>Q.xh.textContent=x>0?'+'+x:'');
   h4Set('low',hr<0.35&&me.al,x=>H4.el.classList.toggle('low',x));
+  {const ek=me.ek,on=ek!==undefined&&me.al;let A=document.getElementById('h4Ammo');   // Earth rock ammo: 8 tiny pips under the crosshair, refilling one shows partial
+    if(on&&!A){A=document.body.appendChild(Object.assign(document.createElement('div'),{id:'h4Ammo'}));A.innerHTML='<i></i>'.repeat(EROCK.max);}
+    if(A){A.style.display=on?'':'none';if(on)h4Set('ek',ek,()=>{const k=A.children;for(let i=0;i<k.length;i++){const f=clamp(ek-i,0,1);k[i].style.opacity=f>=1?'0.95':(0.15+0.35*f).toFixed(2);k[i].style.transform=f>=1?'':'scale('+(0.6+0.4*f).toFixed(2)+')';}});}}
   h4Set('rg',!!(me.rg&&me.al),x=>{H4.el.classList.toggle('regen',x);const f=document.getElementById('rgFx')||document.body.appendChild(Object.assign(document.createElement('div'),{id:'rgFx'}));f.classList.toggle('on',x);});
   // The secondary bar shows shield HP, Darkness guard time, or Stand HP.
   const stand=me.ea,standBroken=stand&&stand[0]>0;
