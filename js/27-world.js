@@ -264,7 +264,7 @@ const GQ_OPT=[   // [key, group, label, level names]
   ['aa','ภาพรวม','ลบขอบหยัก',['ปิด','เร็ว','TAA']],
   ['paint','ภาพรวม','ฟิลเตอร์ภาพวาด',['ปิด','เร็ว','เต็ม']],
   ['softp','ภาพรวม','อนุภาคขอบนุ่ม',['ปิด','เปิด']],
-  ['grass','โลก','หญ้า',['ปิด','Low','Medium','High']],
+  ['grass','โลก','หญ้า',['ปิด','Low','Medium','High','Cinematic']],
   ['surf','โลก','ผิววัสดุละเอียด',['ปิด','เปิด']],
   ['amb','โลก','ฝุ่น/หมอกบรรยากาศ',['ปิด','Low','Medium','High']],
   ['detail','โลก','ฉากไกล (โหลดแมพถัดไป)',['Low','High']],
@@ -278,7 +278,7 @@ const GQ_PRE={
   medium:   {res:1,dyn:0,shadow:2,pcss:0,ao:1,bloom:1,grade:1,aa:1,paint:1,softp:1,grass:2,surf:1,amb:2,detail:1,dist:2,particles:1,debris:1,flash:1},
   high:     {res:2,dyn:0,shadow:3,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:3,surf:1,amb:3,detail:1,dist:2,particles:2,debris:2,flash:1},
   ultra:    {res:3,dyn:0,shadow:4,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:3,surf:1,amb:3,detail:1,dist:2,particles:2,debris:2,flash:1},
-  cinematic:{res:3,dyn:0,shadow:4,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:3,surf:1,amb:3,detail:1,dist:2,particles:3,debris:3,flash:1},
+  cinematic:{res:3,dyn:0,shadow:4,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:4,surf:1,amb:3,detail:1,dist:2,particles:3,debris:3,flash:1},
 };
 const GQ_NAME={low:'Low',medium:'Medium',high:'High',ultra:'Ultra',cinematic:'Cinematic',custom:'Custom'};
 const GQ=(()=>{let o=null;try{o=JSON.parse(store('wd_gfx2')||'null');}catch(e){}

@@ -104,5 +104,9 @@ cut), smoke ×1 (`SMOKE_K` 1, was cut to 0.4 on 2026-11-18), ground marks / debr
   (Low: pixel ratio 0.7, no shadows; Ultra/Cinematic: 1.5, 4096 shadows); UI clicks → Custom + saved; High vs Cinematic
   combat shots `shots/cinecmp.jpg`. `WD.GQ`, `WD.gq`, `WD.gqPreset`, `WD.gqSet` exposed for tests.
 
+- Grass level **Cinematic** (user 2026-11-24 "much denser"): `GRASS.cineK` 3 × blades per area and patch 44 (High 40) →
+  249,744 blades vs 68,800 on High (cap `MAXN`/`CAP` raised to 320k). Cost seen: +0.1–0.4 ms GPU (headless NVIDIA, 1080p).
+  Shots `shots/grasscmp.jpg`. Cinematic preset uses it.
+
 Not done yet: gate configs per preset (Low / Cinematic), 6v6 bench per preset, entry preload compiles only the High variant
 (another preset compiles its shaders when chosen = the accepted short hitch).
