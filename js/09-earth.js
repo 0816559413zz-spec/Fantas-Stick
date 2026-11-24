@@ -211,8 +211,8 @@ function earthCrush(p){const T=p.tec;p.crush=null;if(!T)return;
 const DUSTB={v:{range:500,r:350,time:5,rWeak:200,timeWeak:3,delay:0.6,cloud:3}};
 // ---------- สกิล 4: Terra Isle — Stand ต่อยจุ่มลงพื้นตรงจุดเล็งแล้วยกเกาะหินลอยขึ้นมา (ลอยต่ำ กระโดดขึ้นได้)
 // มีคนยืนบน = เกาะค่อย ๆ ลอยสูงขึ้น • ทุกคนยืนได้ • มี HP • อยู่ 12 วิ
-const ISLE=defSpell(EARTH,{id:'terraisle',v:{range:600,r:72,h0:1.25,hMax:6.5,rise:2.4,hp:350,life:12,punch:0.15,lift:0.5,env:20},
-  vn:{range:'ระยะเล็ง',r:'เกาะ • รัศมี',h0:'เกาะ • ลอยตอนเกิด (ม.)',hMax:'เกาะ • สูงสุด (ม.)',rise:'มีคนยืน • ความไวลอยขึ้น (ไล่ช้าลงใกล้สูงสุด)',hp:'เกาะ • HP',life:'อยู่นาน (วิ)'},
+const ISLE=defSpell(EARTH,{id:'terraisle',v:{range:600,r:72,h0:1.25,hMax:6.5,acc:9,vMax:6,hp:350,life:12,punch:0.15,lift:0.5,env:20},
+  vn:{range:'ระยะเล็ง',r:'เกาะ • รัศมี',h0:'เกาะ • ลอยตอนเกิด (ม.)',hMax:'เกาะ • สูงสุด (ม.)',acc:'มีคนยืน • เร่ง/เบรก (ม./วิ²)',vMax:'มีคนยืน • ความเร็วสูงสุด (ม./วิ)',hp:'เกาะ • HP',life:'อยู่นาน (วิ)'},
   role:'utility',n:'Terra Isle',ic:'🏝',cd:14,d:'ชี้จุด: พื้นแตกสั่นแป๊บนึงแล้วเกาะหินลอยขึ้นมาเอง (ลอยต่ำ กระโดดขึ้นได้) • มีคนยืนบนเกาะ = ค่อย ๆ ลอยสูงขึ้น (สูงสุด ~6.5 ม.) • ทุกคนยืนได้ บังกระสุนด้านล่าง • HP 350 อยู่ 12 วิ',
   cast(p,S){if(p.aug||p.ramp||p.ecb||p.wr)return false;const V=S.v,o=aimPoint(p,V.range),x=o.x,y=o.y,seed=(Math.random()*1e6)|0,team=p.team,id=p.id;
     if(p.isle){const old=(G.eso||[]).find(q=>q.id===p.isle);if(old)eKill(old);}
@@ -226,7 +226,9 @@ function earthIsleTick(dt){if(!G.eso)return;const V=ISLE.v;
     if(age<0.35){w.h=V.h0*Math.min(1,age/0.3);}
     else{let on=false;for(const t of plist().concat(G.en)){if(t.dead||t.alive===false)continue;const z=t.isE?(t.h||0):(t.z||0);
         if((t.x-w.x1)**2+(t.y-w.y1)**2<w.r*w.r&&Math.abs(z-w.h)<0.2){on=true;break;}}
-      if(on&&w.h<V.hMax)w.h=Math.min(V.hMax,w.h+Math.max(0.15,(V.hMax-w.h)*V.rise)*dt);}   // fast lift-off that eases out near the top (user 2026-11-24)
+      // smooth: accelerates from rest, cruises, then brakes into the top (user 2026-11-24) • nobody on = drifts to a stop
+      const room=V.hMax-w.h,vBrake=Math.sqrt(2*V.acc*Math.max(0,room));w.v=w.v||0;
+      w.v=on&&room>0.01?Math.min(w.v+V.acc*dt,V.vMax,vBrake):Math.max(0,w.v-V.acc*1.5*dt);w.h=Math.min(V.hMax,w.h+w.v*dt);}
     w.hgt=w.h;}}
 
 // ---------- สกิล 5: Terra Auger ----------

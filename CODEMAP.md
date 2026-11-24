@@ -87,7 +87,7 @@ SDOME_POSE:235 stormDomeCost:236 stormDomeDash:237 stormDomeCharge:238 stormDome
 ## js/09-darkness.js (463) — 
 DARKP:2 DARK_V:6 DARK_BA:7 DARK_LONG_DASH:8 DARK_CHASE_FLOW:9 DARK_MAW:10 DARK_VEIL_PULL_CLEAR:11 DARK_CHASE_T:12 DARK_WALTZ_ORB:13 darkFlow:14 darkOrbImmune:15 darkAlive:23 darkReset:24 darkState:25 darkEvent:26 darkAim:29 darkTarget:36 darkCone:40 darkBAFloor:47 darkBATargets:51 darkMoveHeading:68 darkClearCooldown:71 darkMark:75 darkReveal:82 darkQueue:83 darkGainFlow:84 darkKill:90 darkTick:93 darkShieldTick:127 darkShieldCrossAt:144 darkShieldCross:153 darkBeamStop:154 darkDash:163 darkBasic:186 DARK_MARK:216 darkWaveTick:233 DARK_CHASE:255 darkMoveWaltz:306 DARK_WALTZ:331 DARK_WARD:353 DARK_VEIL:368 DARK_ULT:376 darkUltBite:391 darkMoveChase:401 darkSnap:441 darkMarked:460
 
-## js/09-earth.js (383) — สายดิน ⛰️ (ผู้ใช้ออกแบบทั้งหมด — designs/earth.md §0 FINAL SPEC) • ฝั่งโฮสต์
+## js/09-earth.js (385) — สายดิน ⛰️ (ผู้ใช้ออกแบบทั้งหมด — designs/earth.md §0 FINAL SPEC) • ฝั่งโฮสต์
 §8 Tectonic Crush: Stand ดันช้า (TECT.v.push) แล้วกำแพงปิดเร็ว (TECT.v.s…
 EARTH:9 ERV:12
 §24 ตัวช่วย
@@ -108,14 +108,14 @@ TECT:185 earthCrush:198
 DUSTB:211
 §212 สกิล 4: Terra Isle — Stand ต่อยจุ่มลงพื้นตรงจุดเล็งแล้วยกเกาะหินลอยขึ…
 ISLE:214 earthIsleTick:224
-§232 สกิล 5: Terra Auger
-AUGER:235
-§236 สกิล 5: Rampart (ผู้ใช้ 2026-11-23 v2) — เลือกจุด (โฮโลแกรม) แล้วคลิก…
-RAMPART:238 earthRampAimUpd:243 earthRampAimTick:245 earthRampPlace:251 eAugAim:263 earthAugFire:264 earthMound:275
-§278 อัลติ: Wrath — ชาร์จบนพื้น หินดันผู้เล่นขึ้นฟ้า Stand ปาเสาลงจุดเล็ง
-WRATH_READY_T:279 WRATH_THROW_SWING_T:280 WRATH_DRAW_T:281 WRATH:282 earthWrathAim:288 earthWrathFlightAngles:289 earthPillarThrow:295 earthPillarImpact:301 earthWrathTick:309 earthWrathEnd:333 E_WRS:337 earthSpikeTick:338
-§344 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
-updateEarth:345 earthSnapP:359 earthSnapW:375
+§234 สกิล 5: Terra Auger
+AUGER:237
+§238 สกิล 5: Rampart (ผู้ใช้ 2026-11-23 v2) — เลือกจุด (โฮโลแกรม) แล้วคลิก…
+RAMPART:240 earthRampAimUpd:245 earthRampAimTick:247 earthRampPlace:253 eAugAim:265 earthAugFire:266 earthMound:277
+§280 อัลติ: Wrath — ชาร์จบนพื้น หินดันผู้เล่นขึ้นฟ้า Stand ปาเสาลงจุดเล็ง
+WRATH_READY_T:281 WRATH_THROW_SWING_T:282 WRATH_DRAW_T:283 WRATH:284 earthWrathAim:290 earthWrathFlightAngles:291 earthPillarThrow:297 earthPillarImpact:303 earthWrathTick:311 earthWrathEnd:335 E_WRS:339 earthSpikeTick:340
+§346 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
+updateEarth:347 earthSnapP:361 earthSnapW:377
 
 ## js/09-light.js (564) — 
 LIGHTP:8 LTV:12 lgOn:19 lightShieldPitch:20 lightShieldGauge:21 lightClearBond:22 lightReset:26 lightAlly:32 lightLinkPos:33 lightUnlink:34 lightReleaseAlly:52 lightBondTarget:59 lightBondTap:79 lightRecall:94
@@ -965,4 +965,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(118 files, 36071 lines)
+(118 files, 36073 lines)
