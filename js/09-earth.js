@@ -134,7 +134,7 @@ function earthFistBreak(pr){
 }
 
 // ---------- Dash: Stand Rampage / Rock Boost Escape ----------
-const EKICK={cd:5,back:950,up:6,dmg:20,range:520,hold:0.22,cdUp:8,launch:22,upR:60,upKnock:350};
+const EKICK={cd:5,back:950,up:6,dmg:20,range:520,hold:0.22,cdUp:8,launch:19,upR:60,upKnock:350};
 SPELLS.ekickrock={hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');const o=G.players[pr.owner];knock(t,o?o.x:pr.x-pr.vx,o?o.y:pr.y-pr.vy,300);}};
 function earthDash(p,inp,pr,dt,setCd){
   if(p.ramp){const R=p.ramp;R.t-=dt;
