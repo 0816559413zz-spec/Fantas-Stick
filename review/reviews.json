@@ -1,5 +1,5 @@
 {
- "next": 172,
+ "next": 173,
  "items": [
   {
    "id": 171,
@@ -3597,6 +3597,23 @@
    "links": [
     "/shots/motion_earth_rockba.gif",
     "/shots/earth_rockba_sheet.jpg"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 172,
+   "title": "Earth: Stone Barrage (แทน Tectonic Crush)",
+   "text": "ปาหินทั้งวงหลังตัวออกไปรัวๆ ไม่ตรงเป้าทุกก้อน กระจาย+ส่ายนิดๆ ก้อนละ 15 ระเบิดกระจาย • แล้ววงเติมเต็มเร็ว ~2 วิ • ท่าดันสองมือไปข้างหน้าค้างเกร็ง • คูลดาวน์ 9 วิ",
+   "kind": "Skill",
+   "who": "Earth",
+   "status": "wait",
+   "created": "2026-11-24T22:00:00",
+   "updated": "2026-11-24T22:00:00",
+   "imgs": [],
+   "links": [
+    "/shots/motion_earth_barrage.gif",
+    "/shots/earth_barrage_sheet.jpg"
    ],
    "feedback": "",
    "reply": ""

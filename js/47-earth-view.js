@@ -816,6 +816,10 @@ SKANIM.terraisle='islecast';
 // Earth BA throw (user 2026-11-24): quick wand flick toward the aim — tiny wind-up, accelerating snap, short follow-through
 CANIM.erockthrow={d:0.36,st:0,tr:[0.25,0.6],k:[[0.25,-0.55,-0.35,0.18,0.02,-0.45,0.35,0,-0.02,'s'],[0.5,-1.55,-0.1,-0.12,0.1,-0.5,0.4,0,-0.04,'i'],[1,-1.25,-0.15,-0.05,0.04,-0.45,0.35,0,0,'s']]};
 SKANIM.erockthrow='erockthrow';
+// Stone Barrage cast (user 2026-11-24): short wind-up, both hands thrust forward (accelerating), held with a tremble while
+// the ring empties in a rapid volley, then settle
+CANIM.stonebarrage={d:0.95,st:0,tr:null,tm:[0.25,0.62],k:[[0.15,-0.6,-0.4,0.25,0.04,-0.7,0.6,0,-0.05,'s'],[0.25,-1.55,-0.1,-0.08,0.14,-1.5,0.1,0,-0.1,'i'],[0.62,-1.5,-0.1,-0.08,0.15,-1.45,0.12,0,-0.1,'s'],[1,-1.1,-0.15,0,0.03,-0.8,0.3,0,0,'s']]};
+SKANIM.stonebarrage='stonebarrage';
 // rock ring behind the back: 8 small faceted rocks on a slowly turning vertical circle; count follows the ammo (ek),
 // the refilling rock grows in place. One shared geometry, per-rock seed for size/tilt.
 const ERING={geo:null,mat:null};
@@ -1013,6 +1017,7 @@ function earthEfx(ev){
     // ----- Tectonic Crush -----
     case 'ewallup':shake(0.35);if(near)snd('boom',ev);return true;
     case 'erockthrow':{if(near)snd('whoosh',{x,y,vol:0.35});return true;}
+    case 'erockbar':{if(near)snd('buff',{x,y,vol:0.4});burst(x,y,ECOL.dust,8,120,0.4,2.2,{h:1.4,vh:[0,2],g:2});return true;}
     case 'erockboom':{burst(x,y,ECOL.dust,10,170,0.4,2.6,{h:Math.max(0.2,H),vh:[1,3],g:6});eChunks(x,y,Math.max(0.2,H),5,170,6,0.16);ring(x,y,'#e3c690',34,0.25,Math.max(0.15,H));if(H<0.6)dfCracks(x,y,0.06,26,'#a98a62',0.6);if(near)snd('boom',{x,y,vol:0.35});return true;}
     case 'eislecall':EV.icall.push({t:0,x,y,a:ev.a,id:ev.id});if(near)snd('buff',{x,y,vol:0.5});return true;   // Terra Isle: Stand punch
     case 'eisleup':{shake(0.4);if(near)snd('boom',ev);burst(x,y,ECOL.dust,24,260,0.5,3.4,{h:0.3,vh:[2,7],g:7});eChunks(x,y,0.3,10,240,9,0.24);for(let i=0;i<5;i++)smoke(x+rnd(-60,60),y+rnd(-60,60),0.3,2,ECOL.dust,0.7,8,50);return true;}

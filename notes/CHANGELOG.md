@@ -1505,3 +1505,4 @@
 - 2026-11-24 Earth BA: rock ring ammo (8), splash 15 every 0.7 s, refill one per 1.8 s, minimal pips; Stand punch + charged slam removed (protocol v111)
 - 2026-11-24 Earth rock ring v2: bigger rocks, even spacing, refill rises from the centre and the others slide over (not yet visually checked)
 - 2026-11-24 Minimal class HUD (pips/thin arc) for Wind, Nature, Light; Water gauge hidden; Earth texts off • Earth rock ring smaller rocks, wider circle
+- 2026-11-24 Earth Stone Barrage replaces Tectonic Crush: rapid volley of the whole rock ring with sway, fast refill; rocks render as rocks
