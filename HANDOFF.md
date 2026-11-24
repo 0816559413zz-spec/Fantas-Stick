@@ -15,7 +15,6 @@
 **Rules cleanup (2026-11-24, docs only):** HANDOFF split (this file = status only; log → `notes/HANDOFF-LOG.md`, old changelog → `notes/HANDOFF-CHANGELOG-OLD.md`). `CLAUDE.md` = 9 core rules + task router; `AGENTS.md` = pointer. Cause of "Claude ignores CLAUDE.md": HANDOFF too big to read, conflicting rules, too many rules.
 
 
-**Earth Stone Mark (2026-11-24, v112, tested on a player bot: mark → 5 BA rocks → petrified 1 s; charge 0.6 s, line lingers 0.5 s, gold diamond sigil over the head):** replaces Stonebreaker (stub `STONEB` kept for old slab code). Host js/09-earth.js `SMARK`, `earthMarkFire`, `earthStoneHit` (hooked in `earthRockSplash` + `SPELLS.ekickrock`), `earthStoneSnap` → snapshot `stn` (P, E). View js/47: `CANIM.stonemark`, efx `esmc` (charge sand), `esmf` (kinked TubeGeometry line — natFx Tube did not show in headless), `epetrify`, `eStoneUpd` (ring, stuck rocks, stone body material swap).
 
 **Next session — Nature cast review (2026-11-24):** Review the raised left elbow, thorn wrap, and left-hand cast transitions across the full Nature kit. The in-game review is `shots/nature-every-skill.gif` on the capture machine. It covers the two-hit whip, turret, both Dash examples, Lotus heal and buff, relocation, Wood Ball, Wood Wall, and World Tree. Nature's shield is disabled in the current build. Use the existing VFX Studio GIF Export for the next Studio preview, as documented in `guides/WORKFLOW-WITH-CLAUDE.md`. Further pose and VFX changes are deferred until the user resumes the review.
 
