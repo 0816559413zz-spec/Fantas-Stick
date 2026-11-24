@@ -3756,6 +3756,23 @@
    ],
    "feedback": "",
    "reply": "แก้แล้ว: ค้าง Shift = เสาหินดันพุ่งขึ้นแบบเร่ง สูง ~10 ม. • หินที่ถีบเป็นก้อนเล็กทรง platform ผิวมน ไม่แหลม"
+  },
+  {
+   "id": 178,
+   "title": "Earth: Stone Mark (แทน Stonebreaker) — มาร์ค + หินเกาะตัว + กลายเป็นหิน",
+   "text": "เลือก Earth กดสกิล Stone Mark ใส่หุ่น แล้วปา BA หินใส่ 5 ก้อนใน 4 วิ (หุ่นกลายเป็นหิน 1 วิ) • GIF shots/motion_earth_mark.gif",
+   "kind": "Skill",
+   "who": "Earth",
+   "status": "wait",
+   "created": "2026-11-24T23:50:00",
+   "updated": "2026-11-24T23:50:00",
+   "imgs": [],
+   "links": [
+    "/shots/motion_earth_mark.gif",
+    "/shots/earth_mark_zoom.jpg"
+   ],
+   "feedback": "",
+   "reply": ""
   }
  ]
 }

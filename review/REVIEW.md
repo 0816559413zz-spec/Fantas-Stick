@@ -30,6 +30,15 @@ Nature หันขวา 45° มือซ้ายลดลงตอนวิ�
 - ลิงก์/ไฟล์: `/shots/motion_ready_flow_preview.gif`
 - ลิงก์/ไฟล์: `/shots/motion_ready_flow_game_preview.gif`
 
+## #178 Earth: Stone Mark (แทน Stonebreaker) — มาร์ค + หินเกาะตัว + กลายเป็นหิน
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Skill • สาย/ส่วน: Earth
+
+**วิธีดู / อะไรรอรีวิว:**
+เลือก Earth กดสกิล Stone Mark ใส่หุ่น แล้วปา BA หินใส่ 5 ก้อนใน 4 วิ (หุ่นกลายเป็นหิน 1 วิ) • GIF shots/motion_earth_mark.gif
+
+- ลิงก์/ไฟล์: `/shots/motion_earth_mark.gif`
+- ลิงก์/ไฟล์: `/shots/earth_mark_zoom.jpg`
+
 ## #177 Earth: Shift ใหม่ (ถีบหินกลางอากาศ / ค้างพุ่งขึ้น)
 - สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Skill • สาย/ส่วน: Earth
 

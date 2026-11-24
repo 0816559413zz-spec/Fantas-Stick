@@ -94,7 +94,7 @@ function earthReset(p){p.ehp=ERV.sh;p.stdB=0;p.eShT=0;p.epn=null;p.esb=null;p.au
 const EROCK={max:8,rate:0.7,refill:1.8,splash:34,dmg:10};
 function earthRockTick(p,dt){if(p.erk===undefined)p.erk=EROCK.max;if(p.erk<EROCK.max&&!p.erBar)p.erk=Math.min(EROCK.max,p.erk+dt/(p.erkFast>G.time?BARRAGE.v.refill/EROCK.max:EROCK.refill));}
 function earthRockSplash(pr){if(pr.splashed)return;pr.splashed=1;const o=G.players[pr.owner];if(!o)return;
-  for(const t of foesIn(o.team,pr.x,pr.y,EROCK.splash,pr.h+3)){const z=t.isE?(t.h||0):(t.z||0);if(Math.abs(z+1-pr.h)<2.6)aoeHit(o,t,EROCK.dmg);}
+  for(const t of foesIn(o.team,pr.x,pr.y,EROCK.splash,pr.h+3)){const z=t.isE?(t.h||0):(t.z||0);if(Math.abs(z+1-pr.h)<2.6&&aoeHit(o,t,EROCK.dmg))earthStoneHit(t);}
   damageEnv(pr.x,pr.y,EROCK.splash,6*ERV.env,pr.owner,'rock',Math.max(0.3,pr.h));
   emit({k:'efx',z:'erockboom',x:Math.round(pr.x),y:Math.round(pr.y),h:Math.round(pr.h*10)/10});}
 SPELLS.erockb={hit(pr){earthRockSplash(pr);}};
@@ -135,7 +135,7 @@ function earthFistBreak(pr){
 
 // ---------- Dash: Stand Rampage / Rock Boost Escape ----------
 const EKICK={cd:5,back:950,up:6,dmg:20,range:520,hold:0.22,cdUp:8,launch:23,v0:7,boost:0.16,upR:60,upKnock:350};   // launch v2: column pushes with rising speed (ease-in) for `boost` s, then flies fast
-SPELLS.ekickrock={hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');const o=G.players[pr.owner];knock(t,o?o.x:pr.x-pr.vx,o?o.y:pr.y-pr.vy,300);}};
+SPELLS.ekickrock={hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');earthStoneHit(t);const o=G.players[pr.owner];knock(t,o?o.x:pr.x-pr.vx,o?o.y:pr.y-pr.vy,300);}};
 function earthDash(p,inp,pr,dt,setCd){
   if(p.ramp){const R=p.ramp;R.t-=dt;
     p.dashX=Math.cos(p.ang);p.dashY=Math.sin(p.ang);p.dash=0.05;p.dashSp=ERV.rampSp;p.eRamp=p.id;p.shieldOn=false;
@@ -186,24 +186,30 @@ function earthStoneAim(p,range=60,origin=2){
   const d=reach*Math.cos(pt),x=p.x+Math.cos(a)*d,y=p.y+Math.sin(a)*d;
   return {x,y,h:h0+reach*Math.sin(pt)/20+terrT(p.x,p.y)-terrT(x,y),a,pt};
 }
-const STONEB=defSpell(EARTH,{id:'stonebreaker',v:{delay:0.45,knock:1800,wallDmg:20,wallStun:1,env:40},vn:{delay:'แผ่นหินพุ่งหลังกด (วิ)',knock:'แรงกระเด็น',wallDmg:'ชนของแข็ง • ดาเมจเพิ่ม',wallStun:'ชนของแข็ง • สตัน (วิ)',env:'แผ่นหินแตก • ดาเมจใส่บ้าน/ของ (×ตัวคูณ)'},role:'finisher',n:'Stonebreaker',ic:'🧱',cd:8,d:'แผ่นหินลอยตามเป้ากลางจอ Stand อยู่หลังแผ่นแล้วต่อยให้พุ่งตามแนวเล็ง 3 มิติ ระยะ 700 โดนศัตรูคนแรกแล้วแตก',fx:'25 ดาเมจ + กระเด็นไกล ~300 • กระเด็นไปชนของแข็ง (กำแพงแผนที่ / กำแพง Tectonic / เสา + กำแพงโดเมน Wrath) = +20 ดาเมจ สตัน 2 วิ (โคลน/เนิน Auger ไม่นับ) • ต้องมี Stand',
-  cast(p){if(!eStand(p))return eNoStand(p);if(p.aug||p.ramp||p.ecb)return false;
-    // งัดแผ่นหินขึ้นจากพื้นก่อน → Stand โผล่มาต่อย (รอยร้าว) → แผ่นหินพุ่ง (0.45 วิ หลังกด)
-    const cast=p.esb={at:G.time};
-    const start=earthStoneAim(p);
-    emit({k:'efx',z:'esbcast',x:start.x,y:start.y,id:p.id});
-    G.strikes.push({x:p.x,y:p.y,t:STONEB.v.delay,fn(){
-      if(p.esb!==cast)return;
-      p.esb=null;
-      if(!p.alive||p.downed||!eStand(p))return;
-      const {x,y,h,a,pt}=earthStoneAim(p),spd=PDEF.eslab.spd,flat=spd*Math.cos(pt);
-      shoot(p,'eslab',{sp:'stonebreaker',x,y,h,vx:flat*Math.cos(a),vy:flat*Math.sin(a),vh:spd*Math.sin(pt)/20,quiet:1});
-      emit({k:'efx',z:'esbfire',x,y,h,a,pt,id:p.id});
-    }});},
-  hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');const o=G.players[pr.owner];
-    if(!t.isE&&shieldFaces(t,pr.x-pr.vx*0.05,pr.y-pr.vy*0.05,pr.h))return;
-    const a=Math.atan2(pr.vy,pr.vx);knock(t,t.x-Math.cos(a)*10,t.y-Math.sin(a)*10,STONEB.v.knock);t.sbk=0.7;t.sbkSrc=pr.owner;t.sbkN=t.solN|0;
-    emit({k:'efx',z:'esbhit',x:pr.x,y:pr.y,h:pr.h,a,pt:Math.atan2(pr.vh*20,Math.hypot(pr.vx,pr.vy))});}});
+// Stonebreaker replaced by Stone Mark (user 2026-11-24) — same SPELL_LIST slot; STONEB stub keeps the old slab code parsing
+const STONEB={v:{delay:0.45,knock:1800,wallDmg:20,wallStun:1,env:40}};
+// ---------- สกิล 1: Stone Mark — ชาร์จไม้สั้น ๆ แล้วยิงเส้นสเปลหัก ๆ ถึงทันที (ไม่ใช่กระสุน) มาร์คศัตรูคนแรก ไม่มีดาเมจ
+// ศัตรูที่โดนมาร์ค: หินทุกก้อนที่โดน (BA วงหิน / Stone Barrage / หินถีบ) เกาะตัว 1 ชั้น (ชั้นละ 4 วิ) • ครบ 5 = กลายเป็นหินทั้งตัว 1 วิ แล้วมาร์คหาย
+const SMARK=defSpell(EARTH,{id:'stonemark',v:{charge:0.45,len:900,w:18,mark:6,win:4,need:5,stone:1},
+  vn:{charge:'ชาร์จก่อนยิง (วิ)',len:'ระยะ',w:'กว้างเส้น',mark:'มาร์คอยู่ (วิ)',win:'หินแต่ละชั้นอยู่ (วิ)',need:'ชั้นที่กลายเป็นหิน',stone:'กลายเป็นหิน (วิ)'},
+  role:'control',n:'Stone Mark',ic:'🪨',cd:8,d:'ชาร์จไม้ 0.45 วิ แล้วยิงเส้นสเปลหัก ๆ ถึงทันที ระยะ 900 มาร์คศัตรูคนแรก 6 วิ (ไม่มีดาเมจ)',fx:'ศัตรูที่โดนมาร์ค: หินที่ปาโดนเกาะตัวทีละชั้น (ชั้นละ 4 วิ) • ครบ 5 ชั้น = กลายเป็นหินทั้งตัว ขยับไม่ได้ 1 วิ แล้วมาร์คหาย',
+  cast(p,S){if(p.aug||p.ramp||p.wr||p.esm)return false;const c=p.esm={at:G.time};
+    emit({k:'efx',z:'esmc',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});
+    G.strikes.push({x:p.x,y:p.y,t:S.v.charge,fn(){if(p.esm!==c)return;p.esm=null;if(p.alive&&!p.downed)earthMarkFire(p);}});}});
+function earthMarkFire(p){const V=SMARK.v,h0=p.z+1.5,inp=p.inp||{},r=aimRay3(p,h0,V.len);let ex,ey,eh;
+  if(r){ex=r.x;ey=r.y;eh=r.h;}else{const ap=clamp(inp.ap||0,-1.5,1.5);ex=p.x+Math.cos(p.ang)*V.len;ey=p.y+Math.sin(p.ang)*V.len;eh=h0+Math.tan(ap)*V.len/20;}
+  const dx=ex-p.x,dy=ey-p.y,dh=(eh-h0)*20,L=Math.max(1,Math.hypot(dx,dy,dh));let best=null,bu=2;
+  for(const t of foesOf(p.team)){if(t.dead||t.alive===false||t.downed)continue;const tx0=t.x-p.x,ty0=t.y-p.y,tz0=(cH(t)-h0)*20,u=(tx0*dx+ty0*dy+tz0*dh)/(L*L);if(u<0||u>1||u>=bu)continue;
+    if(Math.hypot(tx0-dx*u,ty0-dy*u,tz0-dh*u)<=(t.r||PR)+V.w){bu=u;best=t;}}
+  if(best){ex=best.x;ey=best.y;eh=cH(best);best.stMk=G.time+V.mark;best.stS=[];best.stSrc=p.id;}
+  emit({k:'efx',z:'esmf',x:Math.round(p.x),y:Math.round(p.y),h:h0,x2:Math.round(ex),y2:Math.round(ey),h2:Math.round(eh*10)/10,hit:best?1:0,id:p.id});}
+// a stone hit on a marked foe adds one layer; `need` layers inside `win` s = petrified (stun) and the mark is used up
+function earthStoneHit(t){if(!(t.stMk>G.time)||!t.alive&&t.alive!==undefined)return;const V=SMARK.v;
+  t.stS=(t.stS||[]).filter(x=>G.time-x<V.win);t.stS.push(G.time);
+  if(t.stS.length>=V.need){t.stS=[];t.stMk=0;addStun(t,V.stone);t.stoneT=G.time+Math.max(0.3,t.stun||V.stone);
+    emit({k:'efx',z:'epetrify',x:Math.round(t.x),y:Math.round(t.y),h:cH(t)});}}
+// snapshot: 0 none • 1+layers while marked • +10 while petrified
+function earthStoneSnap(t){const m=t.stMk>G.time,s=t.stoneT>G.time;if(!m&&!s)return 0;return (m?1+(t.stS||[]).filter(x=>G.time-x<SMARK.v.win).length:0)+(s?10:0);}
 
 // ---------- สกิล 2: Mud Swamp ----------
 const MUDS=defSpell(EARTH,{id:'mudswamp',v:{range:600,r:120,warn:0.5,time:5,slow:0.5},vn:{range:'ระยะเล็ง',r:'รัศมี',warn:'วงเตือน (วิ)',time:'อยู่นาน (วิ)',slow:'ศัตรู • ความเร็ว (เท่า)'},role:'control',n:'Mud Swamp',ic:'🟤',cd:12,d:'เล็งพื้นระยะ 600 วงเตือน 0.5 วิ แล้วเป็นบ่อโคลนรัศมี 120 นาน 5 วิ (โดนเฉพาะศัตรู)',fx:'ศัตรูในโคลน: ช้าลง 50% ใช้ Dash/กระโดดไม่ได้ ขาจมโคลน • ไม่มีดาเมจ • ใช้ได้แม้ Stand แตก',
