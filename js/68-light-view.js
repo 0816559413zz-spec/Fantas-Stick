@@ -1931,6 +1931,7 @@ function drawLightHud(x,y,me){
   const emp=(L[5]|0)===1,tgt=emp?1:(L[16]||0)/100,oh=(L[17]|0)===1,dt=1/60;if(LGHUD.em&&!emp)LGHUD.e=1;LGHUD.em=emp;if(emp||LGHUD.h<0.02)LGHUD.e=0;   // Empower (ผู้ใช้ 2026-11-18): เกจเต็มมีแสงไหล ไม่ร้อน • หมดบัฟ = เกจลดลงจนเป็น 0
   LGHUD.h+=(tgt-LGHUD.h)*Math.min(1,dt*(LGHUD.e&&tgt<LGHUD.h?2.2:12));
   LGHUD.a=clamp(LGHUD.a+((LGHUD.h>0.01||oh||emp)?dt/0.15:-dt/0.4),0,1);if(LGHUD.a<=0)return;
+  {const col=(L[17]|0)===1?'#ff6a4a':LGHUD.h<0.85?'#ffd36a':'#ffa03a';cx.save();cx.globalAlpha=LGHUD.a;hudArc(x,y,LGHUD.h,col);cx.restore();return;}   // minimal (user 2026-11-24)
   const h=LGHUD.h,R=112,cX=x-52,lo=0.47,hi=-0.47,sp=lo-hi,T=performance.now();   // โค้งด้านขวาเป้า ห่างออกมา (ผู้ใช้ 2026-11-17) • ธีมแสง: ทองเรือง + แกนขาว • เปลี่ยนสีแค่ใกล้เต็ม/ร้อนเกิน
   const P=t=>[cX+Math.cos(t)*R,y+Math.sin(t)*R],dia=(t,r,c)=>{const [px,py]=P(t);cx.fillStyle=c;cx.beginPath();cx.moveTo(px,py-r*1.6);cx.lineTo(px+r,py);cx.lineTo(px,py+r*1.6);cx.lineTo(px-r,py);cx.closePath();cx.fill();};
   cx.save();cx.globalAlpha=LGHUD.a;cx.lineCap='round';

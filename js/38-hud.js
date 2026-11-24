@@ -1,3 +1,10 @@
+// Minimal resource pips under the crosshair (user 2026-11-24): n small squares, `full` lit, the next one partly lit by `frac`
+function hudPips(x,y,n,full,frac,col){const w=5,gap=3,x0=x-(n*w+(n-1)*gap)/2;
+  for(let i=0;i<n;i++){const f=i<full?1:i===full?clamp(frac||0,0,1):0,px=x0+i*(w+gap);
+    cx.fillStyle='rgba(0,0,0,0.45)';cx.fillRect(px-1,y-1,w+2,w+2);cx.fillStyle=col;cx.globalAlpha=f>=1?0.95:0.15+0.35*f;cx.fillRect(px,y,w,w);cx.globalAlpha=1;}}
+// Minimal thin gauge arc on the right of the crosshair (0..1)
+function hudArc(x,y,k,col){const R=30,a0=-0.55,a1=0.55;cx.lineCap='round';cx.lineWidth=2.5;cx.strokeStyle='rgba(0,0,0,0.4)';cx.beginPath();cx.arc(x,y,R,a0,a1);cx.stroke();
+  if(k>0.005){cx.strokeStyle=col;cx.lineWidth=2;cx.beginPath();cx.arc(x,y,R,a1-(a1-a0)*clamp(k,0,1),a1);cx.stroke();}cx.lineCap='butt';}
 function drawReticleTimer(ctx,x,y,radius,timeLeft){
   const start=-Math.PI/2,turn=Math.PI*2;
   ctx.save();

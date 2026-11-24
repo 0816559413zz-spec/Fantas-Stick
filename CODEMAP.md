@@ -474,12 +474,12 @@ lastFrame:2 HSTOP:5 hitStop:6 FXSTUDIO:8
 §9 เก็บ shader ที่ compile แล้วไว้ตลอดเกม (ผู้ใช้ 2026-11-02 "เล่นกับบอท…
 PINMAX:13 PINNED:13 KEEPSRC:16 pinPrograms:22 frame:25 _fpsAcc:42 _fpsN:42 _fpsLast:42 render:43 detailCull:89 viewDetailAt:92 renderGame:99
 
-## js/38-hud.js (482) — 
-drawReticleTimer:1
-§10 HUD
-rr:11 SLOTS:12 fmtTime:13
-§14 ชิ้นส่วน HUD ธีมทอง-น้ำเงิน
-HG:15 HG2:15 HUDF:17 hudTick:18 readyPulse:20 diaPath:22 plate:24 frameBox:30 bossTrail:38 drawBossBar:39 spellDia:59 thinBar:88 drawHUD:93 raceRankClient:175 drawModeHUD:179 MM:217 MMB:218 drawMinimap:219 slotKey:295 mySlots:296 STATUS_ICO:305 SLOTS_IMP:306 BR_LOCK:307 CLUSTER:309 E_NEEDSTAND:310 slotState:311 drawBottom:335 drawBoard:350 FHUD:375 FHTEX:376 fhFrame:377 FH_EDGE:380 FH_CORE:380 fhMix:381 FHC:383 fhLayer:384 drawFireHeat:387 SNAPB:471 snapBanner:472 drawSnapBanner:473
+## js/38-hud.js (489) — 
+hudPips:2 hudArc:6 drawReticleTimer:8
+§17 HUD
+rr:18 SLOTS:19 fmtTime:20
+§21 ชิ้นส่วน HUD ธีมทอง-น้ำเงิน
+HG:22 HG2:22 HUDF:24 hudTick:25 readyPulse:27 diaPath:29 plate:31 frameBox:37 bossTrail:45 drawBossBar:46 spellDia:66 thinBar:95 drawHUD:100 raceRankClient:182 drawModeHUD:186 MM:224 MMB:225 drawMinimap:226 slotKey:302 mySlots:303 STATUS_ICO:312 SLOTS_IMP:313 BR_LOCK:314 CLUSTER:316 E_NEEDSTAND:317 slotState:318 drawBottom:342 drawBoard:357 FHUD:382 FHTEX:383 fhFrame:384 FH_EDGE:387 FH_CORE:387 fhMix:388 FHC:390 fhLayer:391 drawFireHeat:394 SNAPB:478 snapBanner:479 drawSnapBanner:480
 
 ## js/39-menu.js (291) — 
 myLook:5 myColor:5 myKit:5 myName:6 renderMyHouse:9
@@ -824,7 +824,7 @@ bdNearKit:305
 ## js/68-darkness-view.js (1153) — 
 nightWaltzStrip:2 nightWaltzBorder:80 stDarkVeilGround:118 darkFxMesh:195 drawDarknessHud:201 drawDarkHudBar:220 darknessMarkView:227 darkWaveViews:237 darkActiveViews:237 darkViewRoot:238 darkViewTemp:245 darknessClear:257 darkDeathRoots:265 darkDeathClear:268 darkWorldAt:282 darkMarkWind:285 darkMarkLaunch:313 darkMarkContact:325 darkViewNow:338 darkFlowHud:338 darkIdleWeaponPose:339 darkBAGroundImpact:343 darkSettleWeapon:358 darkBlendWeapon:369 darkShowWeaponReturn:392 darkTrailHistory:399 darkDashView:438 darknessCharacter:484 darknessEfx:727 stDarkShieldInk:1024 stDarkVeilBlade:1067 stWardDrainPool:1104
 
-## js/68-light-view.js (1962) — 
+## js/68-light-view.js (1963) — สายแสง ✨ ภาพฝั่งเครื่องผู้เล่น (รอบแรก 2026-11-16 — ภาพชั่วคราวตามสเปก designs/light.md ร…
 LGV:7 LGSH:9 LGSH_L:11 _lgM4:14 _lgQ:14 _lgSV:14 _lgS:14 _lgC:14 _lgC2:14 lgGlowTex:15 lgNeon:17 lgEmpFx:25 lgWallBurn:44 lgShardSpawn:60 lgShardTick:64 lgBaCore:65 lgCrDim:108 lgEmpBeam:112 lgNeonCrystal:126 lgSanctumFloorTex:136 lgSanctumMoteTex:147 lgHoneyTex:162 lgShield:166 _lgShieldEuler:202 lightShieldEv:203 LGPOSE:206 _lgLeanBase:207 _lgLeanUndo:207 _lgGlass:208 _lgCore:208 _lgGeo:208 _lgEdge:208 _lgEdgeM:208 lgCrystalMesh:210 lgState:218 _lgV:219 _lgW:219 lgWorld:220 LG_ULT_ASSET:223 LG_CRYSTAL_ASSET:223 LG_ULT_INTRO:224 LG_ULT_ARRIVAL_FX:224 LG_ULT_TIME:225 lgUltMaterials:226 lgSovereignFinishes:227 lgSovereignMaterials:228 lgSovereignFinish:289 lgSovereignCrystal:310 lgSkinSovereign:319 lgPoseSovereign:372 lgSovereignHeart:448 LG_SASH_X:474 LG_SASH_Z:474 lgSovereignRibbon:475 lgSovereignFlare:534 LG_PALM_TRAVEL:547 LG_PALM_SCORCH_LIFE:548 LG_PALM_SCORCH_SLOTS:548 lgPalmGateOffset:549 lgSovereignPalmWaves:551 lgPosePalmWaves:560 lgPoseBeamWaves:566 lgSovereignPalmGate:578 lgSovereignScorchTrail:588 lgPalmScorch:616 lgSovereignCrossSparks:652 lgSovereignGather:675 lgSovereignWingCurrent:708 lgSovereignChargeSeal:737 lgSovereignChestRecoil:754 lgSovereignSeal:764 lgSovereignArmSigils:780 lgBuildSovereign:811 lgReturnMark:888 lgUltVisual:902 lgWardVisual:1139 _lgBeamM:1155 lgBeamMat:1156 lgSovereignChestBeam:1159 lgSovereignPalmBeam:1196 _lgLinkM:1266 lgLinkMat:1267 lgUnitTube:1270 lgTube:1271 lgAim:1279 lightFX:1280 lgBaseObjects:1523 lgClearBase:1524 lgClear:1525 lightDropView:1532 lgAllyEmpEnd:1538
 §1542 เหตุการณ์
 lgBlip:1544 lgArcFx:1548 lgFlyFx:1551 lgSovereignArrival:1552 lightFxTick:1591 LG_BLAST_EXPAND:1595 LG_BLAST_HOLD:1595 lgImpactDome:1596 lgBlastFloor:1636 lgBlastThreads:1667 lgFitGround:1695 lgGroundWarning:1704 lightEfx:1717 _lgHq:1874 _lgHy:1874 lgProcHead:1876 lightHeadPose:1891 LGHUD:1899 lgBondScreen:1900 drawCrystalBondHud:1901 drawLightHud:1924
@@ -837,13 +837,13 @@ _natFx:3 natFxClear:4 natFxMake:5 T:6 S:6 O:6 seed:7 ease:8 outQ:8 inQ:8 phase:8
 §91 อนุภาค
 Pool:92 leafGeo:100 LEAF:101 SPK:102 DIRT:103 PUFF:104 CHIP:105 POOLS:106 leafCols:107 leaves:108 sparks:109 dirt:110 puff:111 chips:112 TrailRibbon:114 WHIP_N:125 WHIP_L:125 WHIP_LAG:125 Whip:126 CLIPS:189 tick:190 clip:191 drop:192 natFx:195
 
-## js/68-nature-view.js (909) — 
-NAT_VIEW:2 NAT_MARKS:2 NAT_MOTION:2 natV:3 natWorld:4 natPhase:5 natSmooth:6 natEase:7 natOut:8 natStd:9 natAdd:10 natMesh:11 natRing:12 natLeaf:16 natPlantM:19 natGlow:26 natArt:29 natureProjectileModel:31 natSet:37 natAnimate:38 natTube:39 natTrail:50 natSeed:68 natLotus:77 natBall:93 natPlantView:103 natStartStudy:113 natWearWall:131 natTreeGlow:154 natModelTick:174 natMarker:257 natMarks:268 natThorn:287 NAT_SHIELD_K:292 natShieldMake:293 natureCharacter:366 natOutlineMat:395 natOutline:399 natLinks:411 syncNature:426 natureClear:445 natDome:454 natMuzzle:476 natSlam:486 natHook:503 natCoil:560 _nfQ:581 _nfT:581 _nfX:581 natWandTip:583 HOOK_HIT:586 natPullQ:586 natPullE:586 _nwQ:587 natForearmR:589 natEmpPose:593 natBigSlam:601 natRootWarn:608 natRootUp:612 natThornLine:633 natRest:649 natHookFoePose:654 natHookPose:670 natHookArm:686 natShock:688 natSprout:689 natHealRims:690 natWhipHit:692 natBallRange:693 natSummon:695 NAT_TREE_GREEN:703 NAT_TREE_RED:703 _natGlowRed:704 natFoe:705 natTreeTint:706 natTreeAura:707 natAuraDrop:717 NAT_HOLO:719 natHoloMake:720 natHolo:731 natHoloClear:734 natDirOf:735 natMoment:736 natureEvent:765 NTHUD:833 drawNatureHud:834 NPH:855 NPH_IC:856 natPortraitObj:862 natPortrait:863 natPlantHud:875
+## js/68-nature-view.js (907) — 
+NAT_VIEW:2 NAT_MARKS:2 NAT_MOTION:2 natV:3 natWorld:4 natPhase:5 natSmooth:6 natEase:7 natOut:8 natStd:9 natAdd:10 natMesh:11 natRing:12 natLeaf:16 natPlantM:19 natGlow:26 natArt:29 natureProjectileModel:31 natSet:37 natAnimate:38 natTube:39 natTrail:50 natSeed:68 natLotus:77 natBall:93 natPlantView:103 natStartStudy:113 natWearWall:131 natTreeGlow:154 natModelTick:174 natMarker:257 natMarks:268 natThorn:287 NAT_SHIELD_K:292 natShieldMake:293 natureCharacter:366 natOutlineMat:395 natOutline:399 natLinks:411 syncNature:426 natureClear:445 natDome:454 natMuzzle:476 natSlam:486 natHook:503 natCoil:560 _nfQ:581 _nfT:581 _nfX:581 natWandTip:583 HOOK_HIT:586 natPullQ:586 natPullE:586 _nwQ:587 natForearmR:589 natEmpPose:593 natBigSlam:601 natRootWarn:608 natRootUp:612 natThornLine:633 natRest:649 natHookFoePose:654 natHookPose:670 natHookArm:686 natShock:688 natSprout:689 natHealRims:690 natWhipHit:692 natBallRange:693 natSummon:695 NAT_TREE_GREEN:703 NAT_TREE_RED:703 _natGlowRed:704 natFoe:705 natTreeTint:706 natTreeAura:707 natAuraDrop:717 NAT_HOLO:719 natHoloMake:720 natHolo:731 natHoloClear:734 natDirOf:735 natMoment:736 natureEvent:765 NTHUD:833 drawNatureHud:834 NPH:853 NPH_IC:854 natPortraitObj:860 natPortrait:861 natPlantHud:873
 
 ## js/68-storm-bow.js (285) — 
 SB_FULL:2 _sbShard:3 sbShard:4 sbMat:5 sbJag:6 SB_TIP:8 _sbBlade:9 sbBlade:10 sbMake:11 SB_START:33 SB_ANCHOR:33 SB_POLE:33 stormBowView:34 _ikS:90 _ikE:90 _ikH:90 _ikT:90 _ikP:90 _ikD:90 _ikA:90 _ikQ:90 _ikQ2:90 sbAim:91 stormBowForearm:94 stormBowFx:106 sbStaffAxis:122 sbStaffMake:123 stormStaffView:140 stormStaffCast:152 stormStaffSwing:155 _sbWaveG:157 sbWaveGeo:158 SB_WAVE_F:159 stormWaveMake:169 stormWaveTick:173 SMK:181 SWAVE_BURSTS:182 WAVE_BURST_CYAN:183 stormWaveBurst:184 stormWaveBurstTick:209 _smkEye:239 _smkRot:239 stormMarkSet:240 stormMarkClear:262 stormMarkTick:266
 
-## js/68-water-view.js (249) — 
+## js/68-water-view.js (250) — สายน้ำ 💧 — ภาพฝั่งผู้เล่น • VFX = assets/fx/water/* (tools/water-vfx-gen.py, สไตล์ desig…
 WTV:5 WTC:6 WT_BODY:8 WMB_POSE:14 waterMoonPose:15 waterCharacterPose:19 wtState:49 wtStop:50 wtMesh:51 _wtV:53 _wtP:53 wtBakeClone:54 wtLineMat:65 _wtOlMat:72 wtOutline:74 WT_SINKD:80 wtSinkOffset:81 wtAlive:88 wtLoop:90 WT_FR:93 wtFrPath:94 _wtFa:96 _wtFb:96 _wtFs:96 _wtFn:96 wtFamRiseMesh:97 WT_POOL:102 wtFamRise:103 wtFamRiseOff:110 _wtTube:112 WT_BEAM_V:113 WT_BEAM_F:116 WT_BEAM_O:120 wtBeamMesh:123 wtBeamSync:127 wtBeamOff:137
 §139 ต่อผู้เล่น: โล่ฟองน้ำ/ฮีล • ลูกผู้ช่วยที่ไหล่ • ร่างโคลน + เส้นน้ำ • …
 waterFX:140
@@ -854,7 +854,7 @@ waterEfx:216
 §245 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
 drawWaterHud:246
 
-## js/68-wind-view.js (445) — 
+## js/68-wind-view.js (445) — สายลม 🌪️ — ภาพฝั่งเครื่องเล่น (ขั้นที่ 1) • ตรรกะอยู่ js/09-wind.js • ไฟล์นี้มีแต่นิยามฟ…
 WV:6 WN_BODY:8 WN_AIR_FEET:8 WF_POSE:12 WF_FEET:12 WF_REF:12 WF_ROLL:12 _wfP:13 _wfF:13 windFlyPose:14 WTLF:24 windTailDraw:25 windTailFeel:31 windCharacterPose:33 wvState:50 wvAlive:51
 §52 ทุกเฟรมของผู้เล่นสายลม: ปีกติดหลัง / ปีกห่อตอนยกโล่ / ดูดลมชาร์จเกจ
 wfeSwing:53 wfeTwist:53 W_BLAST_SUCK:54 WFE_HOLD:55 WFE_TURN:55 windLatePose:57 _faX:93 _faQ:93 _faT:93 WF_ELBOW:93 windForearm:94 windFX:96
@@ -966,4 +966,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(118 files, 36204 lines)
+(118 files, 36211 lines)

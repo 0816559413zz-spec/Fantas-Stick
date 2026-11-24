@@ -280,7 +280,7 @@ function drawWindHud(x,y,A,me){   // ผู้ใช้ 2026-11-16: HUD สา�
     cx.lineWidth=2.5;cx.strokeStyle='rgba(0,0,0,0.5)';cx.beginPath();cx.arc(ix,iy,r+2,0,6.283);cx.stroke();
     if(fill>0){cx.strokeStyle=ready?'#a4ff7e':'#5fbf5a';cx.beginPath();cx.arc(ix,iy,r+2,-Math.PI/2,-Math.PI/2+6.283*fill);cx.stroke();}
     if(key){cx.font='600 10px Kanit,sans-serif';cx.textAlign='center';cx.fillStyle='rgba(234,255,241,0.8)';cx.fillText(key,ix,iy+r+12);}};
-  for(let i=0;i<n;i++){const fill=i<A[10]?1:i===A[10]?clamp((A[13]||0)/100,0,1):0;icon('w_slipstream',x0+i*26,y+30,11,fill,fill>=1,i===0?slipKey:'');}
+  hudPips(x,y+26,n,A[10]|0,(A[13]||0)/100,'#c4f5cf');   // minimal (user 2026-11-24)
 }
 // ---------- ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) + ลูกศรทางดัน (คลิกซ้าย) ----------
 function wvAimGhost(p,A,h){

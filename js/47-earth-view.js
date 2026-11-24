@@ -823,7 +823,7 @@ const ERING={geo:null,mat:null};
 // in from the middle of the ring into its slot while the others slide over quickly to make room; a thrown rock leaves and
 // the rest close the gap. The ring keeps turning at the same speed the whole time.
 function earthRockRing(o,p,now,dt){const ek=p.ek;if(ek===undefined||!p.al){if(o.eRing)o.eRing.g.visible=false;return;}
-  if(!ERING.geo){ERING.geo=new THREE.IcosahedronGeometry(0.21,0);ERING.mat=new THREE.MeshStandardMaterial({color:'#b89a72',roughness:0.95,flatShading:true});ERING.mat.userData.keep=true;}
+  if(!ERING.geo){ERING.geo=new THREE.IcosahedronGeometry(0.17,0);ERING.mat=new THREE.MeshStandardMaterial({color:'#b89a72',roughness:0.95,flatShading:true});ERING.mat.userData.keep=true;}
   if(!o.eRing){const g=new THREE.Group();g.position.set(0,1.5,-0.45);o.g.add(g);const pool=[];
     for(let i=0;i<EROCK.max;i++){const m=new THREE.Mesh(ERING.geo,ERING.mat);m.castShadow=true;m.visible=false;g.add(m);pool.push({m,s:0.85+0.3*((i*37)%10)/10,ph:i*1.7});}
     o.eRing={g,pool,live:[],rot:0};}
@@ -833,7 +833,7 @@ function earthRockRing(o,p,now,dt){const ek=p.ek;if(ek===undefined||!p.al){if(o.
     r.off=prev&&next?(prev.off+((next.off+Math.PI*2)-prev.off)/2):prev?prev.off+Math.PI:0;r.rad=0;r.m.visible=true;R.live.push(r);}
   const m=R.live.length,full=Math.floor(ek+0.02);
   for(let i=0;i<m;i++){const r=R.live[i],tgt=(R.live[0].off)+i/m*Math.PI*2,d=Math.atan2(Math.sin(tgt-r.off),Math.cos(tgt-r.off));
-    r.off+=d*Math.min(1,dt*12);r.rad+=(0.62-r.rad)*Math.min(1,dt*10);   // fast slide into place / rise out from the centre
+    r.off+=d*Math.min(1,dt*12);r.rad+=(0.85-r.rad)*Math.min(1,dt*10);   // fast slide into place / rise out from the centre
     const a=R.rot+r.off,f=i<full?1:clamp(ek-full,0,1);
     r.m.position.set(Math.cos(a)*r.rad,Math.sin(a)*r.rad+Math.sin(now/420+r.ph)*0.03,0);r.m.rotation.set(now/900+r.ph,now/1300+r.ph,0);r.m.scale.setScalar(r.s*(0.35+0.65*f));}}
 
@@ -1148,7 +1148,7 @@ function eShieldArc(x,y,v){const s=Math.max(0.72,SH/1080),R=250*s,cy=y-205*s+R,s
   cx.fillStyle='rgba(255,255,255,0.85)';cx.fillRect(x-1.5,y-1.5,3,3);}   // จุดกลางเล็ก ๆ แทนเป้าเล็งที่ซ่อน
 function drawEarthHud(x,y,A,me){
   const y0=y+70;cx.textAlign='center';cx.font='600 15px Kanit,sans-serif';let row=0;
-  const txt=(s,col)=>{const yy=y0+row*22;row++;cx.lineWidth=4;cx.strokeStyle='rgba(0,0,0,0.75)';cx.strokeText(s,x,yy);cx.fillStyle=col;cx.fillText(s,x,yy);};
+  const txt=()=>{};const _txtOld=(s,col)=>{const yy=y0+row*22;row++;cx.lineWidth=4;cx.strokeStyle='rgba(0,0,0,0.75)';cx.strokeText(s,x,yy);cx.fillStyle=col;cx.fillText(s,x,yy);};
   const arc=(k,col,r)=>{cx.lineWidth=6;cx.strokeStyle='rgba(0,0,0,0.6)';cx.beginPath();cx.arc(x,y,r,-Math.PI/2,Math.PI*1.5);cx.stroke();cx.strokeStyle=col;cx.beginPath();cx.arc(x,y,r,-Math.PI/2,-Math.PI/2+k*Math.PI*2);cx.stroke();};
   // แถบเวลาไหลลด (แทนตัวเลขวินาที)
   const bar=(k,col)=>{const w=190,h=8,yy=y0+row*22-12;row++;cx.fillStyle='rgba(0,0,0,0.6)';cx.fillRect(x-w/2-2,yy-2,w+4,h+4);

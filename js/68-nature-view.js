@@ -845,9 +845,7 @@ function drawNatureHud(x,y,A){
     cx.fillStyle='#e8c690';cx.beginPath();cx.ellipse(w/2-2,0,3,h/2-.5,0,0,Math.PI*2);cx.fill();cx.strokeStyle='#8a6034';cx.beginPath();cx.ellipse(w/2-2,0,1.4,2,0,0,Math.PI*2);cx.stroke();
     const leaf=(lx,ly,r)=>{cx.fillStyle='#8ee06a';cx.beginPath();cx.ellipse(lx,ly,r,r*.5,-.6,0,Math.PI*2);cx.fill();};leaf(-3,-h/2-1.5,3);
     cx.restore();cx.restore();};
-  for(let i=0;i<2;i++){const px=x+(i-.5)*gap,have=i<n,fill=have?1:i===n?pr:0;
-    if(NTHUD.fl[i]>0){NTHUD.fl[i]-=dt;cx.save();cx.globalAlpha=Math.max(0,NTHUD.fl[i]/.35)*.8;cx.fillStyle='#fff';cx.shadowColor='#c8ff9a';cx.shadowBlur=14;cx.beginPath();cx.arc(px,y0,11,0,Math.PI*2);cx.fill();cx.restore();}
-    log(px,y0,have?1:.55,fill);}
+  hudPips(x,y+26,2,n,pr,'#d9b27a');   // minimal (user 2026-11-24)
 }
 
 // HP พืชของเรา (ผู้ใช้ 2026-11-10): ลอยเหนือไพ่สกิล ไม่มีกรอบ • ภาพหัวจากโมเดลจริง (ถ่ายครั้งเดียวต่อชนิด) ซ้ายบน • เลข HP ขวาบน
