@@ -598,6 +598,7 @@ function eFistCrumble(x,y,h,yaw,pitch,left){
 }
 function earthProjMesh(o,t,left=false){let m;
   if(t==='eslab'){m=makeSlab(true);}
+  else if(t==='ekr'){m=eIsleMesh(7,1);m.scale.setScalar(1);}   // kick rock (user 2026-11-24): small smooth isle-shaped rock, no points
   else if(t==='efist'||t==='efistc'){
     m=makeEarthFist(left);m.scale.setScalar(t==='efistc'?EARTH_FIST_SCALE:.86);
   }
@@ -850,8 +851,8 @@ function earthRockRing(o,p,now,dt){const ek=p.ek;if(ek===undefined||!p.al){if(o.
 // Rampart cast v3 (user 2026-11-24): side-on like Terra Isle — body turns so the slapping left side leads, head on target
 if(CANIM.rampcast){const T=[-0.25,-0.55,-0.55,-0.55,-0.1,0];CANIM.rampcast.k.forEach((k,i)=>{k[3]=T[Math.min(i,T.length-1)];});CANIM.rampcast.d=1.4;}   // v7: slower — slam 0.28 s, longer hold, lift 0.75 s (user: rose too soon after the slam)
 const EISLE={top:['#c99b62','#a66f3c','#8e9850','#d6b781','#a9603d'],mat:null,geo:new Map()};
-function eIsleGeo(seed){if(EISLE.geo.has(seed))return EISLE.geo.get(seed);
-  const R=eRng(seed),rad=ISLE.v.r*S3,n=24,o1=R()*10,o2=R()*10,Z=EISLE.top.map(c=>new THREE.Color(c)),pts=[];
+function eIsleGeo(seed,small){if(small&&EISLE.kg)return EISLE.kg;if(!small&&EISLE.geo.has(seed))return EISLE.geo.get(seed);
+  const R=eRng(seed),rad=small?0.42:ISLE.v.r*S3,n=24,o1=R()*10,o2=R()*10,Z=EISLE.top.map(c=>new THREE.Color(c)),pts=[];
   for(let i=0;i<n;i++){const a=i/n*Math.PI*2,r=rad*(0.9+0.12*Math.sin(a*3+o1)+0.07*Math.sin(a*5+o2));pts.push([Math.cos(a)*r,Math.sin(a)*r]);}
   const zone=(x,z)=>{const u=Math.sin(x*1.6+o1)*Math.cos(z*1.4+o2)+0.5*Math.sin((x+z)*2.6+o2);const k=(u+1.5)/3*(Z.length-1),i0=Math.max(0,Math.min(Z.length-2,Math.floor(k))),f=k-i0;return Z[i0].clone().lerp(Z[i0+1],Math.min(1,Math.max(0,f)));};
   const P=[],C=[],I=[],vtx=(x,z,y,c)=>{P.push(x,y,z);C.push(c.r,c.g,c.b);return P.length/3-1;},under=Z[1];
@@ -859,8 +860,8 @@ function eIsleGeo(seed){if(EISLE.geo.has(seed))return EISLE.geo.get(seed);
   for(let i=0;i<n;i++){const j=(i+1)%n;I.push(c0,m[j],m[i],m[i],m[j],e[j],m[i],e[j],e[i]);}
   // underside (user 2026-11-24 v3): one smooth body with 2-3 hanging points. Polar grid from the rim inward; depth =
   // shallow bowl + 2-3 cone-like lobes (soft falloff) so it stays continuous, darker the deeper it goes
-  const NL=2+(R()<0.55?1:0),lobes=[];for(let k=0;k<NL;k++){const a=k/NL*Math.PI*2+R()*0.7,d=rad*(0.4+0.15*R());lobes.push([Math.cos(a)*d,Math.sin(a)*d,(k?1.2:1.7)+R()*0.5,rad*(0.36+0.08*R())]);}
-  const depth=(x,z,t)=>{let y=0.25+0.9*Math.pow(t,0.8);for(const L of lobes){const q=Math.hypot(x-L[0],z-L[1])/L[3];if(q<1)y+=L[2]*Math.pow(1-q,1.7);}return y;};
+  const NL=small?0:2+(R()<0.55?1:0),lobes=[];for(let k=0;k<NL;k++){const a=k/NL*Math.PI*2+R()*0.7,d=rad*(0.4+0.15*R());lobes.push([Math.cos(a)*d,Math.sin(a)*d,(k?1.2:1.7)+R()*0.5,rad*(0.36+0.08*R())]);}
+  const depth=(x,z,t)=>{let y=small?0.08+0.3*Math.pow(t,0.6):0.25+0.9*Math.pow(t,0.8);for(const L of lobes){const q=Math.hypot(x-L[0],z-L[1])/L[3];if(q<1)y+=L[2]*Math.pow(1-q,1.7);}return y;};
   const RG=10;let prev=e,maxD=0.01;const rings=[];
   for(let r=1;r<=RG;r++){const t=r/RG,sc=1-t;rings.push(pts.map((q,i)=>{const L=0.93+0.1*Math.sin(i*1.7+r*2.1+o1);return [q[0]*sc*L,q[1]*sc*L,t];}));}
   for(const ring of rings)for(const q of ring)maxD=Math.max(maxD,depth(q[0],q[1],q[2]));
@@ -868,12 +869,12 @@ function eIsleGeo(seed){if(EISLE.geo.has(seed))return EISLE.geo.get(seed);
     for(let i=0;i<n;i++){const j=(i+1)%n;I.push(prev[i],prev[j],idx[j],prev[i],idx[j],idx[i]);}prev=idx;}
   {const d=depth(0,0,1),cc=vtx(0,0,-d,under.clone().multiplyScalar(0.62-0.42*Math.min(1,d/maxD)));for(let i=0;i<n;i++){const j=(i+1)%n;I.push(prev[i],prev[j],cc);}}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('color',new THREE.Float32BufferAttribute(C,3));g.setIndex(I);g.computeVertexNormals();
-  EISLE.geo.set(seed,g);if(EISLE.geo.size>8){const k=EISLE.geo.keys().next().value;EISLE.geo.get(k).dispose();EISLE.geo.delete(k);}
+  if(small){g.translate(0,0.12,0);EISLE.kg=g;return g;}EISLE.geo.set(seed,g);if(EISLE.geo.size>8){const k=EISLE.geo.keys().next().value;EISLE.geo.get(k).dispose();EISLE.geo.delete(k);}
   return g;}
 function eIsleTint(g,c,mul,keep){const P=g.attributes.position,old=g.attributes.color,C=new Float32Array(P.count*3);
   for(let i=0;i<P.count;i++){const s=keep&&old?old.getX(i):1;C[i*3]=c.r*mul*s;C[i*3+1]=c.g*mul*s;C[i*3+2]=c.b*mul*s;}g.setAttribute('color',new THREE.BufferAttribute(C,3));}
-function eIsleMesh(seed){if(!EISLE.mat){EISLE.mat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:0.95,metalness:0,side:THREE.DoubleSide});EISLE.mat.userData.keep=true;}
-  const m=new THREE.Mesh(eIsleGeo(seed),EISLE.mat);m.castShadow=m.receiveShadow=true;return m;}
+function eIsleMesh(seed,small){if(!EISLE.mat){EISLE.mat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:0.95,metalness:0,side:THREE.DoubleSide});EISLE.mat.userData.keep=true;}
+  const m=new THREE.Mesh(eIsleGeo(seed,small),EISLE.mat);m.castShadow=m.receiveShadow=true;return m;}
 // Stand punch: big Stand rises, cocks a fist high, slams it into the ground (accelerating), holds/strains, then yanks up
 // no Stand (user 2026-11-24): ground cracks at the spot, rumbles with dust, then the isle comes up on its own
 function eIsleTick(dt,now){for(let i=EV.icall.length-1;i>=0;i--){const R=EV.icall[i];R.t+=dt;const t=R.t,P=ISLE.v.punch,L=ISLE.v.lift;
@@ -1024,7 +1025,7 @@ function earthEfx(ev){
     case 'ewallup':shake(0.35);if(near)snd('boom',ev);return true;
     case 'ekick':{const c=Math.cos(ev.a),sn=Math.sin(ev.a);eChunks(x+c*30,y+sn*30,H+0.4,8,220,8,0.2);burst(x+c*24,y+sn*24,ECOL.dust,12,200,0.35,2.4,{h:H+0.5,vh:[0,3],g:4});if(mine)shake(0.25);if(near)snd('boom',{x,y,vol:0.4});return true;}
     case 'elaunch':{dfCracks(x,y,0.06,50,'#a98a62',1);eChunks(x,y,0.2,12,220,10,0.24);burst(x,y,ECOL.dust,20,240,0.5,3.2,{h:0.2,vh:[3,9],g:7});ring(x,y,'#e3c690',50,0.3,0.15);
-      {const g=rockMesh(0.9,2.2,0.9,0.12,3,eTMat('cliff','#c9b394'));g.position.copy(eW(x,y,-2.2));scene.add(g);eAnim({g,life:0.9,fn(a){const t=a.t;g.position.y=GY(x,y)+(t<0.12?-2.2+2.4*(t/0.12):t<0.5?0.2:0.2-2.6*((t-0.5)/0.4));}});}
+      {const g=rockMesh(0.9,2.2,0.9,0.12,3,eTMat('cliff','#c9b394'));g.position.copy(eW(x,y,-2.2));scene.add(g);eAnim({g,life:0.9,fn(a){const t=a.t;const u=Math.min(1,t/0.18);g.position.y=GY(x,y)+(t<0.18?-2.2+2.6*u*u:t<0.5?0.4:0.4-2.8*((t-0.5)/0.4));}});}
       if(near)snd('boom',{x,y,vol:0.5});shake(0.3);return true;}
     case 'erockthrow':{if(near)snd('whoosh',{x,y,vol:0.35});return true;}
     case 'erockbar':{if(near)snd('buff',{x,y,vol:0.4});burst(x,y,ECOL.dust,8,120,0.4,2.2,{h:1.4,vh:[0,2],g:2});return true;}

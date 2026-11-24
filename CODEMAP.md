@@ -87,7 +87,8 @@ SDOME_POSE:235 stormDomeCost:236 stormDomeDash:237 stormDomeCharge:238 stormDome
 ## js/09-darkness.js (463) — 
 DARKP:2 DARK_V:6 DARK_BA:7 DARK_LONG_DASH:8 DARK_CHASE_FLOW:9 DARK_MAW:10 DARK_VEIL_PULL_CLEAR:11 DARK_CHASE_T:12 DARK_WALTZ_ORB:13 darkFlow:14 darkOrbImmune:15 darkAlive:23 darkReset:24 darkState:25 darkEvent:26 darkAim:29 darkTarget:36 darkCone:40 darkBAFloor:47 darkBATargets:51 darkMoveHeading:68 darkClearCooldown:71 darkMark:75 darkReveal:82 darkQueue:83 darkGainFlow:84 darkKill:90 darkTick:93 darkShieldTick:127 darkShieldCrossAt:144 darkShieldCross:153 darkBeamStop:154 darkDash:163 darkBasic:186 DARK_MARK:216 darkWaveTick:233 DARK_CHASE:255 darkMoveWaltz:306 DARK_WALTZ:331 DARK_WARD:353 DARK_VEIL:368 DARK_ULT:376 darkUltBite:391 darkMoveChase:401 darkSnap:441 darkMarked:460
 
-## js/09-earth.js (415) — 
+## js/09-earth.js (416) — สายดิน ⛰️ (ผู้ใช้ออกแบบทั้งหมด — designs/earth.md §0 FINAL SPEC) • ฝั่งโฮสต์
+§8 Tectonic Crush: Stand ดันช้า (TECT.v.push) แล้วกำแพงปิดเร็ว (TECT.v.s…
 EARTH:9 ERV:12
 §24 ตัวช่วย
 eOn:25 eStand:26 eNoStand:27 eSegD:29 eAdd:30 eCollide:32 eProjHit:53 eKill:56
@@ -96,27 +97,27 @@ earthTick:59 earthSpd:84 earthShHit:86 earthBreak:87 earthReset:89
 §91 ท่าพื้นฐาน (คลิกซ้าย)
 EROCK:94 earthRockTick:95 earthRockSplash:96 earthBasic:101 earthFistStart:114 earthCBStart:115 earthFistAim:116 earthFistFire:117 earthFistBreak:124
 §136 Dash: Stand Rampage / Rock Boost Escape
-EKICK:137 earthDash:139 earthRampEnd:173
-§178 สกิล 1: Stonebreaker
-earthStoneAim:179 STONEB:188
-§207 สกิล 2: Mud Swamp
-MUDS:208
-§212 สกิล 3: Tectonic Crush
-TECT:215
-§216 สกิล 3: Stone Barrage — ปาหินทั้งวงหลังตัวออกไปรัว ๆ (ไม่ตรงเป้า 100%…
-BARRAGE:217 earthBarrageTick:222 earthCrush:228
-§239 สกิล 4: Dust Burst
-DUSTB:241
-§242 สกิล 4: Terra Isle — Stand ต่อยจุ่มลงพื้นตรงจุดเล็งแล้วยกเกาะหินลอยขึ…
-ISLE:244 earthIsleTick:254
-§264 สกิล 5: Terra Auger
-AUGER:267
-§268 สกิล 5: Rampart (ผู้ใช้ 2026-11-23 v2) — เลือกจุด (โฮโลแกรม) แล้วคลิก…
-RAMPART:270 earthRampAimUpd:275 earthRampAimTick:277 earthRampPlace:283 eAugAim:295 earthAugFire:296 earthMound:307
-§310 อัลติ: Wrath — ชาร์จบนพื้น หินดันผู้เล่นขึ้นฟ้า Stand ปาเสาลงจุดเล็ง
-WRATH_READY_T:311 WRATH_THROW_SWING_T:312 WRATH_DRAW_T:313 WRATH:314 earthWrathAim:320 earthWrathFlightAngles:321 earthPillarThrow:327 earthPillarImpact:333 earthWrathTick:341 earthWrathEnd:365 E_WRS:369 earthSpikeTick:370
-§376 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
-updateEarth:377 earthSnapP:391 earthSnapW:407
+EKICK:137 earthDash:139 earthRampEnd:174
+§179 สกิล 1: Stonebreaker
+earthStoneAim:180 STONEB:189
+§208 สกิล 2: Mud Swamp
+MUDS:209
+§213 สกิล 3: Tectonic Crush
+TECT:216
+§217 สกิล 3: Stone Barrage — ปาหินทั้งวงหลังตัวออกไปรัว ๆ (ไม่ตรงเป้า 100%…
+BARRAGE:218 earthBarrageTick:223 earthCrush:229
+§240 สกิล 4: Dust Burst
+DUSTB:242
+§243 สกิล 4: Terra Isle — Stand ต่อยจุ่มลงพื้นตรงจุดเล็งแล้วยกเกาะหินลอยขึ…
+ISLE:245 earthIsleTick:255
+§265 สกิล 5: Terra Auger
+AUGER:268
+§269 สกิล 5: Rampart (ผู้ใช้ 2026-11-23 v2) — เลือกจุด (โฮโลแกรม) แล้วคลิก…
+RAMPART:271 earthRampAimUpd:276 earthRampAimTick:278 earthRampPlace:284 eAugAim:296 earthAugFire:297 earthMound:308
+§311 อัลติ: Wrath — ชาร์จบนพื้น หินดันผู้เล่นขึ้นฟ้า Stand ปาเสาลงจุดเล็ง
+WRATH_READY_T:312 WRATH_THROW_SWING_T:313 WRATH_DRAW_T:314 WRATH:315 earthWrathAim:321 earthWrathFlightAngles:322 earthPillarThrow:328 earthPillarImpact:334 earthWrathTick:342 earthWrathEnd:366 E_WRS:370 earthSpikeTick:371
+§377 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
+updateEarth:378 earthSnapP:392 earthSnapW:408
 
 ## js/09-light.js (564) — 
 LIGHTP:8 LTV:12 lgOn:19 lightShieldPitch:20 lightShieldGauge:21 lightClearBond:22 lightReset:26 lightAlly:32 lightLinkPos:33 lightUnlink:34 lightReleaseAlly:52 lightBondTarget:59 lightBondTap:79 lightRecall:94
@@ -600,7 +601,7 @@ WB:298 wbInit:299 wbBegin:309 wbEnd:310 fxWarpMake:311 fxWarpTick:324
 §332 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:335 fxVolLoad:336 fxVolTex:340 fxVolSet:343 fxVolReady:344 fxVolMake:345 fxVolTick:348 fxPreAssets:353 fxAssetsWait:355
 
-## js/47-earth-view.js (1181) — 
+## js/47-earth-view.js (1182) — สายดิน ⛰️ — ภาพฝั่งเครื่องเล่น (Stand / Stand ใหญ่ / กำแพง / เสา / เนิน / ฝุ่น / สว่าน / …
 ECOL:9 EGUARD_BIG:14 EGUARD:14 EV:15 eW:16 EARTH_FIST_SCALE:17 eYaw:18
 §19 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
 ETEX:20 eTex:21 eFadeTex:35 eMat:37 eTMat:38 rockGeo:39 ROCKU:45 rockMesh:46 coneMesh:48 _eChunkM:50 eChunks:51
@@ -617,19 +618,19 @@ eSteelEnv:503 eHeatTex:508 EDR:513 eDrillGeo:514 makeDrill:520 drillHeat:527
 §529 เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายห…
 ePillarVeins:530 makePillar:548
 §554 กระสุนหิน
-earthFistMat:556 makeEarthFist:560 eFistCrumble:576 earthProjMesh:599 SLAB:609 makeSlab:610 eSlabGeo:615 eSlabMats:626 slabCracks:693
-§696 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
-earthClear:697 eMergePartial:705 eMergeKids:710 eMakeSO:718
-§737 Rampart wall (user 2026-11-23 v2): fused rounded boulders, uneven top…
-ERAMP:738 eRng:739 eBlock:742 eRampGeo:757 eRampMats:773 eRampMesh:784 eRampHolo:788 eRampPlace:789 eRampTick:791
-§809 Terra Isle (user 2026-11-24, ref: floating island chunk): earthy top …
-ERING:831 earthRockRing:835 EISLE:852 eIsleGeo:853 eIsleTint:873 eIsleMesh:875 eIsleTick:879 syncEarth:887 earthFog:940 eMudScreen:943 _eOlMat:950 eOutlines:952 _eCamT:957 eAnim:958 eDebris:959 eWave:961 eAirWave:963 esbImpact:966
-§973 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
-earthEfx:974 eWindOut:1097 eAirCone:1103 eDrillFly:1105
-§1109 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
-earthMudZone:1110 earthMudSink:1117
-§1118 HUD ใต้เป้าเล็ง
-ESM:1120 eSmooth:1121 ESF:1124 eShieldFx:1125 eChips:1130 eShieldSegs:1133 eShieldNum:1147 eShieldArc:1151 drawEarthHud:1164
+earthFistMat:556 makeEarthFist:560 eFistCrumble:576 earthProjMesh:599 SLAB:610 makeSlab:611 eSlabGeo:616 eSlabMats:627 slabCracks:694
+§697 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
+earthClear:698 eMergePartial:706 eMergeKids:711 eMakeSO:719
+§738 Rampart wall (user 2026-11-23 v2): fused rounded boulders, uneven top…
+ERAMP:739 eRng:740 eBlock:743 eRampGeo:758 eRampMats:774 eRampMesh:785 eRampHolo:789 eRampPlace:790 eRampTick:792
+§810 Terra Isle (user 2026-11-24, ref: floating island chunk): earthy top …
+ERING:832 earthRockRing:836 EISLE:853 eIsleGeo:854 eIsleTint:874 eIsleMesh:876 eIsleTick:880 syncEarth:888 earthFog:941 eMudScreen:944 _eOlMat:951 eOutlines:953 _eCamT:958 eAnim:959 eDebris:960 eWave:962 eAirWave:964 esbImpact:967
+§974 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
+earthEfx:975 eWindOut:1098 eAirCone:1104 eDrillFly:1106
+§1110 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
+earthMudZone:1111 earthMudSink:1118
+§1119 HUD ใต้เป้าเล็ง
+ESM:1121 eSmooth:1122 ESF:1125 eShieldFx:1126 eChips:1131 eShieldSegs:1134 eShieldNum:1148 eShieldArc:1152 drawEarthHud:1165
 
 ## js/48-ragdoll.js (419) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 _ragFw:41 ragBones:42 ragBasis:49 ragTargets:57 ragStart:63 ragBack:96 ragFloor:97 ragStep:98 ragPose:163 ragWrite:178 ragRestore:190 ragEnd:194 ragTick:196 ragHideDead:240 clearDeathFades:249 deathClipMat:259 deathSlashSplit:266 DD_ALPHA:320 deathDissolve:321 deathVisualSync:395
@@ -967,4 +968,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(118 files, 36357 lines)
+(118 files, 36359 lines)

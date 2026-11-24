@@ -15,7 +15,7 @@ PATHS[EARTH].vn={sh:'โล่ Stand • HP',shDelay:'โล่ • เริ่
   cbHold:'หมัดชาร์จ • กดค้างกี่วิเริ่มชาร์จ',cbCharge:'หมัดชาร์จ • ชาร์จ (วิ)',cbDmg:'หมัดชาร์จ • ดาเมจตรง',cbR:'เศษหมัดชาร์จ • ระยะ',cbShardDmg:'เศษหมัดชาร์จ • ดาเมจต่อเป้า',cbStun:'หมัดชาร์จ • สตัน (วิ)',cbCd:'หมัดชาร์จ • คูลดาวน์ (วิ)',cbSlow:'หมัดชาร์จ • ความเร็วเดินตอนชาร์จ (เท่า)',
   rampT:'Rampage • วิ่งนาน (วิ)',rampSp:'Rampage • ความเร็ว',rampDmg:'Rampage • ชนดาเมจ',rampStun:'Rampage • ชนสตัน (วิ)',rampKnock:'Rampage • ชนกระเด็น',rampCd:'Rampage • คูลดาวน์ (วิ)',slamR:'Rampage จบ • รัศมีทุบ',slamDmg:'Rampage จบ • ดาเมจ',slamStun:'Rampage จบ • สตัน (วิ)',
   boostDist:'Rock Boost • ระยะ',boostR:'Rock Boost • รัศมีผลัก',boostKnock:'Rock Boost • แรงผลัก',boostCd:'Rock Boost • คูลดาวน์ (วิ)',env:'ทุกสกิล • ตัวคูณพังบ้าน/ของ'};
-Object.assign(PDEF,{erock:{spd:1250,r:9,dmg:15,life:0.62,col:'#c9a36a'},eslab:{spd:1800,r:24,dmg:25,life:0.39,col:'#d8b47a'}});
+Object.assign(PDEF,{erock:{spd:1250,r:9,dmg:15,life:0.62,col:'#c9a36a'},ekr:{spd:1800,r:20,dmg:20,life:0.3,col:'#c9a36a'},eslab:{spd:1800,r:24,dmg:25,life:0.39,col:'#d8b47a'}});
 Object.assign(PDEF,{
   efist:{spd:1150,r:13,col:'#b69160'},
   efistc:{spd:1380,r:27,col:'#d2a970'},
@@ -134,7 +134,7 @@ function earthFistBreak(pr){
 }
 
 // ---------- Dash: Stand Rampage / Rock Boost Escape ----------
-const EKICK={cd:5,back:950,up:6,dmg:20,range:520,hold:0.22,cdUp:8,launch:19,upR:60,upKnock:350};
+const EKICK={cd:5,back:950,up:6,dmg:20,range:520,hold:0.22,cdUp:8,launch:23,v0:7,boost:0.16,upR:60,upKnock:350};   // launch v2: column pushes with rising speed (ease-in) for `boost` s, then flies fast
 SPELLS.ekickrock={hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');const o=G.players[pr.owner];knock(t,o?o.x:pr.x-pr.vx,o?o.y:pr.y-pr.vy,300);}};
 function earthDash(p,inp,pr,dt,setCd){
   if(p.ramp){const R=p.ramp;R.t-=dt;
@@ -152,13 +152,14 @@ function earthDash(p,inp,pr,dt,setCd){
   {const air=p.z>groundH(p.x,p.y,p.z)+0.3,K=EKICK;
     if(pr.sp&&air&&!(p.eKickCd>G.time)&&!(p.mudT>0)&&!(p.stun>0)){const a=p.ang,dx=Math.cos(a),dy=Math.sin(a);
       p.eKickCd=G.time+K.cd;p.vx=-dx*K.back;p.vy=-dy*K.back;p.vz=Math.max(p.vz||0,K.up);
-      shoot(p,'eslab',{sp:'ekickrock',dmg:K.dmg,quiet:1,h:p.z+0.6,life:K.range/PDEF.eslab.spd});
+      shoot(p,'ekr',{sp:'ekickrock',dmg:K.dmg,quiet:1,h:p.z+0.6,life:K.range/PDEF.ekr.spd});
       emit({k:'efx',z:'ekick',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});emit({k:'sk',id:p.id,s:'ekick'});}
     if(!air&&inp.dh&&!(p.eLaunchCd>G.time)&&!(p.mudT>0)&&!(p.stun>0)){p.eLH=(p.eLH||0)+dt;
-      if(p.eLH>=K.hold){p.eLH=0;p.eLaunchCd=G.time+K.cdUp;p.vz=K.launch;p.z+=0.05;
+      if(p.eLH>=K.hold){p.eLH=0;p.eLaunchCd=G.time+K.cdUp;p.vz=K.v0;p.eLB=K.boost;p.jumpAir=true;p.z+=0.05;
         for(const t of foesIn(p.team,p.x,p.y,K.upR,p.z+3))knock(t,p.x,p.y,K.upKnock);
         emit({k:'efx',z:'elaunch',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}}
     else p.eLH=0;
+    if(p.eLB>0){p.eLB=Math.max(0,p.eLB-dt);const k=1-p.eLB/K.boost;p.vz=K.v0+(K.launch-K.v0)*k*k;p.jumpAir=true;}
     const r=Math.max(0,(p.eKickCd||0)-G.time);p.cd.dodge=r;p.cdMax.dodge=K.cd;}
   return false;
   // (old Stand Rampage / Rock Boost below kept dormant)
