@@ -132,6 +132,7 @@ function groundH(x,y,z){
   let g=0;
   if(TERR&&TERR.fl.length){const t=terrT(x,y),a=t+(z||0)+TSTEP;const zz=t+(z||0);for(const f of TERR.fl){const v=floorAt(f,x,y,'top');if((v<=a||(v-zz<1.0&&floorAt(f,x,y,'bot')<=zz))&&v-t>g)g=v-t;}}   // inside a thick slab (roof) near its top = stand on it (fast falls/fliers no longer sink through)
   if(G&&G.glac)for(const s of G.glac)if(s.h>0&&(x-s.x)**2+(y-s.y)**2<s.r*s.r&&s.h>g)g=s.h;
+  if(G&&G.eso)for(const w of G.eso)if(w.k==='isle'&&!w.dead&&(z||0)>=w.h-0.45&&(x-w.x1)**2+(y-w.y1)**2<w.r*w.r&&w.h>g)g=w.h;   // Terra Isle top (only from above)
   if(G&&G.eso)for(const w of G.eso)if(w.k==='mound'&&!w.dead){const d2=(x-w.x1)**2+(y-w.y1)**2,r2=w.r*w.r;if(d2<r2){const v=w.hgt*(1-d2/r2);if(v>g)g=v;}}   // เนินสายดิน = พื้นโดมเดินขึ้นได้
   {const m=bldMoundH(x,y);if(m>g)g=m;}
   {const c=cityFloorH(x,y,z);if(c>g)g=c;}

@@ -1477,3 +1477,4 @@
 - 2026-11-24 Cast animation joints: CANIM j keys (knees, thighs, left elbow); Rampart crouches with knees; guides/ANIMATION.md
 - 2026-11-24 All cast poses get auto knees/elbow/stagger stance (CANIM joint layer); Rampart bigger elbow + staggered wide stance
 - 2026-11-24 Natural arms/legs everywhere: resting elbow bends (wand follows right elbow), relaxed staggered idle stance with soft knees
+- 2026-11-24 Earth Terra Isle replaces Dust Burst: Stand punch-lift, floating earth isle that rises while stood on (protocol v110)
