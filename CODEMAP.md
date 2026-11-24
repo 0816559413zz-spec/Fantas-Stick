@@ -226,10 +226,10 @@ CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:16 cityOn:17 cityLayout:19 cityReset:29 cityApp
 §146 ข้างในตึก (2026-10-28 ผู้ใช้: เดินเข้าได้ 1–3 ชั้น มีทางขึ้น • ผนังนอ…
 CIN:150 cityInterior:151 cinSlabOn:180 cinOpenPanel:182 cityIwHit:184 cityRampHit:186 cinIwSegs:189 cinIwRects:190 cinSecAt:191 citySecHit:193 cinIn:195 cinHole:196 cinRampH:197 _sgCI:198 cityBoxGrid:199 cityRoomAt:200 cityFloorH:202 cityCeilH:207 cinWallRect:211 cityCollideIn:214 cityProjIn:224 _sgCS:242 citySolidAt:243 cityRay:252 cityRoomBox:255 citySnapB:256 citySnapS:257 cityParse:259
 
-## js/12-efs.js (78) — สภาพธาตุบนฉาก (Element Surfaces) — เฟส 1: ไฟบนรั้วไม้ (designs/element-surfaces.md)
+## js/12-efs.js (78) — 
 EFSV:9 EFS:10 efsLv:11 efsBuild:12 efsBreak:28 efsRepair:29 efsDist:30 efsHeat:31 efsProj:36 efsEnv:42 _efsHit:46 efsTick:47 efsSnap:67 efsParse:71 efsHostView:78
 
-## js/12-fcs-bridge.js (113) — Castle Strike bridge shell destruction (user 2026-11-19 "eggshell"): the bridge = solid c…
+## js/12-fcs-bridge.js (113) — 
 BSKV:10 BSKN:11 bskBuild:14 bskGround:38 bskOutline:40 bskSegs:53 bskInPoly:63 bskCut:65 bskStage:70 bskSetSt:71 bskHit:75 bskEnv:84 bskSnap:93 bskParse:97 bskRepair:104 bskExport:106
 
 ## js/12-launch.js (39) — 
@@ -285,7 +285,7 @@ SGT:153 sgTeamPlan:154 sgBotMode:175 sgBreachAim:189 sgBotGoal:196 sgUnstick:212
 ## js/16-voice.js (89) — 
 VOICE:4 rosterIds:5 toggleMic:6 voiceSync:20 teamOn:37 teamOf:38 applyVoiceGates:39 VAC:49 onIncomingCall:50 voiceLevels:62 speakingIds:70 updateVoiceUI:76
 
-## js/17-input.js (66) — การควบคุม
+## js/17-input.js (66) — 
 INPUT:4 mouseX:5 mouseY:5 showBoard:5 SET_DEF:6 SET:7 KEYACT:9 KMAP:10 PMAP:10 SKORD:11 rebuildKeys:12 keyName:22 _rebind:24 MSANE:50 mouseSane:51 cvEl:66
 
 ## js/18-audio.js (306) — 
@@ -638,7 +638,7 @@ ESM:1199 eSmooth:1200 ESF:1203 eShieldFx:1204 eChips:1209 eShieldSegs:1212 eShie
 ## js/48-ragdoll.js (429) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 _ragFw:41 ragBones:42 ragBasis:49 ragTargets:57 ragStart:63 ragBack:96 ragFloor:97 ragStep:98 ragPose:170 ragWrite:185 ragRestore:197 ragEnd:201 ragTick:203 ragHideDead:250 clearDeathFades:259 deathClipMat:269 deathSlashSplit:276 DD_ALPHA:330 deathDissolve:331 deathVisualSync:405
 
-## js/49-cloth.js (258) — ผ้าคลุมจริง (cloth sim) — เฉพาะตัวละครของเราเอง • ภาพบนเครื่องตัวเองล้วน ไม่แตะ sim / hit…
+## js/49-cloth.js (258) — 
 CLOTH:10 CLOTH_LITE:28 CL_ROWS:29 CL_NC:29 CL_GAP:29 CL_IN:29 _clV:30 _clA:30 _clB:30 clPinK:32 clBind:34 cloakPanelGrid:36 cloakBodyIndices:50 stormCape:59 clothSetup:97 clTargets:127 clReset:131 clCapsule:135 _clO:139 clWorld:140 clWorldHit:148 clStep:153 clDraw:166 clothTick:187 clRun:197
 §213 other players: low-res cloth on the batched body (student_all_batch)
 clLiteSetup:215 clLiteShow:242 clLiteTick:243 clLiteDraw:253
@@ -831,7 +831,7 @@ bdNearKit:380
 ## js/68-darkness-view.js (1153) — 
 nightWaltzStrip:2 nightWaltzBorder:80 stDarkVeilGround:118 darkFxMesh:195 drawDarknessHud:201 drawDarkHudBar:220 darknessMarkView:227 darkWaveViews:237 darkActiveViews:237 darkViewRoot:238 darkViewTemp:245 darknessClear:257 darkDeathRoots:265 darkDeathClear:268 darkWorldAt:282 darkMarkWind:285 darkMarkLaunch:313 darkMarkContact:325 darkViewNow:338 darkFlowHud:338 darkIdleWeaponPose:339 darkBAGroundImpact:343 darkSettleWeapon:358 darkBlendWeapon:369 darkShowWeaponReturn:392 darkTrailHistory:399 darkDashView:438 darknessCharacter:484 darknessEfx:727 stDarkShieldInk:1024 stDarkVeilBlade:1067 stWardDrainPool:1104
 
-## js/68-light-view.js (1963) — 
+## js/68-light-view.js (1963) — สายแสง ✨ ภาพฝั่งเครื่องผู้เล่น (รอบแรก 2026-11-16 — ภาพชั่วคราวตามสเปก designs/light.md ร…
 LGV:7 LGSH:9 LGSH_L:11 _lgM4:14 _lgQ:14 _lgSV:14 _lgS:14 _lgC:14 _lgC2:14 lgGlowTex:15 lgNeon:17 lgEmpFx:25 lgWallBurn:44 lgShardSpawn:60 lgShardTick:64 lgBaCore:65 lgCrDim:108 lgEmpBeam:112 lgNeonCrystal:126 lgSanctumFloorTex:136 lgSanctumMoteTex:147 lgHoneyTex:162 lgShield:166 _lgShieldEuler:202 lightShieldEv:203 LGPOSE:206 _lgLeanBase:207 _lgLeanUndo:207 _lgGlass:208 _lgCore:208 _lgGeo:208 _lgEdge:208 _lgEdgeM:208 lgCrystalMesh:210 lgState:218 _lgV:219 _lgW:219 lgWorld:220 LG_ULT_ASSET:223 LG_CRYSTAL_ASSET:223 LG_ULT_INTRO:224 LG_ULT_ARRIVAL_FX:224 LG_ULT_TIME:225 lgUltMaterials:226 lgSovereignFinishes:227 lgSovereignMaterials:228 lgSovereignFinish:289 lgSovereignCrystal:310 lgSkinSovereign:319 lgPoseSovereign:372 lgSovereignHeart:448 LG_SASH_X:474 LG_SASH_Z:474 lgSovereignRibbon:475 lgSovereignFlare:534 LG_PALM_TRAVEL:547 LG_PALM_SCORCH_LIFE:548 LG_PALM_SCORCH_SLOTS:548 lgPalmGateOffset:549 lgSovereignPalmWaves:551 lgPosePalmWaves:560 lgPoseBeamWaves:566 lgSovereignPalmGate:578 lgSovereignScorchTrail:588 lgPalmScorch:616 lgSovereignCrossSparks:652 lgSovereignGather:675 lgSovereignWingCurrent:708 lgSovereignChargeSeal:737 lgSovereignChestRecoil:754 lgSovereignSeal:764 lgSovereignArmSigils:780 lgBuildSovereign:811 lgReturnMark:888 lgUltVisual:902 lgWardVisual:1139 _lgBeamM:1155 lgBeamMat:1156 lgSovereignChestBeam:1159 lgSovereignPalmBeam:1196 _lgLinkM:1266 lgLinkMat:1267 lgUnitTube:1270 lgTube:1271 lgAim:1279 lightFX:1280 lgBaseObjects:1523 lgClearBase:1524 lgClear:1525 lightDropView:1532 lgAllyEmpEnd:1538
 §1542 เหตุการณ์
 lgBlip:1544 lgArcFx:1548 lgFlyFx:1551 lgSovereignArrival:1552 lightFxTick:1591 LG_BLAST_EXPAND:1595 LG_BLAST_HOLD:1595 lgImpactDome:1596 lgBlastFloor:1636 lgBlastThreads:1667 lgFitGround:1695 lgGroundWarning:1704 lightEfx:1717 _lgHq:1874 _lgHy:1874 lgProcHead:1876 lightHeadPose:1891 LGHUD:1899 lgBondScreen:1900 drawCrystalBondHud:1901 drawLightHud:1924
@@ -850,7 +850,7 @@ NAT_VIEW:2 NAT_MARKS:2 NAT_MOTION:2 natV:3 natWorld:4 natPhase:5 natSmooth:6 nat
 ## js/68-storm-bow.js (285) — 
 SB_FULL:2 _sbShard:3 sbShard:4 sbMat:5 sbJag:6 SB_TIP:8 _sbBlade:9 sbBlade:10 sbMake:11 SB_START:33 SB_ANCHOR:33 SB_POLE:33 stormBowView:34 _ikS:90 _ikE:90 _ikH:90 _ikT:90 _ikP:90 _ikD:90 _ikA:90 _ikQ:90 _ikQ2:90 sbAim:91 stormBowForearm:94 stormBowFx:106 sbStaffAxis:122 sbStaffMake:123 stormStaffView:140 stormStaffCast:152 stormStaffSwing:155 _sbWaveG:157 sbWaveGeo:158 SB_WAVE_F:159 stormWaveMake:169 stormWaveTick:173 SMK:181 SWAVE_BURSTS:182 WAVE_BURST_CYAN:183 stormWaveBurst:184 stormWaveBurstTick:209 _smkEye:239 _smkRot:239 stormMarkSet:240 stormMarkClear:262 stormMarkTick:266
 
-## js/68-water-view.js (250) — 
+## js/68-water-view.js (250) — สายน้ำ 💧 — ภาพฝั่งผู้เล่น • VFX = assets/fx/water/* (tools/water-vfx-gen.py, สไตล์ desig…
 WTV:5 WTC:6 WT_BODY:8 WMB_POSE:14 waterMoonPose:15 waterCharacterPose:19 wtState:49 wtStop:50 wtMesh:51 _wtV:53 _wtP:53 wtBakeClone:54 wtLineMat:65 _wtOlMat:72 wtOutline:74 WT_SINKD:80 wtSinkOffset:81 wtAlive:88 wtLoop:90 WT_FR:93 wtFrPath:94 _wtFa:96 _wtFb:96 _wtFs:96 _wtFn:96 wtFamRiseMesh:97 WT_POOL:102 wtFamRise:103 wtFamRiseOff:110 _wtTube:112 WT_BEAM_V:113 WT_BEAM_F:116 WT_BEAM_O:120 wtBeamMesh:123 wtBeamSync:127 wtBeamOff:137
 §139 ต่อผู้เล่น: โล่ฟองน้ำ/ฮีล • ลูกผู้ช่วยที่ไหล่ • ร่างโคลน + เส้นน้ำ • …
 waterFX:140
@@ -861,7 +861,7 @@ waterEfx:216
 §245 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
 drawWaterHud:246
 
-## js/68-wind-view.js (445) — 
+## js/68-wind-view.js (445) — สายลม 🌪️ — ภาพฝั่งเครื่องเล่น (ขั้นที่ 1) • ตรรกะอยู่ js/09-wind.js • ไฟล์นี้มีแต่นิยามฟ…
 WV:6 WN_BODY:8 WN_AIR_FEET:8 WF_POSE:12 WF_FEET:12 WF_REF:12 WF_ROLL:12 _wfP:13 _wfF:13 windFlyPose:14 WTLF:24 windTailDraw:25 windTailFeel:31 windCharacterPose:33 wvState:50 wvAlive:51
 §52 ทุกเฟรมของผู้เล่นสายลม: ปีกติดหลัง / ปีกห่อตอนยกโล่ / ดูดลมชาร์จเกจ
 wfeSwing:53 wfeTwist:53 W_BLAST_SUCK:54 WFE_HOLD:55 WFE_TURN:55 windLatePose:57 _faX:93 _faQ:93 _faT:93 WF_ELBOW:93 windForearm:94 windFX:96

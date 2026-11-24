@@ -861,7 +861,7 @@ function eStoneUpd(o,n,dt,now){if(!o||!o.g)return;let S=o.estn;if(!n&&(!S||!S.on
   if(!S){S=o.estn={g:new THREE.Group(),coat:null,cov:0,pet:false,on:false};S.g.userData.estn=1;o.g.add(S.g);
     const rg=new THREE.Mesh(new THREE.RingGeometry(0.42,0.52,32),ESTN.ring);rg.userData.estn=1;rg.rotation.x=-Math.PI/2;rg.position.y=0.05;S.g.add(rg);S.ring=rg;
     const sg=new THREE.Mesh(new THREE.OctahedronGeometry(0.17,0),ESTN.sig);sg.userData.estn=1;sg.scale.set(0.8,1.3,0.8);sg.position.y=2.45;S.g.add(sg);S.sig=sg;}
-  S.on=n>0;const mk=n%10,pet=n>=10,lay=Math.max(0,mk-1),want=pet?1.05:lay>0?0.16+0.17*lay:0;
+  S.on=n>0;const mk=n%10,pet=n>=10,lay=Math.max(0,mk-1),want=pet?1.05:lay>0?0.2+0.05*lay:0;   // v4 (user): thin patches per layer, full body only when petrified
   S.cov+=(want-S.cov)*Math.min(1,dt*(want>S.cov?7:3));
   if(S.cov>0.01&&!S.coat)S.coat=eCoatMake(o);
   if(S.coat){for(const C of S.coat){C.mat.userData.u.uCov.value=S.cov;if(C.c.material!==C.mat&&!S.pet)C.c.material=C.mat;}   // other code (hit flash) may swap materials
