@@ -520,9 +520,13 @@ function bdStacks() {
   for (const s of B.st) { const c = new THREE.Mesh(new THREE.CylinderGeometry(s.r * 0.75, s.r, s.h + 6, 9, 3), m); c.position.set(s.x, base - 6 + (s.h + 6) / 2, s.z); bdStk.add(c); }
   gBd.add(bdStk);
 }
+function bdTreeNote() {   // painted trees vs the game cap (4500, thinned evenly over the whole backdrop)
+  const B = M && M.bd; if (!B) return ''; let ex = 0; for (let k = 0; k < B.tr.length; k++) ex += B.tr[k]; const nt = Math.min(32, Math.max(2, Math.round(2 * (B.c / 5) * (B.c / 5)))), n = Math.round(ex / 255 * 0.8 * nt);
+  return n <= 4500 ? 'Painted ≈ ' + n.toLocaleString() + ' trees (game max 4,500)' : 'Painted ≈ ' + n.toLocaleString() + ' trees → game shows 4,500 spread evenly (' + Math.round(4500 / n * 100) + '% of each patch) • clear far patches (Shift) to make the rest denser';
+}
 function bdTreesBuild() {
   if (bdTrees) { gBd.remove(bdTrees); bdTrees.geometry.dispose(); bdTrees = null; } const B = M.bd; if (!B) return;
-  const P = BD.bdTreePts(B, M, bdAt, 9000); if (!P.length) return; const n = P.length / 3;
+  const P = BD.bdTreePts(B, M, bdAt, 4500); if (!P.length) return; const n = P.length / 3;
   const geo = new THREE.ConeGeometry(2.4, 9, 6).translate(0, 4.5, 0);
   bdTrees = new THREE.InstancedMesh(geo, new THREE.MeshLambertMaterial({ color: '#2c4a2a', flatShading: true }), n); const m4 = new THREE.Matrix4();
   for (let i = 0; i < n; i++) { const s = P[i * 3 + 2]; bdTrees.setMatrixAt(i, m4.makeScale(s, s, s).setPosition(P[i * 3], bdAt(P[i * 3], P[i * 3 + 1]) - 0.3, P[i * 3 + 1])); }
@@ -586,7 +590,7 @@ function bdOpts(b) {   // Settings panel of the Backdrop tool
     b.append(h3('Brush'), slider('Size (radius m)', 'brad', 3, 400, 1), opt.bm !== 'paint' ? slider(opt.bm === 'tree' ? 'Speed' : 'Strength', 'bstr', 0.5, 20, 0.5) : null, check('Soft Edge', 'soft'));
     if (opt.bm === 'set') b.append(slider('Height (m)', 'bh', -80, 300, 1), el('div', { class: 'row' }, el('span', { style: 'flex:1' }, 'Alt+click = take the height under the cursor'), pickBtn('height', v => { opt.bh = clamp(Math.round(v), -80, 300); renderOpts(); }, 'a height')));
     if (opt.bm === 'paint') b.append(el('div', { class: 'row' }, el('span', { style: 'flex:1' }, 'Current: ' + BD.BSURF[opt.bs].n), pickBtn('bsurf', v => { opt.bs = v; renderOpts(); }, 'a surface (map ground → closest colour)')), pal(BD.BSURF, opt.bs, i => { opt.bs = i; renderOpts(); }), el('p', { class: 'note' }, 'Shift = back to Auto (grass on flat, rock on steep, sand at the water, snow up high)'));
-    if (opt.bm === 'tree') b.append(slider('Density (0–255)', 'btd', 10, 255, 5), el('p', { class: 'note' }, 'Drag = grow trees toward this density • Shift = clear • no trees under water or on cliffs'));
+    if (opt.bm === 'tree') b.append(slider('Density (0–255)', 'btd', 10, 255, 5), el('p', { class: 'note' }, 'Drag = grow trees toward this density • Shift = clear • no trees under water or on cliffs'), el('p', { class: 'note' }, bdTreeNote()));
   }
   const sea = el('input', { type: 'checkbox', checked: B.sea != null, onchange: () => { pushUndo('b'); B.sea = sea.checked ? (opt.seaL != null ? opt.seaL : -2) : null; bdAfter(); } });
   const lv = el('input', { class: 'tl-in', type: 'number', step: 0.5, value: B.sea != null ? B.sea : (opt.seaL != null ? opt.seaL : -2), style: 'width:70px', onchange: e => { pushUndo('b'); opt.seaL = +e.target.value; if (B.sea != null) B.sea = opt.seaL; bdAfter(); } });

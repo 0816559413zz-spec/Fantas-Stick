@@ -8,6 +8,8 @@
 
 ## Latest notes (newest first)
 
+**Backdrop trees fix (2026-11-24, `mapbuild/backdrop.js` `bdTreePts` + `js/67-coast.js` `trees()`):** painted backdrop trees past the cap (game 4,500 / low 1,200) were taken in row order, so on big forests (Cliff Side Castle ≈ 74k painted) only the first rows showed and new painting elsewhere never appeared. Now thinned evenly everywhere (keep factor = cap / expected). Editor uses the game's tries-per-cell and cap 4,500; Trees brush shows painted count vs the cap.
+
 **First-run flow (2026-11-24, user):** title logo reads FTS (was FTA). Character creator = looks + wand only (2 steps, confirm on step 2; `js/39-menu.js`); the element/spell and house steps are gone from it. A new player's spell picker (`skwOpen`) opens by itself the first time they enter a game room (no `wd_kit2` yet; `js/62-hub-ui.js` `HUI.kitAsked`). House (`myLook.h`) still exists internally (scarf colors, crests). Planned next: element select screen before each match (mockups in claude.ai artifact, not in the game yet); element is picked once per match, no swap at spawn.
 
 **Map Builder version badge (2026-11-24):** top bar shows `Map vN • Remote vN` for the open map: local = `assets/manifest.json` on disk, Remote = `origin/main` (what GitHub Pages serves; `git fetch` at most once a minute via `GET /api/mb-ver`). Yellow + `(not committed)`/`(not pushed)` when they differ; click to recheck, auto every 2 min. Needs a restarted `tools/serve.py`.

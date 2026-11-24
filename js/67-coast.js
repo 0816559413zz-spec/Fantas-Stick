@@ -211,8 +211,9 @@ function bdGridSrc(J,hx0,hz0,low){
       o.w=Math.min(1,Math.max(0,(sl-0.8)/0.8))*(sea!=null?Math.min(1,Math.max(0,(y-sea+3)/5)):1)*(1-Math.min(1,Math.max(0,(e-120)/130)));   // cliff ribs near only (far rows too sparse → streaks)
       o.si=sf[Math.min(ny-1,Math.max(0,Math.round((z-Z0)/c)))*nx+Math.min(nx-1,Math.max(0,Math.round((x-X0)/c)))];return y;},
     trees(){const P=[],cap=low?1200:4500,o={},yAt=(x,z)=>src.h(x,z,o),sl=sea!=null?sea:-1e9,nt=Math.min(32,Math.max(2,Math.round(2*(c/5)*(c/5))));   // tries per cell: same trees per m² on a coarse grid
+      let ex=0;for(let k=0;k<n;k++)ex+=tr[k];const kp=Math.min(1,cap/Math.max(1,ex/255*0.8*nt));   // over the cap: thin evenly everywhere (was: first rows only → most of a big forest missing)
       for(let j=0;j<ny&&P.length<cap*4;j++)for(let i=0;i<nx;i++){const k=j*nx+i,t=tr[k];if(!t)continue;
-        for(let q=0;q<nt;q++){const id=nt===2?k*2+q:k*64+q;if(bdHsh(id,991)>=t/255*0.8)continue;
+        for(let q=0;q<nt;q++){const id=nt===2?k*2+q:k*64+q;if(bdHsh(id,991)>=t/255*0.8*kp)continue;
           const x=X0+(i+bdHsh(id,992)-0.5)*c,z=Z0+(j+bdHsh(id,994)-0.5)*c;if(Math.max(Math.abs(x)-hx0,Math.abs(z)-hz0)<8)continue;
           const y=yAt(x,z);if(y<sl+0.8)continue;if(Math.max(Math.abs(yAt(x+2,z)-yAt(x-2,z)),Math.abs(yAt(x,z+2)-yAt(x,z-2)))/4>1.1)continue;
           P.push(x,z,y,0.9+bdHsh(id,993)*0.9);if(P.length>=cap*4)break;}}

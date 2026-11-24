@@ -817,7 +817,7 @@ BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:137 backdropHide:141
 
-## js/67-coast.js (414) — 
+## js/67-coast.js (415) — 
 COAST:10 BD_LOD:14
 §26 2D value noise (deterministic)
 cvN:27 cvF:29
@@ -826,9 +826,9 @@ COAST_SKY:31 coastSky:32 BD_AIR:59 BD_DET_V:63 BD_DET_F:64 bdDetailCol:68 BD_DET
 §136 land shape
 coastShape:137 coastH:162
 §175 height sources: one interface for the code coast (BACKDROP.fcs) and M…
-coastSrcProc:178 BD_SURF:184 bdB64:185 bdRle:186 bdHsh:187 bdGridSrc:188 coastGrid:223 bdCoast:233 coastTreePts:327 BD_TREE_FAR:335 coastTreeMesh:336
-§375 near-edge detail bands (user 2026-11-23: backdrop next to the play ar…
-bdNearKit:380
+coastSrcProc:178 BD_SURF:184 bdB64:185 bdRle:186 bdHsh:187 bdGridSrc:188 coastGrid:224 bdCoast:234 coastTreePts:328 BD_TREE_FAR:336 coastTreeMesh:337
+§376 near-edge detail bands (user 2026-11-23: backdrop next to the play ar…
+bdNearKit:381
 
 ## js/68-darkness-view.js (1153) — 
 nightWaltzStrip:2 nightWaltzBorder:80 stDarkVeilGround:118 darkFxMesh:195 drawDarknessHud:201 drawDarkHudBar:220 darknessMarkView:227 darkWaveViews:237 darkActiveViews:237 darkViewRoot:238 darkViewTemp:245 darknessClear:257 darkDeathRoots:265 darkDeathClear:268 darkWorldAt:282 darkMarkWind:285 darkMarkLaunch:313 darkMarkContact:325 darkViewNow:338 darkFlowHud:338 darkIdleWeaponPose:339 darkBAGroundImpact:343 darkSettleWeapon:358 darkBlendWeapon:369 darkShowWeaponReturn:392 darkTrailHistory:399 darkDashView:438 darknessCharacter:484 darknessEfx:727 stDarkShieldInk:1024 stDarkVeilBlade:1067 stWardDrainPool:1104
@@ -975,4 +975,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(119 files, 36990 lines)
+(119 files, 36991 lines)

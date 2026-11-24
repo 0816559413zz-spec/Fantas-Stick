@@ -155,9 +155,10 @@ export function bdGen(B, M, pre, seed = 1) {
 export function bdAuto(B, y, slope) { if (slope > 1.0) return 4; if (B.sea != null && y < B.sea + 1.4) return 5; if (y > (B.snow != null ? +B.snow : 110) + 10) return 7; return 1; }
 // tree positions from the density grid → flat [x, z, scale, …] (map coords) • yAt(x,z) = shown height • same rule in js/67-coast.js bdGridSrc.trees
 export function bdTreePts(B, M, yAt, cap) {
-  const P = [], sea = B.sea != null ? B.sea : -1e9;
+  const P = [], sea = B.sea != null ? B.sea : -1e9, nt = Math.min(32, Math.max(2, Math.round(2 * (B.c / 5) * (B.c / 5))));   // same tries per cell as the game (js/67-coast.js)
+  let ex = 0; for (let k = 0; k < B.tr.length; k++) ex += B.tr[k]; const kp = Math.min(1, cap / Math.max(1, ex / 255 * 0.8 * nt));   // over the cap: thin evenly (not first rows only)
   for (let j = 0; j < B.ny && P.length < cap * 3; j++) for (let i = 0; i < B.nx; i++) { const k = j * B.nx + i, t = B.tr[k]; if (!t) continue;
-    for (let q = 0; q < 2; q++) { const id = k * 2 + q; if (hsh(id, 991) >= t / 255 * 0.8) continue;
+    for (let q = 0; q < nt; q++) { const id = nt === 2 ? k * 2 + q : k * 64 + q; if (hsh(id, 991) >= t / 255 * 0.8 * kp) continue;
       const x = B.x0 + (i + hsh(id, 992) - 0.5) * B.c, z = B.z0 + (j + hsh(id, 994) - 0.5) * B.c; if (bdOut(M, x, z) < 8) continue;
       const y = yAt(x, z); if (y < sea + 0.8) continue; if (Math.max(Math.abs(yAt(x + 2, z) - yAt(x - 2, z)), Math.abs(yAt(x, z + 2) - yAt(x, z - 2))) / 4 > 1.1) continue;
       P.push(+x.toFixed(2), +z.toFixed(2), +(0.9 + hsh(id, 993) * 0.9).toFixed(2)); if (P.length >= cap * 3) break; } }
