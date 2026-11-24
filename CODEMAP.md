@@ -29,7 +29,7 @@ HOUSES:239 HAIRC:244 HAIRSTY:246 WOODC:249 WOODN:250 WCOREC:251 WCOREN:252 WANDS
 ## js/02-fcs-data.js (3) — 
 FCS_DATA:3
 
-## js/02-fcs-rooms.js (100) — 
+## js/02-fcs-rooms.js (100) — FCS room pieces (rule: guides/MAP-ROOMS.md — user 2026-11-20: every room/courtyard is a s…
 FCS_ROOMS:11 fcsRoomAdd:12 FCS_C0:13 fcsRoomOf:14 fcsCut:15
 §16 gen context (called from genFcs)
 fcsRoomK:17 roomWall:27 roomCol:36 roomFloor:38 roomCeil:44 fcsCeilAt:46 fcsCeilClamp:54
@@ -202,7 +202,7 @@ windUltCast:504 windUltTick:507 windUltSweep:532 windFloatZ:540 windShieldPitch:
 §551 สกิล (ผู้ใช้ 2026-11-08: รีดีไซน์ทั้งชุด — id เดิมไว้ให้ชุดสกิล/tune/…
 W_WL:553 W_DR:559 W_VX:565 W_VO:571 W_FW:577 W_UL:587
 
-## js/10-net.js (210) — เครือข่าย (PeerJS / WebRTC)
+## js/10-net.js (210) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NET_QMAX:70 NETU:72 netUndelta:73 setStatus:79 hostGame:81 hostPeer:90 netConnect:110 joinWatch:121 joinFail:136 netLost:142 joinGame:157 joinPeer:168 clientOnData:183 leave:198 leaveRoom:200
 
 ## js/11-host.js (494) — 
@@ -270,8 +270,10 @@ bombTick:347 modeSnap:360
 §385 สร้าง snapshot ส่งให้ทุกเครื่อง
 r1:386 DEFP:388 packP:389 unpackP:390 makeSnap:391 PROF:409 pf:410 hostSent:411 hostLoop:412 HLW:427 pingN:437
 
-## js/15-siege.js (277) — 
-SGV:12 SG_TEAM:25 sgF:26 sgCore:27 sgInZone:28 sgSpawn:29 sgInit:30 sgWallsApply:39 sgWallDmg:43 sgWallHit:49 sgWallEnv:50 sgInput:55 sgStop:63 sgTick:64 sgCoreDown:100 sgPhaseGo:113 sgEnd:121 sgResult:123 sgSnap:129 SGB:138 sgBotTarget:140
+## js/15-siege.js (277) — 🏰 โหมดบุกปราสาท (siege) — แบบ Basic ตาม designs/castle-gameplay-concept.md + แผนที่ js/0…
+SGV:12 SG_TEAM:25 sgF:26 sgCore:27 sgInZone:28 sgSpawn:29 sgInit:30 sgWallsApply:39 sgWallDmg:43 sgWallHit:49 sgWallEnv:50 sgInput:55 sgStop:63 sgTick:64 sgCoreDown:100 sgPhaseGo:113 sgEnd:121 sgResult:123 sgSnap:129
+§135 บอทเล่นบุกปราสาท: ฝ่ายบุก = เดินไปแกนแล้วร่าย (เจอศัตรูใกล้ = สู้ก่อน…
+SGB:138 sgBotTarget:140
 §150 team plan (user 2026-11-22: don't trickle in one by one)
 SGT:153 sgTeamPlan:154 sgBotMode:175 sgBreachAim:189 sgBotGoal:196 sgUnstick:212 sgBotThink:225
 
@@ -394,7 +396,7 @@ hallBuild:39 hallEnv:85
 §87 mood: blend by how far the camera is inside the hall rect (3 m soft e…
 hallPre:88 hallPost:97
 
-## js/28-fcs-props.js (156) — 
+## js/28-fcs-props.js (156) — FCS room props — look + destruction (user 2026-11-20). Gameplay side: RPK / roomProp in j…
 FRP:11 FRP_PV:12 FRP_PB:13 frpMat:16
 §26 part builders: local metres, x along the prop, z across, y up. push(g…
 frpBuild:27 fcsPropsBuild:75 fcsPropsView:101 fcsRoomBrkFx:110 FRP_DEB:111 frpDebris:114 _frM:128 _frQ:128 _frS:128 frpSet:129 frpDebrisTick:130
@@ -801,7 +803,7 @@ H4PF:204 h4PfMode:205 h4PfAvatar:207 h4Portrait:209 h4PfRead:220 h4MapBox:227
 ## js/66-hudlay.js (34) — HUD layout (HUD Editor, user 2026-11-24)
 HUDL_DEF:5 HUDL:11 HL0:12 hlGet:13 hudHs:14 hlSet:16 hlJson:20 hlApplyDom:22 hlBegin:26 hlEnd:28 hlBox:30 HL_DEMO_FEED:31
 
-## js/67-backdrop.js (141) — 
+## js/67-backdrop.js (141) — ฉากหลังนอกพื้นที่เล่น (ผู้ใช้ 2026-10-28: "ทำ LOD หลอกตาของนอกแมพ ให้รู้สึกว่าแมพกว้าง")
 BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:137 backdropHide:141
@@ -874,12 +876,12 @@ BRM:9 BFW:12 BSK:13 BROOM_SK:19 broomVert:40 broomMove:53 broomStrike:72 broomSt
 §131 ฝั่งจอ
 broomHead:133 BBEAM:140 _bbGeo:141 broomView:142 broomMountFx:173 broomDismountFx:181 broomBeamFx:183 broomSkFx:199 broomStrikeFx:212 broomFlakFx:217 broomHud:222 broomHudT:223 broomTick:232
 
-## js/70-water-dragon.js (498) — 
-WDG:7 wdgBuild:8 T:9 root:9 fixed:9 rings:10 sides:10 fastNormals:12 geoOf:21 skin:22 faceSkin:50 group:51 head:52 faceTime:54 groundY:54 faceMaterial:55 faceBlue:60 hornBlue:60 ridgeCyan:60 profile:62 headProfile:63 faceGeo:68 fp:68 fc:68 fi:68 faceRings:68 faceSides:68 navy:69 aqua:69 belly:69 flowHi:69 neckBlend:69 headStroke:81 eyePatch:82 waterCrest:97 bodyGeo:123 bodyP:123 bodyUV:123 indices:123 body:129 finShape:131 finGeo:132 finPos:134 finUV:134 finSkin:136 fins:137 limbSkin:139 clawSkin:140 taperedLimb:141 arms:148 bodyLength:158 intro:158 settleWindow:158 tipHz:158 bodyBulk:158 bodyRadius:159 flight:161 quarters:162 step:162 dr:162 dy:162 spiralKnot:163 first:164 entry:164 crest:168 bank:171 corner:171 cruiseEntry:171 quarterHandle:174 leadLength:176 up:180 zAxis:180 yAxis:180 smooth:181 startAt:182 startD:182 startDistance:184 distanceToCruise:184 hoverSpeed:184 fastDuration:184 brakeDuration:184 startRamp:184 fastSpeed:185 progress:186
-§195 ทางบิน: ใช้ระยะทาง (เมตร) ไม่ใช่สัดส่วน เพื่อต่อทางพุ่งลงตอนเล็งเสร็จ…
-dive:196 PA:197 TA:198 DIVE_DOWN:200 DIVE_POUR:200 DIVE_STEP:200 diveDist:201 lastTime:202 lastHeadT:202 headRight:202 bodyState:202 filtered:202 shape:203 gate:256 rune:258 shadowMat:259 shadow:260 ringMat:261 ring:262 glyphMat:263 glyphHi:264 glyphPath:265 water:272 splashGeometry:275 lowWaveGeometry:276 splashBursts:277 pulse:283 outerRing:284 dropletMat:285 drops:285 transform:287 gateAt:288 sprayMaterial:310 spray:310 curlCurve:312 foamMaterial:313 foam:314 particles:315 foamParticles:315 rand:316 bodySprayAt:317 waveSegments:338 waveSheets:338 wavesAt:345 currentConfigs:360 currentMaterial:367 currentSegments:372 currentSides:372 currentMeshes:372 _cC:381 _cR:381 _cV:381 _cRad:381 currentPointTo:382 currentPoint:389 currentSpray:390 currentParticles:391 _cS:392 _cCos:393 _cSin:393 _cPow:393 currentsAt:394
-§459 เล่น
-WDG_YAW:460 wdgGet:461 wdgStart:462 wdgDive:469 wdgKeep:472 wdgEnd:473 wdgTick:474
+## js/70-water-dragon.js (502) — 
+WDG:7 wdgBuild:8 T:9 root:9 fixed:9 rings:10 sides:10 fastNormals:12 geoOf:21 skin:22 faceSkin:50 group:51 head:52 faceTime:54 groundY:54 faceMaterial:55 faceBlue:60 hornBlue:60 ridgeCyan:60 profile:62 headProfile:63 faceGeo:68 fp:68 fc:68 fi:68 faceRings:68 faceSides:68 navy:69 aqua:69 belly:69 flowHi:69 neckBlend:69 headStroke:81 eyePatch:82 waterCrest:97 bodyGeo:123 bodyP:123 bodyUV:123 indices:123 body:129 finShape:131 finGeo:132 finPos:134 finUV:134 finSkin:136 FIN_N:139 fins:139 _fM:140 _fQ:140 _fS:140 _fP:140 limbSkin:142 clawSkin:143 taperedLimb:144 arms:151 bodyLength:161 intro:161 settleWindow:161 tipHz:161 bodyBulk:161 bodyRadius:162 flight:164 quarters:165 step:165 dr:165 dy:165 spiralKnot:166 first:167 entry:167 crest:171 bank:174 corner:174 cruiseEntry:174 quarterHandle:177 leadLength:179 up:183 zAxis:183 yAxis:183 smooth:184 startAt:185 startD:185 startDistance:187 distanceToCruise:187 hoverSpeed:187 fastDuration:187 brakeDuration:187 startRamp:187 fastSpeed:188 progress:189
+§198 ทางบิน: ใช้ระยะทาง (เมตร) ไม่ใช่สัดส่วน เพื่อต่อทางพุ่งลงตอนเล็งเสร็จ…
+dive:199 PA:200 TA:201 DIVE_DOWN:203 DIVE_POUR:203 DIVE_STEP:203 diveDist:204 lastTime:205 lastHeadT:205 headRight:205 bodyState:205 filtered:205 shape:206 gate:260 rune:262 shadowMat:263 shadow:264 ringMat:265 ring:266 glyphMat:267 glyphHi:268 glyphPath:269 water:276 splashGeometry:279 lowWaveGeometry:280 splashBursts:281 pulse:287 outerRing:288 dropletMat:289 drops:289 transform:291 gateAt:292 sprayMaterial:314 spray:314 curlCurve:316 foamMaterial:317 foam:318 particles:319 foamParticles:319 rand:320 bodySprayAt:321 waveSegments:342 waveSheets:342 wavesAt:349 currentConfigs:364 currentMaterial:371 currentSegments:376 currentSides:376 currentMeshes:376 _cC:385 _cR:385 _cV:385 _cRad:385 currentPointTo:386 currentPoint:393 currentSpray:394 currentParticles:395 _cS:396 _cCos:397 _cSin:397 _cPow:397 currentsAt:398
+§463 เล่น
+WDG_YAW:464 wdgGet:465 wdgStart:466 wdgDive:473 wdgKeep:476 wdgEnd:477 wdgTick:478
 
 ## js/71-perfhud.js (162) — 
 PERF:9 perfNetSample:11 perfNetSend:14 perfNetReceive:20 perfNetFrame:25 FRZ:40 frzAdd:42 frzOk:45 frzFrame:46 SHW:53 shwDiff:54 shwPath:58 shwSig:60 shwWho:61 shwHead:68 shwSrc:69 shwSame:70 shwFrame:71 frzRecv:85 frzIn:87 frzNote:89 FRZ_NAME:93 frzRows:94 perfFrame:96 perfDom:111 perfStats:119 perfGraph:123 _gpuName:136 gpuIntegrated:137 perfRows:138 perfPanel:158 perfText:159
@@ -887,7 +889,7 @@ PERF:9 perfNetSample:11 perfNetSend:14 perfNetReceive:20 perfNetFrame:25 FRZ:40 
 ## js/72-dash-pose.js (85) — 
 DPOSE:12 DPT:24 _dpQ:25 _dpX:25 _dpP:25 dpMix:26 dpKnees:28 dpStyle:36 DPDBG:41 dashPose:42 dpApply:75
 
-## js/73-tune.js (141) — 
+## js/73-tune.js (141) — แผงปรับค่า 🎚️ (F8 / ปุ่ม "ปรับค่า" ในเมนูพัก และหน้าแรก) — ปรับตัวเลขในเกมสดๆ แล้วเซฟลง …
 TUNE:8 tuneNum:9 tuneBuild:15
 §80 ใช้ / เก็บค่า
 tuneSetVal:81 tuneApplyFile:84 tuneJson:88
@@ -964,4 +966,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(118 files, 36066 lines)
+(118 files, 36070 lines)

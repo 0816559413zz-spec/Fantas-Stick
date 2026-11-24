@@ -134,7 +134,10 @@ finGeo.translate(0,0,-.035);finGeo.rotateY(Math.PI/2);
 const finPos=finGeo.attributes.position,finUV=finGeo.attributes.uv;
 for(let i=0;i<finPos.count;i++)finUV.setXY(i,.38+finPos.getZ(i)*.16,.68-finPos.getY(i)*.41);
 const finSkin=skin.clone();finSkin.uniforms.uFoamStrength.value=.32;finSkin.uniforms.uRim.value=.22;
-const fins=Array.from({length:38},()=>{const m=new T.Mesh(finGeo,finSkin);m.renderOrder=3;group.add(m);return m;});
+// 38 fins = one InstancedMesh (6v6 CPU 2026-11-24: was 38 draws per dragon) • fin copy of the skin reads instanceMatrix
+finSkin.vertexShader=finSkin.vertexShader.split('vec4(position,1.0)').join('IP_').replace('normalMatrix*normal','normalMatrix*(mat3(instanceMatrix)*normal)').replace('void main(){','void main(){vec4 IP_=instanceMatrix*vec4(position,1.0);');
+const FIN_N=38,fins=new T.InstancedMesh(finGeo,finSkin,FIN_N);fins.renderOrder=3;fins.frustumCulled=false;group.add(fins);
+const _fM=new T.Matrix4(),_fQ=new T.Quaternion(),_fS=new T.Vector3(),_fP=new T.Vector3();
 // One small pair of forelimbs; their frame follows the same backbone as the fins.
 const limbSkin=skin.clone();limbSkin.uniforms.uFoamStrength.value=.18;limbSkin.uniforms.uC1.value.set('#72d6ff');
 const clawSkin=faceSkin.clone();clawSkin.uniforms.uC1.value.set('#dcfbff');
@@ -245,9 +248,10 @@ function shape(t){
  bodyGeo.attributes.position.needsUpdate=true;fastNormals(bodyGeo);
  const last=rings;head.position.copy(centers[last]).addScaledVector(tangents[last],-.95);head.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(rights[last],ups[last],tangents[last]));
  head.visible=centers[last].y>-1.5;   // ตาเป็นวัสดุเรียบ ไม่ถูกตัดที่พื้น → ซ่อนทั้งหัวเมื่อจมลง
- fins.forEach((m,j)=>{const i=Math.round((.10+j*.84/(fins.length-1))*rings),u=i/rings,r=bodyRadius(u),scale=(.24+.94*smooth(u/.70))*(.88+.12*Math.sin(j*1.7));
-  m.position.copy(centers[i]).addScaledVector(ups[i],r*.90);m.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(rights[i],ups[i],tangents[i]));m.scale.set(scale*.82,scale,scale);
- });
+ for(let j=0;j<FIN_N;j++){const i=Math.round((.10+j*.84/(FIN_N-1))*rings),u=i/rings,r=bodyRadius(u),scale=(.24+.94*smooth(u/.70))*(.88+.12*Math.sin(j*1.7));
+  _fP.copy(centers[i]).addScaledVector(ups[i],r*.90);_fQ.setFromRotationMatrix(_fM.makeBasis(rights[i],ups[i],tangents[i]));_fS.set(scale*.82,scale,scale);
+  fins.setMatrixAt(j,_fM.compose(_fP,_fQ,_fS));}
+ fins.instanceMatrix.needsUpdate=true;
  const armIndex=Math.round(.84*rings);
  arms.forEach(({root:ar,pose,sign})=>{ar.position.copy(centers[armIndex]);ar.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(rights[armIndex],ups[armIndex],tangents[armIndex]));pose.rotation.z=sign*(.10+.05*Math.sin(t*2.1));pose.rotation.x=.06*Math.sin(t*1.8);});
  faceTime.value=t;for(const material of [skin,faceSkin,finSkin,limbSkin,clawSkin]){material.uniforms.time.value=t;material.uniforms.uFoamTime.value=t;}

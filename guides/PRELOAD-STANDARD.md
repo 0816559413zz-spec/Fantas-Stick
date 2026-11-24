@@ -293,6 +293,10 @@ ablate fcs rows use `map:'fcs-file',mode:'siege'` — tdm can't load fcs-file).
   intact + hit). `WD.PNV` exposed for tests. Gate PASS 4/4 after.
   Trap seen: a broken `assets/manifest.json` (conflict markers) silently drops fcs-file to the code map `fcs` (no panels) and
   breaks model loads → the gate then shows ~20 mid-match shaders per config. Check `map fcs-file` in the gate line.
+- **Water dragon fins (round 3):** 38 fin meshes per dragon → one `InstancedMesh` (js/70-water-dragon, fin copy of the skin
+  reads `instanceMatrix`; matrices composed per frame as before). 38 draws → 1 per dragon; look identical (`shots/dragcmp.jpg`).
+  Gate: 3/4 PASS; tdm shift5 picked map `greathall` → 2 × 44 ms outline shell `dclip` variant (#ffb659, thickness .035) on the
+  student rig — not from the fins; open item (that outline × darkness-clip combo is not in `warmCharVariants`).
 
 ## 7. Work order
 
