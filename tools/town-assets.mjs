@@ -64,6 +64,7 @@ class Mesh {
     for (const T of [this, this.g]) for (const arr of [T.p, T.n]) for (let i = 0; i < arr.length; i += 3) { const a = arr[i], b = arr[i + 1], d = arr[i + 2]; arr[i] = M[0] * a + M[1] * b + M[2] * d; arr[i + 1] = M[3] * a + M[4] * b + M[5] * d; arr[i + 2] = M[6] * a + M[7] * b + M[8] * d; }
     return this; }
   rotY(a) { return this.rotAxis([0, 1, 0], a); }
+  scale(k) { for (const T of [this, this.g]) for (let i = 0; i < T.p.length; i++) T.p[i] *= k; return this; }   // uniform: normals unchanged
   move(x, y, z) { for (const T of [this, this.g]) for (let i = 0; i < T.p.length; i += 3) { T.p[i] += x; T.p[i + 1] += y; T.p[i + 2] += z; } return this; }
   add(m) { for (const k of ['p', 'n', 'c']) { this[k].push(...m[k]); this.g[k].push(...m.g[k]); } return this; }
   bbox() { const b = [1e9, 1e9, 1e9, -1e9, -1e9, -1e9]; for (const T of [this, this.g]) for (let k = 0; k < T.p.length; k += 3) for (let a = 0; a < 3; a++) { b[a] = Math.min(b[a], T.p[k + a]); b[a + 3] = Math.max(b[a + 3], T.p[k + a]); } return b; }
@@ -321,15 +322,17 @@ const A = [];
 // id, English name (UI is English), cat, mesh, {col, ns, cs}
 const add = (id, name, cat, mesh, o = {}) => A.push({ id, name, cat, mesh, col: o.col == null ? 1 : o.col, ns: o.ns || 0, cs: o.cs });
 const RF = [['red', P.roofR, 'red roof', P.red], ['slate', P.roofS, 'slate roof', P.blue]];
+// houses are modelled at real-life size (2.8–3 m floors, 2 m doors); the game's playable houses use ~4.5 m floors → scale up to match (user 2026-11-24: too small)
+const HS = 1.5;
 for (const [rk, rc, rn, aw] of RF) {
-  add('cottage_' + rk, 'Cottage 5x5 (' + rn + ')', 'build', cottage(rc), { cs: 0.95 });
-  add('timber_' + rk, 'Timber House 2F (' + rn + ')', 'build', timberHouse(rc), { cs: 0.9 });
-  add('tall_' + rk, 'Tall Townhouse 3F (' + rn + ')', 'build', tallHouse(rc), { cs: 0.95 });
-  add('big_' + rk, 'Big Stone House 3F 8x10 (' + rn + ')', 'build', bigHouse(rc), { cs: 0.95 });
-  add('wide_' + rk, 'Wide House 2F 10x6 (' + rn + ')', 'build', wideHouse(rc), { cs: 0.92 });
-  add('row_' + rk, 'Row Houses x3 (' + rn + ')', 'build', rowHouses(rc), { cs: 0.95 });
-  add('towerh_' + rk, 'Round Tower House (' + rn + ')', 'build', towerHouse(rc), { cs: 0.85 });
-  add('shop_' + rk, 'Shop House (' + rn + ')', 'build', shopHouse(rc, aw), { cs: 0.88 });
+  add('cottage_' + rk, 'Cottage 7x7 (' + rn + ')', 'build', cottage(rc).scale(HS), { cs: 0.95 });
+  add('timber_' + rk, 'Timber House 2F (' + rn + ')', 'build', timberHouse(rc).scale(HS), { cs: 0.9 });
+  add('tall_' + rk, 'Tall Townhouse 3F (' + rn + ')', 'build', tallHouse(rc).scale(HS), { cs: 0.95 });
+  add('big_' + rk, 'Big Stone House 3F 12x15 (' + rn + ')', 'build', bigHouse(rc).scale(HS), { cs: 0.95 });
+  add('wide_' + rk, 'Wide House 2F 15x9 (' + rn + ')', 'build', wideHouse(rc).scale(HS), { cs: 0.92 });
+  add('row_' + rk, 'Row Houses x3 (' + rn + ')', 'build', rowHouses(rc).scale(HS), { cs: 0.95 });
+  add('towerh_' + rk, 'Round Tower House (' + rn + ')', 'build', towerHouse(rc).scale(HS), { cs: 0.85 });
+  add('shop_' + rk, 'Shop House (' + rn + ')', 'build', shopHouse(rc, aw).scale(HS), { cs: 0.88 });
 }
 // roads: flat, walk-through, no shadow
 { const T = (id, name, f) => { R = rng(500 + A.length); const m = new Mesh(); f(m); add(id, name, 'road', m, { col: 0, ns: 1 }); };

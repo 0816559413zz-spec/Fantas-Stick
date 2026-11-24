@@ -299,20 +299,20 @@ MY:210 myDB:211 mySave:212 myLoad:215 myDecodeReady:221 myPlay:222 myNext:234 my
 §256 เพลงประกอบ (สร้างสดตามแผนที่)
 MUSIC:257 THEMES:258 padNote:263 musicTick:270 toggleMusic:299
 
-## js/19-client.js (342) — 
+## js/19-client.js (343) — 
 cv:4 cx:4 DPR:5 SW:5 SH:5 resize:6 VIEW:12 screen:13 lastBuffKey:13 overShown:13 lastCount:13 PARTS:14 TEXTS:14
 §15 งบเอฟเฟกต์ (VFX budget)
 VFXB:20 combatFxParams:21 FULL_COMBAT_VFX:22 combatVfxReduced:23 _apush:24 vfxQual:33 vfxBegin:35 vfxEnd:39 vfxOnce:41 vfxExtra:43 PCOL:44 setScreen:46 onLobby:58
 §64 ภาพของโฮสต์ลื่น (ผู้ใช้ 2026-10-31 "ขี่ไม้กวาด/กระโดด กล้องสั่น")
 HVB:68 HBOLD:68 hbReset:69 hbPush:70 hbPair:73 onSnap:77 snapApply:81
-§91 บัฟเฟอร์ snapshot (ลูกข่าย, ผู้ใช้ 2026-10-22 "เล่นออนไลน์ให้ลื่น")
-SBUF:94 NETOLD:95 sbufReset:96 sbufPush:97 sbufAdvance:107
-§119 ทำนายตัวเอง (ลูกข่าย): ตัวเราขยับทันทีที่กด ไม่ต้องรอโฮสต์ตอบ
-PRED:122 predictMe:123 myPos:144
-§146 เอฟเฟกต์
-SMOKE_K:149 burst:150 smoke:163 ring:164 floatText:165 shake:166 weaponContactAge:167 weaponImpactAge:183 wandPos:188 impactFX:190 explosionFX:212
-§224 เอฟเฟกต์คาถาใหม่
-ZV:225 COLB:225 WVV:225 GLV:225 ICEV:225 SLV:225 ULTV:225 OBV:225 _iceDisc:227 _iceEdge:228 _iceSpk:229 iceFloorMat:230 _icePlane:231 _icePathMat:232 _iceWvM:232 iceWvMat:234 _iceShardGeo:247 _isM:250 _isQ:250 _isP:250 _isS:250 _isY:250 iceShardTrail:251 _iceShardMat:256 makeIceFloor:257 ICE_WV:292 updateIceFloors:293 FLASHM:305 FLASHING:306 flashModel:307 endFlash:320 tickFlash:321 GHOSTM:323 SOLIDM:323 ghostOf:324 setGhost:330 hitSparks:338
+§92 บัฟเฟอร์ snapshot (ลูกข่าย, ผู้ใช้ 2026-10-22 "เล่นออนไลน์ให้ลื่น")
+SBUF:95 NETOLD:96 sbufReset:97 sbufPush:98 sbufAdvance:108
+§120 ทำนายตัวเอง (ลูกข่าย): ตัวเราขยับทันทีที่กด ไม่ต้องรอโฮสต์ตอบ
+PRED:123 predictMe:124 myPos:145
+§147 เอฟเฟกต์
+SMOKE_K:150 burst:151 smoke:164 ring:165 floatText:166 shake:167 weaponContactAge:168 weaponImpactAge:184 wandPos:189 impactFX:191 explosionFX:213
+§225 เอฟเฟกต์คาถาใหม่
+ZV:226 COLB:226 WVV:226 GLV:226 ICEV:226 SLV:226 ULTV:226 OBV:226 _iceDisc:228 _iceEdge:229 _iceSpk:230 iceFloorMat:231 _icePlane:232 _icePathMat:233 _iceWvM:233 iceWvMat:235 _iceShardGeo:248 _isM:251 _isQ:251 _isP:251 _isS:251 _isY:251 iceShardTrail:252 _iceShardMat:257 makeIceFloor:258 ICE_WV:293 updateIceFloors:294 FLASHM:306 FLASHING:307 flashModel:308 endFlash:321 tickFlash:322 GHOSTM:324 SOLIDM:324 ghostOf:325 setGhost:331 hitSparks:339
 
 ## js/20-vfx-pyro-storm.js (857) — Dragonfall (ภาพ)
 makeDfCircle:3 stormCircleCyan:20 DFV:25 dfCracks:26 updateDfCracks:36 _domeAim:37 domeChargeOrb:38 _spearUp:46 _spearDir:46 _spearA:46 _spearB:46 DOME_SPEAR_LEN:47 stormDomePath:48 stormDomeSpearFX:52 stormDomeHoverFX:83 stormDomeReadyFX:107 stormDomeGroundPoint:128 stormDomeFracture:131 stormDomeFloorPullFX:177 stormDomeFieldFX:204 stormDomePose:240 dragonfallFX:304
@@ -975,4 +975,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(119 files, 36991 lines)
+(119 files, 36992 lines)

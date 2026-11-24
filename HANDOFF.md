@@ -8,6 +8,8 @@
 
 ## Latest notes (newest first)
 
+**Town houses 1.5× bigger (2026-11-24, `tools/town-assets.mjs` `HS`):** the 16 town/* houses were real-life size (2.8–3 m floors) next to the game's ~4.5 m house floors; now scaled 1.5× (names: Cottage 7x7, Big 12x15, Wide 15x9). Props/roads/lamps unchanged. Placed instances grow automatically in Map Builder; a map's game .glb changes only after re-export (town-demo re-exported, catalog rows + 4 spawns moved; fcs-file not re-exported). Check maps for houses now overlapping.
+
 **Map Builder ⬆ Export now publishes (2026-11-24, `POST /api/mb-publish` in tools/serve.py):** Export = export + one commit with only this map (`maps/build/<id>.json`, room prefabs it uses, `assets/maps/<id>.json/.glb`, its single `assets/manifest.json` entry), built on `origin/main` with a temporary index and pushed (= GitHub Pages deploy). Other local changes are never included. Refuses if this PC has unpushed commits. If local edits block the fast-forward the push still lands and this PC stays behind (pull later). ▶ Play / Game View only export. `&dry=1` builds without pushing. Tested with dry runs only.
 
 **Backdrop trees fix (2026-11-24, `mapbuild/backdrop.js` `bdTreePts` + `js/67-coast.js` `trees()`):** painted backdrop trees past the cap (game 4,500 / low 1,200) were taken in row order, so on big forests (Cliff Side Castle ≈ 74k painted) only the first rows showed and new painting elsewhere never appeared. Now thinned evenly everywhere (keep factor = cap / expected). Editor uses the game's tries-per-cell and cap 4,500; Trees brush shows painted count vs the cap.

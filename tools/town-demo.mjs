@@ -16,9 +16,9 @@ const put = (k, x, z, rot = 0, o = {}) => M.objs.push(Object.assign({ id: nid(),
 const ids = Object.keys(INF), of = c => ids.filter(k => INF[k].cat === c);
 // catalog rows: houses red / slate, roads, small stuff
 const row = (list, z, x0 = 6, gap = 2.5, x1 = 116) => { let x = x0; const rows = []; for (const k of list) { const w = INF[k].w; if (x + w > x1) { x = x0; z += 9; } put(k, x + w / 2, z); x += w + gap; } return z; };
-row(of('build').filter(k => k.endsWith('_red')), 10, 4, 2);
-row(of('build').filter(k => k.endsWith('_slate')), 26, 4, 2);
-let z = row(of('road'), 42, 4, 2);
+row(of('build').filter(k => k.endsWith('_red')), 10, 4, 2, 124);
+row(of('build').filter(k => k.endsWith('_slate')), 30, 4, 2, 124);
+let z = row(of('road'), 48, 4, 2);
 z = row(of('light').concat(of('fence')), z + 11, 4, 2.2);
 row(of('prop'), z + 8, 4, 1.6);
 // street scene (x 130..195): main street along z at x=160
@@ -40,7 +40,7 @@ put('banner_red', sx - 3.5, 34); put('banner_blue', sx + 3.5, 34); put('sacks', 
 put('notice', sx - 6, 68, Math.PI / 2); put('hay_bales', sx + 8, 78); put('woodpile', sx - 8, 78); put('fence_picket', sx + 8, 82); put('hedge', sx - 8, 88);
 put('brazier', sx - 2.5, 42); put('brazier', sx + 2.5, 50); put('gate_arch', sx, 3);
 // spawns
-[[20, 90], [60, 90], [100, 90], [140, 30], [180, 30], [140, 70], [180, 70], [60, 4]].forEach(([x, z]) => M.objs.push({ id: nid(), t: 'spawn', x, z, y: 0, rot: 0 }));
+[[20, 90], [60, 90], [100, 90], [160, 18], [160, 30], [160, 62], [160, 74], [60, 4]].forEach(([x, z]) => M.objs.push({ id: nid(), t: 'spawn', x, z, y: 0, rot: 0 }));
 M.objs.push({ id: nid(), t: 'spawnR', x: 6, z: 4, y: 0, rot: 0 }, { id: nid(), t: 'spawnB', x: 194, z: 92, y: 0, rot: Math.PI });
 M.seq = id;
 fs.writeFileSync('maps/build/town-demo.json', JSON.stringify(MD.pack(M)));

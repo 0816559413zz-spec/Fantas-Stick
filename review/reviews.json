@@ -1,5 +1,5 @@
 {
- "next": 184,
+ "next": 186,
  "items": [
   {
    "id": 180,
@@ -3821,6 +3821,23 @@
    "links": [
     "/shots/motion_earth_wrath.gif",
     "/shots/earth_wrath_sheet.jpg"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 185,
+   "title": "บ้าน Town ใหญ่ขึ้น 1.5 เท่า",
+   "text": "บ้านชุด town/* ทั้ง 16 แบบขยาย 1.5 เท่า ให้ชั้นสูงพอๆ กับบ้านในเกม (ของประดับ/ถนน/โคมไฟขนาดเดิม). ดูในเกม: index.html?nosw&playmap=town-demo หรือเปิด Map Builder (โหลดหน้าใหม่) — บ้านที่วางไว้แล้วจะใหญ่ขึ้นเอง เช็กว่ามีหลังไหนทับกัน แล้วกด Export ใหม่",
+   "kind": "Map",
+   "who": "Map Builder",
+   "status": "wait",
+   "created": "2026-11-24",
+   "updated": "2026-11-24",
+   "imgs": [],
+   "links": [
+    "index.html?nosw&playmap=town-demo",
+    "mapbuild.html"
    ],
    "feedback": "",
    "reply": ""
