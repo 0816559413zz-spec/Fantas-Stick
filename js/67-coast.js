@@ -10,8 +10,8 @@
 const COAST={sea:-40,   // sea level (m) under the map ground
   fogC:'#c4cbce',fogN:240,fogF:760,   // scene fog (land, castle)
   seaN:330,seaF:680};   // sea fades into the horizon colour (camera far = 700)
-// near-edge detail bands (bdNearKit below) • ?nobdlod = old flat backdrop (A/B + perf compare) • tint = m of grass next to the edge that takes the map ground colour (js/50 grassBake)
-const BD_LOD={on:!/[?&]nobdlod\b/.test(location.search),hi:[55,115],mid:[140,230],rock:[5,70],grass:36,live:[160,420],tint:18};
+// near-edge detail bands (bdNearKit below; phi/pmid = same bands for painted wind trees, card trees cost more) • ?nobdlod = old flat backdrop (A/B + perf compare) • tint = m of grass next to the edge that takes the map ground colour (js/50 grassBake)
+const BD_LOD={on:!/[?&]nobdlod\b/.test(location.search),hi:[55,115],mid:[140,230],phi:[40,95],pmid:[110,175],rock:[5,70],grass:36,live:[160,420],tint:18};
 (function(){
   const cs={coast:{seed:5,
       jag:7,        // headland edge wobble (m)
@@ -242,7 +242,7 @@ function bdCoast(id,B){
   g.add(so);
   const TP=src.trees();let tr=coastTreeMesh(TP,low);if(tr)g.add(tr);
   for(const q of g.children){q.castShadow=q.receiveShadow=false;}
-  if(hd)bdNearKit(g,TP,src,hx0,hz0,far=>{if(tr){g.remove(tr);tr.children[0]&&tr.children[0].geometry.dispose();}tr=coastTreeMesh(far,low);if(tr)g.add(tr);});
+  if(hd)bdNearKit(g,TP,src,hx0,hz0,(far,round)=>{if(tr){g.remove(tr);tr.children[0]&&tr.children[0].geometry.dispose();}tr=coastTreeMesh(far,low,round);if(tr)g.add(tr);},typeof world!=='undefined'?world:null);
   if(typeof world!=="undefined"&&world){const ho={},W=world;W.userData.bdH=src.hq||((x,z)=>src.h(x,z,ho));world.userData.bdM=hd?BD_LOD.grass:0;
     world.userData.bdTint=hd&&tv.length?(smp,arr)=>{const T=BD_LOD.tint,out=arr||[];   // smp(x,z) → map edge ground colour (linear rgb) or null • arr = saved result (grass cache hit)
       if(!arr)for(const k of tv){const x=pos[k*3],z=pos[k*3+2],e=Math.max(0,Math.max(Math.abs(x)-hx0,Math.abs(z)-hz0)),c0=smp(x,z);if(!c0)continue;const t=Math.min(1,e/T),w=1-t*t*(3-2*t);out.push(k,c0[0],c0[1],c0[2],w);}
@@ -260,13 +260,17 @@ function coastTreePts(S,hx0,hz0,low){
     if(k<0.55||R()>(k-0.5)*2.2)continue;if(S.land(px,pz)>-9)continue;P.push(px,pz);}
   const n=Math.min(cap,P.length/2),Q=[];for(let i=0;i<n;i++){const x=P[i*2],z=P[i*2+1];Q.push(x,z,S.top(x,z)-0.3,0.9+R()*0.9);}return Q;
 }
-function coastTreeMesh(P,low){
+function coastTreeMesh(P,low,round){   // round = broadleaf blobs (maps whose forest is the painted wind trees)
   if(!P.length)return null;
   const R=mulberry(9052),tiles=new Map(),group=new THREE.Group();
   group.name='coastTrees';
   const M=(y,sx)=>new THREE.Matrix4().makeTranslation(0,y,0).multiply(new THREE.Matrix4().makeScale(sx||1,1,sx||1));
   const sides=low?4:5;
-  const geo=ffMerge([[new THREE.CylinderGeometry(0.2,0.32,2.4,4),'#4a3828',M(1.2)],
+  const geo=round?ffMerge([[new THREE.CylinderGeometry(0.22,0.34,4.4,4),'#4a3a2a',M(2.2)],
+    [new THREE.IcosahedronGeometry(2.9,0),'#2c6a30',M(6.4,1.15),'#4f9238'],
+    [new THREE.IcosahedronGeometry(2.2,0),'#3a7d34',M(8.6),'#6aaa40'],
+    [new THREE.IcosahedronGeometry(1.7,0),'#2a6430',M(6.2,1.5),'#4a8a36']])
+   :ffMerge([[new THREE.CylinderGeometry(0.2,0.32,2.4,4),'#4a3828',M(1.2)],
     [new THREE.ConeGeometry(2.5,5.4,sides),'#1c2f1d',M(4.2),'#2c4829'],
     [new THREE.ConeGeometry(1.8,5.4,sides),'#243c25',M(6.8),'#3d5f35']]);
   const mat=new THREE.MeshLambertMaterial({vertexColors:true});
@@ -296,15 +300,19 @@ function coastTreeMesh(P,low){
 // e = m outside the map edge • trees: e < hi → gorge kit pines (same models as the castle forest), < mid → light pines (pine_la/lb), beyond → instanced cones
 // band changes are a per-tree random chance (smoothstep) → no visible line, nothing swaps while playing (no popping)
 // ground: stones / shrubs / ferns thin out over rock[] • grass blades: grassBake carries on BD_LOD.grass m past the edge (js/50) • land shading: grLive fades over live[] (camera m)
-function bdNearKit(g,P,src,hx0,hz0,swap){
+// tree style follows the map: forest of painted wind trees (Map Builder kit ptree/*, js/77) → same trees + bushes past the edge, round far blobs
+function bdNearKit(g,P,src,hx0,hz0,swap,W){
   if(typeof gltfLoader!=='function'||typeof ffParts!=='function')return;
-  gltfLoader().then(L=>L.loadAsync('assets/mapkit/gorge.glb?v=9')).then(gltf=>{
+  Promise.all([gltfLoader().then(L=>L.loadAsync('assets/mapkit/gorge.glb?v=9')),(W&&W.userData.ptReady)||0]).then(([gltf,ptN])=>{
     if(!g.parent)return;   // map already dropped
+    const PK=ptN>=12&&typeof paintKit==='function'?paintKit():null;
     const E=(x,z)=>Math.max(Math.abs(x)-hx0,Math.abs(z)-hz0),ss=(a,t)=>{t=Math.min(1,Math.max(0,(t-a[0])/(a[1]-a[0])));return t*t*(3-2*t);};
     const o={},sea=src.sea!=null?src.sea+1:-1e9,items={},far=[],put=(id,x,y,z,s,lean)=>{(items[id]=items[id]||[]).push([x,y,z,s,lean]);};
     const ground=(x,z)=>{const y=src.h(x,z,o);return y<sea||o.w>0.15||E(x,z)<2?null:y;};   // dry, not cliff, outside the map
     const HOF={pine_a:20.5,pine_b:26.3,pine_c:15.6,pine_d:31.1,pine_la:24.3,pine_lb:19.5},HI=['pine_a','pine_b','pine_c','pine_d'];
     for(let i=0;i<P.length;i+=4){const x=P[i],z=P[i+1],y=P[i+2],s=P[i+3],e=E(x,z),r=bdHsh(i,7001),h=10.5*s;
+      if(PK){const sc=0.95+(s-0.9)*0.75;if(r<1-ss(BD_LOD.phi,e)){put('pt'+((bdHsh(i,7002)*4)|0),x,y,z,sc,1);if(bdHsh(i,7004)<0.45){const a=bdHsh(i,7010)*6.283,d=3+bdHsh(i,7011)*4,fx=x+Math.cos(a)*d,fz=z+Math.sin(a)*d,fy=ground(fx,fz);if(fy!=null)put('pb'+(bdHsh(i,7012)<0.5?0:1),fx,fy,fz,0.9+bdHsh(i,7013)*0.9,0);}}
+        else if(r<1-ss(BD_LOD.pmid,e))put('pf'+(bdHsh(i,7003)<0.5?0:1),x,y,z,sc,1);else far.push(x,z,y,s);continue;}
       if(r<1-ss(BD_LOD.hi,e)){const id=HI[(bdHsh(i,7002)*HI.length)|0];put(id,x,y,z,h/HOF[id],1);
         if(bdHsh(i,7004)<0.5){const a=bdHsh(i,7010)*6.283,d=2.5+bdHsh(i,7011)*3.5,fx=x+Math.cos(a)*d,fz=z+Math.sin(a)*d,fy=ground(fx,fz);if(fy!=null)put(bdHsh(i,7012)<0.5?'fern_a':'fern_b',fx,fy,fz,0.9+bdHsh(i,7013)*0.8,0);}}
       else if(r<1-ss(BD_LOD.mid,e)){const id=bdHsh(i,7003)<0.5?'pine_la':'pine_lb';put(id,x,y,z,h*0.95/HOF[id],1);}
@@ -312,15 +320,18 @@ function bdNearKit(g,P,src,hx0,hz0,swap){
     const R=mulberry(7101),K0=BD_LOD.rock,ax=hx0+K0[1],az=hz0+K0[1];
     for(let n=0;n<4200;n++){const x=(R()*2-1)*ax,z=(R()*2-1)*az,e=E(x,z),q=R(),s=R();if(e<K0[0]||e>K0[1]||R()>1-ss([K0[0]+5,K0[1]],e))continue;
       const y=ground(x,z);if(y==null)continue;
-      if(q<0.72)put(['stone_a','stone_b','stone_c'][(s*3)|0],x,y,z,0.7+R()*1.8,0);else if(q<0.86)put(s<0.5?'shrub_a':'shrub_b',x,y,z,0.8+R()*0.8,0);else put(s<0.5?'fern_a':'fern_b',x,y,z,0.8+R()*0.9,0);}
+      if(q<(PK?0.55:0.72))put(['stone_a','stone_b','stone_c'][(s*3)|0],x,y,z,0.7+R()*1.8,0);else if(PK)put('pb'+(s<0.5?0:1),x,y,z,0.8+R()*1.0,0);else if(q<0.86)put(s<0.5?'shrub_a':'shrub_b',x,y,z,0.8+R()*0.8,0);else put(s<0.5?'fern_a':'fern_b',x,y,z,0.8+R()*0.9,0);}
     const q=new THREE.Quaternion(),eu=new THREE.Euler(),sv=new THREE.Vector3(),pv=new THREE.Vector3(),tm=new THREE.Matrix4(),fin=new THREE.Matrix4(),kit=new THREE.Group();kit.name='bdKit';
     let tris=0;
-    for(const id in items){const K=ffParts(gltf.scene,'g_'+id);if(!K)continue;const L2=items[id];tm.makeTranslation(K.off.x,K.off.y,K.off.z);
+    for(const id in items){const pg=PK&&/^p[tfb]\d$/.test(id)?PK[{t:'tree',f:'far',b:'bush'}[id[1]]][+id[2]]:null;
+      if(pg){const L2=items[id],im=new THREE.InstancedMesh(pg,PK.mat,L2.length);L2.forEach(([x,y,z,s,lean],i)=>{eu.set(lean?(bdHsh(i,7031)-0.5)*0.07:0,bdHsh(i,7032)*6.283,lean?(bdHsh(i,7033)-0.5)*0.07:0);q.setFromEuler(eu);sv.setScalar(s);pv.set(x,y-0.1,z);im.setMatrixAt(i,fin.compose(pv,q,sv));});
+        im.instanceMatrix.needsUpdate=true;im.computeBoundingSphere();im.castShadow=im.receiveShadow=false;im.name='bdKit_'+id;kit.add(im);tris+=(pg.index?pg.index.count:pg.attributes.position.count)/3*L2.length;continue;}
+      const K=ffParts(gltf.scene,'g_'+id);if(!K)continue;const L2=items[id];tm.makeTranslation(K.off.x,K.off.y,K.off.z);
       const mats=L2.map(([x,y,z,s,lean],i)=>{eu.set(lean?(bdHsh(i,7031)-0.5)*0.07:0,bdHsh(i,7032)*6.283,lean?(bdHsh(i,7033)-0.5)*0.07:0);q.setFromEuler(eu);sv.setScalar(s);pv.set(x,y-0.05,z);return new THREE.Matrix4().compose(pv,q,sv);});
       for(const p of K.parts){const im=new THREE.InstancedMesh(p.g,p.m,L2.length);mats.forEach((M,i)=>{fin.multiplyMatrices(M,tm).multiply(p.rel);im.setMatrixAt(i,fin);});
         im.instanceMatrix.needsUpdate=true;im.computeBoundingSphere();im.castShadow=im.receiveShadow=false;im.name='bdKit_'+id;kit.add(im);
         tris+=(p.g.index?p.g.index.count:p.g.attributes.position.count)/3*L2.length;}}
-    g.add(kit);swap(far);
+    g.add(kit);swap(far,!!PK);
     if(window.WD&&WD.coast&&WD.coast.g===g)WD.coast.kit={n:Object.fromEntries(Object.entries(items).map(([k,v])=>[k,v.length])),far:far.length/4,draws:kit.children.length,tris:tris|0};
   }).catch(e=>console.warn('backdrop kit',e));
 }

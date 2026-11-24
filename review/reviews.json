@@ -1,6 +1,25 @@
 {
- "next": 168,
+ "next": 169,
  "items": [
+  {
+   "id": 168,
+   "title": "รอยต่อ Backdrop ↔ พื้นที่เล่น: ต้นไม้นอกขอบเป็นชนิดเดียวกับในแมพ (fcs-file)",
+   "text": "แมพที่ป่าเป็นต้นไม้ลมแบบภาพวาด (kit ptree) → นอกขอบใช้ต้นเดียวกัน (ใกล้ = ต้นเต็ม, ถัดไป = ต้นใบน้อย, ไกล = ก้อนใบกลม) + พุ่มใบแทนเฟิร์น/พุ่มสน • เดิมนอกขอบเป็นสนเข้ม ดูคนละป่า • แมพอื่นยังเป็นสนเหมือนเดิม • ดู: ขอบตะวันตก (ป่าฝั่งผู้บุก)",
+   "kind": "Map",
+   "who": "Backdrop",
+   "status": "wait",
+   "created": "2026-11-24T12:00:00",
+   "updated": "2026-11-24T12:00:00",
+   "imgs": [],
+   "links": [
+    "/index.html?nosw&dev=1&playmap=fcs-file&pm=siege&mbcam=-230,55,-30,2.8,0.38",
+    "/shots/bd_seam_before.jpg",
+    "/shots/bd_seam_after.jpg",
+    "/shots/bd_seam_ground.jpg"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
   {
    "id": 157,
    "title": "Painterly บนแมพบุกปราสาท",

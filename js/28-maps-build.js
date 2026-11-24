@@ -558,6 +558,7 @@ function fileMapBody(id,F,T,night,W,fb){
   fileMapFx(F.fx);
   W.userData.lights=(F.lights||[]).map(L=>({abs:1,x:tx(L.x),y:GY(L.x,L.y)+(L.h||2),z:tz(L.y),col:L.col||'#ffb060',int:L.int||2,dist:L.dist||14}));
   if(!F.file)return;
+  let ptDone;W.userData.ptReady=new Promise(r=>ptDone=r);   // wind-tree count once the .glb is in (backdrop matches tree style, js/67-coast bdNearKit)
   W.userData.grPend=1;   // ยังเป็นพื้นสำรอง (เขียว) → ห้ามถ่ายแผนที่หญ้า/ห้ามโชว์หญ้า จนกว่า .glb จริงจะมา (js/50 grassTick) — เดิมถ่ายพื้นสำรอง ทุกแมพเลยมีหญ้าเต็ม (โบสถ์/หิมะ/ทะเลทราย)
   gltfLoader().then(L=>L.loadAsync('assets/'+F.file+'?v='+(F.v||0))).then(gltf=>{
     if(!fb.parent)return;                                       // ฉากถูกทิ้งไปแล้ว
@@ -569,14 +570,14 @@ function fileMapBody(id,F,T,night,W,fb){
     fileStyleScene(sc);   // style presets (js/28-fcs-castle.js) — MAP-STANDARD round 4   // ผิววัสดุ (js/76): แมพนิ่ง = ฉายตามพิกัดโลก
     backdropHide(id,sc);   // ของไกลเดิมที่ฉากหลัง (js/67) มาแทน
     W.remove(fb);setTimeout(()=>disposeTree(fb),5000);W.add(sc);W.userData.grPend=0;   // ทิ้งพื้นสำรองทีหลัง (กำลังอุ่นเชดเดอร์อยู่ได้)
-    if(typeof ptreeScene==='function')ptreeScene(sc);   // Map Builder wind trees → InstancedMesh + wind material (js/77)
+    ptDone(typeof ptreeScene==='function'?ptreeScene(sc):0);   // Map Builder wind trees → InstancedMesh + wind material (js/77)
     if(typeof paintScene==='function')paintScene(id,sc);   // ลุคภาพวาด: ต้นไม้ใหม่ + ลายพู่กัน (js/77)
     brkSetup(sc,skip);   // ของบังที่พังได้: แยกออกจาก batch (js/23)
     batchStatic(sc,skip);
     if(meadowGrass)sc.add(meadowGrass);
     if(gltf.animations&&gltf.animations.length){const mx=new THREE.AnimationMixer(sc);for(const c of gltf.animations)mx.clipAction(c).play();W.userData.mixer=mx;}
     gl.shadowMap.needsUpdate=true;setTimeout(prewarmShaders,0);
-  }).catch(err=>{W.userData.grPend=0;console.warn('map glb',id,err);});   // โหลดไม่ได้ = ใช้พื้นสำรองต่อ (ถ่ายหญ้าจากพื้นสำรอง)
+  }).catch(err=>{W.userData.grPend=0;ptDone(0);console.warn('map glb',id,err);});   // โหลดไม่ได้ = ใช้พื้นสำรองต่อ (ถ่ายหญ้าจากพื้นสำรอง)
 }
 function replaceMeadowTufts(root){
   const old=[];
