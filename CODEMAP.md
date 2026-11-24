@@ -29,7 +29,7 @@ HOUSES:241 HAIRC:246 HAIRSTY:248 WOODC:251 WOODN:252 WCOREC:253 WCOREN:254 WANDS
 ## js/02-fcs-data.js (3) — 
 FCS_DATA:3
 
-## js/02-fcs-rooms.js (100) — FCS room pieces (rule: guides/MAP-ROOMS.md — user 2026-11-20: every room/courtyard is a s…
+## js/02-fcs-rooms.js (100) — 
 FCS_ROOMS:11 fcsRoomAdd:12 FCS_C0:13 fcsRoomOf:14 fcsCut:15
 §16 gen context (called from genFcs)
 fcsRoomK:17 roomWall:27 roomCol:36 roomFloor:38 roomCeil:44 fcsCeilAt:46 fcsCeilClamp:54
@@ -87,7 +87,7 @@ SDOME_POSE:235 stormDomeCost:236 stormDomeDash:237 stormDomeCharge:238 stormDome
 ## js/09-darkness.js (463) — 
 DARKP:2 DARK_V:6 DARK_BA:7 DARK_LONG_DASH:8 DARK_CHASE_FLOW:9 DARK_MAW:10 DARK_VEIL_PULL_CLEAR:11 DARK_CHASE_T:12 DARK_WALTZ_ORB:13 darkFlow:14 darkOrbImmune:15 darkAlive:23 darkReset:24 darkState:25 darkEvent:26 darkAim:29 darkTarget:36 darkCone:40 darkBAFloor:47 darkBATargets:51 darkMoveHeading:68 darkClearCooldown:71 darkMark:75 darkReveal:82 darkQueue:83 darkGainFlow:84 darkKill:90 darkTick:93 darkShieldTick:127 darkShieldCrossAt:144 darkShieldCross:153 darkBeamStop:154 darkDash:163 darkBasic:186 DARK_MARK:216 darkWaveTick:233 DARK_CHASE:255 darkMoveWaltz:306 DARK_WALTZ:331 DARK_WARD:353 DARK_VEIL:368 DARK_ULT:376 darkUltBite:391 darkMoveChase:401 darkSnap:441 darkMarked:460
 
-## js/09-earth.js (422) — 
+## js/09-earth.js (423) — 
 EARTH:9 ERV:12
 §24 ตัวช่วย
 eOn:25 eStand:26 eNoStand:27 eSegD:29 eAdd:30 eCollide:32 eProjHit:53 eKill:56
@@ -100,25 +100,25 @@ EKICK:137 earthDash:139 earthRampEnd:174
 §179 สกิล 1: Stonebreaker
 earthStoneAim:180 STONEB:190
 §191 สกิล 1: Stone Mark — ชาร์จไม้สั้น ๆ แล้วยิงเส้นสเปลหัก ๆ ถึงทันที (ไม…
-SMARK:193 earthMarkFire:199 earthStoneHit:207 earthStoneSnap:212
-§214 สกิล 2: Mud Swamp
-MUDS:215
-§219 สกิล 3: Tectonic Crush
-TECT:222
-§223 สกิล 3: Stone Barrage — ปาหินทั้งวงหลังตัวออกไปรัว ๆ (ไม่ตรงเป้า 100%…
-BARRAGE:224 earthBarrageTick:229 earthCrush:235
-§246 สกิล 4: Dust Burst
-DUSTB:248
-§249 สกิล 4: Terra Isle — Stand ต่อยจุ่มลงพื้นตรงจุดเล็งแล้วยกเกาะหินลอยขึ…
-ISLE:251 earthIsleTick:261
-§271 สกิล 5: Terra Auger
-AUGER:274
-§275 สกิล 5: Rampart (ผู้ใช้ 2026-11-23 v2) — เลือกจุด (โฮโลแกรม) แล้วคลิก…
-RAMPART:277 earthRampAimUpd:282 earthRampAimTick:284 earthRampPlace:290 eAugAim:302 earthAugFire:303 earthMound:314
-§317 อัลติ: Wrath — ชาร์จบนพื้น หินดันผู้เล่นขึ้นฟ้า Stand ปาเสาลงจุดเล็ง
-WRATH_READY_T:318 WRATH_THROW_SWING_T:319 WRATH_DRAW_T:320 WRATH:321 earthWrathAim:327 earthWrathFlightAngles:328 earthPillarThrow:334 earthPillarImpact:340 earthWrathTick:348 earthWrathEnd:372 E_WRS:376 earthSpikeTick:377
-§383 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
-updateEarth:384 earthSnapP:398 earthSnapW:414
+SMARK:193 earthMarkFire:199 earthStoneHit:208 earthStoneSnap:213
+§215 สกิล 2: Mud Swamp
+MUDS:216
+§220 สกิล 3: Tectonic Crush
+TECT:223
+§224 สกิล 3: Stone Barrage — ปาหินทั้งวงหลังตัวออกไปรัว ๆ (ไม่ตรงเป้า 100%…
+BARRAGE:225 earthBarrageTick:230 earthCrush:236
+§247 สกิล 4: Dust Burst
+DUSTB:249
+§250 สกิล 4: Terra Isle — Stand ต่อยจุ่มลงพื้นตรงจุดเล็งแล้วยกเกาะหินลอยขึ…
+ISLE:252 earthIsleTick:262
+§272 สกิล 5: Terra Auger
+AUGER:275
+§276 สกิล 5: Rampart (ผู้ใช้ 2026-11-23 v2) — เลือกจุด (โฮโลแกรม) แล้วคลิก…
+RAMPART:278 earthRampAimUpd:283 earthRampAimTick:285 earthRampPlace:291 eAugAim:303 earthAugFire:304 earthMound:315
+§318 อัลติ: Wrath — ชาร์จบนพื้น หินดันผู้เล่นขึ้นฟ้า Stand ปาเสาลงจุดเล็ง
+WRATH_READY_T:319 WRATH_THROW_SWING_T:320 WRATH_DRAW_T:321 WRATH:322 earthWrathAim:328 earthWrathFlightAngles:329 earthPillarThrow:335 earthPillarImpact:341 earthWrathTick:349 earthWrathEnd:373 E_WRS:377 earthSpikeTick:378
+§384 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
+updateEarth:385 earthSnapP:399 earthSnapW:415
 
 ## js/09-light.js (564) — 
 LIGHTP:8 LTV:12 lgOn:19 lightShieldPitch:20 lightShieldGauge:21 lightClearBond:22 lightReset:26 lightAlly:32 lightLinkPos:33 lightUnlink:34 lightReleaseAlly:52 lightBondTarget:59 lightBondTap:79 lightRecall:94
@@ -277,10 +277,8 @@ bombTick:347 modeSnap:360
 §385 สร้าง snapshot ส่งให้ทุกเครื่อง
 r1:386 DEFP:388 packP:389 unpackP:390 makeSnap:391 PROF:409 pf:410 hostSent:411 hostLoop:412 HLW:427 pingN:437
 
-## js/15-siege.js (277) — 🏰 โหมดบุกปราสาท (siege) — แบบ Basic ตาม designs/castle-gameplay-concept.md + แผนที่ js/0…
-SGV:12 SG_TEAM:25 sgF:26 sgCore:27 sgInZone:28 sgSpawn:29 sgInit:30 sgWallsApply:39 sgWallDmg:43 sgWallHit:49 sgWallEnv:50 sgInput:55 sgStop:63 sgTick:64 sgCoreDown:100 sgPhaseGo:113 sgEnd:121 sgResult:123 sgSnap:129
-§135 บอทเล่นบุกปราสาท: ฝ่ายบุก = เดินไปแกนแล้วร่าย (เจอศัตรูใกล้ = สู้ก่อน…
-SGB:138 sgBotTarget:140
+## js/15-siege.js (277) — 
+SGV:12 SG_TEAM:25 sgF:26 sgCore:27 sgInZone:28 sgSpawn:29 sgInit:30 sgWallsApply:39 sgWallDmg:43 sgWallHit:49 sgWallEnv:50 sgInput:55 sgStop:63 sgTick:64 sgCoreDown:100 sgPhaseGo:113 sgEnd:121 sgResult:123 sgSnap:129 SGB:138 sgBotTarget:140
 §150 team plan (user 2026-11-22: don't trickle in one by one)
 SGT:153 sgTeamPlan:154 sgBotMode:175 sgBreachAim:189 sgBotGoal:196 sgUnstick:212 sgBotThink:225
 
@@ -403,7 +401,7 @@ hallBuild:39 hallEnv:85
 §87 mood: blend by how far the camera is inside the hall rect (3 m soft e…
 hallPre:88 hallPost:97
 
-## js/28-fcs-props.js (156) — FCS room props — look + destruction (user 2026-11-20). Gameplay side: RPK / roomProp in j…
+## js/28-fcs-props.js (156) — 
 FRP:11 FRP_PV:12 FRP_PB:13 frpMat:16
 §26 part builders: local metres, x along the prop, z across, y up. push(g…
 frpBuild:27 fcsPropsBuild:75 fcsPropsView:101 fcsRoomBrkFx:110 FRP_DEB:111 frpDebris:114 _frM:128 _frQ:128 _frS:128 frpSet:129 frpDebrisTick:130
@@ -606,7 +604,7 @@ WB:298 wbInit:299 wbBegin:309 wbEnd:310 fxWarpMake:311 fxWarpTick:324
 §332 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:335 fxVolLoad:336 fxVolTex:340 fxVolSet:343 fxVolReady:344 fxVolMake:345 fxVolTick:348 fxPreAssets:353 fxAssetsWait:355
 
-## js/47-earth-view.js (1225) — 
+## js/47-earth-view.js (1260) — 
 ECOL:9 EGUARD_BIG:14 EGUARD:14 EV:15 eW:16 EARTH_FIST_SCALE:17 eYaw:18
 §19 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
 ETEX:20 eTex:21 eFadeTex:35 eMat:37 eTMat:38 rockGeo:39 ROCKU:45 rockMesh:46 coneMesh:48 _eChunkM:50 eChunks:51
@@ -629,13 +627,13 @@ earthClear:698 eMergePartial:706 eMergeKids:711 eMakeSO:719
 §738 Rampart wall (user 2026-11-23 v2): fused rounded boulders, uneven top…
 ERAMP:739 eRng:740 eBlock:743 eRampGeo:758 eRampMats:774 eRampMesh:785 eRampHolo:789 eRampPlace:790 eRampTick:792
 §810 Terra Isle (user 2026-11-24, ref: floating island chunk): earthy top …
-ESTN:837 earthStoneVis:838 eStoneUpd:839 ERING:855 earthRockRing:859 EISLE:876 eIsleGeo:877 eIsleTint:897 eIsleMesh:899 eIsleTick:903 syncEarth:911 earthFog:965 eMudScreen:968 _eOlMat:975 eOutlines:977 _eCamT:982 eAnim:983 eDebris:984 eWave:986 eAirWave:988 esbImpact:991
-§998 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
-earthEfx:999 eWindOut:1141 eAirCone:1147 eDrillFly:1149
-§1153 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
-earthMudZone:1154 earthMudSink:1161
-§1162 HUD ใต้เป้าเล็ง
-ESM:1164 eSmooth:1165 ESF:1168 eShieldFx:1169 eChips:1174 eShieldSegs:1177 eShieldNum:1191 eShieldArc:1195 drawEarthHud:1208
+ESTN:838 eCoatMat:839 eCoatMake:850 earthStoneVis:857 eStoneUpd:858 eStoneCrust:874 ERING:882 earthRockRing:886 EISLE:903 eIsleGeo:904 eIsleTint:924 eIsleMesh:926 eIsleTick:930 syncEarth:938 earthFog:992 eMudScreen:995 _eOlMat:1002 eOutlines:1004 _eCamT:1009 eAnim:1010 eDebris:1011 eWave:1013 eAirWave:1015 esbImpact:1018
+§1025 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
+earthEfx:1026 eWindOut:1176 eAirCone:1182 eDrillFly:1184
+§1188 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
+earthMudZone:1189 earthMudSink:1196
+§1197 HUD ใต้เป้าเล็ง
+ESM:1199 eSmooth:1200 ESF:1203 eShieldFx:1204 eChips:1209 eShieldSegs:1212 eShieldNum:1226 eShieldArc:1230 drawEarthHud:1243
 
 ## js/48-ragdoll.js (429) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 _ragFw:41 ragBones:42 ragBasis:49 ragTargets:57 ragStart:63 ragBack:96 ragFloor:97 ragStep:98 ragPose:170 ragWrite:185 ragRestore:197 ragEnd:201 ragTick:203 ragHideDead:250 clearDeathFades:259 deathClipMat:269 deathSlashSplit:276 DD_ALPHA:330 deathDissolve:331 deathVisualSync:405
@@ -831,7 +829,7 @@ bdNearKit:380
 ## js/68-darkness-view.js (1153) — 
 nightWaltzStrip:2 nightWaltzBorder:80 stDarkVeilGround:118 darkFxMesh:195 drawDarknessHud:201 drawDarkHudBar:220 darknessMarkView:227 darkWaveViews:237 darkActiveViews:237 darkViewRoot:238 darkViewTemp:245 darknessClear:257 darkDeathRoots:265 darkDeathClear:268 darkWorldAt:282 darkMarkWind:285 darkMarkLaunch:313 darkMarkContact:325 darkViewNow:338 darkFlowHud:338 darkIdleWeaponPose:339 darkBAGroundImpact:343 darkSettleWeapon:358 darkBlendWeapon:369 darkShowWeaponReturn:392 darkTrailHistory:399 darkDashView:438 darknessCharacter:484 darknessEfx:727 stDarkShieldInk:1024 stDarkVeilBlade:1067 stWardDrainPool:1104
 
-## js/68-light-view.js (1963) — 
+## js/68-light-view.js (1963) — สายแสง ✨ ภาพฝั่งเครื่องผู้เล่น (รอบแรก 2026-11-16 — ภาพชั่วคราวตามสเปก designs/light.md ร…
 LGV:7 LGSH:9 LGSH_L:11 _lgM4:14 _lgQ:14 _lgSV:14 _lgS:14 _lgC:14 _lgC2:14 lgGlowTex:15 lgNeon:17 lgEmpFx:25 lgWallBurn:44 lgShardSpawn:60 lgShardTick:64 lgBaCore:65 lgCrDim:108 lgEmpBeam:112 lgNeonCrystal:126 lgSanctumFloorTex:136 lgSanctumMoteTex:147 lgHoneyTex:162 lgShield:166 _lgShieldEuler:202 lightShieldEv:203 LGPOSE:206 _lgLeanBase:207 _lgLeanUndo:207 _lgGlass:208 _lgCore:208 _lgGeo:208 _lgEdge:208 _lgEdgeM:208 lgCrystalMesh:210 lgState:218 _lgV:219 _lgW:219 lgWorld:220 LG_ULT_ASSET:223 LG_CRYSTAL_ASSET:223 LG_ULT_INTRO:224 LG_ULT_ARRIVAL_FX:224 LG_ULT_TIME:225 lgUltMaterials:226 lgSovereignFinishes:227 lgSovereignMaterials:228 lgSovereignFinish:289 lgSovereignCrystal:310 lgSkinSovereign:319 lgPoseSovereign:372 lgSovereignHeart:448 LG_SASH_X:474 LG_SASH_Z:474 lgSovereignRibbon:475 lgSovereignFlare:534 LG_PALM_TRAVEL:547 LG_PALM_SCORCH_LIFE:548 LG_PALM_SCORCH_SLOTS:548 lgPalmGateOffset:549 lgSovereignPalmWaves:551 lgPosePalmWaves:560 lgPoseBeamWaves:566 lgSovereignPalmGate:578 lgSovereignScorchTrail:588 lgPalmScorch:616 lgSovereignCrossSparks:652 lgSovereignGather:675 lgSovereignWingCurrent:708 lgSovereignChargeSeal:737 lgSovereignChestRecoil:754 lgSovereignSeal:764 lgSovereignArmSigils:780 lgBuildSovereign:811 lgReturnMark:888 lgUltVisual:902 lgWardVisual:1139 _lgBeamM:1155 lgBeamMat:1156 lgSovereignChestBeam:1159 lgSovereignPalmBeam:1196 _lgLinkM:1266 lgLinkMat:1267 lgUnitTube:1270 lgTube:1271 lgAim:1279 lightFX:1280 lgBaseObjects:1523 lgClearBase:1524 lgClear:1525 lightDropView:1532 lgAllyEmpEnd:1538
 §1542 เหตุการณ์
 lgBlip:1544 lgArcFx:1548 lgFlyFx:1551 lgSovereignArrival:1552 lightFxTick:1591 LG_BLAST_EXPAND:1595 LG_BLAST_HOLD:1595 lgImpactDome:1596 lgBlastFloor:1636 lgBlastThreads:1667 lgFitGround:1695 lgGroundWarning:1704 lightEfx:1717 _lgHq:1874 _lgHy:1874 lgProcHead:1876 lightHeadPose:1891 LGHUD:1899 lgBondScreen:1900 drawCrystalBondHud:1901 drawLightHud:1924
@@ -850,7 +848,7 @@ NAT_VIEW:2 NAT_MARKS:2 NAT_MOTION:2 natV:3 natWorld:4 natPhase:5 natSmooth:6 nat
 ## js/68-storm-bow.js (285) — 
 SB_FULL:2 _sbShard:3 sbShard:4 sbMat:5 sbJag:6 SB_TIP:8 _sbBlade:9 sbBlade:10 sbMake:11 SB_START:33 SB_ANCHOR:33 SB_POLE:33 stormBowView:34 _ikS:90 _ikE:90 _ikH:90 _ikT:90 _ikP:90 _ikD:90 _ikA:90 _ikQ:90 _ikQ2:90 sbAim:91 stormBowForearm:94 stormBowFx:106 sbStaffAxis:122 sbStaffMake:123 stormStaffView:140 stormStaffCast:152 stormStaffSwing:155 _sbWaveG:157 sbWaveGeo:158 SB_WAVE_F:159 stormWaveMake:169 stormWaveTick:173 SMK:181 SWAVE_BURSTS:182 WAVE_BURST_CYAN:183 stormWaveBurst:184 stormWaveBurstTick:209 _smkEye:239 _smkRot:239 stormMarkSet:240 stormMarkClear:262 stormMarkTick:266
 
-## js/68-water-view.js (250) — 
+## js/68-water-view.js (250) — สายน้ำ 💧 — ภาพฝั่งผู้เล่น • VFX = assets/fx/water/* (tools/water-vfx-gen.py, สไตล์ desig…
 WTV:5 WTC:6 WT_BODY:8 WMB_POSE:14 waterMoonPose:15 waterCharacterPose:19 wtState:49 wtStop:50 wtMesh:51 _wtV:53 _wtP:53 wtBakeClone:54 wtLineMat:65 _wtOlMat:72 wtOutline:74 WT_SINKD:80 wtSinkOffset:81 wtAlive:88 wtLoop:90 WT_FR:93 wtFrPath:94 _wtFa:96 _wtFb:96 _wtFs:96 _wtFn:96 wtFamRiseMesh:97 WT_POOL:102 wtFamRise:103 wtFamRiseOff:110 _wtTube:112 WT_BEAM_V:113 WT_BEAM_F:116 WT_BEAM_O:120 wtBeamMesh:123 wtBeamSync:127 wtBeamOff:137
 §139 ต่อผู้เล่น: โล่ฟองน้ำ/ฮีล • ลูกผู้ช่วยที่ไหล่ • ร่างโคลน + เส้นน้ำ • …
 waterFX:140
@@ -861,7 +859,7 @@ waterEfx:216
 §245 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
 drawWaterHud:246
 
-## js/68-wind-view.js (445) — 
+## js/68-wind-view.js (445) — สายลม 🌪️ — ภาพฝั่งเครื่องเล่น (ขั้นที่ 1) • ตรรกะอยู่ js/09-wind.js • ไฟล์นี้มีแต่นิยามฟ…
 WV:6 WN_BODY:8 WN_AIR_FEET:8 WF_POSE:12 WF_FEET:12 WF_REF:12 WF_ROLL:12 _wfP:13 _wfF:13 windFlyPose:14 WTLF:24 windTailDraw:25 windTailFeel:31 windCharacterPose:33 wvState:50 wvAlive:51
 §52 ทุกเฟรมของผู้เล่นสายลม: ปีกติดหลัง / ปีกห่อตอนยกโล่ / ดูดลมชาร์จเกจ
 wfeSwing:53 wfeTwist:53 W_BLAST_SUCK:54 WFE_HOLD:55 WFE_TURN:55 windLatePose:57 _faX:93 _faQ:93 _faT:93 WF_ELBOW:93 windForearm:94 windFX:96
@@ -896,7 +894,7 @@ PERF:9 perfNetSample:11 perfNetSend:14 perfNetReceive:20 perfNetFrame:25 FRZ:40 
 ## js/72-dash-pose.js (85) — 
 DPOSE:12 DPT:24 _dpQ:25 _dpX:25 _dpP:25 dpMix:26 dpKnees:28 dpStyle:36 DPDBG:41 dashPose:42 dpApply:75
 
-## js/73-tune.js (141) — แผงปรับค่า 🎚️ (F8 / ปุ่ม "ปรับค่า" ในเมนูพัก และหน้าแรก) — ปรับตัวเลขในเกมสดๆ แล้วเซฟลง …
+## js/73-tune.js (141) — 
 TUNE:8 tuneNum:9 tuneBuild:15
 §80 ใช้ / เก็บค่า
 tuneSetVal:81 tuneApplyFile:84 tuneJson:88
@@ -973,4 +971,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(119 files, 36937 lines)
+(119 files, 36973 lines)

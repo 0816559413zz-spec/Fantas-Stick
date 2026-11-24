@@ -99,7 +99,7 @@ function earthRockSplash(pr){if(pr.splashed)return;pr.splashed=1;const o=G.playe
   emit({k:'efx',z:'erockboom',x:Math.round(pr.x),y:Math.round(pr.y),h:Math.round(pr.h*10)/10});}
 SPELLS.erockb={hit(pr){earthRockSplash(pr);}};
 function earthBasic(p,inp,dt,setCd){
-  const prev=p.eFirePrv;p.eFirePrv=inp.fire;earthRockTick(p,dt);earthBarrageTick(p,dt);if(p.erBar)return;
+  const prev=p.eFirePrv;p.eFirePrv=inp.fire;earthRockTick(p,dt);earthBarrageTick(p,dt);if(p.erBar||p.esm||p.esmPost>G.time)return;
   if(p.rmpAim)return;if(p.rmpNoFire){if(inp.fire)return;p.rmpNoFire=0;}   // Rampart placing click must not punch
   if(p.aug||p.ramp||p.ecb)return;
   if(p.wr){if(p.wr.ph==='aim'&&p.wr.t>=WRATH_READY_T&&inp.fire&&!prev)earthPillarThrow(p);return;}
@@ -190,9 +190,9 @@ function earthStoneAim(p,range=60,origin=2){
 const STONEB={v:{delay:0.45,knock:1800,wallDmg:20,wallStun:1,env:40}};
 // ---------- สกิล 1: Stone Mark — ชาร์จไม้สั้น ๆ แล้วยิงเส้นสเปลหัก ๆ ถึงทันที (ไม่ใช่กระสุน) มาร์คศัตรูคนแรก ไม่มีดาเมจ
 // ศัตรูที่โดนมาร์ค: หินทุกก้อนที่โดน (BA วงหิน / Stone Barrage / หินถีบ) เกาะตัว 1 ชั้น (ชั้นละ 4 วิ) • ครบ 5 = กลายเป็นหินทั้งตัว 1 วิ แล้วมาร์คหาย
-const SMARK=defSpell(EARTH,{id:'stonemark',v:{charge:0.6,len:900,w:18,mark:6,win:4,need:5,stone:1},
+const SMARK=defSpell(EARTH,{id:'stonemark',v:{charge:0.8,post:0.35,len:900,w:18,mark:6,win:4,need:5,stone:1},
   vn:{charge:'ชาร์จก่อนยิง (วิ)',len:'ระยะ',w:'กว้างเส้น',mark:'มาร์คอยู่ (วิ)',win:'หินแต่ละชั้นอยู่ (วิ)',need:'ชั้นที่กลายเป็นหิน',stone:'กลายเป็นหิน (วิ)'},
-  role:'control',n:'Stone Mark',ic:'🪨',cd:8,d:'ชาร์จไม้ 0.6 วิ แล้วยิงเส้นสเปลหัก ๆ ถึงทันที ระยะ 900 มาร์คศัตรูคนแรก 6 วิ (ไม่มีดาเมจ)',fx:'ศัตรูที่โดนมาร์ค: หินที่ปาโดนเกาะตัวทีละชั้น (ชั้นละ 4 วิ) • ครบ 5 ชั้น = กลายเป็นหินทั้งตัว ขยับไม่ได้ 1 วิ แล้วมาร์คหาย',
+  role:'control',n:'Stone Mark',ic:'🪨',cd:8,d:'ชาร์จไม้ 0.8 วิ แล้วยิงเส้นสเปลหัก ๆ ถึงทันที ระยะ 900 มาร์คศัตรูคนแรก 6 วิ (ไม่มีดาเมจ)',fx:'ศัตรูที่โดนมาร์ค: หินที่ปาโดนเกาะตัวทีละชั้น (ชั้นละ 4 วิ) • ครบ 5 ชั้น = กลายเป็นหินทั้งตัว ขยับไม่ได้ 1 วิ แล้วมาร์คหาย',
   cast(p,S){if(p.aug||p.ramp||p.wr||p.esm)return false;const c=p.esm={at:G.time};
     emit({k:'efx',z:'esmc',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});
     G.strikes.push({x:p.x,y:p.y,t:S.v.charge,fn(){if(p.esm!==c)return;p.esm=null;if(p.alive&&!p.downed)earthMarkFire(p);}});}});
@@ -202,6 +202,7 @@ function earthMarkFire(p){const V=SMARK.v,h0=p.z+1.5,inp=p.inp||{},r=aimRay3(p,h
   for(const t of foesOf(p.team)){if(t.dead||t.alive===false||t.downed)continue;const tx0=t.x-p.x,ty0=t.y-p.y,tz0=(cH(t)-h0)*20,u=(tx0*dx+ty0*dy+tz0*dh)/(L*L);if(u<0||u>1||u>=bu)continue;
     if(Math.hypot(tx0-dx*u,ty0-dy*u,tz0-dh*u)<=(t.r||PR)+V.w){bu=u;best=t;}}
   if(best){ex=best.x;ey=best.y;eh=cH(best);best.stMk=G.time+V.mark;best.stnS=[];best.stSrc=p.id;}
+  p.esmPost=G.time+V.post;   // short recovery after the shot (no BA)
   emit({k:'efx',z:'esmf',x:Math.round(p.x),y:Math.round(p.y),h:h0,x2:Math.round(ex),y2:Math.round(ey),h2:Math.round(eh*10)/10,hit:best?1:0,id:p.id});}
 // a stone hit on a marked foe adds one layer; `need` layers inside `win` s = petrified (stun) and the mark is used up
 function earthStoneHit(t){if(!(t.stMk>G.time)||!t.alive&&t.alive!==undefined)return;const V=SMARK.v;
