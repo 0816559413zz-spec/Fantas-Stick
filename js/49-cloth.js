@@ -10,23 +10,24 @@
 const CLOTH={
   ON:true,
   G:-16,          // แรงโน้มถ่วงผ้า (หน่วย/วิ²) — หนักขึ้น = ห้อยมากขึ้นตอนวิ่ง
-  DAMP:0.96,      // หน่วงความเร็วต่อขั้น (น้อยลง = ผ้าหยุดแกว่งเร็วขึ้น • 0.992 เดิม = แกว่งยาวเป็นชิงช้า)
-  INERT:0.22,     // ส่วนของการเดินที่ผ้ารับรู้ (0 = ผ้าเกาะตัวนิ่ง, 1 = ผ้าอยู่ในโลกจริง แกว่งสุดแรง) — ผู้ใช้ 2026-11-06: ขยับนิดเดียวผ้าแกว่งเหมือนรถไฟเหาะ
-  INERT_R:0.3,    // เหมือนกัน แต่ของการหมุนตัว
+  DAMP:0.93,      // หน่วงความเร็วต่อขั้น (น้อยลง = ผ้าหยุดแกว่งเร็วขึ้น • 0.992 เดิม = แกว่งยาวเป็นชิงช้า)
+  INERT:0.15,     // ส่วนของการเดินที่ผ้ารับรู้ (0 = ผ้าเกาะตัวนิ่ง, 1 = ผ้าอยู่ในโลกจริง แกว่งสุดแรง) — ผู้ใช้ 2026-11-06: ขยับนิดเดียวผ้าแกว่งเหมือนรถไฟเหาะ
+  INERT_R:0.2,    // เหมือนกัน แต่ของการหมุนตัว
   RMAX:2.2,       // ความเร็วสูงสุดที่ผ้ารับรู้ (หน่วย/วิ) — วิ่ง/พุ่งเร็วแค่ไหน ผ้าก็ไม่กระชากเกินนี้
-  AIR:1.1,        // ลมปะทะตอนวิ่ง: ผ้าไหลไปข้างหลังนิ่ง ๆ ตามความเร็ว (แทนการแกว่ง)
+  AIR:0.8,        // ลมปะทะตอนวิ่ง: ผ้าไหลไปข้างหลังนิ่ง ๆ ตามความเร็ว (แทนการแกว่ง)
   IT:6,           // รอบแก้แท่งต่อขั้น (มาก = ผ้าตึงขึ้น)
   STEP:1/60,      // ขั้นจำลอง (วิ)
   SUB:2,          // แบ่งแถวเพิ่มระหว่างแถวของโมเดล (ผ้าโค้งเนียนขึ้น)
-  TORSO:0.2,LEG:0.11,ARM:0.08,   // รัศมีชนลำตัว / ขา / ต้นแขน
-  FLUT:0.9,       // ลมพลิ้วเบา ๆ ที่ชายผ้า
+  TORSO:0.24,LEG:0.13,ARM:0.13,FORE:0.17,HAND:0.14,   // less flutter + fatter body = no clipping (user 2026-11-24)
+    // รัศมีชนลำตัว / ขา / ต้นแขน
+  FLUT:0.4,       // ลมพลิ้วเบา ๆ ที่ชายผ้า
   VMAX:30,        // ความเร็วผ้าเทียบกับตัวสูงสุด (หน่วย/วิ) — กันแค่กรณีพุ่งผิดปกติ
   SNAP:3,         // ตัวกระโดดไกลกว่านี้ในเฟรมเดียว (วาร์ป/เกิดใหม่) = รีเซ็ตผ้า
 };
 const CL_ROWS=[[0.3,1.6],[0.355,1.5],[0.4,1.3],[0.47,1.0],[0.58,0.7],[0.7,0.4],[0.8,0.1]],CL_NC=29,CL_GAP=0.95,CL_IN=0.014;
 const _clV=new THREE.Vector3(),_clA=new THREE.Vector3(),_clB=new THREE.Vector3();
 // ความแข็งที่ดึงกลับรูปเดิมของแต่ละแถว (ตามความสูงในโมเดล): ไหล่ติดแน่น → ชายผ้าอิสระ
-function clPinK(y){return y>=1.59?1:y>=1.45?0.6:y>=1.25?0.2:y>=1.05?0.05:0;}
+function clPinK(y){return y>=1.59?1:y>=1.45?0.7:y>=1.25?0.35:y>=1.05?0.12:0.03;}
 // ตำแหน่งผ้าในโมเดลตอนยืนตรง (bind) ของแถว r (ทศนิยมได้ = แถวแทรก) คอลัมน์ j
 function clBind(rf,j){const r0=Math.min(CL_ROWS.length-2,Math.floor(rf)),k=rf-r0,a=CL_ROWS[r0],b=CL_ROWS[r0+1],rr=lerp(a[0],b[0],k),y=lerp(a[1],b[1],k),ph=-Math.PI+CL_GAP/2+(Math.PI*2-CL_GAP)*j/(CL_NC-1);   // มุม atan2(x,-z): ช่องเปิดอยู่ที่ ±π
   return [rr*Math.sin(ph),y,-rr*Math.cos(ph)];}
@@ -115,7 +116,7 @@ function clothSetup(o){
   const mo=mk(matTwin(outer.material,'rigid'),false),mi=mk(matTwin(inner.material,'rigid'),true);   // วัสดุแฝด: แผงในโมเดลเป็น skinned (js/22 matTwin)
   const B=n=>o.fileModel.getObjectByName(n);
   const C={o,outer,ref,rf,NR,N,pk,E:new Float64Array(E),mo,mi,P:new Float32Array(N*3),Q:new Float32Array(N*3),T:new Float32Array(N*3),Tm:new Float32Array(CL_ROWS.length*CL_NC*3),
-    caps:[['hips','neck','TORSO'],['thigh_L','shin_L','LEG'],['shin_L','foot_L','LEG'],['thigh_R','shin_R','LEG'],['shin_R','foot_R','LEG'],['upper_arm_L','forearm_L','ARM'],['upper_arm_R','forearm_R','ARM']].map(([a,b,k])=>[B(a),B(b),k]).filter(c=>c[0]&&c[1]),
+    caps:[['hips','neck','TORSO'],['thigh_L','shin_L','LEG'],['shin_L','foot_L','LEG'],['thigh_R','shin_R','LEG'],['shin_R','foot_R','LEG'],['upper_arm_L','forearm_L','ARM'],['upper_arm_R','forearm_R','ARM'],['forearm_L','hand_L','FORE'],['forearm_R','hand_R','FORE']].map(([a,b,k])=>[B(a),B(b),k]).filter(c=>c[0]&&c[1]),
     init:false,flip:false,t:0,acc:0,air:{x:0,z:0}};
   C.capV=C.caps.map(()=>[new THREE.Vector3(),new THREE.Vector3(),0]);
   o.g.userData.extra=(o.g.userData.extra||[]).concat([mo,mi]);   // disposeObj(o.g) ทิ้ง mesh ผ้าด้วย
@@ -158,7 +159,7 @@ function clStep(C,h,gy,caps,bv,W){const P=C.P,Q=C.Q,T=C.T,pk=C.pk,E=C.E,N=C.N,g=
     for(let e=0;e<E.length;e+=4){const a=E[e]*3,b=E[e+1]*3,wa=pk[E[e]]>=1?0:1,wb=pk[E[e+1]]>=1?0:1;if(!(wa+wb))continue;
       const dx=P[b]-P[a],dy=P[b+1]-P[a+1],dz=P[b+2]-P[a+2],d=Math.sqrt(dx*dx+dy*dy+dz*dz)||1e-6,s=(d-E[e+2])/d*E[e+3]/(wa+wb);
       P[a]+=dx*s*wa;P[a+1]+=dy*s*wa;P[a+2]+=dz*s*wa;P[b]-=dx*s*wb;P[b+1]-=dy*s*wb;P[b+2]-=dz*s*wb;}
-    const hitB=(it&1)||it===CLOTH.IT-1;   // ชนตัว: รอบเว้นรอบ + รอบสุดท้ายเสมอ (ไม่ทะลุตัว แต่คำนวณน้อยลงเกือบครึ่ง)
+    const hitB=true;   // body collision every pass (was every other pass → arms/legs poked through)
     for(let n=0;n<N;n++){if(pk[n]>=1)continue;const i=n*3;if(hitB)for(const c of caps)clCapsule(P,Q,i,c[0],c[1],c[2]);if(P[i+1]<gy){P[i+1]=gy;Q[i]=lerp(Q[i],P[i],0.6);Q[i+2]=lerp(Q[i+2],P[i+2],0.6);}if(W&&it===CLOTH.IT-1)clWorldHit(P,Q,i,W);}}}
 function clDraw(C){const po=C.mo.geometry.attributes.position,pi=C.mi.geometry.attributes.position;for(let n=0;n<C.N;n++)if(C.pk[n]>=1){const i=n*3;C.P[i]=C.T[i];C.P[i+1]=C.T[i+1];C.P[i+2]=C.T[i+2];}po.array.set(C.P);
   const jump=C.o.jumpLegs;
@@ -188,7 +189,7 @@ function clothTick(dt){if(!CLOTH.ON||typeof NET==='undefined')return;const o=PM3
   o.g.updateMatrixWorld(true);clTargets(C);
   const wj=o.wud!==undefined||(o.wld&&o.wld.t<0.15);if(!C.init||wj)clReset(C);   // Sonic Boom พุ่ง: ตัวย้ายแทบทันที ไม่ให้ผ้ารับรู้ความเร็ว ไม่งั้นปลิวค้างหลังจบ
   else{const i=0;if(Math.hypot(C.T[i]-C.P[i],C.T[i+1]-C.P[i+1],C.T[i+2]-C.P[i+2])>CLOTH.SNAP)clReset(C);}
-  for(let i=0;i<C.caps.length;i++){const q=C.caps[i],c=C.capV[i];q[0].getWorldPosition(c[0]);q[1].getWorldPosition(c[1]);c[2]=CLOTH[q[2]];}
+  for(let i=0;i<C.caps.length;i++){const q=C.caps[i],c=C.capV[i];q[0].getWorldPosition(c[0]);q[1].getWorldPosition(c[1]);c[2]=CLOTH[q[2]];if(q[2]==='FORE')c[1].sub(c[0]).multiplyScalar(1+CLOTH.HAND/Math.max(c[1].length(),1e-3)).add(c[0]);}   // FORE: reach past the wrist to cover the hand + cuff
   _clV.setFromMatrixPosition(C.o.g.matrixWorld);if(!C.lp){C.lp=_clV.clone();C.ly=C.o.g.rotation.y;}
   const dl=_clB.copy(_clV).sub(C.lp);C.lp.copy(_clV);
   // ผ้าจำลองในกรอบของตัวละคร: ย้ายทุกจุดตามตัวไปส่วนใหญ่ (ไม่เพิ่มความเร็ว) เหลือแค่เศษ INERT ให้ผ้ารับรู้ — จึงไม่แกว่งตามทุกก้าว/ทุกการหมุน

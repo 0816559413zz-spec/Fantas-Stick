@@ -638,8 +638,8 @@ ESM:1164 eSmooth:1165 ESF:1168 eShieldFx:1169 eChips:1174 eShieldSegs:1177 eShie
 ## js/48-ragdoll.js (429) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 _ragFw:41 ragBones:42 ragBasis:49 ragTargets:57 ragStart:63 ragBack:96 ragFloor:97 ragStep:98 ragPose:170 ragWrite:185 ragRestore:197 ragEnd:201 ragTick:203 ragHideDead:250 clearDeathFades:259 deathClipMat:269 deathSlashSplit:276 DD_ALPHA:330 deathDissolve:331 deathVisualSync:405
 
-## js/49-cloth.js (203) — 
-CLOTH:10 CL_ROWS:26 CL_NC:26 CL_GAP:26 CL_IN:26 _clV:27 _clA:27 _clB:27 clPinK:29 clBind:31 cloakPanelGrid:33 cloakBodyIndices:47 stormCape:56 clothSetup:94 clTargets:124 clReset:128 clCapsule:132 _clO:136 clWorld:137 clWorldHit:145 clStep:150 clDraw:163 clothTick:184
+## js/49-cloth.js (204) — 
+CLOTH:10 CL_ROWS:27 CL_NC:27 CL_GAP:27 CL_IN:27 _clV:28 _clA:28 _clB:28 clPinK:30 clBind:32 cloakPanelGrid:34 cloakBodyIndices:48 stormCape:57 clothSetup:95 clTargets:125 clReset:129 clCapsule:133 _clO:137 clWorld:138 clWorldHit:146 clStep:151 clDraw:164 clothTick:185
 
 ## js/50-grass.js (428) — 
 AIR:10 AIR_MAP:17 AIR_NG:20 airGust:21 airGustOff:26 airEnv:27 airGs:28 airMark:30 airForMap:33 _airV:34 airAt:35 airGv:41 airTick:42
@@ -971,4 +971,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(119 files, 36816 lines)
+(119 files, 36817 lines)
