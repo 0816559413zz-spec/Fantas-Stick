@@ -6,7 +6,7 @@ const O=window.__o||{},MAP=O.map||'meadow',N=O.n||600,SCALE=O.scale||1,REP=O.rep
 await HL.solo({kit:'0'});WD.hostToLobby();
 const paths=[0,1,2,6,7,8];
 for(let i=1;i<12;i++)WD.addPlayer('b6-'+i,'B'+i,null,null,String(paths[i%6]));
-WD.broadcastLobby();WD.G.mode='tdm';WD.G.mapPick=MAP;
+WD.broadcastLobby();WD.G.mode=O.mode||'tdm';WD.G.mapPick=MAP;   // tdm ignores Map Builder siege maps (fcs-file) → ablate rows for fcs use mode siege
 const sel=document.querySelector('#setGfx');WD.QUAL.mode='high';WD.QUAL.scale=SCALE;WD.QUAL.lvl=0;WD.applyQuality();
 WD.hostStart();
 for(let i=0;i<240;i++){HL.step(1);if(i%30===0)await HL.sleep(0);}
@@ -45,5 +45,5 @@ const topDraws=Object.entries(groups).sort((a,b)=>b[1].draws-a[1].draws).slice(0
 const pct=(a,p)=>{const s=[...a].sort((x,y)=>x-y);return s.length?+s[Math.min(s.length-1,Math.floor(s.length*p))].toFixed(2):0;};
 const frames=Object.keys(gpuFrame).filter(k=>+k>60).map(k=>gpuFrame[k]/REP);
 const passes={};for(const k of Object.keys(acc))passes[k]={median:pct(acc[k],.5),p95:pct(acc[k],.95)};
-return {map:WD.G.map,players:players.length,teams:[...new Set(players.map(p=>p.team))].length,res:WD.gl.domElement.width+'x'+WD.gl.domElement.height,rep:REP,quality:WD.QUAL.mode,scale:WD.QUAL.scale,opts:O,
+return {map:WD.builtMap||WD.G.map,mode:WD.G.mode,players:players.length,teams:[...new Set(players.map(p=>p.team))].length,res:WD.gl.domElement.width+'x'+WD.gl.domElement.height,rep:REP,quality:WD.QUAL.mode,scale:WD.QUAL.scale,opts:O,
   gpuMs:{median:pct(frames,.5),p95:pct(frames,.95),max:pct(frames,1),frames:frames.length},passes,cpuMs:{median:pct(cpu,.5),p95:pct(cpu,.95)},drawCalls:pct(calls,.5),tris:Math.round(pct(tris,.5)),triTop:top,big:window.__big,drawTop:topDraws,errors:[...new Set(HL.errs)].slice(0,5)};

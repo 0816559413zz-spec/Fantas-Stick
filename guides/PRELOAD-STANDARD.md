@@ -270,6 +270,22 @@ Rule: **light changes = uniform changes, never structural changes.**
   (no extra pass). Some ablation runs (`tdm` + `mapPick`) loaded another map (no PaintPass, ~1 M tris) and were dropped — the
   bench needs a fixed map for tdm before the fxcel / trees-off rows can be trusted.
 
+**6v6 CPU round (2026-11-24):** fcs-file siege 6v6, headless 1080p high (`tools/bench-6v6.js`, now `mode`/`map` options;
+ablate fcs rows use `map:'fcs-file',mode:'siege'` — tdm can't load fcs-file).
+- Profile before: three render ~55% (renderBufferDirect 31%), updateZV 8.6%, water dragon ~8%, syncPlayers 7%,
+  updateMatrixWorld 7% (2713 objects), drawHUD 4%, getParameters 2.1%.
+- **Flat 2-pass per draw** (js/01 `flatMark` from `Material.onBeforeRender`): one transparent DoubleSide material shared by flat
+  + solid pieces made every flat piece draw twice and rebuild its program params. Now decided per geometry each draw.
+- **Torch batch** (js/28-fcs-castle `fcsTorchSync`, `?notorchbatch` off): castle torch sprites sharing one texture/colour → one
+  `InstancedMesh` billboard ShaderMaterial (flicker in shader, visibility synced from the original sprites).
+- **Rubble**: only the first pile keeps the 1 empty warm instance (round 4 had added 74 draws + shadows).
+- **Shadow pass every 2nd frame** on high for Map Builder maps too (was fcs only).
+- **Wind ult wings**: rachis/cap/feather pieces go through `instz` (js/68-wind-view); look checked (`shots/wingcmp_a/b.jpg`).
+- Result: CPU **21.0 → 19.0 ms median, p95 30.4 → 27.9**, draws 849 → ~700, getParameters 2.1% → 1.2%.
+- Gate after: PASS 4/4, 0 mid-match shaders (3 slow frames in siege shift0 while other headless runs shared the GPU).
+- Left (bigger jobs): water dragon fins (38 ExtrudeGeometry per dragon, `finSkin` ShaderMaterial — needs instancing in the
+  fxTexMat shader), 126 breakable panels (own material + DataTexture each — merge into atlas/instances), matrix freezing (risky).
+
 ## 7. Work order
 
 | Step | Work | Done when |

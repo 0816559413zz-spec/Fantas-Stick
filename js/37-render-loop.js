@@ -108,7 +108,7 @@ function renderGame(v,P,E,me,dt,now){
   let t1=t0;   // projMode แยกย่อยให้ WD.PROF (pm.proj / pm.earth / ...) — รวมยังเป็น 'projMode' เหมือนเดิม
   broomTick(dt);syncProj(v,now);pf('pm.proj',t1);t1=performance.now();syncWalls(v);syncPots(v,now);pf('pm.walls',t1);t1=performance.now();
   syncEarth(v,dt,now);pf('pm.earth',t1);t1=performance.now();syncWind(v,dt,now);pf('pm.wind',t1);t1=performance.now();syncWater(v,dt,now);syncNature(v,P,me,dt,now);pf('pm.water',t1);t1=performance.now();
-  syncProps(v);cityCull();cityViewSync(dt);brkSync(dt);efsView(dt);pnlView(dt);fcsPropsView(dt);if(MAPID!=='fcs'&&MAPS[MAPID]&&MAPS[MAPID].deco)fcsCastleTick();fcsParView();fcsShellView(dt);pf('pm.props',t1);t1=performance.now();syncMins(v,now,dt);pf('pm.mins',t1);t1=performance.now();
+  syncProps(v);cityCull();cityViewSync(dt);brkSync(dt);efsView(dt);pnlView(dt);fcsPropsView(dt);fcsTorchSync();if(MAPID!=='fcs'&&MAPS[MAPID]&&MAPS[MAPID].deco)fcsCastleTick();fcsParView();fcsShellView(dt);pf('pm.props',t1);t1=performance.now();syncMins(v,now,dt);pf('pm.mins',t1);t1=performance.now();
   syncModeObjs(v,P,me,now,dt);pf('projMode',t0);
   KC=Math.max(0,KC-dt);roleShowT=Math.max(0,roleShowT-dt);
   $('#trainEnd').classList.toggle('hidden',!(NET.isHost&&v.mode==='train'&&v.ph!=='over'));
@@ -116,7 +116,7 @@ function renderGame(v,P,E,me,dt,now){
   tickFlash(dt);
   t0=performance.now();{let t1=t0;updateZV(dt);pf('fx.zv',t1);let t2=performance.now();updateParticles(dt);pf('fx.particles',t2);pf('fx.parts',t1);t1=performance.now();updateShapes(dt);pf('fx.shapes',t1);t1=performance.now();updateLights(dt);pf('fx.lights',t1);t1=performance.now();updateVfx(dt);pf('fx.vfx',t1);t1=performance.now();updateDebris(dt);pf('fx.debris',t1);}pf('fx',t0);
   QUAL.frame++;
-  const shadowInterval=QUAL.mode==='high'?(MAPID==='fcs'?2:1):QUAL.cs>=2?12:QUAL.cs?6:QUAL.mode==='auto'&&QUAL.lvl>=2?4:2;
+  const shadowInterval=QUAL.mode==='high'?(MAPID==='fcs'||MAPS[MAPID]&&MAPS[MAPID].fm?2:1):QUAL.cs>=2?12:QUAL.cs?6:QUAL.mode==='auto'&&QUAL.lvl>=2?4:2;   // Map Builder maps (fcs-file …) like fcs: big static castles, shadow pass ~120 draws (2026-11-24 6v6 CPU)
   gl.shadowMap.needsUpdate=gl.shadowMap.needsUpdate||QUAL.frame%shadowInterval===0;
   if(gl.shadowMap.needsUpdate)shadowFollow();if(QUAL.frame%30===1)shadowDepthSplit();cullTick(dt);
   if(FXSTUDIO.noDraw)return;

@@ -11,10 +11,10 @@ import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 // แผ่นแบน (Plane/Circle/Ring/Shape) ก็เหมือนกัน: มองจากมุมไหนก็เห็นแค่ด้านเดียว → วาดรอบเดียวได้พิกเซลเท่าเดิม (ผู้ใช้ 2026-11-07 "ไฟต์นัวๆกระตุก":
 // วงอัลติสายฟ้าแบบสีปกติทำให้ three คิด shader ใหม่ ~400 ครั้ง/เฟรม) • จำต่อวัสดุ: เห็นกับรูปไม่แบนครั้งเดียว = กลับไปวาด 2 รอบตลอด • ?twopass = ปิด
 const FLAT_GEO=new Set(['PlaneGeometry','CircleGeometry','RingGeometry','ShapeGeometry']),FLAT_ON=!/[?&]twopass\b/.test(location.search);
-function flatMark(m,g){if(!FLAT_ON||!m||m._flat===-1||!g||m.side!==THREE.DoubleSide||!m.transparent)return;m._flat=FLAT_GEO.has(g.type)?1:-1;}
+function flatMark(m,g){if(!FLAT_ON||!m||!g||m.side!==THREE.DoubleSide||!m.transparent)return;m._flat=FLAT_GEO.has(g.type)||g.userData.flat?1:-1;}   // per draw (2026-11-24): one material on flat + solid pieces (wind ult #c3f9e3: Shape + Octahedron) made every flat piece 2-pass, 2 getParameters each
 Object.defineProperty(THREE.Material.prototype,'forceSinglePass',{configurable:true,
   get(){return this._fsp||this.blending===THREE.AdditiveBlending||this._flat===1;},set(v){this._fsp=v;}});
-THREE.Material.prototype.onBeforeRender=function(r,s,c,g){if(this._flat!==-1)flatMark(this,g);};
+THREE.Material.prototype.onBeforeRender=function(r,s,c,g){flatMark(this,g);};
 // ชิ้นเล็กหลายชิ้นที่ใช้ geometry + วัสดุเดียวกัน (หนามน้ำแข็ง, อักษรวงสายฟ้า) → วาดรวมเป็น InstancedMesh ก้อนเดียว (ผู้ใช้ 2026-11-07 "ไฟต์นัวๆกระตุก": ฉากมี ~1,500 draw ตอนอัลติ)
 // instz(meshes,host) คืนตัวแทน (Object3D) ตำแหน่งเดิม ลูกเดิม → โค้ดเดิมขยับ/ซ่อนตัวแทนได้เหมือนเดิม • instzTick() ก่อน render ลอกตำแหน่งลงก้อนรวม • ?noinstz = ปิด
 // ใช้ได้กับวัสดุ three มาตรฐานเท่านั้น (ShaderMaterial ที่เขียน vertex เองไม่รู้จัก instanceMatrix)

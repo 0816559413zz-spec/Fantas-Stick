@@ -173,6 +173,7 @@ function fcsCastleDressing(n,wood,iron){const WH=FCS_WH[1],R=mulberry(434343),ma
     fl.position.set(x,y,z);fl.scale.set(1.3,1.6,1);fl.userData.ph=R()*9;addW(fl);FCSC.torch.push(fl);}
 }
 function fcsCastleTick(){const t=performance.now()/1000;FCSC.uT.value=t;
+  if(FCSC.torch.tb){FCSC.torch.tb.uFl.value=1;return;}   // batched: flicker runs in the shader
   for(const f of FCSC.torch){const k=0.85+0.12*Math.sin(t*13+f.userData.ph)+0.08*Math.sin(t*23.7+f.userData.ph*2);f.scale.set(1.25*k,1.6*k,1);}}
 // ---------- room pieces: look (js/02-room-*.js view(K,V)) — V = shared builder, merged per material
 function fcsRoomsView(){const D=fcsDecoKit();for(const r of FCS_ROOMS)if(r.view&&r.K)try{r.view(r.K,D.V);}catch(e){console.error('room view',r.id,e);}D.done();}
@@ -245,3 +246,37 @@ function fileStyleScene(sc){
     if(!o.geometry.attributes.normal)o.geometry.computeVertexNormals();   // MB meshes are flat-shaded without normals; the ashlar shader needs them
     o.material=/^floor/.test(n)?_poOn(fcsCastleMat('f','#b4a68e',{fr:1.3,fc:1.0,moss:0.35}),-1,-1):fcsCastleMat('s','#c2b298');});
 }
+
+// Candle / torch glow sprites → one InstancedMesh billboard (2026-11-24, 6v6 CPU: 69 sprite draws on fcs-file, one material each).
+// Built on the first frame after the map is complete (all builders pushed into FCSC.torch). Same look: additive glow texture,
+// view-facing quad, flicker 0.85+0.12 sin+0.08 sin when fcsCastleTick runs (uFl), else the sprite's own scale. Hidden sprite
+// (candelabra broken, js/28-fcs-props) = zero size. ?notorchbatch = old sprites.
+const TORCH_BATCH=!/[?&]notorchbatch/.test(location.search);
+function fcsTorchSync(){const L=FCSC.torch;if(!L.length||!TORCH_BATCH)return;
+  if(!L.tb){const S=L.filter(f=>f.isSprite&&f.parent&&f.material.map===FCSC.gt&&f.material.color.equals(L[0].material.color));L.tb={S,im:null,uFl:{value:0},vis:[]};
+    if(S.length<4)return;const P=S[0].parent;P.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(P.matrixWorld).invert(),m4=new THREE.Matrix4(),v=new THREE.Vector3();
+    const ph=new THREE.InstancedBufferAttribute(new Float32Array(S.length*2),2),geo=new THREE.PlaneGeometry(1,1);geo.setAttribute('aPV',ph);
+    const mat=new THREE.ShaderMaterial({uniforms:THREE.UniformsUtils.merge([THREE.UniformsLib.fog,{map:{value:FCSC.gt},color:{value:S[0].material.color.clone()},uT:{value:0}}]),
+      transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,fog:true,
+      vertexShader:`uniform float uT,uFl;attribute vec2 aPV;varying vec2 vUv;
+#include <fog_pars_vertex>
+void main(){vUv=uv;vec4 mvPosition=modelViewMatrix*instanceMatrix*vec4(0.,0.,0.,1.);
+ float k=0.85+0.12*sin(uT*13.+aPV.x)+0.08*sin(uT*23.7+aPV.x*2.);vec2 sz=mix(vec2(length(instanceMatrix[0].xyz),length(instanceMatrix[1].xyz)),vec2(1.25,1.6)*k,uFl)*aPV.y;
+ mvPosition.xy+=position.xy*sz;gl_Position=projectionMatrix*mvPosition;
+#include <fog_vertex>
+}`,
+      fragmentShader:`uniform sampler2D map;uniform vec3 color;varying vec2 vUv;
+#include <fog_pars_fragment>
+void main(){gl_FragColor=texture2D(map,vUv)*vec4(color,1.);
+#include <tonemapping_fragment>
+#include <colorspace_fragment>
+#include <fog_fragment>
+}`});
+    mat.uniforms.uT=FCSC.uT;mat.uniforms.uFl=L.tb.uFl;
+    const im=new THREE.InstancedMesh(geo,mat,S.length);im.frustumCulled=false;im.renderOrder=S[0].renderOrder;im.name='torch_batch';
+    S.forEach((f,i)=>{f.updateMatrixWorld(true);f.getWorldPosition(v).applyMatrix4(inv);m4.makeScale(f.scale.x,f.scale.y,1).setPosition(v);im.setMatrixAt(i,m4);
+      ph.setXY(i,f.userData.ph||0,f.visible?1:0);L.tb.vis[i]=f.visible;f.parent.remove(f);});
+    P.add(im);L.tb.im=im;L.tb.ph=ph;}
+  const B=L.tb;if(!B.im)return;let ch=false;
+  for(let i=0;i<B.S.length;i++){const vis=B.S[i].visible;if(vis!==B.vis[i]){B.vis[i]=vis;B.ph.setY(i,vis?1:0);ch=true;}}
+  if(ch)B.ph.needsUpdate=true;}
