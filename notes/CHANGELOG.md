@@ -1493,3 +1493,4 @@
 - 2026-11-24 Terra Isle: punchier rise (acc 24, vMax 11, ~1 s to the top), emerge 0.3 s
 - 2026-11-24 Terra Isle cast animation (thrust → hold → scoop up) + gold streak; faster rise (~0.8 s)
 - 2026-11-24 Terra Isle cast v2: side-on body, arm points forward, head on target
+- 2026-11-24 Terra Isle cast animation approved by user (chat)
