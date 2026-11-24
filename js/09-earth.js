@@ -91,7 +91,7 @@ function earthReset(p){p.ehp=ERV.sh;p.stdB=0;p.eShT=0;p.epn=null;p.esb=null;p.au
 // ---------- ท่าพื้นฐาน (คลิกซ้าย) ----------
 // BA (user 2026-11-24): no Stand. A ring of rocks floats behind the back; each shot throws one (splash), the ring refills
 // one rock at a time. Hold = keep throwing every `rate` s while rocks last. No charged attack any more.
-const EROCK={max:8,rate:0.7,refill:1.8,splash:34,dmg:15};
+const EROCK={max:8,rate:0.7,refill:1.8,splash:34,dmg:10};
 function earthRockTick(p,dt){if(p.erk===undefined)p.erk=EROCK.max;if(p.erk<EROCK.max&&!p.erBar)p.erk=Math.min(EROCK.max,p.erk+dt/(p.erkFast>G.time?BARRAGE.v.refill/EROCK.max:EROCK.refill));}
 function earthRockSplash(pr){if(pr.splashed)return;pr.splashed=1;const o=G.players[pr.owner];if(!o)return;
   for(const t of foesIn(o.team,pr.x,pr.y,EROCK.splash,pr.h+3)){const z=t.isE?(t.h||0):(t.z||0);if(Math.abs(z+1-pr.h)<2.6)aoeHit(o,t,EROCK.dmg);}
@@ -199,7 +199,7 @@ const TECT={v:{len:300,gap:240,hp:200,crush2:80,crush1:40,push:1.0,slide:0.06,kn
 // ---------- สกิล 3: Stone Barrage — ปาหินทั้งวงหลังตัวออกไปรัว ๆ (ไม่ตรงเป้า 100% ส่ายนิด ๆ) แล้ววงเติมเต็มเร็วในไม่กี่วิ
 const BARRAGE=defSpell(EARTH,{id:'stonebarrage',v:{gap:0.045,spread:0.09,wob:1.6,refill:1.0},
   vn:{gap:'ห่างระหว่างก้อน (วิ)',spread:'กระจาย (เรเดียน)',wob:'ส่ายกลางอากาศ',refill:'เติมเต็มวงใน (วิ)'},
-  role:'finisher',n:'Stone Barrage',ic:'🪨',cd:9,d:'ปาหินทั้งวงหลังตัวออกไปรัว ๆ ตามจุดเล็ง (ส่ายนิด ๆ ไม่ตรงเป้าทุกก้อน) ก้อนละ 15 ระเบิดกระจาย • แล้ววงหินเติมเต็มใน ~1 วิ',
+  role:'finisher',n:'Stone Barrage',ic:'🪨',cd:9,d:'ปาหินทั้งวงหลังตัวออกไปรัว ๆ ตามจุดเล็ง (ส่ายนิด ๆ ไม่ตรงเป้าทุกก้อน) ก้อนละ 10 ระเบิดกระจาย • แล้ววงหินเติมเต็มใน ~1 วิ',
   cast(p,S){if(p.aug||p.ramp||p.ecb||p.wr||p.erBar)return false;earthRockTick(p,0);const n=Math.max(1,Math.floor(p.erk||0));p.erBar={left:n,t:0};
     emit({k:'efx',z:'erockbar',x:Math.round(p.x),y:Math.round(p.y),h:p.z,n,id:p.id});}});
 function earthBarrageTick(p,dt){const B=p.erBar;if(!B)return;B.t-=dt;
@@ -391,7 +391,7 @@ function earthSnapW(){return {ES:(G.eso||[]).map(w=>[w.id,{tec:0,pil:1,mound:2,d
   ED:(G.edust||[]).map(d=>[d.id,Math.round(d.x),Math.round(d.y),d.r,Math.round(d.t*10)/10,d.team,d.boom?1:0,d.boom?d.ids:0])};}
 
 // ท่าพื้นฐาน + โล่ + Dash ของสาย (PBASIC ต้องอยู่ช่องที่ 6 = ลำดับใน PATHS)
-PBASIC.push({id:'b_earth',type:'erock',n:'วงหินปา',d:'วงหิน 8 ก้อนลอยหลังตัว • คลิก/ค้าง = ปาหินทีละก้อนทุก 0.7 วิ ระเบิดกระจาย 15 ดาเมจ (รัศมี ~1.7 ม.) • หินเติมเองทีละก้อน ~1.8 วิ • เดิม: คลิก = Stand เล็กด้านหน้าส่งกำปั้นหินตามแนวเล็ง 3 มิติ ระยะ 500 ดาเมจ 10 ทุก 0.8 วิ • กดค้าง = Stand ใหญ่ด้านหลังง้างชาร์จ 2 วิ แล้วยิงหมัดใหญ่ ดาเมจตรง 50 + ผลักถอยเล็กน้อย เศษหินพุ่งเป็นกรวยด้านหลังเป้า ดาเมจ 20 ต่อเป้า คูลดาวน์ 6 วิ เดินช้า 40% • Stand แตก = ยิงหินเล็ก 5 ดาเมจ ทุก 0.35 วิ',
+PBASIC.push({id:'b_earth',type:'erock',n:'วงหินปา',d:'วงหิน 8 ก้อนลอยหลังตัว • คลิก/ค้าง = ปาหินทีละก้อนทุก 0.7 วิ ระเบิดกระจาย 10 ดาเมจ (รัศมี ~1.7 ม.) • หินเติมเองทีละก้อน ~1.8 วิ • เดิม: คลิก = Stand เล็กด้านหน้าส่งกำปั้นหินตามแนวเล็ง 3 มิติ ระยะ 500 ดาเมจ 10 ทุก 0.8 วิ • กดค้าง = Stand ใหญ่ด้านหลังง้างชาร์จ 2 วิ แล้วยิงหมัดใหญ่ ดาเมจตรง 50 + ผลักถอยเล็กน้อย เศษหินพุ่งเป็นกรวยด้านหลังเป้า ดาเมจ 20 ต่อเป้า คูลดาวน์ 6 วิ เดินช้า 40% • Stand แตก = ยิงหินเล็ก 5 ดาเมจ ทุก 0.35 วิ',
   shd:'โล่ Stand Barrier: Stand ยกโล่หินใหญ่ กันได้รอบตัว 300 HP (มากที่สุดในทุกสาย) • ไม่ได้ใช้ 3 วิ ฟื้น 20/วิ • โล่แตก = Stand หาย 10 วิ (ยิงหินเล็กแทนหมัด, Dash เป็น Rock Boost, สกิลที่ใช้ Stand ใช้ไม่ได้) แล้วกลับมาพร้อมโล่เต็ม 300',
   dsd:'Stand Rampage (Shift): ขี่ Stand วิ่งชาร์จตามทิศเล็ง 1.2 วิ (~600) กด Shift อีกครั้งหยุดก่อน • ชนศัตรู 15 + กระเด็นเล็กน้อย • จบด้วยทุบพื้น 20 + ผลักเล็กน้อย รัศมี 150 • ทะลุกำแพง/เสาของเรา พังของศัตรู • คูลดาวน์ 8 วิ • Stand แตก = Rock Boost Escape: หินดันพุ่ง ~400 ศัตรูรอบจุดเริ่ม (120) กระเด็น คูลดาวน์ 6 วิ',
   hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');},tick:earthBasic,dash:earthDash});
