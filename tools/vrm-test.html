@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VRM Test — Fantas Stick</title>
+<!-- ทดลองโมเดล VRoid (.vrm) ก่อนเอาเข้าเกม (ผู้ใช้ 2026-11-24 เลือกทาง VRoid)
+     เปิด: python tools/serve.py → http://localhost:8765/tools/vrm-test.html  (ลากไฟล์ .vrm มาวาง หรือ ?vrm=assets/vrm/xxx.vrm)
+     • ดูหน้าตา/ความหนัก (สามเหลี่ยม, วัสดุ, เท็กซ์เจอร์, ขนาดไฟล์) • ลองท่าเดิมของเกม (assets/chars/student.glb) บนกระดูก VRM • ผม/กระโปรงแกว่ง (spring bone) -->
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.min.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/","@pixiv/three-vrm":"https://unpkg.com/@pixiv/three-vrm@2.1.0/lib/three-vrm.module.min.js"}}</script>
+<style>
+:root{--bg:#0b1020;--panel:rgba(12,17,34,.88);--line:rgba(217,180,90,.35);--gold:#f3dc94;--text:#efe6cf;--mute:#98a2bb}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:14px/1.45 'Kanit',system-ui,sans-serif;overflow:hidden}
+#cv{position:fixed;inset:0;display:block}
+.pan{position:fixed;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;backdrop-filter:blur(8px)}
+#info{left:14px;top:14px;width:290px}#ctl{right:14px;top:14px;width:250px}
+h1{font-size:16px;margin:0 0 6px;color:var(--gold)}h2{font-size:13px;margin:12px 0 6px;color:var(--gold);font-weight:500}
+table{width:100%;border-collapse:collapse;font-size:12.5px}td{padding:2px 0}td:last-child{text-align:right;color:#fff}
+.ok{color:#8fe39a!important}.warn{color:#ffcf6a!important}.bad{color:#ff7a7a!important}
+button{font:inherit;font-size:12.5px;color:var(--text);background:#1b2442;border:1px solid rgba(255,255,255,.18);border-radius:8px;padding:5px 9px;margin:0 4px 6px 0;cursor:pointer}
+button.on{border-color:var(--gold);color:var(--gold);background:#2a3560}
+#drop{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--gold);background:rgba(5,8,18,.75);pointer-events:none;opacity:0;transition:opacity .2s}
+#drop.show{opacity:1}#hint{left:50%;bottom:16px;transform:translateX(-50%);font-size:13px;color:var(--mute)}
+input[type=file]{font-size:12px;color:var(--mute);width:100%}
+</style></head><body>
+<canvas id="cv"></canvas>
+<div class="pan" id="info"><h1>VRM Test</h1><div id="stats" style="color:var(--mute)">ยังไม่ได้โหลดโมเดล — ลากไฟล์ .vrm มาวางที่หน้านี้</div></div>
+<div class="pan" id="ctl">
+  <h2 style="margin-top:0">ไฟล์</h2><input type="file" id="file" accept=".vrm,.glb">
+  <h2>ท่าจากเกม (student.glb)</h2><div id="anims"></div>
+  <h2>สีหน้า</h2><div id="exprs"></div>
+  <h2>มุมมอง</h2><div><button id="bRef">ตัวเดิมในเกม (เทียบขนาด)</button><button id="bSpin">หมุนเอง</button><button id="bFace">ซูมหน้า</button></div>
+</div>
+<div class="pan" id="hint">ลากเมาส์ = หมุนกล้อง • ล้อเมาส์ = ซูม • ผม/กระโปรงแกว่งตามจริง (spring bone)</div>
+<div id="drop">วางไฟล์ .vrm ที่นี่</div>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {VRMLoaderPlugin,VRMUtils} from '@pixiv/three-vrm';
+
+const cv=document.getElementById('cv'),R=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+R.setPixelRatio(Math.min(2,devicePixelRatio));R.outputColorSpace=THREE.SRGBColorSpace;R.shadowMap.enabled=true;
+const S=new THREE.Scene();S.background=new THREE.Color('#1a2140');S.fog=new THREE.Fog('#1a2140',8,22);
+const cam=new THREE.PerspectiveCamera(30,1,0.05,100);cam.position.set(0.6,1.4,3.6);
+const ctl=new OrbitControls(cam,cv);ctl.target.set(0,1.0,0);ctl.enableDamping=true;
+S.add(new THREE.HemisphereLight('#dfe7ff','#3a3040',1.4));
+const sun=new THREE.DirectionalLight('#fff2dc',2.2);sun.position.set(2,4,3);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);S.add(sun);
+const rim=new THREE.DirectionalLight('#9fb6ff',1.2);rim.position.set(-3,2,-3);S.add(rim);
+const fl=new THREE.Mesh(new THREE.CircleGeometry(6,48),new THREE.MeshStandardMaterial({color:'#2b3358',roughness:0.9}));fl.rotation.x=-Math.PI/2;fl.receiveShadow=true;S.add(fl);
+const ring=new THREE.Mesh(new THREE.RingGeometry(0.55,0.62,48),new THREE.MeshBasicMaterial({color:'#f3dc94',transparent:true,opacity:0.6}));ring.rotation.x=-Math.PI/2;ring.position.y=0.005;S.add(ring);
+function size(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();}addEventListener('resize',size);size();
+
+const loader=new GLTFLoader();loader.register(p=>new VRMLoaderPlugin(p));
+let vrm=null,mixer=null,act=null,clips={},src=null,ref=null,spin=false,curAnim='idle';
+
+// ---------- ท่าเดิมของเกม → กระดูก VRM (humanoid) ----------
+// rig เกม: แขนห้อยลงตอนยืนตรง • VRM: ท่า T (แขนกาง) → แขนใส่ค่าชดเชยหมุน 90° (OFF) ให้ท่าเดิมยังห้อยแขนเหมือนเกม
+const MAP={hips:'hips',spine:'spine',chest:'chest',neck:'neck',head:'head',
+  upper_arm_L:'leftUpperArm',forearm_L:'leftLowerArm',hand_L:'leftHand',upper_arm_R:'rightUpperArm',forearm_R:'rightLowerArm',hand_R:'rightHand',
+  thigh_L:'leftUpperLeg',shin_L:'leftLowerLeg',foot_L:'leftFoot',thigh_R:'rightUpperLeg',shin_R:'rightLowerLeg',foot_R:'rightFoot'};
+const OFF={L:new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),-Math.PI/2),R:new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),Math.PI/2)};
+const ARM={upper_arm_L:['L',0],forearm_L:['L',1],hand_L:['L',1],upper_arm_R:['R',0],forearm_R:['R',1],hand_R:['R',1]};
+async function loadSrc(){if(src)return src;src=await loader.loadAsync('../assets/chars/student.glb');src.scene.updateMatrixWorld(true);return src;}
+function retarget(clip){
+  const tracks=[],q=new THREE.Quaternion(),pw=new THREE.Quaternion(),ri=new THREE.Quaternion(),v0=vrm.meta?.metaVersion==='0';
+  for(const t of clip.tracks){
+    const [bn,prop]=t.name.split('.');if(prop!=='quaternion'||!MAP[bn])continue;
+    const node=vrm.humanoid.getNormalizedBoneNode(MAP[bn]);const b=src.scene.getObjectByName(bn);if(!node||!b)continue;
+    b.getWorldQuaternion(ri).invert();b.parent.getWorldQuaternion(pw);
+    const a=ARM[bn],o=a&&OFF[a[0]],oi=o&&o.clone().invert(),vals=new Float32Array(t.values.length);
+    for(let i=0;i<t.values.length;i+=4){
+      q.fromArray(t.values,i).premultiply(pw).multiply(ri);          // หมุนจากท่ายืนตรงของเกม ในแกนโลก
+      if(a){if(a[1])q.premultiply(oi).multiply(o);else q.multiply(o);}  // แขน: ต้นแขน = ท่า × ชดเชย • ท่อนล่าง/มือ = แปลงแกนด้วยชดเชย
+      q.toArray(vals,i);if(v0){vals[i]=-vals[i];vals[i+2]=-vals[i+2];}
+    }
+    tracks.push(new THREE.QuaternionKeyframeTrack(node.name+'.quaternion',t.times,vals));
+  }
+  return new THREE.AnimationClip(clip.name,clip.duration,tracks);
+}
+async function setupAnims(){
+  await loadSrc();mixer=new THREE.AnimationMixer(vrm.scene);clips={};
+  for(const c of src.animations){const n=c.name.split('|').pop().toLowerCase();clips[n]=retarget(c);}
+  const box=document.getElementById('anims');box.innerHTML='';
+  for(const n of [...Object.keys(clips),'tpose']){const b=document.createElement('button');b.textContent=n==='tpose'?'T-pose':n;b.onclick=()=>play(n);b.dataset.a=n;box.appendChild(b);}
+  play(curAnim);
+}
+function play(n){
+  curAnim=n;document.querySelectorAll('#anims button').forEach(b=>b.classList.toggle('on',b.dataset.a===n));
+  if(act){act.stop();act=null;}if(n==='tpose'||!clips[n]){vrm.humanoid.resetNormalizedPose();return;}
+  act=mixer.clipAction(clips[n]);act.reset().play();
+}
+
+// ---------- สถิติความหนัก (เทียบกับตัวเดิมในเกม ~2.5k สามเหลี่ยม) ----------
+function stats(file,bytes){
+  let tris=0,meshes=0,skinned=0;const mats=new Set(),tex=new Map();
+  vrm.scene.traverse(o=>{if(!o.isMesh)return;meshes++;if(o.isSkinnedMesh)skinned++;const g=o.geometry;tris+=(g.index?g.index.count:g.attributes.position.count)/3;
+    for(const m of [].concat(o.material)){mats.add(m);for(const k in m){const v=m[k];if(v&&v.isTexture&&v.image)tex.set(v.image,v.image.width+'×'+v.image.height);}
+      if(m.uniforms)for(const k in m.uniforms){const v=m.uniforms[k]?.value;if(v&&v.isTexture&&v.image)tex.set(v.image,v.image.width+'×'+v.image.height);}}});
+  const box=new THREE.Box3().setFromObject(vrm.scene),h=box.max.y-box.min.y;
+  const sb=vrm.springBoneManager?(vrm.springBoneManager.joints?.size??0):0,ex=vrm.expressionManager?vrm.expressionManager.expressions.length:0;
+  const cls=(v,a,b)=>v<=a?'ok':v<=b?'warn':'bad',px=[...tex.values()];
+  const texMB=[...tex.keys()].reduce((s,im)=>s+(im.width*im.height*4*1.33)/1048576,0);
+  document.getElementById('stats').innerHTML=`<table>
+<tr><td>ไฟล์</td><td>${file}</td></tr><tr><td>ขนาดไฟล์</td><td class="${cls(bytes/1048576,8,20)}">${(bytes/1048576).toFixed(1)} MB</td></tr>
+<tr><td>VRM</td><td>${vrm.meta?.metaVersion==='0'?'0.x':'1.0'} • ${esc(vrm.meta?.name||vrm.meta?.title||'-')}</td></tr>
+<tr><td>สามเหลี่ยม</td><td class="${cls(tris,30000,70000)}">${Math.round(tris).toLocaleString()}</td></tr>
+<tr><td>ชิ้น mesh (skinned)</td><td class="${cls(meshes,8,20)}">${meshes} (${skinned})</td></tr>
+<tr><td>วัสดุ</td><td class="${cls(mats.size,8,16)}">${mats.size}</td></tr>
+<tr><td>เท็กซ์เจอร์</td><td class="${cls(texMB,64,160)}">${tex.size} รูป ~${Math.round(texMB)} MB ในการ์ดจอ</td></tr>
+<tr><td>ขนาดรูป</td><td style="font-size:11px">${[...new Set(px)].join(', ')}</td></tr>
+<tr><td>ความสูง</td><td>${h.toFixed(2)} m</td></tr><tr><td>ข้อต่อแกว่ง (ผม/ผ้า)</td><td>${sb}</td></tr><tr><td>สีหน้า</td><td>${ex}</td></tr></table>
+<p style="font-size:11.5px;color:var(--mute);margin:8px 0 0">เขียว = เบาพอสำหรับ 10 คนในเกม • เหลือง = พอได้ ต้องลดตอนเอาเข้าเกม • แดง = หนักไป<br>ตัวเดิมในเกม ≈ 2,500 สามเหลี่ยม, 1 รูป</p>`;
+}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+async function loadVRM(url,name,bytes){
+  document.getElementById('stats').textContent='กำลังโหลด '+name+' …';
+  try{
+    const g=await loader.loadAsync(url);const v=g.userData.vrm;if(!v)throw new Error('ไฟล์นี้ไม่ใช่ VRM');
+    if(vrm){S.remove(vrm.scene);VRMUtils.deepDispose(vrm.scene);}
+    VRMUtils.removeUnnecessaryVertices(g.scene);VRMUtils.removeUnnecessaryJoints(g.scene);VRMUtils.rotateVRM0(v);
+    vrm=v;vrm.scene.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;}});S.add(vrm.scene);
+    if(!bytes){try{bytes=+(await fetch(url,{method:'HEAD'})).headers.get('content-length')||0;}catch(e){}}
+    stats(name,bytes||0);
+    const ex=document.getElementById('exprs');ex.innerHTML='';
+    for(const n of ['neutral','happy','angry','sad','surprised','relaxed','blink']){if(n!=='neutral'&&!vrm.expressionManager?.getExpression(n))continue;
+      const b=document.createElement('button');b.textContent=n;b.onclick=()=>{for(const k of ['happy','angry','sad','surprised','relaxed','blink'])vrm.expressionManager?.setValue(k,0);if(n!=='neutral')vrm.expressionManager.setValue(n,1);};ex.appendChild(b);}
+    const h=new THREE.Box3().setFromObject(vrm.scene).max.y;ctl.target.set(0,h*0.55,0);
+    await setupAnims();
+  }catch(e){console.error(e);document.getElementById('stats').innerHTML='<span class="bad">โหลดไม่ได้: '+esc(e.message)+'</span>';}
+}
+// ตัวเดิมในเกม (เทียบขนาด) วางข้างขวา
+document.getElementById('bRef').onclick=async e=>{
+  if(ref){S.remove(ref);ref=null;e.target.classList.remove('on');return;}
+  await loadSrc();ref=src.scene.clone(true);ref.position.x=1.3;ref.traverse(o=>{if(o.isMesh)o.castShadow=true;});S.add(ref);e.target.classList.add('on');};
+document.getElementById('bSpin').onclick=e=>{spin=!spin;e.target.classList.toggle('on',spin);};
+document.getElementById('bFace').onclick=()=>{if(!vrm)return;const h=vrm.humanoid.getNormalizedBoneNode('head'),p=new THREE.Vector3();h.getWorldPosition(p);ctl.target.copy(p).y+=0.06;cam.position.set(p.x+0.15,p.y+0.08,p.z+0.75);};
+document.getElementById('file').onchange=e=>{const f=e.target.files[0];if(f)loadVRM(URL.createObjectURL(f),f.name,f.size);};
+const drop=document.getElementById('drop');
+addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('show');});addEventListener('dragleave',e=>{if(!e.relatedTarget)drop.classList.remove('show');});
+addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('show');const f=e.dataTransfer.files[0];if(f)loadVRM(URL.createObjectURL(f),f.name,f.size);});
+const qv=new URLSearchParams(location.search).get('vrm');if(qv)loadVRM('../'+qv,qv.split('/').pop());
+
+const clock=new THREE.Clock();
+R.setAnimationLoop(()=>{const dt=Math.min(0.05,clock.getDelta());
+  if(mixer)mixer.update(dt);if(vrm){if(spin)vrm.scene.rotation.y+=dt*0.6;vrm.update(dt);}
+  ctl.update();R.render(S,cam);});
+window.VT={get vrm(){return vrm},play,loadVRM,THREE,cam,ctl,R,S};
+</script></body></html>

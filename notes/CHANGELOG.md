@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-24 — **VRoid model path started** (user wants anime-style models like their references). `tools/vrm-test.html` loads a VRoid .vrm, shows how heavy it is and plays the game's own animations on it; plan in `designs/vroid-plan.md`. Waiting for the user's VRoid characters.
 <<<<<<< HEAD
 - 2026-11-24 — Cloth CPU (OPTIMIZE §W): clTargets via bone matrices (15× faster, same result), one normal pass + negated inner sheet, others' cloth 30 Hz beyond 8 m / outside nearest 4. Cloth 10.3 % → 6.6 % of 6v6 CPU. Review #189.
 - 2026-11-24 — **Siege loot phase (temporary).** After a core falls, maps with a Loot Area now play retreat (20 s) → loot (45 s, main timer paused) → next point. Extensible item registry `SG_ITEMS` with one placeholder item (regen shard), pickup on touch, drop on death, loot-phase drops vanish at its end. Bots go to their retreat zone, then collect items and fight in the area. Gold curtain, glowing items, HUD bag and markers. Dev menu: jump to the loot phase after any core, end it, give an item. Protocol v114.
