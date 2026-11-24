@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-24 — **Town kit props and roads 1.5× bigger too.** Lamps, stalls, carts, fences and the rest of town/* follow the houses (×1.5); roads and paving grow in width/length only. Asset names show the new sizes. town-demo re-laid out (300×150) and re-exported.
 - 2026-11-24 — Measured skill VFX cost in 6v6 (guides/OPTIMIZE.md §W): VFX = CPU −5–6 ms median / −11 ms p95, ~190 draws, GPU −2.6 ms (effect meshes, not particles; particle layer only 0.3 ms). Bench: `novfx`/`fcsNovfx` rows (`window.__novfx`), fx/particle counts in tools/bench-6v6.js.
 - 2026-11-24 — **Town kit houses 1.5× bigger.** The 16 town/* houses matched real-life storey heights and looked small next to the game's houses; tools/town-assets.mjs now scales them 1.5× (props, roads, lamps unchanged). town-demo layout adjusted and re-exported.
 - 2026-11-24 — **Map Builder Export pushes the map.** ⬆ Export now also commits and pushes only that map's files (source, room prefabs, exported .json/.glb, its manifest entry) on top of origin/main, without touching other local changes. Play / Game View still only export locally.

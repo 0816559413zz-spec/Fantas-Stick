@@ -8,6 +8,8 @@
 
 ## Latest notes (newest first)
 
+**Whole town kit 1.5× (2026-11-24, `tools/town-assets.mjs` `HS` in `add()`):** props, lamps, fences and roads/paving now also ×1.5 (roads/paving in x/z only, same thickness; steps scale fully). Names updated (Cobble Road 6x6, Plaza 12x12, Fence 6m…). Road pieces now snap on a 6 m grid. town-demo is 300×150, street scene stretched ×1.5, re-exported. Maps that already use town roads/props (fcs-file) need a check + re-export.
+
 **Town houses 1.5× bigger (2026-11-24, `tools/town-assets.mjs` `HS`):** the 16 town/* houses were real-life size (2.8–3 m floors) next to the game's ~4.5 m house floors; now scaled 1.5× (names: Cottage 7x7, Big 12x15, Wide 15x9). Props/roads/lamps unchanged. Placed instances grow automatically in Map Builder; a map's game .glb changes only after re-export (town-demo re-exported, catalog rows + 4 spawns moved; fcs-file not re-exported). Check maps for houses now overlapping.
 
 **Map Builder ⬆ Export now publishes (2026-11-24, `POST /api/mb-publish` in tools/serve.py):** Export = export + one commit with only this map (`maps/build/<id>.json`, room prefabs it uses, `assets/maps/<id>.json/.glb`, its single `assets/manifest.json` entry), built on `origin/main` with a temporary index and pushed (= GitHub Pages deploy). Other local changes are never included. Refuses if this PC has unpushed commits. If local edits block the fast-forward the push still lands and this PC stays behind (pull later). ▶ Play / Game View only export. `&dry=1` builds without pushing. Tested with dry runs only.

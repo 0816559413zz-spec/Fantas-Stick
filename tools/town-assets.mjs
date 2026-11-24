@@ -64,7 +64,9 @@ class Mesh {
     for (const T of [this, this.g]) for (const arr of [T.p, T.n]) for (let i = 0; i < arr.length; i += 3) { const a = arr[i], b = arr[i + 1], d = arr[i + 2]; arr[i] = M[0] * a + M[1] * b + M[2] * d; arr[i + 1] = M[3] * a + M[4] * b + M[5] * d; arr[i + 2] = M[6] * a + M[7] * b + M[8] * d; }
     return this; }
   rotY(a) { return this.rotAxis([0, 1, 0], a); }
-  scale(k) { for (const T of [this, this.g]) for (let i = 0; i < T.p.length; i++) T.p[i] *= k; return this; }   // uniform: normals unchanged
+  scale(k, ky = k) { for (const T of [this, this.g]) for (let i = 0; i < T.p.length; i++) T.p[i] *= i % 3 === 1 ? ky : k;   // uniform: normals unchanged • ky = 1: flat pieces keep their thickness
+    if (ky !== k) for (const T of [this, this.g]) for (let i = 0; i < T.n.length; i += 3) { const x = T.n[i] / k, y = T.n[i + 1] / ky, z = T.n[i + 2] / k, l = Math.hypot(x, y, z) || 1; T.n[i] = x / l; T.n[i + 1] = y / l; T.n[i + 2] = z / l; }
+    return this; }
   move(x, y, z) { for (const T of [this, this.g]) for (let i = 0; i < T.p.length; i += 3) { T.p[i] += x; T.p[i + 1] += y; T.p[i + 2] += z; } return this; }
   add(m) { for (const k of ['p', 'n', 'c']) { this[k].push(...m[k]); this.g[k].push(...m.g[k]); } return this; }
   bbox() { const b = [1e9, 1e9, 1e9, -1e9, -1e9, -1e9]; for (const T of [this, this.g]) for (let k = 0; k < T.p.length; k += 3) for (let a = 0; a < 3; a++) { b[a] = Math.min(b[a], T.p[k + a]); b[a + 3] = Math.max(b[a + 3], T.p[k + a]); } return b; }
@@ -318,12 +320,13 @@ function gateArch() { R = rng(409); const m = new Mesh(); for (const x of [-1.6,
   m.box(-1.95, 2.95, -0.3, 1.95, 3.45, 0.3, P.stone); gable(m, -1.95, -0.4, 1.95, 0.4, 3.45, 0.55, 0.12, P.roofR, P.stone, 'x'); lantern(m, -1.6, 2.95, 0.5, 0.7); m.box(-1.25, 2.6, -0.1, 1.25, 2.95, 0.1, P.woodD); return m; }
 
 // ---------- list ----------
+// the kit was modelled at real-life size (2.8–3 m floors, 2 m doors); the game's playable houses use ~4.5 m floors → everything ×1.5 (user 2026-11-24: too small)
+// roads/paving grow in x/z only (same thickness); houses scale in their add() line, the rest in add()
+const HS = 1.5;
 const A = [];
 // id, English name (UI is English), cat, mesh, {col, ns, cs}
-const add = (id, name, cat, mesh, o = {}) => A.push({ id, name, cat, mesh, col: o.col == null ? 1 : o.col, ns: o.ns || 0, cs: o.cs });
+const add = (id, name, cat, mesh, o = {}) => (cat !== 'build' && mesh.scale(HS, cat === 'road' && id !== 'steps_4' ? 1 : HS), A.push({ id, name, cat, mesh, col: o.col == null ? 1 : o.col, ns: o.ns || 0, cs: o.cs }));
 const RF = [['red', P.roofR, 'red roof', P.red], ['slate', P.roofS, 'slate roof', P.blue]];
-// houses are modelled at real-life size (2.8–3 m floors, 2 m doors); the game's playable houses use ~4.5 m floors → scale up to match (user 2026-11-24: too small)
-const HS = 1.5;
 for (const [rk, rc, rn, aw] of RF) {
   add('cottage_' + rk, 'Cottage 7x7 (' + rn + ')', 'build', cottage(rc).scale(HS), { cs: 0.95 });
   add('timber_' + rk, 'Timber House 2F (' + rn + ')', 'build', timberHouse(rc).scale(HS), { cs: 0.9 });
@@ -337,20 +340,20 @@ for (const [rk, rc, rn, aw] of RF) {
 // roads: flat, walk-through, no shadow
 { const T = (id, name, f) => { R = rng(500 + A.length); const m = new Mesh(); f(m); add(id, name, 'road', m, { col: 0, ns: 1 }); };
   const all = () => true;
-  T('road_4', 'Cobble Road 4x4', m => cobbles(m, -2, -2, 2, 2, all));
-  T('road_8', 'Cobble Road 4x8', m => cobbles(m, -2, -4, 2, 4, all));
-  T('road_curb_4', 'Cobble Road 4x4 + Curbs', m => { cobbles(m, -2, -2, 2, 2, all); for (const s of [-1, 1]) { const c = new Mesh(); curbX(c, -2, 2, 0); c.rotY(Math.PI / 2).move(s * 2.15, 0, 0); m.add(c); } });
-  T('road_curve', 'Cobble Road Curve 90 (r4)', m => cobblesPolar(m, -4, -4, 2, 6, 0, Math.PI / 2));
-  T('road_t', 'Cobble T-Junction 4x4', m => { cobbles(m, -2, -2, 2, 2, all); const c = new Mesh(); curbX(c, -2, 2, 0); c.move(0, 0, -2.15); m.add(c); });
+  T('road_4', 'Cobble Road 6x6', m => cobbles(m, -2, -2, 2, 2, all));
+  T('road_8', 'Cobble Road 6x12', m => cobbles(m, -2, -4, 2, 4, all));
+  T('road_curb_4', 'Cobble Road 6x6 + Curbs', m => { cobbles(m, -2, -2, 2, 2, all); for (const s of [-1, 1]) { const c = new Mesh(); curbX(c, -2, 2, 0); c.rotY(Math.PI / 2).move(s * 2.15, 0, 0); m.add(c); } });
+  T('road_curve', 'Cobble Road Curve 90 (r6)', m => cobblesPolar(m, -4, -4, 2, 6, 0, Math.PI / 2));
+  T('road_t', 'Cobble T-Junction 6x6', m => { cobbles(m, -2, -2, 2, 2, all); const c = new Mesh(); curbX(c, -2, 2, 0); c.move(0, 0, -2.15); m.add(c); });
   T('road_end', 'Cobble Road End (round)', m => { cobbles(m, -2, 0, 2, 2, all); cobblesPolar(m, 0, 0, 0, 2, Math.PI, Math.PI * 2); });
-  T('alley_2', 'Narrow Alley 2x4', m => cobbles(m, -1, -2, 1, 2, all, { rowH: 0.28 }));
-  T('plaza_round', 'Round Plaza 8m', m => { cobblesPolar(m, 0, 0, 0, 1.2, 0, Math.PI * 2, { k: P.stoneG }); cobblesPolar(m, 0, 0, 1.2, 4, 0, Math.PI * 2); });
-  T('plaza_sq', 'Square Plaza 8x8', m => { cobbles(m, -4, -4, 4, 4, all); m.box(-1.2, 0, -1.2, 1.2, RT + 0.01, 1.2, P.stoneG); m.box(-1.0, 0, -1.0, 1.0, RT + 0.015, 1.0, P.flag); });
-  T('flags_4', 'Stone Flag Paving 4x4', m => flags(m, -2, -2, 2, 2));
-  T('flags_8', 'Stone Flag Paving 8x8', m => flags(m, -4, -4, 4, 4, 1.1));
+  T('alley_2', 'Narrow Alley 3x6', m => cobbles(m, -1, -2, 1, 2, all, { rowH: 0.28 }));
+  T('plaza_round', 'Round Plaza 12m', m => { cobblesPolar(m, 0, 0, 0, 1.2, 0, Math.PI * 2, { k: P.stoneG }); cobblesPolar(m, 0, 0, 1.2, 4, 0, Math.PI * 2); });
+  T('plaza_sq', 'Square Plaza 12x12', m => { cobbles(m, -4, -4, 4, 4, all); m.box(-1.2, 0, -1.2, 1.2, RT + 0.01, 1.2, P.stoneG); m.box(-1.0, 0, -1.0, 1.0, RT + 0.015, 1.0, P.flag); });
+  T('flags_4', 'Stone Flag Paving 6x6', m => flags(m, -2, -2, 2, 2));
+  T('flags_8', 'Stone Flag Paving 12x12', m => flags(m, -4, -4, 4, 4, 1.1));
   T('stepping', 'Stepping Stones Path', m => { for (let i = 0; i < 6; i++) { const z = -2.5 + i * 1.0, x = Math.sin(i * 1.3) * 0.35, r = 0.32 + R() * 0.12; m.cyl(x, 0, z, r, 0.07, r * 0.95, 7, jit(P.flag, 0.1), { a0: R() }); } });
-  T('curb_4', 'Curb Stone 4m', m => curbX(m, -2, 2, 0));
-  T('steps_4', 'Stone Steps 4 wide (3 steps)', m => { for (let i = 0; i < 3; i++) m.box(-2, 0, -0.6 + i * 0.4, 2, 0.22 * (3 - i), 0.6, jit(P.stone, 0.05), { top: P.flag }); });
+  T('curb_4', 'Curb Stone 6m', m => curbX(m, -2, 2, 0));
+  T('steps_4', 'Stone Steps 6 wide (3 steps)', m => { for (let i = 0; i < 3; i++) m.box(-2, 0, -0.6 + i * 0.4, 2, 0.22 * (3 - i), 0.6, jit(P.stone, 0.05), { top: P.flag }); });
 }
 // lights (glass glows; place a Light object for real light)
 add('lamp_post', 'Lamp Post', 'light', lampPost(), { cs: 0.35 });
@@ -387,10 +390,10 @@ add('banner_red', 'Banner Pole (red)', 'prop', bannerPole(P.red), { col: 0 });
 add('banner_blue', 'Banner Pole (blue)', 'prop', bannerPole(P.blue), { col: 0 });
 add('notice', 'Notice Board', 'prop', noticeBoard(), { col: 0 });
 // fences / walls
-add('fence_wood', 'Wooden Fence 4m', 'fence', fenceWood(), { cs: 1 });
-add('fence_picket', 'Picket Fence 3m', 'fence', fencePicket(), { cs: 1 });
-add('wall_low', 'Low Stone Wall 4m', 'fence', stoneWallLow(), { cs: 1 });
-add('hedge', 'Hedge 3m', 'fence', hedge(), { cs: 1 });
+add('fence_wood', 'Wooden Fence 6m', 'fence', fenceWood(), { cs: 1 });
+add('fence_picket', 'Picket Fence 4.5m', 'fence', fencePicket(), { cs: 1 });
+add('wall_low', 'Low Stone Wall 6m', 'fence', stoneWallLow(), { cs: 1 });
+add('hedge', 'Hedge 4.5m', 'fence', hedge(), { cs: 1 });
 add('gate_arch', 'Stone Gate Arch', 'fence', gateArch(), { col: 0 });
 
 // ---------- GLB ----------

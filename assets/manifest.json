@@ -503,7 +503,7 @@
   "town-demo": {
    "file": "maps/town-demo.glb",
    "data": "maps/town-demo.json",
-   "v": 4
+   "v": 5
   }
  },
  "ptex": {}
