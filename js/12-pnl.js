@@ -141,7 +141,8 @@ function pnlCollide(o,r,z){
       continue;}
     let [u,v]=pnLoc(p,o.x,o.y);if(Math.abs(v)>p.ht+r||Math.abs(u)>p.hl+r)continue;
     if(za>=p.zb+p.H-0.45||za+PN_BODY<=p.zb)continue;   // low wall top: step over
-    const r0=clamp(Math.floor((za-p.zb)/p.chh),0,p.nr-1),r1=clamp(Math.floor((za+PN_BODY-p.zb)/p.chh),0,p.nr-1);let run=-1,moved=false;
+    // rows whose top is ≤ feet+0.45 = step onto (pnlTopH stands there), not a wall
+    const r0=clamp(Math.floor((za+0.45-p.zb)/p.chh),0,p.nr-1),r1=clamp(Math.floor((za+PN_BODY-p.zb)/p.chh),0,p.nr-1);let run=-1,moved=false;
     for(let c=0;c<=p.nc;c++){let bl=false;if(c<p.nc)for(let rr=r0;rr<=r1;rr++)if(pnSolid(p,rr*p.nc+c)){bl=true;break;}
       if(bl&&run<0)run=c;
       if(!bl&&run>=0){const a=-p.hl+run*p.cw,b=-p.hl+c*p.cw,q=bldPush(u,v,[(a+b)/2,0,(b-a)/2,p.ht],r);if(q){u=q[0];v=q[1];moved=true;}run=-1;}}

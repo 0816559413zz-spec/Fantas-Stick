@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-24 — **Broken wall stubs are walkable.** When the top of a breakable wall is shot away, the low piece left behind no longer pushes you out: you can step onto it and walk through the gap; full-height parts still block.
+- 2026-11-24 — **Modular ruin kit in Map Builder.** 31 ruin pieces (walls, pillars, high-ground platforms, stairs, ramps, ledges, a bridge you can walk under, arches, rubble) under "Ruin (modular)". Players can stand on platforms/bridges and use walls as cover. Sample map ruin-demo. Steep stairs/ramps made in Map Builder are now climbable.
 - 2026-11-24 — **Paint shows real surface pictures.** Each ground surface button in Map Builder's Paint tool now shows a small picture taken in the game (grass blades, cobbles, cracked stone and so on) instead of a flat colour.
 - 2026-11-24 — **FFT sea (Graphics → โลก → น้ำทะเล).** Coast seas (fcs-file and coast backdrops) get real FFT waves, sun highlights, sky reflection and crest foam on High (3 wave layers) and Cinematic (4 layers + sun glitter); Low keeps the old sea. Lite port of Ultra-Water (MIT), decorative only. About +0.3 ms (High) / +1.2 ms (Cinematic) GPU, nothing when no sea is on screen.
 - 2026-11-24 — **Breakable panel Tilt in the gizmo.** In Map Builder's Rotate mode a breakable panel now shows a red ring that tilts it about its length axis (roofs, ramps, floors), in 5° steps; the green ring still turns it around the vertical axis.

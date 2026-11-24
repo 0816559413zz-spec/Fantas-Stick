@@ -235,10 +235,10 @@ BSKV:10 BSKN:11 bskBuild:14 bskGround:38 bskOutline:40 bskSegs:53 bskInPoly:63 b
 ## js/12-launch.js (39) — 
 LAUNCH:4 launch:10 launchTick:22 launchWall:31 launchWallHit:39
 
-## js/12-pnl.js (224) — Breakable panels (แผ่นพัง) — Map Builder pn_wall → data.pnl (guides/D…
-PNDEF:13 PN_BODY:17 PN_CH:18 PNL:19 PNG:19 pnGT:20 sgPnl:21 _sgPN:22 _sgPN2:22 _sgPN3:22 pnlGen:23 pnTP:36 pnTopF:37 pnLoc:38 pnWorld:39 pnCU:40 pnL3:42 pnP3:44 pnCellPos:45 pnCellUW:46 pnSolid:47 pnMark:48 pnlLinks:50 pnlSupport:68 pnEmit:76 pnBreakAll:80 pnStage:81 pnlHit:83 pnDmgCell:97 pnHitFx:102 pnlEnv:104 pnSeg:114 pnlRay:121 pnlSolidAt:126 pnlProj:129 pnlCollide:135 pnPileCols:152 pnPileAt:156 pnlTopH:161 pnlMoundH:170 pnlTick:172 pnlSnap:178 pnlParse:183
-§189 old houses → panel groups (same footprint as BLDDEF: walls wh m, gabl…
-PN_HOUSE:192 pnHouse:193 pnlHouseConv:221
+## js/12-pnl.js (225) — Breakable panels (แผ่นพัง) — Map Builder pn_wall → data.pnl (guides/D…
+PNDEF:13 PN_BODY:17 PN_CH:18 PNL:19 PNG:19 pnGT:20 sgPnl:21 _sgPN:22 _sgPN2:22 _sgPN3:22 pnlGen:23 pnTP:36 pnTopF:37 pnLoc:38 pnWorld:39 pnCU:40 pnL3:42 pnP3:44 pnCellPos:45 pnCellUW:46 pnSolid:47 pnMark:48 pnlLinks:50 pnlSupport:68 pnEmit:76 pnBreakAll:80 pnStage:81 pnlHit:83 pnDmgCell:97 pnHitFx:102 pnlEnv:104 pnSeg:114 pnlRay:121 pnlSolidAt:126 pnlProj:129 pnlCollide:135 pnPileCols:153 pnPileAt:157 pnlTopH:162 pnlMoundH:171 pnlTick:173 pnlSnap:179 pnlParse:184
+§190 old houses → panel groups (same footprint as BLDDEF: walls wh m, gabl…
+PN_HOUSE:193 pnHouse:194 pnlHouseConv:222
 
 ## js/13-enemies.js (171) — ศัตรู (โหมด Co-op)
 spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
@@ -987,4 +987,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(120 files, 37458 lines)
+(120 files, 37459 lines)
