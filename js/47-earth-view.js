@@ -819,13 +819,23 @@ SKANIM.erockthrow='erockthrow';
 // rock ring behind the back: 8 small faceted rocks on a slowly turning vertical circle; count follows the ammo (ek),
 // the refilling rock grows in place. One shared geometry, per-rock seed for size/tilt.
 const ERING={geo:null,mat:null};
-function earthRockRing(o,p,now,dt){const ek=p.ek;if(ek===undefined||!p.al){if(o.eRing)o.eRing.visible=false;return;}
-  if(!ERING.geo){ERING.geo=new THREE.IcosahedronGeometry(0.16,0);ERING.mat=new THREE.MeshStandardMaterial({color:'#b89a72',roughness:0.95,flatShading:true});ERING.mat.userData.keep=true;}
-  if(!o.eRing){const g=new THREE.Group();g.position.set(0,1.45,-0.42);o.g.add(g);o.eRing={g,r:[],visible:true};
-    for(let i=0;i<EROCK.max;i++){const m=new THREE.Mesh(ERING.geo,ERING.mat);m.castShadow=true;const s=0.8+0.4*((i*37)%10)/10;m.userData={s,ph:i*1.7};m.scale.setScalar(s);g.add(m);o.eRing.r.push(m);}}
-  const R=o.eRing;R.g.visible=true;const rot=now/2600,n=EROCK.max;
-  for(let i=0;i<n;i++){const m=R.r[i],a=rot+i/n*Math.PI*2,f=clamp(ek-i,0,1),u=m.userData;m.visible=f>0.02;
-    m.position.set(Math.cos(a)*0.55,Math.sin(a)*0.55+Math.sin(now/420+u.ph)*0.03,0);m.rotation.set(now/900+u.ph,now/1300+u.ph,0);m.scale.setScalar(u.s*(f>=1?1:0.35+0.5*f));}}
+// v2 (user 2026-11-24): bigger rocks; rocks are spaced evenly round the ring by how many there are. A refilled rock rises
+// in from the middle of the ring into its slot while the others slide over quickly to make room; a thrown rock leaves and
+// the rest close the gap. The ring keeps turning at the same speed the whole time.
+function earthRockRing(o,p,now,dt){const ek=p.ek;if(ek===undefined||!p.al){if(o.eRing)o.eRing.g.visible=false;return;}
+  if(!ERING.geo){ERING.geo=new THREE.IcosahedronGeometry(0.24,0);ERING.mat=new THREE.MeshStandardMaterial({color:'#b89a72',roughness:0.95,flatShading:true});ERING.mat.userData.keep=true;}
+  if(!o.eRing){const g=new THREE.Group();g.position.set(0,1.5,-0.45);o.g.add(g);const pool=[];
+    for(let i=0;i<EROCK.max;i++){const m=new THREE.Mesh(ERING.geo,ERING.mat);m.castShadow=true;m.visible=false;g.add(m);pool.push({m,s:0.85+0.3*((i*37)%10)/10,ph:i*1.7});}
+    o.eRing={g,pool,live:[],rot:0};}
+  const R=o.eRing,n=Math.min(EROCK.max,Math.ceil(ek-0.02));R.g.visible=true;R.rot+=dt*2.4;   // constant spin
+  while(R.live.length>n){const r=R.live.shift();r.m.visible=false;R.pool.push(r);}   // thrown: the leading rock leaves
+  while(R.live.length<n&&R.pool.length){const r=R.pool.shift(),k=R.live.length;const prev=R.live[k-1],next=R.live[0];   // refill: enter between the last and first
+    r.off=prev&&next?(prev.off+((next.off+Math.PI*2)-prev.off)/2):prev?prev.off+Math.PI:0;r.rad=0;r.m.visible=true;R.live.push(r);}
+  const m=R.live.length,full=Math.floor(ek+0.02);
+  for(let i=0;i<m;i++){const r=R.live[i],tgt=(R.live[0].off)+i/m*Math.PI*2,d=Math.atan2(Math.sin(tgt-r.off),Math.cos(tgt-r.off));
+    r.off+=d*Math.min(1,dt*12);r.rad+=(0.62-r.rad)*Math.min(1,dt*10);   // fast slide into place / rise out from the centre
+    const a=R.rot+r.off,f=i<full?1:clamp(ek-full,0,1);
+    r.m.position.set(Math.cos(a)*r.rad,Math.sin(a)*r.rad+Math.sin(now/420+r.ph)*0.03,0);r.m.rotation.set(now/900+r.ph,now/1300+r.ph,0);r.m.scale.setScalar(r.s*(0.35+0.65*f));}}
 
 // Rampart cast v3 (user 2026-11-24): side-on like Terra Isle — body turns so the slapping left side leads, head on target
 if(CANIM.rampcast){const T=[-0.25,-0.55,-0.55,-0.55,-0.1,0];CANIM.rampcast.k.forEach((k,i)=>{k[3]=T[Math.min(i,T.length-1)];});CANIM.rampcast.d=1.4;}   // v7: slower — slam 0.28 s, longer hold, lift 0.75 s (user: rose too soon after the slam)
