@@ -85,7 +85,8 @@ function snapApply(s,live){
   PROPON=!!s.PB;if(s.PB)for(let i=0;i<PROPS.length;i++)PROPS[i].st=+(s.PB[i]||0);
   if(!NET.isHost){brkParse(s.BK);efsParse(s.EF);bskParse(s.BS);cityParse(s.CB,s.CS);pnlParse(s.PN);}
   if(live){VIEW.prev=VIEW.cur;VIEW.tPrev=VIEW.tCur;VIEW.cur=s;VIEW.tCur=performance.now();VIEW.a=VIEW.ex=null;if(NET.isHost)hbPush(s);}
-  if(s.ev&&!(NET.isHost&&document.hidden))for(const ev of s.ev)fx(ev);   // โฮสต์ย่อแท็บ: ไม่สร้างเอฟเฟกต์ (ไม่มีใครเห็น กันอนุภาคค้างเต็มหน่วยความจำ)
+  if(s.ev&&!(NET.isHost&&document.hidden)&&!window.__novfx)for(const ev of s.ev)fx(ev);   // __novfx: bench only (tools/bench-6v6-ablate novfx)
+    // โฮสต์ย่อแท็บ: ไม่สร้างเอฟเฟกต์ (ไม่มีใครเห็น กันอนุภาคค้างเต็มหน่วยความจำ)
   syncOverlays(s);
 }
 // ---------- บัฟเฟอร์ snapshot (ลูกข่าย, ผู้ใช้ 2026-10-22 "เล่นออนไลน์ให้ลื่น") ----------

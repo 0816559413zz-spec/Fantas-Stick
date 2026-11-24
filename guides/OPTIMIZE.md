@@ -322,6 +322,28 @@ Two more runs with everything (incl. the sliced warm compile): 41.8 fps, p99 59 
 - **12-player WebRTC loopback on Meadow**, two game pages on one machine and ten bots. Both peers received the same 12-player match; sampled windows reported roughly **20 snapshots/s**, host payload **71 KiB/s**, peak send queue **3.8 KiB**, zero trims, and guest max receive gap **56 ms**. This verifies the transport and HUD counters on loopback. Remote Internet timing and the Siege map were outside this test. Synthetic oversized messages also verified trim accounting and encoded byte totals.
 - **First-attack validation after warm-up.** The headless test used to freeze the same animation-frame scheduler that shader warm-up needed. Warm-up now retains the browser scheduler, while the test still drives match frames manually. In a fresh Water Training run after warm-up, 150 basic-attack frames produced **zero new shader programs**, **zero frames over 50 ms**, and **36.3 ms p99** for measured frame work.
 
+## W. What skill VFX cost in a 6v6 fight (2026-11-24)
+
+`node tools/bench-6v6-ablate.js base nofx novfx fcs fcsNofx fcsNovfx` (1080p High, headless NVIDIA, 12 players casting).
+`nofx` = particles/transparent layer (`fxScene`) not drawn; `novfx` = no visuals from host events at all (`window.__novfx`,
+js/19; also drops poses/objects that come with effects).
+
+| run | live fx files (med/max) | particles (med/max) | GPU ms med / p95 | CPU ms med / p95 | draws |
+|---|---|---|---|---|---|
+| meadow base | 31 / 73 | 5682 / 8753 | 9.06 / 13.4 | 17.5 / 28.0 | 488 |
+| meadow nofx | 31 / 72 | 5735 / 8813 | 9.56 / 12.9 | 19.5 / 29.5 | 469 |
+| meadow novfx | 10 / 22 | 3113 / 5819 | 6.39 / 8.6 | 12.3 / 16.9 | 304 |
+| fcs-file base | 28 / 70 | 5715 / 10371 | 14.7 / 18.2 | 19.1 / 38.9 | 610 |
+| fcs-file nofx | 28 / 70 | 5722 / 10344 | 15.4 / 19.4 | 24.6 / 37.5 | 585 |
+| fcs-file novfx | 10 / 18 | 3230 / 6118 | 12.1 / 15.0 | 13.2 / 36.9 | 399 |
+
+Findings:
+- Drawing particles is cheap: FXPass only −0.25–0.3 ms without `fxScene` → half-resolution particles would win little.
+- Skill VFX as a whole = **CPU −5–6 ms median, −11 ms p95 (meadow)**, ~180–210 draws, GPU −2.6 ms mostly in RenderPass
+  (effect meshes in the main scene: fire volumes, ice/rock meshes, rings, bolts), not in the particle layer.
+- The frame is CPU-bound (CPU 17–19 ms vs GPU 9–15 ms) → next: VFX budget + distance LOD (fewer layers/objects when
+  many effects run) and pooling/instancing of the effect meshes; find the heaviest effects with a CPU profile first.
+
 ## Benchmarks
 
 - 2026-11-22, combat readability A/B in Team PvP at 1000×560. All 11 classes cast the same 31 skills in an 80-frame test. The default combat presentation reduced median active particles from 2,650 to 1,220 and peak particles from 3,740 to 1,776. Median frame draw calls were 472 versus 461. Shard Storm's landing warning and active edge and Night Waltz's boundary rendered in both runs. `?fullvfx` keeps the original effects for comparison. This fixture measures effect load, not live match FPS.

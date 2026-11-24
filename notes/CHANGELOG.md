@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-24 — Measured skill VFX cost in 6v6 (guides/OPTIMIZE.md §W): VFX = CPU −5–6 ms median / −11 ms p95, ~190 draws, GPU −2.6 ms (effect meshes, not particles; particle layer only 0.3 ms). Bench: `novfx`/`fcsNovfx` rows (`window.__novfx`), fx/particle counts in tools/bench-6v6.js.
 - 2026-11-24 — **Town kit houses 1.5× bigger.** The 16 town/* houses matched real-life storey heights and looked small next to the game's houses; tools/town-assets.mjs now scales them 1.5× (props, roads, lamps unchanged). town-demo layout adjusted and re-exported.
 - 2026-11-24 — **Map Builder Export pushes the map.** ⬆ Export now also commits and pushes only that map's files (source, room prefabs, exported .json/.glb, its manifest entry) on top of origin/main, without touching other local changes. Play / Game View still only export locally.
 - 2026-11-24 — **Fix: backdrop tree painting showed nothing on big forests.** Tree points over the cap were cut by row order (editor 9,000, game 4,500), so only the top rows of a big forest appeared. Both now thin evenly across the whole backdrop; the editor matches the game's tries per cell and cap, and the Trees brush shows how many trees are painted vs shown.

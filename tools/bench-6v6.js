@@ -24,9 +24,10 @@ for(const pass of WD.composer.passes){const nm=pass.constructor.name,orig=pass.r
   pass.render=function(...a){const q=g2.createQuery();g2.beginQuery(ext.TIME_ELAPSED_EXT,q);try{return orig(...a);}finally{g2.endQuery(ext.TIME_ELAPSED_EXT);pend.push({q,nm,f:frameNo});}};}
 const gpuFrame={};
 function drain(force){for(let i=0;i<pend.length;){const e=pend[i];if(g2.getQueryParameter(e.q,g2.QUERY_RESULT_AVAILABLE)){if(!g2.getParameter(ext.GPU_DISJOINT_EXT)){const ms=g2.getQueryParameter(e.q,g2.QUERY_RESULT)/1e6;(acc[e.nm]||(acc[e.nm]=[])).push(ms);gpuFrame[e.f]=(gpuFrame[e.f]||0)+ms;}g2.deleteQuery(e.q);pend.splice(i,1);}else i++;}}
-const cpu=[],calls=[],tris=[];WD.gl.info.autoReset=false;
+const cpu=[],calls=[],tris=[],fxn=[],pn=[];WD.gl.info.autoReset=false;
 for(let f=0;f<N;f++){frameNo=f;if(O.profile&&f===60)console.profile('b6');if(O.profile&&f===N-60)console.profileEnd('b6');
   for(const p of players){const I=p.inp;I.fire=f%45<5?1:0;if(f===30)I.c.q++;if(f===90)I.c.x++;if(f===180)I.c.e++;if(f===300)I.c.r++;if(f===420)I.c.f++;if(f===520)I.c.q++;}
+  {const R=WD.fx&&WD.fx.R;fxn.push(R?R.inst.length:0);pn.push(WD.PSYS.reduce((a,S)=>a+(S.geo?S.geo.drawRange.count:0),0));}   // live fx-file instances / particles
   WD.gl.info.reset();p0.hp=p0.maxHp;const t=performance.now();HL.step(1);cpu.push(performance.now()-t);calls.push(WD.gl.info.render.calls);tris.push(WD.gl.info.render.triangles);
   for(let r=1;r<REP;r++){WD.gl.shadowMap.needsUpdate=true;WD.taaBegin&&WD.taaBegin();WD.composer.render(1/60);WD.taaFinish&&WD.taaFinish();}
   drain();if(f%20===0)await HL.sleep(0);}
@@ -46,4 +47,4 @@ const pct=(a,p)=>{const s=[...a].sort((x,y)=>x-y);return s.length?+s[Math.min(s.
 const frames=Object.keys(gpuFrame).filter(k=>+k>60).map(k=>gpuFrame[k]/REP);
 const passes={};for(const k of Object.keys(acc))passes[k]={median:pct(acc[k],.5),p95:pct(acc[k],.95)};
 return {map:WD.builtMap||WD.G.map,mode:WD.G.mode,players:players.length,teams:[...new Set(players.map(p=>p.team))].length,res:WD.gl.domElement.width+'x'+WD.gl.domElement.height,rep:REP,quality:WD.QUAL.mode,scale:WD.QUAL.scale,opts:O,
-  gpuMs:{median:pct(frames,.5),p95:pct(frames,.95),max:pct(frames,1),frames:frames.length},passes,cpuMs:{median:pct(cpu,.5),p95:pct(cpu,.95)},drawCalls:pct(calls,.5),tris:Math.round(pct(tris,.5)),triTop:top,big:window.__big,drawTop:topDraws,errors:[...new Set(HL.errs)].slice(0,5)};
+  gpuMs:{median:pct(frames,.5),p95:pct(frames,.95),max:pct(frames,1),frames:frames.length},passes,cpuMs:{median:pct(cpu,.5),p95:pct(cpu,.95)},drawCalls:pct(calls,.5),fxInst:{median:pct(fxn,.5),max:pct(fxn,1)},particles:{median:pct(pn,.5),max:pct(pn,1)},tris:Math.round(pct(tris,.5)),triTop:top,big:window.__big,drawTop:topDraws,errors:[...new Set(HL.errs)].slice(0,5)};
