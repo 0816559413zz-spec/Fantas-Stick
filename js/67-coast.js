@@ -57,6 +57,34 @@ function coastSky(){
 // aerial perspective (user ref 2026-11-24, painted alpine valley): with distance colours cool toward a sky blue but keep their light/shade,
 // so far lit snow stays bright and far shade turns blue • haze = fog colour × BD_AIR.k (per frame) • before the scene fog • chained onto earlier patches
 const BD_AIR={U:{uAirC:{value:new THREE.Color()},uAirD:{value:new THREE.Vector2(180,1400)}},k:[0.62,0.74,0.95],a:0.6};
+// ground detail (user 2026-11-24 "texture ละเอียดขึ้น"): per-pixel world noise on the backdrop land — mottled albedo at 3 / 14 / 70 m,
+// rock strata on steep faces, bump lighting from the same height • fine layers fade with distance (no shimmer) • near = 1: fade in past the
+// play-area detail (grLive/surfApply handle the first ~200 m)
+const BD_DET_V=`vBW=(modelMatrix*vec4(transformed,1.0)).xyz;vBN=normalize(mat3(modelMatrix)*objectNormal);`;
+const BD_DET_F=`varying vec3 vBW;varying vec3 vBN;
+float bdHs(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float bdN(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(bdHs(i),bdHs(i+vec2(1.0,0.0)),f.x),mix(bdHs(i+vec2(0.0,1.0)),bdHs(i+1.0),f.x),f.y);}
+`;
+function bdDetailCol(near){return `float bdH=0.0;{float dd=length(vViewPosition),k0=${near?'smoothstep(90.0,220.0,dd)':'1.0'},k1=(1.0-smoothstep(70.0,280.0,dd))*k0,k2=(1.0-smoothstep(350.0,1700.0,dd))*k0;
+  vec3 p=vBW;float f1=bdN(p.xz*0.33),f2=bdN(p.xz*0.07+3.1),f3=bdN(p.xz*0.014+7.7),st=1.0-smoothstep(0.55,0.82,vBN.y);
+  float bn=bdN(vec2(p.y*0.22+f2*2.5,(p.x+p.z)*0.012)),cr=smoothstep(0.62,0.9,bdN(vec2(p.y*0.05+f3*4.0,(p.x-p.z)*0.03)));
+  float m=(f1-0.5)*0.26*k1+(f2-0.5)*0.30*k2+(f3-0.5)*0.22*k0+st*((bn-0.5)*0.40*k2-cr*0.25*k2);
+  float lum=dot(diffuseColor.rgb,vec3(0.3,0.59,0.11));m*=1.0-0.6*smoothstep(0.45,0.75,lum);   // snow: softer speckle
+  float km=(1.0-smoothstep(500.0,1400.0,dd))*k0,f4=bdN(p.xz*0.15+1.7),bu=smoothstep(0.66,0.86,bdN(p.xz*0.11+f2*0.8))*(1.0-st)*smoothstep(0.6,0.85,vBN.y);   // f4 ~7 m mottling, bu = shrub clumps on gentle grass
+  m+=(f4-0.5)*0.24*km*(1.0-st)-bu*0.42*km;
+  diffuseColor.rgb*=1.0+m;diffuseColor.rgb=mix(diffuseColor.rgb,diffuseColor.rgb*vec3(1.06,1.03,0.9),(f2-0.5)*0.5*k2*(1.0-st));   // grass: warm / cool patches
+  bdH=f1*0.9*k1+f2*5.0*k2+st*(bn*3.0-cr*4.0)*k2+(f4*1.2+bu*2.0)*km;}
+`;}
+const BD_DET_N=`{vec3 dpx=dFdx(-vViewPosition),dpy=dFdy(-vViewPosition);float hx=dFdx(bdH),hy=dFdy(bdH);vec3 r1=cross(dpy,normal),r2=cross(normal,dpx);float det=dot(dpx,r1);
+  if(abs(det)>1e-6){vec3 g=sign(det)*(hx*r1+hy*r2);normal=normalize(abs(det)*normal-g*0.6);}}
+`;
+function bdDetail(m,near){
+  const prior=m.onBeforeCompile,def=THREE.Material.prototype.onBeforeCompile,pk=m.customProgramCacheKey,pkDef=THREE.Material.prototype.customProgramCacheKey;
+  m.onBeforeCompile=function(sh,r){if(prior&&prior!==def)prior.call(this,sh,r);
+    sh.vertexShader='varying vec3 vBW;varying vec3 vBN;\n'+sh.vertexShader.replace('#include <project_vertex>','#include <project_vertex>\n'+BD_DET_V);
+    sh.fragmentShader=BD_DET_F+sh.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\n'+bdDetailCol(near)).replace('#include <normal_fragment_maps>','#include <normal_fragment_maps>\n'+BD_DET_N);};
+  m.customProgramCacheKey=function(){return (pk&&pk!==pkDef?pk.call(this):(prior&&prior!==def?prior.toString().length:''))+'|bddet'+(near?1:0);};
+  return m;}
 function bdAerial(m){
   const prior=m.onBeforeCompile,def=THREE.Material.prototype.onBeforeCompile,pk=m.customProgramCacheKey,pkDef=THREE.Material.prototype.customProgramCacheKey;
   m.onBeforeCompile=function(sh,r){if(prior&&prior!==def)prior.call(this,sh,r);Object.assign(sh.uniforms,BD_AIR.U);
@@ -218,6 +246,7 @@ function bdCoast(id,B){
   lg.setAttribute('color',new THREE.BufferAttribute(col,3));
   const lmat=!hd?new THREE.MeshLambertMaterial({vertexColors:true}):grLive(new THREE.MeshStandardMaterial({vertexColors:true,roughness:0.95,metalness:0}),BD_LOD.live);
   if(hd&&typeof surfApply==='function')surfApply(lmat,true);   // play-area ground detail (js/50 grLive + js/76 surface) — both fade out with camera distance
+  if(!/[?&]nobddet\b/.test(location.search))bdDetail(lmat,hd);   // per-pixel ground detail (?nobddet = off, for A/B)
   bdAerial(lmat);   // distance haze (blue far ridges)
   const lm=new THREE.Mesh(lg,lmat);lm.name='coastLand';lm.onBeforeRender=bdAirTick;g.add(lm);
   // sea (same grid, flat at sea level, sd = distance to the shore for foam / shallow colour)

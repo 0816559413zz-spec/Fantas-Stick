@@ -1,5 +1,5 @@
 {
- "next": 174,
+ "next": 175,
  "items": [
   {
    "id": 171,
@@ -3632,6 +3632,24 @@
     "/shots/bd_alpine_valley.png",
     "/shots/bd_alpine_high.png",
     "/shots/bd_alpine_town.png"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 174,
+   "title": "Backdrop: พื้นละเอียดขึ้น",
+   "text": "ทุกแมพที่มี Backdrop: ลายพื้นวาดราย pixel (ไม่ใช้รูป) — หญ้ามีลายด่าง + กอพุ่มไม้เข้ม, หินชันมีชั้นหิน + รอยแตก, แสงเงานูนต่ำจากลายเดียวกัน • ลายละเอียดจางตามระยะ (ไม่กระพริบ) • ช่วงใกล้แมพยังใช้รายละเอียดเดิม • FPS เท่าเดิมในเทส (30 ทั้งเปิด/ปิด) • ดูเทียบ: before/after • ปิดดูได้ด้วย ?nobddet",
+   "kind": "Map",
+   "who": "Backdrop",
+   "status": "wait",
+   "created": "2026-11-24T17:00:00",
+   "updated": "2026-11-24T17:00:00",
+   "imgs": [],
+   "links": [
+    "/shots/bd_detail_before.png",
+    "/shots/bd_detail_after.png",
+    "/shots/bd_detail_fcs.png"
    ],
    "feedback": "",
    "reply": ""
