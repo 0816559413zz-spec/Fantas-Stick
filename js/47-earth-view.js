@@ -829,23 +829,24 @@ CANIM.ekick={d:0.7,st:0,tr:null,k:[[0.12,-0.9,-0.6,0.1,0.2,-0.9,0.6,0,0.05,'s'],
 SKANIM.ekick='ekick';
 // Stone Mark cast (user 2026-11-24): draw the wand back beside the body (elbow bent, twist back, left arm out for balance) and
 // hold while sand gathers at the tip (0.45 s) → accelerating flick to point forward → hold → small overshoot → settle
-CANIM.stonemark={d:0.95,st:0,tr:[0.47,0.62],k:[[0.2,-0.35,-0.6,0.35,-0.02,-0.7,0.35,0,-0.04,'s'],[0.46,-0.45,-0.65,0.42,-0.03,-0.75,0.4,0,-0.05,'s'],[0.53,-1.6,-0.05,-0.18,0.08,-0.4,0.3,0,-0.02,'i'],[0.75,-1.55,-0.08,-0.15,0.07,-0.4,0.3,0,-0.02,'s'],[0.85,-1.42,-0.1,-0.08,0.05,-0.45,0.32,0,-0.01,'o'],[1,-1.0,-0.2,0,0,-0.4,0.3,0,0,'s']],
-  j:[[0.2,0.3,0.2,0.6,-0.15,0.1,0.1,-0.1],[0.46,0.35,0.25,0.65,-0.18,0.12,0.1,-0.1],[0.53,0.15,0.35,0.4,0.1,-0.25,0.1,-0.1],[1,0.1,0.1,0.4,0,0,0.08,-0.08]]};
+CANIM.stonemark={d:1.15,st:0,tr:[0.52,0.66],k:[[0.18,-0.35,-0.6,0.35,-0.02,-0.7,0.35,0,-0.04,'s'],[0.5,-0.45,-0.68,0.45,-0.03,-0.75,0.4,0,-0.06,'s'],[0.57,-1.6,-0.05,-0.18,0.08,-0.4,0.3,0,-0.02,'i'],[0.78,-1.55,-0.08,-0.15,0.07,-0.4,0.3,0,-0.02,'s'],[0.87,-1.42,-0.1,-0.08,0.05,-0.45,0.32,0,-0.01,'o'],[1,-1.0,-0.2,0,0,-0.4,0.3,0,0,'s']],   // v2: 0.6 s charge (fires at u≈0.52)
+  j:[[0.18,0.3,0.2,0.6,-0.15,0.1,0.1,-0.1],[0.5,0.38,0.25,0.65,-0.18,0.12,0.1,-0.1],[0.57,0.15,0.35,0.4,0.1,-0.25,0.1,-0.1],[1,0.1,0.1,0.4,0,0,0.08,-0.08]]};
 SKANIM.stonemark='stonemark';
 // Stone Mark target look: faint gold rune ring at the feet while marked, one rock stuck to the body per layer (pops in),
 // petrified = every body mesh swaps to a grey stone material until it ends
-const ESTN={geo:null,mat:null,body:null,ring:null,slots:[[0.24,1.2,0.16],[-0.27,1.48,0.06],[0.2,0.62,0.18],[-0.2,0.34,-0.12],[0.04,1.8,-0.2]]};
+const ESTN={geo:null,mat:null,body:null,ring:null,slots:[[0.3,1.2,0.18],[-0.33,1.5,0.06],[0.25,0.62,0.2],[-0.25,0.34,-0.14],[0.05,1.86,-0.25]]};
 function earthStoneVis(v,dt,now){for(const p of v.P||[])eStoneUpd(PM3.get(p.id),p.stn|0,dt,now);for(const e of v.E||[])eStoneUpd(EM3.get(e.id),e.stn|0,dt,now);}
 function eStoneUpd(o,n,dt,now){if(!o||!o.g)return;let S=o.estn;if(!n&&(!S||!S.on))return;
-  if(!ESTN.geo){ESTN.geo=new THREE.IcosahedronGeometry(0.17,0);ESTN.mat=new THREE.MeshStandardMaterial({color:'#9c8a6c',roughness:1,flatShading:true});
-    ESTN.body=new THREE.MeshStandardMaterial({color:'#8d877c',roughness:1,metalness:0,flatShading:true});ESTN.ring=new THREE.MeshBasicMaterial({color:'#ffcf6a',transparent:true,opacity:0.3,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
+  if(!ESTN.geo){ESTN.geo=new THREE.IcosahedronGeometry(0.25,0);ESTN.mat=new THREE.MeshStandardMaterial({color:'#9c8a6c',roughness:1,flatShading:true});
+    ESTN.body=new THREE.MeshStandardMaterial({color:'#8d877c',roughness:1,metalness:0,flatShading:true});ESTN.ring=new THREE.MeshBasicMaterial({color:'#e3a53c',transparent:true,opacity:0.75,depthWrite:false,side:THREE.DoubleSide,toneMapped:false});ESTN.sig=new THREE.MeshStandardMaterial({color:'#e9b44c',emissive:'#a8661a',emissiveIntensity:0.6,roughness:0.5,flatShading:true});ESTN.sig.userData.keep=true;
     for(const m of [ESTN.mat,ESTN.body,ESTN.ring])m.userData.keep=true;}
   if(!S){S=o.estn={g:new THREE.Group(),r:[],pet:false,on:false};S.g.userData.estn=1;o.g.add(S.g);
     for(let i=0;i<ESTN.slots.length;i++){const m=new THREE.Mesh(ESTN.geo,ESTN.mat);m.userData.estn=1;m.castShadow=true;m.position.set(...ESTN.slots[i]);m.rotation.set(i*1.3,i*2.1,i*0.7);m.scale.setScalar(0.001);m.userData.k=0;S.g.add(m);S.r.push(m);}
-    const rg=new THREE.Mesh(new THREE.RingGeometry(0.42,0.52,32),ESTN.ring);rg.userData.estn=1;rg.rotation.x=-Math.PI/2;rg.position.y=0.05;S.g.add(rg);S.ring=rg;}
+    const rg=new THREE.Mesh(new THREE.RingGeometry(0.42,0.52,32),ESTN.ring);rg.userData.estn=1;rg.rotation.x=-Math.PI/2;rg.position.y=0.05;S.g.add(rg);S.ring=rg;
+    const sg=new THREE.Mesh(new THREE.OctahedronGeometry(0.17,0),ESTN.sig);sg.userData.estn=1;sg.scale.set(0.8,1.3,0.8);sg.position.y=2.45;S.g.add(sg);S.sig=sg;}   // mark sigil: small gold stone diamond spinning above the head
   S.on=n>0;const mk=n%10,pet=n>=10,lay=pet?ESTN.slots.length:Math.max(0,mk-1);
   S.r.forEach((m,i)=>{const want=i<lay?1:0;m.userData.k+=(want-m.userData.k)*Math.min(1,dt*16);const k=m.userData.k;m.visible=k>0.02;m.scale.setScalar(Math.max(0.001,k*(1.15+0.25*Math.max(0,1-k)*4)*(0.85+0.12*i%3)));});
-  S.ring.visible=mk>0;S.ring.scale.setScalar(1+0.06*Math.sin(now/240));
+  S.ring.visible=mk>0;S.ring.scale.setScalar(1+0.06*Math.sin(now/240));S.sig.visible=mk>0;S.sig.rotation.y=now/400;S.sig.position.y=2.45+0.06*Math.sin(now/300);S.sig.scale.setScalar(1+0.08*Math.max(0,lay));
   if(pet!==S.pet){S.pet=pet;o.g.traverse(m=>{if(!m.isMesh||m.userData.estn)return;
     if(pet){const M=m.material;if(Array.isArray(M)||M.transparent||M.blending===THREE.AdditiveBlending)return;m.userData.estnOm=M;m.material=ESTN.body;}
     else if(m.userData.estnOm){m.material=m.userData.estnOm;delete m.userData.estnOm;}});}}
@@ -1047,8 +1048,10 @@ function earthEfx(ev){
     // ----- Tectonic Crush -----
     case 'ewallup':shake(0.35);if(near)snd('boom',ev);return true;
     case 'esmc':{const o=PM3.get(ev.id);if(!o||!o.tip)return true;if(near)snd('whoosh',{x,y,vol:0.25});   // sand gathers at the wand tip during the charge
-      eAnim({life:0.45,fn(){if(!o.tip)return;const w=o.tip.getWorldPosition(new THREE.Vector3()),q=simOf(w),gh=GY(q.x,q.y);
-        for(let k=0;k<3;k++){const a=Math.random()*6.28,r=10+Math.random()*10,dh=(Math.random()-0.5)*1.1,T=0.22;PARTS.push({x:q.x+Math.cos(a)*r,y:q.y+Math.sin(a)*r,h:w.y-gh+dh,vx:-Math.cos(a)*r/T,vy:-Math.sin(a)*r/T,vh:-dh/T,life:T,max:T,col:k?'#ffd27a':'#c9a36a',size:1.6,g:0});}}});return true;}
+      const orb=new THREE.Mesh(new THREE.IcosahedronGeometry(1,1),new THREE.MeshBasicMaterial({color:'#ffe08a',toneMapped:false}));scene.add(orb);
+      eAnim({life:SMARK.v.charge,end(){orb.geometry.dispose();orb.material.dispose();scene.remove(orb);},fn(a){if(!o.tip)return;const w=o.tip.getWorldPosition(new THREE.Vector3()),q=simOf(w),gh=GY(q.x,q.y),u=Math.min(1,a.t/SMARK.v.charge);
+        orb.position.copy(w);orb.scale.setScalar(0.02+0.09*u*u+0.01*Math.sin(a.t*40));
+        for(let k=0;k<4;k++){const a=Math.random()*6.28,r=10+Math.random()*10,dh=(Math.random()-0.5)*1.1,T=0.22;PARTS.push({x:q.x+Math.cos(a)*r,y:q.y+Math.sin(a)*r,h:w.y-gh+dh,vx:-Math.cos(a)*r/T,vy:-Math.sin(a)*r/T,vh:-dh/T,life:T,max:T,col:k?'#ffd27a':'#c9a36a',size:1.6,g:0});}}});return true;}
     case 'esmf':{const V3=(a=0,b=0,c=0)=>new THREE.Vector3(a,b,c),o=ev.id!=null?PM3.get(ev.id):null;if(o&&o.g)o.g.updateMatrixWorld(true);
       const st=o&&o.tip?o.tip.getWorldPosition(V3()):eW(ev.x,ev.y,ev.h),end=eW(ev.x2,ev.y2,ev.h2);
       // instant spell line with a few sharp kinks (not straight, "breaks itself a little"); solid gold-brown body + bright core, fades in 0.3 s
@@ -1058,7 +1061,7 @@ function earthEfx(ev){
       const g=new THREE.Group(),mc=new THREE.MeshBasicMaterial({color:'#fff0b8',transparent:true,toneMapped:false}),mo=new THREE.MeshBasicMaterial({color:'#b5802f',transparent:true,opacity:0.85,depthWrite:false});
       const core=new THREE.Mesh(new THREE.TubeGeometry(path,K*8,0.05,6,false),mc),outer=new THREE.Mesh(new THREE.TubeGeometry(path,K*8,0.11,6,false),mo);
       for(const m of [core,outer]){m.frustumCulled=false;g.add(m);}scene.add(g);
-      eAnim({g,life:0.32,end(){g.traverse(m=>{if(m.geometry)m.geometry.dispose();});mc.dispose();mo.dispose();scene.remove(g);},fn(a){const f=Math.max(0,1-a.t/0.32);mc.opacity=f;mo.opacity=0.85*f*f;}});
+      eAnim({g,life:0.85,end(){g.traverse(m=>{if(m.geometry)m.geometry.dispose();});mc.dispose();mo.dispose();scene.remove(g);},fn(a){const f=a.t<0.5?1:Math.max(0,1-(a.t-0.5)/0.35);mc.opacity=f;mo.opacity=0.85*f*f;}});
       for(let i=1;i<K;i++){const q=simOf(kink[i]);burst(q.x,q.y,ECOL.dust,3,60,0.35,1.8,{h:kink[i].y-GY(q.x,q.y),vh:[-0.5,1],g:2});}
       const H2=ev.h2-0;burst(ev.x2,ev.y2,'#ffd27a',ev.hit?14:6,160,0.4,2.2,{h:H2,vh:[0,2],g:3});if(ev.hit){eChunks(ev.x2,ev.y2,H2,5,140,6,0.14);ring(ev.x2,ev.y2,'#ffcf6a',34,0.3,Math.max(0.1,H2-1));}
       if(near)snd('zap',{x,y,vol:0.35});if(mine)shake(0.12);return true;}

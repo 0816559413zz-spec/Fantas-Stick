@@ -190,9 +190,9 @@ function earthStoneAim(p,range=60,origin=2){
 const STONEB={v:{delay:0.45,knock:1800,wallDmg:20,wallStun:1,env:40}};
 // ---------- สกิล 1: Stone Mark — ชาร์จไม้สั้น ๆ แล้วยิงเส้นสเปลหัก ๆ ถึงทันที (ไม่ใช่กระสุน) มาร์คศัตรูคนแรก ไม่มีดาเมจ
 // ศัตรูที่โดนมาร์ค: หินทุกก้อนที่โดน (BA วงหิน / Stone Barrage / หินถีบ) เกาะตัว 1 ชั้น (ชั้นละ 4 วิ) • ครบ 5 = กลายเป็นหินทั้งตัว 1 วิ แล้วมาร์คหาย
-const SMARK=defSpell(EARTH,{id:'stonemark',v:{charge:0.45,len:900,w:18,mark:6,win:4,need:5,stone:1},
+const SMARK=defSpell(EARTH,{id:'stonemark',v:{charge:0.6,len:900,w:18,mark:6,win:4,need:5,stone:1},
   vn:{charge:'ชาร์จก่อนยิง (วิ)',len:'ระยะ',w:'กว้างเส้น',mark:'มาร์คอยู่ (วิ)',win:'หินแต่ละชั้นอยู่ (วิ)',need:'ชั้นที่กลายเป็นหิน',stone:'กลายเป็นหิน (วิ)'},
-  role:'control',n:'Stone Mark',ic:'🪨',cd:8,d:'ชาร์จไม้ 0.45 วิ แล้วยิงเส้นสเปลหัก ๆ ถึงทันที ระยะ 900 มาร์คศัตรูคนแรก 6 วิ (ไม่มีดาเมจ)',fx:'ศัตรูที่โดนมาร์ค: หินที่ปาโดนเกาะตัวทีละชั้น (ชั้นละ 4 วิ) • ครบ 5 ชั้น = กลายเป็นหินทั้งตัว ขยับไม่ได้ 1 วิ แล้วมาร์คหาย',
+  role:'control',n:'Stone Mark',ic:'🪨',cd:8,d:'ชาร์จไม้ 0.6 วิ แล้วยิงเส้นสเปลหัก ๆ ถึงทันที ระยะ 900 มาร์คศัตรูคนแรก 6 วิ (ไม่มีดาเมจ)',fx:'ศัตรูที่โดนมาร์ค: หินที่ปาโดนเกาะตัวทีละชั้น (ชั้นละ 4 วิ) • ครบ 5 ชั้น = กลายเป็นหินทั้งตัว ขยับไม่ได้ 1 วิ แล้วมาร์คหาย',
   cast(p,S){if(p.aug||p.ramp||p.wr||p.esm)return false;const c=p.esm={at:G.time};
     emit({k:'efx',z:'esmc',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});
     G.strikes.push({x:p.x,y:p.y,t:S.v.charge,fn(){if(p.esm!==c)return;p.esm=null;if(p.alive&&!p.downed)earthMarkFire(p);}});}});
