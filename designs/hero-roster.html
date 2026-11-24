@@ -1,0 +1,119 @@
+<title>Fantas Stick Heroes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;700;800&family=IBM+Plex+Sans+Thai:wght@400;600&display=swap">
+<style>
+/* layout: world premise strip, then a grid of 9 hero dossiers; each dossier is tinted by its element and
+   shows silhouette hook, palette chips, weapon and how the existing kit reads as tech */
+:root{
+  --ink:#101217; --panel:#181b23; --line:#2b313d; --text:#eceef3; --mute:#9aa1b0;
+  --f-display:"Kanit","Leelawadee UI",Tahoma,sans-serif;
+  --f-body:"IBM Plex Sans Thai","Leelawadee UI",Tahoma,sans-serif;
+  color-scheme:dark;
+}
+body{background:var(--ink);color:var(--text);font:15px/1.6 var(--f-body)}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{padding-block:32px 8px}
+.eyebrow{font:600 12px var(--f-display);letter-spacing:.18em;text-transform:uppercase;color:var(--mute)}
+h1{font:800 clamp(30px,5vw,50px)/1.05 var(--f-display);margin:6px 0 0;text-wrap:balance}
+.lead{color:#c8ccd6;max-width:70ch;margin:12px 0 0}
+.premise{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:22px 0 8px}
+.premise div{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.premise b{display:block;font:600 15px var(--f-display);margin-bottom:4px}
+.premise p{margin:0;color:var(--mute);font-size:14px}
+h2{font:700 24px var(--f-display);margin:30px 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;padding-bottom:12px}
+.hero{min-width:0;position:relative;border-radius:14px;overflow:hidden;border:1px solid color-mix(in srgb,var(--c) 45%,var(--line));
+  background:linear-gradient(160deg,color-mix(in srgb,var(--c) 22%,var(--ink)) 0,var(--panel) 46%)}
+.hero .top{padding:18px 18px 10px;display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:start}
+.handle{font:800 34px/1 var(--f-display);letter-spacing:.02em;color:var(--c);margin:0}
+.el{font:600 12px var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);text-align:right}
+.who{grid-column:1/-1;color:#d6d9e1;font-size:14px}
+.chips{display:flex;gap:6px;padding:0 18px 12px}
+.chips span{width:26px;height:14px;border-radius:4px;border:1px solid rgba(255,255,255,.18)}
+.quote{margin:0 18px 12px;padding-left:12px;border-left:3px solid var(--c);color:#e4e6ec;font-style:italic;font-size:14px}
+dl{margin:0;padding:4px 18px 16px;display:grid;grid-template-columns:96px 1fr;gap:8px 12px}
+dt{font:600 13px var(--f-display);color:var(--c)}
+dd{margin:0;font-size:14px;color:#cfd2da;min-width:0}
+.kit{margin:0 18px 18px;border-top:1px dashed color-mix(in srgb,var(--c) 40%,var(--line));padding-top:12px}
+.kit b{font:600 13px var(--f-display);color:var(--mute);letter-spacing:.08em}
+.kit ul{margin:6px 0 0;padding-left:18px;font-size:13.5px;color:#c4c8d2}
+.kit li{margin:3px 0}
+.kit em{font-style:normal;color:var(--text)}
+.notes{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin-bottom:40px}
+.notes ul{margin:6px 0 0;padding-left:20px;color:#c8ccd6}
+.notes li{margin:5px 0}
+</style>
+
+<header class="wrap">
+  <div class="eyebrow">Hero roster · ร่าง v1</div>
+  <h1>ฮีโร่ Fantas Stick</h1>
+  <p class="lead">เลิกธีมพ่อมด เปลี่ยนเป็นฮีโร่ 9 คน คนละอาชีพ คนละเงาตัว พลังธาตุมาจากชุดและอุปกรณ์ที่ใช้พลังงาน "แกนธาตุ" ไม่ใช่เวทมนตร์ สกิลและ VFX ในเกมใช้ของเดิมได้เกือบทั้งหมด เปลี่ยนแค่เหตุผลในเรื่องและหน้าตาตัวละคร</p>
+  <div class="premise">
+    <div><b>โลก</b><p>เมืองยุคใกล้อนาคตที่สร้างทับซากป้อมเก่า พลังงานทั้งเมืองมาจากผลึก "แกนธาตุ" ที่ขุดได้ใต้ป้อม</p></div>
+    <div><b>ทำไมต้องบุกปราสาท</b><p>แกนในโหมดบุกปราสาทคือเครื่องปฏิกรณ์แกนธาตุ ฝ่ายบุกต้องทำลายให้ได้ ฝ่ายรับต้องรักษาไว้ ใช้กติกาโหมดเดิมได้ทั้งหมด</p></div>
+    <div><b>ฮีโร่มาจากไหน</b><p>คนธรรมดาหลายอาชีพที่ได้ชุดหรืออุปกรณ์แกนธาตุ เช่น นักบินผาดโผน นักดำน้ำกู้ซาก หรือคนงานเหมือง แต่ละคนใช้ธาตุตามงานของตัวเอง</p></div>
+    <div><b>สไตล์ภาพ</b><p>สัดส่วนเกินจริง มือ เท้า และไหล่ใหญ่ ลงสีแบบมือวาด ใช้สีหลักคนละ 1–2 สีและมีจุดเรืองแสงเป็นสีธาตุ ดูแค่เงาตัวต้องรู้ว่าเป็นใคร</p></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h2>รายชื่อฮีโร่ 9 คน</h2>
+  <div class="grid" id="grid"></div>
+  <h2>สิ่งที่เปลี่ยนในเกมถ้าใช้แนวนี้</h2>
+  <div class="notes"><ul>
+    <li><b>เหมือนเดิม:</b> กลไกสกิล ตัวเลข และ VFX ธาตุส่วนใหญ่ เพราะยังเป็นไฟ น้ำแข็ง สายฟ้า ฯลฯ เหมือนเดิม</li>
+    <li><b>เปลี่ยน:</b> โมเดลตัวละครจาก "นักเรียน 1 ตัว" เป็น "ฮีโร่ 9 ตัว" และเปลี่ยนไม้กายสิทธิ์เป็นอาวุธประจำตัว ท่าร่ายบางท่าต้องปรับให้เข้ากับอาวุธ เช่น ยิงจากแขนปืน หรือสั่งโดรน</li>
+    <li><b>ตัดออก:</b> บ้าน 4 หลัง ตราบ้าน และหน้าสร้างตัวละครแบบพ่อมด ใช้สีทีมแดง/ฟ้าแทน ส่วนการแต่งตัวเปลี่ยนเป็นสกินของแต่ละฮีโร่</li>
+    <li><b>สายคำสาปกับสายอัญเชิญ</b> (ซ่อนอยู่) ยังไม่ได้ออกแบบฮีโร่ให้ ทำทีหลังถ้าจะเปิดใช้</li>
+    <li><b>ยังเป็นร่าง:</b> ชื่อ อายุ และเรื่องราวเป็นตัวเลือกแรก แก้ได้ทั้งหมด ภาพจริงต้องให้คนวาดคอนเซปต์ตามการ์ดนี้</li>
+  </ul></div>
+</main>
+
+<script>
+const H=[
+ {h:'FLARE',el:'ไฟ · Pyro',c:'#ff6a2b',pal:['#ff6a2b','#2b2522','#f2c14e'],who:'นักบินผาดโผนสายเอ็กซ์ตรีม อายุ 24',q:'"ถ้าไม่ร้อน ก็ไม่ใช่โชว์"',
+  sil:'เจ็ตแพ็กไอพ่นคู่บนหลัง กับผ้าพันคอกันไฟยาวปลายไหม้',wpn:'ปืนพลุติดแขนขวา ยิงแบบรัวเบา ๆ หรือชาร์จเป็นลูกไฟใหญ่',per:'ขี้โม้ ชอบเล่นให้คนดู แต่ไม่เคยทิ้งเพื่อน',
+  mode:'บุก: บินข้ามกำแพงไปวางวงไฟปิดทางฝ่ายรับ',
+  kit:[['Kindle','จุดไอพ่นดีดตัวขึ้นแล้วร่อนลง'],['Dragonfall','ไอพ่นเต็มกำลัง บินสั้น ๆ แล้วพุ่งกระแทกพื้น'],['Ring of Embers','ยิงพลุลงพื้นเป็นวงเพลิง'],['Inferno Nova (อัลติ)','ปลดล็อกเตาปฏิกรณ์ในชุด ระเบิดไฟรอบตัว']]},
+ {h:'TUNDRA',el:'น้ำแข็ง · Frost',c:'#7fd6f5',pal:['#e8f4fa','#7fd6f5','#24324a'],who:'อดีตหน่วยคุ้มกันสถานีขั้วโลก อายุ 31',q:'"ยืนให้มั่น แล้วอย่าถอย"',
+  sil:'เกราะไหล่ข้างเดียวใหญ่มาก มีผลึกงอก และปกขนสัตว์หนา',wpn:'ดาบแช่เย็นที่แปลงร่างได้: ดาบ ↔ ปืนยิงแท่งน้ำแข็ง (ปุ่ม V เดิม)',per:'พูดน้อย ใจเย็น ปกป้องทีมเป็นอันดับแรก',
+  mode:'รับ: ยืนหน้าประตู ทำพื้นน้ำแข็งชะลอฝ่ายบุก',
+  kit:[['Frostforge','ดาบขยายเป็นขวานผลึก'],['Permafrost','ปักดาบลงพื้น แช่แข็งรอบตัว'],['Cryo Shell','ชุดปิดผนึกตัวเป็นแคปซูลน้ำแข็ง'],['Mirror Legion (อัลติ)','ปล่อยโดรนดาบน้ำแข็ง 2 ลำฟันตาม']]},
+ {h:'VOLTA',el:'สายฟ้า · Storm',c:'#ffd23f',pal:['#ffd23f','#1c1d22','#5fd0ff'],who:'คนส่งของความเร็วสูงใต้ดิน อายุ 19',q:'"ส่งถึงก่อนเธอกะพริบตา"',
+  sil:'เป้คอยล์ไฟฟ้า มีแท่งเสาอากาศ 3 แท่งชี้ขึ้น และผมชี้ตั้ง',wpn:'ถุงมือเทสลา ปล่อยลำไฟฟ้าระยะใกล้ (BA เดิม) และพับเป็นธนูรางยิงไกลได้',per:'ใจร้อน พูดเร็ว แข่งกับทุกคน',
+  mode:'บุก: Dash 3 ชาร์จทะลุแนวรับ ไล่เก็บคนอ่อนแรง',
+  kit:[['Dash','เร่งคอยล์พุ่งทะลุศัตรู'],['ธนูสายฟ้า','ประกอบธนูรางจากถุงมือแล้วยิงไกล'],['ออร์บคู่','ปล่อยโดรนออร์บเล็ก 2 ลูก'],['ร่างเทพสายฟ้า (อัลติ)','โอเวอร์คล็อกชุดจนร่างกลายเป็นไฟฟ้า']]},
+ {h:'BRAMBLE',el:'ธรรมชาติ · Nature',c:'#6cc24a',pal:['#6cc24a','#efe6cf','#7a4f2a'],who:'วิศวกรพฤกษศาสตร์ประจำโรงเรือน อายุ 27',q:'"ปลูกตรงนี้ เดี๋ยวมันดูแลเราเอง"',
+  sil:'เป้โรงเรือนแก้วใบใหญ่บนหลัง ข้างในมีต้นไม้เรืองแสง และหมวกปีกกว้าง',wpn:'ปืนยิงเมล็ด และแส้เถาไฟเบอร์ (BA ฟาดกรวยหน้าเดิม)',per:'อารมณ์ดี ชอบคุยกับต้นไม้ แต่วางแผนเก่ง',
+  mode:'รับ: ปลูกป้อมยิงและกำแพงไม้ ยึดห้องข้างเป็นฐาน',
+  kit:[['ป้อมฝักหนาม','ปลูกฝักป้อมยิงอัตโนมัติ'],['ดอกบัว','วางดอกไม้ฮีลจากเป้'],['กำแพงไม้','ยิงเมล็ดโตเร็วเป็นกำแพง'],['ต้นไม้โลก (อัลติ)','เทเมล็ดทั้งโรงเรือนลงพื้น ต้นยักษ์คุ้มกันทีม']]},
+ {h:'GRIT & BOULDER',el:'ดิน · Earth',c:'#c8935a',pal:['#c8935a','#3a3230','#f0b13a'],who:'คนงานเหมืองตัวเล็ก กับหุ่นขุดหินรีโมต อายุ 35',q:'"บูลเดอร์ ทุบ!"',
+  sil:'ตัวคนเตี้ยล่ำ มีหุ่นหินตัวใหญ่ลอยอยู่ข้างหลัง ดูเงาก็รู้ทันทีว่าเป็นคู่',wpn:'รีโมตบังคับหุ่น และค้อนเหมืองไว้ใช้เองตอนหุ่นพัง',per:'ปากร้ายใจดี รักหุ่นเหมือนลูก',
+  mode:'บุก: หุ่นทุบกำแพงและสร้างกำแพงหินบังให้ทีมเดินเข้า',
+  kit:[['Stand (หุ่น)','Stand เดิมกลายเป็นหุ่นขุดหิน Boulder'],['Tectonic Crush','หุ่นดึงพื้นขึ้นเป็นกำแพงคู่'],['Terra Auger','หุ่นหมุนสว่านแล้วพุ่งลง'],['Wrath (อัลติ)','หุ่นยกเสาหินแล้วปาลงจุดที่เลือก']]},
+ {h:'KESTREL',el:'ลม · Wind',c:'#8ef0c4',pal:['#8ef0c4','#f4f6f2','#2f3a3a'],who:'นักแข่งวิงสูทลอยฟ้า อายุ 22',q:'"ข้างบนไม่มีไฟแดง"',
+  sil:'ปีกกลแผ่นขนนกโลหะพับไว้บนหลังเหมือนใบมีด และแว่นนักบิน',wpn:'ปีกยิงขนนกโลหะ (BA เดิมยิงจากปีก) และสนับแขนควบคุมลม',per:'อิสระ ไม่ชอบกฎ ช่วยเพื่อนแบบไม่พูดเยอะ',
+  mode:'บุก: บินเข้าทางสูง สร้างร่องลมให้ทีมวิ่งเร็วขึ้น',
+  kit:[['Featherwing','กางปีกกลบิน 5 วิ'],['Plume Volley','ยิงขนนกโลหะรัวจากปีกทั้งสองข้าง'],['Tailwind','พ่นร่องลมให้ทีม'],['Sonic Boom Strike (อัลติ)','ทะลวงกำแพงเสียงทั้งตัว']]},
+ {h:'MARLIN',el:'น้ำ · Water',c:'#3fa1ff',pal:['#3fa1ff','#163a4f','#c79a4a'],who:'นักดำน้ำกู้ซากเรือ อายุ 29',q:'"ใจเย็น ๆ น้ำมีแรงกว่าที่คิด"',
+  sil:'หมวกดำน้ำทองเหลืองครึ่งหน้า สายยางขดพันตัว และถังน้ำบนหลัง',wpn:'ปืนแรงดันน้ำ ยิงเข็มน้ำ 3 นัด และโดรนงูทะเล',per:'สุขุม ตลกแห้ง ๆ ชอบเล่าเรื่องเรือจม',
+  mode:'ทุกทาง: ใช้คลื่นผลักคนออกจากแกน หรือขังคนในฟองน้ำ',
+  kit:[['Riptide','ปล่อยน้ำจากถังเป็นคลื่นยักษ์'],['Tidecaller Orb','ปล่อยโดรนงูทะเลยิงตาม'],['Abyssal Beam','เปิดวาล์วเต็มที่ ยิงลำน้ำแรงดันสูง'],['Dragon of the Deep (อัลติ)','ประกอบน้ำทั้งถังเป็นหุ่นมังกรน้ำ']]},
+ {h:'PRISM',el:'แสง · Light',c:'#ffe7a3',pal:['#ffe7a3','#fbfaf4','#c9a24a'],who:'แพทย์สนามที่เคยเป็นนักแสดงโชว์แสง อายุ 26',q:'"อยู่ใกล้ฉันไว้ เดี๋ยวสว่างเอง"',
+  sil:'วงแหวนโดรนคริสตัลลอยเป็นรัศมีหลังตัว และเสื้อโค้ทขาวยาว',wpn:'คทาเลนส์ยิงลำแสง (Prism Ray เดิม) และโดรนคริสตัลที่ส่งให้เพื่อนได้',per:'อบอุ่น มั่นใจ ชอบเป็นจุดสนใจ แต่คอยดูแลทุกคน',
+  mode:'ซัพพอร์ต: ผูกคู่หูแล้วตามดันเข้าแกนด้วยกัน',
+  kit:[['Crystal Bond','ส่งโดรนคริสตัลไปลิงก์กับเพื่อน'],['Sanctum Crystal','ปักโดรนฮีลลงพื้น'],['Light Step','วาร์ปด้วยการหักเหแสงไปหาคู่หู'],['Radiant Sovereign (อัลติ)','รวมโดรนทุกลำเป็นร่างแสงยักษ์เหนือคู่หู']]},
+ {h:'NOCT',el:'ความมืด · Darkness',c:'#a77bff',pal:['#a77bff','#141118','#d9d4e6'],who:'เจ้าหน้าที่ลับหน่วยลบร่องรอย อายุ ?',q:'"ติดตราแล้ว หนีไม่พ้นหรอก"',
+  sil:'โค้ทยาวชายไม่เท่ากัน และเคียวพับได้สะพายหลังเป็นทรงเสี้ยว',wpn:'เคียวพับนาโน และควันนาไนต์ที่พาตัวไปได้ (ร่างลูกเงาเดิม)',per:'เงียบ เย็นชา มีอารมณ์ขันมืด ๆ',
+  mode:'บุก: อ้อมทางลับเข้าไปติดตราคนเฝ้าแกน แล้วไล่ฟัน',
+  kit:[['Death Sentence','ปาคลื่นเคียวติดตราเป้า'],['Nightfall','พุ่งไล่เป้าที่ติดตราแล้วฟัน 3 ครั้ง'],['Umbral Veil','ปล่อยควันนาไนต์ซ่อนเพื่อน'],['Maw of the Abyss (อัลติ)','ปล่อยฝูงนาไนต์เป็นสัตว์เงางับ']]}
+];
+const esc=t=>String(t).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+document.getElementById('grid').innerHTML=H.map(x=>`<article class="hero" style="--c:${x.c}">
+  <div class="top"><h3 class="handle">${esc(x.h)}</h3><div class="el">${esc(x.el)}</div><div class="who">${esc(x.who)}</div></div>
+  <div class="chips">${x.pal.map(p=>`<span style="background:${p}" title="${p}"></span>`).join('')}</div>
+  <p class="quote">${esc(x.q)}</p>
+  <dl><dt>เงาตัวเด่น</dt><dd>${esc(x.sil)}</dd><dt>อาวุธ</dt><dd>${esc(x.wpn)}</dd><dt>นิสัย</dt><dd>${esc(x.per)}</dd><dt>ในโหมดบุกปราสาท</dt><dd>${esc(x.mode)}</dd></dl>
+  <div class="kit"><b>สกิลเดิม → เหตุผลแบบเทค</b><ul>${x.kit.map(([a,b])=>`<li><em>${esc(a)}</em>: ${esc(b)}</li>`).join('')}</ul></div>
+</article>`).join('');
+</script>

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<title>Character style sketches</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mali:wght@400;600&display=swap">
+<style>html,body{margin:0;background:#e9e4d8}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1600" height="1060"></canvas>
+<script>
+// Hand-drawn sheet: 4 character style directions (front view + silhouette test + notes).
+const cv=document.getElementById('c'),g=cv.getContext('2d');
+let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
+const j=a=>(rnd()-.5)*2*a;
+const INK={pencil:'#34333a',soft:'#6a6870',paper:'#f4efe2',grid:'rgba(90,120,160,.12)',red:'#b3262b',blue:'#1f4fa8',green:'#2f7a3a'};
+
+function stroke(c,pts,col,w,passes=2,amp=1,close=false){
+  if(close)pts=[...pts,pts[0]];
+  for(let p=0;p<passes;p++){
+    c.beginPath();c.strokeStyle=col;c.lineWidth=w*(p?0.65:1);c.lineCap='round';c.lineJoin='round';c.globalAlpha=p?0.45:0.92;
+    for(let i=0;i<pts.length-1;i++){
+      const [x1,y1]=pts[i],[x2,y2]=pts[i+1],L=Math.hypot(x2-x1,y2-y1),n=Math.max(1,Math.round(L/28));
+      if(i===0)c.moveTo(x1+j(amp),y1+j(amp));
+      for(let k=1;k<=n;k++){const t=k/n,mx=x1+(x2-x1)*(t-.5/n),my=y1+(y2-y1)*(t-.5/n);
+        c.quadraticCurveTo(mx+j(amp*1.4),my+j(amp*1.4),x1+(x2-x1)*t+j(amp),y1+(y2-y1)*t+j(amp));}
+    }
+    c.stroke();
+  }
+  c.globalAlpha=1;
+}
+// smooth closed blob through points (fill), then sketchy outline
+function blob(c,pts,fill,col=INK.pencil,w=2.4){
+  if(fill){c.beginPath();const n=pts.length;
+    for(let i=0;i<=n;i++){const a=pts[i%n],b=pts[(i+1)%n],m=[(a[0]+b[0])/2,(a[1]+b[1])/2];i?c.quadraticCurveTo(a[0],a[1],m[0],m[1]):c.moveTo(m[0],m[1]);}
+    c.fillStyle=fill;c.fill();}
+  if(col){const sm=[];const n=pts.length;for(let i=0;i<n;i++){const a=pts[i],b=pts[(i+1)%n];sm.push(a,[(a[0]+b[0])/2,(a[1]+b[1])/2]);}stroke(c,sm,col,w,2,1.1,true);}
+}
+function ell(c,x,y,rx,ry,fill,col=INK.pencil,w=2.4,rot=0){const p=[];for(let i=0;i<20;i++){const a=i/20*Math.PI*2,cx=Math.cos(a)*rx,cy=Math.sin(a)*ry;p.push([x+cx*Math.cos(rot)-cy*Math.sin(rot),y+cx*Math.sin(rot)+cy*Math.cos(rot)]);}blob(c,p,fill,col,w);}
+function hatch(c,pts,col,gap=7,al=.35){c.save();c.beginPath();pts.forEach((p,i)=>i?c.lineTo(...p):c.moveTo(...p));c.closePath();c.clip();
+  const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]),x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  c.globalAlpha=al;for(let x=x0-(y1-y0);x<x1;x+=gap)stroke(c,[[x,y1],[x+(y1-y0)*.8,y0]],col,1.1,1,.6);c.restore();}
+function txt(s,x,y,{size=15,col=INK.pencil,bold=0,align='left',rot=0}={}){g.save();g.translate(x,y);g.rotate(rot+j(.008));g.fillStyle=col;g.textAlign=align;g.font=(bold?'600 ':'400 ')+size+'px Mali';g.fillText(s,0,0);g.restore();}
+function wand(c,x1,y1,x2,y2,col='#6b4a2e'){stroke(c,[[x1,y1],[x2,y2]],col,5,2,.6);}
+function star(c,x,y,r,col){const p=[];for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.45:r;p.push([x+Math.cos(a)*rr,y+Math.sin(a)*rr]);}c.beginPath();p.forEach((q,i)=>i?c.lineTo(...q):c.moveTo(...q));c.closePath();c.fillStyle=col;c.fill();stroke(c,p,INK.pencil,1.6,1,.5,true);}
+
+// ---- 4 styles, drawn around (0,0)=feet centre, height ~330 px upward ----
+const CLOAK='#5a4f8f',CLOAK2='#7a70b0',SKIN='#f1d2b4',TIE='#c9a24a';
+const STYLES=[
+ {name:'A · จอมเวทหัวโต',ratio:'หัว : ตัว ≈ 1 : 1.6',tag:'น่ารัก อ่านง่าย หมวกเป็นเอกลักษณ์',
+  pros:['หมวกงอบอกตัวตนได้ไกล ๆ','หัวโตเห็นสีหน้า/อีโมตชัด','แต่งหมวกตามสายได้ง่าย'],
+  cons:['ตัวสั้น ท่าฟัน/ท่าร่ายใหญ่ดูไม่ค่อยดุ','หัวโตบังวิวกล้องหลังบ่ามากขึ้น'],
+  draw(c){
+   blob(c,[[-70,-8],[-48,-130],[0,-150],[48,-130],[70,-8],[0,4]],CLOAK);           // cloak cone
+   hatch(c,[[-70,-8],[-48,-130],[-20,-140],[-34,-4]],INK.pencil,8,.3);
+   ell(c,-22,0,16,9,'#3a3540');ell(c,22,0,16,9,'#3a3540');                          // feet
+   stroke(c,[[-48,-110],[-78,-70]],CLOAK,16,1,.4);ell(c,-80,-66,10,10,SKIN);         // arm L
+   stroke(c,[[48,-110],[80,-92]],CLOAK,16,1,.4);ell(c,84,-92,10,10,SKIN);            // arm R
+   wand(c,84,-92,120,-150);star(c,122,-156,12,'#ffd84a');
+   ell(c,0,-205,62,58,SKIN);                                                        // big head
+   ell(c,-20,-205,6,9,'#2a2830',null);ell(c,20,-205,6,9,'#2a2830',null);            // eyes
+   stroke(c,[[-10,-180],[0,-176],[10,-180]],INK.pencil,2,1,.4);
+   stroke(c,[[0,-148],[-8,-128],[0,-112],[8,-128],[0,-148]],TIE,6,1,.3);            // tie
+   blob(c,[[-86,-238],[86,-238],[60,-250],[34,-300],[10,-340],[46,-372],[-4,-350],[-30,-300],[-60,-250]],'#3c3466'); // bent hat
+   stroke(c,[[-50,-252],[50,-252]],TIE,7,1,.5);
+  }},
+ {name:'B · หุ่นไม้แกะสลัก',ratio:'หัว : ตัว ≈ 1 : 3',tag:'งานฝีมือ ข้อต่อกลม ผ้าพันคอปลิว',
+  pros:['ไม่เหมือนเกมอื่น ดูทำมือ','ข้อต่อกลมทำท่าแข็ง ๆ ตลกได้','เศษไม้แตกตอนตายเข้ากับ ragdoll'],
+  cons:['ต้องทำผิวลายไม้ (texture) เพิ่ม','หน้าแกะสลักแสดงอารมณ์ได้น้อย'],
+  draw(c){
+   const W='#c8935a',WD='#9a6a3c';
+   stroke(c,[[-14,-130],[-24,-66],[-22,-6]],W,15,1,.4);stroke(c,[[14,-130],[24,-66],[22,-6]],W,15,1,.4);  // legs
+   ell(c,-24,-66,9,9,WD);ell(c,24,-66,9,9,WD);ell(c,-24,0,18,9,WD);ell(c,24,0,18,9,WD);
+   blob(c,[[-42,-240],[42,-240],[34,-130],[-34,-130]],W);                            // torso barrel
+   stroke(c,[[-38,-210],[38,-210]],WD,2,1,.6);stroke(c,[[-36,-170],[36,-170]],WD,2,1,.6);
+   blob(c,[[-40,-150],[40,-150],[46,-110],[-46,-110]],CLOAK);                         // belt skirt
+   stroke(c,[[-44,-232],[-70,-180],[-76,-130]],W,13,1,.4);ell(c,-70,-180,8,8,WD);ell(c,-78,-126,10,10,WD);
+   stroke(c,[[44,-232],[78,-206],[104,-224]],W,13,1,.4);ell(c,78,-206,8,8,WD);ell(c,108,-226,10,10,WD);
+   stroke(c,[[110,-228],[150,-296],[160,-290]],'#6b4a2e',4,2,.8);stroke(c,[[136,-272],[148,-262]],'#4f7f45',4,1,.5); // twig wand
+   blob(c,[[-30,-252],[30,-252],[40,-238],[0,-228],[-40,-238]],'#b8423a');            // scarf
+   stroke(c,[[-30,-242],[-70,-236],[-98,-214],[-120,-222]],'#b8423a',10,1,.8);
+   stroke(c,[[0,-252],[0,-266]],WD,10,1,.3);
+   ell(c,0,-312,40,50,W);                                                          // egg head
+   stroke(c,[[-20,-318],[-8,-314]],INK.pencil,3,1,.3);stroke(c,[[8,-314],[20,-318]],INK.pencil,3,1,.3);
+   stroke(c,[[-6,-290],[6,-290]],INK.pencil,2,1,.3);
+   stroke(c,[[-30,-340],[-12,-352]],WD,1.5,1,.5);stroke(c,[[18,-300],[30,-296]],WD,1.5,1,.5); // wood grain
+   blob(c,[[-36,-344],[0,-372],[36,-344],[20,-354],[-20,-354]],'#3c3466');             // flat cap
+  }},
+ {name:'C · หน้ากากธาตุ',ratio:'หัว : ตัว ≈ 1 : 4',tag:'สูงเพรียว ฮู้ดคลุม หน้ากากบอกสาย',
+  pros:['หน้ากากเปลี่ยนตามสาย = รู้สายศัตรูทันที','เงาตัวสูงชัด เห็นจากไกล','ผ้าคลุมยาวพลิ้วเข้ากับระบบผ้า'],
+  cons:['ไม่เห็นหน้า อีโมตต้องใช้ท่าทาง','ดูจริงจัง ห่างจากความน่ารัก'],
+  draw(c){
+   stroke(c,[[-10,-120],[-14,-4]],'#2e2a38',9,1,.4);stroke(c,[[10,-120],[16,-4]],'#2e2a38',9,1,.4);
+   ell(c,-16,0,12,6,'#2e2a38');ell(c,18,0,12,6,'#2e2a38');
+   blob(c,[[-34,-300],[34,-300],[44,-200],[38,-110],[-38,-110],[-44,-200]],'#3d4a63');   // tunic
+   blob(c,[[-40,-300],[-80,-200],[-96,-40],[-70,-20],[-56,-60],[-42,-30],[-34,-110]],CLOAK); // cape L (torn)
+   blob(c,[[40,-300],[80,-200],[92,-50],[64,-30],[54,-70],[40,-110]],CLOAK);
+   hatch(c,[[-40,-300],[-80,-200],[-96,-40],[-56,-60],[-34,-110]],INK.pencil,8,.28);
+   stroke(c,[[-30,-150],[30,-150]],TIE,6,1,.5);
+   stroke(c,[[38,-286],[70,-236],[96,-250]],'#3d4a63',11,1,.4);ell(c,100,-252,8,8,SKIN);
+   wand(c,100,-252,112,-330,'#2a2830');ell(c,113,-336,8,8,'#ff7a3a',INK.pencil,1.6);
+   blob(c,[[-38,-310],[0,-322],[38,-310],[32,-372],[0,-410],[-20,-400],[-34,-372]],CLOAK); // hood
+   blob(c,[[-24,-352],[24,-352],[20,-316],[0,-304],[-20,-316]],'#efe8dc');              // mask
+   blob(c,[[0,-348],[8,-334],[4,-322],[-4,-322],[-8,-334]],'#ff6a2b',INK.pencil,1.4);    // flame mark
+   stroke(c,[[-16,-338],[-8,-336]],INK.pencil,2.6,1,.3);stroke(c,[[8,-336],[16,-338]],INK.pencil,2.6,1,.3);
+  }},
+ {name:'D · Stick หมึกพู่กัน',ratio:'หัว : ตัว ≈ 1 : 2.5',tag:'ตรงกับชื่อเกม เส้นหมึกหนา ผ้าคลุมกระดาษ',
+  pros:['ชื่อ Fantas-Stick = ตัวแท่ง จำง่ายที่สุด','โมเดลเบา บอทเยอะไม่กระตุก','ท่าทางชัดมาก (แขนขาเป็นเส้น)'],
+  cons:['ต้องมีของประดับช่วยแยกสาย/ทีม','เสี่ยงดูเรียบเกินถ้าลายเส้นไม่ถึง'],
+  draw(c){
+   blob(c,[[-30,-226],[30,-226],[64,-110],[30,-96],[0,-110],[-34,-96],[-64,-110]],'#e4dccb',INK.pencil,2); // paper cape
+   stroke(c,[[-50,-120],[-40,-200]],INK.soft,1.2,1,.8);stroke(c,[[46,-118],[38,-196]],INK.soft,1.2,1,.8);
+   stroke(c,[[0,-236],[0,-110]],'#1b1a20',12,1,.5);                                    // spine
+   stroke(c,[[0,-112],[-36,-56],[-46,0]],'#1b1a20',11,1,.6);stroke(c,[[0,-112],[30,-58],[50,-2]],'#1b1a20',11,1,.6);
+   stroke(c,[[0,-214],[-44,-170],[-70,-190]],'#1b1a20',10,1,.6);
+   stroke(c,[[0,-214],[52,-196],[86,-230]],'#1b1a20',10,1,.6);
+   wand(c,86,-230,116,-300,'#6b4a2e');ell(c,118,-306,10,10,'#7fd6f5',INK.pencil,1.6);
+   stroke(c,[[-10,-228],[10,-228]],TIE,8,1,.4);
+   ell(c,0,-282,46,46,'#fbf8f0','#1b1a20',6);                                         // round head, thick ink
+   ell(c,-14,-284,5,7,'#1b1a20',null);ell(c,14,-284,5,7,'#1b1a20',null);
+   blob(c,[[-40,-312],[40,-312],[22,-322],[18,-356],[-4,-372],[-18,-350],[-24,-322]],'#3c3466','#1b1a20',3); // small hat
+  }}
+];
+
+function sheet(){
+  g.fillStyle=INK.paper;g.fillRect(0,0,cv.width,cv.height);
+  g.strokeStyle=INK.grid;g.lineWidth=1;for(let x=0;x<cv.width;x+=24){g.beginPath();g.moveTo(x,0);g.lineTo(x,cv.height);g.stroke();}
+  for(let y=0;y<cv.height;y+=24){g.beginPath();g.moveTo(0,y);g.lineTo(cv.width,y);g.stroke();}
+  txt('ตัวละคร Fantas Stick — 4 แนวทางสไตล์ (ร่าง v1)',40,52,{size:30,bold:1});
+  txt('ทุกแบบใช้กระดูก 26 ชิ้น + ท่าเดิมได้ • สีเสื้อคลุม/เนคไทเปลี่ยนตามบ้านเหมือนเดิม • กล่องดำ = ทดสอบเงาตัว (ต้องจำได้แม้เห็นแค่เงา)',40,84,{size:16,col:INK.soft});
+  const colW=385;
+  STYLES.forEach((s,i)=>{
+    const x0=28+i*colW,cx=x0+150,fy=560;
+    // frame
+    stroke(g,[[x0,112],[x0+colW-14,112],[x0+colW-14,1030],[x0,1030]],INK.soft,1.6,1,1.2,true);
+    txt(s.name,x0+16,148,{size:22,bold:1});
+    txt(s.tag,x0+16,174,{size:14,col:INK.soft});
+    // ground shadow + scale ruler
+    ell(g,cx,fy+4,78,10,'rgba(60,58,70,.12)',null);
+    stroke(g,[[x0+16,fy],[x0+16,fy-330]],INK.soft,1.2,1,.4);
+    for(let k=0;k<=4;k++){stroke(g,[[x0+12,fy-k*82.5],[x0+22,fy-k*82.5]],INK.soft,1.2,1,.3);}
+    // figure on offscreen, copied as colour + silhouette
+    const off=document.createElement('canvas');off.width=360;off.height=440;const c=off.getContext('2d');c.translate(170,420);
+    seed=11+i*97;s.draw(c);
+    g.drawImage(off,cx-170,fy-420);
+    const sil=document.createElement('canvas');sil.width=360;sil.height=440;const sc=sil.getContext('2d');
+    sc.drawImage(off,0,0);sc.globalCompositeOperation='source-in';sc.fillStyle='#1d1c22';sc.fillRect(0,0,360,440);
+    const bx=x0+colW-128,by=200;g.fillStyle='rgba(255,255,255,.55)';g.fillRect(bx,by,104,124);
+    stroke(g,[[bx,by],[bx+104,by],[bx+104,by+124],[bx,by+124]],INK.soft,1.2,1,.6,true);
+    g.drawImage(sil,bx+4,by+6,96,117);
+    txt('เงาตัว',bx+52,by+142,{size:13,col:INK.soft,align:'center'});
+    txt(s.ratio,cx,fy+40,{size:15,bold:1,align:'center'});
+    // notes
+    let y=fy+82;txt('ข้อดี',x0+16,y,{size:16,bold:1,col:INK.green});y+=26;
+    s.pros.forEach(p=>{txt('+ '+p,x0+22,y,{size:14});y+=24;});
+    y+=10;txt('ต้องระวัง',x0+16,y,{size:16,bold:1,col:INK.red});y+=26;
+    s.cons.forEach(p=>{txt('– '+p,x0+22,y,{size:14});y+=24;});
+  });
+  // sticky note
+  g.save();g.translate(1250,26);g.rotate(.025);g.fillStyle='#fde68a';g.fillRect(0,0,320,70);g.restore();
+  txt('เลือกได้ 1 แบบ หรือผสม เช่น หัว A + ตัว D',1264,56,{size:15,bold:1});
+  txt('แล้วค่อยทำแผ่นท่าทาง + ของประจำ 9 สาย',1264,80,{size:14});
+}
+window.renderSheet=async()=>{await document.fonts.load('600 20px Mali');await document.fonts.load('400 20px Mali');sheet();return {character_styles_v1:cv.toDataURL('image/png')};};
+document.fonts.ready.then(()=>sheet());
+</script>
+</body></html>

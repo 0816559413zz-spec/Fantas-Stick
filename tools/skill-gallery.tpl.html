@@ -1,0 +1,115 @@
+<title>คลังสกิล Fantas Stick</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;700&family=IBM+Plex+Sans+Thai:wght@400;600&display=swap">
+<style>
+/* layout: sticky element tabs on top; one class per view, its band and cards tinted by that element's color */
+:root{
+  --ink:#0d0f14; --panel:#161a22; --line:#2a303c; --text:#ecedf1; --mute:#9aa1b0;
+  --acc:#ff6a2b; --deep:#2a120a;
+  --f-display:"Kanit","Leelawadee UI",Tahoma,sans-serif;
+  --f-body:"IBM Plex Sans Thai","Leelawadee UI",Tahoma,sans-serif;
+  color-scheme:dark;
+}
+body{background:var(--ink);color:var(--text);font:15px/1.6 var(--f-body)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--ink)}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{padding-block:28px 12px}
+h1{font:700 clamp(26px,4vw,38px)/1.15 var(--f-display);margin:0;text-wrap:balance}
+.sub{color:var(--mute);margin:6px 0 0;max-width:68ch}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--ink) 92%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding-block:10px;scrollbar-width:thin}
+.tab{flex:0 0 auto;display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel);color:var(--text);font:600 14px var(--f-body);padding:7px 14px;border-radius:999px;cursor:pointer}
+.tab i{width:10px;height:10px;border-radius:50%;background:var(--c)}
+.tab[aria-selected="true"]{background:var(--c);color:#111;border-color:var(--c)}
+.tab[aria-selected="true"] i{background:#111}
+.tab:focus-visible,.card button:focus-visible{outline:2px solid var(--c,var(--acc));outline-offset:2px}
+.band{margin-top:18px;border-radius:14px;padding:22px 22px 20px;background:linear-gradient(135deg,var(--deep),var(--ink) 80%);border:1px solid color-mix(in srgb,var(--acc) 40%,transparent)}
+.band h2{font:700 clamp(24px,3.4vw,32px)/1.1 var(--f-display);margin:0;color:var(--acc)}
+.band .en{font:500 13px var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.band p{margin:8px 0 0;color:var(--mute)}
+.group{font:500 13px var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--acc);margin:26px 0 10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.card{min-width:0;display:flex;flex-direction:column;background:color-mix(in srgb,var(--deep) 55%,var(--panel));border:1px solid color-mix(in srgb,var(--acc) 35%,var(--line));border-radius:12px;overflow:hidden}
+.card.ult{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}
+.media{aspect-ratio:400/262;max-width:100%;background:#000;position:relative}
+.media button{all:unset;cursor:zoom-in;display:block;width:100%;height:100%}
+.media img{width:100%;height:100%;object-fit:cover;display:block}
+.none{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:16px;color:var(--mute);font-size:13px;
+  background:repeating-linear-gradient(45deg,color-mix(in srgb,var(--acc) 10%,transparent) 0 10px,transparent 10px 20px)}
+.body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.key{font:600 12px var(--f-body);background:var(--acc);color:#111;padding:2px 9px;border-radius:6px}
+.chip{font-size:12px;color:var(--acc);border:1px solid color-mix(in srgb,var(--acc) 50%,transparent);padding:1px 8px;border-radius:6px}
+.cd{font-size:12px;color:var(--mute);margin-left:auto;font-variant-numeric:tabular-nums}
+.card h3{font:600 18px/1.25 var(--f-display);margin:2px 0 0}
+.card p{margin:0;color:#c9ccd6;font-size:14px}
+.fx{font:12px ui-monospace,Consolas,monospace;color:var(--mute);word-break:break-all}
+.guide{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.gbox{min-width:0;background:color-mix(in srgb,var(--deep) 45%,var(--panel));border:1px solid color-mix(in srgb,var(--acc) 30%,var(--line));border-radius:12px;padding:14px 16px}
+.gbox h4{margin:0 0 8px;font:600 15px var(--f-display);color:var(--acc)}
+.gbox p,.gbox li{font-size:14px;color:#d3d6de;margin:0}
+.gbox ul{margin:0;padding-left:18px;display:grid;gap:4px}
+.style{font:600 17px/1.4 var(--f-display);color:var(--text)!important}
+.gw{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;margin-top:8px}
+.gw b{font-size:13px}.gw .g{color:#7fd88f}.gw .w{color:#ff8a7a}
+.combo{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 8px}
+.combo span{background:color-mix(in srgb,var(--acc) 14%,transparent);border:1px solid color-mix(in srgb,var(--acc) 40%,transparent);border-radius:8px;padding:4px 9px;font-size:13.5px;color:#e8eaf0}
+.combo i{font-style:normal;color:var(--acc);font-weight:700}
+.wide{grid-column:1/-1}
+footer{color:var(--mute);font-size:13px;padding-block:28px 40px}
+dialog{border:0;padding:0;background:transparent;max-width:min(96vw,1100px)}
+dialog::backdrop{background:rgba(0,0,0,.82)}
+dialog img{width:100%;border-radius:10px;display:block}
+dialog p{color:#fff;font:600 16px var(--f-display);margin:8px 0 0;text-align:center}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+
+<header class="wrap">
+  <h1>คลังสกิล Fantas Stick</h1>
+  <p class="sub">ทุกสาย ทุกสกิล พร้อมวิธีเล่นและคอมโบ และภาพเคลื่อนไหวจาก VFX Studio • เลือกสายด้านล่าง • กดที่ภาพเพื่อขยาย • การ์ดที่มีลายทางคือสกิลที่ยังไม่มีเอฟเฟกต์ใน Studio</p>
+</header>
+<nav><div class="wrap tabs" id="tabs" role="tablist"></div></nav>
+<main class="wrap" id="main"></main>
+<footer class="wrap" id="foot"></footer>
+<dialog id="zoom"><img id="zimg" alt=""><p id="zcap"></p></dialog>
+
+<script>
+const C=/*DATA*/[];
+const $=s=>document.querySelector(s),esc=t=>String(t??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const tabs=$('#tabs');
+C.forEach(c=>{const b=document.createElement('button');b.className='tab';b.role='tab';b.id='t-'+c.slug;b.style.setProperty('--c',c.acc);
+  b.innerHTML='<i></i>'+esc(c.th);b.onclick=()=>{location.hash=c.slug;};tabs.append(b);});
+function card(k,c){
+  const media=k.gif?`<button aria-label="ขยาย ${esc(k.n)}" data-g="${esc(k.gif)}" data-n="${esc(c.th+' · '+k.key+' · '+k.n)}"><img loading="lazy" src="${esc(k.gif)}" alt="${esc(k.n)}"></button>`
+    :`<div class="none">${k.fx?'กำลังทำ GIF':'ยังไม่มีเอฟเฟกต์ใน VFX Studio'}</div>`;
+  return `<article class="card ${k.kind==='ult'?'ult':''}"><div class="media">${media}</div><div class="body">
+    <div class="top"><span class="key">${esc(k.key)}</span>${k.role?`<span class="chip">${esc(k.role)}</span>`:''}${k.cd?`<span class="cd">คูลดาวน์ ${k.cd} วิ</span>`:''}</div>
+    <h3>${esc(k.n)}</h3><p>${esc(k.d)}</p>${k.fx?`<span class="fx">${esc(k.fx)}</span>`:''}</div></article>`;}
+function guideHTML(c){const g=c.guide;if(!g)return '';
+  return `<div class="group">วิธีเล่นแบบเข้าใจง่าย</div><section class="guide">
+   <div class="gbox"><h4>แนวเล่น</h4><p class="style">${esc(g.style)}</p>
+     <div class="gw"><b class="g">เด่น</b><p>${esc(g.good)}</p><b class="w">ระวัง</b><p>${esc(g.weak)}</p></div></div>
+   <div class="gbox"><h4>ในโหมดบุกปราสาท</h4><p>${esc(g.siege)}</p><h4 style="margin-top:12px">เคล็ดลับ</h4><ul>${g.tips.map(t=>`<li>${esc(t)}</li>`).join('')}</ul></div>
+   <div class="gbox wide"><h4>คอมโบง่าย ๆ (กดตามลำดับ)</h4>${g.combos.map(cb=>`<div class="combo">${cb.map(x=>`<span>${esc(x)}</span>`).join('<i>→</i>')}</div>`).join('')}</div>
+  </section>`;}
+function show(slug){
+  const c=C.find(x=>x.slug===slug)||C[0];
+  document.documentElement.style.setProperty('--acc',c.acc);document.documentElement.style.setProperty('--deep',c.deep);
+  tabs.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',t.id==='t-'+c.slug));
+  const base=c.cards.filter(k=>k.kind==='base'),sk=c.cards.filter(k=>k.kind!=='base');
+  const n=c.cards.filter(k=>k.gif).length;
+  $('#main').innerHTML=`<section class="band"><div class="en">${esc(c.en)}</div><h2>${esc(c.th)}</h2>
+    <p>มี GIF ${n} จาก ${c.cards.length} การ์ด</p></section>${guideHTML(c)}
+    <div class="group">ท่าพื้นฐาน</div><div class="grid">${base.map(k=>card(k,c)).join('')}</div>
+    <div class="group">สกิลและอัลติ</div><div class="grid">${sk.map(k=>card(k,c)).join('')}</div>`;
+  document.getElementById('t-'+c.slug).scrollIntoView({inline:'nearest',block:'nearest'});
+}
+$('#main').addEventListener('click',e=>{const b=e.target.closest('button[data-g]');if(!b)return;
+  $('#zimg').src=b.dataset.g;$('#zcap').textContent=b.dataset.n;$('#zoom').showModal();});
+$('#zoom').addEventListener('click',()=>$('#zoom').close());
+addEventListener('hashchange',()=>show(location.hash.slice(1)));
+show(location.hash.slice(1));
+const all=C.reduce((a,c)=>a+c.cards.length,0),have=C.reduce((a,c)=>a+c.cards.filter(k=>k.gif).length,0);
+$('#foot').textContent=`รวม ${C.length} สาย ${all} การ์ด มี GIF ${have} • คำอธิบายสกิลดึงจากข้อมูลในเกม • ภาพเป็นพรีวิวเอฟเฟกต์จาก VFX Studio ไม่ใช่คลิปจากเกมจริง ระยะและจังหวะอาจต่างจากในเกมเล็กน้อย`;
+</script>

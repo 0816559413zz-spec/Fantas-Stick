@@ -1,0 +1,11 @@
+{
+"0":{"ba":"fire/spark_fly","shield":"fire/fshield_preview_c","dash":"fire/dash_go","kindle":null,"dragonfall":"fire/dragonfall_a","ringofembers":null,"blazeform":"fire/blazeform_aura","ignitionsnap":null,"colossus":"fire/colossus"},
+"1":{"ba":"frost/swing_sword_a","shield":"frost/shield_a","dash":"frost/slide","frostforge":"frost/forge_b","glacierrend":"frost/rend_slash","permafrost":"frost/perma_b","cryoshell":"frost/cryoshell","frostaura":"frost/aura","mirrorlegion":"frost/mirror"},
+"2":{"ba":"storm/beam_b","shield":"storm/shield","dash":"storm/dash_go","thunderline":"storm/line_mix","speedsiphon":"storm/siphon_c","triplestrike":"storm/tstrike_mix","stormorbs":"storm/orb_hit","railgun":"storm/rail_fire","stormdome":null,"godlightning":"storm/claw_sweep_c"},
+"3":{"ba":null,"shield":null,"dash":null,"poisondart":null,"vinelash":null,"sporecloud":null,"bloom":null,"thornburst":"nature/wood_wall_growth_study","worldtree":"nature/tree_summon"},
+"6":{"ba":"earth/cbslam","shield":null,"dash":null,"stonebreaker":null,"mudswamp":null,"tectoniccrush":null,"dustburst":null,"terraauger":null,"wrath":null},
+"7":{"ba":"wind/feather_fly","shield":"wind/wall_guard","dash":"wind/dash_push","aegisgale":"wind/downburst","windrift":"wind/plume_fly","vortexbind":"wind/slip_fwd_g","voidspheres":"wind/tailwind","featherwing":"wind/featherwing","eyeofheaven":"wind/sonic_dash_g"},
+"8":{"ba":"water/ba_muzzle","shield":"water/shield_bubble","dash":"water/dash_sink","riptide":"water/riptide","tidecaller":"water/fam_serpent","aquacage":"water/cage_bubble","abyssalbeam":"water/beam_loop","moonwater":"water/moon_beam","dragondeep":"water/dragon_intro"},
+"9":{"ba":"light/ba_fire","shield":"light/shield_hit","dash":"light/step_out","crystalbond":"light/crystal_out","shardvolley":"light/volley_boom","empowerlight":"light/emp_burst","sanctumcrystal":"light/san_plant","veiledshard":null,"radiantsovereign":"light/sovereign_body"},
+"10":{"ba":"darkness/scythe_ba","shield":"darkness/shield_preview","dash":"darkness/quick_dash_preview","darkmark":"darkness/mark_wave_preview","darkchase":"darkness/chase_preview","darkwaltz":"darkness/night_waltz_preview","darkward":"darkness/ward_drain_preview","darkveil":"darkness/veil_preview","darkrift":"darkness/ult_v1"}
+}

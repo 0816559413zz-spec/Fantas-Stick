@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<title>Siege attack styles sketch</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mali:wght@400;600&display=swap">
+<style>html,body{margin:0;background:#e9e4d8}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1600" height="1300"></canvas>
+<script>
+// Hand-drawn catalogue: 5 siege attack styles + which map/phase uses which.
+const cv=document.getElementById('c'),g=cv.getContext('2d');
+let seed=23;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
+const j=a=>(rnd()-.5)*2*a;
+const INK={pencil:'#3b3a3f',main:'#1f4fa8',flank:'#d9741c',high:'#7a3fa0',atk:'#b3262b',def:'#1f5fbf',green:'#2f7a3a',hi:'rgba(255,214,64,.42)',paper:'#f4efe2',soft:'#5b5a60',wood:'#8a5a2b',water:'rgba(70,140,210,.32)'};
+const STY={multi:['หลายทาง','#d9741c'],breach:['ทุบเข้า','#8a5a2b'],climb:['ไต่ขึ้น','#7a3fa0'],cross:['ข้ามน้ำ','#1f6fb0'],sneak:['ลอบเข้า','#3b3a3f']};
+let OX=0,OY=0,S=1;const P=(x,y)=>[OX+x*S,OY+y*S];
+
+function stroke(pts,col,w,passes=2,amp=1){
+  for(let p=0;p<passes;p++){
+    g.beginPath();g.strokeStyle=col;g.lineWidth=w*(p?0.7:1);g.lineCap='round';g.lineJoin='round';g.globalAlpha=p?0.5:0.9;
+    for(let i=0;i<pts.length-1;i++){
+      const [x1,y1]=pts[i],[x2,y2]=pts[i+1],L=Math.hypot(x2-x1,y2-y1),n=Math.max(1,Math.round(L/34));
+      if(i===0)g.moveTo(x1+j(amp),y1+j(amp));
+      for(let k=1;k<=n;k++){const t=k/n,mx=x1+(x2-x1)*(t-.5/n),my=y1+(y2-y1)*(t-.5/n);
+        g.quadraticCurveTo(mx+j(amp*1.5),my+j(amp*1.5),x1+(x2-x1)*t+j(amp),y1+(y2-y1)*t+j(amp));}
+    }
+    g.stroke();
+  }
+  g.globalAlpha=1;
+}
+const M=pts=>pts.map(p=>P(...p));
+const poly=(pts,col=INK.pencil,w=2,close=true)=>stroke(M(close?[...pts,pts[0]]:pts),col,w);
+const rect=(x,y,w,h,col=INK.pencil,lw=2)=>poly([[x,y],[x+w,y],[x+w,y+h],[x,y+h]],col,lw);
+function wall(pts,w=6){stroke(M(pts),INK.pencil,w,1,.5);}
+function wash(x,y,w,h,col){g.save();g.globalCompositeOperation='multiply';g.fillStyle=col;const [a,b]=P(x,y);g.beginPath();g.moveTo(a+j(3),b+j(3));g.lineTo(a+w*S+j(3),b+j(3));g.lineTo(a+w*S+j(3),b+h*S+j(3));g.lineTo(a+j(3),b+h*S+j(3));g.closePath();g.fill();g.restore();}
+function hatch(x,y,w,h,col=INK.pencil,gap=4,ang=1,al=.4){g.save();const [a,b]=P(x,y);g.beginPath();g.rect(a,b,w*S,h*S);g.clip();
+  for(let t=-h;t<w+h;t+=gap){const pts=[P(x+t,y),P(x+t+h*ang,y+h)];g.beginPath();g.strokeStyle=col;g.globalAlpha=al;g.lineWidth=1;g.moveTo(pts[0][0]+j(1),pts[0][1]);g.lineTo(pts[1][0]+j(1.5),pts[1][1]);g.stroke();}
+  g.restore();g.globalAlpha=1;}
+function breakable(x1,y1,x2,y2){const n=Math.max(3,Math.round(Math.hypot(x2-x1,y2-y1)/3.2));const dx=y2-y1,dy=x1-x2,L=Math.hypot(dx,dy)||1;
+  for(let k=0;k<=n;k++){const t=k/n,x=x1+(x2-x1)*t,y=y1+(y2-y1)*t;stroke([P(x-dx/L*2.6,y-dy/L*2.6),P(x+dx/L*2.6,y+dy/L*2.6)],INK.wood,2.2,1,.4);}}
+function arrow(pts,col,w=2.4,dash){if(dash)g.setLineDash(dash);
+  const sp=[];for(let i=0;i<pts.length-1;i++){const [x1,y1]=pts[i],[x2,y2]=pts[i+1];for(let t=0;t<1;t+=.34)sp.push([x1+(x2-x1)*t,y1+(y2-y1)*t]);}
+  sp.push(pts[pts.length-1]);stroke(M(sp),col,w,1,.8);g.setLineDash([]);
+  const [ax,ay]=P(...pts[pts.length-2]),[bx,by]=P(...pts[pts.length-1]),a=Math.atan2(by-ay,bx-ax),L=11;
+  stroke([[bx-Math.cos(a-.45)*L,by-Math.sin(a-.45)*L],[bx,by],[bx-Math.cos(a+.45)*L,by-Math.sin(a+.45)*L]],col,w,1,.4);}
+function txt(s,x,y,{size=15,col=INK.pencil,rot=0,bold=0,px=0,align='left'}={}){const [a,b]=px?[x,y]:P(x,y);g.save();g.translate(a,b);g.rotate(rot+j(.01));g.fillStyle=col;g.textAlign=align;
+  g.font=`${bold?600:400} ${size}px Mali, "Comic Sans MS", sans-serif`;s.split('\n').forEach((l,i)=>g.fillText(l,0,i*size*1.25));g.restore();}
+function core(x,y){g.save();g.globalCompositeOperation='multiply';g.fillStyle=INK.hi;const [a,b]=P(x,y);g.beginPath();g.arc(a,b,13*S,0,7);g.fill();g.restore();
+  stroke([[a,b-10],[a+8,b],[a,b+10],[a-8,b],[a,b-10]],INK.pencil,2.4,2,.4);}
+function chip(style,x,y){const [n,c]=STY[style];g.font='600 14px Mali';const w=g.measureText(n).width+18;
+  g.save();g.globalAlpha=.16;g.fillStyle=c;g.fillRect(x,y-15,w,22);g.restore();stroke([[x,y-15],[x+w,y-15],[x+w,y+7],[x,y+7],[x,y-15]],c,1.6,1,.8);txt(n,x+9,y+1,{px:1,size:14,bold:1,col:c});return w;}
+
+async function draw(){
+  try{await document.fonts.load('400 16px Mali');await document.fonts.load('600 16px Mali');}catch(e){}
+  g.fillStyle=INK.paper;g.fillRect(0,0,1600,1300);
+  for(let i=0;i<11000;i++){g.fillStyle=`rgba(120,100,70,${rnd()*.05})`;g.fillRect(rnd()*1600,rnd()*1300,1.5,1.5);}
+  txt('บุกปราสาท — 5 วิธีบุก (ใช้ผสมกันในแต่ละแมพ)',56,50,{px:1,size:28,bold:1});
+  txt('แต่ละแมพมี "สไตล์ประจำแมพ" 1 แบบ · ในแมพเดียวกัน 3 เฟสใช้วิธีบุกไม่ซ้ำกัน · ภาพเล็กแต่ละอัน = มุมบนของ 1 เฟส (ฝ่ายบุกมาจากล่าง)',58,80,{px:1,size:14,col:INK.soft});
+
+  const cards=[
+    ['multi','1 · หลายทาง','แกนเข้าได้ 4–5 ทางรอบด้าน\nฝ่ายรับต้องแบ่งคนเฝ้า\nบุกชนะด้วยการหลอกทาง/แยกทีม','แสง · ธรรมชาติ · ความมืด'],
+    ['breach','2 · ทุบเข้า','เริ่มมีทางเข้าแค่ 1–2 ทาง\nกำแพง/ประตูพังได้ 2–3 จุด\nพังจุดไหน = เปิดทางใหม่ตรงนั้น\nฝ่ายรับสร้างกำแพงอุดได้','ดิน · ไฟ · ลม (Sonic Boom)'],
+    ['climb','3 · ไต่ขึ้น','แกนอยู่ชั้นบนสุด (+6 ม.)\nขึ้นทีละชั้นด้วยทางลาด/บันได\nใครคุมที่สูงได้เปรียบ\nโดนผลักตก = เสียตำแหน่ง','ลม · น้ำแข็ง (สร้างทางขึ้น) · สายฟ้า'],
+    ['cross','4 · ข้ามน้ำ','คูน้ำ/ทะเลสาบแบ่งพื้นที่\nสะพานแค่ 2 จุด (คอขวด)\nน้ำแข็งแช่น้ำเป็นทางใหม่ได้\nน้ำเปียก = ต่อยอดสายฟ้า','น้ำ · น้ำแข็ง · สายฟ้า'],
+    ['sneak','5 · ลอบเข้า','อุโมงค์/ทางลับเล็ก ๆ หลายเส้น\nมืด ระยะมองสั้น ห้องเล็ก\nฝ่ายรับเฝ้าไม่ทั่ว\nปะทะประชิดเป็นหลัก','ความมืด · สายฟ้า · น้ำแข็งประชิด'],
+  ];
+  cards.forEach(([st,title,rules,cls],i)=>{
+    const x0=40+i*312,y0=110;S=2.7;OX=x0+12;OY=y0+44;
+    stroke([[x0,y0],[x0+296,y0],[x0+296,y0+560],[x0,y0+560],[x0,y0]],INK.pencil,1.6,2,1.2);
+    txt(title,x0+14,y0+30,{px:1,size:19,bold:1,col:STY[st][1]});
+    // frame of the mini map 100x100
+    poly([[0,0],[100,0],[100,100],[0,100]],'rgba(59,58,63,.35)',1.2);
+    if(st==='multi'){
+      core(50,42);[[22,22,10],[68,22,10],[22,58,10],[68,60,10]].forEach(([x,y,w])=>{rect(x,y,w,4,INK.pencil,1.6);hatch(x,y,w,4,INK.pencil,2);});
+      arrow([[50,96],[50,58]],INK.main,3);arrow([[8,92],[6,44],[34,42]],INK.flank,2.4);arrow([[92,92],[95,46],[66,42]],INK.flank,2.4);
+      arrow([[18,96],[30,72],[42,52]],INK.flank,2);arrow([[30,6],[44,30]],INK.high,2.2,[6,5]);
+      [[50,74,'1'],[12,64,'2'],[88,64,'3'],[30,80,'4'],[34,14,'5']].forEach(([x,y,n])=>txt(n,x,y,{size:13,bold:1,align:'center'}));
+      txt('B',86,10,{size:16,bold:1,col:INK.def});
+    }
+    if(st==='breach'){
+      wall([[0,50],[100,50]],7);g.strokeStyle=INK.paper;g.lineWidth=14;const [a,b]=P(43,50),[c,d]=P(57,50);g.beginPath();g.moveTo(a,b);g.lineTo(c,d);g.stroke();
+      const gate=[];for(let k=0;k<5;k++){stroke([P(44+k*3,47),P(44+k*3,53)],INK.pencil,2,1,.3);}
+      [[8,22],[70,92]].forEach(()=>{});
+      g.strokeStyle=INK.paper;g.lineWidth=14;[[10,50,24,50],[76,50,90,50]].forEach(([x1,y1,x2,y2])=>{const [a,b]=P(x1,y1),[c,d]=P(x2,y2);g.beginPath();g.moveTo(a,b);g.lineTo(c,d);g.stroke();});
+      breakable(10,50,24,50);breakable(76,50,90,50);
+      core(50,24);arrow([[50,96],[50,36]],INK.main,3);arrow([[17,94],[17,40],[38,26]],INK.flank,2.2,[7,5]);arrow([[83,94],[83,40],[62,26]],INK.flank,2.2,[7,5]);
+      txt('ประตูเหล็ก',50,60,{size:12,align:'center'});txt('พังได้',17,58,{size:12,col:INK.wood,align:'center'});txt('พังได้',83,58,{size:12,col:INK.wood,align:'center'});
+      txt('ประ = เปิดหลังพัง',50,82,{size:11,col:INK.soft,align:'center'});
+    }
+    if(st==='climb'){
+      [[4,4,92,92,'+0'],[16,8,68,62,'+3'],[30,12,40,30,'+6']].forEach(([x,y,w,h,l],k)=>{rect(x,y,w,h,INK.pencil,2.2);if(k)hatch(x,y,w,h,STY.climb[1],4-k,.6,.18+.08*k);txt(l,x+3,y+h-3,{size:12,bold:1,col:STY.climb[1]});});
+      core(50,26);
+      arrow([[50,96],[50,84],[76,76],[78,50],[64,44]],INK.main,2.8);arrow([[10,90],[10,40],[24,30],[32,24]],INK.flank,2.2);
+      for(let k=0;k<4;k++)stroke([P(76+k*1.6,72-k*4),P(84+k*1.6,72-k*4)],INK.pencil,1.2,1,.3);
+      txt('ทางลาด',88,70,{size:11});txt('ผลักตก\n= ลงชั้นล่าง',8,16,{size:11,col:INK.soft});
+    }
+    if(st==='cross'){
+      wash(0,40,100,22,INK.water);
+      [[22,40,10],[68,40,10]].forEach(([x,y,w])=>{rect(x,y,w,22,INK.pencil,2);for(let k=1;k<6;k++)stroke([P(x,y+k*3.7),P(x+w,y+k*3.7)],INK.pencil,1,1,.3);});
+      core(50,20);arrow([[27,96],[27,64],[27,36],[42,24]],INK.main,2.8);arrow([[73,96],[73,64],[73,36],[58,24]],INK.main,2.8);
+      arrow([[50,96],[50,66],[50,34]],'#4fa3d8',2.4,[4,5]);txt('น้ำแข็งแช่\nเป็นทาง',53,76,{size:11,col:'#2c5f93'});
+      txt('สะพาน',27,70,{size:11,align:'center'});txt('สะพาน',73,70,{size:11,align:'center'});
+    }
+    if(st==='sneak'){
+      hatch(0,0,100,100,INK.pencil,3,.4,.12);
+      const tun=[[[8,96],[8,70],[26,70],[26,48],[40,48],[40,30]],[[50,96],[50,80],[62,80],[62,58],[54,58],[54,40]],[[92,96],[92,60],[76,60],[76,38],[62,30]]];
+      tun.forEach(t=>{stroke(M(t.map(([x,y])=>[x-3,y])),INK.pencil,1.6,1,.6);stroke(M(t.map(([x,y])=>[x+3,y])),INK.pencil,1.6,1,.6);});
+      g.fillStyle=INK.paper;const [a,b]=P(34,10);g.fillRect(a,b,32*S,24*S);rect(34,10,32,24,INK.pencil,2.2);core(50,22);
+      arrow(tun[0],INK.flank,2,[6,4]);arrow(tun[1],INK.flank,2,[6,4]);arrow(tun[2],INK.flank,2,[6,4]);
+      txt('อุโมงค์แคบ 3 ม.',50,92,{size:11,align:'center',col:INK.soft});
+    }
+    txt(rules,x0+14,y0+360,{px:1,size:14});
+    txt('เด่น: '+cls,x0+14,y0+520,{px:1,size:13,col:INK.main,bold:1});
+  });
+
+  // ---- map lineup table
+  const TY=730;txt('แมพ × เฟส (ตัวอย่างการผสม — ยังไม่ล็อก)',56,TY,{px:1,size:22,bold:1});
+  const maps=[
+    ['Cliff Side Castle','multi',['multi','breach','climb'],['ป่ารอบนอก เข้าได้รอบด้าน','ทางเดินโถง + Hall ทุบกำแพงเข้า','ปราการบนหน้าผา ไต่ 3 ชั้น']],
+    ['ป้อมทะเลสาบ','cross',['cross','multi','climb'],['ยึดท่าเรือ ข้ามสะพาน','ลานบนเกาะ เข้าหลายทาง','หอคอยกลางน้ำ ไต่ขึ้น']],
+    ['ประตูเมืองเหล็ก','breach',['breach','multi','sneak'],['ทุบประตูเมือง','ถนนในเมือง หลายซอย','ป้อมใน ลอบเข้าทางลับ']],
+    ['สุสานใต้ปราสาท','sneak',['multi','sneak','breach'],['ทางเข้าสุสาน หลายปาก','อุโมงค์มืด','โถงใต้ดิน ทุบผนึก']],
+  ];
+  const c0=56,cw=[230,140,390,390,390];let y=TY+28;
+  const hdr=['แมพ','สไตล์ประจำแมพ','เฟส 1','เฟส 2','เฟส 3'];let x=c0;
+  hdr.forEach((h,i)=>{txt(h,x+8,y+20,{px:1,size:15,bold:1,col:INK.soft});x+=cw[i];});
+  y+=34;stroke([[c0,y],[c0+cw.reduce((a,b)=>a+b),y]],INK.pencil,1.8,1,.8);
+  maps.forEach(([name,sig,ph,notes])=>{
+    x=c0;txt(name,x+8,y+34,{px:1,size:16,bold:1});x+=cw[0];chip(sig,x+8,y+32);x+=cw[1];
+    ph.forEach((s,k)=>{const w=chip(s,x+8,y+24);txt(notes[k],x+8,y+52,{px:1,size:13,col:INK.soft});x+=cw[2+k];});
+    y+=70;stroke([[c0,y],[c0+cw.reduce((a,b)=>a+b),y]],INK.pencil,1,1,.8);
+  });
+
+  // ---- rules note
+  const NY=y+40;txt('กติกาตอนออกแบบ',56,NY,{px:1,size:18,bold:1});
+  txt('• 3 เฟสในแมพเดียวกันห้ามใช้วิธีบุกซ้ำกัน · สไตล์ประจำแมพต้องอยู่ในอย่างน้อย 1 เฟส และเห็นได้จากหน้าตาแมพ\n• ทุกสายต้องมีอย่างน้อย 1 เฟสในรอบแมพทั้งหมดที่ตัวเองเด่น และไม่มีสายไหนเด่นทุกเฟส\n• เกิดใหม่ได้เรื่อย ๆ → ทุกสไตล์ต้องมีทางให้คนที่เพิ่งเกิดกลับเข้าไฟต์ได้มากกว่า 1 ทาง (แม้แต่ "ทุบเข้า" ก็ต้องมีประตูหลักอีกทาง)',58,NY+30,{px:1,size:14});
+  g.save();g.translate(1300,NY-24);g.rotate(.03);g.fillStyle='#fbe9a0';g.fillRect(0,0,250,110);g.restore();
+  txt('ร่าง v3 · ยังไม่ล็อก',1318,NY+8,{px:1,size:16,bold:1,col:INK.atk,rot:.03});
+  txt('ชื่อแมพ 3 อันหลัง = ตัวอย่าง\nเลือก/เปลี่ยนได้ทั้งหมด',1318,NY+34,{px:1,size:13,rot:.03});
+  window.__done=true;
+}
+draw();
+</script>
+</body></html>

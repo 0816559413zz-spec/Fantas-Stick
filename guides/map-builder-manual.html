@@ -1,0 +1,299 @@
+<title>Map Builder Manual</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* layout: sticky table of contents on the left (top strip on phones), long-form manual on the right;
+   dark studio palette to match the Tools hub, blue accent like the tool's own selection colour */
+:root{
+  --bg0:#121418; --bg1:#1a1d23; --bg2:#22262e; --line:#2f3440; --tx:#e6e8ee; --tx2:#a7adba; --tx3:#7b8290;
+  --acc:#4a8cff; --ok:#5fcf8a; --warn:#f2b84b; --err:#f06a6a;
+  --f:"IBM Plex Sans Thai","Leelawadee UI",Tahoma,sans-serif; --mono:"IBM Plex Mono",Consolas,monospace;
+  color-scheme:dark;
+}
+body{background:var(--bg0);color:var(--tx);font:15px/1.7 var(--f)}
+.page{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:230px minmax(0,1fr);gap:32px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 60px}
+nav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);align-self:start;max-height:calc(100vh - 32px);overflow:auto}
+nav b{display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx3);margin-bottom:8px}
+nav a{display:block;color:var(--tx2);text-decoration:none;font-size:14px;padding:4px 10px;border-left:2px solid var(--line)}
+nav a:hover{color:var(--tx);border-left-color:var(--acc)}
+main{min-width:0}
+h1{font-size:clamp(28px,4vw,38px);line-height:1.15;margin:0 0 6px;text-wrap:balance}
+.lead{color:var(--tx2);max-width:68ch;margin:0}
+h2{font-size:22px;margin:44px 0 10px;padding-top:8px;border-top:1px solid var(--line);scroll-margin-top:16px}
+h3{font-size:16px;margin:22px 0 6px;color:var(--tx)}
+p,li{max-width:72ch}
+p{margin:8px 0}
+ul,ol{padding-left:22px;margin:6px 0}
+li{margin:4px 0}
+kbd{font:500 12.5px var(--mono);background:var(--bg2);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 6px;color:var(--tx);white-space:nowrap}
+code{font:13px var(--mono);color:#b9d0ff;background:rgba(74,140,255,.1);padding:1px 5px;border-radius:4px;word-break:break-all}
+.ui{font-weight:600;color:#cfe0ff}
+.box{background:var(--bg1);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:14px 0}
+.box.tip{border-left:3px solid var(--ok)}.box.warn{border-left:3px solid var(--warn)}
+.box b.t{display:block;font-size:13px;color:var(--tx2);margin-bottom:4px}
+.tbl{overflow-x:auto;margin:10px 0}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--tx3);font-weight:600;font-size:12.5px;letter-spacing:.04em}
+td.ic{font-size:18px;width:36px;text-align:center}
+/* UI mock */
+.mock{display:grid;grid-template-columns:24% 1fr 26%;grid-template-rows:auto 1fr auto;gap:3px;background:#0b0d10;border:1px solid var(--line);border-radius:10px;padding:3px;height:330px;margin:14px 0;font-size:12.5px;max-width:100%}
+.mock>div{background:var(--bg1);border-radius:6px;padding:8px 10px;color:var(--tx2);position:relative;min-width:0;overflow:hidden}
+.mock .bar{grid-column:1/-1;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--bg2)}
+.mock .bar span{background:var(--bg0);border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-size:11.5px}
+.mock .bar .pri{background:var(--acc);color:#fff;border-color:var(--acc)}
+.mock .left{display:grid;grid-template-rows:1fr 1fr;gap:3px;padding:0;background:transparent}
+.mock .left>div{background:var(--bg1);border-radius:6px;padding:8px 10px}
+.mock .scene{background:linear-gradient(180deg,#26303d,#1b2a22)}
+.mock .tools{position:absolute;left:8px;top:30px;display:grid;gap:2px}
+.mock .tools i{font-style:normal;width:22px;height:20px;display:grid;place-items:center;background:var(--bg2);border-radius:3px;font-size:12px}
+.mock .stat{grid-column:1/-1;background:var(--bg2);font-size:11.5px;padding:3px 10px}
+.mock .lbl{color:var(--tx);font-weight:600;display:block;margin-bottom:4px}
+.n{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--acc);color:#fff;font-size:12px;font-weight:600;margin-right:4px;vertical-align:1px}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps>li{counter-increment:s;position:relative;padding-left:40px;margin:12px 0}
+.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;width:26px;height:26px;border-radius:50%;background:var(--bg2);border:1px solid var(--acc);color:#cfe0ff;display:grid;place-items:center;font-size:13px;font-weight:600}
+.keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:4px 24px}
+.keys div{display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.keys div span:last-child{text-align:right}
+@media (max-width:820px){
+  .page{grid-template-columns:1fr}
+  nav{position:static;max-height:none;display:flex;flex-wrap:wrap;gap:4px}
+  nav b{width:100%}
+  nav a{border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:13px}
+  .mock{grid-template-columns:1fr;grid-template-rows:auto;height:auto}
+  .mock .left{grid-template-rows:auto auto}
+  .mock .scene{min-height:140px}
+}
+</style>
+
+<div class="page">
+<nav aria-label="สารบัญ">
+  <b>สารบัญ</b>
+  <a href="#what">Map Builder คืออะไร</a><a href="#open">เปิดใช้งาน</a><a href="#screen">หน้าจอ</a><a href="#camera">คุมกล้อง</a>
+  <a href="#tools">เครื่องมือ 10 ตัว</a><a href="#gizmo">ย้าย หมุน ย่อขยาย</a><a href="#new">ทำแผนที่ใหม่ทีละขั้น</a>
+  <a href="#siege">แผนที่บุกปราสาท</a><a href="#castle">ชิ้นส่วนปราสาท</a><a href="#rooms">ห้องสำเร็จ</a><a href="#pnl">แผ่นพัง</a>
+  <a href="#bd">ฉากหลัง (Backdrop)</a><a href="#group">จัดกลุ่ม</a><a href="#check">ตรวจก่อนส่ง</a><a href="#files">ไฟล์อยู่ไหน</a>
+  <a href="#keys">ปุ่มลัดทั้งหมด</a><a href="#faq">ปัญหาที่พบบ่อย</a>
+</nav>
+
+<main>
+<h1>คู่มือ Map Builder</h1>
+<p class="lead">เครื่องมือสร้างแผนที่ที่เกมโหลดได้จริง ปั้นพื้น ทาสี วางกำแพง ปราสาท ของ และจุดเกิด แล้วกดส่งเข้าเกมได้เลย หน้าตาเครื่องมือเลียนแบบ Unity และข้อความในเครื่องมือเป็นภาษาอังกฤษ คู่มือนี้จึงเขียนชื่อปุ่มเป็นภาษาอังกฤษตามที่เห็นบนจอ</p>
+
+<h2 id="what">Map Builder คืออะไร</h2>
+<ul>
+  <li><b>Map Builder</b> (<code>mapbuild.html</code>) ใช้ทำ <b>แผนที่จริงที่เล่นได้</b> ส่งเข้าเกมแล้วเลือกเล่นในล็อบบี้ได้ทันที</li>
+  <li><b>Map Editor</b> (<code>mapedit.html</code>, ปุ่ม <span class="ui">Sketch ▸</span>) เป็นผังร่างมุมบน ใช้คุยออกแบบ ไม่ได้ส่งเข้าเกม</li>
+  <li>ตกลงกันแล้วว่า <b>แผนที่ใหม่ทุกอันทำใน Map Builder</b> ไม่เขียนแผนที่เป็นโค้ด</li>
+  <li>หน่วย: <b>1 ช่อง = 1 เมตร</b> ตารางพื้นละเอียด 0.5 เมตร ตรงกับตารางชนของเกม เห็นอย่างไรก็ชนอย่างนั้น</li>
+</ul>
+
+<h2 id="open">เปิดใช้งาน</h2>
+<ol class="steps">
+  <li>ดับเบิลคลิก <code>Tools.bat</code> ในโฟลเดอร์เกม (เปิดเซิร์ฟเวอร์ในเครื่องให้เอง)</li>
+  <li>ในหน้าศูนย์รวม Tool กด <span class="ui">Map Builder</span></li>
+  <li>เลือกแผนที่จากช่องด้านบนซ้าย หรือกด <span class="ui">＋ New</span> สร้างใหม่</li>
+</ol>
+<div class="box warn"><b class="t">ต้องเปิดผ่าน Tools.bat เท่านั้น</b>ถ้าเปิดไฟล์ <code>mapbuild.html</code> ตรง ๆ จะบันทึกและส่งเข้าเกมไม่ได้ เพราะต้องใช้เซิร์ฟเวอร์ในเครื่องเขียนไฟล์ให้</div>
+
+<h2 id="screen">หน้าจอ</h2>
+<div class="mock" aria-label="ภาพจำลองหน้าจอ Map Builder">
+  <div class="bar"><span class="lbl" style="margin:0">❶</span><span>Map ▾</span><span>＋ New</span><span>Save</span><span>↶ ↷</span><span>✋ ✥ ⟳ ⤢ ⇥</span><span>▶</span><span class="pri">⬆ Export</span></div>
+  <div class="left"><div><span class="lbl">❷ Hierarchy</span>Walls<br>Upper Floors<br>Objects<br>Rooms…</div><div><span class="lbl">❸ Tool Settings</span>ค่าของเครื่องมือที่ใช้อยู่</div></div>
+  <div class="scene"><span class="lbl">❹ Scene</span><div class="tools"><i>⬚</i><i>⛰</i><i>🖌</i><i>▤</i><i>▦</i><i>▭</i><i>♜</i><i>◈</i><i>🌊</i><i>⁘</i></div></div>
+  <div><span class="lbl">❺ Inspector</span>ค่าของชิ้นที่เลือก ขนาด สี พังได้ไหม<br><br>ตรวจก่อนส่งเข้าเกม</div>
+  <div class="stat">❻ Status bar: ตำแหน่งเมาส์ • ข้อมูล • คำแนะนำเครื่องมือ</div>
+</div>
+<div class="tbl"><table>
+  <tr><th>ส่วน</th><th>มีอะไร</th></tr>
+  <tr><td>❶ แถบบน</td><td>เลือกแผนที่ • <span class="ui">New</span> • <span class="ui">Save</span> (<kbd>Ctrl</kbd>+<kbd>S</kbd>, ปกติบันทึกเองทุก 4 วิหลังแก้) • ย้อน/ทำซ้ำ • เครื่องมือแปลงร่าง ✋✥⟳⤢⇥ • <span class="ui">▶</span> ทดลองเล่น • <span class="ui">⬆ Export</span> ส่งเข้าเกม</td></tr>
+  <tr><td>❷ Hierarchy</td><td>รายการของทุกชิ้นในแผนที่ แยกตามหมวด • คลิก = เลือก • ดับเบิลคลิก = ซูมไปหา • มีช่องค้นหา</td></tr>
+  <tr><td>❸ Tool Settings</td><td>ตัวเลือกของเครื่องมือที่กำลังใช้ เช่น ขนาดแปรง สีกำแพง ชนิดของที่จะวาง</td></tr>
+  <tr><td>❹ Scene</td><td>มุมมอง 3D • แถบเครื่องมือ 10 ตัวลอยมุมซ้ายบน • แถบบนของ Scene: <span class="ui">Top</span> มุมบน, <span class="ui">Frame All</span> ดูทั้งแผนที่, <span class="ui">Snap</span> ดูดตาราง, <span class="ui">Grid</span>, <span class="ui">Too Steep</span> (ทางชันเกินเดินขึ้นเป็นสีแดง), <span class="ui">Colliders</span> (ดูที่ชนจริง), <span class="ui">Areas</span> (กรอบเฟส/เพดาน), <span class="ui">Map Lighting</span></td></tr>
+  <tr><td>❺ Inspector</td><td>ค่าของชิ้นที่เลือก และรายการ <b>ตรวจก่อนส่งเข้าเกม</b> ถ้าไม่ได้เลือกอะไร จะแสดงค่าของทั้งแผนที่ เช่น ชื่อ ขนาด ฟ้า หมอก และโหมดที่รองรับ</td></tr>
+</table></div>
+
+<h2 id="camera">คุมกล้อง</h2>
+<div class="keys">
+  <div><span>หมุนรอบ</span><span>ลากเมาส์ขวา</span></div>
+  <div><span>บินแบบเกม</span><span>ค้างเมาส์ขวา + <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span></div>
+  <div><span>บินลง / ขึ้น</span><span>ค้างเมาส์ขวา + <kbd>Q</kbd> / <kbd>E</kbd></span></div>
+  <div><span>บินเร็ว</span><span>+ <kbd>Shift</kbd></span></div>
+  <div><span>เลื่อนมุมมอง</span><span>ลากเมาส์กลาง หรือ <kbd>Space</kbd>+ลาก</span></div>
+  <div><span>ซูม</span><span>ล้อเมาส์</span></div>
+  <div><span>ซูมไปที่ของที่เลือก</span><span><kbd>F</kbd></span></div>
+  <div><span>มุมบน</span><span><kbd>Shift</kbd>+<kbd>T</kbd></span></div>
+  <div><span>ดูทั้งแผนที่</span><span><kbd>Home</kbd></span></div>
+</div>
+
+<h2 id="tools">เครื่องมือ 10 ตัว</h2>
+<p>อยู่ที่แถบลอยมุมซ้ายบนของ Scene กดปุ่มลัดเพื่อสลับได้ ตัวเลือกของแต่ละตัวอยู่ในช่อง <span class="ui">Tool Settings</span></p>
+<div class="tbl"><table>
+  <tr><th></th><th>เครื่องมือ</th><th>ปุ่ม</th><th>ใช้ทำอะไร / วิธีใช้</th></tr>
+  <tr><td class="ic">⬚</td><td>Select</td><td><kbd>V</kbd></td><td>เลือกและแก้ของ คลิก = เลือก, คลิกซ้ำแล้วลาก = ย้าย, <kbd>Shift</kbd>/<kbd>Ctrl</kbd>+คลิก = เลือกหลายชิ้น • กำแพง: ลากจุดขาวเพื่อดัดเส้น, <kbd>Alt</kbd>+คลิก = เพิ่มจุด</td></tr>
+  <tr><td class="ic">⛰</td><td>Sculpt</td><td><kbd>B</kbd></td><td>ปั้นพื้น: Raise ยก / Lower กด / Smooth เกลี่ย / Flatten ปรับราบ / Set Height ตั้งความสูง / Noise ขรุขระ / Ramp ลากจาก A ไป B เป็นทางลาด • <kbd>Shift</kbd> = กลับด้าน • <kbd>[</kbd><kbd>]</kbd> หรือ <kbd>Shift</kbd>+ล้อ = ขนาดแปรง • สีแดง = ชันเกินเดินขึ้น</td></tr>
+  <tr><td class="ic">🖌</td><td>Paint</td><td><kbd>P</kbd></td><td>ทาผิวพื้น เช่น หญ้า ดิน หิน ทราย โคลน น้ำ น้ำแข็ง ลาวา • <kbd>Shift</kbd> = ลบกลับเป็นหญ้า • <kbd>Alt</kbd>+คลิก = ดูดผิวตรงนั้น</td></tr>
+  <tr><td class="ic">▤</td><td>Wall</td><td><kbd>K</kbd></td><td>คลิกทีละจุดวาดแนวกำแพง • ดับเบิลคลิก/<kbd>Enter</kbd> = จบ • คลิกจุดแรก = ปิดวง • <kbd>Backspace</kbd> = ถอยจุด • <kbd>Esc</kbd> = ยกเลิก • ตั้งความหนา ความสูง สี โค้ง และพังได้ ที่ Tool Settings</td></tr>
+  <tr><td class="ic">▦</td><td>Breakable Panel</td><td><kbd>N</kbd></td><td>ผนังพังได้ทีละช่อง (อิฐ ปูน หิน ไม้ กระจก เหล็ก) คลิกทีละจุดเหมือนกำแพง แต่ละช่วง = 1 แผ่น คลิกจุดแรก = ปิดเป็นบ้าน • ดูหัวข้อ <a href="#pnl">แผ่นพัง</a></td></tr>
+  <tr><td class="ic">▭</td><td>Upper Floor</td><td><kbd>L</kbd></td><td>พื้นชั้นบน สะพาน ทางลาด • ลากจาก A ไป B = สะพาน/ทางลาดเชื่อมสองจุด • คลิกเฉย ๆ = แท่นมาตรฐาน • เดินลอดใต้ได้ถ้าสูง ≥ 2.8 ม.</td></tr>
+  <tr><td class="ic">♜</td><td>Castle</td><td><kbd>C</kbd></td><td>ชิ้นปราสาทสำเร็จ (กำแพง หอ ประตู ตึก บันได สะพาน ทรงอิสระ) ปลายชิ้นดูดติดกันเอง • ดูหัวข้อ <a href="#castle">ชิ้นส่วนปราสาท</a></td></tr>
+  <tr><td class="ic">◈</td><td>Place</td><td><kbd>O</kbd></td><td>วางของ: จุดเกิด แสง ทรงพื้นฐาน ของจากคลัง Asset ของในเกม (ลัง ถัง ต้นไม้ บ้าน) ของตกแต่ง ห้องสำเร็จ และจุดของโหมดบุกปราสาท • <kbd>,</kbd><kbd>.</kbd> หรือ <kbd>Shift</kbd>+ล้อ = หมุนก่อนวาง • วางบนชั้นบนได้</td></tr>
+  <tr><td class="ic">🌊</td><td>Backdrop</td><td><kbd>J</kbd></td><td>ภูเขา ทะเล ป่า นอกพื้นที่เล่น (ฉากหลัง ไม่มีที่ชน) • ดูหัวข้อ <a href="#bd">ฉากหลัง</a></td></tr>
+  <tr><td class="ic">⁘</td><td>Scatter</td><td><kbd>G</kbd></td><td>ลากโปรยต้นไม้ หิน หญ้า เป็นวงกว้าง • <kbd>Shift</kbd> = ลบของในวง</td></tr>
+</table></div>
+<div class="box tip"><b class="t">ตัวดูดสี 💧 Pick</b>ทุกช่องสีมีปุ่ม 💧 อยู่ข้าง ๆ กดแล้วคลิกบนแผนที่ = เอาสี ผิวพื้น หรือความสูงตรงนั้นมาใช้ หรือกด <kbd>Alt</kbd>+คลิก ในเครื่องมือ Paint / Wall / Castle / Place ก็ได้เหมือนกัน</div>
+
+<h2 id="gizmo">ย้าย หมุน ย่อขยาย (แบบ Unity)</h2>
+<p>เลือกของแล้วกดปุ่มเหล่านี้ จะมีตัวจับ (gizmo) ขึ้นมาให้ลาก ลาก 1 ครั้ง = <kbd>Ctrl</kbd>+<kbd>Z</kbd> ย้อนได้ 1 ครั้ง</p>
+<div class="tbl"><table>
+  <tr><th>ปุ่ม</th><th>เครื่องมือ</th><th>ทำอะไร</th></tr>
+  <tr><td><kbd>Q</kbd> ✋</td><td>Hand</td><td>ลากซ้าย = เลื่อนมุมมอง ไม่มีตัวจับ ใช้ตอนกลัวเผลอย้ายของ</td></tr>
+  <tr><td><kbd>W</kbd> ✥</td><td>Move</td><td>ลูกศรแดง/น้ำเงิน = ย้ายแนวราบ, ลูกศร<b>เขียว</b> = สูงต่ำ • ดูดตามค่า <span class="ui">Snap</span></td></tr>
+  <tr><td><kbd>E</kbd> ⟳</td><td>Rotate</td><td>หมุนรอบแกนตั้งทีละ 5° (ห้องสำเร็จทีละ 90°) • ของตกแต่ง/Asset เอียงแกน X/Z ได้ด้วย</td></tr>
+  <tr><td><kbd>R</kbd> ⤢</td><td>Scale</td><td>ย่อขยายตามแกนของชิ้น • ลูกบาศก์ตรงกลาง = ขยายทุกด้านเท่ากัน</td></tr>
+  <tr><td><kbd>T</kbd> ⇥</td><td>Resize</td><td>ลากหน้าเดียว อีกด้านอยู่กับที่ (ใช้ขยายกำแพง/พื้นให้ชนพอดี)</td></tr>
+</table></div>
+<div class="keys">
+  <div><span>หมุนของที่เลือก/ที่จะวาง</span><span><kbd>,</kbd> <kbd>.</kbd></span></div>
+  <div><span>ย่อ / ขยาย</span><span><kbd>[</kbd> <kbd>]</kbd></span></div>
+  <div><span>ยกขึ้น / ลง (จมดินได้)</span><span><kbd>PgUp</kbd> <kbd>PgDn</kbd></span></div>
+  <div><span>วางติดพื้น</span><span><kbd>End</kbd></span></div>
+  <div><span>ทำซ้ำ (วางทับที่เดิม)</span><span><kbd>Ctrl</kbd>+<kbd>D</kbd></span></div>
+  <div><span>ลบ</span><span><kbd>Del</kbd></span></div>
+</div>
+<p>ตัวเลข ขนาด สี และตัวเลือก เช่น <span class="ui">Collides</span> (ชนไหม) หรือ <span class="ui">Breakable</span> (พังได้ไหม) แก้ละเอียดได้ที่ <span class="ui">Inspector</span> ด้านขวา</p>
+
+<h2 id="new">ทำแผนที่ใหม่ทีละขั้น</h2>
+<ol class="steps">
+  <li><b>สร้าง:</b> กด <span class="ui">＋ New</span> ตั้ง id (ภาษาอังกฤษ ไม่เว้นวรรค เช่น <code>moonlake</code>) ชื่อที่จะโชว์ในเกม และขนาดกว้าง×ยาวเป็นเมตร</li>
+  <li><b>ตั้งค่าแผนที่:</b> ไม่ต้องเลือกอะไร แล้วดู Inspector: ชื่อ คำอธิบาย ฟ้า หมอก เพลง และติ๊ก <b>โหมดที่เล่นได้</b> เช่น FFA, Team, บุกปราสาท</li>
+  <li><b>ปั้นพื้น ⛰:</b> ยกเนิน ขุดหุบ ทำทางลาด ดูให้ทางที่ต้องเดินขึ้นไม่เป็นสีแดง</li>
+  <li><b>ทาผิว 🖌:</b> หญ้า ดิน หิน ทาง น้ำ ฯลฯ (โคลน/น้ำ/น้ำแข็ง/ลาวา ถูกส่งเป็นข้อมูลพื้นที่พิเศษให้เกมด้วย)</li>
+  <li><b>สิ่งก่อสร้าง:</b> กำแพง ▤, ชิ้นปราสาท ♜, พื้นชั้นบน ▭, ผนังพังได้ ▦ หรือวางห้องสำเร็จจาก Place</li>
+  <li><b>ของและที่กำบัง ◈ ⁘:</b> ลัง ถัง ต้นไม้ หิน บ้าน ของตกแต่ง และแสง (ไม่เกิน 12 ดวง)</li>
+  <li><b>จุดเกิด ◈:</b> หมวด System: <span class="ui">Spawn Point</span> (แนะนำ 6 จุดขึ้นไป) หรือ <span class="ui">Red/Blue Team Spawn</span> สำหรับโหมดทีม</li>
+  <li><b>ตรวจ:</b> ดูรายการ <b>ตรวจก่อนส่งเข้าเกม</b> ใน Inspector แก้ข้อที่เป็น ✕ ให้หมด (ข้อ ! เป็นคำเตือน)</li>
+  <li><b>ทดลองเล่น ▶:</b> ส่งเข้าเกมแล้วเปิดเกมบนแผนที่นี้ทันที เดินดูว่าติดหรือลอยตรงไหน</li>
+  <li><b>ส่งเข้าเกม ⬆ Export:</b> เขียนไฟล์ที่เกมโหลด หลังจากนี้แผนที่จะขึ้นให้เลือกในล็อบบี้</li>
+</ol>
+<div class="box tip"><b class="t">ส่งใหม่ทุกครั้งที่แก้</b>แก้แผนที่แล้วต้องกด <span class="ui">⬆ Export</span> หรือ <span class="ui">▶</span> อีกครั้ง เกมถึงจะเห็นของใหม่ ระบบบันทึกอัตโนมัติแค่บันทึกต้นฉบับ ยังไม่ได้ส่งเข้าเกม</div>
+
+<h2 id="siege">แผนที่บุกปราสาท</h2>
+<p>ใช้เครื่องมือ <span class="ui">Place ◈</span> หมวด <b>Siege mode</b> และติ๊กโหมดบุกปราสาทในค่าแผนที่</p>
+<div class="tbl"><table>
+  <tr><th>ของ</th><th>ใส่ยังไง</th></tr>
+  <tr><td>Core (แกน)</td><td>วางตามลำดับ ใส่เลข <code>n</code> = 1, 2, 3 … ใน Inspector (แกนเลขน้อยถูกบุกก่อน) ตั้งขนาดได้</td></tr>
+  <tr><td>Attacker / Defender Spawn</td><td>จุดเกิดฝ่ายบุก (<code>sgA</code>) และฝ่ายรับ (<code>sgB</code>) <b>เฟสละ 1 จุดต่อฝ่าย</b> ใส่เลขเฟส <code>ph</code></td></tr>
+  <tr><td>Phase Area</td><td>กรอบสี่เหลี่ยมพื้นที่เล่นของแต่ละเฟส (ใส่ <code>ph</code>) ใช้หลายกรอบต่อเฟสได้ แกนและจุดเกิดของเฟสนั้นต้องอยู่ในกรอบ</td></tr>
+  <tr><td>กำแพง/ประตูเป้าหมาย</td><td>เลือกกำแพง → Inspector ตั้ง "เป้าหมายบุกปราสาท" เป็น <b>wall</b> (พังได้) หรือ <b>gate</b> (ประตูที่เปิดเมื่อแกน 1 แตก)</td></tr>
+  <tr><td>Ceiling (เพดาน)</td><td>หมวด Room ใส่ในห้องที่มีหลังคา ค่าเริ่มสูง 21 ม. ถ้าต่ำกว่า 20 ม. ตัวตรวจจะเตือน เพราะสายที่บินได้จะเล่นลำบาก</td></tr>
+</table></div>
+<p>ตัวตรวจเช็กให้ว่าแกนเรียงเลขครบ ทุกเฟสมีจุดเกิดสองฝ่าย มีพื้นที่เล่น และของอยู่ในกรอบ ถ้าติ๊กแค่บุกปราสาท กด ▶ จะเปิดเกมโหมดบุกปราสาทให้เลย คุณเป็นฝ่ายบุก มีบอทฝ่ายรับ 1 ตัว</p>
+<div class="box"><b class="t">ตัวอย่างให้เปิดดู</b><code>siege-demo</code> (3 เฟส ประตู กำแพงเป้าหมาย รั้ว เพดาน) และ <code>fcs-file</code> (ปราสาทหลักทั้งแผนที่) เลือกจากช่องแผนที่ด้านบนได้เลย</div>
+
+<h2 id="castle">ชิ้นส่วนปราสาท ♜</h2>
+<ul>
+  <li><b>ชิ้นที่มี:</b> wall กำแพงตรง • corner มุม L • tower หอคอย (กลม/เหลี่ยม) • gate ประตูเมือง (มีบานไม้พังได้) • keep ตึกใหญ่ • stairs บันได • ramp ทางลาด • walk ทางเดินยก • bridge สะพาน • free ทรงอิสระ</li>
+  <li><b>วาง:</b> เลือกชิ้น แล้วคลิก • <kbd>,</kbd><kbd>.</kbd> หมุน 45° (<kbd>Shift</kbd> = 15°) • <b>ปลายชิ้นดูดติดกันเอง</b>ภายใน 1.6 ม. • คลิกบนยอดกำแพงหรือทางเดิน = วางต่อที่ความสูงนั้น</li>
+  <li><b>ตัวเลือก:</b> ฟันปลา ทางเดินบนยอด หลังคา หอมุม ราว เสารอง ประตู แก้ใน Tool Settings / Inspector</li>
+  <li><b>พังได้</b> ปิดเป็นค่าเริ่ม ถ้าเปิด กำแพงจะแตกเป็นช่วงละประมาณ 4 ม. แต่จะไม่มีฟันปลาและทางเดินบนยอด</li>
+  <li><b>ทรงอิสระ:</b> คลิกวาดรูปปิดทีละจุด → ได้ทรงตันดึงขึ้นสูง ปรับ "หุบยอด" ได้ (1 = ตรง, 0 = แหลม) ลากจุดสีฟ้าเพื่อปั้นรูป</li>
+  <li>ช่องประตูเดินลอดได้เมื่อสูง ≥ 2.2 ม.</li>
+</ul>
+
+<h2 id="rooms">ห้องสำเร็จ (prefab)</h2>
+<ul>
+  <li>ห้อง = แผนที่ที่ id ขึ้นต้นด้วย <code>room-</code> ทำเหมือนแผนที่ปกติบนพื้นราบ</li>
+  <li><b>วางห้อง:</b> Place → หมวด Prefab Rooms → คลิก = จุดกลางห้อง หมุนทีละ 90°</li>
+  <li>แก้ไฟล์ห้องครั้งเดียว ทุกแผนที่ที่ใช้ห้องนั้นเปลี่ยนตาม</li>
+  <li><b>แตกห้องเข้าแผนที่:</b> เลือกห้อง → Inspector กดปุ่มแตกห้อง → ของในห้องกลายเป็นของปกติ แก้ได้ทุกชิ้น และไม่ผูกกับไฟล์ห้องแล้ว</li>
+  <li>ตัวเลือก <span class="ui">Unbreakable</span> = ผนังทั้งห้องพังไม่ได้ • <span class="ui">Roof collision</span> = ยืนบนหลังคาได้</li>
+  <li><b>มีให้ใช้:</b> ห้องโถงใหญ่ <code>room-greathall</code> • ลาน 5 แบบ (ตลาด ลานฝึก สวนน้ำพุ โรงตีเหล็ก ค่ายทหาร) • บ้านหิน 5 แบบ (กระท่อม คฤหาสน์ จั่ว 3 ลูก หอ เพิงพิงกำแพง)</li>
+</ul>
+
+<h2 id="pnl">แผ่นพัง ▦</h2>
+<ul>
+  <li>เลือกวัสดุ แล้วคลิกลากแนวผนัง ทั้งเส้นอยู่กลุ่มเดียวกันและค้ำกัน คลิกจุดแรก = ปิดวงเป็นบ้าน</li>
+  <li><b>แบบพัง:</b> เป็นรู + กองซาก • ผิวหลุดเป็นชั้น • แตกทั้งแผ่น • เป็นรูไม่มีซาก</li>
+  <li>ปุ่ม <b>เจาะประตู</b> (1.4×2.4 ม.) และ <b>เจาะหน้าต่าง</b> (1.2×1.2 ม.) • ทำหลังคาเอียงหรือจั่วสามเหลี่ยมได้</li>
+  <li><b>ลองทุบ:</b> ใช้ Select แล้วคลิกบนแผ่น = ทุบ 1 ช่อง (<kbd>Shift</kbd> = 3×3) สีแดง = โดนทุบ สีส้ม = ส่วนที่จะร่วงตาม ไม่บันทึกลงไฟล์</li>
+  <li>บ้าน <code>house</code> ที่วางไว้ เลือกแล้วกด "แตกเป็นแผ่นพัง" เพื่อแก้ทีละแผ่นได้</li>
+  <li>ระวังจำนวนช่องรวม: เกิน 6,000 ตัวตรวจจะเตือน เกิน 12,000 ส่งเข้าเกมไม่ได้</li>
+</ul>
+
+<h2 id="bd">ฉากหลัง (Backdrop) 🌊</h2>
+<ul>
+  <li>เป็นพื้นที่รอบนอกแผนที่ไกลออกไป 600 ม. ทุกด้าน เกมวาดให้สวย แต่<b>เดินไปไม่ได้และไม่มีที่ชน</b></li>
+  <li><b>เริ่มจากแบบสำเร็จ:</b> coast หน้าผาริมทะเล • island เกาะ • valley หุบเขา • plains ทุ่ง • lake ทะเลสาบ • flat ราบ</li>
+  <li>แปรง: Raise / Lower / Smooth / Flatten / Set Height / Noise / Paint / Trees • Sea Stack คลิก = เพิ่มหินกลางทะเล, <kbd>Shift</kbd>+คลิก = ลบ</li>
+  <li>ตั้งระดับน้ำทะเล และติ๊ก <b>on</b> เพื่อให้เกมใช้</li>
+</ul>
+
+<h2 id="group">จัดกลุ่ม (Group)</h2>
+<div class="keys">
+  <div><span>รวมเป็นกลุ่มใหม่</span><span><kbd>Ctrl</kbd>+<kbd>G</kbd></span></div>
+  <div><span>เอาออกจากกลุ่ม</span><span><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd></span></div>
+  <div><span>เลือกทั้งกลุ่ม</span><span>คลิกชื่อกลุ่มใน Hierarchy</span></div>
+  <div><span>เปลี่ยนชื่อ</span><span>ดับเบิลคลิกชื่อกลุ่ม</span></div>
+</div>
+<p>กลุ่มใช้จัดระเบียบในเครื่องมือเท่านั้น เกมไม่สนใจ ชื่อว่าง = ยุบกลุ่ม</p>
+
+<h2 id="check">ตรวจก่อนส่งเข้าเกม</h2>
+<p>รายการอยู่ใน Inspector คลิกข้อความที่เป็นลิงก์เพื่อกระโดดไปหาจุดที่มีปัญหา</p>
+<ul>
+  <li><span style="color:var(--err)">✕</span> ต้องแก้ก่อนส่ง เช่น จุดเกิดไม่ครบ แกนเลขไม่ครบ ที่ชนเกิน 2,000 ชิ้น หรือช่องแผ่นพังเกิน 12,000</li>
+  <li><span style="color:var(--warn)">!</span> คำเตือน ส่งได้แต่ควรดู เช่น จุดเกิดอยู่บนทางชัน ชิดกำแพง เดินไปหากันไม่ถึง แสงเกิน 12 ดวง ใต้ชั้นบนเตี้ยกว่า 2.8 ม. หรือพื้นสูงต่ำเกินช่วง −5 ถึง +20 ม.</li>
+  <li><span style="color:var(--ok)">✓</span> ผ่าน</li>
+</ul>
+
+<h2 id="files">ไฟล์อยู่ไหน</h2>
+<div class="tbl"><table>
+  <tr><th>ไฟล์</th><th>คืออะไร</th></tr>
+  <tr><td><code>maps/build/&lt;id&gt;.json</code></td><td><b>ต้นฉบับ</b> ที่ Map Builder เปิดและบันทึก</td></tr>
+  <tr><td><code>assets/maps/&lt;id&gt;.json</code> + <code>.glb</code></td><td>ไฟล์ที่<b>เกมโหลด</b> เขียนตอนกด ⬆ Export</td></tr>
+  <tr><td><code>assets/manifest.json</code></td><td>รายชื่อแผนที่ในเกม เลขเวอร์ชันขยับเองทุกครั้งที่ส่ง</td></tr>
+  <tr><td><code>assets/mapkit/kit.json</code></td><td>คลัง Asset ที่ใช้วางในหมวด Kit</td></tr>
+  <tr><td><code>maps/build/_deleted/</code></td><td>แผนที่ที่ลบแล้ว กู้คืนได้</td></tr>
+</table></div>
+
+<h2 id="keys">ปุ่มลัดทั้งหมด</h2>
+<h3>เครื่องมือ</h3>
+<div class="keys">
+  <div><span>Select</span><kbd>V</kbd></div><div><span>Sculpt</span><kbd>B</kbd></div><div><span>Paint</span><kbd>P</kbd></div>
+  <div><span>Wall</span><kbd>K</kbd></div><div><span>Breakable Panel</span><kbd>N</kbd></div><div><span>Upper Floor</span><kbd>L</kbd></div>
+  <div><span>Castle</span><kbd>C</kbd></div><div><span>Place</span><kbd>O</kbd></div><div><span>Backdrop</span><kbd>J</kbd></div>
+  <div><span>Scatter</span><kbd>G</kbd></div>
+</div>
+<h3>แก้ของ</h3>
+<div class="keys">
+  <div><span>Hand / Move / Rotate / Scale / Resize</span><span><kbd>Q</kbd> <kbd>W</kbd> <kbd>E</kbd> <kbd>R</kbd> <kbd>T</kbd></span></div>
+  <div><span>หมุน</span><span><kbd>,</kbd> <kbd>.</kbd></span></div><div><span>ย่อ / ขยาย</span><span><kbd>[</kbd> <kbd>]</kbd></span></div>
+  <div><span>ยก / ลด</span><span><kbd>PgUp</kbd> <kbd>PgDn</kbd></span></div><div><span>ติดพื้น</span><kbd>End</kbd></div>
+  <div><span>ทำซ้ำ</span><span><kbd>Ctrl</kbd>+<kbd>D</kbd></span></div><div><span>ลบ</span><kbd>Del</kbd></div>
+  <div><span>ย้อน / ทำซ้ำ</span><span><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></span></div>
+  <div><span>บันทึก</span><span><kbd>Ctrl</kbd>+<kbd>S</kbd></span></div>
+  <div><span>รวมกลุ่ม / เอาออก</span><span><kbd>Ctrl</kbd>+<kbd>G</kbd> / +<kbd>Shift</kbd></span></div>
+</div>
+<h3>กล้อง</h3>
+<div class="keys">
+  <div><span>ซูมไปที่ของ</span><kbd>F</kbd></div><div><span>มุมบน</span><span><kbd>Shift</kbd>+<kbd>T</kbd></span></div>
+  <div><span>ทั้งแผนที่</span><kbd>Home</kbd></div><div><span>บิน</span><span>เมาส์ขวา + <kbd>WASD</kbd> <kbd>Q</kbd><kbd>E</kbd></span></div>
+</div>
+
+<h2 id="faq">ปัญหาที่พบบ่อย</h2>
+<h3>แก้แล้วในเกมไม่เปลี่ยน</h3>
+<p>ยังไม่ได้กด <span class="ui">⬆ Export</span> หรือ <span class="ui">▶</span> ใหม่ ถ้ากดแล้วยังไม่เปลี่ยน ให้รีเฟรชหน้าเกม</p>
+<h3>เดินขึ้นเนินไม่ได้</h3>
+<p>เปิด <span class="ui">Too Steep</span> ดู ส่วนที่เป็นสีแดงชันเกินไป ใช้ Sculpt → Smooth หรือ Ramp ทำทางลาด</p>
+<h3>เดินทะลุของ หรือชนของที่มองไม่เห็น</h3>
+<p>เปิด <span class="ui">Colliders</span> ดูที่ชนจริง แล้วเช็กช่อง <span class="ui">Collides</span> และขนาดที่ชนใน Inspector (ต้นไม้ชนแค่ลำต้นเป็นค่าเริ่ม)</p>
+<h3>ของลอยหรือจมดิน</h3>
+<p>เลือกของแล้วกด <kbd>End</kbd> = วางติดพื้นพอดี</p>
+<h3>ส่งเข้าเกมไม่ได้ / บันทึกไม่ได้</h3>
+<p>ต้องเปิดผ่าน <code>Tools.bat</code> และแก้ข้อ ✕ ในตัวตรวจให้หมด id ห้ามซ้ำกับแผนที่ที่สร้างจาก Blender</p>
+<h3>เกมกระตุกบนแผนที่นี้</h3>
+<p>ดูจำนวนที่ชน (กำแพงบางใช้วงชนเยอะ) จำนวนช่องแผ่นพัง แสง และของจากคลังที่มาจากหลายแผนที่ (หลายวัสดุ) ลดลงตามที่ตัวตรวจเตือน</p>
+</main>
+</div>

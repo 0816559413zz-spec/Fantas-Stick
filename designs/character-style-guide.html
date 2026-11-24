@@ -1,0 +1,106 @@
+<title>Fantas Academy Look</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;700&family=IBM+Plex+Sans+Thai:wght@400;600&display=swap">
+<style>
+/* layout: style rules -> uniform anatomy list -> four original houses with CSS-drawn scarves -> keep/avoid table */
+:root{
+  --ink:#14131a; --panel:#1c1b24; --line:#302e3b; --text:#eeedf2; --mute:#a3a1af; --gold:#d8b871;
+  --f-display:"Kanit","Leelawadee UI",Tahoma,sans-serif;
+  --f-body:"IBM Plex Sans Thai","Leelawadee UI",Tahoma,sans-serif;
+  color-scheme:dark;
+}
+body{background:var(--ink);color:var(--text);font:15px/1.65 var(--f-body)}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:30px 48px}
+.eyebrow{font:600 12px var(--f-display);letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+h1{font:700 clamp(30px,5vw,46px)/1.08 var(--f-display);margin:6px 0 0;text-wrap:balance}
+.lead{color:#cfcdd8;max-width:70ch;margin:12px 0 0}
+h2{font:700 24px var(--f-display);margin:36px 0 12px}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.rule{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.rule b{font:600 16px var(--f-display);display:block;margin-bottom:2px;color:var(--gold)}
+.rule p{margin:0;color:#c9c7d3;font-size:14px}
+.uni{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}
+.part{min-width:0;display:grid;grid-template-columns:44px 1fr;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+.part .n{font:700 22px var(--f-display);color:var(--gold)}
+.part b{font:600 15px var(--f-display)}
+.part p{margin:2px 0 0;color:#c9c7d3;font-size:14px}
+.houses{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.house{min-width:0;border-radius:12px;overflow:hidden;border:1px solid color-mix(in srgb,var(--a) 50%,var(--line));background:linear-gradient(170deg,color-mix(in srgb,var(--a) 26%,var(--ink)),var(--panel) 60%)}
+.house .hd{padding:16px 16px 6px}
+.house h3{font:700 22px var(--f-display);margin:0;color:color-mix(in srgb,var(--b) 70%,#fff)}
+.house .en{font:500 12px var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.house p{margin:6px 0 0;font-size:14px;color:#d2d0db}
+.scarf{position:relative;height:150px;margin:8px 16px 14px}
+.scarf .wrap2{position:absolute;left:50%;top:0;transform:translateX(-50%);width:120px;height:34px;border-radius:17px;background:var(--a);box-shadow:inset 0 -6px 0 rgba(0,0,0,.18)}
+.scarf .tail{position:absolute;top:22px;width:34px;height:110px;background:linear-gradient(var(--a) 0 58%,var(--b) 58% 74%,var(--a) 74%);
+  clip-path:polygon(0 0,100% 0,100% 88%,50% 100%,0 88%);box-shadow:inset -5px 0 0 rgba(0,0,0,.15)}
+.scarf .t1{left:calc(50% - 44px);transform:rotate(4deg)}
+.scarf .t2{left:calc(50% + 8px);top:26px;height:96px;transform:rotate(-6deg)}
+.scarf .knit{position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 2px,transparent 2px 6px);pointer-events:none}
+.scarf .badge{position:absolute;left:calc(50% - 36px);top:118px;width:16px;height:16px;border-radius:50%;background:var(--b);border:2px solid rgba(0,0,0,.35)}
+.sw{display:flex;gap:6px;padding:0 16px 16px;flex-wrap:wrap}
+.sw span{font:12px ui-monospace,Consolas,monospace;color:var(--mute);display:flex;align-items:center;gap:6px}
+.sw i{width:18px;height:18px;border-radius:4px;background:var(--c);border:1px solid rgba(255,255,255,.2)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 14px var(--f-display);color:var(--gold)}
+td:first-child{color:var(--text);font-weight:600;white-space:nowrap}
+.note{margin-top:28px;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:8px;padding:14px 18px;color:#d2d0db}
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">Character look · ร่าง v1</div>
+  <h1>ลุคนักเรียนเวท Fantas</h1>
+  <p class="lead">แนวอนิเมะ 3D (อัปเดตตามที่ผู้ใช้ขอ 2026-11-23) ลายเส้นนุ่ม ตาโต สีสดแต่ไม่จัด ท่าทางมีชีวิต ไม่แข็ง ยังเป็นนักเรียนเวทที่ผู้เล่นแต่งหน้า ผม และสีได้เหมือนเดิม ชุด บ้าน สี และตราออกแบบใหม่ทั้งหมดเป็นของเกมเราเอง</p>
+
+  <h2>กฎสไตล์อนิเมะ (เอาแค่เทคนิค)</h2>
+  <div class="rules">
+    <div class="rule"><b>สัดส่วน</b><p>สูงประมาณ 6 หัว ขาเรียวยาว ไหล่แคบ มือเล็กลง หัวใหญ่กว่าคนจริงเล็กน้อย ดูน่ารักแต่ยังเท่</p></div>
+    <div class="rule"><b>หน้า</b><p>ตาวาดเป็นลาย (เปลี่ยนสีตาและอารมณ์ได้) มีไฮไลต์ในตา 2 จุด จมูกเป็นแค่จุดเงา ปากเป็นเส้นสั้น หน้าเรียบไม่มีเงาแหว่ง</p></div>
+    <div class="rule"><b>ผม</b><p>ช่อแหลมเป็นแผงแบบอนิเมะ มีปอยหน้าม้า และปลายผมไล่อีกสีได้ (ตัวเลือกแต่งตัว) มีแถบเงาวาวโค้งคาดศีรษะ 1 แถบ</p></div>
+    <div class="rule"><b>ผ้า</b><p>ทรงชัด ชายผ้าพลิ้วตามแรงวิ่ง/พุ่ง รอยพับเป็นเส้นวาด ไม่ทำลายผ้าสมจริง</p></div>
+    <div class="rule"><b>การลงสี (cel shading)</b><p>เงาแบบตัด 2 ชั้น (สว่าง/เงา) ไม่ไล่นุ่ม เงาบนหน้าบังคับให้เรียบ มีเส้นขอบบาง ๆ สีเข้มกว่าผิวนั้น (ไม่ใช่ดำล้วน) และขอบโดนแสงสีอุ่นเส้นบาง</p></div>
+    <div class="rule"><b>ไม่แข็ง</b><p>ท่าทางมีจังหวะเร่ง-หน่วง ตัวโน้มก่อนวิ่ง ผมและผ้าส่ายตามหลังตัว (secondary motion) ท่ายืนรอโยกเบา ๆ และมีอีโมตหน้า</p></div>
+    <div class="rule"><b>เพื่อไม่ให้ดูเหมือน AI</b><p>ทุกชิ้นต้องมีเหตุผลและซ้ำกันทั้งเกม ใช้ทรงหลักน้อยชิ้น ยอมให้ไม่สมมาตร เช่น ผ้าคลุมไหล่ข้างเดียว ตรากลัดข้างเดียว และไม่ใส่ลายละเอียดที่ไม่มีหน้าที่</p></div>
+  </div>
+
+  <h2>ชุดนักเรียน Fantas (ออกแบบใหม่)</h2>
+  <div class="uni">
+    <div class="part"><span class="n">1</span><div><b>เสื้อคลุมปกตั้ง</b><p>ยาวคลุมเข่า ไม่มีฮู้ด ปกตั้งสูงพับเป็นสองชั้น ชายด้านหน้าสั้น ด้านหลังยาว ตัดเฉียง พอวิ่งชายหลังจะพลิ้วเป็นทรงจำง่าย</p></div></div>
+    <div class="part"><span class="n">2</span><div><b>ผ้าคลุมไหล่ข้างเดียว</b><p>เป็นสีบ้าน คลุมไหล่ซ้ายลงมาถึงศอก ใช้เป็นเงาตัวประจำเกม ดูไกล ๆ ก็รู้ว่าเป็นนักเรียน Fantas</p></div></div>
+    <div class="part"><span class="n">3</span><div><b>ผ้าพันคอปลายธง</b><p>ผ้าพื้นสีหลักมีแถบสีรองกว้างแถบเดียว ไม่ใช้ลายทางถี่ ปลายตัดเป็นสามเหลี่ยมแบบธง และปักตราบ้านที่ปลายข้างหนึ่ง</p></div></div>
+    <div class="part"><span class="n">4</span><div><b>เข็มกลัดรูนธาตุ</b><p>กลัดเสื้อคลุมไว้ที่อกข้างเดียว รูปทรงเปลี่ยนตามสายที่เลือก เช่น ไฟ น้ำแข็ง หรือสายฟ้า และเรืองแสงตอนร่ายสกิล</p></div></div>
+    <div class="part"><span class="n">5</span><div><b>เสื้อกั๊กไขว้ + เชิ้ต</b><p>เสื้อกั๊กติดกระดุมเฉียงข้าง ไม่ใช่กระดุมกลาง ปกเชิ้ตกลม ไม่ผูกเนคไทแบบเดิม ใช้ผ้าผูกคอเล็ก ๆ สีบ้านแทน</p></div></div>
+    <div class="part"><span class="n">6</span><div><b>ซองไม้กายสิทธิ์ที่ต้นขา + บูทหุ้มข้อ</b><p>มีสายหนังคาดต้นขาเป็นซองใส่ไม้ และกระเป๋าใส่ขวดยาเล็ก ๆ ดูเป็นนักเรียนที่ออกไปสู้จริง ไม่ได้นั่งเรียนอย่างเดียว</p></div></div>
+  </div>
+
+  <h2>4 บ้านใหม่ (แทนบ้านเดิม)</h2>
+  <div class="houses" id="houses"></div>
+
+  <h2>เอาอะไร / ไม่เอาอะไรจากภาพอ้างอิง</h2>
+  <div class="tbl"><table>
+    <tr><th>เรื่อง</th><th>เอา (เทคนิค)</th><th>ไม่เอา (ของเขา)</th></tr>
+    <tr><td>หน้า/ผม</td><td>หน้าการ์ตูนกึ่งจริง ผมเป็นช่อหนา</td><td>หน้าตัวละครใดตัวหนึ่งในภาพ</td></tr>
+    <tr><td>ชุด</td><td>ผ้าหนามีตะเข็บ ชุดหลายชั้น</td><td>เสื้อคลุมมีฮู้ด + ขอบแถบสีบ้าน + เนคไทลายทาง</td></tr>
+    <tr><td>ผ้าพันคอ</td><td>ผ้าพันคอถักเป็นของประจำตัว</td><td>ลายทางสลับถี่สองสีแบบในภาพ</td></tr>
+    <tr><td>บ้าน</td><td>มี 4 บ้าน แต่ละบ้านมีสีประจำ</td><td>ชื่อบ้าน สัตว์ประจำบ้าน และคู่สีเดิมทั้งหมด</td></tr>
+    <tr><td>การลงสี</td><td>เงานุ่ม ขอบโดนแสงอุ่น</td><td>ไม่มีอะไรต้องตัด เพราะเป็นเทคนิคทั่วไป</td></tr>
+  </table></div>
+
+  <div class="note"><b>เรื่องสำคัญ:</b> ตอนนี้ในโค้ดเกมยังใช้ชื่อบ้านและสัตว์ประจำบ้านจากเรื่องดังโดยตรง (ใน <code>HOUSES</code> ของ <code>js/02-data.js</code>) ถ้าจะเผยแพร่เกม ควรเปลี่ยนเป็น 4 บ้านใหม่ในหน้านี้ ระบบสีบ้านเดิมใช้ต่อได้เลย แค่เปลี่ยนชื่อ สี และตรา</div>
+</div>
+
+<script>
+const HS=[
+ {th:'บ้านเพลิงอรุณ',en:'Dawnflare',animal:'จิ้งจอกหางไฟ',trait:'กล้าลองของใหม่ บุกก่อนคิดทีหลัง',a:'#c4532d',b:'#f1dcb0'},
+ {th:'บ้านคลื่นคราม',en:'Tidewell',animal:'กระเรียน',trait:'ใจเย็น ช่างสังเกต วางแผนเป็นขั้น',a:'#2a6f7a',b:'#e6eef0'},
+ {th:'บ้านรากศิลา',en:'Rootstone',animal:'หมีป่า',trait:'อดทน มั่นคง ไม่ทิ้งเพื่อน',a:'#4f6e3a',b:'#d9b36a'},
+ {th:'บ้านเงาดารา',en:'Starshade',animal:'ค้างคาวดาว',trait:'ทะเยอทะยาน เงียบ แต่คิดไกล',a:'#4a2e6b',b:'#e3c9e8'}
+];
+document.getElementById('houses').innerHTML=HS.map(h=>`<article class="house" style="--a:${h.a};--b:${h.b}">
+ <div class="hd"><div class="en">${h.en}</div><h3>${h.th}</h3><p>สัตว์ประจำบ้าน: ${h.animal}<br>${h.trait}</p></div>
+ <div class="scarf" aria-hidden="true"><div class="wrap2"></div><div class="tail t1"></div><div class="tail t2"></div><div class="badge"></div><div class="knit"></div></div>
+ <div class="sw"><span style="--c:${h.a}"><i></i>${h.a}</span><span style="--c:${h.b}"><i></i>${h.b}</span></div>
+</article>`).join('');
+</script>

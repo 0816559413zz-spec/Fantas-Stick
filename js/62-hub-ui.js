@@ -217,6 +217,7 @@ function hubLobby(){
   const L=LOBBY,el=$('#hRoom');if(!L||!el)return;
   if(HUI.st==='flip'){if(HUI.flipDone)hubFlipEnd();else return;}
   if(NET.isHost)clearTimeout(HUI.hostT);
+  if(!store('wd_kit2')&&!HUI.kitAsked){HUI.kitAsked=1;setTimeout(()=>{try{skwOpen();}catch(e){console.warn(e);}},400);}   // first match: pick element here (user 2026-11-24, creator no longer has it)
   const host=NET.isHost,M=MODES[L.mode]||MODES.train,hm=HMODES.find(x=>x.k===L.mode)||{k:L.mode,en:modeTitle(M),th:'',d:M.d};
   const team=!!M.team,me=L.players.find(p=>p.id===NET.myId);
   const K=parseKit(myKit),P=PATHS[K.path]||PATHS[0],ult=SPELL_LIST[K.ult];

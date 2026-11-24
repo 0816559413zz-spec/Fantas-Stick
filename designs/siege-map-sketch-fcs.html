@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<title>Cliff Side Castle multi-entry sketch</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mali:wght@400;600&display=swap">
+<style>html,body{margin:0;background:#e9e4d8}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1600" height="1370"></canvas>
+<script>
+// Hand-drawn redesign proposal for Cliff Side Castle (Map Editor grid 140x50, 1 cell = 1 m editor, x4.5 in game).
+const cv=document.getElementById('c'),g=cv.getContext('2d');
+let seed=11;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
+const j=a=>(rnd()-.5)*2*a;
+const INK={pencil:'#3b3a3f',main:'#1f4fa8',flank:'#d9741c',high:'#7a3fa0',atk:'#b3262b',def:'#1f5fbf',green:'#2f7a3a',hi:'rgba(255,214,64,.40)',paper:'#f4efe2',grid:'rgba(90,120,160,.13)',soft:'#5b5a60',wood:'#8a5a2b'};
+let S=10.6,OX=58,OY=118;
+const P=(x,y)=>[OX+x*S,OY+y*S];
+const GAME=4.5,WALK=8.75;
+
+function stroke(pts,col,w,passes=2,amp=1){
+  for(let p=0;p<passes;p++){
+    g.beginPath();g.strokeStyle=col;g.lineWidth=w*(p?0.7:1);g.lineCap='round';g.lineJoin='round';g.globalAlpha=p?0.5:0.9;
+    for(let i=0;i<pts.length-1;i++){
+      const [x1,y1]=pts[i],[x2,y2]=pts[i+1],L=Math.hypot(x2-x1,y2-y1),n=Math.max(1,Math.round(L/36));
+      if(i===0)g.moveTo(x1+j(amp),y1+j(amp));
+      for(let k=1;k<=n;k++){const t=k/n,mx=x1+(x2-x1)*(t-.5/n),my=y1+(y2-y1)*(t-.5/n);
+        g.quadraticCurveTo(mx+j(amp*1.5),my+j(amp*1.5),x1+(x2-x1)*t+j(amp),y1+(y2-y1)*t+j(amp));}
+    }
+    g.stroke();
+  }
+  g.globalAlpha=1;
+}
+const M=pts=>pts.map(p=>P(...p));
+const line=(a,b,c,d,col=INK.pencil,w=2)=>stroke([P(a,b),P(c,d)],col,w);
+const poly=(pts,col=INK.pencil,w=2,close=true)=>stroke(M(close?[...pts,pts[0]]:pts),col,w);
+const rect=(x,y,w,h,col=INK.pencil,lw=2)=>poly([[x,y],[x+w,y],[x+w,y+h],[x,y+h]],col,lw);
+function wash(x,y,w,h,col){g.save();g.globalCompositeOperation='multiply';g.fillStyle=col;const [a,b]=P(x,y);
+  g.beginPath();g.moveTo(a+j(4),b+j(4));g.lineTo(a+w*S+j(4),b+j(4));g.lineTo(a+w*S+j(4),b+h*S+j(4));g.lineTo(a+j(4),b+h*S+j(4));g.closePath();g.fill();g.restore();}
+function circle(cx,cy,r,col=INK.pencil,w=2,dash){
+  const pts=[];const n=44,o=rnd()*6;for(let i=0;i<=n+2;i++){const a=o+i/n*Math.PI*2,rr=r*(1+j(.03));pts.push(P(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr));}
+  if(dash)g.setLineDash(dash);stroke(pts,col,w,1);g.setLineDash([]);
+}
+function hatch(x,y,w,h,col=INK.pencil,gap=.8,ang=1){
+  g.save();const [a,b]=P(x,y);g.beginPath();g.rect(a,b,w*S,h*S);g.clip();
+  for(let t=-h;t<w+h;t+=gap){const pts=[P(x+t,y),P(x+t+h*ang,y+h)];g.beginPath();g.strokeStyle=col;g.globalAlpha=.4;g.lineWidth=1;
+    g.moveTo(pts[0][0]+j(1),pts[0][1]);g.lineTo(pts[1][0]+j(1.5),pts[1][1]);g.stroke();}
+  g.restore();g.globalAlpha=1;
+}
+function wall(pts){stroke(M(pts),INK.pencil,S*.75,1,.5);stroke(M(pts),INK.pencil,1.4,1,1);}
+function breakable(x1,y1,x2,y2){ // wooden/breakable segment drawn as tick marks
+  const n=Math.max(3,Math.round(Math.hypot(x2-x1,y2-y1)/.9));const dx=y2-y1,dy=x1-x2,L=Math.hypot(dx,dy)||1;
+  for(let k=0;k<=n;k++){const t=k/n,x=x1+(x2-x1)*t,y=y1+(y2-y1)*t;stroke([P(x-dx/L*.7,y-dy/L*.7),P(x+dx/L*.7,y+dy/L*.7)],INK.wood,2.2,1,.4);}
+}
+function gap(x1,y1,x2,y2){const [a,b]=P(x1,y1),[c,d]=P(x2,y2);g.strokeStyle=INK.paper;g.lineWidth=S*1.1;g.lineCap='butt';g.beginPath();g.moveTo(a,b);g.lineTo(c,d);g.stroke();}
+function arrow(pts,col,w=2.4,dash){
+  if(dash)g.setLineDash(dash);
+  const sp=[];for(let i=0;i<pts.length-1;i++){const [x1,y1]=pts[i],[x2,y2]=pts[i+1];for(let t=0;t<1;t+=.34)sp.push([x1+(x2-x1)*t,y1+(y2-y1)*t]);}
+  sp.push(pts[pts.length-1]);stroke(M(sp),col,w,1,.8);g.setLineDash([]);
+  const [ax,ay]=P(...pts[pts.length-2]),[bx,by]=P(...pts[pts.length-1]),a=Math.atan2(by-ay,bx-ax),L=12;
+  stroke([[bx-Math.cos(a-.45)*L,by-Math.sin(a-.45)*L],[bx,by],[bx-Math.cos(a+.45)*L,by-Math.sin(a+.45)*L]],col,w,1,.4);
+}
+const plen=pts=>pts.slice(1).reduce((s,p,i)=>s+Math.hypot(p[0]-pts[i][0],p[1]-pts[i][1]),0);
+function txt(s,x,y,{size=15,col=INK.pencil,rot=0,bold=0,px=0,align='left'}={}){
+  const [a,b]=px?[x,y]:P(x,y);g.save();g.translate(a,b);g.rotate(rot+j(.01));g.fillStyle=col;g.textAlign=align;
+  g.font=`${bold?600:400} ${size}px Mali, "Comic Sans MS", sans-serif`;
+  s.split('\n').forEach((l,i)=>g.fillText(l,0,i*size*1.22));g.restore();
+}
+function badge(n,x,y,col=INK.pencil){const [a,b]=P(x,y);g.fillStyle=INK.paper;g.beginPath();g.arc(a,b,10,0,7);g.fill();
+  stroke((()=>{const p=[];for(let i=0;i<=26;i++){const t=i/24*Math.PI*2;p.push([a+Math.cos(t)*10,b+Math.sin(t)*10]);}return p;})(),col,1.8,1,.4);
+  txt(String(n),a,b+5,{px:1,size:14,bold:1,col,align:'center'});}
+function spawn(x,y,letter,col,label){const [a,b]=P(x,y);g.fillStyle=col;g.globalAlpha=.16;g.fillRect(a-14,b-14,28,28);g.globalAlpha=1;
+  stroke([[a-14,b-14],[a+14,b-14],[a+14,b+14],[a-14,b+14],[a-14,b-14]],col,2.4,2,1);txt(letter,a,b+6,{px:1,size:17,bold:1,col,align:'center'});
+  if(label)txt(label,a,b+30,{px:1,size:12,col,align:'center'});}
+function core(x,y,n){wash(x-4.5,y-3,9,6,INK.hi);circle(x,y,3.7,INK.pencil,2,[8,6]);const [a,b]=P(x,y);
+  stroke([[a,b-11],[a+9,b],[a,b+11],[a-9,b],[a,b-11]],INK.pencil,2.6,2,.5);txt('แกน '+n,x,y+5.6,{align:'center',bold:1,size:14});}
+function cross(x,y){const [a,b]=P(x,y),r=6;stroke([[a-r,b],[a+r,b]],INK.green,3,1,.3);stroke([[a,b-r],[a,b+r]],INK.green,3,1,.3);}
+
+async function draw(){
+  try{await document.fonts.load('400 16px Mali');await document.fonts.load('600 16px Mali');}catch(e){}
+  g.fillStyle=INK.paper;g.fillRect(0,0,cv.width,cv.height);
+  for(let i=0;i<11000;i++){g.fillStyle=`rgba(120,100,70,${rnd()*.05})`;g.fillRect(rnd()*1600,rnd()*1370,1.5,1.5);}
+  g.strokeStyle=INK.grid;g.lineWidth=1;
+  for(let x=0;x<=140;x+=5){const [a]=P(x,0);g.beginPath();g.moveTo(a,OY);g.lineTo(a,OY+50*S);g.stroke();if(x%10===0)txt(String(x),a,OY-6,{px:1,size:10,col:'#8a8f9c',align:'center'});}
+  for(let y=0;y<=50;y+=5){const [,b]=P(0,y);g.beginPath();g.moveTo(OX,b);g.lineTo(OX+140*S,b);g.stroke();}
+
+  txt('Cliff Side Castle — 3 เฟส 3 วิธีบุก (หลายทาง → ทุบเข้า → ไต่ขึ้น)',58,46,{px:1,size:28,bold:1});
+  txt('วาดทับกริดเดิมใน Map Editor (140×50 ช่อง) · สีเส้นตามแบบของคุณ: ฟ้า = ทางหลัก · ส้ม = ทางอ้อม · ม่วงประ = ทางสูง/กระโดดลง · A แดง = จุดเกิดบุก · B ฟ้า = จุดเกิดรับ',60,76,{px:1,size:14,col:INK.soft});
+
+  // phase washes (no overlap)
+  wash(0,0,28,50,'rgba(120,175,95,.20)');wash(28,0,60,50,'rgba(190,150,110,.17)');wash(88,0,52,50,'rgba(120,140,170,.17)');
+  txt('เฟส 1 · ป่า — หลายทาง',1,2.6,{size:15,bold:1,col:'#3c6b34'});
+  txt('เฟส 2 · Hall — ทุบเข้า',29,2.6,{size:15,bold:1,col:'#7a5434'});
+  txt('เฟส 3 · ปราการ — ไต่ขึ้น',89,2.6,{size:15,bold:1,col:'#44597a'});
+  poly([[0,0],[140,0],[140,50],[0,50]],INK.pencil,1.4);
+
+  // ---------- walls ----------
+  // west castle wall x=28 with iron gate + 2 breakables (kept from your map)
+  wall([[28,0],[28,50]]);gap(28,11,28,18);gap(28,2,28,8);gap(28,22,28,28);
+  breakable(28,2,28,8);breakable(28,22,28,28);
+  for(let k=0;k<6;k++)line(27.6,11.3+k*1.2,28.4,11.3+k*1.2,INK.pencil,2);
+  txt('ประตูเหล็ก\n(เปิดเมื่อแกน 1 แตก)',29,18.6,{size:11,col:INK.soft});
+  // corridor south wall y=20 (x28-63) with hall doors
+  wall([[28,20],[63,20]]);gap(46,20,54,20);gap(40,20,44,20);breakable(40,20,44,20);txt('เริ่มเปิด 2 ทาง (①③)'+'\n'+'พังเพิ่มได้ 3 จุด (②④⑤)',40,40.5,{size:12,col:INK.wood,bold:1});
+  // Hall z177 x38-63 y21-36
+  wall([[38,21],[38,36],[63,36],[63,21]]);gap(38,25,38,31);breakable(38,25,38,31);gap(49,36,56,36);breakable(49,36,56,36);gap(63,26,63,31);
+  // hall balcony (north, level 3)
+  hatch(39,21,23,2.2,INK.pencil,.7,.4);txt('ระเบียงชั้น 2 (+3)',57,25.2,{size:11,col:INK.soft,align:'center'});
+  // phase 2/3 wall x=88 with gatehouse + postern
+  wall([[88,0],[88,50]]);gap(88,21,88,28);gap(88,33,88,37);
+  // wall-walk north (high route) y=5
+  hatch(88,6,36,2,INK.high,.9,.5);txt('กำแพงเดิน (+4)',106,5.4,{size:11,col:INK.high,align:'center'});
+  // keep courtyard x100-124 y12-36
+  rect(96,8,34,34,INK.pencil,2.4);hatch(96,8,34,34,'#7a3fa0',1.4,.6,.15);rect(104,16,18,16,INK.pencil,2.8);hatch(104,16,18,16,'#7a3fa0',.8,.6,.3);gap(96,21,96,28);gap(108,42,114,42);gap(104,21,104,27);gap(109,16,115,16);gap(109,32,115,32);gap(122,20,122,28);[[96,21,96,28],[104,21,104,27],[108,42,114,42],[109,16,115,16],[109,32,115,32],[122,20,122,28]].forEach(([a,b,c,d])=>{const v=a===c;for(let k=0;k<5;k++){const t=k/4;v?line(a-.6,b+(d-b)*t,a+.6,b+(d-b)*t,INK.pencil,1.4):line(a+(c-a)*t,b-.6,a+(c-a)*t,b+.6,INK.pencil,1.4);}});txt('+0',92,46,{size:13,bold:1,col:'#7a3fa0'});txt('+3',97,41,{size:13,bold:1,col:'#7a3fa0'});txt('+6',105,31,{size:13,bold:1,col:'#7a3fa0'});txt('ชั้นบน = ที่ของฝ่ายรับ'+'\n'+'ทางลาด/บันได = คอขวดแต่ละชั้น',124,46.6,{size:11,col:INK.soft});
+  // fix: east block that was unreachable -> open yard
+  txt('ลานหลังเดิม (x122–139) เดินไม่ถึง\n→ ทำเป็นชั้นบนของฝ่ายรับ',123,4,{size:11,col:INK.soft});
+  // cover pieces
+  [[13,11,1.4,1.4],[19,16,1.4,1.4],[48,27,1.6,1.6],[54,30,1.6,1.6],[109,21,1.6,1.6],[115,26,1.6,1.6],[44,10,1,1],[57,14,1,1],[95,30,2,2],[80,38,2,2]].forEach(r=>{rect(...r,INK.pencil,1.6);hatch(...r,INK.pencil,.5);});
+  // forest marks
+  for(let i=0;i<40;i++){const x=1+rnd()*25,y=4+rnd()*44;if(Math.hypot(x-16,y-14)<5)continue;const [a,b]=P(x,y);stroke([[a-3,b+3],[a,b-4],[a+3,b+3]],'#4f7f45',1.3,1,.4);}
+  // creek west
+  g.save();g.globalCompositeOperation='multiply';stroke(M([[0,26],[3,23],[5,17],[4,10],[6,3]]),'rgba(70,140,210,.35)',12,1,1);g.restore();
+  txt('ลำธาร',4.6,9,{size:11,col:'#2c5f93'});
+  // ridge east of forest
+  hatch(21,20,5,16,'#4f7f45',1,.3);txt('สันเนิน +4',23.5,38,{size:11,col:'#3c6b34',align:'center'});
+
+  // ---------- cores, spawns ----------
+  core(16,14,1);core(51,29,2);core(112,24,3);
+  spawn(3,44,'A1',INK.atk,'บุก 1');spawn(22,6,'A2',INK.atk,'บุก 2');spawn(76,20,'A3',INK.atk,'บุก 3');
+  spawn(33,5,'B1',INK.def,'รับ 1');spawn(76,45,'B2',INK.def,'รับ 2');spawn(127,24,'B3',INK.def,'รับ 3');
+  cross(4,30);cross(24,40);cross(34,25);cross(68,22);cross(92,8);cross(94,40);
+
+  // ---------- routes ----------
+  const R={
+    p1main:[[4,42],[9,37],[14,30],[15,23],[16,18]],
+    p1west:[[2,41],[1.5,30],[3,22],[6,16],[12,14]],
+    p1north:[[3,22],[5,12],[8,8],[13,10]],
+    p1ridge:[[6,45],[17,42],[23,36],[23.5,24],[20,16]],
+    p2main:[[24,8],[29,14],[40,14],[50,17],[50,25]],
+    p2west:[[29,15],[33,22],[36,28],[44,28]],
+    p2east:[[30,12],[52,13],[62,16],[65,21],[64.5,27],[61,28.5],[55,29]],
+    p2bal:[[36,17],[42,19],[45,23],[48,26]],
+    p3main:[[78,21],[88,24.5],[100,24.5],[108,24]],
+    p3south:[[77,23],[86,34],[92,36],[104,38],[110,36.5],[111,28]],
+    p3high:[[79,19],[87,18],[90,12],[104,8],[111,8],[111.5,13],[112,20]],
+  };
+  arrow(R.p1main,INK.main,3);arrow(R.p1west,INK.flank,2.4);arrow(R.p1north,INK.flank,2.2);arrow(R.p1ridge,INK.high,2.4,[7,6]);
+  arrow(R.p2main,INK.main,3);arrow(R.p2west,INK.flank,2.4,[7,6]);arrow(R.p2east,INK.flank,2.4);arrow(R.p2bal,INK.high,2.4,[7,6]);
+  arrow(R.p3main,INK.main,3);arrow(R.p3south,INK.flank,2.4);arrow(R.p3high,INK.high,2.4,[7,6]);
+  // connectors (lane-to-lane)
+  g.setLineDash([3,6]);stroke(M([[2,29],[13,29.5],[23,29]]),INK.soft,1.6,1,.6);stroke(M([[92,36],[96,30],[100,26.5]]),INK.soft,1.6,1,.6);stroke(M([[33,21],[44,19]]),INK.soft,1.6,1,.6);g.setLineDash([]);
+  txt('ทางเชื่อมเลน',8,32,{size:11,col:INK.soft});txt('ทางเชื่อมเลน',93,31,{size:11,col:INK.soft});
+  // defender exits
+  arrow([[33,7],[28.5,5],[22,9],[18,11.5]],INK.def,2,[5,5]);arrow([[33,7],[30,22],[26,25],[20,17]],INK.def,2,[5,5]);
+  arrow([[76,43],[62,41],[53,38],[51,33]],INK.def,2,[5,5]);arrow([[75,43],[70,34],[66,29]],INK.def,2,[5,5]);
+  arrow([[131,24],[124,24],[116,24]],INK.def,2,[5,5]);arrow([[132,27],[130,40],[116,41],[112,38]],INK.def,2,[5,5]);
+
+  // entry badges per core
+  [[1,16,20.5],[2,9,15],[3,21,16.8],[4,12,9.2]].forEach(([n,x,y])=>badge(n,x,y));
+  [[1,50,21],[2,40,28],[3,61,28.5],[4,46,23.6],[5,52.5,35]].forEach(([n,x,y])=>badge(n,x,y));
+  [[1,103,24.5],[2,111.5,14.5],[3,111,33.8],[4,121,24]].forEach(([n,x,y])=>badge(n,x,y));
+
+  // route length labels (computed)
+  const lab=(pts,name,col,x,y,al='left')=>{const m=plen(pts);txt(`${name} ≈${Math.round(m)} ม. (เกม ≈${Math.round(m*GAME/WALK)} วิ)`,x,y,{size:11,col,align:al});};
+  lab(R.p1main,'หลัก',INK.main,10,35.5);lab(R.p1west,'อ้อม',INK.flank,0.4,48.6);lab(R.p1ridge,'สูง',INK.high,13,47.2);
+  lab(R.p2main,'หลัก',INK.main,33,12.2);lab(R.p2east,'อ้อม',INK.flank,52,11.2);lab(R.p2west,'อ้อม',INK.flank,29.5,33.4);
+  lab(R.p3main,'หลัก',INK.main,89,22.8);lab(R.p3south,'อ้อม',INK.flank,86,42.5);lab(R.p3high,'สูง',INK.high,90,10.6);
+
+  // ---------- zoom: core entry diagrams ----------
+  const ZY=700;txt('ทางเข้าแต่ละแกน (เลขในวงกลม = ทางเข้า)',58,ZY-18,{px:1,size:20,bold:1});
+  const zoom=(cx,cy,title,items)=>{
+    const R0=62;g.save();g.globalCompositeOperation='multiply';g.fillStyle=INK.hi;g.beginPath();g.arc(cx,cy,R0,0,7);g.fill();g.restore();
+    const pts=[];for(let i=0;i<=46;i++){const t=i/44*Math.PI*2;pts.push([cx+Math.cos(t)*R0*(1+j(.02)),cy+Math.sin(t)*R0*(1+j(.02))]);}
+    g.setLineDash([8,6]);stroke(pts,INK.pencil,2,1,.6);g.setLineDash([]);
+    stroke([[cx,cy-14],[cx+11,cy],[cx,cy+14],[cx-11,cy],[cx,cy-14]],INK.pencil,2.6,2,.4);
+    txt(title,cx,cy-R0-104,{px:1,size:17,bold:1,align:'center'});
+    items.forEach(([n,ang,col,label,dash])=>{const a=ang*Math.PI/180,x1=cx+Math.cos(a)*(R0+46),y1=cy+Math.sin(a)*(R0+46),x2=cx+Math.cos(a)*(R0-8),y2=cy+Math.sin(a)*(R0-8);
+      if(dash)g.setLineDash([7,6]);stroke([[x1,y1],[x2,y2]],col,3,1,.6);g.setLineDash([]);
+      const h=Math.atan2(y2-y1,x2-x1);stroke([[x2-Math.cos(h-.45)*12,y2-Math.sin(h-.45)*12],[x2,y2],[x2-Math.cos(h+.45)*12,y2-Math.sin(h+.45)*12]],col,3,1,.3);
+      const bx=cx+Math.cos(a)*(R0+58),by=cy+Math.sin(a)*(R0+58);g.fillStyle=INK.paper;g.beginPath();g.arc(bx,by,10,0,7);g.fill();
+      txt(String(n),bx,by+5,{px:1,size:14,bold:1,col,align:'center'});
+      const lx=cx+Math.cos(a)*(R0+74),ly=by+4,al=Math.cos(a)>.3?'left':Math.cos(a)<-.3?'right':'center';
+      txt(label,al==='center'?bx:lx,al==='center'?(Math.sin(a)<0?by-16:by+26):ly,{px:1,size:12,col,align:al});});
+  };
+  zoom(240,ZY+180,'แกน 1 · ลานกลางป่า',[[1,90,INK.main,'ถนนป่า (หลัก)\nกว้าง ~8 ช่อง'],[2,180,INK.flank,'ริมลำธาร\nแคบ 3–4'],[3,20,INK.high,'กระโดดลง\nจากสันเนิน',1],[4,-110,INK.flank,'ซากหิน\nทางเหนือ'],['B',-35,INK.def,'ฝ่ายรับ\nจากประตูข้าง',1]]);
+  zoom(780,ZY+180,'แกน 2 · Hall (ทุบเข้า)',[[1,-90,INK.main,'ประตูคู่ (เปิดอยู่)'],[2,180,INK.flank,'กำแพงตะวันตก\nต้องพังก่อน',1],[3,0,INK.flank,'ประตูตะวันออก\n(เปิดอยู่ ทางอ้อม)'],[4,-140,INK.high,'พังผนังเหนือ\n→ ระเบียง → กระโดด',1],[5,90,INK.def,'กำแพงใต้พังได้\n(ฝั่งรับ)',1]]);
+  zoom(1320,ZY+180,'แกน 3 · ยอดปราการ +6 (ไต่ขึ้น)',[[1,180,INK.main,'ทางลาดตะวันตก\n+0 → +3 → +6'],[2,-90,INK.high,'กำแพงเดิน +4 →'+'\n'+'ลง +3 → บันไดเหนือ',1],[3,90,INK.flank,'บันไดใต้'+'\n'+'(ทางอ้อม)'],[4,0,INK.def,'ฝ่ายรับลงจาก'+'\n'+'ชั้นบนตะวันออก',1]]);
+
+  // ---------- findings table ----------
+  const TY=1090;txt('วิเคราะห์ผังเดิม → สิ่งที่ปรับ',58,TY,{px:1,size:20,bold:1});
+  const rows=[
+    ['ระยะเกิด→แกน','เฟส 1: บุก 33 ม. / รับ 14 ม. (2.4 เท่า) · เฟส 2–3 รับใกล้แกนมาก (15–23 ม.)','ย้าย B ถอยลึกขึ้น ให้บุก:รับ ≈ 1.5–2 เท่า'],
+    ['ทางอ้อมยาวเกิน','ทางอ้อม 94 ม. เทียบทางหลัก 34 ม. (2.8 เท่า) · 71 ม. เทียบ 35 ม. (2 เท่า)','ทางอ้อมไม่เกิน 1.5 เท่าของทางหลัก'],
+    ['แกนติดขอบแผนที่','แกน 2 (49,45) และแกน 3 (110,45) อยู่ขอบล่าง เข้าได้แค่ 2–3 ด้าน','ย้ายแกนเข้ากลางห้อง/ลาน ให้เข้าได้ 4 ทาง'],
+    ['เส้นทางเฟส 3','เส้นทางที่วาดไปจบที่ห้อง Hall (51,28) แต่ธงแกน 3 อยู่ (110,45)','แกน 2 = Hall · แกน 3 = ลานปราการตะวันออก'],
+    ['พื้นที่เฟสซ้อนกัน','เฟส 2 (x28–87) กับเฟส 3 (x64–139) ซ้อนกัน 24 ช่อง · มุมขวาบนเดินไม่ถึง','แบ่งเฟสไม่ซ้อน: 0–27 / 28–87 / 88–139'],
+    ['เกิดใหม่ได้เรื่อย ๆ','ตายแล้วเกิดใหม่ทันทีตามคอนเซปต์ → เวลาเดินกลับคือ "ราคาของการตาย" · ตอนนี้ ≈ 18 วิ (1 ช่อง = 4.5 ม.)','เป้าเดินกลับ 10–15 วิ · รับเดินสั้นกว่าบุก'],
+  ];
+  const cx0=58,cw=[170,640,520];let y=TY+20;
+  stroke([[cx0,y],[cx0+cw[0]+cw[1]+cw[2],y]],INK.pencil,1.6,1,.8);
+  rows.forEach(r=>{y+=36;txt(r[0],cx0+6,y-12,{px:1,size:14,bold:1});txt(r[1],cx0+cw[0]+6,y-12,{px:1,size:13});txt('→ '+r[2],cx0+cw[0]+cw[1]+6,y-12,{px:1,size:13,col:INK.green});
+    stroke([[cx0,y],[cx0+cw[0]+cw[1]+cw[2],y]],INK.pencil,1,1,.8);});
+
+  // sticky note
+  g.save();g.translate(1378,1070);g.rotate(-.03);g.fillStyle='#fbe9a0';g.fillRect(0,0,210,170);g.restore();
+  txt('ร่าง v3 · ยังไม่ล็อก',1392,1100,{px:1,size:16,bold:1,col:INK.atk,rot:-.03});
+  txt('ทุกแกนเข้าได้ ≥ 4 ทาง\n(หลัก · อ้อม · สูง · พังกำแพง)\nเกิดใหม่เรื่อย ๆ → คนทยอยเข้าไฟต์\nหลายทาง = ไม่ติดคอขวดเดียว',1392,1126,{px:1,size:12,rot:-.03});
+  window.__done=true;
+}
+draw();
+</script>
+</body></html>

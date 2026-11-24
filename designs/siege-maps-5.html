@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<title>Siege 5 maps sketch</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mali:wght@400;600&display=swap">
+<style>html,body{margin:0;background:#e9e4d8}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1600" height="940"></canvas>
+<script>
+// Hand-drawn sketches of 5 proposed siege maps (Map Editor grid 140x50). render(i) draws map i.
+const cv=document.getElementById('c'),g=cv.getContext('2d');
+let seed=1;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
+const j=a=>(rnd()-.5)*2*a;
+const INK={pencil:'#3b3a3f',main:'#1f4fa8',flank:'#d9741c',high:'#7a3fa0',freeze:'#3f9ad6',atk:'#b3262b',def:'#1f5fbf',green:'#2f7a3a',hi:'rgba(255,214,64,.42)',paper:'#f4efe2',grid:'rgba(90,120,160,.12)',soft:'#5b5a60',wood:'#8a5a2b',water:'rgba(70,140,210,.30)',ice:'rgba(150,205,235,.45)'};
+const STY={multi:['หลายทาง','#d9741c'],breach:['ทุบเข้า','#8a5a2b'],climb:['ไต่ขึ้น','#7a3fa0'],cross:['ข้ามน้ำ','#1f6fb0'],sneak:['ลอบเข้า','#3b3a3f']};
+const S=10.6,OX=58,OY=126;const P=(x,y)=>[OX+x*S,OY+y*S];
+
+function stroke(pts,col,w,passes=2,amp=1){
+  for(let p=0;p<passes;p++){
+    g.beginPath();g.strokeStyle=col;g.lineWidth=w*(p?0.7:1);g.lineCap='round';g.lineJoin='round';g.globalAlpha=p?0.5:0.9;
+    for(let i=0;i<pts.length-1;i++){
+      const [x1,y1]=pts[i],[x2,y2]=pts[i+1],L=Math.hypot(x2-x1,y2-y1),n=Math.max(1,Math.round(L/36));
+      if(i===0)g.moveTo(x1+j(amp),y1+j(amp));
+      for(let k=1;k<=n;k++){const t=k/n,mx=x1+(x2-x1)*(t-.5/n),my=y1+(y2-y1)*(t-.5/n);
+        g.quadraticCurveTo(mx+j(amp*1.5),my+j(amp*1.5),x1+(x2-x1)*t+j(amp),y1+(y2-y1)*t+j(amp));}
+    }
+    g.stroke();
+  }
+  g.globalAlpha=1;
+}
+const M=pts=>pts.map(p=>P(...p));
+const line=(a,b,c,d,col=INK.pencil,w=2)=>stroke([P(a,b),P(c,d)],col,w,1,.4);
+const poly=(pts,col=INK.pencil,w=2,close=true)=>stroke(M(close?[...pts,pts[0]]:pts),col,w);
+const rect=(x,y,w,h,col=INK.pencil,lw=2)=>poly([[x,y],[x+w,y],[x+w,y+h],[x,y+h]],col,lw);
+function wash(x,y,w,h,col){g.save();g.globalCompositeOperation='multiply';g.fillStyle=col;const [a,b]=P(x,y);
+  g.beginPath();g.moveTo(a+j(3),b+j(3));g.lineTo(a+w*S+j(3),b+j(3));g.lineTo(a+w*S+j(3),b+h*S+j(3));g.lineTo(a+j(3),b+h*S+j(3));g.closePath();g.fill();g.restore();}
+function hatch(x,y,w,h,col=INK.pencil,gap=.8,ang=1,al=.4){g.save();const [a,b]=P(x,y);g.beginPath();g.rect(a,b,w*S,h*S);g.clip();
+  for(let t=-h;t<w+h;t+=gap){const pts=[P(x+t,y),P(x+t+h*ang,y+h)];g.beginPath();g.strokeStyle=col;g.globalAlpha=al;g.lineWidth=1;
+    g.moveTo(pts[0][0]+j(1),pts[0][1]);g.lineTo(pts[1][0]+j(1.5),pts[1][1]);g.stroke();}
+  g.restore();g.globalAlpha=1;}
+function clear(x1,y1,x2,y2,w=1.1){const [a,b]=P(x1,y1),[c,d]=P(x2,y2);g.strokeStyle=INK.paper;g.lineWidth=S*w;g.lineCap='butt';g.beginPath();g.moveTo(a,b);g.lineTo(c,d);g.stroke();}
+function wall(pts){stroke(M(pts),INK.pencil,S*.7,1,.5);stroke(M(pts),INK.pencil,1.4,1,1);}
+function brk(x1,y1,x2,y2){clear(x1,y1,x2,y2);const n=Math.max(3,Math.round(Math.hypot(x2-x1,y2-y1)/.9));const dx=y2-y1,dy=x1-x2,L=Math.hypot(dx,dy)||1;
+  for(let k=0;k<=n;k++){const t=k/n,x=x1+(x2-x1)*t,y=y1+(y2-y1)*t;stroke([P(x-dx/L*.7,y-dy/L*.7),P(x+dx/L*.7,y+dy/L*.7)],INK.wood,2.2,1,.4);}}
+function stairs(x1,y1,x2,y2){const v=Math.abs(x2-x1)<Math.abs(y2-y1);clear(x1,y1,x2,y2,1.2);for(let k=0;k<6;k++){const t=k/5;v?line(x1-.7,y1+(y2-y1)*t,x1+.7,y1+(y2-y1)*t,INK.pencil,1.4):line(x1+(x2-x1)*t,y1-.7,x1+(x2-x1)*t,y1+.7,INK.pencil,1.4);}}
+function bridge(x,y,w,h){g.fillStyle=INK.paper;const [a,b]=P(x,y);g.fillRect(a,b,w*S,h*S);const hor=w>h;
+  stroke(M(hor?[[x,y],[x+w,y]]:[[x,y],[x,y+h]]),INK.pencil,2,1,.6);stroke(M(hor?[[x,y+h],[x+w,y+h]]:[[x+w,y],[x+w,y+h]]),INK.pencil,2,1,.6);
+  const n=Math.round((hor?w:h)/1.2);for(let k=1;k<n;k++){const t=k/n;hor?line(x+w*t,y,x+w*t,y+h,INK.wood,1.2):line(x,y+h*t,x+w,y+h*t,INK.wood,1.2);}}
+function tier(x,y,w,h,l){rect(x,y,w,h,INK.pencil,2.4);const d={'+3':[1.5,.14],'+4':[1.2,.18],'+6':[.8,.28]}[l]||[1.8,.1];hatch(x,y,w,h,'#7a3fa0',d[0],.6,d[1]);txt(l,x+.6,y+h-.8,{size:13,bold:1,col:'#7a3fa0'});}
+function bld(x,y,w,h){rect(x,y,w,h,INK.pencil,1.8);hatch(x,y,w,h,INK.pencil,.9,1,.3);}
+function rock(x,y,w,h){hatch(x,y,w,h,INK.pencil,.6,.4,.32);hatch(x,y,w,h,INK.pencil,1.1,-.8,.2);}
+function dark(x,y,w,h){g.save();g.globalCompositeOperation='multiply';g.fillStyle='rgba(60,58,70,.10)';const [a,b]=P(x,y);g.fillRect(a,b,w*S,h*S);g.restore();hatch(x,y,w,h,INK.pencil,1.5,.3,.12);}
+function tunnel(pts,w=1.4){stroke(M(pts),INK.paper,S*w*2,1,.3);stroke(M(pts.map(([x,y])=>[x,y-w])),INK.pencil,1.5,1,.6);stroke(M(pts.map(([x,y])=>[x,y+w])),INK.pencil,1.5,1,.6);}
+function trees(x,y,w,h,n,col='#4f7f45'){for(let i=0;i<n;i++){const [a,b]=P(x+rnd()*w,y+rnd()*h);stroke([[a-3,b+3],[a,b-4],[a+3,b+3]],col,1.3,1,.4);}}
+function graves(x,y,w,h,n){for(let i=0;i<n;i++){const [a,b]=P(x+rnd()*w,y+rnd()*h);stroke([[a,b-4],[a,b+4]],INK.soft,1.3,1,.3);stroke([[a-3,b-1.5],[a+3,b-1.5]],INK.soft,1.3,1,.3);}}
+function arrow(pts,col,w=2.4,dash){if(dash)g.setLineDash(dash);
+  const sp=[];for(let i=0;i<pts.length-1;i++){const [x1,y1]=pts[i],[x2,y2]=pts[i+1];for(let t=0;t<1;t+=.34)sp.push([x1+(x2-x1)*t,y1+(y2-y1)*t]);}
+  sp.push(pts[pts.length-1]);stroke(M(sp),col,w,1,.8);g.setLineDash([]);
+  const [ax,ay]=P(...pts[pts.length-2]),[bx,by]=P(...pts[pts.length-1]),a=Math.atan2(by-ay,bx-ax),L=12;
+  stroke([[bx-Math.cos(a-.45)*L,by-Math.sin(a-.45)*L],[bx,by],[bx-Math.cos(a+.45)*L,by-Math.sin(a+.45)*L]],col,w,1,.4);}
+function txt(s,x,y,{size=13,col=INK.pencil,rot=0,bold=0,px=0,align='left'}={}){const [a,b]=px?[x,y]:P(x,y);g.save();g.translate(a,b);g.rotate(rot+j(.01));g.fillStyle=col;g.textAlign=align;
+  g.font=`${bold?600:400} ${size}px Mali, "Comic Sans MS", sans-serif`;String(s).split('\n').forEach((l,i)=>g.fillText(l,0,i*size*1.25));g.restore();}
+function badge(n,x,y,col=INK.pencil){const [a,b]=P(x,y);g.fillStyle=INK.paper;g.beginPath();g.arc(a,b,9,0,7);g.fill();
+  const p=[];for(let i=0;i<=26;i++){const t=i/24*Math.PI*2;p.push([a+Math.cos(t)*9,b+Math.sin(t)*9]);}stroke(p,col,1.6,1,.3);txt(n,a,b+4.5,{px:1,size:12,bold:1,col,align:'center'});}
+function spawn(x,y,l,team){const col=team==='a'?INK.atk:INK.def,[a,b]=P(x,y);g.fillStyle=col;g.globalAlpha=.16;g.fillRect(a-13,b-13,26,26);g.globalAlpha=1;
+  stroke([[a-13,b-13],[a+13,b-13],[a+13,b+13],[a-13,b+13],[a-13,b-13]],col,2.2,2,1);txt(l,a,b+5,{px:1,size:15,bold:1,col,align:'center'});}
+function core(x,y,n){wash(x-4.2,y-2.8,8.4,5.6,INK.hi);const p=[];const o=rnd()*6;for(let i=0;i<=46;i++){const a=o+i/44*Math.PI*2;p.push(P(x+Math.cos(a)*3.7,y+Math.sin(a)*3.7));}
+  g.setLineDash([8,6]);stroke(p,INK.pencil,2,1,.6);g.setLineDash([]);const [a,b]=P(x,y);stroke([[a,b-10],[a+8,b],[a,b+10],[a-8,b],[a,b-10]],INK.pencil,2.5,2,.4);txt('แกน '+n,x,y+5.4,{size:13,bold:1,align:'center'});}
+function cross(x,y){const [a,b]=P(x,y),r=6;stroke([[a-r,b],[a+r,b]],INK.green,3,1,.3);stroke([[a,b-r],[a,b+r]],INK.green,3,1,.3);}
+function chip(style,x,y){const [n,c]=STY[style];g.font='600 14px Mali';const w=g.measureText(n).width+18;g.save();g.globalAlpha=.16;g.fillStyle=c;g.fillRect(x,y-15,w,22);g.restore();
+  stroke([[x,y-15],[x+w,y-15],[x+w,y+7],[x,y+7],[x,y-15]],c,1.6,1,.8);txt(n,x+9,y+1,{px:1,size:14,bold:1,col:c});return w;}
+
+// ======================= MAP DATA =======================
+const RT={main:[INK.main,3],flank:[INK.flank,2.4],high:[INK.high,2.4,[7,6]],freeze:[INK.freeze,2.4,[4,5]],brk:[INK.flank,2.4,[7,6]],def:[INK.def,2,[5,5]]};
+const MAPS=[
+ { // 1 ----------------------------------------------------------
+  name:'ป้อมทะเลสาบจันทรา',en:'Moonlake Fort',sig:'cross',seed:31,
+  mood:'กลางคืนริมทะเลสาบ แสงจันทร์ หมอกบนน้ำ · ฝ่ายบุกต้องข้ามน้ำขึ้นเกาะ แล้วไต่ขึ้นประภาคาร',
+  phases:[['cross','ข้ามทะเลสาบ','rgba(90,150,200,.16)'],['multi','หมู่บ้านบนเกาะ','rgba(190,160,110,.15)'],['climb','ประภาคารบนหิน','rgba(140,110,170,.15)']],
+  draw(){
+    wash(14,0,10,50,INK.water);bridge(12,8,14,4);bridge(12,38,14,4);
+    wash(14,21,10,8,INK.ice);txt('น้ำตื้น\nแช่แข็งเป็นทางได้',19,19,{size:11,col:'#2c5f93',align:'center'});
+    rect(28,18,12,14,INK.pencil,1.8);txt('ท่าเรือ',34,17.2,{size:11,align:'center'});
+    trees(1,2,11,46,22);
+    wash(46,0,47,3,INK.water);wash(46,47,47,3,INK.water);
+    [[50,6,6,5],[60,4,7,6],[52,33,6,6],[62,36,6,6],[80,6,6,6],[82,36,6,6],[58,14,5,5],[84,16,5,5]].forEach(r=>bld(...r));
+    txt('หลังคาเดินได้',61,13,{size:11,col:INK.high});
+    wash(93,0,4,50,INK.water);bridge(92,22,6,6);
+    tier(98,3,38,44,'+0');tier(104,9,26,32,'+3');tier(112,16,13,18,'+6');
+    stairs(104,23,104,27);stairs(112,23,112,27);stairs(116,9,120,9);stairs(116,16,120,16);stairs(116,41,120,41);stairs(116,34,120,34);stairs(125,23,125,27);
+    txt('ประภาคาร',118.5,14.6,{size:11,align:'center',col:'#7a3fa0'});
+  },
+  cores:[[34,25,1],[73,25,2],[118.5,25,3]],
+  spawns:[[3,25,'A1','a'],[48,25,'B1','d'],[40.5,25,'A2','a'],[96,13,'B2','d'],[86,25,'A3','a'],[133,25,'B3','d']],
+  heals:[[27,6],[27,44],[56,25],[90,44],[100,6]],
+  routes:[['main',[[4,23],[8,10],[26,10],[32,20]]],['flank',[[4,27],[8,40],[26,40],[32,30]]],['freeze',[[5,25],[14,25],[24,25],[29.5,25]]],['def',[[46,25],[38.5,25]]],
+    ['main',[[40,25],[55,25],[68,25]]],['flank',[[40,22],[48,13],[68,9],[72,20]]],['flank',[[40,28],[48,42],[72,44],[73,30]]],['high',[[44,19],[58,14],[63,17],[69,22]]],['def',[[96,15],[86,19],[77,23]]],
+    ['main',[[87,25],[97,25],[104,25],[112,25],[115,25]]],['flank',[[87,28],[94,44],[118,44],[118,41],[118.5,30]]],['high',[[87,22],[96,6],[118,6],[118,9],[118.5,20]]],['def',[[131,25],[125,25],[122.5,25]]]],
+  badges:[[1,30,18],[2,30,32],[3,27,25],[1,64,25],[2,72,17],[3,73,33],[4,65,18.6],[1,109,25],[2,118,12],[3,118,38]],
+  notes:[['ข้ามน้ำ','สะพาน 2 จุด (เหนือ/ใต้) เป็นคอขวด · น้ำแข็งแช่น้ำตื้นกลางทะเลสาบเป็นทางที่ 3 · ไฟละลายทางน้ำแข็งได้','น้ำ · น้ำแข็ง · สายฟ้า (น้ำเปียก)'],
+         ['หลายทาง','ลานกลางหมู่บ้าน เข้าได้ 4 ทาง: ถนนหลัก ตรอกเหนือ ทางเลียบน้ำใต้ เดินบนหลังคา','แสง · ธรรมชาติ · ความมืด'],
+         ['ไต่ขึ้น','ประภาคาร +0 → +3 → +6 · บันได 3 ทิศ · ทางเลียบหินเหนือ/ใต้ อ้อมขึ้นบันได','ลม · น้ำแข็ง (สร้างทางขึ้น)']],
+ },
+ { // 2 ----------------------------------------------------------
+  name:'ประตูเมืองเหล็ก',en:'Ironhold Gate',sig:'breach',seed:57,
+  mood:'เมืองป้อมหิน กำแพงสูงหนา ควันจากเตาหลอม · ทุบกำแพงเข้าเมือง ไล่ตามซอย แล้วลอบเข้าป้อมในทางท่อ',
+  phases:[['breach','ทุบกำแพงเมือง','rgba(150,110,80,.16)'],['multi','ตลาดในเมือง','rgba(190,160,110,.15)'],['sneak','ป้อมในทางลับ','rgba(70,70,90,.12)']],
+  draw(){
+    trees(1,2,10,10,6);trees(1,38,10,10,6);[[8,20,5,3],[6,30,5,3]].forEach(r=>{rect(...r,INK.pencil,1.4);});txt('ค่ายบุก',9,19,{size:11});
+    wall([[24,0],[24,50]]);brk(24,22,24,28);brk(24,5,24,11);brk(24,39,24,45);clear(24,15,24,17.5);clear(24,32.5,24,35);
+    txt('ประตูเหล็กใหญ่\n(HP สูง)',25,21,{size:11,col:INK.wood});txt('ประตูเล็ก\nแคบ 3 ม.',25,14.6,{size:10,col:INK.soft});txt('ประตูเล็ก',25,37,{size:10,col:INK.soft});
+    [[28,4,6,8],[28,38,6,8],[40,14,4,4],[40,32,4,4]].forEach(r=>bld(...r));
+    [[48,3,9,8],[48,39,9,8],[60,3,8,9],[60,38,8,9],[48,15,6,6],[48,29,6,6],[80,3,10,9],[80,38,10,9],[82,16,6,6],[82,28,6,6],[62,15,4,4],[62,31,4,4]].forEach(r=>bld(...r));
+    txt('ตลาด',73,19,{size:11,align:'center'});
+    dark(93,0,47,50);
+    wall([[108,10],[134,10],[134,40],[108,40],[108,10]]);clear(108,23,108,27);txt('ประตูป้อม\nแคบ',103,22,{size:10,col:INK.soft,align:'center'});
+    [[110,12,6,6],[126,12,6,6],[110,32,6,6],[126,32,6,6]].forEach(r=>bld(...r));
+    tunnel([[95,44],[104,44],[104,36],[112,30]]);tunnel([[95,6],[102,6],[102,14],[112,19]]);tunnel([[96,25],[100,25]],1);
+    txt('ท่อระบายน้ำ',99,47,{size:11});txt('ห้องเก็บไวน์',99,4,{size:11});
+  },
+  cores:[[34,25,1],[73,25,2],[121,25,3]],
+  spawns:[[3,25,'A1','a'],[46,25,'B1','d'],[40.5,25,'A2','a'],[96,25,'B2','d'],[86,25,'A3','a'],[138,25,'B3','d']],
+  heals:[[14,25],[38,8],[56,25],[92,8],[100,44]],
+  routes:[['brk',[[4,25],[18,25],[24,25],[30,25]]],['flank',[[4,22],[16,16],[24,16],[31,22]]],['flank',[[4,28],[16,34],[24,34],[31,28]]],['brk',[[6,10],[24,8],[32,20]]],['def',[[44,25],[37.5,25]]],
+    ['main',[[38,25],[52,25],[68,25]]],['flank',[[38,20],[46,13],[58,13],[70,21]]],['flank',[[38,30],[46,37],[58,37],[70,29]]],['flank',[[46,25],[56,26],[58,32],[64,28],[69.5,27]]],['def',[[94,25],[78,25]]],
+    ['main',[[86,24],[96,24],[105,24],[117,24]]],['flank',[[86,28],[95,44],[104,44],[104,36],[117,28]]],['flank',[[86,21],[95,6],[102,6],[102,14],[117,22]]],['def',[[136,25],[124.5,25]]]],
+  badges:[[1,27,25],[2,27,18],[3,27,32],[4,26.4,8],[1,62,25],[2,64,14],[3,64,36],[1,111,24],[2,108,33],[3,108,16.6]],
+  notes:[['ทุบเข้า','เปิดอยู่แค่ประตูเล็ก 2 บาน (แคบ) · ทุบประตูเหล็กใหญ่หรือกำแพง 2 ช่วงเพื่อเปิดทางกว้าง · ฝ่ายรับสร้างกำแพงอุดได้','ดิน · ไฟ · ลม (Sonic Boom)'],
+         ['หลายทาง','ลานตลาด ซอยตึกหลายเส้น เข้าได้ 3–4 ทาง ยืนบนตึกต่ำได้','แสง · ธรรมชาติ · สายฟ้า'],
+         ['ลอบเข้า','ประตูป้อมแคบทางเดียว · ท่อระบายน้ำ (ใต้) และห้องเก็บไวน์ (เหนือ) โผล่ในป้อม · มืด ระยะมองสั้น','ความมืด · สายฟ้า · น้ำแข็งประชิด']],
+ },
+ { // 3 ----------------------------------------------------------
+  name:'สุสานราชันย์',en:'Crypt of Kings',sig:'sneak',seed:83,
+  mood:'สุสานเก่าบนเนิน หมอกเขียวจาง ๆ · บุกผ่านสุสานบนดิน ลงอุโมงค์มืด แล้วทุบผนึกห้องบรรจุพระศพ',
+  phases:[['multi','ลานสุสาน','rgba(120,160,110,.15)'],['sneak','อุโมงค์ใต้ดิน','rgba(70,70,90,.14)'],['breach','ห้องผนึกราชันย์','rgba(150,110,80,.15)']],
+  draw(){
+    graves(2,2,40,46,70);[[10,8,6,5],[10,37,6,5],[22,4,6,6],[22,40,6,6],[38,10,5,6],[38,34,5,6]].forEach(r=>bld(...r));
+    rect(28,19,12,12,INK.pencil,1.6);txt('โบสถ์ร้าง',34,18.2,{size:11,align:'center'});clear(28,23,28,27);clear(40,23,40,27);clear(32,19,36,19);clear(32,31,36,31);
+    rock(46,0,47,50);
+    tunnel([[47,25],[56,25],[56,25]],1.6);tunnel([[47,25],[52,12],[64,12],[70,20]]);tunnel([[47,25],[52,38],[64,38],[70,30]]);tunnel([[56,25],[68,25]],1.6);
+    tunnel([[64,12],[80,8],[90,14]]);tunnel([[64,38],[80,42],[90,36]]);
+    g.fillStyle=INK.paper;let [a,b]=P(68,19);g.fillRect(a,b,12*S,12*S);rect(68,19,12,12,INK.pencil,2);txt('ห้องกระดูก',74,18.2,{size:11,align:'center'});
+    g.fillStyle=INK.paper;[a,b]=P(84,10);g.fillRect(a,b,9*S,30*S);rect(84,10,9,30,INK.pencil,1.6);
+    txt('บันไดลง',47,22,{size:11});
+    wall([[104,8],[134,8],[134,42],[104,42],[104,8]]);brk(104,22,104,28);brk(116,8,122,8);brk(116,42,122,42);clear(104,13,104,15.5);clear(104,34.5,104,37);
+    txt('ผนึก (พังได้)',101,21,{size:10,col:INK.wood,align:'center'});txt('ทางแคบเปิดอยู่',100,12,{size:10,col:INK.soft,align:'center'});
+    [[108,12,3,3],[128,12,3,3],[108,35,3,3],[128,35,3,3]].forEach(r=>bld(...r));
+  },
+  cores:[[34,25,1],[74,25,2],[119,25,3]],
+  spawns:[[3,25,'A1','a'],[44,25,'B1','d'],[36,6,'A2','a'],[88,25,'B2','d'],[89,6,'A3','a'],[137,25,'B3','d']],
+  heals:[[18,25],[46,46],[60,25],[96,6],[96,44]],
+  routes:[['main',[[4,25],[20,25],[28,25],[31,25]]],['flank',[[4,22],[12,15],[24,13],[33,19],[33.5,21]]],['flank',[[4,28],[12,35],[24,37],[33,31],[33.5,29]]],['high',[[6,26],[18,30],[26,34],[30,30]]],['def',[[42,25],[37.5,25]]],
+    ['main',[[38,8],[46,22],[56,25],[70,25]]],['flank',[[38,9],[52,12],[64,12],[71,21]]],['flank',[[38,10],[46,28],[52,38],[64,38],[71,29]]],['def',[[86,25],[77.5,25]]],
+    ['main',[[90,8],[96,13],[104,14.5],[115,22]]],['brk',[[90,9],[98,25],[106,25],[115,25]]],['flank',[[90,10],[95,36],[104,36],[115,28]]],['brk',[[92,4],[119,4],[119,9],[119,21]]],['def',[[135,25],[122.5,25]]]],
+  badges:[[1,27,25],[2,32,17],[3,32,33],[4,28,32],[1,58,25],[2,67,17],[3,67,33],[1,107,14.5],[2,107,25],[3,107,36],[4,119,6]],
+  notes:[['หลายทาง','โบสถ์ร้างกลางสุสาน มีประตู 4 ทิศ · ป้ายหลุมศพเตี้ย ๆ เป็นของบังกระจาย','แสง · ธรรมชาติ · ความมืด'],
+         ['ลอบเข้า','ลงบันไดสู่อุโมงค์ 3 เส้น มืดทั้งเฟส ห้องกระดูกตรงกลาง · ระยะมองสั้น ปะทะประชิด','ความมืด · สายฟ้า · น้ำแข็งประชิด'],
+         ['ทุบเข้า','ห้องผนึกเปิดแค่ทางแคบ 2 ทาง · ทุบผนึก 3 จุด (ตะวันตก/เหนือ/ใต้) เปิดทางกว้าง','ดิน · ไฟ · ลม']],
+ },
+ { // 4 ----------------------------------------------------------
+  name:'หอดูดาวยอดเขา',en:'Skyspire Observatory',sig:'climb',seed:101,
+  mood:'ภูเขาหิมะ ลมแรง แสงดาว · ลอดถ้ำขึ้นเขา ข้ามแม่น้ำน้ำแข็ง แล้วไต่ขึ้นหอดูดาวยอดเขา',
+  phases:[['sneak','ถ้ำทางขึ้นเขา','rgba(70,70,90,.13)'],['cross','แม่น้ำน้ำแข็ง','rgba(120,180,220,.16)'],['climb','หอดูดาว','rgba(140,110,170,.15)']],
+  draw(){
+    rock(0,0,46,50);
+    tunnel([[3,25],[14,25],[26,25]],1.6);tunnel([[3,25],[8,12],[20,8],[30,16]]);tunnel([[3,25],[8,38],[20,42],[30,34]]);tunnel([[14,25],[20,18]],1);
+    g.fillStyle=INK.paper;const [a,b]=P(28,17);g.fillRect(a,b,14*S,16*S);rect(28,17,14,16,INK.pencil,2);txt('โถงถ้ำ',35,16.2,{size:11,align:'center'});
+    g.fillStyle=INK.paper;const [c,d]=P(42,21);g.fillRect(c,d,4*S,8*S);
+    trees(48,2,10,46,16,'#5b7f6a');
+    wash(60,0,10,50,INK.ice);wash(62,0,6,50,INK.water);bridge(58,6,14,4);bridge(58,40,14,4);
+    txt('น้ำแข็งบาง\nไฟละลายได้ · น้ำแข็งแช่ซ้ำได้',65,20,{size:10,col:'#2c5f93',align:'center'});
+    rect(74,18,12,14,INK.pencil,1.8);txt('ศาลาพัก',80,17.2,{size:11,align:'center'});
+    tier(96,2,40,46,'+0');tier(102,8,28,34,'+3');tier(110,15,13,20,'+6');
+    stairs(102,22,102,28);stairs(110,23,110,27);stairs(114,8,119,8);stairs(114,15,119,15);stairs(114,42,119,42);stairs(114,35,119,35);stairs(123,23,123,27);
+    [[98,10],[98,40]].forEach(([x,y])=>{const p=[];for(let i=0;i<=20;i++){const t=i/18*Math.PI*2;p.push(P(x+Math.cos(t)*1.6,y+Math.sin(t)*1.6));}stroke(p,'#7a3fa0',1.6,1,.3);txt('ลมยก',x+2,y+.5,{size:10,col:'#7a3fa0'});});
+    txt('โดมกล้องดาว',116.5,13.6,{size:11,align:'center',col:'#7a3fa0'});
+  },
+  cores:[[35,25,1],[80,25,2],[116.5,25,3]],
+  spawns:[[3,25,'A1','a'],[50,25,'B1','d'],[44,25,'A2','a'],[92,25,'B2','d'],[88,10,'A3','a'],[132,25,'B3','d']],
+  heals:[[14,30],[52,8],[52,42],[90,44],[126,6]],
+  routes:[['main',[[4,25],[14,25],[26,25],[31,25]]],['flank',[[4,23],[8,12],[20,8],[31,20]]],['flank',[[4,27],[8,38],[20,42],[31,30]]],['def',[[48,25],[42,25],[38.5,25]]],
+    ['main',[[46,23],[56,8],[72,8],[78,20]]],['flank',[[46,27],[56,42],[72,42],[78,30]]],['freeze',[[46,25],[60,25],[70,25],[76,25]]],['def',[[90,25],[83.5,25]]],
+    ['main',[[88,12],[96,25],[102,25],[110,25],[113,25]]],['flank',[[88,14],[94,45],[116.5,45],[116.5,42],[116.5,30]]],['high',[[90,9],[98,10],[100,5],[116.5,5],[116.5,8],[116.5,20]]],['def',[[130,25],[123,25],[120,25]]]],
+  badges:[[1,29,25],[2,31,18],[3,31,32],[1,76,20],[2,76,30],[3,73,25],[1,106,25],[2,116.5,11],[3,116.5,39]],
+  notes:[['ลอบเข้า','ถ้ำ 3 อุโมงค์ ไปบรรจบที่โถงถ้ำ · มืด อุโมงค์แคบ 3 ม. · ฝ่ายรับเฝ้าไม่ทั่ว','ความมืด · สายฟ้า · น้ำแข็งประชิด'],
+         ['ข้ามน้ำ','แม่น้ำมีสะพาน 2 จุด · น้ำแข็งแช่เป็นทางกลางได้ · ไฟละลายน้ำแข็งบางให้คนตกน้ำ (ช้าลง)','น้ำ · น้ำแข็ง · ไฟ'],
+         ['ไต่ขึ้น','หอดูดาว +0 → +3 → +6 · ช่องลมยก 2 จุดให้ลม/ทุกสายกระโดดขึ้นชั้นบนได้ไวขึ้น','ลม · น้ำแข็ง · แสง']],
+ },
+ { // 5 ----------------------------------------------------------
+  name:'วิหารป่าศักดิ์สิทธิ์',en:'Verdant Sanctum',sig:'multi',seed:127,
+  mood:'ป่าดิบชื้นกลางวัน ต้นไม้ยักษ์ น้ำตก · ทุบรั้วไม้หนาม ข้ามแม่น้ำในป่า แล้วชิงลานวิหารที่เข้าได้รอบด้าน',
+  phases:[['breach','รั้วไม้หนาม','rgba(150,110,80,.15)'],['cross','แม่น้ำในป่า','rgba(90,150,200,.15)'],['multi','ลานวิหาร','rgba(120,170,100,.17)']],
+  draw(){
+    trees(1,1,22,48,34);
+    stroke(M([[26,0],[26,50]]),INK.wood,S*.6,1,.8);brk(26,6,26,12);brk(26,38,26,44);brk(26,22,26,28);clear(26,15,26,18);clear(26,32,26,35);
+    txt('รั้วไม้หนาม\n(ติดไฟ/พังได้ทั้งแนว)',27,4,{size:11,col:INK.wood});txt('ประตูไม้',27,14.4,{size:10,col:INK.soft});txt('ประตูไม้',27,31.4,{size:10,col:INK.soft});
+    trees(28,2,16,10,8);trees(28,38,16,10,8);
+    trees(47,2,10,46,16);wash(58,0,10,50,INK.water);bridge(56,10,14,3);bridge(56,37,14,3);
+    [[61,22],[64,26],[61,29]].forEach(([x,y])=>{const p=[];for(let i=0;i<=16;i++){const t=i/14*Math.PI*2;p.push(P(x+Math.cos(t)*1.1,y+Math.sin(t)*.8));}stroke(p,INK.pencil,1.6,1,.3);});
+    txt('หินโผล่ (กระโดดข้าม)',63,20.6,{size:10,col:'#2c5f93',align:'center'});txt('น้ำตก',63,48.6,{size:11,col:'#2c5f93',align:'center'});
+    trees(70,2,22,10,10);trees(70,38,22,10,10);
+    wall([[104,8],[110,8]]);wall([[126,8],[132,8]]);wall([[104,42],[110,42]]);wall([[126,42],[132,42]]);wall([[104,8],[104,19]]);wall([[104,31],[104,42]]);wall([[132,8],[132,19]]);wall([[132,31],[132,42]]);
+    [[108,14,3,3],[125,14,3,3],[108,33,3,3],[125,33,3,3]].forEach(r=>bld(...r));
+    const p=[];for(let i=0;i<=40;i++){const t=i/38*Math.PI*2;p.push(P(118+Math.cos(t)*5,12+Math.sin(t)*3));}stroke(p,'#4f7f45',2,1,.4);txt('ต้นไม้ยักษ์\n(กิ่ง = ทางสูง)',118,11.6,{size:10,align:'center',col:'#3c6b34'});
+    trees(94,2,8,46,10);trees(134,2,5,46,6);
+  },
+  cores:[[36,25,1],[80,25,2],[118,25,3]],
+  spawns:[[3,25,'A1','a'],[48,25,'B1','d'],[42,25,'A2','a'],[94,25,'B2','d'],[87.5,25,'A3','a'],[137,25,'B3','d']],
+  heals:[[12,25],[44,6],[52,44],[90,8],[100,44]],
+  routes:[['brk',[[4,25],[18,25],[26,25],[32,25]]],['flank',[[4,22],[16,16.5],[26,16.5],[33,22]]],['flank',[[4,28],[16,33.5],[26,33.5],[33,28]]],['brk',[[6,9],[26,9],[34,21]]],['def',[[46,25],[39.5,25]]],
+    ['main',[[42,23],[54,11.5],[72,11.5],[78,20]]],['flank',[[42,27],[54,38.5],[72,38.5],[78,30]]],['high',[[42,25],[58,25],[61,22],[64,26],[68,25],[76,25]]],['def',[[92,25],[83.5,25]]],
+    ['main',[[88,25],[104,25],[114,25]]],['flank',[[88,22],[100,10],[112,10],[116,20]]],['flank',[[88,28],[100,40],[112,40],[116,30]]],['high',[[95,14],[110,13],[114,13],[117,21]]],['def',[[135,25],[121.5,25]]],['def',[[135,22],[129,10],[120,20.5]]]],
+  badges:[[1,29,25],[2,29,18],[3,29,32],[4,29,9],[1,76,20],[2,76,30],[3,72,25],[1,107,25],[2,110,13],[3,110,37.5],[4,114,10.8]],
+  notes:[['ทุบเข้า','รั้วไม้หนามทั้งแนว เปิดแค่ประตูไม้ 2 บาน · ไฟเผารั้วให้ลามเปิดทางได้ (ไม้) · ธรรมชาติซ่อม/ปลูกกำแพงไม้อุด','ไฟ · ดิน · ธรรมชาติ'],
+         ['ข้ามน้ำ','แม่น้ำมีสะพานไม้ 2 จุด · หินโผล่กลางน้ำกระโดดข้ามได้ · น้ำตกทิศใต้บังสายตา','น้ำ · ลม · น้ำแข็ง'],
+         ['หลายทาง','ลานวิหารเปิด 4 มุม + กิ่งต้นไม้ยักษ์เป็นทางสูง · ฝ่ายรับต้องแบ่งคนเฝ้า','แสง · ธรรมชาติ · ความมืด']],
+ },
+];
+
+async function render(i){
+  const m=MAPS[i];seed=m.seed;
+  g.setLineDash([]);g.fillStyle=INK.paper;g.fillRect(0,0,1600,940);
+  for(let k=0;k<9000;k++){g.fillStyle=`rgba(120,100,70,${rnd()*.05})`;g.fillRect(rnd()*1600,rnd()*940,1.5,1.5);}
+  g.strokeStyle=INK.grid;g.lineWidth=1;
+  for(let x=0;x<=140;x+=5){const [a]=P(x,0);g.beginPath();g.moveTo(a,OY);g.lineTo(a,OY+50*S);g.stroke();if(x%10===0)txt(x,a,OY-6,{px:1,size:10,col:'#8a8f9c',align:'center'});}
+  for(let y=0;y<=50;y+=5){const [,b]=P(0,y);g.beginPath();g.moveTo(OX,b);g.lineTo(OX+140*S,b);g.stroke();}
+  txt(`แมพ ${i+1} · ${m.name}`,58,46,{px:1,size:28,bold:1});
+  txt(m.en,58+g.measureText?0:0,0,{px:1,size:1});
+  let w=chip(m.sig,620,42);txt('← สไตล์ประจำแมพ',632+w,48,{px:1,size:13,col:INK.soft});
+  txt(m.mood,60,80,{px:1,size:14,col:INK.soft});
+  // phase washes
+  const PX=[[0,46],[46,47],[93,47]];
+  m.phases.forEach(([st,nm,col],k)=>{wash(PX[k][0],0,PX[k][1],50,col);});
+  m.draw();
+  // phase dividers + labels
+  [46,93].forEach(x=>{g.setLineDash([10,8]);stroke(M([[x,0],[x,50]]),'rgba(59,58,63,.55)',1.6,1,.6);g.setLineDash([]);});
+  poly([[0,0],[140,0],[140,50],[0,50]],INK.pencil,1.4);
+  m.phases.forEach(([st,nm],k)=>{const [a,b]=P(PX[k][0]+1,0);g.fillStyle='rgba(244,239,226,.85)';g.fillRect(a-4,b+4,250,26);txt(`เฟส ${k+1} · ${nm}`,a+2,b+22,{px:1,size:15,bold:1,col:STY[st][1]});});
+  m.cores.forEach(c=>core(...c));m.heals.forEach(h=>cross(...h));
+  m.routes.forEach(([t,pts])=>{const r=RT[t];arrow(pts,r[0],r[1],r[2]);});
+  m.spawns.forEach(s=>spawn(...s));m.badges.forEach(b=>badge(...b));
+  // notes per phase
+  const NY=706;m.notes.forEach(([st0,desc,cls],k)=>{const st=Object.keys(STY).find(q=>STY[q][0]===st0)||st0;const x=58+k*500;const cw=chip(st,x,NY);txt(`เฟส ${k+1}`,x+cw+10,NY+1,{px:1,size:14,bold:1});
+    const words=desc.split(' · ');txt(words.join('\n'),x,NY+32,{px:1,size:13});txt('เด่น: '+cls,x,NY+32+words.length*16.5+10,{px:1,size:13,bold:1,col:INK.main});});
+  // legend
+  const LY=900;const lg=[[INK.main,'ทางหลัก'],[INK.flank,'ทางอ้อม'],[INK.flank,'หลังทุบ',[7,6]],[INK.high,'ทางสูง/กระโดด',[7,6]],[INK.freeze,'แช่น้ำแข็ง',[4,5]],[INK.def,'ฝ่ายรับ',[5,5]]];
+  let lx=58;lg.forEach(([c,s,d])=>{if(d)g.setLineDash(d);stroke([[lx,LY],[lx+34,LY]],c,3,1,.6);g.setLineDash([]);txt(s,lx+42,LY+5,{px:1,size:13});lx+=150;});
+  txt('A แดง = จุดเกิดบุก · B ฟ้า = จุดเกิดรับ (เลข = เฟส) · + เขียว = จุดฮีล · เลขในวงกลม = ทางเข้าแกน',lx+10,LY+5,{px:1,size:13,col:INK.soft});
+  g.save();g.translate(1352,30);g.rotate(.03);g.fillStyle='#fbe9a0';g.fillRect(0,0,200,64);g.restore();
+  txt('ร่าง v1 · ยังไม่ล็อก',1366,56,{px:1,size:15,bold:1,col:INK.atk,rot:.03});txt('140×50 ช่อง (กริด Map Editor)',1366,78,{px:1,size:11,rot:.03});
+}
+window.renderAll=async()=>{try{await document.fonts.load('400 16px Mali');await document.fonts.load('600 16px Mali');}catch(e){}
+  const out={};for(let i=0;i<MAPS.length;i++){await render(i);out['siege_map5_'+(i+1)]=cv.toDataURL('image/png');}return out;};
+window.renderOne=async i=>{try{await document.fonts.load('400 16px Mali');await document.fonts.load('600 16px Mali');}catch(e){}
+  await render(i);return {['siege_map5_'+(i+1)]:cv.toDataURL('image/png')};};
+window.__ready=true;
+</script>
+</body></html>

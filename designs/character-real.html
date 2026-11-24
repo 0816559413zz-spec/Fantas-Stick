@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<title>Character realistic sketches</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mali:wght@400;600&display=swap">
+<style>html,body{margin:0;background:#e9e4d8}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1600" height="1060"></canvas>
+<script>
+// Pencil concept sheet: semi-realistic student mage, 3 original uniform options + face close-up.
+const cv=document.getElementById('c'),g=cv.getContext('2d');
+let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
+const j=a=>(rnd()-.5)*2*a;
+const INK={pencil:'#34333a',soft:'#6a6870',paper:'#f4efe2',grid:'rgba(90,120,160,.10)',red:'#b3262b',green:'#2f7a3a'};
+function stroke(c,pts,col,w,passes=2,amp=1,close=false){
+  if(close)pts=[...pts,pts[0]];
+  for(let p=0;p<passes;p++){
+    c.beginPath();c.strokeStyle=col;c.lineWidth=w*(p?0.65:1);c.lineCap='round';c.lineJoin='round';c.globalAlpha=p?0.45:0.92;
+    for(let i=0;i<pts.length-1;i++){
+      const [x1,y1]=pts[i],[x2,y2]=pts[i+1],L=Math.hypot(x2-x1,y2-y1),n=Math.max(1,Math.round(L/24));
+      if(i===0)c.moveTo(x1+j(amp),y1+j(amp));
+      for(let k=1;k<=n;k++){const t=k/n,mx=x1+(x2-x1)*(t-.5/n),my=y1+(y2-y1)*(t-.5/n);
+        c.quadraticCurveTo(mx+j(amp*1.3),my+j(amp*1.3),x1+(x2-x1)*t+j(amp),y1+(y2-y1)*t+j(amp));}
+    }
+    c.stroke();
+  }
+  c.globalAlpha=1;
+}
+function blob(c,pts,fill,col=INK.pencil,w=1.8){
+  if(fill){c.beginPath();const n=pts.length;
+    for(let i=0;i<=n;i++){const a=pts[i%n],b=pts[(i+1)%n],m=[(a[0]+b[0])/2,(a[1]+b[1])/2];i?c.quadraticCurveTo(a[0],a[1],m[0],m[1]):c.moveTo(m[0],m[1]);}
+    c.fillStyle=fill;c.fill();}
+  if(col){const sm=[];const n=pts.length;for(let i=0;i<n;i++){const a=pts[i],b=pts[(i+1)%n];sm.push(a,[(a[0]+b[0])/2,(a[1]+b[1])/2]);}stroke(c,sm,col,w,2,.7,true);}
+}
+function ell(c,x,y,rx,ry,fill,col=INK.pencil,w=1.8){const p=[];for(let i=0;i<22;i++){const a=i/22*Math.PI*2;p.push([x+Math.cos(a)*rx,y+Math.sin(a)*ry]);}blob(c,p,fill,col,w);}
+function hatch(c,pts,col,gap=5,al=.3,dir=1){c.save();c.beginPath();pts.forEach((p,i)=>i?c.lineTo(...p):c.moveTo(...p));c.closePath();c.clip();
+  const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]),x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys),h=y1-y0;
+  c.globalAlpha=al;for(let x=x0-h;x<x1+h;x+=gap)stroke(c,[[x,y1],[x+h*.7*dir,y0]],col,.9,1,.4);c.restore();}
+function txt(s,x,y,{size=15,col=INK.pencil,bold=0,align='left'}={}){g.save();g.translate(x,y);g.rotate(j(.006));g.fillStyle=col;g.textAlign=align;g.font=(bold?'600 ':'400 ')+size+'px Mali';g.fillText(s,0,0);g.restore();}
+
+const SKIN='#ecc9a8',HAIR='#4a3426',SHIRT='#f3f0ea',VEST='#5b5d66',TROU='#3a3b42',SHOE='#2a2523';
+// emblem: own crest (star over crescent in a shield)
+function crest(c,x,y,s,col){blob(c,[[x-7*s,y-8*s],[x+7*s,y-8*s],[x+7*s,y+1*s],[x,y+9*s],[x-7*s,y+1*s]],'#1d1c22',col,1.2);
+  c.beginPath();c.arc(x,y+1*s,4*s,.3,Math.PI-.3);c.strokeStyle=col;c.lineWidth=1.4;c.stroke();
+  c.fillStyle=col;c.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,r=i%2?1.3*s:3*s;c.lineTo(x+Math.cos(a)*r,y-3*s+Math.sin(a)*r);}c.fill();}
+
+// figure: feet at (0,0), 7 heads tall (H=56)
+function face(c,hairStyle){
+  ell(c,0,-364,21,28,SKIN);                                   // head
+  ell(c,-21,-362,4,7,SKIN);ell(c,21,-362,4,7,SKIN);
+  stroke(c,[[-12,-374],[-4,-375]],HAIR,2.2,1,.3);stroke(c,[[4,-375],[12,-374]],HAIR,2.2,1,.3); // brows
+  stroke(c,[[-12,-367],[-8,-369],[-4,-367]],INK.pencil,1.4,1,.2);stroke(c,[[4,-367],[8,-369],[12,-367]],INK.pencil,1.4,1,.2);
+  ell(c,-8,-367,1.8,1.8,'#3b2b22',null);ell(c,8,-367,1.8,1.8,'#3b2b22',null);
+  stroke(c,[[1,-366],[3,-354],[-1,-352]],INK.soft,1.2,1,.2);   // nose
+  stroke(c,[[-5,-344],[0,-343],[5,-344]],'#9a5a50',1.6,1,.2);  // mouth
+  stroke(c,[[-21,-356],[-12,-340],[0,-336],[12,-340],[21,-356]],INK.pencil,1.2,1,.3); // jaw
+  if(hairStyle===0)blob(c,[[-24,-366],[-26,-384],[-14,-398],[4,-400],[20,-394],[27,-380],[24,-364],[18,-378],[6,-384],[-6,-378],[-16,-382],[-20,-368]],HAIR); // wavy short
+  if(hairStyle===1)blob(c,[[-24,-360],[-24,-390],[-6,-400],[16,-398],[26,-384],[25,-340],[20,-336],[19,-372],[0,-386],[-16,-374],[-20,-340],[-25,-336]],HAIR); // shoulder-length
+  if(hairStyle===2)blob(c,[[-23,-372],[-22,-390],[-8,-398],[10,-398],[22,-390],[23,-372],[14,-384],[-12,-386]],HAIR); // neat short
+  for(let i=0;i<5;i++)stroke(c,[[-14+i*7,-394],[-10+i*7,-382]],'#2e2018',1,1,.4);
+}
+function figure(c,o){
+  const L=o.lining,R=o.robe;
+  // legs + shoes
+  blob(c,[[-22,-120],[-4,-120],[-8,-10],[-20,-10]],TROU);blob(c,[[4,-120],[22,-120],[20,-10],[8,-10]],TROU);
+  ell(c,-15,-4,13,6,SHOE);ell(c,15,-4,13,6,SHOE);
+  // inner: shirt + vest + tie
+  blob(c,[[-34,-318],[34,-318],[36,-200],[-36,-200]],SHIRT);
+  blob(c,[[-32,-296],[-8,-318],[0,-262],[8,-318],[32,-296],[34,-196],[-34,-196]],VEST);
+  for(let k=0;k<3;k++)ell(c,0,-246+k*16,1.8,1.8,'#1d1c22',null);
+  stroke(c,[[-10,-322],[0,-312],[10,-322]],INK.pencil,1.4,1,.3);   // collar
+  blob(c,[[-4,-314],[4,-314],[7,-270],[0,-262],[-7,-270]],o.tie);
+  for(let k=0;k<4;k++)stroke(c,[[-6,-306+k*11],[6,-300+k*11]],o.tie2,2,1,.3);
+  // robe body
+  const hem=o.short?-196:-70,flare=o.short?52:76;
+  if(o.short){ // short coat to the hip + belt
+    blob(c,[[-58,-316],[-34,-318],[-26,-250],[-30,-196],[-56,-190],[-62,-250]],R);
+    blob(c,[[58,-316],[34,-318],[26,-250],[30,-196],[56,-190],[62,-250]],R);
+    blob(c,[[-38,-204],[38,-204],[38,-192],[-38,-192]],'#6b4a2e');ell(c,0,-198,6,6,'#c9a24a');
+    blob(c,[[18,-192],[28,-192],[30,-170],[16,-170]],'#7ab8d8');blob(c,[[-30,-192],[-20,-192],[-18,-176],[-32,-176]],'#d06a4a'); // potion vials
+    blob(c,[[-26,-200],[26,-200],[34,-120],[-34,-120]],TROU);
+  }else{
+    blob(c,[[-58,-316],[-34,-320],[-24,-250],[-30,-180],[-34,hem],[-flare,hem+4],[-62,-200],[-64,-260]],R);
+    blob(c,[[58,-316],[34,-320],[24,-250],[30,-180],[34,hem],[flare,hem+4],[62,-200],[64,-260]],R);
+    stroke(c,[[-34,-200],[-34,hem]],L,3,1,.4);stroke(c,[[34,-200],[34,hem]],L,3,1,.4); // lining edge
+    hatch(c,[[-58,-316],[-62,-200],[-flare,hem+4],[-48,hem]],INK.pencil,5,.25);
+  }
+  // high collar / hood behind neck
+  if(o.hood){blob(c,[[-46,-318],[-30,-334],[0,-326],[30,-334],[46,-318],[26,-312],[0,-318],[-26,-312]],L);
+             blob(c,[[-50,-320],[-36,-340],[-20,-336],[-30,-318]],R);blob(c,[[50,-320],[36,-340],[20,-336],[30,-318]],R);}
+  if(o.collar){blob(c,[[-30,-318],[-26,-346],[-14,-336],[-12,-318]],R);blob(c,[[30,-318],[26,-346],[14,-336],[12,-318]],R);
+               stroke(c,[[-26,-346],[-14,-336]],L,2.5,1,.3);stroke(c,[[26,-346],[14,-336]],L,2.5,1,.3);}
+  // clasp
+  if(o.clasp===1){stroke(c,[[-30,-292],[30,-292]],'#2a2523',2,1,.3);blob(c,[[-8,-296],[8,-296],[8,-288],[-8,-288]],'#6b4a2e');}
+  if(o.clasp===2){ell(c,-30,-300,5,5,'#c9a24a');ell(c,30,-300,5,5,'#c9a24a');stroke(c,[[-26,-300],[0,-294],[26,-300]],'#c9a24a',1.6,1,.3);}
+  // one-shoulder half cape
+  if(o.halfcape){blob(c,[[-62,-322],[10,-326],[22,-300],[-10,-230],[-46,-206],[-74,-250]],L);hatch(c,[[-62,-322],[10,-326],[-10,-230],[-74,-250]],INK.pencil,6,.22);}
+  // arms (sleeves) + hands + wand
+  const sw=o.short?13:17;
+  stroke(c,[[-56,-308],[-66,-236],[-58,-170]],R,sw*2,1,.4);stroke(c,[[-58,-176],[-58,-166]],L,sw*2,1,.3);
+  ell(c,-58,-158,7,9,SKIN);
+  stroke(c,[[56,-308],[74,-246],[96,-210]],R,sw*2,1,.4);stroke(c,[[92,-216],[98,-206]],L,sw*2,1,.3);
+  ell(c,102,-202,7,8,SKIN);
+  stroke(c,[[102,-202],[136,-262]],'#5a3c26',4,2,.4);ell(c,137,-264,2.5,2.5,'#f4e3a1',null);
+  crest(c,-40,-276,1.4,o.crest);
+  face(c,o.hair);
+}
+const OPTS=[
+ {name:'A · เสื้อคลุมยาวมีฮู้ด',tag:'ใกล้ภาพอ้างอิงที่สุด แต่ตัดเย็บใหม่',robe:'#25232b',lining:'#5a6fb8',tie:'#5a6fb8',tie2:'#d8dbe6',crest:'#c9a24a',hood:1,clasp:1,hair:0,
+  pros:['ดูเป็นนักเรียนเวทชัดเจน','ซับในฮู้ด/ขอบ/เนคไท = สีบ้าน','ชายเสื้อยาวพลิ้วกับระบบผ้าเดิม'],cons:['ชายยาวบังขาเวลาวิ่ง/กระโดด','ใกล้แนวเกมพ่อมดอื่นมาก ต้องดีไซน์ตราเอง']},
+ {name:'B · โค้ทคอตั้ง + ผ้าคลุมไหล่',tag:'สง่า ดูเป็นนักรบเวทมากขึ้น',robe:'#2b2f3a',lining:'#9a3b3b',tie:'#9a3b3b',tie2:'#e2c48a',crest:'#e2c48a',collar:1,halfcape:1,clasp:2,hair:1,
+  pros:['เงาตัวต่างจากเกมพ่อมดทั่วไป','ผ้าคลุมไหล่ข้างเดียวใส่สีบ้าน/ทีมได้เด่น','เข้ากับโหมดบุกปราสาท'],cons:['ต้องทำโมเดลผ้าคลุมใหม่','ดูจริงจัง ผู้เล่นเด็กอาจชอบน้อยกว่า']},
+ {name:'C · โค้ทสั้น + เข็มขัดขวดยา',tag:'คล่องตัว แนวนักผจญภัย',robe:'#3a3328',lining:'#3f7a55',tie:'#3f7a55',tie2:'#e6e0cf',crest:'#d9c08a',short:1,clasp:0,hair:2,
+  pros:['เห็นขาชัด ท่าวิ่ง/Dash/กระโดดอ่านง่าย','ขวดยาที่เข็มขัดเปลี่ยนตามสายได้','ไม่บังกล้องเวลามองจากหลัง'],cons:['ความเป็น "พ่อมดนักเรียน" ลดลง','ต้องทำท่ากางเกง/ขาให้ละเอียดขึ้น']}
+];
+function sheet(){
+  g.fillStyle=INK.paper;g.fillRect(0,0,cv.width,cv.height);
+  g.strokeStyle=INK.grid;g.lineWidth=1;for(let x=0;x<cv.width;x+=24){g.beginPath();g.moveTo(x,0);g.lineTo(x,cv.height);g.stroke();}
+  for(let y=0;y<cv.height;y+=24){g.beginPath();g.moveTo(0,y);g.lineTo(cv.width,y);g.stroke();}
+  txt('ตัวละคร Fantas Stick — แนวนักเรียนเวทสมจริง (ร่าง v1)',40,52,{size:30,bold:1});
+  txt('สัดส่วนคนจริง ~7 หัว • ชุดและตราออกแบบใหม่ทั้งหมด (ตราดาว+จันทร์เสี้ยว) • สีซับใน/เนคไท/ตรา = สีบ้าน เปลี่ยนได้เหมือนเดิม',40,84,{size:16,col:INK.soft});
+  OPTS.forEach((o,i)=>{
+    const x0=28+i*400,cx=x0+170,fy=590;
+    stroke(g,[[x0,112],[x0+386,112],[x0+386,1030],[x0,1030]],INK.soft,1.6,1,1.2,true);
+    txt(o.name,x0+16,148,{size:22,bold:1});txt(o.tag,x0+16,174,{size:14,col:INK.soft});
+    ell(g,cx,fy+2,70,8,'rgba(60,58,70,.12)',null);
+    stroke(g,[[x0+20,fy],[x0+20,fy-392]],INK.soft,1,1,.3);
+    for(let k=0;k<=7;k++)stroke(g,[[x0+15,fy-k*56],[x0+25,fy-k*56]],INK.soft,1,1,.2);
+    txt('7 หัว',x0+30,fy-400,{size:12,col:INK.soft});
+    g.save();g.translate(cx,fy);seed=31+i*53;figure(g,o);g.restore();
+    let y=fy+60;txt('ข้อดี',x0+16,y,{size:16,bold:1,col:INK.green});y+=26;
+    o.pros.forEach(p=>{txt('+ '+p,x0+22,y,{size:14});y+=24;});
+    y+=10;txt('ต้องระวัง',x0+16,y,{size:16,bold:1,col:INK.red});y+=26;
+    o.cons.forEach(p=>{txt('– '+p,x0+22,y,{size:14});y+=24;});
+  });
+  // face close-up of A
+  const fx=1228,fw=344;
+  stroke(g,[[fx,112],[fx+fw,112],[fx+fw,1030],[fx,1030]],INK.soft,1.6,1,1.2,true);
+  txt('ซูมหน้า + ช่วงบน (แบบ A)',fx+16,148,{size:20,bold:1});
+  g.save();g.beginPath();g.rect(fx+8,170,fw-16,470);g.clip();g.translate(fx+fw/2,1520);g.scale(3.6,3.6);seed=31;figure(g,OPTS[0]);g.restore();
+  let y=680;
+  [['หน้า','สมจริงแบบการ์ตูนนิด ๆ ตาโตขึ้น 10%'],['ผม','แยกชิ้นเหมือนเดิม (ทรงผม 11 แบบ)'],['เนคไท','ลายทางทแยก 2 สี = สีบ้าน'],['กระดุมเสื้อคลุม','ห่วงไม้ (A) / โซ่ทอง (B)'],['ตรา','ดาว+จันทร์เสี้ยว ของเกมเราเอง']].forEach(([a,b])=>{txt(a,fx+16,y,{size:15,bold:1});txt(b,fx+16,y+22,{size:14,col:INK.soft});y+=54;});
+  g.save();g.translate(fx+14,y+6);g.rotate(-.02);g.fillStyle='#fde68a';g.fillRect(0,0,fw-28,62);g.restore();
+  txt('เลือก A / B / C หรือผสม',fx+28,y+32,{size:15,bold:1});txt('แล้วผมทำภาพสีเต็ม + หน้า/หลัง/ข้าง',fx+28,y+54,{size:13});
+}
+window.renderSheet=async()=>{await document.fonts.load('600 20px Mali');await document.fonts.load('400 20px Mali');sheet();return {character_real_v1:cv.toDataURL('image/png')};};
+document.fonts.ready.then(()=>sheet());
+</script>
+</body></html>

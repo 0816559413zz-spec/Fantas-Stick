@@ -148,7 +148,7 @@ function crRenderHouse(){
 }
 function crGo(n){
   if(crStep===1||crStep===2)crSaveName();
-  crStep=n;const el=$('#creator');for(const k of [1,2,3,4]){el.classList.toggle('s'+k,n===k);$('#crSt'+k).classList.toggle('on',n===k);}
+  crStep=n;const el=$('#creator');for(const k of [1,2,3,4]){el.classList.toggle('s'+k,n===k);const st=$('#crSt'+k);if(st)st.classList.toggle('on',n===k);}
   document.body.classList.toggle('crRot',n!==3);
   if(n===4){crRenderHouse();STAGE.switchT=0;}else crRenderStep1();
   [...document.querySelectorAll('.crTints i')].forEach((e,i)=>e.classList.toggle('on',n===4&&myLook.h===i));
@@ -161,17 +161,16 @@ function crGo(n){
 function crSaveName(){const c=$('#cName');if(c){const n=cleanName(c.value);$('#nameIn').value=n;store('wd_name',n);}}
 function crSetHouse(i){if(i===myLook.h&&crStep===4)return;myLook.h=i;STAGE.switchT=0;renderMyHouse();crRenderHouse();}
 function openCreator(first,step){
-  crSaved=lookStr(myLook);crKitSaved=myKit;ac();crFirst=!!first;crOpen=true;crTab=0;crSlot=0;crLib=parseKit(myKit).path;crKitOnly=step===3&&!first&&(screen==='lobby'||screen==='game');
+  crSaved=lookStr(myLook);crKitSaved=myKit;ac();crFirst=!!first;crOpen=true;crTab=0;crSlot=0;crLib=parseKit(myKit).path;crKitOnly=step===3&&!first;   // creator = look + wand only (user 2026-11-24); step 3 = spell picker from lobby/menu
   $('#crTitle').textContent=crKitOnly?'เลือกสายและคาถา':first?'สร้างตัวละครของคุณ':'แต่งตัวละคร';
   $('#crCancel').classList.toggle('hidden',!!first);
   $('#crSteps').classList.toggle('hidden',crKitOnly);
-  $('#crNext3').classList.toggle('hidden',crKitOnly);$('#crBack3').classList.toggle('hidden',crKitOnly);$('#crKitOk').classList.toggle('hidden',!crKitOnly);
   if(screen==='menu'){document.querySelector('.mprof').classList.add('hidden');document.querySelector('.mleft').classList.add('hidden');}
   document.body.classList.add('crOpenB');document.body.classList.toggle('crGame',screen==='game');
   $('#creator').classList.remove('hidden');crGo(step||1);
 }
 function closeCreator(save){
-  if(save){crSaveName();lookClampLocks(myLook);store('wd_look',lookStr(myLook));store('wd_kit2',myKit);if(JOINQ){const c=JOINQ;JOINQ='';setTimeout(()=>joinGame(c),300);}}
+  if(save){crSaveName();lookClampLocks(myLook);store('wd_look',lookStr(myLook));if(crKitOnly)store('wd_kit2',myKit);if(JOINQ){const c=JOINQ;JOINQ='';setTimeout(()=>joinGame(c),300);}}
   else{myLook=parseLook(crSaved);myKit=crKitSaved;}
   crOpen=false;STAGE.rotY=STAGE.rotV=0;document.body.classList.remove('crRot');renderMyHouse();$('#creator').classList.add('hidden');
   if(screen==='menu'){document.querySelector('.mprof').classList.remove('hidden');document.querySelector('.mleft').classList.remove('hidden');}
@@ -209,12 +208,7 @@ $('#creator').addEventListener('drop',e=>{const t=e.target.closest('[data-ks]');
 $('#crRand').onclick=()=>{const k={h:myLook.h,wd:myLook.wd,wc:myLook.wc,ws:myLook.ws};myLook=lookClampLocks(Object.assign(randLook(),k));crRenderStep1();};
 $('#crNext').onclick=()=>crGo(2);
 $('#crBack2').onclick=()=>crGo(1);
-$('#crNext2').onclick=()=>crGo(3);
-$('#crBack3').onclick=()=>crGo(2);
-$('#crNext3').onclick=()=>crGo(4);
-$('#crBack').onclick=()=>crGo(3);
 $('#crKitOk').onclick=()=>{store('wd_kit2',myKit);closeCreator(true);lobbyKitSend();};
-$('#crHat').onclick=()=>{crSetHouse(Math.floor(Math.random()*4));toast('🎩 หมวกคัดสรรเลือกให้คุณ: '+HOUSES[myLook.h].n+'!');};
 $('#crOk').onclick=()=>closeCreator(true);
 $('#crCancel').onclick=()=>closeCreator(false);
 $('#btnLook').onclick=()=>openCreator(false);

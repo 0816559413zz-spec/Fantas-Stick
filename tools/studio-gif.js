@@ -25,7 +25,8 @@ function studioGifOptions(args){
     to:args.to===undefined?null:number('to',0,0,120),
     still:args['still-at']===undefined?null:number('still-at',0,0,120),
     fps:number('fps',24,1,60),
-    width:number('gif-width',760,160,1920)
+    width:number('gif-width',760,160,1920),
+    max:args['max-len']===undefined?null:number('max-len',0,0.2,120)
   };
   if(!Number.isInteger(settings.fps)||!Number.isInteger(settings.width)){
     throw new Error('--fps และ --gif-width ต้องเป็นจำนวนเต็ม');
@@ -46,7 +47,7 @@ async function captureStudioGif({settings,url,evaluate,temp,root,pageErrors,time
   })()`);
   if(requested&&studio.fx!==requested)throw new Error('Studio เปิดเอฟเฟกต์ไม่สำเร็จ: '+requested);
   const {from,fps,width,name}=settings;
-  const to=settings.to??studio.duration;
+  const to=settings.to??(settings.max?Math.min(studio.duration+studio.tail,from+settings.max):studio.duration);
   const still=settings.still??(from+to)/2;
   const max=studio.duration+studio.tail;
   if(to<=from||to>max+1e-6||still<from||still>to){
@@ -83,8 +84,11 @@ async function captureStudioGif({settings,url,evaluate,temp,root,pageErrors,time
       '-filter_complex',filter,'-loop','0',path.join(temp,'capture.gif')
     ],{timeout,windowsHide:true});
   }catch(error){
-    if(error.code==='ENOENT')throw new Error('ไม่พบ FFmpeg ใน PATH สำหรับประกอบ GIF');
-    throw new Error('ประกอบ GIF ไม่สำเร็จ: '+(error.stderr||error.message).trim());
+    if(error.code==='ENOENT'){
+      // no FFmpeg on this machine: pack the same PNG frames with Python + Pillow
+      try{await run(process.env.PYTHON||'python',[path.join(__dirname,'png-to-gif.py'),temp,String(fps)],{timeout,windowsHide:true});}
+      catch(e2){throw new Error('ไม่พบ FFmpeg และประกอบ GIF ด้วย Python ไม่สำเร็จ: '+(e2.stderr||e2.message).trim());}
+    }else throw new Error('ประกอบ GIF ไม่สำเร็จ: '+(error.stderr||error.message).trim());
   }
   const shots=path.join(root,'shots');
   await fs.mkdir(shots,{recursive:true});

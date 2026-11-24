@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8">
+<title>Character drawing guide</title>
+<style>html,body{margin:0;background:#fff}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1600" height="900"></canvas>
+<script>
+// Drawing guide for the user: 6-head anime proportions (front / side / back) + face construction + outfit zones.
+const cv=document.getElementById('c'),g=cv.getContext('2d');
+const LINE='#b9c4d6',SOFT='#dfe5ee',LAB='#8a96aa',ZONE='#e7b98a',NUM='#c98a4a';
+const TOP=110,HD=120,FEET=TOP+HD*6; // 1 head = 120 px
+function path(pts,{close=false,col=LINE,w=2,dash=null,fill=null}={}){g.beginPath();pts.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));if(close)g.closePath();
+  if(fill){g.fillStyle=fill;g.fill();}g.setLineDash(dash||[]);g.strokeStyle=col;g.lineWidth=w;g.stroke();g.setLineDash([]);}
+function smooth(pts,o={}){g.beginPath();const n=pts.length;g.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<n-1;i++){const m=[(pts[i][0]+pts[i+1][0])/2,(pts[i][1]+pts[i+1][1])/2];g.quadraticCurveTo(pts[i][0],pts[i][1],m[0],m[1]);}
+  g.lineTo(pts[n-1][0],pts[n-1][1]);if(o.close)g.closePath();if(o.fill){g.fillStyle=o.fill;g.fill();}g.setLineDash(o.dash||[]);g.strokeStyle=o.col||LINE;g.lineWidth=o.w||2;g.stroke();g.setLineDash([]);}
+function ell(x,y,rx,ry,o={}){g.beginPath();g.ellipse(x,y,rx,ry,0,0,Math.PI*2);if(o.fill){g.fillStyle=o.fill;g.fill();}g.setLineDash(o.dash||[]);g.strokeStyle=o.col||LINE;g.lineWidth=o.w||2;g.stroke();g.setLineDash([]);}
+function txt(s,x,y,{size=15,col=LAB,bold=0,align='left'}={}){g.fillStyle=col;g.textAlign=align;g.font=(bold?'600 ':'400 ')+size+'px "Leelawadee UI","Segoe UI",Tahoma,sans-serif';g.fillText(s,x,y);}
+function num(n,x,y){g.fillStyle='#fff';g.beginPath();g.arc(x,y,11,0,7);g.fill();g.strokeStyle=NUM;g.lineWidth=2;g.stroke();txt(String(n),x,y+5,{size:13,col:NUM,bold:1,align:'center'});}
+
+// mirrored front/back body outline around centre x
+function bodyFront(cx,back){
+  const Y=k=>TOP+HD*k;
+  // head: anime skull + narrower chin
+  smooth([[cx,Y(0)],[cx+46,Y(0)+8],[cx+50,Y(.45)],[cx+40,Y(.78)],[cx+14,Y(1)],[cx,Y(1)+2],[cx-14,Y(1)],[cx-40,Y(.78)],[cx-50,Y(.45)],[cx-46,Y(0)+8],[cx,Y(0)]],{fill:SOFT,close:1});
+  path([[cx-11,Y(1)-6],[cx-12,Y(1.22)]]);path([[cx+11,Y(1)-6],[cx+12,Y(1.22)]]);
+  const half=s=>[[cx+s*12,Y(1.22)],[cx+s*66,Y(1.32)],[cx+s*58,Y(1.62)],[cx+s*42,Y(2.35)],[cx+s*54,Y(2.8)],[cx+s*50,Y(3.1)]];
+  const torso=[...half(1),[cx,Y(3.02)],...half(-1).reverse()];
+  path(torso,{close:1,fill:SOFT});
+  for(const s of[-1,1]){
+    smooth([[cx+s*50,Y(3.1)],[cx+s*40,Y(3.7)],[cx+s*26,Y(4.45)],[cx+s*24,Y(5.2)],[cx+s*16,Y(5.75)],[cx+s*14,Y(5.86)]]);       // leg outer
+    smooth([[cx+s*4,Y(3.05)],[cx+s*8,Y(3.7)],[cx+s*10,Y(4.45)],[cx+s*8,Y(5.2)],[cx+s*7,Y(5.86)]]);                          // leg inner
+    ell(cx+s*14,Y(4.45),10,7);                                                                                                // knee
+    path([[cx+s*6,Y(5.86)],[cx+s*(back?20:30),Y(5.92)],[cx+s*(back?20:30),Y(6)],[cx+s*5,Y(6)]],{close:1});                    // foot
+    smooth([[cx+s*64,Y(1.34)],[cx+s*74,Y(1.9)],[cx+s*76,Y(2.45)],[cx+s*80,Y(3.05)]]);                                          // arm outer
+    smooth([[cx+s*56,Y(1.65)],[cx+s*62,Y(2.45)],[cx+s*68,Y(3.02)]]);                                                          // arm inner
+    ell(cx+s*68,Y(2.4),7,6);ell(cx+s*76,Y(3.2),11,17);                                                                         // elbow, hand
+  }
+  if(back)path([[cx,Y(1.25)],[cx,Y(3)]],{dash:[6,6]});
+  else {path([[cx-50,Y(.5)],[cx+50,Y(.5)]],{col:SOFT,w:1.4,dash:[4,4]});path([[cx,Y(0)],[cx,Y(1)]],{col:SOFT,w:1.4,dash:[4,4]});}
+}
+function bodySide(cx){
+  const Y=k=>TOP+HD*k;
+  smooth([[cx-6,Y(0)],[cx+34,Y(.08)],[cx+50,Y(.42)],[cx+46,Y(.62)],[cx+40,Y(.86)],[cx+18,Y(1.02)],[cx-8,Y(.92)],[cx-38,Y(.6)],[cx-42,Y(.3)],[cx-6,Y(0)]],{fill:SOFT,close:1});
+  path([[cx-6,Y(.95)],[cx-8,Y(1.24)]]);path([[cx+12,Y(1)],[cx+10,Y(1.24)]]);
+  smooth([[cx-10,Y(1.24)],[cx-22,Y(1.6)],[cx-18,Y(2.4)],[cx-26,Y(2.95)],[cx-18,Y(3.15)],[cx+22,Y(3.1)],[cx+24,Y(2.4)],[cx+30,Y(1.75)],[cx+14,Y(1.26)]],{fill:SOFT,close:1});
+  smooth([[cx-18,Y(3.1)],[cx-8,Y(3.8)],[cx-6,Y(4.45)],[cx-12,Y(5.2)],[cx-10,Y(5.88)]]);smooth([[cx+20,Y(3.1)],[cx+14,Y(3.8)],[cx+10,Y(4.45)],[cx+6,Y(5.2)],[cx+4,Y(5.88)]]);
+  path([[cx-12,Y(5.88)],[cx+30,Y(5.92)],[cx+30,Y(6)],[cx-12,Y(6)]],{close:1});
+  smooth([[cx+2,Y(1.35)],[cx-4,Y(1.9)],[cx+4,Y(2.45)],[cx+16,Y(3.0)]],{w:2});ell(cx+20,Y(3.18),10,16);
+}
+function sheet(){
+  g.fillStyle='#fff';g.fillRect(0,0,1600,900);
+  // head-unit lines
+  const marks=['หัวบน','คาง','อก • ศอก','เป้า • ข้อมือ','เหนือเข่า (เข่า ≈ 4.4)','หน้าแข้ง','เท้า'];
+  for(let k=0;k<=6;k++){const y=TOP+HD*k;path([[70,y],[1130,y]],{col:'#eef1f6',w:1.2});txt(k+'',52,y+5,{size:14,col:LAB,bold:1,align:'right'});txt(marks[k],78,y-6,{size:12});}
+  txt('ไกด์วาดตัวละคร — สัดส่วนอนิเมะ 6 หัว',40,44,{size:24,col:'#55617a',bold:1});
+  txt('วาดทับได้เลย เส้นจาง ๆ = โครงตัว • ลายจุดสีส้ม = ตำแหน่งชุด 6 ชิ้น (ตามหน้าแนวทางลุค) • เปลี่ยน/ลบส่วนไหนก็ได้',40,72,{size:15});
+  const F=300,S=640,B=980;
+  bodyFront(F,0);bodySide(S);bodyFront(B,1);
+  txt('หน้า',F,FEET+44,{size:18,bold:1,col:'#55617a',align:'center'});txt('ข้าง',S,FEET+44,{size:18,bold:1,col:'#55617a',align:'center'});txt('หลัง',B,FEET+44,{size:18,bold:1,col:'#55617a',align:'center'});
+  // outfit zones (front)
+  const Y=k=>TOP+HD*k,z={col:ZONE,w:2,dash:[7,6]};
+  smooth([[F-30,Y(1.12)],[F-90,Y(1.4)],[F-96,Y(3)],[F-104,Y(4.2)],[F,Y(4.0)],[F+104,Y(4.2)],[F+96,Y(3)],[F+90,Y(1.4)],[F+30,Y(1.12)]],z);num(1,F+112,Y(3.6));
+  smooth([[F-14,Y(1.2)],[F-28,Y(1.05)],[F-16,Y(1.18)]],z);path([[F-20,Y(1.02)],[F-20,Y(1.25)]],z);path([[F+20,Y(1.02)],[F+20,Y(1.25)]],z);
+  smooth([[F+20,Y(1.25)],[F+80,Y(1.3)],[F+98,Y(1.75)],[F+86,Y(2.4)],[F+52,Y(2.1)],[F+30,Y(1.6)]],z);num(2,F+108,Y(1.8));
+  smooth([[F-36,Y(1.18)],[F,Y(1.32)],[F+36,Y(1.18)]],z);path([[F-26,Y(1.3)],[F-34,Y(2.3)],[F-20,Y(2.45)],[F-14,Y(1.35)]],{...z,close:1});num(3,F-48,Y(2.2));
+  ell(F+24,Y(1.75),9,9,z);num(4,F+44,Y(1.62));
+  path([[F-34,Y(1.5)],[F+34,Y(1.5)],[F+30,Y(2.7)],[F-30,Y(2.7)]],{...z,close:1});num(5,F+4,Y(2.25));
+  path([[F+26,Y(3.4)],[F+52,Y(3.4)],[F+50,Y(3.62)],[F+28,Y(3.62)]],{...z,close:1});path([[F-30,Y(5.45)],[F-4,Y(5.45)]],z);path([[F+4,Y(5.45)],[F+30,Y(5.45)]],z);num(6,F+66,Y(3.5));
+  // side coat tail
+  smooth([[S-24,Y(1.3)],[S-40,Y(2.6)],[S-70,Y(4.5)],[S+10,Y(4.1)],[S+34,Y(3.1)]],z);txt('ชายหลังยาวกว่าหน้า',S-70,Y(4.75),{size:12,col:NUM});
+  smooth([[B-30,Y(1.12)],[B-96,Y(1.5)],[B-104,Y(3)],[B-112,Y(4.6)],[B,Y(4.75)],[B+112,Y(4.6)],[B+104,Y(3)],[B+96,Y(1.5)],[B+30,Y(1.12)]],z);
+  // face construction
+  const fx=1370,fy=370,rx=112,ry=165;
+  path([[1180,110],[1560,110],[1560,860],[1180,860]],{close:1,col:'#e6eaf1',w:1.5});
+  txt('โครงหน้าอนิเมะ',1370,140,{size:18,bold:1,col:'#55617a',align:'center'});
+  smooth([[fx,fy-ry],[fx+rx-6,fy-ry+40],[fx+rx,fy-10],[fx+rx-30,fy+100],[fx+48,fy+ry-10],[fx,fy+ry],[fx-48,fy+ry-10],[fx-rx+30,fy+100],[fx-rx,fy-10],[fx-rx+6,fy-ry+40],[fx,fy-ry]],{fill:SOFT,close:1});
+  ell(fx,fy-36,rx+24,ry-6,{col:ZONE,dash:[7,6]});txt('ขอบผม (พองกว่าหัว)',fx,fy-ry-50,{size:12,col:NUM,align:'center'});
+  const ey=fy+38;path([[fx-rx,ey],[fx+rx,ey]],{col:'#c9d2e0',w:1.4,dash:[5,5]});path([[fx,fy-ry],[fx,fy+ry]],{col:'#c9d2e0',w:1.4,dash:[5,5]});
+  for(const s of[-1,1]){path([[fx+s*16,ey-40],[fx+s*70,ey-40],[fx+s*70,ey+26],[fx+s*16,ey+26]],{close:1,col:LINE,w:1.6,dash:[4,4]});
+    smooth([[fx+s*18,ey-54],[fx+s*44,ey-64],[fx+s*72,ey-56]],{col:LINE,w:2});}
+  ell(fx,ey+54,3,3,{col:LINE});path([[fx-14,ey+90],[fx+14,ey+90]]);
+  txt('เส้นตา ≈ ครึ่งล่างของหัว',1196,fy+ry+40,{size:12});txt('กรอบตาโต (กว้าง ≈ 1/4 หน้า)',1196,fy+ry+60,{size:12});txt('จมูก = จุด • ปาก = เส้นสั้น',1196,fy+ry+80,{size:12});
+  // legend
+  let ly=660;txt('ชุด 6 ชิ้น',1196,ly,{size:16,bold:1,col:'#55617a'});ly+=28;
+  [['1','เสื้อคลุมปกตั้ง ชายหลังยาว'],['2','ผ้าคลุมไหล่ข้างเดียว'],['3','ผ้าพันคอปลายธง'],['4','เข็มกลัดรูนธาตุ'],['5','เสื้อกั๊ก + เชิ้ต'],['6','ซองไม้ที่ต้นขา + บูท']].forEach(([n,t])=>{num(n,1208,ly-5);txt(t,1228,ly,{size:14,col:'#6b768b'});ly+=30;});
+}
+sheet();
+window.renderSheet=()=>({char_guide_v1:cv.toDataURL('image/png')});
+</script>
+</body></html>
