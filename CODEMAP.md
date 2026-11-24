@@ -202,7 +202,7 @@ windUltCast:504 windUltTick:507 windUltSweep:532 windFloatZ:540 windShieldPitch:
 §551 สกิล (ผู้ใช้ 2026-11-08: รีดีไซน์ทั้งชุด — id เดิมไว้ให้ชุดสกิล/tune/…
 W_WL:553 W_DR:559 W_VX:565 W_VO:571 W_FW:577 W_UL:587
 
-## js/10-net.js (210) — 
+## js/10-net.js (210) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NET_QMAX:70 NETU:72 netUndelta:73 setStatus:79 hostGame:81 hostPeer:90 netConnect:110 joinWatch:121 joinFail:136 netLost:142 joinGame:157 joinPeer:168 clientOnData:183 leave:198 leaveRoom:200
 
 ## js/11-host.js (494) — 
@@ -597,7 +597,7 @@ WB:298 wbInit:299 wbBegin:309 wbEnd:310 fxWarpMake:311 fxWarpTick:324
 §332 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:335 fxVolLoad:336 fxVolTex:340 fxVolSet:343 fxVolReady:344 fxVolMake:345 fxVolTick:348 fxPreAssets:353 fxAssetsWait:355
 
-## js/47-earth-view.js (1115) — 
+## js/47-earth-view.js (1119) — 
 ECOL:9 EGUARD_BIG:14 EGUARD:14 EV:15 eW:16 EARTH_FIST_SCALE:17 eYaw:18
 §19 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
 ETEX:20 eTex:21 eFadeTex:35 eMat:37 eTMat:38 rockGeo:39 ROCKU:45 rockMesh:46 coneMesh:48 _eChunkM:50 eChunks:51
@@ -620,13 +620,13 @@ earthClear:689 eMergePartial:697 eMergeKids:702 eMakeSO:710
 §729 Rampart wall (user 2026-11-23 v2): fused rounded boulders, uneven top…
 ERAMP:730 eRng:731 eBlock:734 eRampGeo:749 eRampMats:765 eRampMesh:773 eRampHolo:777 eRampPlace:778 eRampTick:780
 §798 Terra Isle (user 2026-11-24, ref: floating island chunk): earthy top …
-EISLE:801 eIsleGeo:802 eIsleTint:818 eIsleMesh:820 eIsleTick:823 syncEarth:833 earthFog:881 eMudScreen:884 _eOlMat:891 eOutlines:893 _eCamT:898 eAnim:899 eDebris:900 eWave:902 eAirWave:904 esbImpact:907
-§914 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
-earthEfx:915 eWindOut:1031 eAirCone:1037 eDrillFly:1039
-§1043 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
-earthMudZone:1044 earthMudSink:1051
-§1052 HUD ใต้เป้าเล็ง
-ESM:1054 eSmooth:1055 ESF:1058 eShieldFx:1059 eChips:1064 eShieldSegs:1067 eShieldNum:1081 eShieldArc:1085 drawEarthHud:1098
+EISLE:801 eIsleGeo:802 eIsleTint:822 eIsleMesh:824 eIsleTick:827 syncEarth:837 earthFog:885 eMudScreen:888 _eOlMat:895 eOutlines:897 _eCamT:902 eAnim:903 eDebris:904 eWave:906 eAirWave:908 esbImpact:911
+§918 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
+earthEfx:919 eWindOut:1035 eAirCone:1041 eDrillFly:1043
+§1047 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
+earthMudZone:1048 earthMudSink:1055
+§1056 HUD ใต้เป้าเล็ง
+ESM:1058 eSmooth:1059 ESF:1062 eShieldFx:1063 eChips:1068 eShieldSegs:1071 eShieldNum:1085 eShieldArc:1089 drawEarthHud:1102
 
 ## js/48-ragdoll.js (419) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 _ragFw:41 ragBones:42 ragBasis:49 ragTargets:57 ragStart:63 ragBack:96 ragFloor:97 ragStep:98 ragPose:163 ragWrite:178 ragRestore:190 ragEnd:194 ragTick:196 ragHideDead:240 clearDeathFades:249 deathClipMat:259 deathSlashSplit:266 DD_ALPHA:320 deathDissolve:321 deathVisualSync:395
@@ -964,4 +964,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(118 files, 36062 lines)
+(118 files, 36066 lines)

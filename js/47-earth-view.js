@@ -806,12 +806,16 @@ function eIsleGeo(seed){if(EISLE.geo.has(seed))return EISLE.geo.get(seed);
   const P=[],C=[],I=[],vtx=(x,z,y,c)=>{P.push(x,y,z);C.push(c.r,c.g,c.b);return P.length/3-1;},under=Z[1];
   const c0=vtx(0,0,0.1,zone(0,0)),m=pts.map(q=>vtx(q[0]*0.55,q[1]*0.55,0.07,zone(q[0]*0.55,q[1]*0.55))),e=pts.map(q=>vtx(q[0],q[1],0,zone(q[0],q[1]).multiplyScalar(0.94)));
   for(let i=0;i<n;i++){const j=(i+1)%n;I.push(c0,m[j],m[i],m[i],m[j],e[j],m[i],e[j],e[i]);}
-  // underside: 6 rings, radius eases to 0 (pointed), gentle twist + noise so it reads as rock but stays one smooth body
-  const H=3.4+R()*0.8;let prev=e;
-  for(let r=1;r<=6;r++){const t=r/6,sc=Math.pow(1-t,1.35)*(1+0.06*t),tw=t*0.35,dk=0.62-0.4*t;
-    const ring=pts.map((q,i)=>{const a=Math.atan2(q[1],q[0])+tw,L=Math.hypot(q[0],q[1])*sc*(0.92+0.16*Math.sin(i*1.7+r*2.1+o1)),c=under.clone().multiplyScalar(dk);return vtx(Math.cos(a)*L,Math.sin(a)*L,-0.25-H*t*(1+0.12*Math.sin(i*2.3+o2)*t),c);});
-    for(let i=0;i<n;i++){const j=(i+1)%n;I.push(prev[i],prev[j],ring[j],prev[i],ring[j],ring[i]);}prev=ring;}
-  const tip=vtx(0,0,-0.25-H*1.2,under.clone().multiplyScalar(0.2));for(let i=0;i<n;i++){const j=(i+1)%n;I.push(prev[i],prev[j],tip);}
+  // underside (user 2026-11-24 v3): one smooth body with 2-3 hanging points. Polar grid from the rim inward; depth =
+  // shallow bowl + 2-3 cone-like lobes (soft falloff) so it stays continuous, darker the deeper it goes
+  const NL=2+(R()<0.55?1:0),lobes=[];for(let k=0;k<NL;k++){const a=k/NL*Math.PI*2+R()*0.7,d=rad*(0.4+0.15*R());lobes.push([Math.cos(a)*d,Math.sin(a)*d,(k?1.2:1.7)+R()*0.5,rad*(0.36+0.08*R())]);}
+  const depth=(x,z,t)=>{let y=0.25+0.9*Math.pow(t,0.8);for(const L of lobes){const q=Math.hypot(x-L[0],z-L[1])/L[3];if(q<1)y+=L[2]*Math.pow(1-q,1.7);}return y;};
+  const RG=10;let prev=e,maxD=0.01;const rings=[];
+  for(let r=1;r<=RG;r++){const t=r/RG,sc=1-t;rings.push(pts.map((q,i)=>{const L=0.93+0.1*Math.sin(i*1.7+r*2.1+o1);return [q[0]*sc*L,q[1]*sc*L,t];}));}
+  for(const ring of rings)for(const q of ring)maxD=Math.max(maxD,depth(q[0],q[1],q[2]));
+  for(const ring of rings){const idx=ring.map(q=>{const d=depth(q[0],q[1],q[2]);return vtx(q[0],q[1],-d,under.clone().multiplyScalar(0.62-0.42*Math.min(1,d/maxD)));});
+    for(let i=0;i<n;i++){const j=(i+1)%n;I.push(prev[i],prev[j],idx[j],prev[i],idx[j],idx[i]);}prev=idx;}
+  {const d=depth(0,0,1),cc=vtx(0,0,-d,under.clone().multiplyScalar(0.62-0.42*Math.min(1,d/maxD)));for(let i=0;i<n;i++){const j=(i+1)%n;I.push(prev[i],prev[j],cc);}}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('color',new THREE.Float32BufferAttribute(C,3));g.setIndex(I);g.computeVertexNormals();
   EISLE.geo.set(seed,g);if(EISLE.geo.size>8){const k=EISLE.geo.keys().next().value;EISLE.geo.get(k).dispose();EISLE.geo.delete(k);}
   return g;}
