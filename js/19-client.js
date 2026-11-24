@@ -80,7 +80,7 @@ function onSnap(s){
 }
 function snapApply(s,live){
   if(s.mp&&s.mp!==builtMap&&mapReady(s.mp)){setMapVars(s.mp);buildWorld(s.mp);}
-  if(!NET.isHost&&s.M&&s.M.sg){SGPH=s.M.sg.ph;SGTR=s.M.sg.tr||0;}   // เฟสบุกปราสาท → พื้นที่เล่น (js/02-fcs)
+  if(!NET.isHost&&s.M&&s.M.sg){SGPH=s.M.sg.ph;SGTR=s.M.sg.tr||0;SGLT=s.M.sg.lt||0;}   // เฟสบุกปราสาท → พื้นที่เล่น (js/02-fcs)
   if(!NET.isHost&&s.mp)AREA=mapArea(s.mp,s.mode);
   PROPON=!!s.PB;if(s.PB)for(let i=0;i<PROPS.length;i++)PROPS[i].st=+(s.PB[i]||0);
   if(!NET.isHost){brkParse(s.BK);efsParse(s.EF);bskParse(s.BS);cityParse(s.CB,s.CS);pnlParse(s.PN);}

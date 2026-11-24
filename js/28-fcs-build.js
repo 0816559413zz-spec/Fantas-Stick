@@ -277,8 +277,8 @@ function efsView(dt){
       else if(L>=2&&q>0.93)smoke(x,y,g+1.1+0.3*L,1,'#2b2724',rnd(1.2,1.8),3+1.2*L,10);}}
 }
 // ---------- ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg) ----------
-const SGV3={g:null,cores:[],bw:[],bar:null,barK:'',beams:new Map(),bwK:''};
-function sgClearView(){if(SGV3.g){scene.remove(SGV3.g);disposeTree(SGV3.g);}SGV3.g=null;SGV3.cores=[];SGV3.bw=[];SGV3.bar=null;SGV3.barK='';SGV3.bwK='';SGV3.beams.clear();}
+const SGV3={g:null,cores:[],bw:[],bar:null,barK:'',beams:new Map(),bwK:'',it:[],itK:'',lz:null,lzK:''};
+function sgClearView(){if(SGV3.g){scene.remove(SGV3.g);disposeTree(SGV3.g);}SGV3.g=null;SGV3.cores=[];SGV3.bw=[];SGV3.bar=null;SGV3.barK='';SGV3.bwK='';SGV3.beams.clear();SGV3.it=[];SGV3.itK='';SGV3.lz=null;SGV3.lzK='';}
 // Map Builder siege map (MAPS[id].fcs from sgFromFile): parts the game draws itself — burnable fences + team spawn pads
 // (target walls/gate + cores come from sgViewBuild like on fcs). Called from buildFileMap (js/28-maps-build.js).
 function sgFileBuild(id){
@@ -344,16 +344,49 @@ function sgSync(v,P,me,now,dt){
     b.position.copy(a).addScaledVector(d,0.5);b.scale.set(1,L,1);b.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());b.material.opacity=0.55+0.3*Math.sin(now/70+p.x);
     if(Math.random()<0.4)PARTS.push({x:k.x+rnd(-14,14),y:k.y+rnd(-14,14),h:GY(k.x,k.y)+4.3+rnd(-0.8,0.8),vx:rnd(-40,40),vy:rnd(-40,40),vh:rnd(0.5,2),life:0.5,max:0.5,col:'#9fd8ff',size:1.6,g:0});}
   for(const [id,b] of SGV3.beams)if(!seen.has(id)){SGV3.g.remove(b);b.geometry.dispose();b.material.dispose();SGV3.beams.delete(id);}
+  sgLootSync(S,now);
+}
+// loot phase view: gold curtain around the loot area (retreat + loot) • ground items (S.it "kind,x,y;…" from sgSnap js/15-siege)
+function sgLootSync(S,now){
+  const b=S.ph-1,on=S.lc&&(S.tr>0||S.lt>0),key=on?MAPID+'|'+b:'';
+  if(SGV3.lzK!==key){SGV3.lzK=key;if(SGV3.lz){SGV3.g.remove(SGV3.lz);disposeTree(SGV3.lz);SGV3.lz=null;}
+    const R=on&&sgFD().loot&&sgFD().loot[b]||[],pos=[],H=2.5,step=FCS_C;
+    const ins=(x,y)=>R.some(q=>x>=q.x1&&x<=q.x2&&y>=q.y1&&y<=q.y2);
+    const seg=(x0,y0,x1,y1)=>{const b0=GY(x0,y0),b1=GY(x1,y1);pos.push(tx(x0),b0,tz(y0),tx(x1),b1,tz(y1),tx(x1),b1+H,tz(y1),tx(x0),b0,tz(y0),tx(x1),b1+H,tz(y1),tx(x0),b0+H,tz(y0));};
+    for(const q of R){
+      for(let x=q.x1;x<q.x2;x+=step){const x2=Math.min(q.x2,x+step),mx=(x+x2)/2;for(const [y,o] of [[q.y1,-2],[q.y2,2]])if(!ins(mx,y+o))seg(x,y,x2,y);}
+      for(let y=q.y1;y<q.y2;y+=step){const y2=Math.min(q.y2,y+step),my=(y+y2)/2;for(const [x,o] of [[q.x1,-2],[q.x2,2]])if(!ins(x+o,my))seg(x,y,x,y2);}}
+    if(pos.length){const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(pos),3));
+      SGV3.lz=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:'#ffc94a',transparent:true,opacity:0.22,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending}));SGV3.g.add(SGV3.lz);}}
+  if(SGV3.lz)SGV3.lz.material.opacity=S.lt>0?0.2+0.08*Math.sin(now/300):0.12;
+  const it=S.it||'';
+  if(SGV3.itK!==it){SGV3.itK=it;for(const o of SGV3.it){SGV3.g.remove(o);disposeTree(o);}SGV3.it=[];
+    for(const e of it?it.split(';'):[]){const [k,x,y]=e.split(','),I=SG_ITEMS[k]||{col:'#ffffff'},X=+x,Y=+y,o=new THREE.Group();o.position.set(tx(X),GY(X,Y),tz(Y));
+      const m=new THREE.Mesh(new THREE.OctahedronGeometry(0.45,0),new THREE.MeshStandardMaterial({color:I.col,emissive:I.col,emissiveIntensity:1.4,roughness:0.25}));m.scale.y=1.5;m.position.y=1.2;o.add(m);
+      const gl=new THREE.Sprite(glowMat(I.col,1.2));gl.scale.setScalar(2.4);gl.position.y=1.2;o.add(gl);
+      const rg=new THREE.Mesh(new THREE.RingGeometry(0.7,0.9,24),new THREE.MeshBasicMaterial({color:I.col,transparent:true,opacity:0.5,depthWrite:false,side:THREE.DoubleSide}));rg.rotation.x=-Math.PI/2;rg.position.y=0.06;o.add(rg);
+      o.userData={m,ph:X*0.01+Y*0.013};SGV3.g.add(o);SGV3.it.push(o);}}
+  for(const o of SGV3.it){const u=o.userData;u.m.rotation.y=now/500+u.ph;u.m.position.y=1.2+Math.sin(now/350+u.ph)*0.18;}
 }
 function sgDust(pos){const x=pos.x*20+MW/2,y=pos.z*20+MH/2;for(let i=0;i<26;i++)PARTS.push({x:x+rnd(-40,40),y:y+rnd(-40,40),h:rnd(0.3,4),vx:rnd(-60,60),vy:rnd(-60,60),vh:rnd(0.5,3),life:1.4,max:1.4,col:'#b8a488',size:rnd(3,6),g:0,smoke:true,grow:1});}
 function sgFx(ev){
   const me=myPos(),near=!me||Math.hypot(ev.x-me.x,ev.y-me.y)<1400;
   if(ev.k==='sgwall'){if(near)snd('rubble',ev);}
+  else if(ev.k==='sgitem'){const I=SG_ITEMS[ev.it]||{col:'#ffffff'};for(let i=0;i<18;i++)PARTS.push({x:ev.x+rnd(-10,10),y:ev.y+rnd(-10,10),h:1.2,vx:rnd(-90,90),vy:rnd(-90,90),vh:rnd(1,4),life:0.6,max:0.6,col:I.col,size:1.4,g:3});if(near)snd('pickup',ev);}
   else if(ev.k==='sgcore'){for(let i=0;i<40;i++)PARTS.push({x:ev.x+rnd(-20,20),y:ev.y+rnd(-20,20),h:4.3,vx:rnd(-260,260),vy:rnd(-260,260),vh:rnd(1,7),life:1.1,max:1.1,col:'#9fd8ff',size:2.4,g:6});FX.flashLight(ev.x,ev.y,4.3,'#7fc0ff',6,30,0.6);snd('boom',ev);}
 }
 // ---------- HUD ----------
 function sgTop(v){const S=v.M&&v.M.sg;if(!S)return '🏰 บุกปราสาท';const i=S.ph-1,pc=Math.ceil(S.hp[i]/S.mx*100);
-  return `🏰 เฟส ${S.ph}/${S.n}   •   แกน ${S.ph} เหลือ ${pc}%   •   `+(S.pr>0?`เตรียมตัว ${S.pr} วิ`:S.tr>0?`🔁 เฟสถัดไปเริ่มใน ${S.tr} วิ`:S.ot?`⏱ ต่อเวลา! (ผ่อนผัน ${S.gr.toFixed(1)} วิ)`:`⏱ ${fmtTime(v.tm)}`);}
+  return `🏰 เฟส ${S.ph}/${S.n}   •   แกน ${S.ph} เหลือ ${pc}%   •   `+(S.pr>0?`เตรียมตัว ${S.pr} วิ`:S.lt>0?`🎁 ชิงของ ${S.lt} วิ`:S.tr>0?(S.lc?`🔁 ชิงของเริ่มใน ${S.tr} วิ`:`🔁 เฟสถัดไปเริ่มใน ${S.tr} วิ`):S.ot?`⏱ ต่อเวลา! (ผ่อนผัน ${S.gr.toFixed(1)} วิ)`:`⏱ ${fmtTime(v.tm)}`);}
+// loot HUD: own bag (S.iv "id:kind.kind;…") + markers on nearby ground items
+function sgLootHud(S,me,big){
+  const mine=(S.iv||'').split(';').find(e=>e.slice(0,e.lastIndexOf(':'))===String(me.id)),bag=mine?mine.slice(mine.lastIndexOf(':')+1).split('.'):[];
+  if(bag.length||S.lt>0){cx.textAlign='center';big('กระเป๋า '+(bag.length?bag.map(k=>(SG_ITEMS[k]||{}).ic||'?').join(' '):'—')+`  (${bag.length}/${SG_CARRY})`+(bag.length?'  • '+[...new Set(bag)].map(k=>(SG_ITEMS[k]||{}).n||k).join(', '):''),SH*0.36+30,15,'#d8fff0');}
+  if(!me.al||!S.it)return;
+  for(const e of S.it.split(';')){const [k,x,y]=e.split(','),X=+x,Y=+y,d=Math.hypot(X-me.x,Y-me.y);if(d>2400)continue;
+    const s=toScreen(X,(GY(X,Y)||0)+2.2,Y);if(!s||s[0]<20||s[0]>SW-20||s[1]<20||s[1]>SH-20)continue;const I=SG_ITEMS[k]||{ic:'?',col:'#fff'};
+    cx.font='600 15px Kanit,sans-serif';cx.textAlign='center';cx.fillStyle=I.col;cx.fillText(I.ic+' '+Math.round(d/20)+' ม.',s[0],s[1]);}
+}
 function sgHud(v,me,big){
   const S=v.M&&v.M.sg;if(!S||!me)return;
   const atk=me.tm===0,F=sgFD(),k=F.cores[S.ph-1];
@@ -374,10 +407,13 @@ function sgHud(v,me,big){
   if(atk&&me.al&&S.pr<=0&&!(S.tr>0)&&k){const inz=Math.hypot(me.x-k.x,me.y-k.y)<S.zr+PR;
     if(me.sc)big('🔮 กำลังร่ายทำลายแกน… (ยิง / โล่ / สกิล / พุ่ง = หยุด • G = หยุด)',SH-170,17,'#9fd8ff');
     else if(inz)big('กด G เพื่อร่ายทำลายแกน',SH-170,18,'#ffe9a8');}
-  if(S.tr>0){const inNew=me.al&&sgInArea(me.x,me.y,S.ph);
+  sgLootHud(S,me,big);
+  if(S.tr>0&&S.lc)big(`🎁 ไปจุดถอยของทีม — ช่วงชิงของเริ่มใน ${S.tr} วิ (เขตทอง = ที่ของจะเกิด)`,SH*0.36,22,'#ffe9a8');
+  else if(S.tr>0){const inNew=me.al&&sgInArea(me.x,me.y,S.ph);
     if(atk)big(`ฝ่ายรับกำลังถอย — บุกเฟส ${S.ph} ได้ใน ${S.tr} วิ`,SH*0.36,22,'#ffe9a8');
     else if(me.al&&!inNew)big(`⚠️ ถอยเข้าเขตใหม่! เหลือ ${S.tr} วิ — อยู่นอกเขต = ตาย`,SH*0.36,24,'#ff8a7a');
     else big(`ตั้งแนวป้องกันแกน ${S.ph} — ฝ่ายบุกมาใน ${S.tr} วิ`,SH*0.36,22,'#ffe9a8');}
+  if(S.lt>0)big(`🎁 ชิงของ! เก็บของในเขตทอง — เหลือ ${S.lt} วิ (ตาย = ของหล่น)`,SH*0.36,22,'#ffd76a');
   if(atk&&S.pr>0)big(`ฝ่ายรับกำลังเตรียมตัว — ประตูเปิดใน ${S.pr} วิ`,SH*0.36,22,'#ffe9a8');
   if(!atk&&S.pr>0)big(`เตรียมแนวป้องกัน — ฝ่ายบุกออกมาใน ${S.pr} วิ`,SH*0.36,22,'#ffe9a8');
 }

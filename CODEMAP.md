@@ -36,10 +36,10 @@ fcsRoomK:17 roomWall:27 roomCol:36 roomFloor:38 roomCeil:44 fcsCeilAt:46 fcsCeil
 §55 breakable room props (user 2026-11-20): BRK groups (js/12-buildings.j…
 RPK:59 roomProp:67 roomsFromFile:77 roomsCur:89 RWH:91 roomWallEnv:92
 
-## js/02-fcs.js (257) — 
+## js/02-fcs.js (264) — 
 FCS_C:7 FCS_WH:8 genFcs:9
 §196 พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G…
-SGPH:197 SGTR:197 SG_SPR:198 sgFD:200 _sgAreaC:201 sgArea:202 _sgAreaT:209 sgAreaT:210 sgClamp:216 sgInArea:226 sgAttach:229 sgFromFile:239
+SGPH:197 SGTR:197 SGLT:197 SG_SPR:198 sgFD:200 _sgAreaC:201 sgArea:202 _sgAreaT:209 sgAreaT:210 sgClamp:216 _sgAreaL:227 sgAreaL:228 sgInArea:233 sgAttach:236 sgFromFile:246
 
 ## js/02-room-greathall.js (105) — 
 
@@ -277,12 +277,16 @@ bombTick:347 modeSnap:360
 §385 สร้าง snapshot ส่งให้ทุกเครื่อง
 r1:386 DEFP:388 packP:389 unpackP:390 makeSnap:391 PROF:409 pf:410 hostSent:411 hostLoop:412 HLW:427 pingN:437
 
-## js/15-siege.js (277) — 🏰 โหมดบุกปราสาท (siege) — แบบ Basic ตาม designs/castle-gameplay-concept.md + แผนที่ js/0…
-SGV:12 SG_TEAM:25 sgF:26 sgCore:27 sgInZone:28 sgSpawn:29 sgInit:30 sgWallsApply:39 sgWallDmg:43 sgWallHit:49 sgWallEnv:50 sgInput:55 sgStop:63 sgTick:64 sgCoreDown:100 sgPhaseGo:113 sgEnd:121 sgResult:123 sgSnap:129
-§135 บอทเล่นบุกปราสาท: ฝ่ายบุก = เดินไปแกนแล้วร่าย (เจอศัตรูใกล้ = สู้ก่อน…
-SGB:138 sgBotTarget:140
-§150 team plan (user 2026-11-22: don't trickle in one by one)
-SGT:153 sgTeamPlan:154 sgBotMode:175 sgBreachAim:189 sgBotGoal:196 sgUnstick:212 sgBotThink:225
+## js/15-siege.js (352) — 🏰 โหมดบุกปราสาท (siege) — แบบ Basic ตาม designs/castle-gameplay-concept.md + แผนที่ js/0…
+SGV:13 SG_TEAM:28
+§29 loot-phase items (designs/castle-gameplay-concept.md "ลำดับแมตช์ใหม่"…
+SG_ITEMS:34 SG_ITEM_T:37 SG_CARRY:38 sgF:39 sgCore:40 sgInZone:41 sgSpawn:42 sgInit:43 sgWallsApply:52 sgWallDmg:56 sgWallHit:62 sgWallEnv:63 sgInput:68 sgStop:76 sgTick:77 sgCoreDown:119 sgPhaseGo:133
+§141 loot phase (after core b = S.ph-1 fell, between the retreat and the n…
+sgLootR:142 sgHasLoot:143 sgLootGo:144 sgLootEnd:152 sgItemsTick:157 sgEnd:169 sgResult:171 sgSnap:177
+§185 บอทเล่นบุกปราสาท: ฝ่ายบุก = เดินไปแกนแล้วร่าย (เจอศัตรูใกล้ = สู้ก่อน…
+SGB:188 sgBotTarget:190
+§200 team plan (user 2026-11-22: don't trickle in one by one)
+SGT:203 sgTeamPlan:204 sgBotMode:225 sgBreachAim:239 sgBotGoal:246 sgBotIn:265 sgBotLoot:274 sgUnstick:286 sgBotThink:299
 
 ## js/16-voice.js (89) — 
 VOICE:4 rosterIds:5 toggleMic:6 voiceSync:20 teamOn:37 teamOf:38 applyVoiceGates:39 VAC:49 onIncomingCall:50 voiceLevels:62 speakingIds:70 updateVoiceUI:76
@@ -377,12 +381,12 @@ CITY_STY:181 CITY_VEH:188 cityFacade:190 CITYK:203 _cZ:204 _cT:204 _cR:204 _cC:2
 §259 ตึกไฮไลต์ล้มทั้งตึก (ขั้น 7)
 _ctA:262 _ctB:262 _ctC:262 cityTowerPose:263 cityTowerAnim:271 cityTowerRubble:278 CAREA:292 cityAreaSync:293 cityViewSync:305 cityDebris:349 cityFX:358
 
-## js/28-fcs-build.js (383) — 
+## js/28-fcs-build.js (419) — ภาพแผนที่ First Castle Strike (แบบ Basic: กล่อง/ทรงพื้นฐาน ยังไม่มีโมเดลจริง) + ภาพ/HUD โ…
 buildFcs:5 fcsBridge:41 fcsRubbleMat:64 fcsCore:79 FCSB:105 fcsParView:106 FSH_V:120 FSH_B:121 fcsShellMat:123 fcsBlocks:138 fcsShellBuild:150 fcsParFall:165 fcsFallTick:172 fcsShellView:184 FPILE:192 _rfP:194 _rfQ:194 _rfS:194 fcsFadeList:195 fcsRubbleFade:200 fcsShellFall:204 fcsPileTick:213 fcsShellClear:231 EFS3:234 fcsFences:235 _efC:252 _efM:252 _efS:252 _efZ:252 efsView:253
 §279 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
-SGV3:280 sgClearView:281 sgFileBuild:284 sgViewBuild:290 SGVZR:310 sgBarrier:313 sgSync:327 sgDust:348 sgFx:349
-§354 HUD
-sgTop:355 sgHud:357
+SGV3:280 sgClearView:281 sgFileBuild:284 sgViewBuild:290 SGVZR:310 sgBarrier:313 sgSync:327 sgLootSync:350 sgDust:371 sgFx:372
+§378 HUD
+sgTop:379 sgLootHud:382 sgHud:390
 
 ## js/28-fcs-castle.js (433) — 
 FCSC:9 fcsCastleMat:10 fcsBannerTex:34 fcsGlowTex:44 fcsCastle:46 fcsCastleDressing:154 fcsCastleTick:175
@@ -504,7 +508,8 @@ bpOpen:53 bpOn:53 bpKey:53 bpShow:55 bpSync:57 hovEl:127
 §128 หน้าตั้งค่า
 setRow:129 setTog:130 setTab:131 XHC:132 XHN:132 setOpts:133 SET_ICO:135 SET_EN:138 gfxPanel:141 renderSettings:148 drawXhPrev:171 openSettings:172 closeSettings:174 modeIcon:230 modeTitle:231 renderLobby:232
 
-## js/41-debug.js (221) — 
+## js/41-debug.js (221) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
+§5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
 botBrain:6 _obsKeep:50 balArena:51 _balStash:54 balIsolate:55 balReset:58 balDuel:64 balTour:80 balTeamReset:95 balTeam:104 balCoop:132 balSpellTest:148
 §169 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:170 swSetup:171
@@ -642,10 +647,10 @@ ESM:1157 eSmooth:1158 ESF:1161 eShieldFx:1162 eChips:1167 eShieldSegs:1170 eShie
 ## js/48-ragdoll.js (429) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 _ragFw:41 ragBones:42 ragBasis:49 ragTargets:57 ragStart:63 ragBack:96 ragFloor:97 ragStep:98 ragPose:170 ragWrite:185 ragRestore:197 ragEnd:201 ragTick:203 ragHideDead:250 clearDeathFades:259 deathClipMat:269 deathSlashSplit:276 DD_ALPHA:330 deathDissolve:331 deathVisualSync:405
 
-## js/49-cloth.js (258) — 
-CLOTH:10 CLOTH_LITE:28 CL_ROWS:29 CL_NC:29 CL_GAP:29 CL_IN:29 _clV:30 _clA:30 _clB:30 clPinK:32 clBind:34 cloakPanelGrid:36 cloakBodyIndices:50 stormCape:59 clothSetup:97 clTargets:127 clReset:131 clCapsule:135 _clO:139 clWorld:140 clWorldHit:148 clStep:153 clDraw:166 clothTick:187 clRun:197
-§213 other players: low-res cloth on the batched body (student_all_batch)
-clLiteSetup:215 clLiteShow:242 clLiteTick:243 clLiteDraw:253
+## js/49-cloth.js (282) — 
+CLOTH:10 CLOTH_LITE:28 CL_ROWS:29 CL_NC:29 CL_GAP:29 CL_IN:29 _clV:30 _clA:30 _clB:30 clPinK:32 clBind:34 cloakPanelGrid:36 cloakBodyIndices:50 stormCape:59 clothSetup:97 _clM:130 clTargets:131 clReset:143 clCapsule:147 _clO:151 clWorld:152 clWorldHit:160 clStep:165 clDraw:178 _clRank:200 clothTick:201 clRun:212
+§229 other players: low-res cloth on the batched body (student_all_batch)
+clLiteSetup:231 clLiteShow:258 clLiteTick:259 clLiteDraw:270 clOuterNormals:277
 
 ## js/50-grass.js (428) — 
 AIR:10 AIR_MAP:17 AIR_NG:20 airGust:21 airGustOff:26 airEnv:27 airGs:28 airMark:30 airForMap:33 _airV:34 airAt:35 airGv:41 airTick:42
@@ -927,7 +932,7 @@ surfSync:49 surfQuality:53
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
 
-## js/77-dev.js (307) — Dev Mode: ทดสอบแมพ/สกิลในแมตช์จริง (ผู้ใช้ 2026-11-18)
+## js/77-dev.js (315) — Dev Mode: ทดสอบแมพ/สกิลในแมตช์จริง (ผู้ใช้ 2026-11-18)
 DEV:5 devOn:10 devOff:11 devSoloOk:12 devHold:13 devBroomOk:14 dvMe:15 devSave:16
 §17 hook จากโฮสต์: เรียกต้น hostTick (คืน dt ที่ปรับแล้ว • -1 = หยุดโลก)
 devDt:18 devTick:23 devGod:32 devFreeze:33
@@ -936,13 +941,13 @@ MBCAM:37 mbcamDone:38 devMbCam:40 devFcToggle:41 devFcCam:48 devFcTop:54 devFcMe
 §108 Spectator (user 2026-11-20): watch a full bot match — host steps out,…
 devSpecStart:111 devSpecRestore:127 devSpecStop:133 devSpecAim:135 devSpecKey:139 devCell:143 devCopyAim:144
 §150 คำสั่งโฮสต์
-devTp:151 devSgPhase:155 devBotAdd:166 devAct:175
-§216 Destruction debug (user 2026-11-19): repair / collapse breakables at …
-DEVD_R:219 devBrkFix:220 devPnlFix:221 devPropFix:225 devSkinFix:226 devDestroy:231
-§265 ภาพซ้อนไว้ดูแมพ: กล่องชน (OBS) + วงเขตยึด/จุดเกิดปลอดภัย
-_dvCyl:266 _dvMat:267 devOverlay:268
-§288 2D overlay map: spawn zones + capture zones + players (click = warp)
-_dvMap:289 _dvY:293 devMapDraw:294
+devTp:151 devSgPhase:155 devSgLoot:167 devBotAdd:171 devAct:180
+§224 Destruction debug (user 2026-11-19): repair / collapse breakables at …
+DEVD_R:227 devBrkFix:228 devPnlFix:229 devPropFix:233 devSkinFix:234 devDestroy:239
+§273 ภาพซ้อนไว้ดูแมพ: กล่องชน (OBS) + วงเขตยึด/จุดเกิดปลอดภัย
+_dvCyl:274 _dvMat:275 devOverlay:276
+§296 2D overlay map: spawn zones + capture zones + players (click = warp)
+_dvMap:297 _dvY:301 devMapDraw:302
 
 ## js/77-paint.js (351) — 
 PAINT:12 paintOn:22 paintMap:24 kuwOn:33 paintLights:34
@@ -964,7 +969,7 @@ paintScene:266 paintShafts:281
 kuwQ:295 KUW_LOOP:296 kuwMat:298 paintRT:315 paintKuw:316
 §332 ปรับค่า (tune.html / F8)
 
-## js/78-dev-ui.js (246) — Dev Mode UI (user 2026-11-20): one floating window, many small column…
+## js/78-dev-ui.js (248) — Dev Mode UI (user 2026-11-20): one floating window, many small column…
 §10 orbit camera
 devOrbPick:11 devOrbToggle:23 devOrbCam:28
 §42 video recording
@@ -972,9 +977,9 @@ REC:43 _dvBadge:44 devRecStart:45 devRecStop:60 devRecFrame:62 devRecSave:67 dev
 §94 window
 _dvPanel:95 _dvBtn:98 _dvBody:100 _dvHead:100 devUiApply:102 devFreeMouse:110 devToggle:111 devF2:116 devGrave:121
 §130 rows
-dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:194 devUiAct:201
+dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devRender:143 devPos:196 devUiAct:203
 
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(119 files, 37052 lines)
+(119 files, 37204 lines)

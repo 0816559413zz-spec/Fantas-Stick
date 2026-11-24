@@ -154,7 +154,7 @@ function devTp(x,y,p){
 }
 function devSgPhase(n){
   const S=G.sg,F=sgF();if(!S)return;
-  n=clamp(n|0,1,F.n);S.ph=n;SGPH=n;S.tr=0;SGTR=0;S.ot=false;S.otT=0;S.prep=0;S.win=-1;
+  n=clamp(n|0,1,F.n);S.ph=n;SGPH=n;S.tr=0;SGTR=0;S.lt=0;SGLT=0;S.it=(S.it||[]).filter(o=>!o.tmp);S.ot=false;S.otT=0;S.prep=0;S.win=-1;
   S.hp=S.hp.map((v,i)=>i<n-1?0:SGV.coreHp);
   AREA=mapArea(G.map,G.mode);sgWallsApply();
   for(const p of plist())sgStop(p);
@@ -162,6 +162,11 @@ function devSgPhase(n){
   for(const p of plist()){if(p.team!==0&&p.team!==1)continue;const s=sgSpawn(p.team,n),a=i*1.047,rr=i%6?80:0;i++;
     devTp(s.x+Math.cos(a)*rr,s.y+Math.sin(a)*rr,p);if(!p.alive)p.respawn=Math.min(p.respawn,0.5);}
   banner('🛠 Dev: ไปเฟส '+n,2);
+}
+// jump to the loot phase after core b (= phase b+1 with its retreat skipped)
+function devSgLoot(b){
+  const S=G.sg;if(!S)return;if(!sgHasLoot(b))return toast('แมพนี้ไม่มีเขตชิงของหลังแกน '+b+' (Map Builder: Loot Area)');
+  devSgPhase(b+1);sgLootGo();banner('🛠 Dev: ไปช่วงชิงของหลังแกน '+b,2);
 }
 function devBotAdd(t){
   const ok=PATHS.map((P,i)=>i).filter(i=>!PATHS[i].off);
@@ -189,6 +194,9 @@ function devAct(a,k,v){
   else if(a==='tpaim')devTp(INPUT.gx,INPUT.gy);
   else if(a==='tp'){const q=String(v).split(',').map(Number);devTp(q[0],q[1]);}
   else if(a==='ph')devSgPhase(+v);
+  else if(a==='loot')devSgLoot(+v);
+  else if(a==='lootend'&&G.sg&&G.sg.lt>0)G.sg.lt=0.01;
+  else if(a==='lootgive'&&G.sg&&me){me.sgi=me.sgi||[];if(me.sgi.length<SG_CARRY)me.sgi.push(v||'shard');}
   else if(a==='skip'&&G.sg){G.sg.prep=0;}
   else if(a==='core0'&&G.sg){G.sg.prep=0;G.sg.hp[G.sg.ph-1]=0;}
   else if(a==='corefull'&&G.sg){G.sg.hp[G.sg.ph-1]=SGV.coreHp;}

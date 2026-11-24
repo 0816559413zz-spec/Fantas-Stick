@@ -194,7 +194,7 @@ function genFcs(){
   return {W,H,obs,terr,brkX,fcs:{sp,cores,bw,props,fences,bridge,phases,n:Math.min(cores.length,phases.length)}};
 }
 // ---------- พื้นที่เล่นตามเฟส (กำแพงล่องหน) + เขตจุดเกิดปลอดภัย — ใช้ทั้งโฮสต์ (G.sg.ph) และลูกข่าย (snapshot) ----------
-let SGPH=1,SGTR=0;   // SGTR = seconds left of the phase transition (core just fell: defenders retreat, attackers held at the old line)
+let SGPH=1,SGTR=0,SGLT=0;   // SGLT = seconds left of the loot phase (between two points, js/15-siege)   // SGTR = seconds left of the phase transition (core just fell: defenders retreat, attackers held at the old line)
 const SG_SPR=220;   // รัศมีเขตจุดเกิด (px): ศัตรูเข้าไม่ได้ • คนในทีมที่อยู่ข้างในไม่โดนดาเมจ (js/15-siege) ⚠ ค่าตั้งต้น
 // siege data of the current map: code map fcs or a Map Builder file map with data.siege (sgFromFile) — MAP-STANDARD round 2
 function sgFD(){const M=MAPS[MAPID];return (M&&M.fcs)||MAPS.fcs.fcs;}
@@ -223,11 +223,18 @@ function sgClamp(o,r,A){
     o.x=bx;o.y=by;}
   return o.x!==x||o.y!==y;
 }
+// loot phase after core ph-1 (js/15-siege): play area = old + new + loot rects, nobody held back (both teams fight over the items)
+const _sgAreaL={};
+function sgAreaL(ph){
+  const F=sgFD(),k=clamp(ph|0,2,F.n),C=_sgAreaL[MAPID]||(_sgAreaL[MAPID]=[]);
+  if(!C[k]){const n=sgArea(k),o=F.phases[k-2]||[],L=(F.loot&&F.loot[k-1])||[];C[k]={sg:k,lt:1,rects:o.concat(n.rects,L),sp:n.sp};}
+  return C[k];
+}
 function sgInArea(x,y,ph){return sgArea(ph).rects.some(q=>x>=q.x1&&x<=q.x2&&y>=q.y1&&y<=q.y2);}
 MAPS.fcs=Object.assign({name:'🏰 Cliff Side Castle (แบบเก่า)',d:'แผนที่โหมดบุกปราสาท (แบบ Basic) — บุก 3 เฟส ทำลายแกนทีละจุด',build:'fcs',only:'siege',navTerr:1,navC:FCS_C},genFcs());
 // play area per phase + spawns of the current phase (teamPts / placeAll / respawn use them through fmap) • t 0 = attackers 1 = defenders
 function sgAttach(M){
-  M.areas={get siege(){return SGTR>0&&SGPH>1?sgAreaT(SGPH):sgArea(SGPH);}};
+  M.areas={get siege(){return SGLT>0&&SGPH>1?sgAreaL(SGPH):SGTR>0&&SGPH>1?sgAreaT(SGPH):sgArea(SGPH);}};
   M.fmFor=mode=>{const F=M.fcs,k=clamp(SGPH,1,F.n),a=F.sp.A[k],b=F.sp.B[k];
     const ring=(q,t)=>q?[0,1,2,3,4,5].map(i=>i?{x:q.x+Math.cos(i*1.047)*80,y:q.y+Math.sin(i*1.047)*80,t}:{x:q.x,y:q.y,t}):[];   // 6 spots close together inside the spawn zone
     return {spawns:[...ring(a,0),...ring(b,1)],tasks:[],rings:[],espawn:[]};};
@@ -237,7 +244,7 @@ sgAttach(MAPS.fcs);
 // Map Builder file map with data.siege (mapbuild/model.js gameData) → same shape as MAPS.fcs.fcs + the collision genFcs makes
 // (target walls/gate k:'fcb' sgw = index, cores k:'fck'). Called from regFileMap (js/02-data.js). Rooms/eggshell/stonewall: later rounds.
 function sgFromFile(M,d,id){
-  const S=d.siege,sp={A:{},B:{}},bw=[],obs=M.obs;delete _sgAreaC[id];delete _sgAreaT[id];
+  const S=d.siege,sp={A:{},B:{}},bw=[],obs=M.obs;delete _sgAreaC[id];delete _sgAreaT[id];delete _sgAreaL[id];
   for(const t of ['A','B'])for(const k in S.sp[t])sp[t][+k]={x:S.sp[t][k].x,y:S.sp[t][k].y};
   const cores=(S.cores||[]).slice().sort((a,b)=>a.n-b.n).map((k,i)=>({n:i+1,x:k.x,y:k.y,s:k.s||80}));
   (S.bw||[]).forEach((b,i)=>{bw.push({i,k:b.k==='gate'?'gate':'wall',x:b.x,y:b.y,w:b.w,d:b.d,h:b.k==='gate'?Math.max(5,b.h||5):(b.h||6)});
@@ -247,7 +254,7 @@ function sgFromFile(M,d,id){
   const phases=(S.phases||[]).map(L=>(L||[]).map(q=>({x1:q.x1,y1:q.y1,x2:q.x2,y2:q.y2})));
   const fences=((d.sys&&d.sys.fence)||[]).map(q=>[q[0],q[1],q[2],q[3]]);
   M.fcs={sp,cores,bw,props:[],fences,bridge:null,phases,n:Math.min(cores.length,phases.length)};
-  // loot phase between points (designs/castle-gameplay-concept.md): stored for the coming siege loot system, not played yet
+  // loot phase between points (designs/castle-gameplay-concept.md): played by js/15-siege (sgLootGo) • hold = retreat zones the bots walk to
   const R=q=>({x1:q.x1,y1:q.y1,x2:q.x2,y2:q.y2}),hold={A:{},B:{}},loot={};
   if(S.hold)for(const t of ['A','B'])for(const k in S.hold[t]||{})hold[t][+k]=S.hold[t][k].map(R);
   for(const k in S.loot||{})loot[+k]=S.loot[k].map(R);

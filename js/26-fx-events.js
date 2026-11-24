@@ -47,7 +47,7 @@ function fx(ev,raw){   // raw = ภาพเดิมในโค้ดเท่
   if(ev.k==='emo'){emoFx(ev);return;}   // อีโมต (js/52)
   if(ev.k==='hit'&&ev.e!==undefined)comboHit(ev);   // ห้องฝึก: นับคอมโบ (js/53)
   if(ev.k==='die'&&ev.id)dcamDie(ev);   // กล้องตอนตาย (js/58)
-  if(ev.k==='sgwall'||ev.k==='sgcore'){sgFx(ev);return;}if(ev.k==='sgch')return;   // บุกปราสาท (js/28-fcs-build)
+  if(ev.k==='sgwall'||ev.k==='sgcore'||ev.k==='sgitem'){sgFx(ev);return;}if(ev.k==='sgch')return;   // บุกปราสาท (js/28-fcs-build)
   if(ev.k==='kf'){ffaKf(ev);return;}if(ev.k==='pot'){potFx(ev);return;}   // FFA (js/54)   // ร่ายสกิลสำเร็จ → ท่าเหวี่ยงไม้ (js/35 SKANIM)
   // ร่ายลูกไฟ/Kindle/สปาร์ค: แสงตอนยิงอยู่ที่ปลายไม้จริง (ผู้ใช้ 2026-11-14: ไม่ใช่กลางตัว)
   if(ev.k==='cast'&&ev.id&&(ev.t==='pfire'||ev.t==='pfireb'||ev.t==='spark')&&!ev.tipd){const o=PM3.get(ev.id);if(o&&o.tipW&&performance.now()-(o.tipWT||0)<200){const q=simOf(o.tipW);ev.x=q.x;ev.y=q.y;ev.h=q.h-GY(q.x,q.y);ev.tipd=1;}}

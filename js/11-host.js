@@ -133,7 +133,7 @@ function hostStart(){
       toast('กำลังโหลดแผนที่ปราสาท… จะเริ่มเองเมื่อโหลดเสร็จ');if(!hostStart._w){hostStart._w=1;loadMapData(F).then(()=>{hostStart._w=0;if(screen==='lobby')hostStart();});}return;}}
   const MD=MODES[G.mode];G.map=hostMapNext();
   G.lastMap=G.map;
-  SGPH=1;setMapVars(G.map);AREA=mapArea(G.map,G.mode);   // SGPH = เฟสบุกปราสาท (js/02-fcs) — เริ่มเฟส 1 ก่อนวางจุดเกิด
+  SGPH=1;SGTR=0;SGLT=0;setMapVars(G.map);AREA=mapArea(G.map,G.mode);   // SGPH = เฟสบุกปราสาท (js/02-fcs) — เริ่มเฟส 1 ก่อนวางจุดเกิด
   PROPON=!PROP_OFF_MODES.includes(G.mode);BLDON=PROPON;
   Object.assign(G,{ph:'count',cdT:3,time:0,proj:[],en:[],feed:[],pid:0,eid:0,wave:0,round:1,rw:{},teamScore:[0,0],
     timer:(G.mode==='ffa'||G.mode==='tdm')?480:G.mode==='quid'?360:0,result:null,banner:null,queue:[],slines:[],sorbs:[],fpaths:[],tcells:[],sballs:[],sdomes:[],waveMarks:new Map(),impWin:null,snitchBy:null,raceEnd:undefined});

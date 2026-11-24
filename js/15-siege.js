@@ -6,8 +6,9 @@
 //    ดาเมจรวมต่อแกน × คนร่าย 1 / 1.2 / 1.4 (3 คนขึ้นไป) • มีฝ่ายรับในเขต = ลดลงคงที่ (ไม่ลดตามจำนวนคน)
 //  แกนแตก = เฟสถัดไป (เวลาเพิ่ม + จุดเกิดย้าย + พื้นที่เปลี่ยน, แกน 1 แตก = ประตูเปิด) • แกนสุดท้ายแตก = ฝ่ายบุกชนะ
 //  หมดเวลา: มีฝ่ายบุกในเขตแกน = ต่อเวลา (มีฝ่ายรับในเขต = แกนไม่รับดาเมจ, ฝ่ายบุกออกหมด = นับผ่อนผัน 5→1 วิ) • ไม่มี = ฝ่ายรับชนะ
+//  แกนแตก (ไม่ใช่แกนสุดท้าย) + แมพมี Loot Area = ถอย (trT) → ช่วงชิงของ (lootT, ของชั่วคราว SG_ITEMS) → เฟสถัดไป • เวลาหลักหยุดระหว่างนั้น
 //  ⚠ ตัวเลขทั้งหมดใน SGV = ค่าตั้งต้นชั่วคราว (เอกสารยังไม่กำหนด) ให้ทีมเกมเพลย์ปรับ
-//  ยังไม่ทำ (รอคุยตามเอกสาร): สลับฝั่งรอบสอง, ซ่อมแกน, ช่วงแย่งของ, ยาฮีล/จุดฮีล, เปลี่ยนสายที่จุดเกิด, เสียงร่าย
+//  ยังไม่ทำ (รอคุยตามเอกสาร): สลับฝั่งรอบสอง, ซ่อมแกน, ยาฮีล/จุดฮีล, เปลี่ยนสายที่จุดเกิด, เสียงร่าย
 // =====================================================================
 const SGV={
   time0:330,     // เวลาบุกตั้งต้น (วิ)
@@ -20,16 +21,28 @@ const SGV={
   zoneR:330,     // รัศมีเขตแกน (px)
   wallHp:400,    // เลือดกำแพงพังได้
   grace0:5,graceMin:1,graceT:60,
+  lootT:45,      // loot phase length (s) after the retreat, main timer paused ⚠ temporary
+  pickR:70,      // item pickup radius (px)
   trT:20,        // core fell: seconds for defenders to retreat into the next area before the next phase starts (attackers held at the old line, timer paused)   // ผ่อนผันตอนต่อเวลา: เริ่ม 5 วิ หดเหลือ 1 วิ ภายใน 60 วิของการต่อเวลา
 };
 const SG_TEAM=['ฝ่ายบุก','ฝ่ายรับ'];
+// ---- loot-phase items (designs/castle-gameplay-concept.md "ลำดับแมตช์ใหม่") — item kinds are still open for the gameplay team ----
+// Registry: a new kind = one entry. n name • ic HUD icon • col 3D/HUD colour • max carried per player (optional)
+//   hooks (all optional, host only): pick(p) on pickup • drop(p) when it falls off a dead holder • tick(p,dt,count) every frame while carried
+// Map Builder Item Spawn tier 1–3 → kind via SG_ITEM_T. Carried items fall where the holder dies; dropped during the loot phase = gone when
+// it ends, dropped later = stays until picked up.
+const SG_ITEMS={
+  shard:{n:'ผลึกฟื้นฟู (ของชั่วคราว)',ic:'💠',col:'#6ff0c8',max:3,tick(p,dt,c){if(p.hp<p.maxHp)p.hp=Math.min(p.maxHp,p.hp+3*c*dt);}},   // placeholder: +3 HP/s per shard
+};
+const SG_ITEM_T=['shard','shard','shard'];
+const SG_CARRY=3;   // items one player can hold (all kinds)
 function sgF(){return sgFD();}   // js/02-fcs.js: code fcs or a Map Builder siege map
 function sgCore(){const S=G.sg;return S?sgF().cores[S.ph-1]:null;}
 function sgInZone(p,k){k=k||sgCore();return !!k&&Math.hypot(p.x-k.x,p.y-k.y)<SGV.zoneR+PR;}
 function sgSpawn(t,ph){const s=sgF().sp[t?'B':'A'][ph||G.sg.ph];return s||{x:MW/2,y:MH/2};}
 function sgInit(){
   const F=sgF();SGPH=1;SGTR=0;
-  G.sg={tr:0,ph:1,prep:SGV.prep,ot:false,otT:0,grace:SGV.grace0,win:-1,atk:0,hp:F.cores.map(()=>SGV.coreHp),bw:F.bw.map(b=>b.k==='gate'?-1:SGV.wallHp),t0:0};
+  SGLT=0;G.sg={it:[],lt:0,tr:0,ph:1,prep:SGV.prep,ot:false,otT:0,grace:SGV.grace0,win:-1,atk:0,hp:F.cores.map(()=>SGV.coreHp),bw:F.bw.map(b=>b.k==='gate'?-1:SGV.wallHp),t0:0};
   G.timer=SGV.time0;AREA=mapArea(G.map,G.mode);
   sgWallsApply();
   for(const p of plist())p.sgc=0;
@@ -57,7 +70,7 @@ function sgInput(p,pr,inp){
   if(p.sgc&&(inp.fire||inp.sh||pr.q||pr.e||pr.r||pr.f||pr.x||pr.sp||p.dash>0))sgStop(p);
   if(!pr.g||!p.alive||p.downed)return;
   if(p.sgc){sgStop(p);return;}
-  if(p.team!==0||S.prep>0||S.tr>0||!sgInZone(p)||p.stun>0)return;
+  if(p.team!==0||S.prep>0||S.tr>0||S.lt>0||!sgInZone(p)||p.stun>0)return;
   p.sgc=1;emit({k:'sgch',id:p.id,on:1});
 }
 function sgStop(p){if(!p.sgc)return;p.sgc=0;emit({k:'sgch',id:p.id,on:0});}
@@ -71,9 +84,15 @@ function sgTick(dt){
     if(S.prep<=0){S.prep=0;banner('⚔️ ประตูเปิด! บุกได้',3);}
     return;
   }
+  sgItemsTick(dt);
   if(S.tr>0){   // phase transition: no core casting, timer paused
     S.tr-=dt;SGTR=Math.max(0,S.tr);
-    if(S.tr<=0)sgPhaseGo();
+    if(S.tr<=0){if(sgHasLoot(S.ph-1))sgLootGo();else sgPhaseGo();}
+    return;
+  }
+  if(S.lt>0){   // loot phase: own timer, main timer paused
+    S.lt-=dt;SGLT=Math.max(0,S.lt);
+    if(S.lt<=0)sgLootEnd();
     return;
   }
   // ร่ายแกน
@@ -107,16 +126,45 @@ function sgCoreDown(){
   // line (area = old + new, attackers clamped to the old rects — sgAreaT js/02-fcs), respawns already use the new spawns.
   S.tr=SGV.trT;SGTR=S.tr;
   AREA=mapArea(G.map,G.mode);sgWallsApply();
-  banner(`💥 แกน ${S.ph-1} แตก! ${S.ph===2?'ประตูเปิด • ':''}${SG_TEAM[1]}ถอยเข้าเขตใหม่ — เฟส ${S.ph} เริ่มใน ${SGV.trT} วิ`,4);
+  banner(`💥 แกน ${S.ph-1} แตก! ${S.ph===2?'ประตูเปิด • ':''}${SG_TEAM[1]}ถอยเข้าเขตใหม่ — `+(sgHasLoot(S.ph-1)?`ช่วงชิงของเริ่มใน ${SGV.trT} วิ`:`เฟส ${S.ph} เริ่มใน ${SGV.trT} วิ`),4);
 }
 // transition over: next phase live. Defenders still outside the new area die (out of bounds), attackers left behind move to their new spawn.
-function sgPhaseGo(){
-  const S=G.sg;S.tr=0;SGTR=0;AREA=mapArea(G.map,G.mode);
+// soft (after a loot phase, nobody had time to fall back): defenders outside go to their spawn too instead of dying
+function sgPhaseGo(soft){
+  const S=G.sg;S.tr=0;SGTR=0;S.lt=0;SGLT=0;AREA=mapArea(G.map,G.mode);
   let i=0;
   for(const p of plist()){if(!p.alive||(p.team!==0&&p.team!==1)||sgInArea(p.x,p.y,S.ph))continue;
-    if(p.team===1){p.inv=0;damage(p,99999,null,'zone',true);continue;}
+    if(p.team===1&&!soft){p.inv=0;damage(p,99999,null,'zone',true);continue;}
     const s=sgSpawn(p.team),a=i*1.047,rr=i%6?80:0,q=[s.x+Math.cos(a)*rr,s.y+Math.sin(a)*rr];i++;p.x=q[0];p.y=q[1];p.z=0;p.vz=0;collideWorld(p,PR);p.inv=Math.max(p.inv,1.5);emit({k:'revive',x:p.x,y:p.y});}
   banner(`⚔️ เฟส ${S.ph} เริ่ม! ไปแกน ${S.ph}`,3);
+}
+// ---- loot phase (after core b = S.ph-1 fell, between the retreat and the next point) ----
+function sgLootR(b){const F=sgF();return (F.loot&&F.loot[b])||[];}
+function sgHasLoot(b){return b>=1&&sgLootR(b).length>0;}
+function sgLootGo(){
+  const S=G.sg,F=sgF(),b=S.ph-1;S.tr=0;SGTR=0;S.lt=SGV.lootT;SGLT=S.lt;
+  let pts=(F.items||[]).filter(i=>i.ph===b);
+  if(!pts.length)pts=sgLootR(b).map(q=>({x:(q.x1+q.x2)/2,y:(q.y1+q.y2)/2,t:1}));   // area without Item Spawn points: one item in the middle of each rect
+  for(const i of pts)S.it.push({k:SG_ITEM_T[(i.t||1)-1]||'shard',x:i.x,y:i.y,tmp:1});
+  AREA=mapArea(G.map,G.mode);
+  banner(`🎁 ช่วงชิงของ! เก็บของในเขตทอง ${SGV.lootT} วิ (ตาย = ของหล่น) — จากนั้นเฟส ${S.ph}`,4);
+}
+function sgLootEnd(){
+  const S=G.sg;S.it=S.it.filter(o=>!o.tmp);   // loot-phase items not taken + dropped during it vanish
+  sgPhaseGo(true);
+}
+// pickup on touch • carried-item effects • carried items fall off dead holders (host, every frame)
+function sgItemsTick(dt){
+  const S=G.sg;if(!S.it)S.it=[];
+  for(const p of plist()){const c=p.sgi;
+    if(!p.alive){if(c&&c.length){c.forEach((k,i)=>{const a=i*2.4+1;S.it.push({k,x:p.x+Math.cos(a)*28,y:p.y+Math.sin(a)*28,tmp:S.lt>0?1:0});const I=SG_ITEMS[k];if(I&&I.drop)I.drop(p);});p.sgi=[];}continue;}
+    if(p.team!==0&&p.team!==1)continue;
+    if(c&&c.length){const n={};for(const k of c)n[k]=(n[k]||0)+1;for(const k in n){const I=SG_ITEMS[k];if(I&&I.tick)I.tick(p,dt,n[k]);}}
+    if(p.downed||(c&&c.length>=SG_CARRY))continue;
+    for(let i=0;i<S.it.length;i++){const o=S.it[i],I=SG_ITEMS[o.k];if(!I||Math.hypot(o.x-p.x,o.y-p.y)>SGV.pickR)continue;
+      if(I.max&&(p.sgi||[]).filter(k=>k===o.k).length>=I.max)continue;
+      (p.sgi=p.sgi||[]).push(o.k);S.it.splice(i,1);if(I.pick)I.pick(p);emit({k:'sgitem',x:Math.round(o.x),y:Math.round(o.y),it:o.k});break;}
+  }
 }
 function sgEnd(w){const S=G.sg;if(S.win>=0)return;S.win=w;endMatch();}
 // ผลจบเกม (endMatch js/14)
@@ -129,7 +177,9 @@ function sgResult(ps){
 function sgSnap(){
   const S=G.sg;if(!S)return null;
   return {ph:S.ph,n:sgF().n,pr:Math.ceil(S.prep),tr:Math.ceil(S.tr||0),hp:S.hp.map(v=>Math.max(0,Math.round(v))),mx:SGV.coreHp,ot:S.ot?1:0,gr:S.ot?Math.round(S.grace*10)/10:0,atk:S.atk|0,def:S.def|0,
-    bw:S.bw.map((v,i)=>sgF().bw[i].k==='gate'?(S.ph>=2?1:0):v<=0?1:0).join(''),zr:SGV.zoneR};
+    bw:S.bw.map((v,i)=>sgF().bw[i].k==='gate'?(S.ph>=2?1:0):v<=0?1:0).join(''),zr:SGV.zoneR,
+    lt:Math.ceil(S.lt||0),lc:sgHasLoot(S.ph-1)?1:0,it:(S.it||[]).map(o=>o.k+','+Math.round(o.x)+','+Math.round(o.y)).join(';'),   // ground items
+    iv:plist().filter(p=>p.sgi&&p.sgi.length).map(p=>p.id+':'+p.sgi.join('.')).join(';')};   // carried items
 }
 // =====================================================================
 //  บอทเล่นบุกปราสาท: ฝ่ายบุก = เดินไปแกนแล้วร่าย (เจอศัตรูใกล้ = สู้ก่อน) • ฝ่ายรับ = เฝ้ารอบแกน ไล่คนที่เข้าใกล้แกน
@@ -143,7 +193,7 @@ function sgBotTarget(p){
     const d=Math.hypot(q.x-p.x,q.y-p.y),dk=k?Math.hypot(q.x-k.x,q.y-k.y):1e9;
     if(d>SGB.defCore+SGB.defSee)continue;
     const vis=d<220||(navOn()&&NAV.s&&!navRay(p.x,p.y,q.x,q.y,true));   // มองเห็น (ไม่มีกำแพงสูงบัง) หรือประชิด
-    const ok=p.team===0?d<SGB.atkSee&&vis:(d<SGB.defSee&&vis)||dk<SGV.zoneR*2.5;if(!ok)continue;
+    const ok=p.team===0||G.sg.lt>0?d<SGB.atkSee&&vis:(d<SGB.defSee&&vis)||dk<SGV.zoneR*2.5;if(!ok)continue;   // loot phase: both sides fight whoever is near
     const s=p.team===1?Math.min(d,dk*0.8):d;if(s<bd){bd=s;best=q;}}
   return best;
 }
@@ -173,7 +223,7 @@ function sgTeamPlan(t){
 }
 // should this bot push to the core now, go to the rally point, or fall back? → 'push' | 'rally' | 'back'
 function sgBotMode(p){
-  const S=G.sg;if(!S||S.prep>0||S.tr>0)return 'push';
+  const S=G.sg;if(!S||S.prep>0||S.tr>0||S.lt>0)return 'push';
   const T=sgTeamPlan(p.team),k=sgCore();if(!T||!k)return 'push';
   if(p.sgc||sgInZone(p))return 'push';
   const nf=plist().filter(q=>q.team!==p.team&&q.alive&&!q.downed&&!q.gh&&Math.hypot(q.x-p.x,q.y-p.y)<SGT.near).length,
@@ -196,6 +246,9 @@ function sgBreachAim(p,id,px,py){
 function sgBotGoal(p){
   const S=G.sg,k=sgCore();if(!S||!k)return {x:p.x,y:p.y};
   if(p.team===0&&S.prep>0)return sgSpawn(0);
+  p.ai.lootGo=0;
+  if(S.lt>0)return sgBotLoot(p);
+  if(S.tr>0&&sgHasLoot(S.ph-1)){const H=sgF().hold&&sgF().hold[p.team?'B':'A'][S.ph-1];if(H&&H.length)return sgBotIn(p,H,'hd');}   // retreat zone of the team
   if(p.team===0&&S.tr>0){const o=sgF().phases[S.ph-2];if(o){const k=sgCore();let bx=p.x,by=p.y,bd=1e18;for(const q of o){const x=clamp(k.x,q.x1+60,q.x2-60),y=clamp(k.y,q.y1+60,q.y2-60),d=(x-k.x)**2+(y-k.y)**2;if(d<bd){bd=d;bx=x;by=y;}}return {x:bx,y:by};}}   // wait at the old line, nearest the new core
   const md=p.ai.sgm=sgBotMode(p),T=S.tp&&S.tp[p.team];
   if(md==='back'&&p.team===1){const h=hashStr(p.id)%628/100;return {x:k.x+Math.cos(h)*SGB.ring*0.5,y:k.y+Math.sin(h)*SGB.ring*0.5};}
@@ -207,6 +260,27 @@ function sgBotGoal(p){
       if(sgInArea(x,y,S.ph)&&(!navOn()||!NAV.w||navWalk(x,y))){A.pat={k:S.ph,t:G.time+rnd(4,8),x,y};break;}}
     if(!A.pat||A.pat.k!==S.ph)A.pat={k:S.ph,t:G.time+2,x:k.x+SGB.ring,y:k.y};}
   return {x:A.pat.x,y:A.pat.y};
+}
+// a spot inside rects R (spread per bot, re-picked every 6–10 s) • key = cache slot on p.ai
+function sgBotIn(p,R,key){
+  const A=p.ai,S=G.sg,c=A[key];
+  if(c&&c.ph===S.ph&&G.time<c.t&&R.some(q=>c.x>=q.x1&&c.x<=q.x2&&c.y>=q.y1&&c.y<=q.y2))return c;
+  let best=null;
+  for(let n=0;n<10;n++){const q=R[Math.floor(Math.random()*R.length)],x=rnd(q.x1+60,Math.max(q.x1+60,q.x2-60)),y=rnd(q.y1+60,Math.max(q.y1+60,q.y2-60));
+    best={ph:S.ph,t:G.time+rnd(6,10),x,y};if(!navOn()||!NAV.w||navWalk(x,y))break;}
+  A[key]=best;return best;
+}
+// loot phase goal: nearest free item (not already claimed by a closer teammate) • full bag / nothing left = hold a spot in the loot area
+function sgBotLoot(p){
+  const S=G.sg,A=p.ai,R=sgLootR(S.ph-1),full=(p.sgi||[]).length>=SG_CARRY;
+  if(!full&&S.it.length){let best=null,bd=1e18;
+    for(const o of S.it){const I=SG_ITEMS[o.k];if(!I||(I.max&&(p.sgi||[]).filter(k=>k===o.k).length>=I.max))continue;
+      const d=Math.hypot(o.x-p.x,o.y-p.y);if(d>2600)continue;
+      if(plist().some(q=>q!==p&&q.ai&&q.team===p.team&&q.alive&&q.ai.lootT===o&&Math.hypot(o.x-q.x,o.y-q.y)<d))continue;   // a closer teammate goes for it
+      if(d<bd){bd=d;best=o;}}
+    A.lootT=best;if(best){A.lootGo=1;return {x:best.x,y:best.y};}}
+  A.lootT=null;
+  return R.length?sgBotIn(p,R,'lz'):{x:p.x,y:p.y};
 }
 // กันบอทค้าง (ทุกสถานการณ์ในโหมดนี้): ตั้งใจเดินแต่ 1.2 วิขยับไม่ถึง 25 px = เลี่ยงไปทางที่เดินได้ใกล้ทิศเดิมสุด 0.7 วิ + คิดทางใหม่
 function sgUnstick(p,dt){
@@ -231,6 +305,7 @@ function sgBotThink(p,dt){
   let tg=A.tg&&A.tg.alive&&!A.tg.downed?A.tg:null;
   if(tg&&A.sgm==='back'&&Math.hypot(tg.x-p.x,tg.y-p.y)>200){tg=null;for(const kk of SLOTK.concat(['x']))inp.c[kk]=c0[kk]|0;}   // falling back: don't stop to trade shots
   if(tg&&p.team===0&&A.sgm==='rally'&&Math.hypot(tg.x-p.x,tg.y-p.y)>SGB.atkSee*0.6){tg=null;for(const kk of SLOTK.concat(['x']))inp.c[kk]=c0[kk]|0;}   // gathering: only fight what comes close
+  if(tg&&A.lootGo&&Math.hypot(A.home.x-p.x,A.home.y-p.y)<320&&Math.hypot(tg.x-p.x,tg.y-p.y)>170){tg=null;for(const kk of SLOTK.concat(['x']))inp.c[kk]=c0[kk]|0;}   // item right there: grab it first
   if(tg){   // เดินไปหาเป้าไม่ได้ (กำแพงพังได้ขวาง) = ไม่สนเป้านี้ ไปทำภารกิจ/พังกำแพงก่อน
     const N=p.sgn||(p.sgn={path:null,t:0,gx:0,gy:0});N.rt=(N.rt||0)-dt;
     if(N.rt<=0||N.rtg!==tg){N.rt=1;N.rtg=tg;navEnsure();N.reach=Math.hypot(tg.x-p.x,tg.y-p.y)<220||!!navPath(p.x,p.y,tg.x,tg.y);}
