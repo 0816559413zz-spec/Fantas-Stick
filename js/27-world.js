@@ -342,13 +342,21 @@ function shadowAll(o){o.traverse(m=>{if(m.isMesh){m.castShadow=true;m.receiveSha
 // sky: deep blue zenith → pale horizon, brighter around/under the sun, deeper on the far side, hazy far hills, faint cirrus
 // cumulus: side-view clouds in (azimuth, elevation) space = smooth-union puffs + 3D-noise cauliflower edges + flat bases,
 //   lit by the real sun direction: crisp lit/shade split, lavender shade, darker base, silver rim when backlit
-// tune: SKYC.* then WD.skyBake() (re-bakes + refreshes the Look light) • cost: one draw at load (~ms), then a plain texture
-const SKYC={seed:20261124,n:30,sun:[74,100,-64],zen:'#1748a8',mid:'#3c80d8',hor:'#bfdcf4',horS:'#e6f2fb',halo:'#eef7ff',ground:'#9fbcd0',
+// SKYC.k = sky brightness in game (keeps white clouds under the bloom threshold 0.86) • tune: SKYC.* then WD.skyBake() (re-bakes + refreshes the Look light) • cost: one draw at load (~ms), then a plain texture
+const SKYC={seed:20261124,groups:24,loose:18,k:0.8,sun:[74,100,-64],zen:'#1748a8',mid:'#3c80d8',hor:'#bfdcf4',horS:'#e6f2fb',halo:'#eef7ff',ground:'#9fbcd0',
   hill:'#9dc2e2',hill2:'#86b0d6',lit:'#ffffff',shade:'#a7b4da',base:'#8e9ccb',rim:'#ffffff',cirrus:0.22};
 function skyBakeClear(){
-  const C=SKYC,NC=40;let sd=C.seed;const R=()=>(sd=(sd*1664525+1013904223)>>>0)/4294967296,D=Math.PI/180;
-  const cl=[];   // x = u (0..1), y = base elevation, z = half width, w = height (radians)
-  for(let i=0;i<C.n&&cl.length<NC;i++){const big=i<C.n*0.4,e=(big?3+R()*10:1+Math.pow(R(),1.3)*28)*D,h=(big?6+R()*6:1.5+R()*3)*D*(1+e*1.2);cl.push(new THREE.Vector4(R(),e,h*(1.0+R()*1.2),h));}
+  const C=SKYC,NC=64;let sd=C.seed;const R=()=>(sd=(sd*1664525+1013904223)>>>0)/4294967296,D=Math.PI/180;
+  // clouds live on a flat layer (base altitude ~1, units = cloud-base heights) and are seen in perspective:
+  // groups of clouds (clusters) + a few loose ones; far clouds = small, low, piled into banks on the horizon; near = big, high
+  const P=[],add=(x,z,A,w,h)=>{const r=Math.hypot(x,z);if(r<1.6)return;const e=Math.atan2(A,r);if(e<0.6*D)return;
+    P.push({r,v:new THREE.Vector4(((Math.atan2(z,-x)/(2*Math.PI))+1)%1,e,Math.atan2(w,r),Math.atan2(A+h,r)-e)});};
+  for(let g=0;g<C.groups;g++){const th=R()*Math.PI*2,r0=g<C.groups*0.75?2.3+11*Math.pow(R(),1.1):12+22*R(),A=0.85+R()*0.35,m=2+Math.floor(R()*(r0<5?3:6)),sp=0.8+r0*0.1,big=R()<0.45;
+    for(let k=0;k<m;k++){const w=(big?0.45+R()*0.55:0.25+R()*0.45)*(k?0.8:1.15),h=w*(0.55+R()*0.7)*(k?1:1.3);
+      const l=(R()-0.5)*2.4*sp,rr=r0+(R()-0.5)*0.35*sp;add(Math.cos(th)*rr-Math.sin(th)*l,Math.sin(th)*rr+Math.cos(th)*l,A+(R()-0.5)*0.06,w,h);}}   // spread sideways, little in depth (same elevation band)
+  for(let i=0;i<C.loose;i++){const th=R()*Math.PI*2,r=2+30*Math.pow(R(),1.1),w=0.15+R()*0.35;add(Math.cos(th)*r,Math.sin(th)*r,0.9+R()*0.3,w,w*(0.4+R()*0.4));}
+  P.sort((a,b)=>a.r-b.r);   // near first: the shader takes the first cloud covering a pixel = correct overlap
+  const cl=P.slice(0,NC).map(o=>o.v);   // x = u (0..1), y = base elevation, z = half width, w = height (radians)
   while(cl.length<NC)cl.push(new THREE.Vector4(0,0,0,0));
   const col=k=>new THREE.Color(C[k]),U={uC:{value:cl},uSun:{value:new THREE.Vector3(...C.sun).normalize()},uCir:{value:C.cirrus}};
   for(const k of ['zen','mid','hor','horS','halo','ground','hill','hill2','lit','shade','base','rim'])U['c_'+k]={value:col(k)};
@@ -363,22 +371,40 @@ float n3(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);float n=dot(i,vec3(1
 float fbm(vec3 p){float a=.5,s=0.;for(int i=0;i<5;i++){s+=a*n3(p);p=p*2.07+vec3(1.7,9.2,3.1);a*=.5;}return s;}
 float smin(float a,float b,float k){float h=clamp(.5+.5*(b-a)/k,0.,1.);return mix(b,a,h)-k*h*(1.-h);}
 vec3 dirOf(vec2 q){float ph=q.x*6.2831853,e=q.y;return vec3(-cos(ph)*cos(e),sin(e),sin(ph)*cos(e));}
-// signed distance to the nearest cloud (radians); vert = height above that cloud base, hh = cloud height
-float clouds(vec2 q,out float vert,out float hh){float best=1.;vert=0.;hh=.1;
-  for(int i=0;i<NC;i++){vec4 c=uC[i];if(c.w<=0.)continue;
-    float du=q.x-c.x;du-=floor(du+.5);float X=du*6.2831853*cos(q.y),Y=q.y-c.y;
-    if(abs(X)>c.z*1.5+c.w||Y<-.02||Y>c.w*2.2)continue;
-    float s=1.,ci=float(i)*31.7;
-    for(int k=0;k<15;k++){float fk=float(k),a=h11(ci+fk),b=h11(ci+fk+17.),r2=h11(ci+fk+33.);vec2 ct;float r;
-      if(k<10){float t=fk/9.;ct.x=(t-.5)*1.7*c.z+(a-.5)*.2*c.z;r=c.w*(.28+.55*sin(3.1416*t))*(.75+.5*b);ct.y=r*(.35+.45*r2);}
-      else{ct.x=(a-.5)*c.z*.9;r=c.w*(.3+.28*b);ct.y=c.w*(.6+.55*r2);}
-      s=smin(s,length(vec2(X,Y)-ct)-r,c.w*.16);}
-    s=max(s,-Y);   // flat base
-    if(s<best){best=s;vert=Y;hh=c.w;}}
-  return best;}
-float cloudsN(vec2 q,out float vert,out float hh){float s=clouds(q,vert,hh);if(s>.06)return s;
-  vec3 d=dirOf(q);float up=smoothstep(0.,hh*.35,vert);
-  s+=(fbm(d*16./max(hh*12.,.35))-.5)*hh*.42*(.3+.7*up)+(fbm(d*45./max(hh*12.,.35))-.5)*hh*.12*up;return s;}
+// one cloud: signed distance (radians), Y = height above its base • c = (u, base elev, half width, height), ci = seed
+float cloudSdf(vec2 q,vec3 d,vec4 c,float ci,out float Y){
+  float du=q.x-c.x;du-=floor(du+.5);float X=du*6.2831853*cos(q.y);Y=q.y-c.y;
+  if(abs(X)>c.z*1.5+c.w||Y<-.02||Y>c.w*2.2)return 1.;
+  float s=1.;
+  for(int k=0;k<15;k++){float fk=float(k),a=h11(ci+fk),b=h11(ci+fk+17.),r2=h11(ci+fk+33.);vec2 ct;float r;
+    if(k<10){float t=fk/9.;ct.x=(t-.5)*1.7*c.z+(a-.5)*.2*c.z;r=c.w*(.28+.55*sin(3.1416*t))*(.75+.5*b);ct.y=r*(.35+.45*r2);}
+    else{ct.x=(a-.5)*c.z*.9;r=c.w*(.3+.28*b);ct.y=c.w*(.6+.55*r2);}
+    s=smin(s,length(vec2(X,Y)-ct)-r,c.w*.16);}
+  s=max(s,-Y);   // flat base
+  if(s<c.w*.3){float up=smoothstep(0.,c.w*.35,Y),f=1./max(c.w*12.,.12);vec3 o=vec3(ci*.13,ci*.07,0.);   // cauliflower edges (per-cloud noise offset)
+    s+=(fbm(d*16.*f+o)-.5)*c.w*.42*(.3+.7*up)+(fbm(d*45.*f+o)-.5)*c.w*.12*up;}
+  return s;}
+// first cloud (list is near→far) from index 'from' that covers this pixel → idx (-1 = none)
+float frontCloud(vec2 q,vec3 d,int from,out int idx,out float vert,out float hh){idx=-1;vert=0.;hh=.1;
+  for(int i=0;i<NC;i++){if(i<from)continue;vec4 c=uC[i];if(c.w<=0.)continue;float Y,s=cloudSdf(q,d,c,float(i)*31.7,Y);
+    if(s<.0016){idx=i;vert=Y;hh=c.w;return s;}}
+  return 1.;}
+vec4 uCi(int idx){for(int i=0;i<NC;i++)if(i==idx)return uC[i];return vec4(0.);}
+// shade the front cloud from 'from' → rgb + alpha in a, idx out
+vec3 shadeCloud(vec2 q,vec3 d,float e,int from,out float a,out int idx){float vert,hh;a=0.;float s=frontCloud(q,d,from,idx,vert,hh);if(idx<0)return vec3(0.);
+  vec4 c=uCi(idx);float ci=float(idx)*31.7,ep=max(.003,hh*.04),Y2;
+  float sx=cloudSdf(q+vec2(ep/(6.2831853*cos(e)),0.),dirOf(q+vec2(ep/(6.2831853*cos(e)),0.)),c,ci,Y2),sy=cloudSdf(q+vec2(0.,ep),dirOf(q+vec2(0.,ep)),c,ci,Y2);
+  vec2 n=normalize(vec2(sx-s,sy-s)+1e-7);   // outward normal (sdf grows outward)
+  float ph=q.x*6.2831853;vec3 tE=vec3(sin(ph),0.,cos(ph)),tN=vec3(cos(ph)*sin(e),cos(e),-sin(ph)*sin(e));
+  vec2 L=vec2(dot(uSun,tE),dot(uSun,tN));L=length(L)>1e-3?normalize(L):vec2(0.,1.);
+  float front=-dot(d,uSun),v01=clamp(vert/hh,0.,1.);
+  float shv=dot(n,L)*.5+v01*.62-.3+front*.25;float lit=smoothstep(-.02,.24,shv);
+  vec3 cc=mix(c_shade,c_lit,lit);
+  float depth=clamp(-s/(hh*.3),0.,1.);cc=mix(cc,cc*.94,depth*(1.-lit));
+  cc=mix(c_base,cc,smoothstep(0.,hh*.4,vert));
+  float edge=(1.-smoothstep(0.,hh*.05,-s))*smoothstep(hh*.05,hh*.3,vert);   // rim on sides/top, not the flat basecc=mix(cc,c_rim,edge*(max(0.,dot(d,uSun))*.7+.12));
+  cc=mix(cc,c_hor,(1.-smoothstep(0.,.18,e))*.45);
+  a=1.-smoothstep(-.0016,.0016,s);return cc;}
 void main(){
   vec2 q=vec2(vUv.x,(vUv.y-.5)*3.1415927);vec3 d=dirOf(q);float e=q.y;
   vec3 dh=normalize(vec3(d.x,0.,d.z)+1e-5),sh=normalize(vec3(uSun.x,0.,uSun.z));float az=dot(dh,sh)*.5+.5,t=clamp(e/1.5707963,0.,1.);
@@ -390,19 +416,8 @@ void main(){
   if(e>-.02){float h1=(.4+2.8*hn*hn)*.01745,h2=(.1+1.6*hn2)*.01745;
     if(e<h1)sky=mix(sky,c_hill,.85);if(e<h2)sky=mix(sky,c_hill2,.9);}
   vec3 col=sky;
-  if(e>0.){float vert,hh;float s=cloudsN(q,vert,hh);
-    if(s<.004){float ep=max(.003,hh*.04),v2,h2;
-      vec2 g=vec2(cloudsN(q+vec2(ep/(6.2831853*cos(e)),0.),v2,h2)-s,cloudsN(q+vec2(0.,ep),v2,h2)-s);vec2 n=-normalize(g+1e-7);
-      float ph=q.x*6.2831853;vec3 tE=vec3(sin(ph),0.,cos(ph)),tN=vec3(cos(ph)*sin(e),cos(e),-sin(ph)*sin(e));
-      vec2 L=vec2(dot(uSun,tE),dot(uSun,tN));L=length(L)>1e-3?normalize(L):vec2(0.,1.);
-      float front=-dot(d,uSun),v01=clamp(vert/hh,0.,1.);
-      float shv=dot(n,L)*.5+v01*.62-.3+front*.25;float lit=smoothstep(-.02,.24,shv);
-      vec3 cc=mix(c_shade,c_lit,lit);
-      float depth=clamp(-s/(hh*.3),0.,1.);cc=mix(cc,cc*.94,depth*(1.-lit));
-      cc=mix(c_base,cc,smoothstep(0.,hh*.4,vert));
-      float edge=1.-smoothstep(0.,hh*.05,-s);cc=mix(cc,c_rim,edge*(max(0.,dot(d,uSun))*.7+.12));
-      cc=mix(cc,c_hor,(1.-smoothstep(0.,.18,e))*.45);
-      float px=.0016,a=1.-smoothstep(-px,px,s);col=mix(sky,cc,a);}}
+  if(e>0.){float a1,a2;int i1,i2;vec3 c1=shadeCloud(q,d,e,0,a1,i1);
+    if(i1>=0){vec3 under=sky;if(a1<.999){vec3 c2=shadeCloud(q,d,e,i1+1,a2,i2);if(i2>=0)under=mix(sky,c2,a2);}col=mix(under,c1,a1);}}   // edge blends into the cloud behind, not the sky
   gl_FragColor=vec4(col,1.);}`});
   const rt=new THREE.WebGLRenderTarget(2048,1024,{generateMipmaps:true,minFilter:THREE.LinearMipmapLinearFilter,magFilter:THREE.LinearFilter,colorSpace:THREE.SRGBColorSpace,depthBuffer:false});
   rt.texture.wrapS=THREE.RepeatWrapping;
@@ -449,7 +464,7 @@ const LDIR=new THREE.Vector3(-55,95,-70).normalize();
 function setSky(mode){
   const clear=mode==='clear',noon=mode==='day'||clear,day=noon||mode==='sunset';   // 'day' = painterly forest noon (js/77) • 'clear' = clear blue midday (file maps sky:'day')
   SKY.mode=mode;
-  SKY.mesh.material.map=clear?SKY.clear:noon?SKY.noon:day?SKY.sunset:SKY.night;SKY.mesh.material.color.set('#ffffff');SKY.mesh.material.needsUpdate=true;   // white = original sky image (overcast maps tint later in js/28)
+  SKY.mesh.material.map=clear?SKY.clear:noon?SKY.noon:day?SKY.sunset:SKY.night;SKY.mesh.material.color.setScalar(clear?SKYC.k:1);SKY.mesh.material.needsUpdate=true;   // white = original sky image (overcast maps tint later in js/28)
   SKY.stars.visible=!day;SKY.moon.visible=!day;SKY.sun.visible=day;
   moonL.intensity=day?0.82:1;
   SKY.sunG.material.color.copy(hdr(clear?'#fff4d8':'#ffb070',0.48));SKY.sunC.material.color.copy(hdr(clear?'#fffbea':'#ffd48e',clear?1.4:0.91));   // white noon sun vs orange sunset sun
