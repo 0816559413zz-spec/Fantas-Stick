@@ -8,6 +8,8 @@
 #   POST /api/bug-img?name=<ชื่อ>   → เก็บรูปของโน้ตลง bugs/img/<ชื่อ>.png|.jpg
 #   GET/POST /api/reviews           → กระดานรอรีวิว (review.html): review/reviews.json + เขียน review/REVIEW.md ให้ Claude อ่าน (`--review-md` = เขียนใหม่)
 #   POST /api/review-img?name=<ชื่อ> → เก็บรูปลง review/img/<ชื่อ>.png|.jpg
+#   GET/POST /api/concepts          → คลัง Concept (concepts.html): concepts/concepts.json + เขียน concepts/CONCEPTS.md ให้ Claude อ่าน (`--concepts-md` = เขียนใหม่)
+#   POST /api/concept-img?name=<ชื่อ> → เก็บรูป Ref/ผลลัพธ์ลง concepts/img/<ชื่อ>.png|.jpg
 #   GET/POST /api/sb                → สตอรี่บอร์ด VFX (storyboard.html): storyboard/boards.json + เขียน storyboard/sb-<id>.md + STORYBOARDS.md ให้ Claude อ่าน
 #   POST /api/sb-img?name=<ชื่อ>    → เก็บภาพร่าง/รูปตัวอย่างลง storyboard/img/<ชื่อ>.png|.jpg
 #   POST /api/sb-rec?name=<ชื่อ>    → เก็บท่าตัวละครที่อัดจากเกม (studio/rec.js) ลง storyboard/rec/<ชื่อ>.json
@@ -102,6 +104,48 @@ def bugs_save(db):
         f.write(bugs_md(db))
     used = {os.path.basename(i) for b in db.get('items', []) for i in b.get('imgs', [])}
     d = os.path.join(BUGD, 'img')
+    for f in os.listdir(d):
+        if f not in used and time.time() - os.path.getmtime(os.path.join(d, f)) > 120:
+            os.remove(os.path.join(d, f))
+
+CPD = os.path.join(ROOT, 'concepts')
+CP_ST = {'idea': '💡 ไอเดีย', 'ready': '📝 พรอมต์พร้อม', 'gen': '🖼 เจนแล้ว', 'pick': '⭐ ใช้เป็นแนวหลัก', 'drop': '❌ ไม่เอา'}
+
+def cp_load():
+    p = os.path.join(CPD, 'concepts.json')
+    if not os.path.exists(p):
+        return {'next': 1, 'items': []}
+    return json.load(open(p, encoding='utf-8'))
+
+def cp_md(db):
+    L = ['# คลัง Concept (concepts.html)', '',
+         '> เขียนอัตโนมัติจาก `concepts.html` (ผ่าน `tools/serve.py`) — อย่าแก้ตรง ๆ, แก้ `concepts/concepts.json` แล้วรัน `python tools/serve.py --concepts-md`.',
+         '> **Claude:** นี่คือคลังภาพอ้างอิง + พรอมต์ที่ผู้ใช้เอาไปเจนรูป (ChatGPT) — เปิดรูปด้วย Read. สถานะ ⭐ = แนวทางที่ผู้ใช้เลือก. สไตล์งานหลัก = สีน้ำ.', '']
+    order = {'pick': 0, 'gen': 1, 'ready': 2, 'idea': 3, 'drop': 4}
+    for b in sorted(db.get('items', []), key=lambda b: (order.get(b.get('status'), 9), -b.get('id', 0))):
+        L.append(f"## #{b.get('id')} {b.get('title') or '(ไม่มีหัวข้อ)'}")
+        L.append(f"- สถานะ: {CP_ST.get(b.get('status'), b.get('status'))} • ชนิด: {b.get('kind') or '-'} • แท็ก: {b.get('tags') or '-'}")
+        L.append('')
+        if b.get('notes'):
+            L += [b['notes'].strip(), '']
+        for im in b.get('refs', []):
+            L.append(f"- Ref: `{im}`")
+        for im in b.get('results', []):
+            L.append(f"- ผลลัพธ์: `{im}`")
+        if b.get('refs') or b.get('results'):
+            L.append('')
+        if b.get('prompt'):
+            L += ['**พรอมต์:**', '```', b['prompt'].strip(), '```', '']
+    return chr(10).join(L) + chr(10)
+
+def cp_save(db):
+    os.makedirs(os.path.join(CPD, 'img'), exist_ok=True)
+    with open(os.path.join(CPD, 'concepts.json'), 'w', encoding='utf-8') as f:
+        json.dump(db, f, ensure_ascii=False, indent=1)
+    with open(os.path.join(CPD, 'CONCEPTS.md'), 'w', encoding='utf-8') as f:
+        f.write(cp_md(db))
+    used = {os.path.basename(i) for b in db.get('items', []) for i in b.get('refs', []) + b.get('results', [])}
+    d = os.path.join(CPD, 'img')
     for f in os.listdir(d):
         if f not in used and time.time() - os.path.getmtime(os.path.join(d, f)) > 120:
             os.remove(os.path.join(d, f))
@@ -688,6 +732,8 @@ class H(SimpleHTTPRequestHandler):
             return self._json(200, bugs_load())
         if u.path == '/api/reviews':
             return self._json(200, rv_load())
+        if u.path == '/api/concepts':
+            return self._json(200, cp_load())
         if u.path == '/api/sb':
             return self._json(200, sb_load())
         if u.path == '/api/sb-skills':
@@ -778,6 +824,14 @@ class H(SimpleHTTPRequestHandler):
                 return self._json(400, {'ok': False, 'err': 'ข้อมูลผิดรูปแบบ: ' + str(e)})
             rv_save(db)
             return self._json(200, {'ok': True})
+        if u.path == '/api/concepts':
+            try:
+                db = json.loads(self._body().decode('utf-8'))
+                assert isinstance(db.get('items'), list)
+            except Exception as e:
+                return self._json(400, {'ok': False, 'err': 'ข้อมูลผิดรูปแบบ: ' + str(e)})
+            cp_save(db)
+            return self._json(200, {'ok': True})
         if u.path == '/api/sb':
             try:
                 db = json.loads(self._body().decode('utf-8'))
@@ -802,13 +856,13 @@ class H(SimpleHTTPRequestHandler):
             d = os.path.join(SBD, 'rec'); os.makedirs(d, exist_ok=True)
             with open(os.path.join(d, name + '.json'), 'wb') as f: f.write(data)
             return self._json(200, {'ok': True, 'path': 'storyboard/rec/' + name + '.json'})
-        if u.path in ('/api/bug-img', '/api/sb-img', '/api/review-img'):
+        if u.path in ('/api/bug-img', '/api/sb-img', '/api/review-img', '/api/concept-img'):
             name = re.sub(r'[^a-zA-Z0-9_\-]', '_', q.get('name', ['img'])[0])[:60] or 'img'
             data = self._body(); ext = 'png'
             if data[:5] == b'data:':
                 head, b64 = data.split(b',', 1); ext = 'jpg' if b'jpeg' in head else 'png'; data = base64.b64decode(b64)
             elif data[:3] == b'\xff\xd8\xff': ext = 'jpg'
-            sub = {'/api/bug-img': 'bugs', '/api/review-img': 'review'}.get(u.path, 'storyboard')
+            sub = {'/api/bug-img': 'bugs', '/api/review-img': 'review', '/api/concept-img': 'concepts'}.get(u.path, 'storyboard')
             d = os.path.join(ROOT, sub, 'img'); os.makedirs(d, exist_ok=True)
             with open(os.path.join(d, name + '.' + ext), 'wb') as f: f.write(data)
             return self._json(200, {'ok': True, 'path': sub + '/img/' + name + '.' + ext})
@@ -859,6 +913,8 @@ if __name__ == '__main__':
         bugs_save(bugs_load()); print('bugs/BUGS.md updated'); sys.exit()
     if '--review-md' in sys.argv:  # Claude แก้ review/reviews.json เองแล้ว → เขียน REVIEW.md ใหม่
         rv_save(rv_load()); print('review/REVIEW.md updated'); sys.exit()
+    if '--concepts-md' in sys.argv:  # Claude แก้ concepts/concepts.json เองแล้ว → เขียน CONCEPTS.md ใหม่
+        cp_save(cp_load()); print('concepts/CONCEPTS.md updated'); sys.exit()
     if '--sb-md' in sys.argv:  # Claude แก้ storyboard/boards.json เองแล้ว → เขียน sb-<id>.md ใหม่
         sb_save(sb_load()); print('storyboard/*.md updated'); sys.exit()
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8765

@@ -64,6 +64,13 @@
      "url": "sketch.html"
     },
     {
+     "id": "concepts",
+     "icon": "🎨",
+     "name": "คลัง Concept",
+     "desc": "เก็บภาพ Ref + พรอมต์ + ผลลัพธ์ที่เจนจาก ChatGPT ต่อคอนเซ็ป (แมพ ตัวละคร ฉาก) สไตล์สีน้ำ ให้ Claude อ่านได้ (concepts/)",
+     "url": "concepts.html"
+    },
+    {
      "id": "bugs",
      "icon": "🐞",
      "name": "โน้ตปัญหา",

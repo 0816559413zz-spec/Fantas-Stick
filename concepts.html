@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>คลัง Concept — Fantas Stick</title>
+<!-- คลัง Concept (Concept Collection): เก็บภาพ Ref + พรอมต์ + ผลลัพธ์ที่เจนจาก ChatGPT ต่อ 1 คอนเซ็ป → concepts/concepts.json + concepts/img/
+     serve.py เขียน concepts/CONCEPTS.md ให้ Claude อ่าน • ต้องเปิดผ่าน tools/serve.py (Tools.bat) -->
+<link rel="stylesheet" href="hub/tool-ui.css">
+<script src="hub/tool-sound.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg0);color:var(--tx);font:13px/1.5 var(--ui);height:100vh;display:flex;flex-direction:column}
+button,input,select,textarea{font:inherit;color:inherit}
+header h1{font-size:14px;margin:0 8px 0 0;font-weight:600}
+#stat{margin-left:auto;color:var(--tx2);font-size:12px}
+#stat.err{color:var(--serr)}
+main{flex:1;display:flex;min-height:0}
+#side{width:330px;border-right:1px solid var(--ln);display:flex;flex-direction:column;background:var(--bg1)}
+#flt{display:flex;gap:4px;padding:8px;flex-wrap:wrap}
+#flt button{flex:1;white-space:nowrap}
+#list{flex:1;overflow:auto}
+.it{padding:8px 12px;border-bottom:1px solid var(--ln);cursor:pointer;display:flex;gap:10px;align-items:center}
+.it:hover{background:var(--bg2)}
+.it.sel{background:var(--bg3);box-shadow:inset 3px 0 var(--acc)}
+.it .th{width:64px;height:46px;flex:none;background:#000;border:1px solid var(--ln);border-radius:3px;object-fit:cover}
+.it .t{flex:1;min-width:0}
+.it .t b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.it .t small{color:var(--tx2)}
+.it.drop .t b{color:var(--tx3)}
+#ed{flex:1;overflow:auto;padding:16px 22px}
+#empty{color:var(--tx2);text-align:center;margin-top:12vh;font-size:14px;line-height:2}
+.row{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.row label{color:var(--tx2);min-width:50px}
+.fld{background:var(--bg1);border:1px solid var(--ln2);border-radius:4px;padding:6px 8px}
+#fTitle{flex:1;font-size:16px;font-weight:600;padding:8px 10px}
+textarea.fld{width:100%;min-height:80px;resize:vertical}
+textarea#fPrompt{min-height:240px;font-family:var(--fu);font-size:12px;line-height:1.55}
+.cap{color:var(--tx2);font-size:12px;margin:16px 0 4px;display:flex;gap:8px;align-items:center}
+.cap b{color:var(--tx);font-weight:600}
+.seg{display:flex}.seg button{border-radius:0}.seg button:first-child{border-radius:4px 0 0 4px}.seg button:last-child{border-radius:0 4px 4px 0}
+.seg button.on[data-v=idea]{background:var(--bg4);border-color:var(--ln2)}
+.seg button.on[data-v=ready]{background:var(--acc);border-color:var(--acc);color:#000}
+.seg button.on[data-v=gen]{background:var(--swarn);border-color:var(--swarn);color:#000}
+.seg button.on[data-v=pick]{background:var(--sok);border-color:var(--sok);color:#000}
+.seg button.on[data-v=drop]{background:var(--tx3);border-color:var(--tx3);color:#000}
+.zone{border:1px dashed var(--ln2);border-radius:6px;padding:12px;min-height:90px}
+.zone.over,.zone.tgt{border-color:var(--acc)}
+.zone.over{background:var(--bg2)}
+.media{display:flex;flex-wrap:wrap;gap:10px}
+.im{position:relative;width:240px;height:160px;background:#000;border:1px solid var(--ln);border-radius:4px;overflow:hidden}
+.im img{width:100%;height:100%;object-fit:contain;cursor:zoom-in}
+.im .bt{position:absolute;top:4px;right:4px;display:flex;gap:3px}
+.im .bt button{padding:1px 7px;background:#000a}
+.im small{position:absolute;left:0;right:0;bottom:0;background:#000b;color:var(--tx2);font-size:10px;padding:1px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hint{color:var(--tx2);font-size:12px;margin-top:8px}
+kbd{background:var(--bg2);border:1px solid var(--ln2);border-radius:3px;padding:0 5px}
+#zoom{position:fixed;inset:0;background:#000d;display:none;z-index:9;align-items:center;justify-content:center}
+#zoom img{max-width:96vw;max-height:94vh}
+.foot{display:flex;gap:8px;margin-top:22px;align-items:center}
+</style></head><body>
+<header class="tl-bar">
+  <a class="tl-home" href="hub.html" title="กลับศูนย์รวม Tool">◂ Tool</a>
+  <h1>คลัง Concept</h1>
+  <button class="tl-btn pri" id="bNew">＋ คอนเซ็ปใหม่</button>
+  <button class="tl-btn" id="bCopy" title="คัดลอกข้อความไปวางในแชท Claude">คัดลอกข้อความส่ง Claude</button>
+  <span id="stat">กำลังโหลด…</span>
+</header>
+<main>
+  <div id="side"><div id="flt"></div><div id="list"></div></div>
+  <div id="ed"></div>
+</main>
+<div id="zoom"><img alt=""></div>
+<script>
+const $=s=>document.querySelector(s);
+const ST={idea:'💡 ไอเดีย',ready:'📝 พรอมต์พร้อม',gen:'🖼 เจนแล้ว',pick:'⭐ แนวหลัก',drop:'❌ ไม่เอา'};
+const KIND=['แผนที่','ตัวละคร','สกิล / เอฟเฟกต์','UI / HUD','ฉาก / บรรยากาศ','อื่น ๆ'];
+const FILT=[['all','ทั้งหมด'],['pick','⭐ แนวหลัก'],['work','กำลังทำ'],['drop','ไม่เอา']];
+let db={next:1,items:[]},cur=null,filter='all',saveT=0,dirty=false,online=false,tgt='results';
+
+function stat(t,err){const s=$('#stat');s.textContent=t;s.className=err?'err':'';}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function nowISO(){const d=new Date();return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,19);}
+const inFilter=b=>filter==='all'||(filter==='pick'?b.status==='pick':filter==='drop'?b.status==='drop':b.status!=='pick'&&b.status!=='drop');
+
+async function load(){
+  try{const r=await fetch('/api/concepts',{cache:'no-store'});if(!r.ok)throw 0;db=await r.json();db.items.forEach(b=>{b.refs=b.refs||[];b.results=b.results||[];b.prompt=b.prompt||'';b.notes=b.notes||'';b.tags=b.tags||'';});online=true;stat('พร้อม • บันทึกอัตโนมัติ');}
+  catch(e){online=false;stat('⚠ ต้องเปิดผ่าน "Tools.bat" (tools/serve.py) ถึงจะบันทึกได้',1);}
+  if(cur)cur=db.items.find(b=>b.id===cur.id)||null;
+  renderFilter();renderList();renderEd();
+}
+function save(now){
+  dirty=true;stat('กำลังบันทึก…');clearTimeout(saveT);
+  saveT=setTimeout(async()=>{
+    try{const r=await fetch('/api/concepts',{method:'POST',body:JSON.stringify(db)});const j=await r.json();if(!j.ok)throw j.err;dirty=false;stat('บันทึกแล้ว ✓ '+new Date().toLocaleTimeString('th-TH'));}
+    catch(e){stat('⚠ บันทึกไม่ได้ — เปิดผ่าน "Tools.bat" หรือยัง?',1);}
+  },now?0:600);
+}
+function newItem(){
+  const b={id:db.next++,title:'',kind:'',tags:'',status:'idea',created:nowISO(),updated:nowISO(),notes:'',prompt:'',refs:[],results:[]};
+  db.items.push(b);cur=b;if(filter!=='all')setFilter('all');renderFilter();renderList();renderEd();save();
+  setTimeout(()=>$('#fTitle')&&$('#fTitle').focus(),0);return b;
+}
+function touch(){cur.updated=nowISO();renderFilter();renderList();save();}
+function setFilter(f){filter=f;renderFilter();renderList();}
+function setStatus(v){cur.status=v;touch();renderEd();}
+
+function renderFilter(){
+  const n=f=>{const o=filter;filter=f;const c=db.items.filter(inFilter).length;filter=o;return c;};
+  $('#flt').innerHTML=FILT.map(([k,t])=>`<button class="tl-btn ${filter===k?'on':''}" data-f="${k}">${t} ${n(k)}</button>`).join('');
+}
+function renderList(){
+  const L=db.items.filter(inFilter).sort((a,b)=>b.id-a.id);
+  $('#list').innerHTML=L.length?L.map(b=>{const th=b.results[0]||b.refs[0];return `<div class="it ${b.status==='drop'?'drop':''} ${cur&&cur.id===b.id?'sel':''}" data-id="${b.id}">
+    ${th?`<img class="th" src="${esc(th)}?v=${b.updated}" loading="lazy">`:'<div class="th"></div>'}
+    <div class="t"><b>#${b.id} ${esc(b.title||'(ยังไม่มีชื่อ)')}</b>
+    <small>${ST[b.status]||''}${b.kind?' • '+esc(b.kind):''} • Ref ${b.refs.length} • ผลลัพธ์ ${b.results.length}</small></div></div>`}).join('')
+    :`<div style="padding:16px;color:var(--tx2)">ไม่มีรายการในหมวดนี้</div>`;
+}
+function zoneHtml(key,title,sub){
+  const b=cur,L=b[key];
+  return `<div class="cap"><b>${title}</b> ${sub}</div>
+  <div class="zone ${tgt===key?'tgt':''}" data-zone="${key}"><div class="media">${L.map((p,i)=>`<div class="im"><img src="${esc(p)}?v=${b.updated}" data-z="1"><small>${esc(p.split('/').pop())}</small><div class="bt">${key==='results'?`<button class="tl-btn" data-mv="${key}:${i}" title="ย้ายไป Ref">→Ref</button>`:`<button class="tl-btn" data-mv="${key}:${i}" title="ย้ายไปผลลัพธ์">→ผล</button>`}<button class="tl-btn" data-del="${key}:${i}" title="เอาออก">✕</button></div></div>`).join('')}</div>
+  <div class="hint">วาง <kbd>Ctrl</kbd>+<kbd>V</kbd> (วางลงช่องที่ไฮไลต์ฟ้า) • ลากไฟล์มาวาง • <button class="tl-btn" data-pick="${key}">เลือกไฟล์…</button> • หรือพิมพ์พาธในรีโป: <input class="fld tl-in" data-path="${key}" style="width:260px" placeholder="เช่น designs/xxx/ref.png แล้วกด Enter"></div></div>`;
+}
+function renderEd(){
+  const E=$('#ed');
+  if(!cur){E.innerHTML=`<div id="empty">คลังรวมภาพ Ref + พรอมต์ + ผลลัพธ์ของแต่ละคอนเซ็ป<br>เลือกรายการทางซ้าย หรือกด <b>＋ คอนเซ็ปใหม่</b><br>วางรูป <kbd>Ctrl</kbd>+<kbd>V</kbd> ที่หน้านี้ = สร้างคอนเซ็ปพร้อมรูปทันที</div>`;return;}
+  const b=cur;
+  E.innerHTML=`
+  <div class="row"><input id="fTitle" class="fld" placeholder="ชื่อคอนเซ็ป เช่น 'Sky Castle — ปราสาทบนเกาะลอยฟ้า'" value="${esc(b.title)}"></div>
+  <div class="row"><label>ชนิด</label><input id="fKind" class="fld tl-in" list="kl" style="width:170px" placeholder="เลือกหรือพิมพ์เอง" value="${esc(b.kind)}"><datalist id="kl">${KIND.map(k=>`<option value="${k}">`).join('')}</datalist>
+    <label style="min-width:auto">แท็ก</label><input id="fTags" class="fld tl-in" style="width:200px" placeholder="เช่น สีน้ำ, ปราสาท" value="${esc(b.tags)}">
+    <div class="seg" id="fSt">${Object.keys(ST).map(k=>`<button class="tl-btn ${b.status===k?'on':''}" data-v="${k}">${ST[k]}</button>`).join('')}</div></div>
+  <div class="cap"><b>โน้ต</b> มุมมอง / อารมณ์ / ข้อกำหนดของแมพ</div>
+  <textarea id="fNotes" class="fld">${esc(b.notes)}</textarea>
+  ${zoneHtml('refs','ภาพ Ref','สิ่งที่แนบให้ ChatGPT (สเก็ตช์ ผัง สไตล์)')}
+  <div class="cap"><b>พรอมต์</b> <button class="tl-btn pri" id="bCp">คัดลอกพรอมต์</button><button class="tl-btn" id="bCpAll" title="รวมรายชื่อไฟล์ Ref ที่ต้องแนบไว้หัวข้อความ">คัดลอกพร้อมรายการ Ref</button><span id="cpN" style="color:var(--tx3)"></span></div>
+  <textarea id="fPrompt" class="fld" placeholder="วางพรอมต์ที่ใช้เจนภาพ (ภาษาอังกฤษ)">${esc(b.prompt)}</textarea>
+  ${zoneHtml('results','ผลลัพธ์','ภาพที่ ChatGPT เจนกลับมา')}
+  <div class="foot"><span class="hint">#${b.id} • สร้าง ${b.created.replace('T',' ').slice(0,16)}</span><span style="flex:1"></span><button class="tl-btn" id="bDel" style="color:var(--serr)">ลบรายการ</button></div>`;
+  $('#fTitle').oninput=e=>{b.title=e.target.value;touch();};
+  $('#fKind').oninput=e=>{b.kind=e.target.value;touch();};
+  $('#fTags').oninput=e=>{b.tags=e.target.value;touch();};
+  $('#fNotes').oninput=e=>{b.notes=e.target.value;touch();};
+  $('#fPrompt').oninput=e=>{b.prompt=e.target.value;touch();};
+  $('#fSt').onclick=e=>{const v=e.target.dataset.v;if(v)setStatus(v);};
+  $('#bDel').onclick=()=>{if(!confirm('ลบรายการ #'+b.id+' ทั้งรูป?'))return;db.items=db.items.filter(x=>x!==b);cur=null;renderFilter();renderList();renderEd();save(1);};
+  const cp=async(t)=>{try{await navigator.clipboard.writeText(t);$('#cpN').textContent='คัดลอกแล้ว ✓';}catch(e){prompt('คัดลอกข้อความนี้:',t);}};
+  $('#bCp').onclick=()=>cp(b.prompt);
+  $('#bCpAll').onclick=()=>cp((b.refs.length?'[แนบรูป: '+b.refs.map(p=>p.split('/').pop()).join(', ')+']\n\n':'')+b.prompt);
+  document.querySelectorAll('.zone').forEach(z=>{
+    const k=z.dataset.zone;
+    z.onmouseenter=()=>{tgt=k;document.querySelectorAll('.zone').forEach(o=>o.classList.toggle('tgt',o===z));};
+    z.ondragover=e=>{e.preventDefault();z.classList.add('over');};z.ondragleave=()=>z.classList.remove('over');
+    z.ondrop=e=>{e.preventDefault();z.classList.remove('over');addFiles(e.dataTransfer.files,k);};
+    z.onclick=e=>{const t=e.target;
+      if(t.dataset.z)zoom(t.src);
+      else if(t.dataset.del){const[kk,i]=t.dataset.del.split(':');b[kk].splice(+i,1);touch();renderEd();}
+      else if(t.dataset.mv){const[kk,i]=t.dataset.mv.split(':'),to=kk==='refs'?'results':'refs';b[to].push(b[kk].splice(+i,1)[0]);touch();renderEd();}
+      else if(t.dataset.pick){const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.multiple=true;inp.onchange=()=>addFiles(inp.files,t.dataset.pick);inp.click();}};
+    const pi=z.querySelector('[data-path]');
+    pi.onkeydown=e=>{if(e.key==='Enter'&&e.target.value.trim()){b[k].push(e.target.value.trim().replace(/\\/g,'/'));touch();renderEd();}};
+  });
+}
+function zoom(src){$('#zoom img').src=src;$('#zoom').style.display='flex';}
+
+// รูป: ย่อให้กว้างไม่เกิน 2400 (งานอาร์ตต้องคมกว่ากระดานรีวิว), PNG ถ้าเล็กพอ ไม่งั้น JPEG → ส่งให้ serve.py เก็บใน concepts/img/
+function fileToCanvas(f){return new Promise((ok,no)=>{const u=URL.createObjectURL(f),im=new Image();im.onload=()=>{const s=Math.min(1,2400/im.width),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c);};im.onerror=no;im.src=u;});}
+function canvasData(c){let d=c.toDataURL('image/png');if(d.length>3e6)d=c.toDataURL('image/jpeg',0.9);return d;}
+async function upload(data){const r=await fetch('/api/concept-img?name=c'+cur.id+'_'+Date.now().toString(36)+Math.floor(Math.random()*99),{method:'POST',body:data});const j=await r.json();if(!j.ok)throw j.err;return j.path;}
+async function addFiles(fl,key){
+  const fs=[...fl].filter(f=>f.type.startsWith('image/'));if(!fs.length)return;
+  if(!online){stat('⚠ ยังแปะรูปไม่ได้ — เปิดผ่าน "Tools.bat" ก่อน',1);return;}
+  if(!cur)newItem();
+  stat('กำลังเก็บรูป…');
+  try{for(const f of fs){cur[key||tgt].push(await upload(canvasData(await fileToCanvas(f))));}touch();renderEd();}
+  catch(e){stat('⚠ เก็บรูปไม่ได้: '+e,1);}
+}
+document.addEventListener('paste',e=>{
+  const fs=[...(e.clipboardData?.items||[])].filter(i=>i.kind==='file').map(i=>i.getAsFile());
+  if(/^(INPUT|TEXTAREA)$/.test(e.target.tagName)&&!fs.length)return;
+  if(fs.length){e.preventDefault();addFiles(fs,tgt);}
+});
+
+$('#zoom').onclick=()=>$('#zoom').style.display='none';
+$('#bNew').onclick=newItem;
+$('#flt').onclick=e=>{if(e.target.dataset.f)setFilter(e.target.dataset.f);};
+$('#list').onclick=e=>{const it=e.target.closest('.it');if(!it)return;cur=db.items.find(b=>b.id===+it.dataset.id);renderList();renderEd();};
+$('#bCopy').onclick=async()=>{
+  const p=db.items.filter(b=>b.status==='pick');
+  const msg=p.length?`ดู concepts/CONCEPTS.md — คอนเซ็ปแนวหลัก ${p.length} เรื่อง: ${p.map(b=>'#'+b.id+' '+b.title).join(', ')} (เปิดรูปด้วย Read)`:'ดู concepts/CONCEPTS.md (คลัง Concept ภาพ Ref + พรอมต์ + ผลลัพธ์ เปิดรูปด้วย Read)';
+  try{await navigator.clipboard.writeText(msg);stat('คัดลอกแล้ว — ไปวางในแชท Claude ได้เลย ✓');}catch(e){prompt('คัดลอกข้อความนี้:',msg);}
+};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')$('#zoom').style.display='none';});
+window.addEventListener('focus',()=>{if(!dirty)load();});
+load();
+</script>
+</body></html>
