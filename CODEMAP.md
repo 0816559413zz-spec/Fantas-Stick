@@ -87,7 +87,7 @@ SDOME_POSE:235 stormDomeCost:236 stormDomeDash:237 stormDomeCharge:238 stormDome
 ## js/09-darkness.js (463) — 
 DARKP:2 DARK_V:6 DARK_BA:7 DARK_LONG_DASH:8 DARK_CHASE_FLOW:9 DARK_MAW:10 DARK_VEIL_PULL_CLEAR:11 DARK_CHASE_T:12 DARK_WALTZ_ORB:13 darkFlow:14 darkOrbImmune:15 darkAlive:23 darkReset:24 darkState:25 darkEvent:26 darkAim:29 darkTarget:36 darkCone:40 darkBAFloor:47 darkBATargets:51 darkMoveHeading:68 darkClearCooldown:71 darkMark:75 darkReveal:82 darkQueue:83 darkGainFlow:84 darkKill:90 darkTick:93 darkShieldTick:127 darkShieldCrossAt:144 darkShieldCross:153 darkBeamStop:154 darkDash:163 darkBasic:186 DARK_MARK:216 darkWaveTick:233 DARK_CHASE:255 darkMoveWaltz:306 DARK_WALTZ:331 DARK_WARD:353 DARK_VEIL:368 DARK_ULT:376 darkUltBite:391 darkMoveChase:401 darkSnap:441 darkMarked:460
 
-## js/09-earth.js (397) — 
+## js/09-earth.js (398) — 
 EARTH:9 ERV:12
 §24 ตัวช่วย
 eOn:25 eStand:26 eNoStand:27 eSegD:29 eAdd:30 eCollide:32 eProjHit:53 eKill:56
@@ -102,19 +102,21 @@ earthStoneAim:162 STONEB:171
 §190 สกิล 2: Mud Swamp
 MUDS:191
 §195 สกิล 3: Tectonic Crush
-TECT:197 earthCrush:210
-§221 สกิล 4: Dust Burst
-DUSTB:223
-§224 สกิล 4: Terra Isle — Stand ต่อยจุ่มลงพื้นตรงจุดเล็งแล้วยกเกาะหินลอยขึ…
-ISLE:226 earthIsleTick:236
-§246 สกิล 5: Terra Auger
-AUGER:249
-§250 สกิล 5: Rampart (ผู้ใช้ 2026-11-23 v2) — เลือกจุด (โฮโลแกรม) แล้วคลิก…
-RAMPART:252 earthRampAimUpd:257 earthRampAimTick:259 earthRampPlace:265 eAugAim:277 earthAugFire:278 earthMound:289
-§292 อัลติ: Wrath — ชาร์จบนพื้น หินดันผู้เล่นขึ้นฟ้า Stand ปาเสาลงจุดเล็ง
-WRATH_READY_T:293 WRATH_THROW_SWING_T:294 WRATH_DRAW_T:295 WRATH:296 earthWrathAim:302 earthWrathFlightAngles:303 earthPillarThrow:309 earthPillarImpact:315 earthWrathTick:323 earthWrathEnd:347 E_WRS:351 earthSpikeTick:352
-§358 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
-updateEarth:359 earthSnapP:373 earthSnapW:389
+TECT:198
+§199 สกิล 3: Stone Barrage — ปาหินทั้งวงหลังตัวออกไปรัว ๆ (ไม่ตรงเป้า 100%…
+BARRAGE:200 earthBarrageTick:205 earthCrush:211
+§222 สกิล 4: Dust Burst
+DUSTB:224
+§225 สกิล 4: Terra Isle — Stand ต่อยจุ่มลงพื้นตรงจุดเล็งแล้วยกเกาะหินลอยขึ…
+ISLE:227 earthIsleTick:237
+§247 สกิล 5: Terra Auger
+AUGER:250
+§251 สกิล 5: Rampart (ผู้ใช้ 2026-11-23 v2) — เลือกจุด (โฮโลแกรม) แล้วคลิก…
+RAMPART:253 earthRampAimUpd:258 earthRampAimTick:260 earthRampPlace:266 eAugAim:278 earthAugFire:279 earthMound:290
+§293 อัลติ: Wrath — ชาร์จบนพื้น หินดันผู้เล่นขึ้นฟ้า Stand ปาเสาลงจุดเล็ง
+WRATH_READY_T:294 WRATH_THROW_SWING_T:295 WRATH_DRAW_T:296 WRATH:297 earthWrathAim:303 earthWrathFlightAngles:304 earthPillarThrow:310 earthPillarImpact:316 earthWrathTick:324 earthWrathEnd:348 E_WRS:352 earthSpikeTick:353
+§359 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
+updateEarth:360 earthSnapP:374 earthSnapW:390
 
 ## js/09-light.js (564) — 
 LIGHTP:8 LTV:12 lgOn:19 lightShieldPitch:20 lightShieldGauge:21 lightClearBond:22 lightReset:26 lightAlly:32 lightLinkPos:33 lightUnlink:34 lightReleaseAlly:52 lightBondTarget:59 lightBondTap:79 lightRecall:94
@@ -210,7 +212,7 @@ G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 fr
 §232 ลูปหลักฝั่งโฮสต์
 hostTick:233 angDiff:250 cH:252 vR:253 updatePlayer:255 hitProp:481 damagePropsIn:488 nearUseProp:489 useProp:490
 
-## js/12-buildings.js (445) — environment damage / rays / collision shared by breakable things
+## js/12-buildings.js (446) — environment damage / rays / collision shared by breakable things
 BLDON:4 bldMoundH:5 damageEnv:7 bldRay:16 aimClip:21 aimLineH:29 aimRay3:30 projEl:57 bldPush:62 updateBldg:68
 §69 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
 BRKDEF:73 BRK_M:73 BRK_MCOL:73 BRK:74 genBrk:75 brkApply:82 brkStage:87 hitBrk:88 damageBrkIn:96 brkSnap:102 brkParse:103
@@ -228,10 +230,10 @@ EFSV:9 EFS:10 efsLv:11 efsBuild:12 efsBreak:28 efsRepair:29 efsDist:30 efsHeat:3
 ## js/12-fcs-bridge.js (113) — Castle Strike bridge shell destruction (user 2026-11-19 "eggshell"): the bridge = solid c…
 BSKV:10 BSKN:11 bskBuild:14 bskGround:38 bskOutline:40 bskSegs:53 bskInPoly:63 bskCut:65 bskStage:70 bskSetSt:71 bskHit:75 bskEnv:84 bskSnap:93 bskParse:97 bskRepair:104 bskExport:106
 
-## js/12-pnl.js (223) — Breakable panels (แผ่นพัง) — Map Builder pn_wall → data.pnl (guides/D…
-PNDEF:13 PN_BODY:16 PN_CH:17 PNL:18 PNG:18 pnGT:19 sgPnl:20 _sgPN:21 _sgPN2:21 _sgPN3:21 pnlGen:22 pnTP:35 pnTopF:36 pnLoc:37 pnWorld:38 pnCU:39 pnL3:41 pnP3:43 pnCellPos:44 pnCellUW:45 pnSolid:46 pnMark:47 pnlLinks:49 pnlSupport:67 pnEmit:75 pnBreakAll:79 pnStage:80 pnlHit:82 pnDmgCell:96 pnHitFx:101 pnlEnv:103 pnSeg:113 pnlRay:120 pnlSolidAt:125 pnlProj:128 pnlCollide:134 pnPileCols:151 pnPileAt:155 pnlTopH:160 pnlMoundH:169 pnlTick:171 pnlSnap:177 pnlParse:182
-§188 old houses → panel groups (same footprint as BLDDEF: walls wh m, gabl…
-PN_HOUSE:191 pnHouse:192 pnlHouseConv:220
+## js/12-pnl.js (224) — Breakable panels (แผ่นพัง) — Map Builder pn_wall → data.pnl (guides/D…
+PNDEF:13 PN_BODY:17 PN_CH:18 PNL:19 PNG:19 pnGT:20 sgPnl:21 _sgPN:22 _sgPN2:22 _sgPN3:22 pnlGen:23 pnTP:36 pnTopF:37 pnLoc:38 pnWorld:39 pnCU:40 pnL3:42 pnP3:44 pnCellPos:45 pnCellUW:46 pnSolid:47 pnMark:48 pnlLinks:50 pnlSupport:68 pnEmit:76 pnBreakAll:80 pnStage:81 pnlHit:83 pnDmgCell:97 pnHitFx:102 pnlEnv:104 pnSeg:114 pnlRay:121 pnlSolidAt:126 pnlProj:129 pnlCollide:135 pnPileCols:152 pnPileAt:156 pnlTopH:161 pnlMoundH:170 pnlTick:172 pnlSnap:178 pnlParse:183
+§189 old houses → panel groups (same footprint as BLDDEF: walls wh m, gabl…
+PN_HOUSE:192 pnHouse:193 pnlHouseConv:221
 
 ## js/13-enemies.js (171) — ศัตรู (โหมด Co-op)
 spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
@@ -414,8 +416,8 @@ makeSnow:475 makeFireflies:482 makeSnitch:489 fileMapFx:496
 §506 แผนที่จากไฟล์ Blender (guides/MAP-DESIGN.md)
 terrGeo:508 buildFileMap:516 fileMapLight:522 fileMapBody:539 replaceMeadowTufts:582 tickM:624 TRPAD:625 ARPAD:625 SHPAD:625 signTex:626 testSign:627 buildTest:634 buildRuins:739 buildPitch:764
 
-## js/28-pnl-build.js (291) — Breakable panels — view (state = PNL in js/12-pnl.js)
-PNV:7 PN_BATCH:8 PN_MI:9 PN_GLSL:10 pnlMat:53 PN_RUB:104 PN_HEAP:105 pnlCls:112 PN_ZU:120 pnlGeo:121 pnlBuild:205 pnlBatch:230 pnlBatSet:252 pnlSyncOne:257 pnlView:280 pnlFX:283
+## js/28-pnl-build.js (326) — Breakable panels — view (state = PNL in js/12-pnl.js)
+PNV:7 PN_BATCH:8 PN_MI:9 PN_GLSL:10 pnlMat:66 PN_RUB:138 PN_HEAP:139 pnlCls:146 PN_ZU:154 pnlGeo:155 pnlBuild:239 pnlBatch:265 pnlBatSet:287 pnlSyncOne:292 pnlView:315 pnlFX:318
 
 ## js/29-characters.js (441) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
 makeCloak:2 updateCloth:10 wandNamed:34 wandSparks:83
@@ -597,7 +599,7 @@ WB:298 wbInit:299 wbBegin:309 wbEnd:310 fxWarpMake:311 fxWarpTick:324
 §332 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:335 fxVolLoad:336 fxVolTex:340 fxVolSet:343 fxVolReady:344 fxVolMake:345 fxVolTick:348 fxPreAssets:353 fxAssetsWait:355
 
-## js/47-earth-view.js (1166) — 
+## js/47-earth-view.js (1171) — 
 ECOL:9 EGUARD_BIG:14 EGUARD:14 EV:15 eW:16 EARTH_FIST_SCALE:17 eYaw:18
 §19 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
 ETEX:20 eTex:21 eFadeTex:35 eMat:37 eTMat:38 rockGeo:39 ROCKU:45 rockMesh:46 coneMesh:48 _eChunkM:50 eChunks:51
@@ -620,13 +622,13 @@ earthClear:696 eMergePartial:704 eMergeKids:709 eMakeSO:717
 §736 Rampart wall (user 2026-11-23 v2): fused rounded boulders, uneven top…
 ERAMP:737 eRng:738 eBlock:741 eRampGeo:756 eRampMats:772 eRampMesh:783 eRampHolo:787 eRampPlace:788 eRampTick:790
 §808 Terra Isle (user 2026-11-24, ref: floating island chunk): earthy top …
-ERING:821 earthRockRing:825 EISLE:842 eIsleGeo:843 eIsleTint:863 eIsleMesh:865 eIsleTick:869 syncEarth:877 earthFog:930 eMudScreen:933 _eOlMat:940 eOutlines:942 _eCamT:947 eAnim:948 eDebris:949 eWave:951 eAirWave:953 esbImpact:956
-§963 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
-earthEfx:964 eWindOut:1082 eAirCone:1088 eDrillFly:1090
-§1094 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
-earthMudZone:1095 earthMudSink:1102
-§1103 HUD ใต้เป้าเล็ง
-ESM:1105 eSmooth:1106 ESF:1109 eShieldFx:1110 eChips:1115 eShieldSegs:1118 eShieldNum:1132 eShieldArc:1136 drawEarthHud:1149
+ERING:825 earthRockRing:829 EISLE:846 eIsleGeo:847 eIsleTint:867 eIsleMesh:869 eIsleTick:873 syncEarth:881 earthFog:934 eMudScreen:937 _eOlMat:944 eOutlines:946 _eCamT:951 eAnim:952 eDebris:953 eWave:955 eAirWave:957 esbImpact:960
+§967 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
+earthEfx:968 eWindOut:1087 eAirCone:1093 eDrillFly:1095
+§1099 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
+earthMudZone:1100 earthMudSink:1107
+§1108 HUD ใต้เป้าเล็ง
+ESM:1110 eSmooth:1111 ESF:1114 eShieldFx:1115 eChips:1120 eShieldSegs:1123 eShieldNum:1137 eShieldArc:1141 drawEarthHud:1154
 
 ## js/48-ragdoll.js (419) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 _ragFw:41 ragBones:42 ragBasis:49 ragTargets:57 ragStart:63 ragBack:96 ragFloor:97 ragStep:98 ragPose:163 ragWrite:178 ragRestore:190 ragEnd:194 ragTick:196 ragHideDead:240 clearDeathFades:249 deathClipMat:259 deathSlashSplit:266 DD_ALPHA:320 deathDissolve:321 deathVisualSync:395
@@ -806,18 +808,18 @@ BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:137 backdropHide:141
 
-## js/67-coast.js (338) — 
+## js/67-coast.js (414) — 
 COAST:10 BD_LOD:14
 §26 2D value noise (deterministic)
 cvN:27 cvF:29
 §30 overcast sky dome (shader: thick cloud deck on a flat layer, horizon …
-COAST_SKY:31 coastSky:32 backdropLook:58
-§69 land shape
-coastShape:70 coastH:95
-§108 height sources: one interface for the code coast (BACKDROP.fcs) and M…
-coastSrcProc:111 BD_SURF:117 bdB64:118 bdRle:119 bdHsh:120 bdGridSrc:121 coastGrid:156 bdCoast:166 coastTreePts:256 coastTreeMesh:264
-§300 near-edge detail bands (user 2026-11-23: backdrop next to the play ar…
-bdNearKit:305
+COAST_SKY:31 coastSky:32 BD_AIR:59 BD_DET_V:63 BD_DET_F:64 bdDetailCol:68 BD_DET_N:78 bdDetail:81 bdAerial:88 bdAirTick:96 BD_SEC:99 bdSec:100 bdSplit:101 bdSnapTrees:110 bdReach:122 bdFar:123 backdropLook:125
+§136 land shape
+coastShape:137 coastH:162
+§175 height sources: one interface for the code coast (BACKDROP.fcs) and M…
+coastSrcProc:178 BD_SURF:184 bdB64:185 bdRle:186 bdHsh:187 bdGridSrc:188 coastGrid:223 bdCoast:233 coastTreePts:327 BD_TREE_FAR:335 coastTreeMesh:336
+§375 near-edge detail bands (user 2026-11-23: backdrop next to the play ar…
+bdNearKit:380
 
 ## js/68-darkness-view.js (1153) — 
 nightWaltzStrip:2 nightWaltzBorder:80 stDarkVeilGround:118 darkFxMesh:195 drawDarknessHud:201 drawDarkHudBar:220 darknessMarkView:227 darkWaveViews:237 darkActiveViews:237 darkViewRoot:238 darkViewTemp:245 darknessClear:257 darkDeathRoots:265 darkDeathClear:268 darkWorldAt:282 darkMarkWind:285 darkMarkLaunch:313 darkMarkContact:325 darkViewNow:338 darkFlowHud:338 darkIdleWeaponPose:339 darkBAGroundImpact:343 darkSettleWeapon:358 darkBlendWeapon:369 darkShowWeaponReturn:392 darkTrailHistory:399 darkDashView:438 darknessCharacter:484 darknessEfx:727 stDarkShieldInk:1024 stDarkVeilBlade:1067 stWardDrainPool:1104
@@ -964,4 +966,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(118 files, 36211 lines)
+(118 files, 36330 lines)

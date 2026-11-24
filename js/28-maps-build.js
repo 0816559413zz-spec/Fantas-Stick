@@ -70,7 +70,7 @@ function batchStatic(root,skip){
   root.updateMatrixWorld(true);
   const inv=new THREE.Matrix4().copy(root.matrixWorld).invert(),groups=new Map();
   root.traverse(o=>{
-    if(!o.isMesh||o.isInstancedMesh||!o.visible||Array.isArray(o.material)||o.material.transparent)return;
+    if(!o.isMesh||o.isInstancedMesh||!o.visible||Array.isArray(o.material)||o.material.transparent||o.userData.noBatch)return;   // noBatch: split on purpose (frustum culling, e.g. backdrop sectors)
     for(let q=o;q&&q!==root;q=q.parent)if(skip.has(q)||!q.visible)return;
     if(o.matrixWorld.determinant()<0)return;
     const g=o.geometry;if(g.morphAttributes&&Object.keys(g.morphAttributes).length)return;

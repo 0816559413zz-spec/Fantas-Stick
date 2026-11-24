@@ -6,7 +6,7 @@
 // Rubble: dusty heap strip + instanced chunks at the foot of broken cells (same heights as pnlMoundH).
 const PNV={list:[],mats:new Map(),bat:[]};
 const PN_BATCH=!/[?&]nopnlbatch/.test(location.search);   // intact panels of one material = one mesh (6v6 CPU 2026-11-24: 126 draws + shadows -> ~10); ?nopnlbatch = one mesh each
-const PN_MI={brick:0,plaster:1,stone:2,wood:3,glass:4,metal:5,roof:6,snowroof:7,timber:8,litwin:9};
+const PN_MI={brick:0,plaster:1,stone:2,wood:3,glass:4,metal:5,roof:6,snowroof:7,timber:8,litwin:9,field:10,moss:11,oldbrick:12,sand:13,marble:14};
 const PN_GLSL=`
 #ifdef PNB
 varying vec4 vPO;varying float vPZ;
@@ -21,8 +21,21 @@ float pnN(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(pnH(
 // running-bond units: x edge distance, y id hash, zw unit centre (q space)
 vec4 pnUnit(vec2 q,float rh,float bw){float r=floor(q.y/rh);float o=mod(r,2.)*0.5*bw;float x=q.x+o;float b=floor(x/bw);
   vec2 l=vec2(x-b*bw,q.y-r*rh);float e=min(min(l.x,bw-l.x),min(l.y,rh-l.y));return vec4(e,pnH(vec2(b,r)),(b+0.5)*bw-o,(r+0.5)*rh);}
+// fieldstone: jittered cells (rounded irregular stones) • x = half gap to the next stone, y id, zw centre
+vec4 pnVor(vec2 q,float s){vec2 p=q/s,i=floor(p),f=fract(p);float d1=8.,d2=8.,h1=0.;vec2 c1=vec2(0.);
+  for(int y=-1;y<=1;y++)for(int x=-1;x<=1;x++){vec2 g=vec2(float(x),float(y)),o=vec2(pnH(i+g),pnH(i+g+17.3))*0.7+0.15,r=g+o-f;float d=dot(r,r);
+    if(d<d1){d2=d1;d1=d;c1=i+g+o;h1=pnH(i+g+3.1);}else if(d<d2)d2=d;}
+  return vec4((sqrt(d2)-sqrt(d1))*0.5*s,h1,c1*s);}
 vec4 pnU(vec2 q){
-#if PNM==2
+#if PNM==10
+  vec4 u=pnVor(vec2(q.x*0.72,q.y),0.34);return vec4(u.x,u.y,u.z/0.72,u.w);
+#elif PNM==11
+  return pnUnit(q,0.38,0.7);
+#elif PNM==13
+  return pnUnit(q,0.5,1.1);
+#elif PNM==14
+  return pnUnit(q,0.8,1.2);
+#elif PNM==2
   return pnUnit(q,0.42,0.8);
 #elif PNM==3
   vec4 u=pnUnit(q.yx,1.7,0.22);return vec4(u.x,u.y,u.w,u.z);
@@ -42,7 +55,7 @@ float pnM(vec2 lp){
   if(uTri>0.5){float t=lp.x/uSz.x+0.5,f=t<uTp.y?uTp.x+(1.-uTp.x)*t/max(uTp.y,1e-4):1.+(uTp.z-1.)*(t-uTp.y)/max(1.-uTp.y,1e-4);if(lp.y+uSz.y*0.5>uSz.y*f)return 9.;}   // shaped top (triangle / slanted)
   vec2 hp=lp+uSz.xy*0.5;for(int i=0;i<4;i++){if(float(i)>=uNHo)break;vec4 h=uHo[i];if(hp.x>h.x&&hp.x<h.y&&hp.y>h.z&&hp.y<h.w)return 9.;}   // openings
   vec2 s=lp;float n=pnN(lp*2.3)*0.6+pnN(lp*6.1)*0.4;
-#if PNM==0||PNM==2||PNM==3||PNM==6||PNM==7
+#if PNM==0||PNM==2||PNM==3||PNM==6||PNM==7||PNM>=10
   vec4 u=pnU(lp+uOff);s=mix(u.zw-uOff,lp,0.18);n=mix(n,u.y,0.6);
 #endif
   vec3 f=pnF(s);
@@ -52,7 +65,7 @@ float pnM(vec2 lp){
 }`;
 function pnlMat(mat,bat){
   const mi=PN_MI[mat]??0;
-  const m=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:mi===4||mi===9?0.15:mi===5?0.55:0.92,metalness:mi===5?0.4:0,transparent:mi===4,opacity:mi===4?0.55:1});
+  const m=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:mi===4||mi===9?0.15:mi===14?0.35:mi===5?0.55:0.92,metalness:mi===5?0.4:0,transparent:mi===4,opacity:mi===4?0.55:1});
   m.defines=bat?{PNM:mi,PNB:1}:{PNM:mi};m.userData.U={};
   m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,m.userData.U);
     sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute float aPk;varying vec3 vLP;varying float vPk;'+(bat?'attribute vec3 aLP;attribute vec4 aPO;attribute float aPZ;varying vec4 vPO;varying float vPZ;':''))
@@ -86,6 +99,27 @@ vec2 q=lp+uOff;vec3 fd=pnF(lp);float nz=pnN(q*1.7)*0.55+pnN(q*7.3)*0.45;vec3 c;
   else{vec4 u=pnUnit(q,0.12,0.34);vec3 br=mix(vec3(0.58,0.28,0.17),vec3(0.74,0.42,0.26),u.y)*(0.85+0.25*nz);c=mix(vec3(0.58,0.55,0.5),br,smoothstep(0.008,0.018,u.x));}
 #elif PNM==9
   {vec2 a=abs(lp);float fr=min(min(uSz.x*0.5-a.x,uSz.y*0.5-a.y),min(a.x,a.y));pnGlow=smoothstep(0.03,0.045,fr);c=mix(vec3(0.3,0.2,0.12),vec3(1.,0.86,0.62),pnGlow);}
+#elif PNM==10
+  {vec4 u=pnU(q);c=mix(vec3(0.62,0.58,0.5),vec3(0.74,0.66,0.52),u.y)*(0.72+0.4*pnH(u.zw+1.7))*(0.88+0.2*nz);
+   c*=0.55+0.45*smoothstep(0.0,0.07,u.x);c=mix(vec3(0.3,0.29,0.27)*(0.8+0.3*nz),c,smoothstep(0.012,0.03,u.x));}
+#elif PNM==11
+  {vec4 u=pnU(q);c=vec3(0.52,0.53,0.5)*(0.78+0.3*u.y)*(0.85+0.25*nz);c=mix(c*0.45,c,smoothstep(0.01,0.035,u.x));
+   if(pk==0){float hy=(lp.y+uSz.y*0.5)/max(uSz.y,0.01),mo=pnN(q*0.9)*0.55+pnN(q*3.3+2.)*0.3+0.3*(1.-hy)+0.25*(1.-smoothstep(0.,0.05,u.x));
+     c=mix(c,mix(vec3(0.24,0.36,0.14),vec3(0.42,0.52,0.2),pnN(q*8.))*(0.8+0.3*nz),smoothstep(0.5,0.72,mo));
+     c*=1.-0.18*smoothstep(0.55,0.85,pnN(vec2(q.x*4.,q.y*0.35)+9.));}}
+#elif PNM==12
+  {vec2 qq=pk==1?q+vec2(0.085,0.):q;vec4 u=pnUnit(qq,0.12,0.34);float ch=step(u.y,0.13);
+   vec3 br=mix(vec3(0.56,0.28,0.18),vec3(0.76,0.45,0.29),fract(u.y*7.3))*(0.75+0.35*nz)*(1.-0.35*step(0.82,u.y));
+   float mw=0.012+0.012*pnN(q*5.);c=mix(vec3(0.36,0.34,0.31)*(0.8+0.25*nz),br*(1.-0.4*ch),smoothstep(mw,mw+0.012,u.x+ch*0.02));
+   if(pk==0){c*=1.-0.22*smoothstep(0.5,0.9,pnN(vec2(q.x*3.,q.y*0.3)));vec2 w=q*1.1+vec2(pnN(q*2.7),pnN(q*2.7+4.))*0.8;
+     c*=1.-0.6*smoothstep(0.55,0.75,pnN(q*0.5+3.))*(1.-smoothstep(0.,0.012,abs(pnN(w*1.8)-0.5)));}}
+#elif PNM==13
+  {vec4 u=pnU(q);c=mix(vec3(1.0,0.8,0.52),vec3(0.93,0.68,0.42),u.y)*(0.96+0.04*sin(q.y*14.+pnN(q*1.5)*5.))*(0.9+0.15*nz);
+   c*=0.85+0.15*smoothstep(0.,0.06,u.x);c=mix(vec3(0.86,0.8,0.68),c,smoothstep(0.006,0.014,u.x));}
+#elif PNM==14
+  {vec4 u=pnU(q);c=vec3(0.9,0.89,0.86)*(0.95+0.07*u.y);vec2 w=q*1.1+vec2(pnN(q*1.9),pnN(q*1.9+5.))*1.6;
+   float v=1.-smoothstep(0.,0.018,abs(pnN(w*1.2+u.y*9.)-0.5)),v2=1.-smoothstep(0.,0.008,abs(pnN(w*3.1+2.)-0.5));
+   c=mix(c,vec3(0.58,0.57,0.56),v*0.35+v2*0.15);c=mix(vec3(0.66,0.66,0.66),c,smoothstep(0.004,0.009,u.x));}
 #else
   {vec2 qq=pk==1?q+vec2(0.085,0.):q;vec4 u=pnUnit(qq,0.12,0.34);vec3 br=mix(vec3(0.6,0.29,0.17),vec3(0.78,0.45,0.27),u.y)*(0.82+0.3*nz);
    br*=1.-0.25*step(0.86,u.y);c=mix(vec3(0.6,0.57,0.52)*(0.85+0.2*nz),br,smoothstep(0.008,0.018,u.x));}
@@ -101,8 +135,8 @@ diffuseColor.rgb=pow(max(c,vec3(0.)),vec3(2.2));`)   // palette written in sRGB 
   m.customProgramCacheKey=()=>'pnl'+mi+(bat?'b':'');
   return m;
 }
-const PN_RUB={roof:['#4a4e58','#3a3e48','#5a5e68'],snowroof:['#e8eef4','#4a4e58','#cfd8e0'],timber:['#d8ccb4','#5a3e28','#9a5a3c'],litwin:['#ffd89a','#cfeef8'],brick:['#8a4a32','#a85a3a','#7c7468','#6a3a28'],plaster:['#bdb5a5','#9a5a3c','#8c8478','#a8a090'],stone:['#8a857a','#6e6a62','#9a948a'],wood:['#6a4a2c','#4a3420','#7a5a38'],glass:['#cfeef8'],metal:['#6a6e72','#55585c']};
-const PN_HEAP={roof:'#4e5058',snowroof:'#8a8c90',timber:'#968c7c',litwin:'#888',brick:'#7a5a48',plaster:'#968c7c',stone:'#7e786e',wood:'#5a4632',glass:'#888',metal:'#5c5e60'};
+const PN_RUB={roof:['#4a4e58','#3a3e48','#5a5e68'],snowroof:['#e8eef4','#4a4e58','#cfd8e0'],timber:['#d8ccb4','#5a3e28','#9a5a3c'],litwin:['#ffd89a','#cfeef8'],brick:['#8a4a32','#a85a3a','#7c7468','#6a3a28'],plaster:['#bdb5a5','#9a5a3c','#8c8478','#a8a090'],stone:['#8a857a','#6e6a62','#9a948a'],wood:['#6a4a2c','#4a3420','#7a5a38'],glass:['#cfeef8'],metal:['#6a6e72','#55585c'],field:['#8a857a','#9a8e78','#6e6a62'],moss:['#7e7e76','#4e6a2c','#6a6a62'],oldbrick:['#7a3e2a','#5e4a3e','#9a5a3a','#5a5650'],sand:['#d4b888','#bf9e6c','#e0c89a'],marble:['#e6e4de','#cfcdc8','#8a8c92']};
+const PN_HEAP={roof:'#4e5058',snowroof:'#8a8c90',timber:'#968c7c',litwin:'#888',brick:'#7a5a48',plaster:'#968c7c',stone:'#7e786e',wood:'#5a4632',glass:'#888',metal:'#5c5e60',field:'#7e786e',moss:'#6a6e5a',oldbrick:'#6e5446',sand:'#b89c74',marble:'#bdbab4'};
 // Real geometry for a panel: the slab is split on cell lines (+ exact opening edges, + gable slope crossings) into sub-rects;
 // each sub-rect is full thickness (stage ≤1), a thinner core (stage 2 = outer skin gone on both faces) or empty (stage 3 / opening / above the gable).
 // Faces between different depths become cut faces (aPk 2), recess floors aPk 1, outer surface aPk 0. Untouched cells are merged (greedy) → few triangles.
@@ -117,7 +151,7 @@ function pnlCls(p){   // depth class per cell: 0 full • 1 core • 2 gone
   return c;
 }
 // stair size along a cut edge [horizontal, vertical] m per material (brick-sized bites)
-const PN_ZU={brick:[0.17,0.12],stone:[0.4,0.21],plaster:[0.15,0.15],wood:[0.11,0.3],timber:[0.15,0.15],roof:[0.15,0.1],snowroof:[0.15,0.1]};
+const PN_ZU={brick:[0.17,0.12],stone:[0.4,0.21],plaster:[0.15,0.15],wood:[0.11,0.3],timber:[0.15,0.15],roof:[0.15,0.1],snowroof:[0.15,0.1],field:[0.3,0.26],moss:[0.36,0.19],oldbrick:[0.17,0.12],sand:[0.5,0.25],marble:[0.6,0.4]};
 function pnlGeo(p,cls,Lm,H,Tm,rec){
   const hL=Lm/2,hH=H/2,hT=Tm/2,cz=hT-rec,cw=Lm/p.nc,ch=H/p.nr,ho=(p.d.ho||[]).slice(0,4),tri=p.tri;
   const tp=p.tp,slope=x=>tri?-hH+H*pnTopF(tp,(x+hL)/Lm):1e9;
@@ -204,20 +238,21 @@ function pnlGeo(p,cls,Lm,H,Tm,rec){
 }
 function pnlBuild(){
   PNV.list=[];if(!PNL.length)return;
-  const grp=addW(new THREE.Group()),rg=new THREE.DodecahedronGeometry(1,0);
+  const grp=addW(new THREE.Group()),rg=new THREE.DodecahedronGeometry(1,0);let zt=null,warm=false;   // zt = one shared blank damage texture for unbreakable one-piece panels • warm = a pile was made (shader warm-up)
   for(const p of PNL){
-    const n=p.st.length,data=new Uint8Array(n*4),tex=new THREE.DataTexture(data,p.nc,p.nr,THREE.RGBAFormat);
-    tex.magFilter=tex.minFilter=THREE.LinearFilter;tex.needsUpdate=true;
+    const n=p.st.length,solid=p.nb&&n===1;let data,tex;
+    if(solid){if(!zt){zt={data:new Uint8Array([0,0,0,255])};zt.tex=new THREE.DataTexture(zt.data,1,1,THREE.RGBAFormat);zt.tex.needsUpdate=true;}data=zt.data;tex=zt.tex;}
+    else{data=new Uint8Array(n*4);tex=new THREE.DataTexture(data,p.nc,p.nr,THREE.RGBAFormat);tex.magFilter=tex.minFilter=THREE.LinearFilter;tex.needsUpdate=true;}
     const Lm=p.hl*2*S3,Tm=p.ht*2*S3,cx=tx(p.x),cz=tz(p.y),mid=pnP3(p,0,p.Hp/2);
     const U={uDmg:{value:tex},uSz:{value:new THREE.Vector3(Lm,p.H,Tm)},uOff:{value:new THREE.Vector2(cx*p.c+cz*p.s,p.tl?p.H/2:p.zb+p.H/2)},uRec:{value:Math.min(0.12,Tm*0.4)},uTri:{value:p.tri?1:0},uTp:{value:new THREE.Vector3(...(p.tp||[1,0,1]))},uNHo:{value:Math.min(4,(p.d.ho||[]).length)},uHo:{value:[0,1,2,3].map(i=>{const h=(p.d.ho||[])[i]||[0,0,0,0];return new THREE.Vector4(h[0],h[1],h[2],h[3]);})}};
     const mat=pnlMat(p.mat);mat.userData.U=U;
     const rec=U.uRec.value,cls=pnlCls(p),m=new THREE.Mesh(pnlGeo(p,cls,Lm,p.H,Tm,rec),mat);m.position.set(tx(mid[0]),mid[2],tz(mid[1]));m.rotation.order='YXZ';m.rotation.y=-p.a;m.rotation.x=p.tl;m.castShadow=m.receiveShadow=true;
     grp.add(m);
     const e={p,m,tex,data,ver:-1,heap:null,rub:null,ck:cls.join(''),Lm,Tm,rec};
-    if(p.mode!=='g'&&!p.tl){
+    if(p.mode!=='g'&&!p.tl&&!p.nb){   // unbreakable panels never make rubble → no heap / rubble meshes
       const S=PNDEF.pile.sp*S3,W=Lm+2*S,D=Tm+2*S,hg=new THREE.PlaneGeometry(W,D,Math.max(2,Math.ceil(W/0.35)),12);hg.rotateX(-Math.PI/2);
       const hm=new THREE.Mesh(hg,new THREE.MeshStandardMaterial({color:PN_HEAP[p.mat]||'#7a6a5a',roughness:1,flatShading:true}));hm.position.set(cx,0,cz);hm.rotation.y=-p.a;hm.receiveShadow=true;hm.visible=false;grp.add(hm);
-      const rm=new THREE.InstancedMesh(rg,new THREE.MeshStandardMaterial({color:'#ffffff',roughness:0.95,flatShading:true}),n*6);rm.setMatrixAt(0,new THREE.Matrix4().makeScale(0,0,0));rm.setColorAt(0,new THREE.Color('#fff'));rm.count=PNV.list.length?0:1;   // first pile: 1 empty instance + colour → the map warm-up compiles the rubble shader (+ shadow) now, not on the first break (~0.4 s); one is enough (same program), the rest stay at 0 draws
+      const rm=new THREE.InstancedMesh(rg,new THREE.MeshStandardMaterial({color:'#ffffff',roughness:0.95,flatShading:true}),n*6);rm.setMatrixAt(0,new THREE.Matrix4().makeScale(0,0,0));rm.setColorAt(0,new THREE.Color('#fff'));rm.count=warm?0:1;warm=true;   // first pile: 1 empty instance + colour → the map warm-up compiles the rubble shader (+ shadow) now, not on the first break (~0.4 s); one is enough (same program), the rest stay at 0 draws
       rm.castShadow=rm.receiveShadow=true;rm.frustumCulled=false;grp.add(rm);
       e.heap=hm;e.rub=rm;}
     PNV.list.push(e);

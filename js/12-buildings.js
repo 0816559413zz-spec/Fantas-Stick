@@ -327,7 +327,7 @@ function killProj(pr){if(pr.type==='wshp'&&!pr.dead){pr.dead=true;if(pr.life>0)w
   pr.dead=true;
   if(pr.type==='nature_pea'){naturePeaSplash(pr);return;}
   if(pr.type==='efist'||pr.type==='efistc'){earthFistBreak(pr);return;}
-  if(pr.type==='erockb'){earthRockSplash(pr);return;}
+  if(pr.sp==='erockb'){earthRockSplash(pr);return;}   // Earth rock (BA / Stone Barrage) bursts on the ground too
   if(pr.type==='fire')explode(pr);
   else if(pr.type==='iceboulder')frostBoom(pr);
   else if(pr.type==='pfireb')pyroBigBoom(pr);
@@ -384,6 +384,7 @@ function projStep(pr,dt,ps){
     }
     if(pr.dead)return;
     const prevX=pr.x,prevY=pr.y,prevH=pr.h;
+    if(pr.wob){pr.wt=(pr.wt||0)+dt;const s=Math.cos(pr.wt*pr.wf+pr.wp)*pr.wob*dt,c=Math.cos(s),n=Math.sin(s),vx=pr.vx;pr.vx=vx*c-pr.vy*n;pr.vy=vx*n+pr.vy*c;}   // Stone Barrage: rocks sway a little in flight
     {const t0=TERR?terrT(pr.x,pr.y):0;pr.x+=pr.vx*dt;pr.y+=pr.vy*dt;pr.h+=pr.vh*dt;if(TERR)pr.h-=terrT(pr.x,pr.y)-t0;}pr.life-=dt;
     if(pr.flak&&broomFlak(pr))return;   // Flak บนไม้กวาด: ใกล้ศัตรู = แตกเป็นกรวย (js/69)
     if(pr.life<=0||pr.x<20||pr.x>MW-20||pr.y<20||pr.y>MH-20||pr.h>40){killProj(pr);return;}

@@ -11,7 +11,8 @@
 // Old houses (OBS k:'house') are rebuilt as panel groups at map load (pnlHouseConv) — js/12-buildings BLDG stays empty.
 // snapshot PN = panels joined by '|' ('' = untouched), 3 cells per char (2 bits each) • events {k:'pn',e:'h'|'b',i,c,el,x,y,h,ox,oy} (c -1 = whole panel)
 const PNDEF={mat:{brick:{hp:60,col:'#b0603c'},plaster:{hp:50,col:'#cfc6b4'},stone:{hp:90,col:'#9a9488'},wood:{hp:35,col:'#8a6440',burn:1},glass:{hp:12,col:'#bfe4f0'},metal:{hp:120,col:'#7c8288'},
-  roof:{hp:40,col:'#4a4e58'},snowroof:{hp:40,col:'#e8eef4'},timber:{hp:45,col:'#d8ccb4',burn:1},litwin:{hp:10,col:'#ffcf80'}},
+  roof:{hp:40,col:'#4a4e58'},snowroof:{hp:40,col:'#e8eef4'},timber:{hp:45,col:'#d8ccb4',burn:1},litwin:{hp:10,col:'#ffcf80'},
+    field:{hp:85,col:'#8e887c'},moss:{hp:80,col:'#6e7a5a'},oldbrick:{hp:45,col:'#8a4a34'},sand:{hp:75,col:'#d0b484'},marble:{hp:100,col:'#e4e2dc'}},
   crack:0.65,outer:0.4,splash:0.25,burn:5,dps:6,pile:{k:0.25,max:0.9,sp:26}};
 const PN_BODY=1.75;   // body height that must fit through a hole (players duck a little)
 const PN_CH='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';

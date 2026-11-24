@@ -15,7 +15,7 @@ PATHS[EARTH].vn={sh:'โล่ Stand • HP',shDelay:'โล่ • เริ่
   cbHold:'หมัดชาร์จ • กดค้างกี่วิเริ่มชาร์จ',cbCharge:'หมัดชาร์จ • ชาร์จ (วิ)',cbDmg:'หมัดชาร์จ • ดาเมจตรง',cbR:'เศษหมัดชาร์จ • ระยะ',cbShardDmg:'เศษหมัดชาร์จ • ดาเมจต่อเป้า',cbStun:'หมัดชาร์จ • สตัน (วิ)',cbCd:'หมัดชาร์จ • คูลดาวน์ (วิ)',cbSlow:'หมัดชาร์จ • ความเร็วเดินตอนชาร์จ (เท่า)',
   rampT:'Rampage • วิ่งนาน (วิ)',rampSp:'Rampage • ความเร็ว',rampDmg:'Rampage • ชนดาเมจ',rampStun:'Rampage • ชนสตัน (วิ)',rampKnock:'Rampage • ชนกระเด็น',rampCd:'Rampage • คูลดาวน์ (วิ)',slamR:'Rampage จบ • รัศมีทุบ',slamDmg:'Rampage จบ • ดาเมจ',slamStun:'Rampage จบ • สตัน (วิ)',
   boostDist:'Rock Boost • ระยะ',boostR:'Rock Boost • รัศมีผลัก',boostKnock:'Rock Boost • แรงผลัก',boostCd:'Rock Boost • คูลดาวน์ (วิ)',env:'ทุกสกิล • ตัวคูณพังบ้าน/ของ'};
-Object.assign(PDEF,{erockb:{spd:1250,r:9,dmg:15,life:0.62,col:'#c9a36a'},erock:{spd:1100,r:6,dmg:5,life:0.55,col:'#c9a36a'},eslab:{spd:1800,r:24,dmg:25,life:0.39,col:'#d8b47a'}});
+Object.assign(PDEF,{erock:{spd:1250,r:9,dmg:15,life:0.62,col:'#c9a36a'},eslab:{spd:1800,r:24,dmg:25,life:0.39,col:'#d8b47a'}});
 Object.assign(PDEF,{
   efist:{spd:1150,r:13,col:'#b69160'},
   efistc:{spd:1380,r:27,col:'#d2a970'},
@@ -91,19 +91,19 @@ function earthReset(p){p.ehp=ERV.sh;p.stdB=0;p.eShT=0;p.epn=null;p.esb=null;p.au
 // ---------- ท่าพื้นฐาน (คลิกซ้าย) ----------
 // BA (user 2026-11-24): no Stand. A ring of rocks floats behind the back; each shot throws one (splash), the ring refills
 // one rock at a time. Hold = keep throwing every `rate` s while rocks last. No charged attack any more.
-const EROCK={max:8,rate:0.7,refill:1.8,splash:34,dmg:15};
-function earthRockTick(p,dt){if(p.erk===undefined)p.erk=EROCK.max;if(p.erk<EROCK.max)p.erk=Math.min(EROCK.max,p.erk+dt/EROCK.refill);}
+const EROCK={max:8,rate:0.7,refill:1.8,splash:34,dmg:10};
+function earthRockTick(p,dt){if(p.erk===undefined)p.erk=EROCK.max;if(p.erk<EROCK.max&&!p.erBar)p.erk=Math.min(EROCK.max,p.erk+dt/(p.erkFast>G.time?BARRAGE.v.refill/EROCK.max:EROCK.refill));}
 function earthRockSplash(pr){if(pr.splashed)return;pr.splashed=1;const o=G.players[pr.owner];if(!o)return;
   for(const t of foesIn(o.team,pr.x,pr.y,EROCK.splash,pr.h+3)){const z=t.isE?(t.h||0):(t.z||0);if(Math.abs(z+1-pr.h)<2.6)aoeHit(o,t,EROCK.dmg);}
   damageEnv(pr.x,pr.y,EROCK.splash,6*ERV.env,pr.owner,'rock',Math.max(0.3,pr.h));
   emit({k:'efx',z:'erockboom',x:Math.round(pr.x),y:Math.round(pr.y),h:Math.round(pr.h*10)/10});}
 SPELLS.erockb={hit(pr){earthRockSplash(pr);}};
 function earthBasic(p,inp,dt,setCd){
-  const prev=p.eFirePrv;p.eFirePrv=inp.fire;earthRockTick(p,dt);
+  const prev=p.eFirePrv;p.eFirePrv=inp.fire;earthRockTick(p,dt);earthBarrageTick(p,dt);if(p.erBar)return;
   if(p.rmpAim)return;if(p.rmpNoFire){if(inp.fire)return;p.rmpNoFire=0;}   // Rampart placing click must not punch
   if(p.aug||p.ramp||p.ecb)return;
   if(p.wr){if(p.wr.ph==='aim'&&p.wr.t>=WRATH_READY_T&&inp.fire&&!prev)earthPillarThrow(p);return;}
-  if(inp.fire&&p.cd.basic<=0&&p.erk>=1){p.erk-=1;const slot=Math.floor(p.erk);shoot(p,'erockb',{sp:'erockb',hand:1});setCd('basic',EROCK.rate);
+  if(inp.fire&&p.cd.basic<=0&&p.erk>=1){p.erk-=1;const slot=Math.floor(p.erk);shoot(p,'erock',{sp:'erockb',hand:1});setCd('basic',EROCK.rate);
     emit({k:'efx',z:'erockthrow',x:Math.round(p.x),y:Math.round(p.y),h:p.z,n:slot,id:p.id});emit({k:'sk',id:p.id,s:'erockthrow'});}
   return;
   // (old Stand punch / charged slam below kept dormant)
@@ -194,19 +194,20 @@ const MUDS=defSpell(EARTH,{id:'mudswamp',v:{range:600,r:120,warn:0.5,time:5,slow
 
 // ---------- สกิล 3: Tectonic Crush ----------
 // กำแพงหินคู่ขนานหน้าตัวเรา (ยาว 300 ห่างกัน 240 HP 200) • กดซ้ำก่อนคูลดาวน์ครบ = Crush (ง้าง 0.5 วิ) • ไม่กดทัน = กำแพงอยู่ต่อเป็นที่กำบังจนพัง/ร่ายคู่ใหม่
-const TECT=defSpell(EARTH,{id:'tectoniccrush',v:{len:300,gap:240,hp:200,crush2:80,crush1:40,push:1.0,slide:0.06,knock1:900,envUp:20,envCrush:40},vn:{len:'กำแพง • ยาว',gap:'กำแพง • ห่างกัน',hp:'กำแพง • HP',crush2:'Crush กำแพงครบ 2 • ดาเมจ',crush1:'Crush กำแพงเหลือ 1 • ดาเมจ',push:'Crush • Stand ดัน (วิ)',slide:'Crush • กำแพงปิด (วิ)',knock1:'Crush เหลือ 1 • แรงกระเด็น',envUp:'กำแพงโผล่ • พังบ้าน/ของ (×ตัวคูณ)',envCrush:'Crush • พังบ้าน/ของ (×ตัวคูณ)'},role:'control',n:'Tectonic Crush',ic:'🪨',cd:14,d:'Stand ดึงพื้นขึ้นเป็นกำแพงหินคู่ขนานหันหน้าเข้าหากันตรงหน้าเรา (ยาว 300 ห่าง 240 HP 200 เปิดหัวท้าย) • กดอีกครั้งก่อนคูลดาวน์ครบ = Crush (Stand ดัน 0.5 วิ แล้วกำแพงหนีบเร็ว)',fx:'Crush: กำแพงครบ 2 = 80 ดาเมจคนตรงกลาง • เหลือ 1 = 40 + กระเด็น • ไม่กด Crush ทัน = กำแพงอยู่ต่อเป็นที่กำบัง • ต้องมี Stand',
-  toggle(p){const T=p.tec;if(!T||!T.ok||p.crush)return false;if(!(p.cd[T.k]>0))return false;if(!eStand(p)){eNoStand(p);return true;}
-    p.crush={t:TECT.v.push+TECT.v.slide};T.ok=false;emit({k:'efx',z:'ecrushw',x:Math.round(T.cx),y:Math.round(T.cy),h:p.z,a:Math.round(T.a*100)/100,id:p.id});return true;},
-  cast(p,S,i){if(!eStand(p))return eNoStand(p);if(p.aug||p.ramp)return false;
-    if(p.tec)for(const id of p.tec.ids){const w=(G.eso||[]).find(q=>q.id===id);if(w)eKill(w);}
-    const V=S.v,a=p.ang,c=Math.cos(a),s=Math.sin(a),ids=[],G2=V.gap/2,L=V.len;
-    for(const sd of [-1,1]){const ox=-s*G2*sd,oy=c*G2*sd,w=eAdd({k:'tec',x1:p.x+c*60+ox,y1:p.y+s*60+oy,x2:p.x+c*(60+L)+ox,y2:p.y+s*(60+L)+oy,r:18,hgt:6,hp:V.hp,maxHp:V.hp,team:p.team,owner:p.id,side:sd,life:10});ids.push(w.id);
-      // ใครยืนทับกำแพงที่กำลังโผล่ = กระเด็นออกด้านข้าง (คนที่อยู่ระหว่างกำแพงไม่โดน)
-      for(const t of plist().concat(G.en)){if(t===p||t.dead||t.alive===false)continue;const q=eSegD(t.x,t.y,w);if(q.d>=w.r+(t.r||PR)+4)continue;
-        const d=q.d||1,f=isBig(t)?150:600,nx=q.d>0.5?(t.x-q.qx)/d:-s*sd,ny=q.d>0.5?(t.y-q.qy)/d:c*sd;t.vx=(t.vx||0)+nx*f;t.vy=(t.vy||0)+ny*f;}}
-    for(const sd of [-1,1])for(let d=60;d<=60+L;d+=60)damageEnv(p.x+c*d-s*G2*sd,p.y+s*d+c*G2*sd,40,V.envUp*ERV.env,p.id,'rock',0.5);   // กำแพงโผล่ = ดันของ/ผนังบ้านพัง
-    p.tec={ids,ok:true,k:SLOTK[i],a,cx:p.x+c*(60+L/2),cy:p.y+s*(60+L/2)};
-    emit({k:'efx',z:'ewallup',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});}});
+// Tectonic Crush replaced by Stone Barrage (user 2026-11-24) — same SPELL_LIST slot; TECT stub keeps old crush code parsing
+const TECT={v:{len:300,gap:240,hp:200,crush2:80,crush1:40,push:1.0,slide:0.06,knock1:900,envUp:20,envCrush:40}};
+// ---------- สกิล 3: Stone Barrage — ปาหินทั้งวงหลังตัวออกไปรัว ๆ (ไม่ตรงเป้า 100% ส่ายนิด ๆ) แล้ววงเติมเต็มเร็วในไม่กี่วิ
+const BARRAGE=defSpell(EARTH,{id:'stonebarrage',v:{gap:0.045,spread:0.09,wob:1.6,refill:1.0},
+  vn:{gap:'ห่างระหว่างก้อน (วิ)',spread:'กระจาย (เรเดียน)',wob:'ส่ายกลางอากาศ',refill:'เติมเต็มวงใน (วิ)'},
+  role:'finisher',n:'Stone Barrage',ic:'🪨',cd:9,d:'ปาหินทั้งวงหลังตัวออกไปรัว ๆ ตามจุดเล็ง (ส่ายนิด ๆ ไม่ตรงเป้าทุกก้อน) ก้อนละ 10 ระเบิดกระจาย • แล้ววงหินเติมเต็มใน ~1 วิ',
+  cast(p,S){if(p.aug||p.ramp||p.ecb||p.wr||p.erBar)return false;earthRockTick(p,0);const n=Math.max(1,Math.floor(p.erk||0));p.erBar={left:n,t:0};
+    emit({k:'efx',z:'erockbar',x:Math.round(p.x),y:Math.round(p.y),h:p.z,n,id:p.id});}});
+function earthBarrageTick(p,dt){const B=p.erBar;if(!B)return;B.t-=dt;
+  if(B.left>0&&B.t<=0){B.t=BARRAGE.v.gap;B.left--;p.erk=Math.max(0,(p.erk||0)-1);const V=BARRAGE.v,off=(Math.random()-0.5)*2*V.spread;
+    const pr=shoot(p,'erock',{sp:'erockb',hand:1,quiet:1});
+    if(pr){const c=Math.cos(off),n=Math.sin(off),vx=pr.vx;pr.vx=vx*c-pr.vy*n;pr.vy=vx*n+pr.vy*c;pr.wob=V.wob*(0.6+0.8*Math.random());pr.wf=9+Math.random()*6;pr.wp=Math.random()*6.28;pr.vh+=(Math.random()-0.5)*3;}
+    emit({k:'efx',z:'erockthrow',x:Math.round(p.x),y:Math.round(p.y),h:p.z,n:Math.floor(p.erk),id:p.id});}
+  if(B.left<=0){p.erBar=null;p.erkFast=G.time+BARRAGE.v.refill;}}
 function earthCrush(p){const T=p.tec;p.crush=null;if(!T)return;
   const W=T.ids.map(id=>(G.eso||[]).find(q=>q.id===id&&!q.dead)).filter(Boolean);if(!W.length){emit({k:'efx',z:'ecrushno',x:p.x,y:p.y,h:p.z+2,id:p.id});return;}
   const V=TECT.v,c=Math.cos(T.a),s=Math.sin(T.a),bx=T.cx-c*V.len/2,by=T.cy-s*V.len/2;
@@ -390,7 +391,7 @@ function earthSnapW(){return {ES:(G.eso||[]).map(w=>[w.id,{tec:0,pil:1,mound:2,d
   ED:(G.edust||[]).map(d=>[d.id,Math.round(d.x),Math.round(d.y),d.r,Math.round(d.t*10)/10,d.team,d.boom?1:0,d.boom?d.ids:0])};}
 
 // ท่าพื้นฐาน + โล่ + Dash ของสาย (PBASIC ต้องอยู่ช่องที่ 6 = ลำดับใน PATHS)
-PBASIC.push({id:'b_earth',type:'erockb',n:'วงหินปา',d:'วงหิน 8 ก้อนลอยหลังตัว • คลิก/ค้าง = ปาหินทีละก้อนทุก 0.7 วิ ระเบิดกระจาย 15 ดาเมจ (รัศมี ~1.7 ม.) • หินเติมเองทีละก้อน ~1.8 วิ • เดิม: คลิก = Stand เล็กด้านหน้าส่งกำปั้นหินตามแนวเล็ง 3 มิติ ระยะ 500 ดาเมจ 10 ทุก 0.8 วิ • กดค้าง = Stand ใหญ่ด้านหลังง้างชาร์จ 2 วิ แล้วยิงหมัดใหญ่ ดาเมจตรง 50 + ผลักถอยเล็กน้อย เศษหินพุ่งเป็นกรวยด้านหลังเป้า ดาเมจ 20 ต่อเป้า คูลดาวน์ 6 วิ เดินช้า 40% • Stand แตก = ยิงหินเล็ก 5 ดาเมจ ทุก 0.35 วิ',
+PBASIC.push({id:'b_earth',type:'erock',n:'วงหินปา',d:'วงหิน 8 ก้อนลอยหลังตัว • คลิก/ค้าง = ปาหินทีละก้อนทุก 0.7 วิ ระเบิดกระจาย 10 ดาเมจ (รัศมี ~1.7 ม.) • หินเติมเองทีละก้อน ~1.8 วิ • เดิม: คลิก = Stand เล็กด้านหน้าส่งกำปั้นหินตามแนวเล็ง 3 มิติ ระยะ 500 ดาเมจ 10 ทุก 0.8 วิ • กดค้าง = Stand ใหญ่ด้านหลังง้างชาร์จ 2 วิ แล้วยิงหมัดใหญ่ ดาเมจตรง 50 + ผลักถอยเล็กน้อย เศษหินพุ่งเป็นกรวยด้านหลังเป้า ดาเมจ 20 ต่อเป้า คูลดาวน์ 6 วิ เดินช้า 40% • Stand แตก = ยิงหินเล็ก 5 ดาเมจ ทุก 0.35 วิ',
   shd:'โล่ Stand Barrier: Stand ยกโล่หินใหญ่ กันได้รอบตัว 300 HP (มากที่สุดในทุกสาย) • ไม่ได้ใช้ 3 วิ ฟื้น 20/วิ • โล่แตก = Stand หาย 10 วิ (ยิงหินเล็กแทนหมัด, Dash เป็น Rock Boost, สกิลที่ใช้ Stand ใช้ไม่ได้) แล้วกลับมาพร้อมโล่เต็ม 300',
   dsd:'Stand Rampage (Shift): ขี่ Stand วิ่งชาร์จตามทิศเล็ง 1.2 วิ (~600) กด Shift อีกครั้งหยุดก่อน • ชนศัตรู 15 + กระเด็นเล็กน้อย • จบด้วยทุบพื้น 20 + ผลักเล็กน้อย รัศมี 150 • ทะลุกำแพง/เสาของเรา พังของศัตรู • คูลดาวน์ 8 วิ • Stand แตก = Rock Boost Escape: หินดันพุ่ง ~400 ศัตรูรอบจุดเริ่ม (120) กระเด็น คูลดาวน์ 6 วิ',
   hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');},tick:earthBasic,dash:earthDash});
