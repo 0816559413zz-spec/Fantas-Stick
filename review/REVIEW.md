@@ -3,6 +3,15 @@
 > เขียนอัตโนมัติจาก `review.html` (ผ่าน `tools/serve.py`) — อย่าแก้ไฟล์นี้ตรง ๆ, แก้ `review/reviews.json` แล้วรัน `python tools/serve.py --review-md`.
 > **Claude:** ทำเฉพาะหัวข้อสถานะ **✏️ ขอแก้** — อ่านความเห็นผู้ใช้ (`ความเห็นผู้ใช้`) + เปิดรูปด้วย Read → แก้ → ตั้ง `status:"wait"` + เขียน `reply` (ไทยสั้น ๆ ว่าแก้อะไร) เพื่อส่งกลับให้ผู้ใช้รีวิวใหม่. อย่าตั้ง `ok` เอง (ผู้ใช้เป็นคนกดผ่าน). งานที่ **⏳ รอ** = รอผู้ใช้ ไม่ต้องทำอะไร
 
+## #181 Earth: Stone Mark (แทน Stonebreaker) — มาร์ค + หินเกาะตัว + กลายเป็นหิน
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Skill • สาย/ส่วน: Earth
+
+**วิธีดู / อะไรรอรีวิว:**
+เลือก Earth กดสกิล Stone Mark ใส่หุ่น แล้วปา BA หินใส่ 5 ก้อนใน 4 วิ (หุ่นกลายเป็นหิน 1 วิ) • GIF shots/motion_earth_mark.gif
+
+- ลิงก์/ไฟล์: `/shots/motion_earth_mark.gif`
+- ลิงก์/ไฟล์: `/shots/earth_mark_zoom.jpg`
+
 ## #180 Nature เถาหนาม ดอกไม้ และลูกแสงที่มือซ้าย
 - สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX / แอนิเมชัน • สาย/ส่วน: Nature
 
@@ -29,15 +38,6 @@ Nature หันขวา 45° มือซ้ายลดลงตอนวิ�
 
 - ลิงก์/ไฟล์: `/shots/motion_ready_flow_preview.gif`
 - ลิงก์/ไฟล์: `/shots/motion_ready_flow_game_preview.gif`
-
-## #178 Earth: Stone Mark (แทน Stonebreaker) — มาร์ค + หินเกาะตัว + กลายเป็นหิน
-- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Skill • สาย/ส่วน: Earth
-
-**วิธีดู / อะไรรอรีวิว:**
-เลือก Earth กดสกิล Stone Mark ใส่หุ่น แล้วปา BA หินใส่ 5 ก้อนใน 4 วิ (หุ่นกลายเป็นหิน 1 วิ) • GIF shots/motion_earth_mark.gif
-
-- ลิงก์/ไฟล์: `/shots/motion_earth_mark.gif`
-- ลิงก์/ไฟล์: `/shots/earth_mark_zoom.jpg`
 
 ## #177 Earth: Shift ใหม่ (ถีบหินกลางอากาศ / ค้างพุ่งขึ้น)
 - สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Skill • สาย/ส่วน: Earth
