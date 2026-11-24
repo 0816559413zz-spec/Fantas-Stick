@@ -48,9 +48,9 @@ Avoid: text, logos, watermark, modern buildings, guns, realistic faces, heavy ou
 
 ---
 
-# พรอมต์ B — วาดแมพปราสาทปัจจุบัน (fcs) เป็นภาพสีน้ำมุมสูง
+# พรอมต์ B — วาดCliffside Castle (แมพปัจจุบัน, fcs) เป็นภาพสีน้ำมุมสูง
 
-Ref เพิ่ม: `designs/sky-castle_ref/03_current_map_overview.webp` (ภาพมุมสูงแมพจริงในเกม = **ผัง/ภูมิประเทศ**)
+Ref เพิ่ม: `designs/sky-castle_ref/03_current_map_overview.webp` (ภาพมุมสูง Cliffside Castle ในเกม = **ผัง/ภูมิประเทศ**)
 แนบ 2 รูป: `03` (ผัง) + `02_style_watercolor_castle.png` (สไตล์) แล้ววางพรอมต์:
 
 ```
