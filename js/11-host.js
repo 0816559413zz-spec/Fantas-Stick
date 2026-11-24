@@ -187,7 +187,7 @@ function chatRelay(id,m){
 function emoHost(id,e){const p=G.players[id];e=e|0;if(!p||!p.alive||p.downed||G.ph==='lobby'||e<0||e>5)return;const n=performance.now();if(n-(p.emoT||0)<1000)return;p.emoT=n;emit({k:'emo',id,e});}
 
 function resetBody(p,x,y){
-  Object.assign(p,{x,y,z:0,vz:0,jumpAir:false,airPose:0,fly:false,flyCd:0,root:0,vx:0,vy:0,hp:p.maxHp,alive:true,downed:false,revive:0,stun:0,burn:0,dash:0,inv:0,
+  Object.assign(p,{x,y,z:0,vz:0,jumpAir:false,airPose:0,fly:false,flyCd:0,root:0,vx:0,vy:0,hp:p.maxHp,alive:true,downed:false,revive:0,stun:0,rgT:0,burn:0,dash:0,inv:0,
     shieldOn:false,shieldE:100,shieldBroken:0,respawn:0,slam:false,slam3:null,dashSp:0,flyOn:false});   // slam: ตายกลางท่ากระโดดฟาด (น้ำแข็ง) แล้วค้าง = ฟันไม่ได้หลังเกิดใหม่
   for(const k of CDK)p.cd[k]=0;clearStatus(p);p.trail=null;natureReset(p);earthReset(p);windReset(p);waterReset(p);lightReset(p);darkReset(p);
   p.ang=Math.atan2(MH/2-y,MW/2-x);
@@ -293,10 +293,11 @@ function updatePlayer(p,dt,acting){
     return;
   }
   p.boost=Math.max(0,(p.boost||0)-dt);
+  launchTick(p,dt);
   // ตกลงพื้นเมื่อไม่ได้บิน
   const gravity=(regular=false)=>{
     const gh=groundH(p.x,p.y,p.z);
-    const free=regular&&!p.slam&&!(p.hover>0)&&!(p.boltDown>0)&&!(p.stun>0)&&!cageBusy;
+    const free=regular&&!p.slam&&!(p.hover>0)&&!(p.boltDown>0)&&!(p.stun>0)&&!(p.rgT>0)&&!cageBusy;
     p.jumpAir=free&&p.jumpAir;
     if(p.z<=gh&&p.vz<=0){p.z=gh;p.jumpAir=false;return;}
     const pull=p.slam?40:p.jumpAir?(p.vz>0?31:19.5):22;
@@ -322,7 +323,7 @@ function updatePlayer(p,dt,acting){
     return;
   }
   if(p.burn>0){p.burn-=dt;p.bt-=dt;if(p.bt<=0){p.bt=1;damage(p,4,p.burnSrc,'burn');if(!p.alive||p.downed)return;}}
-  const canAct=acting&&p.stun<=0;
+  const canAct=acting&&p.stun<=0&&!(p.rgT>0);   // rgT = launched ragdoll (js/12-launch)
   if(p.lgUlt){p.jumpAir=false;lightUltTick(p,inp,dt,canAct&&!cageBusy,pr.x);return;}
   if(acting&&(inp.ax||inp.ay))p.ang=Math.atan2(inp.ay-p.y,inp.ax-p.x)+(p.bld>0?rnd(-0.22,0.22):0);
   if(p.pathIdx===DARKP){
@@ -426,7 +427,7 @@ function updatePlayer(p,dt,acting){
   if(p.slideT>0&&Math.hypot(p.x-p.slX,p.y-p.slY)>40){const lx=p.slX,ly=p.slY;p.slX=p.x;p.slY=p.y;addIce({x:p.x,y:p.y,r:42,t:4,team:p.team,owner:p.id,kind:'path',lx,ly});/* narrower slide trail (user 2026-11-23, was 46, then 28, 34) */}
   p.x+=p.vx*dt;p.y+=p.vy*dt;
   const fr=Math.exp(-6*dt);p.vx*=fr;p.vy*=fr;
-  if(!p.gh)collideWorld(p,PR,p.z);else{p.x=clamp(p.x,30,MW-30);p.y=clamp(p.y,30,MH-30);}
+  if(!p.gh){const s0=p.solN|0,svx=p.vx,svy=p.vy;collideWorld(p,PR,p.z);launchWall(p,s0,svx,svy);}else{p.x=clamp(p.x,30,MW-30);p.y=clamp(p.y,30,MH-30);}
   // พื้นสูงต่ำ (เนิน/หน้าผา) + ภูเขาน้ำแข็ง/พื้นชั้นบน: ขั้นต่ำๆ ก้าวขึ้นได้ / สูงเกินไปเป็นกำแพง
   if(!p.fly&&!(p.colos>0)&&!(p.wsk>0)){
     p.z=terrMove(p,ox0,oy0,p.z,onG0);

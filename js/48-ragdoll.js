@@ -158,6 +158,13 @@ function ragStep(o,R,dt){
     V[i].subVectors(P[i],prev[i]).divideScalar(dt).clampLength(0,22);
     if(!sinkK&&P[i].y<=ragFloor(P[i].x,P[i].z)+RAGJ[i][2]+0.02){const f=Math.exp(-14*dt);V[i].x*=f;V[i].z*=f;if(V[i].y<0)V[i].y=0;}
   }
+  // launch (js/12-launch): whole body follows the real sim position (XZ always, Y while airborne), after velocities so the shift adds no speed — shape/tumble stays free
+  if(R.mode==='launch'){
+    const g=o.g.position,air=g.y>ragFloor(g.x,g.z)+0.2;
+    _rv1.subVectors(T[0],P[0]);if(!air)_rv1.y=0;
+    for(const q of P)q.add(_rv1);
+    _rv2.copy(V[0]);if(!air)_rv2.y=0;for(const w of V)w.sub(_rv2);   // keep only motion relative to the hips
+  }
 }
 // จุด → หมุนกระดูก (world): ลำตัว = ฐานแกน, แขนขา = หมุนตามท่อน ต่อจากการหมุนของพ่อ
 function ragPose(R){
@@ -210,6 +217,7 @@ function ragTick(o,p,v,dt,now){
   if(!R){
     if(dead&&o.ragWasAl)ragStart(o,p,'dead',now);
     else if(down&&!o.ragWasDn)ragStart(o,p,'down',now);
+    else if(!dead&&!down&&p.lr)ragStart(o,p,'launch',now);
     else if(!dead&&!down&&!p.fl&&!p.ds&&!(p.wn&&p.wn[5]>=1)&&o.lhit&&now-o.lhit.t<RAG.KNOCK_WIN*1000&&v&&v.sp>RAG.KNOCK_SP)ragStart(o,p,'knock',now);
     R=o.rag;
   }else{
@@ -219,6 +227,8 @@ function ragTick(o,p,v,dt,now){
     else if(down&&R.mode==='knock'){R.mode='down';R.back=-1;R.t=0;}
     else if(R.mode==='down'&&!down)ragBack(R);
     else if(R.mode==='knock'&&R.t>=RAG.KNOCK_T)ragBack(R);
+    else if(p.lr&&!dead&&!down&&(R.mode!=='launch'||R.back>=0)){R.mode='launch';R.back=-1;R.t=0;}   // launched (again)
+    else if(R.mode==='launch'&&!p.lr)ragBack(R);
   }
   o.ragWasAl=!!p.al;o.ragWasDn=down;
   if(!R)return false;

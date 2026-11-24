@@ -186,6 +186,7 @@ async function swSetup(){
 }
 swSetup();
 window.WD.SW=SWK;
+WD.launch=(t,x,y,rag,src)=>launch(t,x,y,rag,src);
 // ---------- เช็คการ์ดจอตอนเปิดเกม ----------
 // หน้าเว็บเลือกการ์ดจอเองไม่ได้ (เบราว์เซอร์/Windows เลือก — เราขอ powerPreference:'high-performance' ไว้แล้ว js/27)
 // → ถ้าเบราว์เซอร์ใช้การ์ดออนบอร์ด / ไม่ได้ใช้การ์ดจอเลย ขึ้นป้ายบอกวิธีแก้ (ปิดแล้วไม่ขึ้นอีกสำหรับการ์ดตัวเดิม) • ?nogpucheck = ไม่เช็ค • ?gpucheck=igpu|soft = บังคับขึ้นป้าย (ทดสอบ)
