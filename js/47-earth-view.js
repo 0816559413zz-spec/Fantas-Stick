@@ -846,7 +846,7 @@ function syncEarth(v,dt,now){
       else if(o.k!==3){burst(o.x,o.y,ECOL.dust,14,140,0.9,4,{h:0.3,vh:[1,4],g:3,smoke:true,grow:1.5});}}
     const age=(now-o.born)/1000;
     if(o.k===0||o.k===2)o.g.scale.y=Math.min(1,0.05+age/(o.k===0?0.22:0.3));
-    if(o.k===5){const th=(w[11]||0)/100;o.ih=o.ih===undefined?th:o.ih+(th-o.ih)*Math.min(1,dt*10);const em=Math.min(1,age/0.4),ee=em*em*(3-2*em);o.g.position.copy(eW(o.x,o.y,o.ih-4.5*(1-ee)));}   // rises out of the ground as the Stand pulls
+    if(o.k===5){const th=(w[11]||0)/100;o.ih=o.ih===undefined?th:o.ih+(th-o.ih)*Math.min(1,dt*10);const em=Math.min(1,age/0.3),ee=em*em*(3-2*em);o.g.position.copy(eW(o.x,o.y,o.ih-4.5*(1-ee)));}   // rises out of the ground as the Stand pulls
     if(o.k===4){const u=Math.min(1,age/0.3),b=1+2.2*(u-1)**3+1.2*(u-1)**2;o.g.scale.y=Math.max(0.02,u<1?b:1);if(o.vein)o.vein.color.copy(ERAMP.vein).multiplyScalar(0.35+1.6*Math.max(0,1-age/0.9));}
     if(o.k===3)o.mat.opacity=0.14+0.08*Math.sin(now/300);
     else if(w[7]!==o.hp&&o.mat){o.hp=w[7];for(const m of o.mats){if(!m.userData.c0)m.userData.c0=m.color.clone();m.color.copy(m.userData.c0).lerp(new THREE.Color('#5a4632'),1-w[7]/100);}burst(o.x,o.y,ECOL.dust,4,60,0.5,2,{h:rnd(0.5,o.h),g:4});}}

@@ -1488,3 +1488,4 @@
 - 2026-11-24 Terra Isle: Stand bends over and plunges one hand, then pulls the isle up
 - 2026-11-24 Terra Isle: Stand removed, ground cracks then the isle rises on its own at 0.5 s
 - 2026-11-24 Terra Isle: smooth accelerate/brake rise, ease-in-out emerge
+- 2026-11-24 Terra Isle: punchier rise (acc 24, vMax 11, ~1 s to the top), emerge 0.3 s
