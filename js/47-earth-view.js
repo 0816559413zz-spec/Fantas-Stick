@@ -800,45 +800,36 @@ function eRampTick(v,dt,now){
 SKANIM.terraisle='punchcmd';   // caster just points the wand where the Stand punches
 const EISLE={top:['#c99b62','#a66f3c','#8e9850','#d6b781','#a9603d'],mat:null,geo:new Map()};
 function eIsleGeo(seed){if(EISLE.geo.has(seed))return EISLE.geo.get(seed);
-  const R=eRng(seed),rad=ISLE.v.r*S3,n=18,pts=[],col=c=>new THREE.Color(c),Z=EISLE.top.map(col),o1=R()*10,o2=R()*10;
-  for(let i=0;i<n;i++){const a=i/n*Math.PI*2,r=rad*(0.82+0.3*R())*(1+0.08*Math.sin(a*3+o1));pts.push([Math.cos(a)*r,Math.sin(a)*r]);}
-  // top cap: fan from the centre, slight dome, colour zones from low-frequency noise (soft blend between patches)
-  const P=[],C=[],I=[],zone=(x,z)=>{const u=Math.sin(x*1.6+o1)*Math.cos(z*1.4+o2)+0.5*Math.sin((x+z)*2.6+o2);const k=(u+1.5)/3*(Z.length-1),i0=Math.max(0,Math.min(Z.length-2,Math.floor(k))),f=k-i0;return Z[i0].clone().lerp(Z[i0+1],Math.min(1,Math.max(0,f)));};
-  const ring=[[0,0]];for(const q of pts)ring.push(q);const mid=pts.map(q=>[q[0]*0.55,q[1]*0.55]);
-  const vtx=(x,z,y,c,dark)=>{P.push(x,y,z);const k=c.clone().multiplyScalar(dark||1);C.push(k.r,k.g,k.b);return P.length/3-1;};
-  const c0=vtx(0,0,0.12,zone(0,0));const m=mid.map(q=>vtx(q[0],q[1],0.08+0.04*R(),zone(q[0],q[1])));const e=pts.map(q=>vtx(q[0],q[1],0,zone(q[0],q[1]),0.92));
+  const R=eRng(seed),rad=ISLE.v.r*S3,n=24,o1=R()*10,o2=R()*10,Z=EISLE.top.map(c=>new THREE.Color(c)),pts=[];
+  for(let i=0;i<n;i++){const a=i/n*Math.PI*2,r=rad*(0.9+0.12*Math.sin(a*3+o1)+0.07*Math.sin(a*5+o2));pts.push([Math.cos(a)*r,Math.sin(a)*r]);}
+  const zone=(x,z)=>{const u=Math.sin(x*1.6+o1)*Math.cos(z*1.4+o2)+0.5*Math.sin((x+z)*2.6+o2);const k=(u+1.5)/3*(Z.length-1),i0=Math.max(0,Math.min(Z.length-2,Math.floor(k))),f=k-i0;return Z[i0].clone().lerp(Z[i0+1],Math.min(1,Math.max(0,f)));};
+  const P=[],C=[],I=[],vtx=(x,z,y,c)=>{P.push(x,y,z);C.push(c.r,c.g,c.b);return P.length/3-1;},under=Z[1];
+  const c0=vtx(0,0,0.1,zone(0,0)),m=pts.map(q=>vtx(q[0]*0.55,q[1]*0.55,0.07,zone(q[0]*0.55,q[1]*0.55))),e=pts.map(q=>vtx(q[0],q[1],0,zone(q[0],q[1]).multiplyScalar(0.94)));
   for(let i=0;i<n;i++){const j=(i+1)%n;I.push(c0,m[j],m[i],m[i],m[j],e[j],m[i],e[j],e[i]);}
-  // lip: short dark band under the rim
-  const lip=pts.map(q=>vtx(q[0]*0.97,q[1]*0.97,-0.35-0.1*R(),Z[1],0.55));
-  for(let i=0;i<n;i++){const j=(i+1)%n;I.push(e[i],e[j],lip[j],e[i],lip[j],lip[i]);}
-  // underside: jagged inverted cone in 3 rings down to a tip, same hue darker toward the bottom
-  let prev=lip;const H=2.6+R()*0.8;
-  for(let r=1;r<=3;r++){const t=r/3,ringN=pts.map((q,i)=>{const s=(1-t)*(0.85+0.3*R())*(1-0.25*t);return vtx(q[0]*s+(R()-0.5)*0.3,q[1]*s+(R()-0.5)*0.3,-0.35-H*t*(0.8+0.4*R()),Z[1],0.5-0.22*t);});
-    for(let i=0;i<n;i++){const j=(i+1)%n;I.push(prev[i],prev[j],ringN[j],prev[i],ringN[j],ringN[i]);}prev=ringN;}
-  const tip=vtx((R()-0.5)*0.4,(R()-0.5)*0.4,-0.35-H*1.25,Z[1],0.22);for(let i=0;i<n;i++){const j=(i+1)%n;I.push(prev[i],prev[j],tip);}
-  let g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('color',new THREE.Float32BufferAttribute(C,3));g.setIndex(I);g=g.toNonIndexed();g.computeVertexNormals();
-  // hanging rock spikes + boulders / a standing stone on top
-  const parts=[g];
-  for(let k=0;k<4;k++){const a=R()*6.28,d=rad*(0.25+0.45*R()),cn=new THREE.ConeGeometry(0.35+R()*0.35,1.2+R()*1.4,6,1);cn.rotateX(Math.PI);cn.translate(Math.cos(a)*d,-0.35-H*0.35-0.6,Math.sin(a)*d);eIsleTint(cn,Z[1],0.35);parts.push(cn);}
-  for(let k=0;k<3;k++){const a=R()*6.28,d=rad*(0.35+0.4*R()),b=eBlock(R,0.5+R()*0.6,0.4+R()*0.5,0.5+R()*0.6,Math.cos(a)*d,0.05,Math.sin(a)*d,R()*3,(R()-0.5)*0.3,true,0.85);eIsleTint(b,new THREE.Color('#9c8c74'),1,true);parts.push(b);}
-  if(R()<0.8){const a=R()*6.28,d=rad*0.55,b=eBlock(R,0.6,1.6+R()*0.8,0.5,Math.cos(a)*d,0.05,Math.sin(a)*d,R()*3,(R()-0.5)*0.2,true,0.9);eIsleTint(b,new THREE.Color('#8f8270'),1,true);parts.push(b);}
-  for(const q of parts)if(q.index)q.toNonIndexed&&0;
-  const out=mergeGeometries(parts.map(q=>{const x=q.index?q.toNonIndexed():q;if(x.attributes.uv)x.deleteAttribute('uv');x.computeVertexNormals();return x;}),false);
-  EISLE.geo.set(seed,out);if(EISLE.geo.size>8){const k=EISLE.geo.keys().next().value;EISLE.geo.get(k).dispose();EISLE.geo.delete(k);}
-  return out;}
+  // underside: 6 rings, radius eases to 0 (pointed), gentle twist + noise so it reads as rock but stays one smooth body
+  const H=3.4+R()*0.8;let prev=e;
+  for(let r=1;r<=6;r++){const t=r/6,sc=Math.pow(1-t,1.35)*(1+0.06*t),tw=t*0.35,dk=0.62-0.4*t;
+    const ring=pts.map((q,i)=>{const a=Math.atan2(q[1],q[0])+tw,L=Math.hypot(q[0],q[1])*sc*(0.92+0.16*Math.sin(i*1.7+r*2.1+o1)),c=under.clone().multiplyScalar(dk);return vtx(Math.cos(a)*L,Math.sin(a)*L,-0.25-H*t*(1+0.12*Math.sin(i*2.3+o2)*t),c);});
+    for(let i=0;i<n;i++){const j=(i+1)%n;I.push(prev[i],prev[j],ring[j],prev[i],ring[j],ring[i]);}prev=ring;}
+  const tip=vtx(0,0,-0.25-H*1.2,under.clone().multiplyScalar(0.2));for(let i=0;i<n;i++){const j=(i+1)%n;I.push(prev[i],prev[j],tip);}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('color',new THREE.Float32BufferAttribute(C,3));g.setIndex(I);g.computeVertexNormals();
+  EISLE.geo.set(seed,g);if(EISLE.geo.size>8){const k=EISLE.geo.keys().next().value;EISLE.geo.get(k).dispose();EISLE.geo.delete(k);}
+  return g;}
 function eIsleTint(g,c,mul,keep){const P=g.attributes.position,old=g.attributes.color,C=new Float32Array(P.count*3);
   for(let i=0;i<P.count;i++){const s=keep&&old?old.getX(i):1;C[i*3]=c.r*mul*s;C[i*3+1]=c.g*mul*s;C[i*3+2]=c.b*mul*s;}g.setAttribute('color',new THREE.BufferAttribute(C,3));}
-function eIsleMesh(seed){if(!EISLE.mat){EISLE.mat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:0.95,metalness:0,flatShading:true});EISLE.mat.userData.keep=true;}
+function eIsleMesh(seed){if(!EISLE.mat){EISLE.mat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:0.95,metalness:0,side:THREE.DoubleSide});EISLE.mat.userData.keep=true;}
   const m=new THREE.Mesh(eIsleGeo(seed),EISLE.mat);m.castShadow=m.receiveShadow=true;return m;}
 // Stand punch: big Stand rises, cocks a fist high, slams it into the ground (accelerating), holds/strains, then yanks up
 function eIsleTick(dt,now){for(let i=EV.icall.length-1;i>=0;i--){const R=EV.icall[i];R.t+=dt;const c=Math.cos(R.a),sn=Math.sin(R.a),G=R.G,t=R.t;
-    const P=ISLE.v.punch,L=ISLE.v.lift;
-    const lift=t<0.25?_cs(t/0.25):t<P?1-Math.pow((t-0.25)/(P-0.25),3):t<P+0.18?0:t<L+0.12?_cb(Math.min(1,(t-P-0.18)/(L+0.12-P-0.18))):1;
-    const strain=t>=P&&t<P+0.18?1:0;
-    G.g.position.copy(eW(R.x+c*95,R.y+sn*95,-0.8+0.5*Math.min(1,t/0.2)));G.g.rotation.y=Math.atan2(c,sn);   // far side, facing the caster
-    standOp(G,t<1.0?Math.min(1,t/0.15):Math.max(0,1-(t-1.0)/0.3));standPose(G,{t:now/1000,lift,strain,shake:strain});
+    const P=ISLE.v.punch,L=ISLE.v.lift,px=-sn,py=c;   // perpendicular: Stand stands to the right of the spot
+    // lift curve: raise fist (0..0.25) → slam down, accelerating (to P) → grip + strain (to L) → pull up with overshoot (L..L+0.35)
+    const lift=t<0.25?_cs(t/0.25):t<P?1-Math.pow((t-0.25)/(P-0.25),3):t<L?0:0.5*_cb(Math.min(1,(t-L)/0.35));   // pull ends at chest height (hands stay in view)
+    const strain=t>=P&&t<L?1:0,pull=t<L?0:Math.min(1,(t-L)/0.35);
+    G.g.position.copy(eW(R.x+px*85-c*20,R.y+py*85-sn*20,-0.5+0.35*Math.min(1,t/0.2)-0.3*strain+0.2*pull));G.g.rotation.y=Math.atan2(-px,-py);
+    standOp(G,t<L+0.55?Math.min(1,t/0.15):Math.max(0,1-(t-L-0.55)/0.3));standPose(G,{t:now/1000,lift,strain,shake:strain});
     if(!R.hit&&t>=P){R.hit=1;dfCracks(R.x,R.y,0.06,90,'#a98a62',1);eChunks(R.x,R.y,0.2,10,200,8,0.2);burst(R.x,R.y,ECOL.dust,18,220,0.5,3,{h:0.2,vh:[1,4],g:6});ring(R.x,R.y,'#ffd27a',60,0.3,0.15);shake(0.45);}
-    if(t>1.35){disposeObj(G.g);EV.icall.splice(i,1);}}}
+    if(strain&&Math.random()<0.5)burst(R.x+rnd(-60,60),R.y+rnd(-60,60),ECOL.dust,2,80,0.4,2,{h:0.1,vh:[0.5,2],g:5});
+    if(t>L+0.95){disposeObj(G.g);EV.icall.splice(i,1);}}}
 function syncEarth(v,dt,now){
   for(const [id,s] of EV.st)if((s.sbSlab||s.fistCharge?.visible)&&!PM3.has(id)){eStonePrep(s,null);eFistCharge(s,null,null,0);}
   const seen=new Set();
@@ -850,7 +841,7 @@ function syncEarth(v,dt,now){
       else if(o.k!==3){burst(o.x,o.y,ECOL.dust,14,140,0.9,4,{h:0.3,vh:[1,4],g:3,smoke:true,grow:1.5});}}
     const age=(now-o.born)/1000;
     if(o.k===0||o.k===2)o.g.scale.y=Math.min(1,0.05+age/(o.k===0?0.22:0.3));
-    if(o.k===5){const th=(w[11]||0)/100;o.ih=o.ih===undefined?th:o.ih+(th-o.ih)*Math.min(1,dt*10);o.g.position.copy(eW(o.x,o.y,o.ih));o.g.scale.setScalar(Math.min(1,0.3+age/0.35));}
+    if(o.k===5){const th=(w[11]||0)/100;o.ih=o.ih===undefined?th:o.ih+(th-o.ih)*Math.min(1,dt*10);const em=Math.min(1,age/0.32),ee=1-Math.pow(1-em,3);o.g.position.copy(eW(o.x,o.y,o.ih-4.5*(1-ee)));}   // rises out of the ground as the Stand pulls
     if(o.k===4){const u=Math.min(1,age/0.3),b=1+2.2*(u-1)**3+1.2*(u-1)**2;o.g.scale.y=Math.max(0.02,u<1?b:1);if(o.vein)o.vein.color.copy(ERAMP.vein).multiplyScalar(0.35+1.6*Math.max(0,1-age/0.9));}
     if(o.k===3)o.mat.opacity=0.14+0.08*Math.sin(now/300);
     else if(w[7]!==o.hp&&o.mat){o.hp=w[7];for(const m of o.mats){if(!m.userData.c0)m.userData.c0=m.color.clone();m.color.copy(m.userData.c0).lerp(new THREE.Color('#5a4632'),1-w[7]/100);}burst(o.x,o.y,ECOL.dust,4,60,0.5,2,{h:rnd(0.5,o.h),g:4});}}
@@ -972,7 +963,7 @@ function earthEfx(ev){
     case 'esbwall':eDebris(x,y,H,26,240);ring(x,y,'#ffd86b',70,0.4,H);burst(x,y,'#ffe7a0',12,120,0.6,2.2,{h:H+0.8,g:0});shake(0.4);if(near)snd('boom',ev);return true;
     // ----- Tectonic Crush -----
     case 'ewallup':shake(0.35);if(near)snd('boom',ev);return true;
-    case 'eislecall':EV.icall.push({t:0,x,y,a:ev.a,id:ev.id,G:makeStand(2.6,true)});if(near)snd('buff',{x,y,vol:0.5});return true;   // Terra Isle: Stand punch
+    case 'eislecall':EV.icall.push({t:0,x,y,a:ev.a,id:ev.id,G:makeStand(1.9,true)});if(near)snd('buff',{x,y,vol:0.5});return true;   // Terra Isle: Stand punch
     case 'eisleup':{shake(0.4);if(near)snd('boom',ev);burst(x,y,ECOL.dust,24,260,0.5,3.4,{h:0.3,vh:[2,7],g:7});eChunks(x,y,0.3,10,240,9,0.24);for(let i=0;i<5;i++)smoke(x+rnd(-60,60),y+rnd(-60,60),0.3,2,ECOL.dust,0.7,8,50);return true;}
     case 'erampcall':EV.rcall.push({t:0,x,y,a:ev.a,seed:ev.n,id:ev.id,holo:eRampHolo(ev.n),up:false});if(near)snd('buff',{x,y,vol:0.5});return true;   // Rampart: Stand rises and starts heaving the ground
     case 'erampup':{shake(0.55);if(near)snd('boom',ev);const c=Math.cos(ev.a),sn=Math.sin(ev.a);   // wall yanked up: one heavy burst of dust that clears fast
