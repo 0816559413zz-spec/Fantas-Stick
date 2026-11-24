@@ -8,3 +8,6 @@ __pycache__/
 recordings/
 
 photos/
+
+# VRoid test models (sample licence: no redistribution) — local only, never commit
+assets/vrm/

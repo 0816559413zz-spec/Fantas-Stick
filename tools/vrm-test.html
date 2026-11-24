@@ -143,5 +143,6 @@ const clock=new THREE.Clock();
 R.setAnimationLoop(()=>{const dt=Math.min(0.05,clock.getDelta());
   if(mixer)mixer.update(dt);if(vrm){if(spin)vrm.scene.rotation.y+=dt*0.6;vrm.update(dt);}
   ctl.update();R.render(S,cam);});
-window.VT={get vrm(){return vrm},play,loadVRM,THREE,cam,ctl,R,S};
+// step(dt): advance animation + spring bones by hand (the loop pauses when the tab is hidden)
+window.VT={get vrm(){return vrm},play,loadVRM,THREE,cam,ctl,R,S,step(dt){if(mixer)mixer.update(dt);if(vrm)vrm.update(dt);}};
 </script></body></html>
