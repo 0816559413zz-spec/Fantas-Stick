@@ -22,6 +22,7 @@
 #   GET  /api/mb-list              → รายชื่อแผนที่จริงของ Map Builder (mapbuild.html) ใน maps/build/
 #   GET/POST /api/mb?id=<id>        → อ่าน/บันทึกไฟล์ต้นฉบับ maps/build/<id>.json (รูปแบบ: guides/MAP-BUILDER.md)
 #   POST /api/mb-export?id=<id>     → ส่งเข้าเกม: {data, glb(base64)} → assets/maps/<id>.json + .glb + เพิ่ม/ขยับเลข v ใน assets/manifest.json
+#   GET  /api/mb-ver?id=<id>       → เลข v ของแผนที่: ในเครื่อง (manifest) / commit ล่าสุด / บน GitHub (origin/main, fetch ทุก 1 นาที)
 #   POST /api/mb-unexport?id=<id>   → ถอดแผนที่ออกจากเกม (ลบไฟล์ใน assets/maps + รายการใน manifest) เฉพาะแผนที่ที่มีต้นฉบับใน maps/build/
 #   POST /api/mb-del?id=<id>        → ถอดออกจากเกม + ย้ายต้นฉบับไป maps/build/_deleted/
 #   POST /api/mb-asset?name=<ชื่อ>&label=&cat= → เพิ่ม Asset เอง: เก็บ .glb ลง assets/mapkit/ + ลงทะเบียนใน assets/mapkit/kit.json (user)
@@ -526,6 +527,24 @@ def mb_list():
                 out.append({'id': f[:-5], 'name': f[:-5], 'err': str(e), 't': os.path.getmtime(fp)})
     return out
 
+_mbv = {'t': 0}
+def mb_ver(mid):  # map version: on this machine (manifest file) / last commit (HEAD) / GitHub (origin/main, fetched at most once a minute)
+    def v_of(txt):
+        try: return int(((json.loads(txt).get('maps') or {}).get(mid) or {}).get('v', 0))
+        except Exception: return None
+    try: local = v_of(open(MANP, encoding='utf-8').read())
+    except Exception: local = None
+    r = git('show', 'HEAD:assets/manifest.json'); head = v_of(r.stdout) if r.returncode == 0 else None
+    err = ''
+    if time.time() - _mbv['t'] > 60:
+        try:
+            f = subprocess.run(['git', 'fetch', '--quiet', 'origin', 'main'], cwd=ROOT, capture_output=True, text=True, timeout=20)
+            if f.returncode == 0: _mbv['t'] = time.time()
+            else: err = (f.stderr or 'fetch failed').strip()[:120]
+        except Exception as e: err = str(e)[:120]
+    r = git('show', 'origin/main:assets/manifest.json'); remote = v_of(r.stdout) if r.returncode == 0 else None
+    return {'ok': True, 'local': local, 'head': head, 'remote': remote, 'fetched': _mbv['t'], 'err': err}
+
 def mb_manifest(fn):  # แก้ส่วน "maps" ของ assets/manifest.json (คงรูปแบบย่อหน้า 1 ช่องเดิม)
     man = json.load(open(MANP, encoding='utf-8'))
     r = fn(man.setdefault('maps', {}))
@@ -738,6 +757,8 @@ class H(SimpleHTTPRequestHandler):
             return self._json(200, sb_load())
         if u.path == '/api/sb-skills':
             return self._json(200, sb_skills())
+        if u.path == '/api/mb-ver':
+            return self._json(200, mb_ver(q_id(u)))
         if u.path == '/api/mb-list':
             return self._json(200, {'ok': True, 'maps': mb_list()})
         if u.path == '/api/mb':

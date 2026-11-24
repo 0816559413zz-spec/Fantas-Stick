@@ -1444,14 +1444,23 @@ async function save() {
     dirty = false; stat('Saved ' + new Date().toLocaleTimeString('th-TH'), 'ok'); localStorage.setItem('mb_last', M.id); return true; }
   catch (e) { stat('Couldn’t save: ' + e.message + (online ? '' : ' (open through Tools.bat)'), 'err'); return false; }
 }
-async function refreshList() { try { const r = await (await fetch('/api/mb-list')).json(); list = r.maps || []; online = true; } catch (e) { online = false; list = []; } renderList(); }
+async function refreshVer() {   // top bar: map version here vs on GitHub (Pages deploys from origin/main)
+  const s = $('ver'); if (!s) return; if (!online || !M || !M.id) { s.textContent = ''; return; }
+  const id = M.id; let r; try { r = await (await fetch('/api/mb-ver?id=' + id)).json(); } catch (e) { return; } if (!M || M.id !== id) return;
+  const v = x => x == null ? '?' : x ? 'v' + x : '–', loc = r.local || 0, rem = r.remote;
+  s.textContent = 'Map ' + v(loc) + ' • Remote ' + v(rem) + (rem != null && loc !== rem ? (r.head === loc ? ' (not pushed)' : ' (not committed)') : '');
+  s.className = rem == null ? '' : loc === rem ? 'ok' : 'warn';
+  s.title = ['Map = version exported on this machine (assets/manifest.json)', 'Last commit = ' + v(r.head), 'Remote = version on GitHub (origin/main = what the online game loads)',
+    r.err ? 'Couldn’t reach GitHub: ' + r.err : r.fetched ? 'Checked ' + new Date(r.fetched * 1000).toLocaleTimeString('th-TH') : '', 'Click to check again'].filter(Boolean).join('\n');
+}
+async function refreshList() { try { const r = await (await fetch('/api/mb-list')).json(); list = r.maps || []; online = true; } catch (e) { online = false; list = []; } renderList(); refreshVer(); }
 function renderList() { const s = $('mapSel'); s.innerHTML = ''; const ids = new Set(list.map(m => m.id));
   if (M && M.id && !ids.has(M.id)) s.append(el('option', { value: M.id }, M.name));
   for (const m of list) s.append(el('option', { value: m.id }, (M && m.id === M.id ? M.name : m.name) + (m.game ? '  ✓ in game' : '')));
   if (M) s.value = M.id; }
 async function openMap(id) {
   if (dirty) await save();
-  try { const r = await (await fetch('/api/mb?id=' + id)).json(); if (!r.ok) throw new Error(r.err); setMap(MD.unpack(r.map)); localStorage.setItem('mb_last', id); stat('Opened', 'ok'); } catch (e) { stat('Couldn’t open: ' + e.message, 'err'); }
+  try { const r = await (await fetch('/api/mb?id=' + id)).json(); if (!r.ok) throw new Error(r.err); setMap(MD.unpack(r.map)); localStorage.setItem('mb_last', id); stat('Opened', 'ok'); refreshVer(); } catch (e) { stat('Couldn’t open: ' + e.message, 'err'); }
 }
 function setMap(m) {
   M = m; sel = null; msel = []; undo = []; redo = []; draft = null; PNT.br.clear(); dirty = false; GD = null;
@@ -1581,7 +1590,7 @@ async function shotPNG() {
 }
 
 // ================= boot =================
-$('bNew').onclick = newDlg; $('bSave').onclick = save; $('bUndo').onclick = doUndo; $('bRedo').onclick = doRedo; $('bExport').onclick = exportGame;
+$('bNew').onclick = newDlg; $('bSave').onclick = save; $('bUndo').onclick = doUndo; $('bRedo').onclick = doRedo; $('bExport').onclick = exportGame; $('ver').onclick = refreshVer; setInterval(refreshVer, 120000);
 $('bPlay').onclick = async () => { const w = window.open('about:blank', 'mb_play'); if (await exportGame()) w.location = 'index.html?nosw&playmap=' + M.id + (M.modes.length === 1 && M.modes[0] === 'siege' ? '&pm=siege' : '') + '&t=' + Date.now(); else w.close(); };
 $('mapSel').onchange = e => openMap(e.target.value);
 for (const b of document.querySelectorAll('#gbar [data-g]')) b.onclick = () => setGizmo(b.dataset.g);
