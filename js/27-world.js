@@ -343,18 +343,18 @@ function shadowAll(o){o.traverse(m=>{if(m.isMesh){m.castShadow=true;m.receiveSha
 // cumulus: side-view clouds in (azimuth, elevation) space = smooth-union puffs + 3D-noise cauliflower edges + flat bases,
 //   lit by the real sun direction: crisp lit/shade split, lavender shade, darker base, silver rim when backlit
 // SKYC.k = sky brightness in game (keeps white clouds under the bloom threshold 0.86) • tune: SKYC.* then WD.skyBake() (re-bakes + refreshes the Look light) • cost: one draw at load (~ms), then a plain texture
-const SKYC={seed:20261124,groups:24,loose:18,k:0.88,sun:[74,100,-64],zen:'#1748a8',mid:'#3c80d8',hor:'#bfdcf4',horS:'#e6f2fb',halo:'#eef7ff',ground:'#9fbcd0',
+const SKYC={seed:20261124,groups:32,loose:14,k:0.88,sun:[74,100,-64],zen:'#1748a8',mid:'#3c80d8',hor:'#bfdcf4',horS:'#e6f2fb',halo:'#eef7ff',ground:'#9fbcd0',
   hill:'#9dc2e2',hill2:'#86b0d6',lit:'#ffffff',shade:'#bcc7e6',base:'#a6b2db',rim:'#ffffff',cirrus:0.22};
 function skyBakeClear(){
   const C=SKYC,NC=64;let sd=C.seed;const R=()=>(sd=(sd*1664525+1013904223)>>>0)/4294967296,D=Math.PI/180;
   // clouds live on a flat layer (base altitude ~1, units = cloud-base heights) and are seen in perspective:
   // groups of clouds (clusters) + a few loose ones; far clouds = small, low, piled into banks on the horizon; near = big, high
-  const P=[],add=(x,z,A,w,h)=>{const r=Math.hypot(x,z);if(r<1.6)return;const e=Math.atan2(A,r);if(e<0.6*D)return;
+  const P=[],add=(x,z,A,w,h)=>{const r=Math.hypot(x,z);if(r<1.6)return;const e=Math.atan2(A,r);if(e<0.6*D||Math.atan2(w,r)<0.7*D)return;   // skip dots
     P.push({r,v:new THREE.Vector4(((Math.atan2(z,-x)/(2*Math.PI))+1)%1,e,Math.atan2(w,r),Math.atan2(A+h,r)-e)});};
   for(let g=0;g<C.groups;g++){const th=R()*Math.PI*2,r0=g<C.groups*0.75?2.3+11*Math.pow(R(),1.1):12+22*R(),A=0.85+R()*0.35,m=2+Math.floor(R()*(r0<5?3:6)),sp=0.8+r0*0.1,big=R()<0.45;
-    for(let k=0;k<m;k++){const w=(big?0.45+R()*0.55:0.25+R()*0.45)*(k?0.8:1.15),h=w*(0.55+R()*0.7)*(k?1:1.3);
+    for(let k=0;k<m;k++){const w=(big?0.55+R()*0.7:0.35+R()*0.5)*(k?0.85:1.2),h=w*(0.4+R()*0.55)*(k?1:1.25);
       const l=(R()-0.5)*2.4*sp,rr=r0+(R()-0.5)*0.35*sp;add(Math.cos(th)*rr-Math.sin(th)*l,Math.sin(th)*rr+Math.cos(th)*l,A+(R()-0.5)*0.06,w,h);}}   // spread sideways, little in depth (same elevation band)
-  for(let i=0;i<C.loose;i++){const th=R()*Math.PI*2,r=2+30*Math.pow(R(),1.1),w=0.15+R()*0.35;add(Math.cos(th)*r,Math.sin(th)*r,0.9+R()*0.3,w,w*(0.4+R()*0.4));}
+  for(let i=0;i<C.loose;i++){const th=R()*Math.PI*2,r=2+30*Math.pow(R(),1.1),w=0.2+R()*0.45;add(Math.cos(th)*r,Math.sin(th)*r,0.9+R()*0.3,w,w*(0.22+R()*0.25));}   // loose = wide flat scraps
   P.sort((a,b)=>a.r-b.r);   // near first: the shader takes the first cloud covering a pixel = correct overlap
   const cl=P.slice(0,NC).map(o=>o.v);   // x = u (0..1), y = base elevation, z = half width, w = height (radians)
   while(cl.length<NC)cl.push(new THREE.Vector4(0,0,0,0));
@@ -375,14 +375,18 @@ vec3 dirOf(vec2 q){float ph=q.x*6.2831853,e=q.y;return vec3(-cos(ph)*cos(e),sin(
 float cloudSdf(vec2 q,vec3 d,vec4 c,float ci,out float Y){
   float du=q.x-c.x;du-=floor(du+.5);float X=du*6.2831853*cos(q.y);Y=q.y-c.y;
   if(abs(X)>c.z*1.5+c.w||Y<-.02||Y>c.w*2.2)return 1.;
-  float s=1.;
+  // per-cloud character: ty < .45 = flat broken fragment, else heaped cumulus with 0-3 off-centre towers; pk = where the bulk sits
+  float s=1.,ty=h11(ci+77.),pk=h11(ci+91.),fl=ty<.45?.55:1.;
   for(int k=0;k<15;k++){float fk=float(k),a=h11(ci+fk),b=h11(ci+fk+17.),r2=h11(ci+fk+33.);vec2 ct;float r;
-    if(k<10){float t=fk/9.;ct.x=(t-.5)*1.7*c.z+(a-.5)*.2*c.z;r=c.w*(.28+.55*sin(3.1416*t))*(.75+.5*b);ct.y=r*(.35+.45*r2);}
-    else{ct.x=(a-.5)*c.z*.9;r=c.w*(.3+.28*b);ct.y=c.w*(.6+.55*r2);}
-    s=smin(s,length(vec2(X,Y)-ct)-r,c.w*.16);}
-  s=max(s,-Y);   // flat base
-  if(s<c.w*.3){float up=smoothstep(0.,c.w*.35,Y),f=1./max(c.w*12.,.12);vec3 o=vec3(ci*.13,ci*.07,0.);   // cauliflower edges (per-cloud noise offset)
-    s+=(fbm(d*16.*f+o)-.5)*c.w*.42*(.3+.7*up)+(fbm(d*45.*f+o)-.5)*c.w*.07*up;}
+    if(k<10){float t=fk/9.,env=pow(max(0.,1.-abs(t-(.25+.5*pk))*1.6),.7);   // lopsided envelope, random puff sizes (not a symmetric dome)
+      ct.x=(t-.5)*1.8*c.z+(a-.5)*.3*c.z;r=c.w*fl*(.18+.62*env*(.45+.8*b));ct.y=r*(.25+.5*r2);}
+    else{if(ty<.45||h11(ci+fk+51.)>(ty-.45)*1.6)continue;ct.x=((pk-.5)*.8+(a-.5)*.7)*c.z;r=c.w*(.22+.3*b);ct.y=c.w*(.45+.6*r2);}
+    s=smin(s,length(vec2(X,Y)-ct)-r,c.w*.2);}
+  float f=1./max(c.w*12.,.12);vec3 o=vec3(ci*.13,ci*.07,0.);
+  s=max(s,-Y-(fbm(d*9.*f+o+3.)-.5)*c.w*.18);   // base: mostly flat, a little ragged
+  if(s<c.w*.45){float up=smoothstep(0.,c.w*.35,Y);
+    s+=(fbm(d*5.*f+o+7.)-.42)*c.w*(ty<.45?.75:.45);   // big break-up: irregular outline, fragments tear apart
+    s+=(fbm(d*16.*f+o)-.5)*c.w*.36*(.3+.7*up)+(fbm(d*45.*f+o)-.5)*c.w*.07*up;}   // cauliflower lumps
   return s;}
 // first cloud (list is near→far) from index 'from' that covers this pixel → idx (-1 = none)
 float frontCloud(vec2 q,vec3 d,int from,out int idx,out float vert,out float hh){idx=-1;vert=0.;hh=.1;
