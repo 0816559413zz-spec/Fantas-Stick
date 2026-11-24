@@ -504,6 +504,11 @@
    "file": "maps/town-demo.glb",
    "data": "maps/town-demo.json",
    "v": 5
+  },
+  "ruin-demo": {
+   "file": "maps/ruin-demo.glb",
+   "data": "maps/ruin-demo.json",
+   "v": 4
   }
  },
  "ptex": {}

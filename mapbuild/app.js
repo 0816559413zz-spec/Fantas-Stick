@@ -167,7 +167,7 @@ function syncFloors() {
 
 // ================= asset kit =================
 const KIT = { list: [], byId: new Map(), files: new Map(), tpl: new Map(), thumbs: new Map() };
-const CATS = [['sys', 'Game Points'], ['mode', 'Siege Mode'], ['prefab', 'Room Prefabs'], ['room', 'Room / Breakables'], ['deco', 'Decor (game-drawn)'], ['game', 'Game Objects'], ['prim', 'Primitives'], ['collide', 'Collision Shapes'], ['tree', 'Trees'], ['rock', 'Rocks'], ['plant', 'Small Plants'], ['build', 'Buildings'], ['road', 'Roads / Paving'], ['prop', 'Props'], ['light', 'Lamps/Lights'], ['fence', 'Fences'], ['user', 'Custom']];
+const CATS = [['sys', 'Game Points'], ['mode', 'Siege Mode'], ['prefab', 'Room Prefabs'], ['room', 'Room / Breakables'], ['deco', 'Decor (game-drawn)'], ['game', 'Game Objects'], ['prim', 'Primitives'], ['collide', 'Collision Shapes'], ['tree', 'Trees'], ['rock', 'Rocks'], ['plant', 'Small Plants'], ['build', 'Buildings'], ['road', 'Roads / Paving'], ['prop', 'Props'], ['light', 'Lamps/Lights'], ['fence', 'Fences'], ['ruin', 'Ruin (modular)'], ['user', 'Custom']];
 const CS_DEF = { tree: 0.22, light: 0.4, plant: 0.6 };
 let gltfL = null;
 function loader() { if (!gltfL) { gltfL = new GLTFLoader(); const d = new DRACOLoader(); d.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/gltf/'); gltfL.setDRACOLoader(d); gltfL.setMeshoptDecoder(MeshoptDecoder); } return gltfL; }
@@ -224,7 +224,7 @@ function dim(o) {   // footprint for collision (model.js objCircles)
     return { ex: cy ? r : (o.sx || 1) / 2, ez: cy ? r : (o.sz || 1) / 2, h: sy, yo: -sy / 2, col: o.col ? 1 : 0, brk: 0, m: 'stone', cs: cy ? 0.92 : 1 }; }
   if (isPrim(o)) { const sx = o.sx || 1, sz = o.sz || 1, round = o.t === 'cyl' || o.t === 'ball' || o.t === 'cone'; return { ex: sx / 2, ez: sz / 2, h: (o.sy || 1) * (o.t === 'ball' ? 0.84 : 1), col: o.col == null ? 1 : o.col, brk: 0, m: o.m || 'stone', cs: round ? 0.92 : 1 }; }
   if (isKit(o)) { const a = KIT.byId.get(kitId(o)), t = tplNow(kitId(o)); if (!a || !t) return null; const s = o.s || 1;
-    return { ex: t.ex * s, ez: t.ez * s, h: t.h * s, col: o.col == null ? a.col : o.col, brk: a.brk ? 1 : 0, m: a.brk || 'stone', cs: a.cs != null ? a.cs : CS_DEF[a.cat] || 0.85 }; }
+    return { ex: t.ex * s, ez: t.ez * s, h: t.h * s, col: o.col == null ? a.col : o.col, brk: a.brk ? 1 : 0, m: a.brk || 'stone', cs: a.cs != null ? a.cs : CS_DEF[a.cat] || 0.85, s, cb: a.cb, fl: a.fl }; }   // cb/fl = kit collision boxes + walkable slabs (model.js objCircles/kitFloors)
   return null;
 }
 function labelSprite(text, c) {   // small always-readable tag (core number, phase number)

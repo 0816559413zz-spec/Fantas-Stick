@@ -343,12 +343,28 @@ export function surfTop(M, x, z, ref, fl) {   // highest walkable surface at or 
 // dim(o) (from the 3D view) → {ex, ez, h, col, brk, m} half extents on the ground before rotation, height, kit defaults
 export function objCircles(M, o, d) {
   if (!d || !d.col) return [];
+  if (d.cb) {   // kit shapes (tools/ruin-assets.mjs): collision boxes [cx,cz,w,d,h,y0] in model metres replace the bbox footprint ([] = none, e.g. platforms: floors give it)
+    const s = d.s || 1, k = o.cs == null ? 1 : o.cs, rot = o.rot || 0, cs = Math.cos(rot), sn = Math.sin(rot), out = [];
+    for (const [cx, cz, w, dd, h, y0] of d.cb) { const lx = cx * s, lz = cz * s;
+      out.push(...objCircles(M, { x: o.x + lx * cs + lz * sn, z: o.z - lx * sn + lz * cs, rot, y: o.y, cs: 1 }, { ex: w * s * k / 2, ez: dd * s * k / 2, h: h * s, yo: (y0 || 0) * s, col: 1, cs: 1 })); }
+    return out;
+  }
   const k = (o.cs == null ? d.cs || 1 : o.cs), ex = d.ex * k, ez = d.ez * k, g = gh(M, o.x, o.z), lift = (o.y || 0) + (d.yo || 0), top = g + lift + d.h, out = [];
   const add = (x, z, r) => { const gg = gh(M, x, z), c = { x, z, r, top, hgt: top - gg }; if (lift > 0.3) c.bot = g + lift - gg; if (c.hgt > 0.05 && r > 0.05) out.push(c); };
   if (Math.abs(ex - ez) < 0.2 * Math.max(ex, ez) || Math.max(ex, ez) < 0.5) { add(o.x, o.z, Math.max(ex, ez)); return out; }
   const rot = o.rot || 0, long = ex > ez, r = Math.max(0.25, Math.min(ex, ez)), L = Math.max(ex, ez) - r, n = Math.max(1, Math.ceil(L / (r * 1.1)));
   const ax = long ? Math.cos(rot) : Math.sin(rot), az = long ? -Math.sin(rot) : Math.cos(rot);
   for (let i = 0; i <= n; i++) { const t = -L + 2 * L * i / n; add(o.x + ax * t, o.z + az * t, r); }
+  return out;
+}
+
+// kit walkable slabs (kit row fl: {x,z,w,d,y,y2,sol} in model metres, y = local -z edge, y2 = +z edge) → floors at the object (rot, scale s, lift y)
+export function kitFloors(M, objs, dim) {
+  const out = [];
+  for (const o of objs) { if (!o.t || !o.t.startsWith('kit:')) continue; const d = dim(o); if (!d || !d.fl) continue;
+    const s = d.s || 1, rot = o.rot || 0, cs = Math.cos(rot), sn = Math.sin(rot), base = gh(M, o.x, o.z) + (o.y || 0);
+    d.fl.forEach((f, i) => { const lx = f.x * s, lz = f.z * s, r = { id: 'k' + o.id + '_' + i, x: +(o.x + lx * cs + lz * sn).toFixed(3), z: +(o.z - lx * sn + lz * cs).toFixed(3), w: f.w * s, d: f.d * s, rot,
+      y: +(base + f.y * s).toFixed(3), y2: +(base + (f.y2 == null ? f.y : f.y2) * s).toFixed(3), th: f.th || 0.4 }; if (f.sol != null) r.sol = f.sol; out.push(r); }); }
   return out;
 }
 
@@ -359,7 +375,7 @@ export function gameData(M, dim) {
   const nx = M.nx, ny = M.ny, g = new Int16Array(nx * ny);
   for (let i = 0; i < g.length; i++) g[i] = cm(M.hg[i]);
   // floors → top/bottom grids on the same 0.5 grid
-  const fl = [], XP = expandParts(M), allFloors = M.floors.concat(XP.floors), allObjs = M.objs.concat(XP.objs);
+  const fl = [], XP = expandParts(M), allObjs = M.objs.concat(XP.objs), allFloors = M.floors.concat(XP.floors, kitFloors(M, allObjs, dim));
   for (const f of allFloors) {
     const cs = floorCorners(f), x0 = Math.floor(Math.min(...cs.map(c => c[0])) / C) * C, z0 = Math.floor(Math.min(...cs.map(c => c[1])) / C) * C;
     const fx = Math.round((Math.ceil(Math.max(...cs.map(c => c[0])) / C) * C - x0) / C) + 1, fy = Math.round((Math.ceil(Math.max(...cs.map(c => c[1])) / C) * C - z0) / C) + 1;
@@ -389,8 +405,10 @@ export function gameData(M, dim) {
     const r = clamp(Math.min(f.w, f.d) / 4, 0.5, 1), cs = Math.cos(f.rot || 0), sn = Math.sin(f.rot || 0), ln = (L, i, n) => n < 2 ? 0 : -L / 2 + r + (L - 2 * r) * i / (n - 1);
     const na = Math.max(1, Math.ceil((f.w - 2 * r) / (r * 1.4)) + 1), nb = Math.max(1, Math.ceil((f.d - 2 * r) / (r * 1.4)) + 1);
     for (let i = 0; i < na; i++) for (let j = 0; j < nb; j++) { const a = ln(f.w, i, na), b = ln(f.d, j, nb), x = f.x + a * cs + b * sn, z = f.z - a * sn + b * cs;
-      let top = Infinity; for (const [ox, oz] of [[0, 0], [r, 0], [-r, 0], [0, r], [0, -r]]) { const t = floorTop(f, x + ox, z + oz); if (t === t && t < top) top = t; }
-      const g = gh(M, x, z), h = top - 0.15 - g; if (h === h && h < 1e9 && h > TSTEP) put({ x, z, r, hgt: h }, null, { k: 'flr' }); }
+      // top = lowest walking surface a player touching this circle can stand on (samples r + PR away along the slab axes) → steep stairs stay climbable
+      const e = r + PR, y2 = f.y2 == null ? f.y : f.y2; let top = Infinity;   // samples clamped to the slab (low edge counts: you walk on there)
+      for (const [a2, b2] of [[0, 0], [e, 0], [-e, 0], [0, e], [0, -e]]) { const lb = clamp(b + b2, -f.d / 2, f.d / 2), t = f.y + (y2 - f.y) * (lb / f.d + 0.5); if (Math.abs(a + a2) <= f.w / 2 + 1e-6 || a2 === 0) top = Math.min(top, t); }
+      const g = gh(M, x, z), h = top - 0.15 - g; if (h === h && h < 1e9 && h > (ramp ? 0.3 : TSTEP)) put({ x, z, r, hgt: h }, null, { k: 'flr' }); }
   }
   const spawns = [], espawn = [], rings = [], tasks = [], props = [], houses = [], lights = [];
   const sg = { cores: [], sp: { A: {}, B: {} }, phases: [], bw: [], hold: { A: {}, B: {} }, loot: {}, items: [] }, ceil = [], lz = [], rprops = [], deco = [], pnl = [], broom = [], wind = [];
