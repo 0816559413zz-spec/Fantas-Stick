@@ -183,15 +183,20 @@ const GR_LIVE='{vec2 q=vGW.xz;float n1=grN(q*0.031)*0.62+grN(q*0.083+5.1)*0.38,n
   'c=mix(c,mix(c*vec3(0.75,0.95,1.15),vec3(0.72,0.82,0.92),0.7),smoothstep(0.05,0.85,sc.g)*0.85);'+   // น้ำแข็ง: เกล็ดขาวฟ้า (ยังเห็นพื้นเดิมนิด ๆ)
   'diffuseColor.rgb=c;}';
 // far = [near, far] m from the camera: pattern fades out between them (backdrop land, js/67-coast) — skipped beyond far
+// snow / near-white ground: compress albedo above the knee so bright snow keeps its shading + ripples in daylight instead of
+// clipping to white and blooming (user 2026-11-24). x = knee luminance, y = slope above it (0 = flat cap, 1 = off). Low-saturation colours only.
+const SNOWU={uSnow:{value:new THREE.Vector2(0.42,0.38)}};
+const GR_SNOW='{vec3 sc=diffuseColor.rgb;float sL=dot(sc,vec3(0.3,0.59,0.11)),sM=max(sc.r,max(sc.g,sc.b)),sS=(sM-min(sc.r,min(sc.g,sc.b)))/max(sM,0.001);'+
+  'if(sL>uSnow.x){float nL=uSnow.x+(sL-uSnow.x)*uSnow.y,w=1.0-smoothstep(0.1,0.3,sS);diffuseColor.rgb=mix(sc,sc*(nL/sL)*vec3(0.97,0.99,1.03),w);}}\n';
 function grLive(m,far){m.userData.grLive=true;
   const LIVE=far?GR_LIVE.replace('up=smoothstep(0.55,0.85,vGU)','up=smoothstep(0.55,0.85,vGU)*gF').replace('if(uGrLo<0.5){','if(uGrLo<0.5&&gF>0.0){')
     .replace('{vec2 q=vGW.xz;','{vec2 q=vGW.xz;float gF=1.0-smoothstep('+far[0].toFixed(1)+','+far[1].toFixed(1)+',distance(vGW,cameraPosition));'):GR_LIVE;
-  m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,SCAR.U);
+  m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,SCAR.U,SNOWU);
     sh.vertexShader='varying vec3 vGW;varying float vGU;\n'+sh.vertexShader.replace('#include <project_vertex>','#include <project_vertex>\nvGW=(modelMatrix*vec4(transformed,1.0)).xyz;vGU=normalize(mat3(modelMatrix)*normal).y;');
-    sh.fragmentShader='varying vec3 vGW;varying float vGU;uniform sampler2D uScar;uniform vec4 uScarMap;uniform sampler2D uFire;\n'+GR_NOISE+sh.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\n'+LIVE)   // หลังสีจุดยอด (แผนที่จากไฟล์ใช้สีจุดยอด)
+    sh.fragmentShader='varying vec3 vGW;varying float vGU;uniform vec2 uSnow;uniform sampler2D uScar;uniform vec4 uScarMap;uniform sampler2D uFire;\n'+GR_NOISE+sh.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\n'+GR_SNOW+LIVE)   // หลังสีจุดยอด (แผนที่จากไฟล์ใช้สีจุดยอด)
       .replace('#include <normal_fragment_begin>','#include <normal_fragment_begin>\nnormal=normalize(mix(normal,(viewMatrix*vec4(0.0,1.0,0.0,0.0)).xyz,0.45*smoothstep(0.5,0.9,vGU)));')
       .replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\n'+GR_FIRE);};   // เหลี่ยมพื้นนุ่มลง (เนินดูโค้ง)
-  m.customProgramCacheKey=far?()=>'grlive4f'+far.join('_'):()=>'grlive4';
+  m.customProgramCacheKey=far?()=>'grlive5f'+far.join('_'):()=>'grlive5';
   return m;}
 const GR_GLSL_V='uniform vec4 uGrMap;uniform sampler2D uGround;uniform vec3 uGrCam;uniform vec4 uWind;uniform vec2 uGrK;uniform vec4 uGust[12];uniform vec4 uGustB[12];uniform vec4 uPush[16];uniform sampler2D uScar;uniform float uGrH;uniform float uGrW;uniform sampler2D uGroundH;uniform vec3 uSun;uniform vec3 uGrN;uniform sampler2D uFire;uniform vec4 uGrPt;uniform vec2 uGrCl;'+
   'attribute vec4 aOff;varying vec3 vGC;varying vec2 vMk;varying float vTr;varying vec4 vFl;varying vec2 vHu;varying float vFi;\n'+

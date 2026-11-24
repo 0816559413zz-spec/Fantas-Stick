@@ -342,8 +342,8 @@ function shadowAll(o){o.traverse(m=>{if(m.isMesh){m.castShadow=true;m.receiveSha
 // sky: deep blue zenith → pale horizon, brighter around/under the sun, deeper on the far side, hazy far hills, faint cirrus
 // cumulus: side-view clouds in (azimuth, elevation) space = smooth-union puffs + 3D-noise cauliflower edges + flat bases,
 //   lit by the real sun direction: crisp lit/shade split, lavender shade, darker base, silver rim when backlit
-// SKYC.k = sky brightness in game (keeps white clouds under the bloom threshold 0.86) • tune: SKYC.* then WD.skyBake() (re-bakes + refreshes the Look light) • cost: one draw at load (~ms), then a plain texture
-const SKYC={seed:20261124,groups:32,loose:14,k:0.88,sun:[74,100,-64],zen:'#1748a8',mid:'#3c80d8',hor:'#bfdcf4',horS:'#e6f2fb',halo:'#eef7ff',ground:'#9fbcd0',
+// SKYC.k = sky brightness in game (white clouds vs the bloom threshold: Look 'clear' bloomT 1.25) • tune: SKYC.* then WD.skyBake() (re-bakes + refreshes the Look light) • cost: one draw at load (~ms), then a plain texture
+const SKYC={seed:20261124,groups:32,loose:14,k:0.95,sun:[74,100,-64],zen:'#1748a8',mid:'#3c80d8',hor:'#bfdcf4',horS:'#e6f2fb',halo:'#eef7ff',ground:'#9fbcd0',
   hill:'#9dc2e2',hill2:'#86b0d6',lit:'#ffffff',shade:'#bcc7e6',base:'#a6b2db',rim:'#ffffff',cirrus:0.22};
 function skyBakeClear(){
   const C=SKYC,NC=64;let sd=C.seed;const R=()=>(sd=(sd*1664525+1013904223)>>>0)/4294967296,D=Math.PI/180;
