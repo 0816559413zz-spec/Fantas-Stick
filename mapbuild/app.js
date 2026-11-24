@@ -958,7 +958,7 @@ function placeGizmo() {
   else gAnchor.quaternion.setFromAxisAngle(THREE.Object3D.DEFAULT_UP, gmode === 'translate' || k === 'wall' || flatRot(it) ? 0 : it.rot || 0); gAnchor.scale.set(1, 1, 1);
   const sk = gScaleKind(k, it);
   if (gmode === 'translate') { tc.showX = tc.showZ = true; tc.showY = k !== 'room'; }
-  else if (gmode === 'rotate') { tc.showX = tc.showZ = tilt; tc.showY = !flatRot(it); }
+  else if (gmode === 'rotate') { tc.showX = tc.showZ = tilt; tc.showY = !flatRot(it); if (k === 'obj' && it.t === 'pn_wall') tc.showX = true; }   // breakable panel: X ring (length axis) = Tilt
   else if (gmode === 'resize') { const ok = sk === 'xyz' || sk === 'xz' || sk === 'p' || sk === 'f'; tc.showX = tc.showZ = ok; tc.showY = ok && (sk === 'xyz' || sk === 'p'); }   // one-sided: drag a face, the opposite face stays
   else { tc.showX = tc.showZ = !!sk && sk !== 'u' && sk !== 'cp' && sk !== 'L'; tc.showY = !!sk && sk !== 'xz' && sk !== 'L'; if (sk === 'u' || sk === 'cp' || sk === 'L') tc.showX = tc.showY = tc.showZ = true; }
   if (!tc.showX && !tc.showY && !tc.showZ) { tc.detach(); need(); return; }
@@ -991,6 +991,9 @@ tc.addEventListener('objectChange', () => {
   } else if (gmode === 'rotate') {
     let a = yawOf(gAnchor.quaternion) - z.r0; a = Math.atan2(Math.sin(a), Math.cos(a));
     if (k === 'wall') { const cx = z.p.x, cz = z.p.z, c = Math.cos(a), sn = Math.sin(a); it.pts = s.pts.map(p => { const x = p[0] - cx, q = p[1] - cz; return [r2(cx + x * c + q * sn), r2(cz - x * sn + q * c)]; }); }
+    else if (k === 'obj' && it.t === 'pn_wall' && tc.axis === 'X') {   // panel Tilt (tl) about its length axis • anchor is yaw-only, so Euler x = the drag
+      let v = (s.tl || 0) + new THREE.Euler().setFromQuaternion(gAnchor.quaternion, 'YXZ').x; v = +Math.atan2(Math.sin(v), Math.cos(v)).toFixed(4);
+      if (Math.abs(v) < 1e-3) delete it.tl; else it.tl = v; }
     else if (k === 'obj' && tiltOk(it)) { const e = new THREE.Euler().setFromQuaternion(gAnchor.quaternion, 'YXZ'), w = v => { v = Math.atan2(Math.sin(v), Math.cos(v)); return Math.abs(v) < 1e-3 ? 0 : +v.toFixed(4); };
       const r = w(e.y); it.rot = r < 0 ? +(r + 6.2832).toFixed(4) : r; it.rx = w(e.x); it.rz = w(e.z); if (!it.rx) delete it.rx; if (!it.rz) delete it.rz; }
     else { const r = ((s.rot || 0) + a) % 6.2832; it.rot = +(r < 0 ? r + 6.2832 : r).toFixed(4); }

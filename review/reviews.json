@@ -1,5 +1,5 @@
 {
- "next": 190,
+ "next": 191,
  "items": [
   {
    "id": 180,
@@ -3905,6 +3905,22 @@
    "imgs": [],
    "links": [
     "/shots/clothchk.jpg"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 190,
+   "title": "แผ่นพัง: หมุน Tilt ด้วย gizmo",
+   "text": "Map Builder → เลือกแผ่นพัง → กด E (Rotate) → ลากวงแดง = เอียงแผ่น (Tilt) ทีละ 5° • วงเขียว = หมุนรอบแกนตั้งเหมือนเดิม • ช่อง Tilt ใน Inspector อัปเดตตาม (โหลดหน้า Map Builder ใหม่ก่อน)",
+   "kind": "Map",
+   "who": "Map Builder",
+   "status": "wait",
+   "created": "2026-11-24",
+   "updated": "2026-11-24",
+   "imgs": [],
+   "links": [
+    "mapbuild.html"
    ],
    "feedback": "",
    "reply": ""
