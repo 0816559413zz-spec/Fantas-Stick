@@ -94,6 +94,17 @@ function bdAerial(m){
   m.customProgramCacheKey=function(){return (pk&&pk!==pkDef?pk.call(this):(prior&&prior!==def?prior.toString().length:''))+'|bdair';};
   return m;}
 function bdAirTick(){if(scene.fog){const c=BD_AIR.U.uAirC.value.copy(scene.fog.color);c.r*=BD_AIR.k[0];c.g*=BD_AIR.k[1];c.b*=BD_AIR.k[2];}BD_AIR.U.uAirD.value.set(250,Math.max(1600,cam.far*0.8));}
+// ring grid → BD_SEC index ranges along the perimeter (each its own mesh sharing the attributes) so the camera frustum drops the sectors behind / beside it
+// keep(a,b,c) = optional triangle filter • bounding sphere from the sector's own vertices (+2 m for sea swell)
+const BD_SEC=8;
+function bdSec(x,z){return Math.floor((Math.atan2(z,x)/Math.PI+1)*BD_SEC/2)%BD_SEC;}
+function bdSplit(geo,idx,P,NT,NR,keep){
+  const per=Math.ceil(NT/BD_SEC),seg=(NR-1)*6,out=[],v=new THREE.Vector3(),bb=new THREE.Box3();
+  for(let s=0;s<BD_SEC;s++){const a0=s*per*seg,a1=Math.min(NT,(s+1)*per)*seg,si=[];bb.makeEmpty();
+    for(let t=a0;t<a1;t+=3){const a=idx[t],b=idx[t+1],c=idx[t+2];if(keep&&!keep(a,b,c))continue;si.push(a,b,c);for(const k of [a,b,c])bb.expandByPoint(v.set(P[k*3],P[k*3+1],P[k*3+2]));}
+    if(!si.length)continue;const g2=new THREE.BufferGeometry();for(const k in geo.attributes)g2.setAttribute(k,geo.attributes[k]);g2.setIndex(si);
+    g2.boundingBox=bb.clone().expandByScalar(2);g2.boundingSphere=g2.boundingBox.getBoundingSphere(new THREE.Sphere());out.push(g2);}
+  return out;}
 // how far the backdrop reaches from the map centre (m): Map Builder bd.E past the edge • camera far / sea fade / look fog follow it (default 700 m camera)
 function bdReach(id){const fm=MAPS[id]&&MAPS[id].fm,b=fm&&fm.bd&&fm.bd.on&&fm.bd.hg?fm.bd:null;return b?Math.max(MW,MH)*S3/2+(+b.E||600):0;}
 function bdFar(id){const R=bdReach(id);return Math.min(6000,Math.max(700,R+150));}
@@ -248,9 +259,10 @@ function bdCoast(id,B){
   if(hd&&typeof surfApply==='function')surfApply(lmat,true);   // play-area ground detail (js/50 grLive + js/76 surface) — both fade out with camera distance
   if(!/[?&]nobddet\b/.test(location.search))bdDetail(lmat,hd);   // per-pixel ground detail (?nobddet = off, for A/B)
   bdAerial(lmat);   // distance haze (blue far ridges)
-  const lm=new THREE.Mesh(lg,lmat);lm.name='coastLand';lm.onBeforeRender=bdAirTick;g.add(lm);
+  for(const sg2 of bdSplit(lg,idx,pos,NT,NR,null)){const lm=new THREE.Mesh(sg2,lmat);lm.name='coastLand';lm.userData.noBatch=1;lm.onBeforeRender=bdAirTick;g.add(lm);}   // 8 ring sectors → off-screen ones culled
   // sea (same grid, flat at sea level, sd = distance to the shore for foam / shallow colour)
-  const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.BufferAttribute(sea,3));sg.setAttribute('sd',new THREE.BufferAttribute(sdA,1));sg.setIndex(idx);
+  const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.BufferAttribute(sea,3));sg.setAttribute('sd',new THREE.BufferAttribute(sdA,1));
+  const seaGs=bdSplit(sg,idx,sea,NT,NR,(a,b,c)=>!(pos[a*3+1]>SEA+2&&pos[b*3+1]>SEA+2&&pos[c*3+1]>SEA+2));   // skip sea triangles fully under land (never seen) • sectors
   const U={uT:{value:0},uDeep:{value:new THREE.Color('#174652')},uShal:{value:new THREE.Color('#3a9490')},uSky:{value:new THREE.Color('#c6cdd0')},uFoam:{value:new THREE.Color('#eef2f1')},
     uFogC:{value:new THREE.Color(COAST.fogC)},uFogN:{value:COAST.seaN*Math.max(1,bdFar(id)/700)},uFogF:{value:COAST.seaF*Math.max(1,bdFar(id)/700)},uL:{value:new THREE.Vector3()}};
   const sm=new THREE.ShaderMaterial({uniforms:U,fog:false,
@@ -285,9 +297,8 @@ function bdCoast(id,B){
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
       }`});
-  const so=new THREE.Mesh(sg,sm);so.name='coastSea';so.frustumCulled=false;so.visible=src.sea!=null;
-  so.onBeforeRender=()=>{U.uT.value=performance.now()/1000;if(scene.fog)U.uFogC.value.copy(scene.fog.color);U.uL.value.copy(LDIR);};
-  g.add(so);
+  const seaTick=()=>{U.uT.value=performance.now()/1000;if(scene.fog)U.uFogC.value.copy(scene.fog.color);U.uL.value.copy(LDIR);};
+  for(const sg2 of seaGs){const so=new THREE.Mesh(sg2,sm);so.name='coastSea';so.userData.noBatch=1;so.visible=src.sea!=null;so.onBeforeRender=seaTick;g.add(so);}
   const TP=src.trees();let tr=coastTreeMesh(TP,low);if(tr)g.add(tr);
   for(const q of g.children){q.castShadow=q.receiveShadow=false;}
   if(hd)bdNearKit(g,TP,src,hx0,hz0,(far,round)=>{if(tr){g.remove(tr);tr.children[0]&&tr.children[0].geometry.dispose();}tr=coastTreeMesh(far,low,round);if(tr)g.add(tr);},typeof world!=='undefined'?world:null);
@@ -308,6 +319,7 @@ function coastTreePts(S,hx0,hz0,low){
     if(k<0.55||R()>(k-0.5)*2.2)continue;if(S.land(px,pz)>-9)continue;P.push(px,pz);}
   const n=Math.min(cap,P.length/2),Q=[];for(let i=0;i<n;i++){const x=P[i*2],z=P[i*2+1];Q.push(x,z,S.top(x,z)-0.3,0.9+R()*0.9);}return Q;
 }
+const BD_TREE_FAR=/[?&]nobdtlod\b/.test(location.search)?1e9:350;   // ?nobdtlod = full trees everywhere (A/B)
 function coastTreeMesh(P,low,round){   // round = broadleaf blobs (maps whose forest is the painted wind trees)
   if(!P.length)return null;
   const R=mulberry(9052),tiles=new Map(),group=new THREE.Group();
@@ -321,15 +333,18 @@ function coastTreeMesh(P,low,round){   // round = broadleaf blobs (maps whose fo
    :ffMerge([[new THREE.CylinderGeometry(0.2,0.32,2.4,4),'#4a3828',M(1.2)],
     [new THREE.ConeGeometry(2.5,5.4,sides),'#1c2f1d',M(4.2),'#2c4829'],
     [new THREE.ConeGeometry(1.8,5.4,sides),'#243c25',M(6.8),'#3d5f35']]);
+  // far LOD (> BD_TREE_FAR m past the map edge): one blob / one cone, no trunk — same silhouette and colour at that range, ~1/3 the triangles
+  const geoF=round?ffMerge([[new THREE.IcosahedronGeometry(3.3,0),'#2f6e32',M(7.2,1.2),'#5a9a3c']]):ffMerge([[new THREE.ConeGeometry(2.5,9.6,sides),'#1f3420',M(5.6),'#35553a']]);
+  const hx0=MW/2*S3,hz0=MH/2*S3;
   const mat=bdAerial(new THREE.MeshLambertMaterial({vertexColors:true}));
   const m=new THREE.Matrix4(),q=new THREE.Quaternion(),v=new THREE.Vector3(),sc=new THREE.Vector3(),cl=new THREE.Color(),Y=new THREE.Vector3(0,1,0);
   for(let i=0;i<P.length;i+=4){
-    const key=Math.floor(P[i]/180)+','+Math.floor(P[i+1]/180);
+    const key=Math.floor(P[i]/180)+','+Math.floor(P[i+1]/180)+(Math.max(Math.abs(P[i])-hx0,Math.abs(P[i+1])-hz0)>BD_TREE_FAR?'f':'');
     if(!tiles.has(key))tiles.set(key,[]);
     tiles.get(key).push(i);
   }
-  for(const indices of tiles.values()){
-    const mesh=new THREE.InstancedMesh(geo,mat,indices.length);
+  for(const [key,indices] of tiles){
+    const mesh=new THREE.InstancedMesh(key.endsWith('f')?geoF:geo,mat,indices.length);
     mesh.name='coastTrees';
     for(let j=0;j<indices.length;j++){
       const i=indices[j],s=P[i+3];
@@ -371,11 +386,12 @@ function bdNearKit(g,P,src,hx0,hz0,swap,W){
       if(q<(PK?0.55:0.72))put(['stone_a','stone_b','stone_c'][(s*3)|0],x,y,z,0.7+R()*1.8,0);else if(PK)put('pb'+(s<0.5?0:1),x,y,z,0.8+R()*1.0,0);else if(q<0.86)put(s<0.5?'shrub_a':'shrub_b',x,y,z,0.8+R()*0.8,0);else put(s<0.5?'fern_a':'fern_b',x,y,z,0.8+R()*0.9,0);}
     const q=new THREE.Quaternion(),eu=new THREE.Euler(),sv=new THREE.Vector3(),pv=new THREE.Vector3(),tm=new THREE.Matrix4(),fin=new THREE.Matrix4(),kit=new THREE.Group();kit.name='bdKit';
     let tris=0;
-    for(const id in items){const pg=PK&&/^p[tfb]\d$/.test(id)?PK[{t:'tree',f:'far',b:'bush'}[id[1]]][+id[2]]:null;
-      if(pg){const L2=items[id],im=new THREE.InstancedMesh(pg,PK.mat,L2.length);L2.forEach(([x,y,z,s,lean],i)=>{eu.set(lean?(bdHsh(i,7031)-0.5)*0.07:0,bdHsh(i,7032)*6.283,lean?(bdHsh(i,7033)-0.5)*0.07:0);q.setFromEuler(eu);sv.setScalar(s);pv.set(x,y-0.1,z);im.setMatrixAt(i,fin.compose(pv,q,sv));});
+    const SK={};for(const id in items)items[id].forEach((e,i0)=>{const k=id+'|'+bdSec(e[0],e[2]);(SK[k]=SK[k]||[]).push([...e,i0]);});   // split by ring sector → frustum culled
+    for(const key in SK){const id=key.split('|')[0],L2=SK[key],pg=PK&&/^p[tfb]\d$/.test(id)?PK[{t:'tree',f:'far',b:'bush'}[id[1]]][+id[2]]:null;
+      if(pg){const im=new THREE.InstancedMesh(pg,PK.mat,L2.length);L2.forEach(([x,y,z,s,lean,i0],i)=>{eu.set(lean?(bdHsh(i0,7031)-0.5)*0.07:0,bdHsh(i0,7032)*6.283,lean?(bdHsh(i0,7033)-0.5)*0.07:0);q.setFromEuler(eu);sv.setScalar(s);pv.set(x,y-0.1,z);im.setMatrixAt(i,fin.compose(pv,q,sv));});
         im.instanceMatrix.needsUpdate=true;im.computeBoundingSphere();im.castShadow=im.receiveShadow=false;im.name='bdKit_'+id;kit.add(im);tris+=(pg.index?pg.index.count:pg.attributes.position.count)/3*L2.length;continue;}
-      const K=ffParts(gltf.scene,'g_'+id);if(!K)continue;const L2=items[id];tm.makeTranslation(K.off.x,K.off.y,K.off.z);
-      const mats=L2.map(([x,y,z,s,lean],i)=>{eu.set(lean?(bdHsh(i,7031)-0.5)*0.07:0,bdHsh(i,7032)*6.283,lean?(bdHsh(i,7033)-0.5)*0.07:0);q.setFromEuler(eu);sv.setScalar(s);pv.set(x,y-0.05,z);return new THREE.Matrix4().compose(pv,q,sv);});
+      const K=ffParts(gltf.scene,'g_'+id);if(!K)continue;tm.makeTranslation(K.off.x,K.off.y,K.off.z);
+      const mats=L2.map(([x,y,z,s,lean,i0])=>{eu.set(lean?(bdHsh(i0,7031)-0.5)*0.07:0,bdHsh(i0,7032)*6.283,lean?(bdHsh(i0,7033)-0.5)*0.07:0);q.setFromEuler(eu);sv.setScalar(s);pv.set(x,y-0.05,z);return new THREE.Matrix4().compose(pv,q,sv);});
       for(const p of K.parts){const im=new THREE.InstancedMesh(p.g,p.m,L2.length);mats.forEach((M,i)=>{fin.multiplyMatrices(M,tm).multiply(p.rel);im.setMatrixAt(i,fin);});
         im.instanceMatrix.needsUpdate=true;im.computeBoundingSphere();im.castShadow=im.receiveShadow=false;im.name='bdKit_'+id;kit.add(im);
         tris+=(p.g.index?p.g.index.count:p.g.attributes.position.count)/3*L2.length;}}
