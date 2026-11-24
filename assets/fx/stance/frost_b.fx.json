@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "desc": "Stance preview — frost style b (idle breathing, short run, idle)",
+  "tags": ["stance", "preview", "frost"],
+  "dur": 5.6,
+  "layers": [
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 5.6},
+    {"id": "stance", "t": "code", "fn": "studio_class_stance", "at": 0, "life": 5.6, "args": {"layer": "anchor", "cls": "frost", "style": "b", "run": [2.4, 4.0]}}
+  ]
+}

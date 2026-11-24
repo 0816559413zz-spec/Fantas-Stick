@@ -29,7 +29,7 @@ HOUSES:241 HAIRC:246 HAIRSTY:248 WOODC:251 WOODN:252 WCOREC:253 WCOREN:254 WANDS
 ## js/02-fcs-data.js (3) — 
 FCS_DATA:3
 
-## js/02-fcs-rooms.js (100) — FCS room pieces (rule: guides/MAP-ROOMS.md — user 2026-11-20: every room/courtyard is a s…
+## js/02-fcs-rooms.js (100) — 
 FCS_ROOMS:11 fcsRoomAdd:12 FCS_C0:13 fcsRoomOf:14 fcsCut:15
 §16 gen context (called from genFcs)
 fcsRoomK:17 roomWall:27 roomCol:36 roomFloor:38 roomCeil:44 fcsCeilAt:46 fcsCeilClamp:54
@@ -277,14 +277,12 @@ bombTick:347 modeSnap:360
 §385 สร้าง snapshot ส่งให้ทุกเครื่อง
 r1:386 DEFP:388 packP:389 unpackP:390 makeSnap:391 PROF:409 pf:410 hostSent:411 hostLoop:412 HLW:427 pingN:437
 
-## js/15-siege.js (352) — 🏰 โหมดบุกปราสาท (siege) — แบบ Basic ตาม designs/castle-gameplay-concept.md + แผนที่ js/0…
+## js/15-siege.js (352) — 
 SGV:13 SG_TEAM:28
 §29 loot-phase items (designs/castle-gameplay-concept.md "ลำดับแมตช์ใหม่"…
 SG_ITEMS:34 SG_ITEM_T:37 SG_CARRY:38 sgF:39 sgCore:40 sgInZone:41 sgSpawn:42 sgInit:43 sgWallsApply:52 sgWallDmg:56 sgWallHit:62 sgWallEnv:63 sgInput:68 sgStop:76 sgTick:77 sgCoreDown:119 sgPhaseGo:133
 §141 loot phase (after core b = S.ph-1 fell, between the retreat and the n…
-sgLootR:142 sgHasLoot:143 sgLootGo:144 sgLootEnd:152 sgItemsTick:157 sgEnd:169 sgResult:171 sgSnap:177
-§185 บอทเล่นบุกปราสาท: ฝ่ายบุก = เดินไปแกนแล้วร่าย (เจอศัตรูใกล้ = สู้ก่อน…
-SGB:188 sgBotTarget:190
+sgLootR:142 sgHasLoot:143 sgLootGo:144 sgLootEnd:152 sgItemsTick:157 sgEnd:169 sgResult:171 sgSnap:177 SGB:188 sgBotTarget:190
 §200 team plan (user 2026-11-22: don't trickle in one by one)
 SGT:203 sgTeamPlan:204 sgBotMode:225 sgBreachAim:239 sgBotGoal:246 sgBotIn:265 sgBotLoot:274 sgUnstick:286 sgBotThink:299
 
@@ -381,7 +379,7 @@ CITY_STY:181 CITY_VEH:188 cityFacade:190 CITYK:203 _cZ:204 _cT:204 _cR:204 _cC:2
 §259 ตึกไฮไลต์ล้มทั้งตึก (ขั้น 7)
 _ctA:262 _ctB:262 _ctC:262 cityTowerPose:263 cityTowerAnim:271 cityTowerRubble:278 CAREA:292 cityAreaSync:293 cityViewSync:305 cityDebris:349 cityFX:358
 
-## js/28-fcs-build.js (419) — ภาพแผนที่ First Castle Strike (แบบ Basic: กล่อง/ทรงพื้นฐาน ยังไม่มีโมเดลจริง) + ภาพ/HUD โ…
+## js/28-fcs-build.js (419) — 
 buildFcs:5 fcsBridge:41 fcsRubbleMat:64 fcsCore:79 FCSB:105 fcsParView:106 FSH_V:120 FSH_B:121 fcsShellMat:123 fcsBlocks:138 fcsShellBuild:150 fcsParFall:165 fcsFallTick:172 fcsShellView:184 FPILE:192 _rfP:194 _rfQ:194 _rfS:194 fcsFadeList:195 fcsRubbleFade:200 fcsShellFall:204 fcsPileTick:213 fcsShellClear:231 EFS3:234 fcsFences:235 _efC:252 _efM:252 _efS:252 _efZ:252 efsView:253
 §279 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
 SGV3:280 sgClearView:281 sgFileBuild:284 sgViewBuild:290 SGVZR:310 sgBarrier:313 sgSync:327 sgLootSync:350 sgDust:371 sgFx:372
@@ -407,7 +405,7 @@ hallBuild:39 hallEnv:85
 §87 mood: blend by how far the camera is inside the hall rect (3 m soft e…
 hallPre:88 hallPost:97
 
-## js/28-fcs-props.js (156) — FCS room props — look + destruction (user 2026-11-20). Gameplay side: RPK / roomProp in j…
+## js/28-fcs-props.js (156) — 
 FRP:11 FRP_PV:12 FRP_PB:13 frpMat:16
 §26 part builders: local metres, x along the prop, z across, y up. push(g…
 frpBuild:27 fcsPropsBuild:75 fcsPropsView:101 fcsRoomBrkFx:110 FRP_DEB:111 frpDebris:114 _frM:128 _frQ:128 _frS:128 frpSet:129 frpDebrisTick:130
@@ -467,13 +465,17 @@ iceMat:10 iceRim:11 makeIceSword:12 makeIceAxe:31 makeKiteShield:47
 §59 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
 makeIceCrown:63 frostCrown:68 FWS:74 FWA:74 _fwM:75 _fwM2:75 _fwX:75 _fwY:75 _fwZ:75 _fwP:75 _fwS:75 _fwQ:75 _eo:76 _ei:76 _ss:76 fwAim:78 fwWeapons:79 FWP:81 FWT:81 fwChop:82 fwSweep:83 FF_RISE:84 fwIdle:85 fwSwing:88 FWL_N:100 fwLink:101 fwMat:104 SLIDE_POSE:107 _slQ:109 frostSlideHead:110 _slAx:116 frostWandLink:117 frostFX:125
 
-## js/35-sync.js (922) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+## js/35-sync.js (1168) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 §2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
 CPOSE_T:7 _ce:7 _cs:7 _cb:7 _caJ:9 _caJ0:9 AMP_B:10 AMP_S:10 CP_BEND:11 CPOSE:13 _cpT:21 _cpR:21 CP_STEP:22 CPCOL:23 castStyle:24 castStart:25
 §26 ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเห…
-CANIM:31 SKFEET:87 SKANIM:89 skAnim:97 _caT:98 _caR:98 skillPose:99 _g2:139 wandTwoHand:140 characterPoseMix:147 characterStance:148 JUMP_LEGS:155 jumpLegPose:164 jumpCloakTurn:200 jumpCloakEuler:200 jumpCloakPose:201 readyBaseR:220 readyBaseL:220 castBaseR:221 castBaseL:221 jumpElbowPivot:222 clearJumpArms:223 jumpArmPose:229 _caEQ:238 _caEX:238 caElbowL:239 _caRQ:244 caElbowR:245 readyHeadTurn:255 readyHeadParent:255 readyHeadEuler:255 readyHeadPose:256 readyAllowed:272 natureReadyEuler:277 natureReadyArm:277 readyStance:278 jumpShoulders:313 CBLOCK:329 CBLOCK_PATH:330 blockPose:331 castPose:337 lateSkillPose:343 castPose0:344 clearCharacterCast:372 hitRecoilPose:377 syncPlayers:386 syncEnemies:569 projGeo:609 tailGeo:610 _t1:611 makeProj:612 _a:633 _b:633 PJFX:635 syncProj:636 _awT:737 animateWorld:738
-§779 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
-_v:780 toScreen:781 BURNC:789 burnNum:790 NAMETAG:804 nameTag:805 _hsO:811 hudSight:812 SIGHT:825 sightA:826 drawLabels:830 TEXTAG:865 textTag:866 drawTexts:870 HITM:882 DIRI:882 drawXh:884 drawCrosshair:894
+CANIM:31 SKFEET:87 SKANIM:89 skAnim:97 _caT:98 _caR:98 skillPose:99 _g2:139 wandTwoHand:140 characterPoseMix:147 characterStance:148 JUMP_LEGS:155 jumpLegPose:164 jumpCloakTurn:200 jumpCloakEuler:200 jumpCloakPose:201 readyBaseR:220 readyBaseL:220 castBaseR:221 castBaseL:221 jumpElbowPivot:222 clearJumpArms:223 jumpArmPose:229 _caEQ:238 _caEX:238 caElbowL:239 _caRQ:244 caElbowR:245 HEAD_DOWN:255 readyHeadTurn:256 readyHeadParent:256 readyHeadEuler:256 readyHeadPose:257 readyAllowed:273
+§278 Class stances (designs/class-stances.md, user 2026-11-24)
+STANCE_STYLE:285 STANCES:286 STANCE_PICK:306 stanceOf:307 _stQ:308 _stX:308 _stZ:308 stanceSpine:310 stanceSpineOff:314 STANCE_WAND:316 stanceWand:317 _swA:329 _swB:329 _swD:329 _swQ:329 _swQ2:329 _swP:329 stanceWandTip:330 _stV:342 _stV2:342 _stV3:342
+§343 Class look (always-on small VFX that tell the class, STANCES[..].fx)
+stBone:345 stLoc:346 stArmPt:347 ST_TEX:350 stTex:351 ST_MAT:359 stMat:360 stMatNew:361 stRibbon:375 stRibbonSet:377 ST_GEO:378 stBuild:379 _stF:406 _stH:406 stCyc:407 stanceFX:408 classStance:494 natureReadyEuler:516 natureReadyArm:516 readyStance:517 jumpShoulders:555 CBLOCK:571 CBLOCK_PATH:572 blockPose:573 castPose:579 lateSkillPose:585 castPose0:586 clearCharacterCast:614 hitRecoilPose:619 syncPlayers:628 syncEnemies:815 projGeo:855 tailGeo:856 _t1:857 makeProj:858 _a:879 _b:879 PJFX:881 syncProj:882 _awT:983 animateWorld:984
+§1025 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
+_v:1026 toScreen:1027 BURNC:1035 burnNum:1036 NAMETAG:1050 nameTag:1051 _hsO:1057 hudSight:1058 SIGHT:1071 sightA:1072 drawLabels:1076 TEXTAG:1111 textTag:1112 drawTexts:1116 HITM:1128 DIRI:1128 drawXh:1130 drawCrosshair:1140
 
 ## js/36-modes-view.js (171) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 healTex:22 makeItem:23 syncModeObjs:39
@@ -510,8 +512,7 @@ bpOpen:53 bpOn:53 bpKey:53 bpShow:55 bpSync:57 hovEl:127
 §128 หน้าตั้งค่า
 setRow:129 setTog:130 setTab:131 XHC:132 XHN:132 setOpts:133 SET_ICO:135 SET_EN:138 gfxPanel:141 renderSettings:148 drawXhPrev:171 openSettings:172 closeSettings:174 modeIcon:230 modeTitle:231 renderLobby:232
 
-## js/41-debug.js (221) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
-§5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
+## js/41-debug.js (221) — 
 botBrain:6 _obsKeep:50 balArena:51 _balStash:54 balIsolate:55 balReset:58 balDuel:64 balTour:80 balTeamReset:95 balTeam:104 balCoop:132 balSpellTest:148
 §169 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:170 swSetup:171
@@ -692,7 +693,7 @@ SPEC:141 specTarget:142 specCycle:152 drawSpecHint:157
 §165 ป้าย "กำลังต่อใหม่..." (ลูกข่ายหลุดจากโฮสต์ js/10 netLost)
 drawNetBanner:166
 
-## js/53-victory.js (165) — 
+## js/53-victory.js (165) — จบเกม (ผู้ใช้ 2026-10-22): VICTORY / DEFEAT แบบ Overwatch แต่เป็นเวทมนตร์ (สายฟ้า + ไฟ) +…
 VIC:6 VPAL:7 vicKind:17 vicStart:25 vicStop:31 vicSkip:32 vicBolt:36 vicLoop:42
 §108 จอสรุป: MVP + จุดเด่น (ใส่ใน showOver js/26)
 overMvp:117 overBar:127
@@ -708,22 +709,23 @@ POT3:81 potBottle:82 potMesh:91 syncPots:108 potFx:125
 §130 ภาพ: ป้ายตอนฆ่า / จอตอนตาย / อันดับ / มงกุฎค่าหัว
 FFAV:131 MULTI:132 MULTI_TH:132 STREAK:133 pName:134 ffaKf:135 kfSound:150 KINDN:151 drawFFA:152
 
-## js/55-podium.js (82) — 
+## js/55-podium.js (82) — โพเดียมธีมฮอกวอตส์ (ผู้ใช้ 2026-10-22 "podium but make it magician theme hogwart theme")
 POD:6 POD_X:7 POD_H:7 POD_C:7 podStart:8 podStop:29 podPose:37 renderPodium:49
 
-## js/56-progress.js (94) — 
+## js/56-progress.js (94) — เลเวล + สถิติ + ของปลดล็อค (ผู้ใช้ 2026-10-22: "more skin wand cloak unlock as lvl" → เลื…
+§7 var/function (ไม่ใช่ const): หน้าสร้างตัวละครอาจเปิดตอนโหลด (?nointro…
 LV_MAX:8 DEV_MAXLV:11 lvNeed:12 UNLOCKS:13 PROF_ITEMS:23 lvRewards:31 lvNextReward:32 PROG:33 progSave:34 lvOf:35 progLv:36 xpMax:37 wandKillNeed:39 lookLock:40 lookClampLocks:41 progXP:43 progAward:44 progBox:56 progOpen:64 progChip:76
 
-## js/57-tutorial.js (44) — 
+## js/57-tutorial.js (44) — วิธีเล่นแต่ละสาย (ผู้ใช้ 2026-10-22 "สอนเล่นแต่ละสาย") — ปุ่ม "📖 วิธีเล่นสายนี้" ในหน้าเ…
 TUTTIPS:7 tutOpen:12 tutTry:31
 
-## js/58-deathcam.js (60) — 
+## js/58-deathcam.js (60) — กล้องตอนตาย (ผู้ใช้ 2026-10-22): "when ded make cam focus on person who kill u at ur ded …
 DCAM_T1:10 DCAM_T2:10 DCAM_FADE:10 DCAM:11 dcamDie:12 _dcP:19 _dcL:19 dcamCam:20 drawDeathCam:47
 
-## js/59-podroom.js (151) — 
+## js/59-podroom.js (151) — ห้องโถงใหญ่ฮอกวอตส์สำหรับโพเดียม (ผู้ใช้ 2026-10-22 "design me a new lobby for background…
 PODS:9 PODR:11 podRoomBuild:12 podRoomTick:142
 
-## js/60-menu3d.js (397) — 
+## js/60-menu3d.js (397) — เมนูแรก = ลานดวลเวทใต้ดาว ที่ "เดินได้" (ผู้ใช้ 2026-10-22, รอบ 2: "redesign the menu by …
 MENUS:14 MN:17 MN_FOV:19 MN_R:19 _mv:20 _mcp:20 _mcl:20 mnCrest:21 mnTone:25 mnHit:30 mnBuild:32 MNPOP:223 mnToast:243
 §244 สั่งพ่อมด
 mnGo:245 mnWalkTo:248 mnUse:249 mnClose:254
@@ -897,7 +899,7 @@ BRM:9 BFW:12 BSK:13 BROOM_SK:19 broomVert:40 broomMove:53 broomStrike:72 broomSt
 §131 ฝั่งจอ
 broomHead:133 BBEAM:140 _bbGeo:141 broomView:142 broomMountFx:173 broomDismountFx:181 broomBeamFx:183 broomSkFx:199 broomStrikeFx:212 broomFlakFx:217 broomHud:222 broomHudT:223 broomTick:232
 
-## js/70-water-dragon.js (512) — อัลติน้ำ Dragon of the Deep — มังกรน้ำตัวจริงในเกม (ผู้ใช้รับหน้าตา 2026-11-01 จากตัวอย่า…
+## js/70-water-dragon.js (512) — 
 WDG:7 wdgBuild:8 T:9 root:9 fixed:9 rings:10 sides:10 fastNormals:12 geoOf:21 skin:22 faceSkin:50 group:51 head:52 faceTime:54 groundY:54 faceMaterial:55 faceBlue:60 hornBlue:60 ridgeCyan:60 profile:62 headProfile:63 faceGeo:68 fp:68 fc:68 fi:68 faceRings:68 faceSides:68 navy:69 aqua:69 belly:69 flowHi:69 neckBlend:69 headStroke:81 eyePatch:82 waterCrest:97 bodyGeo:123 bodyP:123 bodyUV:123 indices:123 body:129 finShape:131 finGeo:132 finPos:134 finUV:134 finSkin:136 FIN_N:139 fins:139 _fM:140 _fQ:140 _fS:140 _fP:140 limbSkin:142 clawSkin:143 taperedLimb:144 arms:151 bodyLength:161 intro:161 settleWindow:161 tipHz:161 bodyBulk:161 bodyRadius:162 flight:164 quarters:165 step:165 dr:165 dy:165 spiralKnot:166 first:167 entry:167 crest:171 bank:174 corner:174 cruiseEntry:174 quarterHandle:177 leadLength:179 up:183 zAxis:183 yAxis:183 smooth:184 startAt:185 startD:185 startDistance:187 distanceToCruise:187 hoverSpeed:187 fastDuration:187 brakeDuration:187 startRamp:187 fastSpeed:188 progress:189
 §198 ทางบิน: ใช้ระยะทาง (เมตร) ไม่ใช่สัดส่วน เพื่อต่อทางพุ่งลงตอนเล็งเสร็จ…
 dive:199 PA:200 TA:201 DIVE_DOWN:203 DIVE_POUR:203 DIVE_STEP:203 diveDist:204 lastTime:205 lastHeadT:205 headRight:205 bodyState:205 filtered:205 SBUF:209 _sq1:210 _sq2:210 _sv1:210 _sHT:210 _sPrev:210 _sCand:210 _sSide:210 _sUR:210 _sRt:210 _sM:210 _bCos:211 _bSin:211 shape:212 gate:268 rune:270 shadowMat:271 shadow:272 ringMat:273 ring:274 glyphMat:275 glyphHi:276 glyphPath:277 water:284 splashGeometry:287 lowWaveGeometry:288 splashBursts:289 pulse:295 outerRing:296 dropletMat:297 drops:297 transform:299 gateAt:300 sprayMaterial:322 spray:322 curlCurve:324 foamMaterial:325 foam:326 particles:327 foamParticles:327 rand:328 bodySprayAt:329 waveSegments:350 waveSheets:350 wavesAt:357 currentConfigs:372 currentMaterial:379 currentSegments:384 currentSides:384 currentMeshes:384 _cC:393 _cR:393 _cV:393 _cRad:393 currentPointTo:394 currentPoint:401 currentSpray:402 currentParticles:403 _cS:404 _cCos:405 _cSin:405 _cPow:405 currentsAt:406
@@ -910,7 +912,7 @@ PERF:9 perfNetSample:11 perfNetSend:14 perfNetReceive:20 perfNetFrame:25 FRZ:40 
 ## js/72-dash-pose.js (85) — 
 DPOSE:12 DPT:24 _dpQ:25 _dpX:25 _dpP:25 dpMix:26 dpKnees:28 dpStyle:36 DPDBG:41 dashPose:42 dpApply:75
 
-## js/73-tune.js (141) — แผงปรับค่า 🎚️ (F8 / ปุ่ม "ปรับค่า" ในเมนูพัก และหน้าแรก) — ปรับตัวเลขในเกมสดๆ แล้วเซฟลง …
+## js/73-tune.js (141) — 
 TUNE:8 tuneNum:9 tuneBuild:15
 §80 ใช้ / เก็บค่า
 tuneSetVal:81 tuneApplyFile:84 tuneJson:88
@@ -987,4 +989,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(120 files, 37459 lines)
+(120 files, 37705 lines)

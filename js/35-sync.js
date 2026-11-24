@@ -252,14 +252,15 @@ function caElbowR(o,a){const m=o.fileModel;if(!m)return;let k=o.caER;
   W.position.sub(jumpElbowPivot).applyQuaternion(_caRQ).add(jumpElbowPivot);W.quaternion.premultiply(_caRQ);
   T.position.sub(jumpElbowPivot).applyQuaternion(_caRQ).add(jumpElbowPivot);
   k.awp.copy(W.position);k.awq.copy(W.quaternion);k.on=true;}
+let HEAD_DOWN=1;   // sign of 'head pitch down' in readyHeadPose (measured, see class stances)
 const readyHeadTurn=new THREE.Quaternion(),readyHeadParent=new THREE.Quaternion(),readyHeadEuler=new THREE.Euler();
 function readyHeadPose(o,weight,isMe,whip){
   if(!o.readyHeadRest||!weight)return;
   const head=o.lgHead??(o.lgHead=o.fileModel.getObjectByName('head'));
   if(!head)return;
-  const lookPitch=isMe?clamp(pitch-.3,-.39,.45):0;
+  const lookPitch=(isMe?clamp(pitch-.3,-.39,.45):0)*(o.stHead?.4:1)+HEAD_DOWN*(o.stHead||0);
   const target=readyHeadTurn.setFromEuler(readyHeadEuler.set(lookPitch+(whip?.headPitch||0),
-    whip?.headYaw||0,whip?.headRoll||0)).multiply(o.readyHeadRest);
+    whip?.headYaw||0,(whip?.headRoll||0)+(o.stHroll||0))).multiply(o.readyHeadRest);
   target.premultiply(o.g.getWorldQuaternion(readyHeadParent));
   head.parent.getWorldQuaternion(readyHeadParent).invert();
   target.premultiply(readyHeadParent);
@@ -274,8 +275,247 @@ function readyAllowed(o,p,now){
     p.rt||p.ds||p.df||p.hv||p.co||o.dp||o.wsl||o.rag||o.emo||
     p.fr&&(p.fr[3]&1)||p.wn&&p.wn[5]>=1||Math.abs(o.lgHeadYaw||0)>.005);
 }
+// ---------- Class stances (designs/class-stances.md, user 2026-11-24) ----------
+// Each class may own an idle/run stance on top of the shared ready base. Two styles per class while the user picks
+// ('a'/'b'; STANCE_STYLE[path] set by studio/class-stance.js, default 'a'). Angles in rad unless noted.
+//   yaw deg body turn (+ = right shoulder leads) | lean whole-body pitch | spine/chest = waist bend forward (bones) |
+//   rx/rz right arm (x- = raise forward, z- = out to the side) | lx/lz left arm (x- = forward, z+ = out) | ry/ly arm twist | elR/elL elbows |
+//   legR/legL thigh pitch (- = forward) | spR/spL leg spread | kR/kL knees | head pitch (+ = down) | hroll head tilt |
+//   br breath {T s, y, spine, arm} | sway {T s, roll, x} | bounce {T s, y} | run {lean, spine, rx, lx, head} | fx = class look
+const STANCE_STYLE={};
+const STANCES={
+  darkness:{
+    a:{name:'Reaper',yaw:0,lean:.02,spine:.3,chest:.24,rx:.75,rz:-.45,elR:.2,lx:-.28,lz:.5,elL:.5,legR:-.08,legL:.1,spR:.26,spL:.26,kR:.04,kL:.04,
+      head:.62,br:{T:3.6,y:.026,spine:.06,arm:.05},run:{lean:.22,spine:.12,rx:1.25,lx:.55,head:.2},fx:'inkDrip'},
+    b:{name:'Stalker',yaw:-40,lean:0,spine:.22,chest:.14,rx:.45,rz:-.68,elR:.3,lx:-1.0,lz:.25,elL:.55,legR:.18,legL:-.22,spR:.12,spL:.18,kR:.2,kL:0,
+      head:.26,hroll:-.12,br:{T:2.6,y:.014,spine:.03,arm:.03},sway:{T:5,roll:.025,x:.02},run:{lean:.12,spine:.28,rx:.85,lx:-.55,head:.12},fx:'footMist'}},
+  frost:{   // wand in the LEFT hand, forearm across at chin height, wand tip back toward the face; open right hand guides the sword
+    a:{name:'Duelist',yaw:-28,lean:0,spine:-.02,chest:-.05,rx:-.12,rz:-1.05,elR:.18,lx:-1.45,ly:-1.2,lz:.12,elL:2.0,legR:.12,legL:-.18,spR:.16,spL:.16,kR:.05,kL:.05,wandDir:[-.08,.9,-.35],
+      head:-.06,br:{T:4.2,y:.014,spine:.02,arm:.02},run:{lean:.12,spine:.08,rx:.35,lx:-.15,head:.05},wandL:1,fx:'frostBreath'},
+    b:{name:'Guard',yaw:-28,lean:0,spine:.14,chest:.08,rx:-.05,rz:-.55,elR:.3,lx:-1.5,ly:-.9,lz:-.2,elL:1.3,legR:.32,legL:-.4,spR:.24,spL:.2,kR:.42,kL:.3,wandDir:[-.3,-.9,.35],
+      head:.1,br:{T:3,y:.02,spine:.03,arm:.02},run:{lean:.18,spine:.12,rx:.3,lx:-.1,head:.05},wandL:1,fx:'frostGround'}},
+  pyro:{
+    a:{name:'Brawler',yaw:36,lean:.03,spine:.18,chest:.1,rx:-.38,rz:-.28,elR:1.45,lx:-1.0,lz:.28,elL:.95,legR:-.36,legL:.3,spR:.24,spL:.24,kR:.5,kL:.45,
+      head:.12,br:{T:3,y:.01,spine:.02,arm:.02},bounce:{T:.9,y:.03},run:{lean:.2,spine:.1,rx:.25,lx:.1,head:.05},fx:'fireArm'},
+    b:{name:'Torchbearer',yaw:20,lean:0,spine:-.02,chest:-.07,rx:.06,rz:-.16,elR:.32,lx:-.35,lz:1.15,elL:1.55,legR:-.1,legL:.12,spR:.17,spL:.17,kR:.06,kL:.06,
+      head:-.04,br:{T:4,y:.018,spine:.03,arm:.03},run:{lean:.14,spine:.06,rx:.3,lx:.1,head:.04},fx:'fireTorch'}},
+  water:{   // same shared pose (user) - only the class look changes
+    a:{name:'Water spiral',same:1,lzAdd:.42,lxAdd:-.25,fx:'waterSpiral'},   // user 2026-11-24: many water spirals turning round the LEFT arm, outside the sleeve, a clear water orb at the hand with water flowing round inside it
+    b:{name:'Water hem',same:1,fx:'waterHem'}}     // user 2026-11-24: the cloak hem is running water
+};
+const STANCE_PICK={darkness:'b',frost:'b',pyro:'a',water:'a'};   // user's picks 2026-11-24 (Stalker, Guard, Brawler, Water spiral)
+function stanceOf(o){const id=PATHS[o.posePath]?.id,S=STANCES[id];return S?S[STANCE_STYLE[o.posePath]||STANCE_PICK[id]||'a']:null;}
+const _stQ=new THREE.Quaternion(),_stX=new THREE.Vector3(1,0,0),_stZ=new THREE.Vector3(0,0,1);
+// waist bend on the spine + chest bones (the rig only drives arms/thighs), so legs stay straight and the head stays level
+function stanceSpine(o,weight){const m=o.fileModel;if(!m)return;
+  const B=o.stBones||(o.stBones=['spine','chest'].map(n=>m.getObjectByName(n)).filter(Boolean).map(b=>({b,rest:b.quaternion.clone()})));
+  B.forEach((k,i)=>{k.b.quaternion.copy(k.rest).multiply(_stQ.setFromAxisAngle(_stX,o.stSpine[i]*weight)).multiply(_stQ.setFromAxisAngle(_stZ,(o.stRoll||0)*weight*(i?.6:.4)));});
+  o.stOn=true;}
+function stanceSpineOff(o){if(!o.stOn||!o.stBones)return;for(const k of o.stBones)k.b.quaternion.copy(k.rest);o.stOn=false;}
+// Frost holds the wand in the LEFT hand: move the wand mesh + glowing tip to the left arm (and back when the class changes)
+const STANCE_WAND={pos:[.33,.9,0],rot:[0,0,0]};   // left-hand wand offset (hand_L local) + extra turn so the tip points back at the face
+function stanceWand(o,left){
+  const m=o.fileModel;if(!m||!!o.wandL===!!left)return;
+  const hR=m.getObjectByName('hand_R'),hL=m.getObjectByName('hand_L');if(!hR||!hL)return;
+  const from=left?hR:hL,to=left?hL:hR,list=[];from.children.forEach(c=>{if(/^wand_/.test(c.name))list.push(c);});
+  for(const w of list){
+    if(left){w.userData.wR=w.userData.wR||{p:w.position.clone(),q:w.quaternion.clone()};to.add(w);
+      w.position.set(...STANCE_WAND.pos);w.quaternion.copy(w.userData.wR.q).multiply(_stQ.setFromEuler(new THREE.Euler(...STANCE_WAND.rot)));}
+    else{to.add(w);w.position.copy(w.userData.wR.p);w.quaternion.copy(w.userData.wR.q);}}
+  if(o.tip){(left?o.armL:o.armR).add(o.tip);}
+  o.wandL=!!left;}
+// aim the left-hand wand: rotate it about its grip so the tip points along S.wandDir [forward, right, up] (body frame),
+// then put the glowing tip sprite on the real tip
+const _swA=new THREE.Vector3(),_swB=new THREE.Vector3(),_swD=new THREE.Vector3(),_swQ=new THREE.Quaternion(),_swQ2=new THREE.Quaternion(),_swP=new THREE.Vector3();
+function stanceWandTip(o,S){
+  if(!o.wandL||!o.tip||!o.fileModel)return;const hL=stBone(o,'hand_L');const w=hL&&hL.children.find(c=>/^wand_/.test(c.name)&&c.visible);if(!w)return;
+  const E=w.userData.ends||(w.userData.ends=(()=>{w.geometry.computeBoundingBox();const b=w.geometry.boundingBox,cx=(b.min.x+b.max.x)/2,cz=(b.min.z+b.max.z)/2;
+    return {grip:new THREE.Vector3(cx,b.max.y,cz),tip:new THREE.Vector3(cx,b.min.y,cz)};})());
+  w.position.set(...STANCE_WAND.pos);w.quaternion.copy(w.userData.wR.q);w.updateWorldMatrix(true,false);
+  if(S&&S.wandDir){const grip=_swA.copy(E.grip).applyMatrix4(w.matrixWorld),cur=_swB.copy(E.tip).applyMatrix4(w.matrixWorld).sub(grip).normalize();
+    const qb=o.b.getWorldQuaternion(_swQ2),d=S.wandDir;
+    const want=_swD.set(-d[1],d[2],d[0]).applyQuaternion(qb).normalize();   // body frame: +z forward, -x right, +y up
+    const q=_swQ.setFromUnitVectors(cur,want),wp=w.getWorldPosition(_swP).sub(grip).applyQuaternion(q).add(grip);
+    const wq=w.getWorldQuaternion(new THREE.Quaternion()).premultiply(q);
+    w.parent.getWorldQuaternion(_swQ2).invert();w.quaternion.copy(_swQ2.multiply(wq));w.position.copy(w.parent.worldToLocal(wp));w.updateWorldMatrix(true,false);}
+  const p=_stV.copy(E.tip).applyMatrix4(w.matrixWorld);o.tip.parent.worldToLocal(p);o.tip.position.copy(p);}
+const _stV=new THREE.Vector3(),_stV2=new THREE.Vector3(),_stV3=new THREE.Vector3();
+// ---------- Class look (always-on small VFX that tell the class, STANCES[..].fx) ----------
+// Meshes driven by time (not PARTS), so they also show in VFX Studio seeks/GIF export. One group per character under o.g.
+function stBone(o,n){const c=o.stBn||(o.stBn={});if(c.m!==o.fileModel){for(const k in c)delete c[k];c.m=o.fileModel;}return c[n]||(c[n]=o.fileModel?.getObjectByName(n)||null);}
+function stLoc(o,n,out){const b=stBone(o,n);if(!b)return null;b.getWorldPosition(out);return o.g.worldToLocal(out);}
+function stArmPt(o,t,out){   // left arm in o.g space, t 0 = shoulder .. 1 = palm
+  const a=stLoc(o,'upper_arm_L',_stV2),b=stLoc(o,'forearm_L',_stV3);if(!a||!b)return null;
+  if(t<.5)return out.lerpVectors(a,b,t*2);const c=stLoc(o,'hand_L',_stV2);return out.lerpVectors(_stV3,c,(t-.5)*2);}
+const ST_TEX={};
+function stTex(k){if(ST_TEX[k])return ST_TEX[k];const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');
+  if(k==='soft'){const r=g.createRadialGradient(32,32,0,32,32,32);r.addColorStop(0,'rgba(255,255,255,1)');r.addColorStop(.45,'rgba(255,255,255,.55)');r.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=r;g.fillRect(0,0,64,64);}
+  else if(k==='frost'){g.translate(32,32);g.strokeStyle='rgba(255,255,255,.9)';g.lineCap='round';
+    for(let i=0;i<14;i++){const a=i/14*6.283+(i%2)*.2,L=18+(i%3)*5;g.lineWidth=i%2?1:1.6;g.beginPath();g.moveTo(0,0);g.lineTo(Math.cos(a)*L,Math.sin(a)*L);g.stroke();
+      for(const f of [.45,.7]){const x=Math.cos(a)*L*f,y=Math.sin(a)*L*f;g.lineWidth=.8;g.beginPath();g.moveTo(x,y);g.lineTo(x+Math.cos(a+.7)*5,y+Math.sin(a+.7)*5);g.moveTo(x,y);g.lineTo(x+Math.cos(a-.7)*5,y+Math.sin(a-.7)*5);g.stroke();}}
+    const r=g.createRadialGradient(0,0,0,0,0,32);r.addColorStop(0,'rgba(220,245,255,.5)');r.addColorStop(1,'rgba(220,245,255,0)');g.fillStyle=r;g.fillRect(-32,-32,64,64);}
+  else if(k==='ring'){g.strokeStyle='rgba(255,255,255,1)';g.lineWidth=4;g.beginPath();g.arc(32,32,26,0,6.283);g.stroke();}
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return ST_TEX[k]=t;}
+const ST_MAT={};
+function stMat(k){return ST_MAT[k]||(ST_MAT[k]=stMatNew(k));}
+function stMatNew(k){let m;   // own material per piece when each fades on its own (clone() lost the look)
+  if(k==='ink')m=new THREE.MeshBasicMaterial({color:'#050308'});
+  else if(k==='inkSmoke')m=new THREE.SpriteMaterial({map:stTex('soft'),color:'#0a0710',transparent:true,depthWrite:false,opacity:.5});
+  else if(k==='mist')m=new THREE.SpriteMaterial({map:stTex('soft'),color:'#08060d',transparent:true,depthWrite:false,opacity:.9});
+  else if(k==='breath')m=new THREE.SpriteMaterial({map:stTex('soft'),color:'#f2fbff',transparent:true,depthWrite:false,opacity:.6});
+  else if(k==='glint')m=new THREE.SpriteMaterial({map:stTex('soft'),color:'#cdeeff',transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:.9});
+  else if(k==='frost')m=new THREE.MeshBasicMaterial({map:stTex('frost'),color:'#e6f7ff',transparent:true,depthWrite:false,opacity:.6});
+  else if(k==='ice')m=new THREE.MeshStandardMaterial({color:'#bfe8ff',emissive:'#3f9fd8',emissiveIntensity:.5,roughness:.15,metalness:.1,transparent:true,opacity:.85,flatShading:true});
+  else if(k==='water')m=new THREE.MeshStandardMaterial({color:'#3aa6ff',emissive:'#0b4a8a',emissiveIntensity:.6,roughness:.08,metalness:.1,transparent:true,opacity:.8});
+  else if(k==='waterSheet')m=new THREE.MeshStandardMaterial({color:'#46b4ff',emissive:'#1466b0',emissiveIntensity:.75,roughness:.05,metalness:.1,transparent:true,opacity:.72,side:THREE.DoubleSide,depthWrite:false});
+  else if(k==='orb')m=new THREE.MeshStandardMaterial({color:'#7cc9ff',emissive:'#1a6fc0',emissiveIntensity:.55,roughness:.04,metalness:.1,transparent:true,opacity:.45,depthWrite:false});
+  else if(k==='foam')m=new THREE.MeshBasicMaterial({color:'#e8f8ff',transparent:true,opacity:.85,side:THREE.DoubleSide,depthWrite:false});
+  else if(k==='ripple')m=new THREE.MeshBasicMaterial({map:stTex('ring'),color:'#9fdcff',transparent:true,depthWrite:false,opacity:.6});
+  return m;}
+function stRibbon(n,mat){const g=new THREE.BufferGeometry(),idx=[];g.setAttribute('position',new THREE.BufferAttribute(new Float32Array((n+1)*2*3),3).setUsage(THREE.DynamicDrawUsage));
+  for(let i=0;i<n;i++){const a=i*2;idx.push(a,a+1,a+2,a+1,a+3,a+2);}g.setIndex(idx);const m=new THREE.Mesh(g,mat);m.userData.n=n;return m;}
+function stRibbonSet(m,f){const A=m.geometry.attributes.position,a=A.array,n=m.userData.n;for(let i=0;i<=n;i++)f(i/n,a,i*6);A.needsUpdate=true;m.geometry.computeVertexNormals();m.geometry.computeBoundingSphere();}
+const ST_GEO={ball:new THREE.SphereGeometry(1,20,14),drop:new THREE.SphereGeometry(1,10,8),plane:new THREE.PlaneGeometry(1,1),shard:new THREE.OctahedronGeometry(1,0)};
+function stBuild(o,kind){
+  const g=new THREE.Group();g.name='Class look '+kind;g.userData={kind,parts:{}};const P=g.userData.parts;
+  const add=(m,list)=>{m.renderOrder=3;m.frustumCulled=false;g.add(m);(P[list]||(P[list]=[])).push(m);return m;};
+  if(kind==='fireArm'||kind==='fireTorch'){const torch=kind==='fireTorch',n=torch?9:7;
+    for(let i=0;i<n;i++)add(new THREE.Mesh(ST_GEO.ball,fireMat({mode:'ball',disp:.42,flow:[0,1,0],scale:[2.4,2.4,2.4],speed:1.7,int:1.25,op:.92,seed:i*7.3})),'arm');
+    add(new THREE.Mesh(ST_GEO.ball,fireMat({mode:'ball',disp:.5,flow:[0,1,0],scale:[2,2,2],speed:1.9,int:1.35,op:.95,seed:3.1})),'hand');
+    if(torch)add(new THREE.Mesh(ST_GEO.ball,fireMat({mode:'ball',disp:.6,flow:[0,1,0],scale:[1.6,1.6,1.6],speed:2.2,int:1.2,op:.85,seed:9.4})),'hand');
+    for(let i=0;i<6;i++)add(new THREE.Sprite(new THREE.SpriteMaterial({map:stTex('soft'),color:'#ffb347',transparent:true,depthWrite:false,blending:THREE.AdditiveBlending})),'ember');}
+  else if(kind==='inkDrip'){for(let i=0;i<7;i++)add(new THREE.Mesh(ST_GEO.drop,stMat('ink')),'drop');for(let i=0;i<4;i++)add(new THREE.Sprite(stMatNew('inkSmoke')),'wisp');}
+  else if(kind==='footMist'){for(let i=0;i<14;i++)add(new THREE.Sprite(stMatNew('mist')),'mist');}
+  else if(kind==='frostBreath'){for(let i=0;i<4;i++)add(new THREE.Sprite(stMatNew('breath')),'puff');for(let i=0;i<7;i++)add(new THREE.Sprite(stMatNew('glint')),'glint');}
+  else if(kind==='frostGround'){const d=add(new THREE.Mesh(ST_GEO.plane,stMat('frost')),'decal');d.rotation.x=-Math.PI/2;
+    for(let i=0;i<5;i++)add(new THREE.Mesh(ST_GEO.shard,stMat('ice')),'shard');for(let i=0;i<5;i++)add(new THREE.Sprite(stMatNew('glint')),'glint');}
+  if(kind==='waterArm'){for(let i=0;i<2;i++)add(stRibbon(48,stMat('waterSheet')),'strand');add(stRibbon(48,stMat('foam')),'foam');
+    for(let i=0;i<6;i++)add(new THREE.Mesh(ST_GEO.drop,stMat('water')),'bead');for(let i=0;i<5;i++)add(new THREE.Mesh(ST_GEO.drop,stMat('water')),'drip');
+    for(let i=0;i<5;i++){const m=add(new THREE.Mesh(ST_GEO.plane,stMatNew('ripple')),'ripple');m.rotation.x=-Math.PI/2;}}
+  if(kind==='waterSpiral'){for(let i=0;i<4;i++)add(stRibbon(64,stMat('waterSheet')),'strand');for(let i=0;i<2;i++)add(stRibbon(64,stMat('foam')),'foam');
+    add(new THREE.Mesh(ST_GEO.ball,stMat('orb')),'orb');for(let i=0;i<3;i++)add(stRibbon(40,stMat('waterSheet')),'swirl');add(stRibbon(40,stMat('foam')),'swirlFoam');
+    for(let i=0;i<8;i++)add(new THREE.Mesh(ST_GEO.drop,stMat('water')),'bead');}
+  if(kind==='waterHem'){add(stRibbon(CL_NC*2,stMat('waterSheet')),'hem');add(stRibbon(CL_NC*2,stMat('foam')),'foamHem');
+    for(let i=0;i<8;i++)add(new THREE.Mesh(ST_GEO.drop,stMat('water')),'drip');
+    for(let i=0;i<8;i++){const m=add(new THREE.Mesh(ST_GEO.plane,stMatNew('ripple')),'ripple');m.rotation.x=-Math.PI/2;}}
+  if(kind==='waterOrb'||kind==='waterRing'){
+    if(kind==='waterOrb')add(new THREE.Mesh(ST_GEO.ball,stMat('water')),'orb');else for(let i=0;i<7;i++)add(new THREE.Mesh(ST_GEO.drop,stMat('water')),'ring');
+    for(let i=0;i<5;i++)add(new THREE.Mesh(ST_GEO.drop,stMat('water')),'drip');
+    for(let i=0;i<5;i++){const m=add(new THREE.Mesh(ST_GEO.plane,stMatNew('ripple')),'ripple');m.rotation.x=-Math.PI/2;}}
+  o.g.add(g);return g;}
+const _stF=new THREE.Vector3(),_stH=new THREE.Vector3();
+const stCyc=(t,P,i,n)=>((t/P+i/n)%1+1)%1;   // looping age 0..1 for item i of n
+function stanceFX(o,p,now,dt,detail){
+  const S=o.fileModel&&stanceOf(o),kind=S&&!p.dn&&!p.gh&&o.g.visible?S.fx:null;
+  if(o.stLk&&o.stLk.userData.kind!==kind){o.g.remove(o.stLk);o.stLk=null;}
+  if(!kind)return;const g=o.stLk||(o.stLk=stBuild(o,kind)),P=g.userData.parts,t=now/1000;g.visible=true;
+  const B=S.br||{T:3.5},ph=(o.readyBreath||0)*6.283;
+  const fwd=_stF.set(0,0,1).applyQuaternion(o.b.quaternion);fwd.y=0;fwd.normalize();   // facing in o.g space
+  if(kind==='fireArm'||kind==='fireTorch'){const torch=kind==='fireTorch';
+    P.arm.forEach((m,i)=>{const u=.12+.86*i/(P.arm.length-1);if(!stArmPt(o,u,m.position))return;m.position.y+=.03;
+      const r=(torch?.12:.07)+(torch?.05:.02)*u,w=1+.18*Math.sin(t*7.3+i*1.7);m.scale.set(r*w,r*(1.8+.45*Math.sin(t*5.1+i)),r*w);});
+    const h=stLoc(o,'hand_L',_stH);if(h){P.hand[0].position.copy(h).y+=torch?.16:.06;const s=torch?.17:.075;P.hand[0].scale.set(s,s*(torch?2.3:1.8)*(1+.12*Math.sin(t*9)),s);
+      if(P.hand[1]){P.hand[1].position.copy(h).y+=.48+.05*Math.sin(t*6);P.hand[1].scale.set(.11,.3*(1+.2*Math.sin(t*8.3)),.11);}
+      P.ember.forEach((m,i)=>{const a=stCyc(t,1.1,i,6);m.position.copy(h);m.position.x+=Math.sin(i*2.1+t)*.12*a;m.position.z+=Math.cos(i*1.3+t)*.12*a;m.position.y+=.1+a*(torch?.9:.6);
+        m.scale.setScalar(.035*(1-a*.6));m.material.opacity=Math.sin(a*Math.PI);});}
+  }else if(kind==='inkDrip'){
+    const h=stLoc(o,'hand_L',_stH);if(h){const st=g.userData.st||(g.userData.st=P.drop.map(()=>({a:1,x:0,y:0,z:0})));
+      P.drop.forEach((m,i)=>{const a=stCyc(t,1.3,i,P.drop.length),q=st[i];if(a<q.a){q.x=h.x+(Math.random()-.5)*.07;q.y=h.y-.06;q.z=h.z+(Math.random()-.5)*.07;}q.a=a;
+        const fall=a<.25?a/.25*.03:.03+(a-.25)*(a-.25)*2.4;m.position.set(q.x,q.y-fall,q.z);const sz=.03*(a<.25?.5+a*2:1-(a-.25)*.6);m.scale.set(sz,sz*(a<.25?1+a*3:1.9),sz);m.visible=m.position.y>.02;});
+      P.wisp.forEach((m,i)=>{const a=stCyc(t,2.2,i,4),an=t*.9+i*1.57;m.position.set(h.x+Math.cos(an)*.09,h.y-.04+a*.18,h.z+Math.sin(an)*.09);m.scale.setScalar(.12+a*.2);m.material.opacity=.45*Math.sin(a*Math.PI);});}
+  }else if(kind==='footMist'){
+    P.mist.forEach((m,i)=>{const a=stCyc(t,4.5,i,P.mist.length),an=i*2.4+t*.15,r=.3+a*.95;m.position.set(Math.cos(an)*r,.08+a*.22,Math.sin(an)*r);
+      m.scale.set(.8+a*1.1,.35+a*.45,1);m.material.opacity=.9*Math.sin(a*Math.PI);});
+  }else if(kind==='frostBreath'){
+    const hd=stLoc(o,'head',_stH);if(hd){const cyc=(t*6.283/B.T+ph)/6.283,k=((cyc-.5)%1+1)%1;   // puffs on the falling half of the breath (exhale)
+      P.puff.forEach((m,i)=>{const a=k*2-i*.08;const on=a>0&&a<1;m.visible=on;if(!on)return;
+        m.position.copy(hd).addScaledVector(fwd,.18+a*.42);m.position.y+=-.1+a*.06;m.scale.setScalar(.06+a*.26);m.material.opacity=.55*(1-a)*Math.min(1,a*6);});}
+    P.glint.forEach((m,i)=>{const an=i*.9+t*.25,r=.55+.15*Math.sin(i*3.1);m.position.set(Math.cos(an)*r,.5+((i*.37+t*.08)%1)*1.6,Math.sin(an)*r);
+      m.scale.setScalar(.075);m.material.opacity=.3+.7*Math.max(0,Math.sin(t*3+i*2.3));});
+  }else if(kind==='frostGround'){
+    const d=P.decal[0];d.position.set(0,.025,0);const s=1.5+.06*Math.sin(t*1.3);d.scale.set(s,s,s);d.rotation.z=t*.05;d.material.opacity=.5+.1*Math.sin(t*2);
+    const h=stLoc(o,'forearm_L',_stH);if(h)P.shard.forEach((m,i)=>{const an=t*1.4+i*1.257;m.position.set(h.x+Math.cos(an)*.16,h.y+.03*Math.sin(t*2+i),h.z+Math.sin(an)*.16);
+      m.scale.set(.018,.045,.018);m.rotation.set(t+i,t*1.3,i);});
+    P.glint.forEach((m,i)=>{const an=i*1.3+t*.3,r=.3+.5*((i*.29)%1);m.position.set(Math.cos(an)*r,.05+.04*i,Math.sin(an)*r);m.scale.setScalar(.04);m.material.opacity=Math.max(0,Math.sin(t*2.6+i*2));});
+  }
+  if(kind==='waterSpiral'){   // left arm: shoulder -> elbow -> hand; strands spiral outside the sleeve, orb at the hand
+    const sh=stLoc(o,'upper_arm_L',_stH),el=stLoc(o,'forearm_L',_swA),hd=stLoc(o,'hand_L',_swB);
+    if(sh&&el&&hd){const orbC=_swD.copy(hd).addScaledVector(_stV3.copy(hd).sub(el).normalize(),.13);
+      const path=(u,out)=>u<.45?out.lerpVectors(sh,el,u/.45):out.lerpVectors(el,orbC,(u-.45)/.55);
+      const T0=g.userData.v0||(g.userData.v0=[0,1,2,3,4].map(()=>new THREE.Vector3())),up=T0[4].set(0,1,0);
+      const strand=(m,ph,rad,w,turns,spd)=>stRibbonSet(m,(u,a,k)=>{path(Math.max(0,u-.01),T0[0]);path(Math.min(1,u+.01),T0[1]);const tan=T0[1].sub(T0[0]).normalize();
+        const N1=T0[2].crossVectors(tan,up);if(N1.lengthSq()<1e-4)N1.set(1,0,0);N1.normalize();const N2=T0[3].crossVectors(tan,N1);
+        const an=u*6.283*turns-t*spd+ph,r=rad*(1+.1*Math.sin(t*4+u*11+ph))*(u>.85?1-(u-.85)/.15*.6:1),ww=w*Math.min(1,u*10)*Math.min(1,(1-u)*10);
+        const c=path(u,_stV2).addScaledVector(N1,Math.cos(an)*r).addScaledVector(N2,Math.sin(an)*r);
+        a[k]=c.x-tan.x*ww;a[k+1]=c.y-tan.y*ww-ww*.6;a[k+2]=c.z-tan.z*ww;a[k+3]=c.x+tan.x*ww;a[k+4]=c.y+tan.y*ww+ww*.6;a[k+5]=c.z+tan.z*ww;});
+      strand(P.strand[0],0,.19,.03,3.2,5);strand(P.strand[1],1.57,.2,.026,3.2,5);strand(P.strand[2],3.14,.22,.024,2.4,-3.6);strand(P.strand[3],4.71,.17,.02,4,6.5);
+      strand(P.foam[0],.8,.205,.008,3.2,5);strand(P.foam[1],3.9,.225,.007,2.4,-3.6);
+      const ob=P.orb[0];ob.position.copy(orbC);ob.scale.setScalar(.12*(1+.05*Math.sin(t*3.3)));
+      // water running round inside the orb: rings at different tilts turning
+      const ring=(m,tilt,yaw,rad,w,spd)=>stRibbonSet(m,(u,a,k)=>{const an=u*6.283*.85+t*spd,x=Math.cos(an)*rad,y0=Math.sin(an)*rad;
+        const cy=Math.cos(tilt),sy=Math.sin(tilt),cz=Math.cos(yaw),sz=Math.sin(yaw);let px=x,py=y0*cy,pz=y0*sy;const qx=px*cz-pz*sz,qz=px*sz+pz*cz;
+        const ww=w*Math.sin(u*Math.PI);a[k]=orbC.x+qx;a[k+1]=orbC.y+py-ww;a[k+2]=orbC.z+qz;a[k+3]=orbC.x+qx*(1+ww*6);a[k+4]=orbC.y+py+ww;a[k+5]=orbC.z+qz*(1+ww*6);});
+      ring(P.swirl[0],.3,t*.4,.085,.02,4.2);ring(P.swirl[1],1.3,1.2+t*.3,.08,.018,-3.6);ring(P.swirl[2],2.2,2.4,.07,.016,5.1);ring(P.swirlFoam[0],.8,t*.5,.09,.006,4.6);
+      P.bead.forEach((m,i)=>{const u=stCyc(t,1.8,i,8),an=u*6.283*3.2-t*5+i*.8;path(u,m.position);m.position.x+=Math.cos(an)*.2;m.position.z+=Math.sin(an)*.2;m.position.y+=Math.sin(an*1.3)*.05;m.scale.setScalar(.02+.008*(i%3));});}
+  }else if(kind==='waterArm'){   // two water strands + a foam line spiral from the elbow over the hand and up the wand to its tip
+    const e=stLoc(o,'forearm_R',_stH),h=stLoc(o,'hand_R',_swA),tip=o.tip?o.g.worldToLocal(o.tip.getWorldPosition(_swB)):null;
+    if(e&&h&&tip){const path=(u,out)=>u<.45?out.lerpVectors(e,h,u/.45):out.lerpVectors(h,tip,(u-.45)/.55);
+      const T0=new THREE.Vector3(),T1=new THREE.Vector3(),N1=new THREE.Vector3(),N2=new THREE.Vector3(),c=new THREE.Vector3(),up=new THREE.Vector3(0,1,0);
+      const strand=(m,ph,rad,w)=>stRibbonSet(m,(u,a,k)=>{path(Math.max(0,u-.01),T0);path(Math.min(1,u+.01),T1);const tan=T1.sub(T0).normalize();
+        N1.crossVectors(tan,up);if(N1.lengthSq()<1e-4)N1.set(1,0,0);N1.normalize();N2.crossVectors(tan,N1);
+        const an=u*6.283*2.6-t*5+ph,r=rad*(1-.5*u)*(1+.12*Math.sin(t*6+u*9)),ww=w*(1-.6*u)*Math.min(1,u*12)*Math.min(1,(1-u)*14);
+        path(u,c).addScaledVector(N1,Math.cos(an)*r).addScaledVector(N2,Math.sin(an)*r);
+        a[k]=c.x-tan.x*0;a[k+1]=c.y-ww;a[k+2]=c.z;a[k+3]=c.x;a[k+4]=c.y+ww;a[k+5]=c.z;});
+      strand(P.strand[0],0,.13,.04);strand(P.strand[1],3.14,.12,.032);strand(P.foam[0],1.6,.14,.009);
+      P.bead.forEach((m,i)=>{const u=stCyc(t,1.4,i,6),an=u*6.283*3.2-t*5+i;path(u,m.position);m.position.x+=Math.cos(an)*.09*(1-.55*u);m.position.z+=Math.sin(an)*.09*(1-.55*u);m.scale.setScalar(.022*(1-.5*u));});
+      P.drip.forEach((m,i)=>{const a=stCyc(t,1.2,i,5),st=g.userData.dr||(g.userData.dr=[]);if(!st[i]||a<st[i].a)st[i]={a,x:h.x+(Math.random()-.5)*.1,y:h.y-.04,z:h.z+(Math.random()-.5)*.1};st[i].a=a;
+        const y=st[i].y-a*a*3.2;m.visible=y>.02;m.position.set(st[i].x,Math.max(.02,y),st[i].z);m.scale.set(.016,.028,.016);
+        const r=P.ripple[i],land=Math.sqrt(st[i].y/3.2),b=(a-land)/(1-land);r.position.set(st[i].x,.02,st[i].z);r.visible=b>0&&b<.7;r.scale.setScalar(.04+b*.3);r.material.opacity=.6*(1-b/.7);});}
+  }else if(kind==='waterHem'){   // the cloak hem turns to running water: a wavy water band + foam line on the real cloth hem, streams falling off it
+    const C=o.cloth;const hem=g.userData.hem||(g.userData.hem=new Float32Array(CL_NC*3));let ok=false;
+    if(C&&C.P&&C.NR){const b=(C.NR-1)*CL_NC*3;for(let j=0;j<CL_NC;j++){_swA.set(C.P[b+j*3],C.P[b+j*3+1],C.P[b+j*3+2]);o.g.worldToLocal(_swA);hem[j*3]=_swA.x;hem[j*3+1]=_swA.y;hem[j*3+2]=_swA.z;}ok=true;}
+    else for(let j=0;j<CL_NC;j++){const an=o.b.rotation.y+Math.PI+(j/(CL_NC-1)-.5)*5.6;hem[j*3]=Math.sin(an)*.42;hem[j*3+1]=.14;hem[j*3+2]=Math.cos(an)*.42;ok=true;}
+    if(ok){const hp=(u,out)=>{const f=u*(CL_NC-1),j=Math.min(CL_NC-2,Math.floor(f)),k=f-j;return out.set(lerp(hem[j*3],hem[j*3+3],k),lerp(hem[j*3+1],hem[j*3+4],k),lerp(hem[j*3+2],hem[j*3+5],k));};
+      const band=(m,top,bot,ph)=>stRibbonSet(m,(u,a,k)=>{hp(u,_swD);const w=.012*Math.sin(u*40+t*6+ph);a[k]=_swD.x;a[k+1]=_swD.y+top+w;a[k+2]=_swD.z;a[k+3]=_swD.x;a[k+4]=Math.max(.01,_swD.y-bot+w*.5);a[k+5]=_swD.z;});
+      band(P.hem[0],.11,.07,0);band(P.foamHem[0],.115,-.1,1.7);
+      P.drip.forEach((m,i)=>{const a=stCyc(t,.9,i,8),u=((i*.618)%1);hp(u,_swD);const y0=Math.max(.05,_swD.y-.04),y=y0-a*a*2.6;m.visible=y>.02;m.position.set(_swD.x,Math.max(.02,y),_swD.z);m.scale.set(.024,.05,.024);
+        const r=P.ripple[i],land=Math.sqrt(y0/2.6),b=(a-land)/(1-land);r.position.set(_swD.x,.02,_swD.z);r.visible=b>0&&b<.7;r.scale.setScalar(.05+b*.32);r.material.opacity=.6*(1-b/.7);});}
+  }
+  if(kind==='waterOrb'||kind==='waterRing'){
+    const h=stLoc(o,'hand_L',_stH);
+    if(h&&P.orb){const m=P.orb[0];m.position.copy(h);m.position.addScaledVector(fwd,.08);m.position.y+=.06+.03*Math.sin(t*2.2);m.scale.set(.13*(1+.08*Math.sin(t*5.1)),.13*(1+.08*Math.sin(t*4.3+1)),.13*(1+.08*Math.sin(t*3.7+2)));}
+    if(h&&P.ring)P.ring.forEach((m,i)=>{const an=t*2.4+i*6.283/7;m.position.set(h.x+Math.cos(an)*.18,h.y+.03+.04*Math.sin(an*2),h.z+Math.sin(an)*.18);m.scale.setScalar(.042+.014*(i%3));});
+    // drops off the back/side cloak hem, a small ripple where each lands
+    P.drip.forEach((m,i)=>{const a=stCyc(t,1.6,i,5),side=(i/4-.5)*2.2,back=_stV2.copy(fwd).multiplyScalar(-.3).add(_stV3.set(fwd.z,0,-fwd.x).multiplyScalar(side*.22));
+      const fallT=.35,y0=.24;m.position.set(back.x,a<fallT?y0-(a/fallT)*(a/fallT)*y0:-1,back.z);m.visible=a<fallT;m.scale.set(.018,.03,.018);
+      const r=P.ripple[i];r.position.set(back.x,.02,back.z);const b=(a-fallT)/(1-fallT);r.visible=b>0&&b<.6;r.scale.setScalar(.05+b*.35);r.material.opacity=.6*(1-b/.6);});
+  }
+}
+function classStance(o,S,v,now,weight,stride,step,forward,rise){
+  const run=stride,ph=(o.readyBreath||0)*6.283,B=S.br||{T:3.5,y:.015,spine:.03,arm:.03};
+  const br=Math.sin(now/1000*6.283/B.T+ph),sw=S.sway?Math.sin(now/1000*6.283/S.sway.T+ph*.7):0,bn=S.bounce?Math.abs(Math.sin(now/1000*3.1416/S.bounce.T+ph)):0,R=S.run||{};
+  o.b.rotation.y=lerp(o.b.rotation.y,(S.yaw??40)*Math.PI/180,weight);
+  const lean=(S.lean||0)+(R.lean||0)*run*(.4+.6*forward);
+  o.b.rotation.x=lerp(o.b.rotation.x,lean,weight);
+  o.b.rotation.z=lerp(o.b.rotation.z,S.sway?S.sway.roll*sw*(1-run):0,weight);
+  o.b.position.x=lerp(o.b.position.x,S.sway?S.sway.x*sw*(1-run):0,weight);
+  const kneeDrop=.09*((S.kR||0)+(S.kL||0))*(1-run);
+  o.b.position.y=lerp(o.b.position.y,-.045-kneeDrop+B.y*br*(1-.6*run)+(S.bounce?S.bounce.y*bn*(1-run):0)+rise*run,weight);
+  const swing=step*run;
+  o.armR.rotation.set(lerp(o.armR.rotation.x,lerp(S.rx,R.rx??S.rx,run)-B.arm*br+.3*swing,weight),(S.ry||0)*weight,lerp(o.armR.rotation.z,S.rz,weight));
+  o.armL.rotation.set(lerp(o.armL.rotation.x,lerp(S.lx,R.lx??S.lx,run)+B.arm*br-.3*swing,weight),(S.ly||0)*weight,lerp(o.armL.rotation.z,S.lz,weight));   // ry/ly = upper-arm twist (turns the elbow bend plane)
+  o.readyElbowL=S.elL+.04*br;o.readyElbowR=S.elR;
+  for(let side=0;side<2;side++){const leg=o.legs[side].rotation,base=side?S.legL:S.legR;
+    leg.x=lerp(leg.x,-lean+base*(1-run*.7)+(side?step:-step)*run*.55,weight);   // -lean keeps the legs upright under a body lean
+    leg.z=lerp(leg.z,(side?1:-1)*(side?S.spL:S.spR)*(1-.55*run),weight);}
+  o.stK=[(S.kR||0)*(1-run),(S.kL||0)*(1-run)];
+  o.stSpine=[(S.spine||0)+B.spine*br*.4+(R.spine||0)*run*.5,(S.chest||0)+B.spine*br+(R.spine||0)*run*.5];
+  o.stRoll=S.sway?S.sway.roll*.8*sw*(1-run):0;
+  o.stHead=(S.head||0)*(1-run)+(R.head||0)*run;o.stHroll=(S.hroll||0)*(1-run);
+}
 const natureReadyEuler=new THREE.Euler(),natureReadyArm=new THREE.Quaternion();
 function readyStance(o,v,now,weight,nature,whip,whipWeight){
+  let stS;
   const stride=clamp(v.sp/6,0,1),step=Math.sin(o.walk),forward=clamp(v.lvz/4,0,1),lean=(.06+.15*forward)*stride;
   const t=(now*.00028+(o.readyBreath??=(now*.00013)%1))%1;
   const breath=t<.34?_cs(t/.34):t<.46?1:t<.84?1-_cs((t-.46)/.38):0;
@@ -297,11 +537,13 @@ function readyStance(o,v,now,weight,nature,whip,whipWeight){
       lerp(left.z,lerp(.27,.31,stride)+.041*sway+.42*freeOut+.09*freeBack,weight));
     o.readyElbowL=lerp(1.30+.04*breath,1.24-.095*sway,stride)-.48*freeOut+.06*freeBack;
     o.readyElbowR=lerp(.28,.20,stride);
+  }else if((stS=stanceOf(o))&&!stS.same){classStance(o,stS,v,now,weight,stride,step,forward,rise);return;
   }else{
     o.armR.rotation.set(lerp(o.armR.rotation.x,-1.06-lean*.9-.022*breath,weight),0,lerp(o.armR.rotation.z,.27,weight));
     o.armL.rotation.set(lerp(o.armL.rotation.x,.11+.055*breath*(1-stride)-.23*step*stride,weight),0,
       lerp(o.armL.rotation.z,.21+.035*breath+.045*step*stride,weight));
     o.readyElbowL=.73+.11*breath-.13*step*stride;
+    if(stS?.lzAdd){o.armL.rotation.z+=stS.lzAdd*weight;o.armL.rotation.x+=(stS.lxAdd||0)*weight;}   // shared pose, free arm held a little out (Water spiral)
     o.readyElbowR=1.76+lean*.75;
   }
   for(let side=0;side<2;side++){
@@ -524,6 +766,7 @@ function syncPlayers(P,mode,now,dt){
     }
     const rightReady=ready*(activeWhip?1-whipWeight:1);
     o.readyWeight=rightReady;
+    o.stSpine=o.stK=null;o.stHead=o.stHroll=0;
     if(ready)readyStance(o,v,now,ready,nature,activeWhip,whipWeight);
     const jumpWeight=jumpLegPose(o,p,dt,domeKnee,airPhase,hover);
     const liftOff=airPhase===1?_cs(clamp((o.jumpLegs?.time||0)/.105,0,1)):1;
@@ -531,10 +774,11 @@ function syncPlayers(P,mode,now,dt){
     jumpArmPose(o,jumpArmWeight);
     hitRecoilPose(o,dt);
     if(o.rig){
+      if(ready&&o.stSpine)stanceSpine(o,ready);else stanceSpineOff(o);
       rigSync(o,dt,false,Math.max(jumpWeight,ready),Math.max(jumpArmWeight,ready));windForearm(o);stormBowForearm(o);earthFistForearm(o);natForearmR(o);
       if(domeKnee)dpKnees(o,0,domeKnee);
       else if(jumpWeight||o.caJ||ready){
-        const kneeR=(o.caJ?.[0]||0)+.18*ready,kneeL=(o.caJ?.[1]||0)+.13*ready;
+        const kneeR=(o.caJ?.[0]||0)+(o.stK?o.stK[0]:.18)*ready,kneeL=(o.caJ?.[1]||0)+(o.stK?o.stK[1]:.13)*ready;
         dpKnees(o,lerp(kneeR,o.jumpLegs?.p[4]||0,jumpWeight),lerp(kneeL,o.jumpLegs?.p[5]||0,jumpWeight));
       }
       if(!authoredElbows){
@@ -553,6 +797,8 @@ function syncPlayers(P,mode,now,dt){
     if(activeWhip||o.natureWhipView)natureWhipView(o,activeWhip);
     natureCharacter(o,p,now,dt,detail);
     darknessCharacter(o,p,myP,now);
+    stanceFX(o,p,now,dt,detail);
+    if(o.wandLM!==o.fileModel){o.wandL=false;o.wandLM=o.fileModel;}stanceWand(o,stanceOf(o)?.wandL);stanceWandTip(o,stanceOf(o));
     o.tip.getWorldPosition(o.tipW||(o.tipW=new THREE.Vector3()));o.tipWT=performance.now();
     frostWandLink(o,now);
     if(detail&&o.wspk)wandSparks(o,dt);

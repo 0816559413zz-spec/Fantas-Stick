@@ -72,6 +72,7 @@ function stCam(c){if(ST.cam==='game'||!ST.fx)return;const A=stAnchor();if(!A)ret
   if(ST.name===ST_DARKNESS_UNMARKED_CHASE&&ST.cam==='orbit')T.y+=1.12;
   const f=[Math.cos(A.a),Math.sin(A.a)],r=[-Math.sin(A.a),Math.cos(A.a)];
   if(ST.cam==='side')c.position.set(T.x+r[0]*ST.dist,T.y+2.2*ST.dist/9,T.z+r[1]*ST.dist);
+  else if(ST.cam==='left')c.position.set(T.x-r[0]*ST.dist,T.y+2.2*ST.dist/9,T.z-r[1]*ST.dist);   // other side (class stance previews)
   else if(ST.cam==='front')c.position.set(T.x+f[0]*ST.dist,T.y+2*ST.dist/9,T.z+f[1]*ST.dist);
   else if(ST.cam==='top')c.position.set(T.x+0.01,T.y+22,T.z+0.01);
   else{const o=ST.orb;c.position.set(T.x+Math.cos(o.yaw)*Math.cos(o.pitch)*o.dist,T.y+Math.sin(o.pitch)*o.dist,T.z+Math.sin(o.yaw)*Math.cos(o.pitch)*o.dist);}

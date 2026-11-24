@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-24 — **Class stances (user picked):** Darkness Stalker, Frost Guard with the wand in the left hand, Fire Brawler with a burning left arm, Water spirals + orb round the left arm. Two styles per class kept in `STANCES` (js/35-sync.js); preview fx `stance/*` in VFX Studio.
 - 2026-11-24 — **Broken wall stubs are walkable.** When the top of a breakable wall is shot away, the low piece left behind no longer pushes you out: you can step onto it and walk through the gap; full-height parts still block.
 - 2026-11-24 — **Modular ruin kit in Map Builder.** 31 ruin pieces (walls, pillars, high-ground platforms, stairs, ramps, ledges, a bridge you can walk under, arches, rubble) under "Ruin (modular)". Players can stand on platforms/bridges and use walls as cover. Sample map ruin-demo. Steep stairs/ramps made in Map Builder are now climbable.
 - 2026-11-24 — **Paint shows real surface pictures.** Each ground surface button in Map Builder's Paint tool now shows a small picture taken in the game (grass blades, cobbles, cracked stone and so on) instead of a flat colour.
