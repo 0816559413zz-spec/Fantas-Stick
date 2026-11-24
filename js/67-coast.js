@@ -54,14 +54,17 @@ function coastSky(){
   m.onBeforeRender=()=>{m.position.copy(cam.position);U.uT.value=performance.now()/1000;if(scene.fog)U.uFog.value.copy(scene.fog.color);};
   COAST_SKY=m;return m;
 }
+// how far the backdrop reaches from the map centre (m): Map Builder bd.E past the edge • camera far / sea fade / look fog follow it (default 700 m camera)
+function bdReach(id){const fm=MAPS[id]&&MAPS[id].fm,b=fm&&fm.bd&&fm.bd.on&&fm.bd.hg?fm.bd:null;return b?Math.max(MW,MH)*S3/2+(+b.E||600):0;}
+function bdFar(id){const R=bdReach(id);return Math.min(6000,Math.max(700,R+150));}
 // map look (sky / fog / light) — every buildWorld (cached maps too), after setSky
-function backdropLook(id){const fm=MAPS[id]&&MAPS[id].fm,fb=fm&&fm.bd&&fm.bd.on?fm.bd:null,B=BACKDROP&&BACKDROP[id],L=fb?(fb.look==='overcast'?BACKDROP.fcs.look:fb.look==='day'?BACKDROP.fcs.day:null):B&&B.look;if(typeof FF!=='undefined'){FF.ovc=0;FF.base=null;FF.on=false;}
+function backdropLook(id){const vf=bdFar(id);if(cam.far!==vf){cam.far=vf;cam.updateProjectionMatrix();}const fm=MAPS[id]&&MAPS[id].fm,fb=fm&&fm.bd&&fm.bd.on?fm.bd:null,B=BACKDROP&&BACKDROP[id],L=fb?(fb.look==='overcast'?BACKDROP.fcs.look:fb.look==='day'?BACKDROP.fcs.day:null):B&&B.look;if(typeof FF!=='undefined'){FF.ovc=0;FF.base=null;FF.on=false;}
   if(COAST_SKY)COAST_SKY.visible=false;SKY.mesh.visible=true;if(typeof paintOn==='function'&&paintOn(id))return;   // Painterly on: keep its day sky/fog/light (js/77)
   if(!L)return;   // forest fog blend re-captures its base from this look
   if(L.sky&&typeof FF!=='undefined'&&FF.sky&&FF.sky.parent===world){const U=FF.sky.material.uniforms;FF.ovc=1;   // castle map's own cloud sky → overcast blue-grey everywhere
     U.uK.value=1;FF.sky.visible=false;}   // its cloud sky is replaced by the coast sky dome (FF.ovc still hides the sun)
   if(L.sky){const k=coastSky();if(k.parent!==scene)scene.add(k);k.visible=true;SKY.mesh.visible=false;SKY.sun.visible=false;SKY.moon.visible=false;SKY.stars.visible=false;}
-  if(L.fog){scene.fog.color.set(L.fog[0]);scene.fog.near=L.fog[1];scene.fog.far=L.fog[2];}
+  if(L.fog){const s=Math.max(1,vf/700);scene.fog.color.set(L.fog[0]);scene.fog.near=L.fog[1]*s;scene.fog.far=L.fog[2]*s;}   // far reach → look fog stretched with the camera
   if(L.fog&&typeof BFA!=='undefined'){const F=scene.fog;BFA.key=builtKey;BFA.base={c:F.color.clone(),near:F.near,far:F.far,exp:gl.toneMappingExposure,bg:scene.background&&scene.background.isColor?scene.background.clone():null};}   // js/44 battlefield air rewrites the fog every frame from its snapshot → snapshot this look
   if(L.hemi){hemi.color.set(L.hemi[0]);hemi.groundColor.set(L.hemi[1]);hemi.intensity=L.hemi[2];}
   if(L.sun){moonL.color.set(L.sun[0]);moonL.intensity=L.sun[1];}
@@ -143,9 +146,9 @@ function bdGridSrc(J,hx0,hz0,low){
       y=stk(x,z,y,o);o.sd=Math.min(bil(sd,x,z),o.ds);o.d=-1e3;
       o.w=Math.min(1,Math.max(0,(sl-0.8)/0.8))*(sea!=null?Math.min(1,Math.max(0,(y-sea+3)/5)):1);
       o.si=sf[Math.min(ny-1,Math.max(0,Math.round((z-Z0)/c)))*nx+Math.min(nx-1,Math.max(0,Math.round((x-X0)/c)))];return y;},
-    trees(){const P=[],cap=low?1200:4500,o={},yAt=(x,z)=>src.h(x,z,o),sl=sea!=null?sea:-1e9;
+    trees(){const P=[],cap=low?1200:4500,o={},yAt=(x,z)=>src.h(x,z,o),sl=sea!=null?sea:-1e9,nt=Math.min(32,Math.max(2,Math.round(2*(c/5)*(c/5))));   // tries per cell: same trees per m² on a coarse grid
       for(let j=0;j<ny&&P.length<cap*4;j++)for(let i=0;i<nx;i++){const k=j*nx+i,t=tr[k];if(!t)continue;
-        for(let q=0;q<2;q++){const id=k*2+q;if(bdHsh(id,991)>=t/255*0.8)continue;
+        for(let q=0;q<nt;q++){const id=nt===2?k*2+q:k*64+q;if(bdHsh(id,991)>=t/255*0.8)continue;
           const x=X0+(i+bdHsh(id,992)-0.5)*c,z=Z0+(j+bdHsh(id,994)-0.5)*c;if(Math.max(Math.abs(x)-hx0,Math.abs(z)-hz0)<8)continue;
           const y=yAt(x,z);if(y<sl+0.8)continue;if(Math.max(Math.abs(yAt(x+2,z)-yAt(x-2,z)),Math.abs(yAt(x,z+2)-yAt(x,z-2)))/4>1.1)continue;
           P.push(x,z,y,0.9+bdHsh(id,993)*0.9);if(P.length>=cap*4)break;}}
@@ -153,20 +156,20 @@ function bdGridSrc(J,hx0,hz0,low){
   return src;
 }
 // ring grid around the play area: t = along a rounded rect perimeter, r = outward along its normal
-function coastGrid(hx0,hz0,sk,low){
+function coastGrid(hx0,hz0,sk,low,reach){
   const bx=hx0+sk-2,bz=hz0+sk-2,rc=22,hd=BD_LOD.on&&!low,sp=low?7:hd?3:4.5,ca=low?16:hd?32:24,pts=[];
   const side=(ax,az,bx2,bz2,nx,nz)=>{const L=Math.hypot(bx2-ax,bz2-az),n=Math.max(2,Math.round(L/sp));for(let i=0;i<n;i++){const t=i/n;pts.push([ax+(bx2-ax)*t,az+(bz2-az)*t,nx,nz]);}};
   const arc=(cx,cz,a0)=>{for(let i=0;i<ca;i++){const a=a0+i/ca*Math.PI/2,c=Math.cos(a),s=Math.sin(a);pts.push([cx+c*rc,cz+s*rc,c,s]);}};
   // clockwise in screen (x right, z down): north edge (-z) west→east, NE corner, east edge, SE, south east→west, SW, west, NW
   side(-bx+rc,-bz,bx-rc,-bz,0,-1);arc(bx-rc,-bz+rc,-Math.PI/2);side(bx,-bz+rc,bx,bz-rc,1,0);arc(bx-rc,bz-rc,0);
   side(bx-rc,bz,-bx+rc,bz,0,1);arc(-bx+rc,bz-rc,Math.PI/2);side(-bx,bz-rc,-bx,-bz+rc,-1,0);arc(-bx+rc,-bz+rc,Math.PI);
-  const rs=[];let r=0;while(r<1300){rs.push(r);r+=r<62?(low?2.8:1.6):r<110?(low?5:3.5):Math.min(80,3.5*Math.pow(1.12,(r-110)/6));}   // finer rows over the cliff face and its base
+  const rs=[];let r=0;const rEnd=Math.max(1300,(reach||0)+120);while(r<rEnd){rs.push(r);r+=r<62?(low?2.8:1.6):r<110?(low?5:3.5):Math.min(80,3.5*Math.pow(1.12,(r-110)/6));}   // finer rows over the cliff face and its base
   return {pts,rs};
 }
 function bdCoast(id,B){
   const hx0=MW/2*S3,hz0=MH/2*S3,fm=MAPS[id]&&MAPS[id].fm,low=!gq('detail'),sk=B.grid?0:fm&&fm.skirt>0?+fm.skirt:0;
   const src=B.grid?bdGridSrc(B.grid,hx0,hz0,low):coastSrcProc(B,hx0,hz0,sk,low),SEA=src.sea!=null?src.sea:-1e4,S=src.S;
-  const {pts,rs}=coastGrid(hx0,hz0,sk,low),NT=pts.length,NR=rs.length,N=NT*NR;
+  const {pts,rs}=coastGrid(hx0,hz0,sk,low,B.grid?+B.grid.E||600:0),NT=pts.length,NR=rs.length,N=NT*NR;
   const pos=new Float32Array(N*3),sea=new Float32Array(N*3),sdA=new Float32Array(N),ofA=new Float32Array(N),dA=new Float32Array(N),siA=new Uint8Array(N),o={};
   for(let i=0;i<NT;i++){const [px,pz,nx,nz]=pts[i];for(let j=0;j<NR;j++){const k=i*NR+j,x=px+nx*rs[j],z=pz+nz*rs[j],y=src.h(x,z,o);
     // cliff face relief: vertical buttresses + crevices (noise along the coast, slow in height → no folds), pushed along the outward normal
@@ -205,7 +208,7 @@ function bdCoast(id,B){
   // sea (same grid, flat at sea level, sd = distance to the shore for foam / shallow colour)
   const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.BufferAttribute(sea,3));sg.setAttribute('sd',new THREE.BufferAttribute(sdA,1));sg.setIndex(idx);
   const U={uT:{value:0},uDeep:{value:new THREE.Color('#174652')},uShal:{value:new THREE.Color('#3a9490')},uSky:{value:new THREE.Color('#c6cdd0')},uFoam:{value:new THREE.Color('#eef2f1')},
-    uFogC:{value:new THREE.Color(COAST.fogC)},uFogN:{value:COAST.seaN},uFogF:{value:COAST.seaF},uL:{value:new THREE.Vector3()}};
+    uFogC:{value:new THREE.Color(COAST.fogC)},uFogN:{value:COAST.seaN*Math.max(1,bdFar(id)/700)},uFogF:{value:COAST.seaF*Math.max(1,bdFar(id)/700)},uL:{value:new THREE.Vector3()}};
   const sm=new THREE.ShaderMaterial({uniforms:U,fog:false,
     vertexShader:`attribute float sd;uniform float uT;varying vec3 vW;varying float vS;
       void main(){vec3 p=position;float k=smoothstep(2.0,30.0,sd);

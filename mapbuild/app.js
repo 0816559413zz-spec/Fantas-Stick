@@ -546,14 +546,21 @@ function bdStackClick(inv) {
   const [i0, j0, i1, j1] = bdRange(h.x, h.z, 60); updBd(i0, j0, i1, j1); bdStacks(); changed();
 }
 function bdCreate(pre, seed) {
-  pushUndo('b'); const B = M.bd ? Object.assign(BD.bdNew(M, { E: M.bd.E, c: M.bd.c }), { look: M.bd.look }) : BD.bdNew(M); BD.bdGen(B, M, pre, seed); M.bd = B; buildBd(); applySky(); renderOpts(); changed();
+  pushUndo('b'); const B = M.bd ? Object.assign(BD.bdNew(M, { E: M.bd.E, c: M.bd.c }), { look: M.bd.look }) : BD.bdNew(M, { E: opt.bE || 600, c: opt.bc || 5 }); BD.bdGen(B, M, pre, seed); M.bd = B; buildBd(); applySky(); renderOpts(); changed();
 }
 function bdOpts(b) {   // Settings panel of the Backdrop tool
   const B = M.bd;
   b.append(h3('Start From Preset'), el('div', { class: 'row' }, el('label', null, 'Preset'), el('select', { class: 'tl-sel', onchange: e => { opt.bpre = e.target.value; }, html: BD.BD_PRESETS.map(([k, n]) => `<option value="${k}"${k === opt.bpre ? ' selected' : ''}>${n}</option>`).join('') })),
     slider('Variation (seed)', 'bseed', 1, 20, 1),
     el('button', { class: 'tl-btn pri', style: 'width:100%;margin:4px 0', onclick: () => { if (B && !confirm('Replace the whole backdrop with this preset? (Undo works)')) return; bdCreate(opt.bpre, opt.bseed); } }, B ? '↻ Rebuild From Preset' : '＋ Create Backdrop'),
-    el('p', { class: 'note' }, 'Covers the map + 600 m on every side (5 m grid) • inside the play area nothing is drawn; near the edge it meets your map ground • no collision'));
+    el('p', { class: 'note' }, 'Covers the map + ' + (B ? B.E : opt.bE || 600) + ' m on every side (' + (B ? B.c : opt.bc || 5) + ' m grid) • inside the play area nothing is drawn; near the edge it meets your map ground • no collision'));
+  {const E0 = B ? B.E : opt.bE || 600, c0 = B ? B.c : opt.bc || 5, sz = { E: E0, c: c0 };
+    const info = el('p', { class: 'note' }), upd = () => { const n = BD.bdCells(M, sz.E, sz.c); info.textContent = (n / 1e6).toFixed(2) + ' M grid points' + (n > 600000 ? ' — heavy: use a bigger grid cell for a far reach' : '') + ' • the game sees ' + Math.round(Math.max(M.W, M.H) / 2 + sz.E) + ' m from the map centre'; };
+    const sel = (k, L, unit) => el('select', { class: 'tl-sel', onchange: e => { sz[k] = +e.target.value; if (!B) { opt[k === 'E' ? 'bE' : 'bc'] = sz[k]; } upd(); }, html: [...new Set([...L, sz[k]])].sort((x, y) => x - y).map(v => `<option value="${v}"${v === sz[k] ? ' selected' : ''}>${v} ${unit}</option>`).join('') });   // keeps an odd current value listed
+    b.append(h3('Size'), el('div', { class: 'row' }, el('label', null, 'Reach'), sel('E', BD.BD_REACH, 'm')), el('div', { class: 'row' }, el('label', null, 'Grid Cell'), sel('c', BD.BD_CELL, 'm')), info,
+      B ? el('button', { class: 'tl-btn', style: 'width:100%;margin:4px 0', onclick: () => { if (sz.E === B.E && sz.c === B.c) return; pushUndo('b'); M.bd = BD.bdResize(B, M, sz.E, sz.c); buildBd(); renderOpts(); changed(); } }, '⇲ Apply Size (keeps your sculpting)') : null,
+      el('p', { class: 'note' }, 'Reach = how far the backdrop goes past the map edge • Grid Cell = detail (bigger = coarser but light, good for far mountains seen from a high map)'));
+    upd();}
   if (!B) return;
   b.append(h3('Mode'), seg([['up', 'Raise'], ['down', 'Lower'], ['smooth', 'Smooth'], ['flat', 'Flatten', 'Pull to the height where the drag started'], ['set', 'Set Height'], ['noise', 'Noise'], ['paint', 'Paint'], ['tree', 'Trees'], ['stack', 'Sea Stack']], opt.bm, v => { opt.bm = v; renderOpts(); need(); }));
   if (opt.bm === 'stack') b.append(slider('Radius', 'sr', 2, 30, 0.5), slider('Height above sea', 'sh', 2, 80, 1), el('p', { class: 'note' }, 'Click = add a rock pillar • Shift+click = remove the nearest'));
@@ -572,7 +579,7 @@ function bdOpts(b) {   // Settings panel of the Backdrop tool
     el('button', { class: 'tl-btn', style: 'width:100%;margin-top:6px', onclick: () => { if (!confirm('Delete the backdrop? (Undo works)')) return; pushUndo('b'); M.bd = null; buildBd(); applySky(); renderOpts(); changed(); } }, '✕ Delete Backdrop'));
 }
 function bdAfter() { const B = M.bd; updBd(0, 0, B.nx - 1, B.ny - 1); bdSea(); bdStacks(); bdTreesBuild(); renderOpts(); changed(); }
-const bdLim = () => M.bd && show.bd ? { x0: M.bd.x0, z0: M.bd.z0, x1: M.bd.x0 + (M.bd.nx - 1) * M.bd.c, z1: M.bd.z0 + (M.bd.ny - 1) * M.bd.c, d: 3200 } : { x0: -20, z0: -20, x1: M.W + 20, z1: M.H + 20, d: 900 };
+const bdLim = () => M.bd && show.bd ? { x0: M.bd.x0, z0: M.bd.z0, x1: M.bd.x0 + (M.bd.nx - 1) * M.bd.c, z1: M.bd.z0 + (M.bd.ny - 1) * M.bd.c, d: Math.max(3200, M.bd.E * 2 + 1200) } : { x0: -20, z0: -20, x1: M.W + 20, z1: M.H + 20, d: 900 };
 
 // ================= eyedropper (💧 Pick): take a colour / surface / height from what is under the cursor =================
 // pickArm = {k:'color'|'surf'|'bsurf'|'height', apply(v), n} armed by a 💧 button; Alt+click in Paint / Backdrop / Wall / Castle / Place picks for that tool

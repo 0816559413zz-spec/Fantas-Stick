@@ -54,6 +54,19 @@ export function bdUnpack(j) {
   for (let i = 0; i < n && i < h.length; i++) hg[i] = h[i] / 10;
   return Object.assign({}, j, { hg, sf: rleD(j.sf, n), tr: rleD(j.tr, n), st: (j.st || []).map(s => Object.assign({}, s)) });
 }
+// change reach (E m past the map edge) / grid cell (c m): resample — heights bilinear (past the old reach = its edge heights), surface + trees nearest (none past the old reach)
+export const BD_REACH = [300, 600, 1000, 1500, 2000, 3000, 4000], BD_CELL = [5, 10, 20, 40];
+export const bdCells = (M, E, c) => (Math.round((M.W + 2 * E) / c) + 1) * (Math.round((M.H + 2 * E) / c) + 1);
+export function bdResize(B, M, E, c) {
+  const N = bdNew(M, { E, c }), x1 = B.x0 + (B.nx - 1) * B.c, z1 = B.z0 + (B.ny - 1) * B.c;
+  for (const k of ['on', 'sea', 'look', 'seed', 'pre']) N[k] = B[k];
+  N.st = B.st.map(s => Object.assign({}, s));
+  for (let j = 0; j < N.ny; j++) for (let i = 0; i < N.nx; i++) {
+    const x = N.x0 + i * c, z = N.z0 + j * c, k = j * N.nx + i; N.hg[k] = bdRaw(B, x, z);
+    if (x >= B.x0 && x <= x1 && z >= B.z0 && z <= z1) { const o = bdCell(B, x, z); N.sf[k] = B.sf[o]; N.tr[k] = B.tr[o]; }
+  }
+  return N;
+}
 // map resized (content kept centred): move the grid with it
 export function bdShift(B, dx, dz) { if (!B) return; B.x0 += dx; B.z0 += dz; for (const s of B.st) { s.x += dx; s.z += dz; } }
 
