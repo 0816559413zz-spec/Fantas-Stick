@@ -314,12 +314,12 @@ SMOKE_K:150 burst:151 smoke:164 ring:165 floatText:166 shake:167 weaponContactAg
 §225 เอฟเฟกต์คาถาใหม่
 ZV:226 COLB:226 WVV:226 GLV:226 ICEV:226 SLV:226 ULTV:226 OBV:226 _iceDisc:228 _iceEdge:229 _iceSpk:230 iceFloorMat:231 _icePlane:232 _icePathMat:233 _iceWvM:233 iceWvMat:235 _iceShardGeo:248 _isM:251 _isQ:251 _isP:251 _isS:251 _isY:251 iceShardTrail:252 _iceShardMat:257 makeIceFloor:258 ICE_WV:293 updateIceFloors:294 FLASHM:306 FLASHING:307 flashModel:308 endFlash:321 tickFlash:322 GHOSTM:324 SOLIDM:324 ghostOf:325 setGhost:331 hitSparks:339
 
-## js/20-vfx-pyro-storm.js (859) — Dragonfall (ภาพ)
+## js/20-vfx-pyro-storm.js (860) — Dragonfall (ภาพ)
 makeDfCircle:3 stormCircleCyan:20 DFV:25 dfCracks:26 updateDfCracks:36 _domeAim:37 domeChargeOrb:38 _spearUp:46 _spearDir:46 _spearA:46 _spearB:46 DOME_SPEAR_LEN:47 stormDomePath:48 stormDomeSpearFX:52 stormDomeHoverFX:83 stormDomeReadyFX:107 stormDomeGroundPoint:128 stormDomeFracture:131 stormDomeFloorPullFX:177 stormDomeFieldFX:204 stormDomePose:240 dragonfallFX:304
 §368 สายฟ้า (ภาพ)
-TBN:371 TBA:371 TBF:371 TBMAX:371 _tv:372 _tt:372 _ts:372 _tw:372 tbFalloff:375 tbLayer:378 TBL:384 TBO_MAX:386 tbOrbLayer:387 TBC:390 _tcc:391 domeCyan:392 domeGold:393 tbGet:394 TBLUE:397 TBFIRE:397 tboltB:398 tbolt:399 tboltP:411 tbWrite:412 updateBolts:420 LATER:454 STV:454 SBV:454 SDV:454 TSV:454 CLV:454 stTgPos:456 STCLAW:460
-§464 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
-clawGeo:467 clawRakes:472 updateClaws:486 later:494 stFade:495 stBeam:496 STHIT:502 STBASH:502 stBashLean:504 shellPt:511 updateStormV:512 _ev:560 GODPTS:562 bWorld:564 stormClawStop:568 CLAWFX:574 stormClawRangeFX:575 updateClawFX:605 stormClawSwipe:618 stormFX:666 STHUD:813 drawStormHud:814
+TBN:371 TBA:371 TBF:371 TBMAX:371 _tv:372 _tt:372 _ts:372 _tw:372 tbFalloff:375 tbLayer:378 TBL:384 TBO_MAX:386 tbOrbLayer:387 TBC:390 _tcc:391 domeCyan:392 domeGold:393 tbGet:394 TBLUE:397 TBFIRE:397 tboltB:398 tbolt:399 tboltP:411 _tbW:414 _tbA:414 _tbC:414 _tbS:414 _tbF:414 tbWrite4:415 tbSet:423 updateBolts:424 LATER:455 STV:455 SBV:455 SDV:455 TSV:455 CLV:455 stTgPos:457 STCLAW:461
+§465 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
+clawGeo:468 clawRakes:473 updateClaws:487 later:495 stFade:496 stBeam:497 STHIT:503 STBASH:503 stBashLean:505 shellPt:512 updateStormV:513 _ev:561 GODPTS:563 bWorld:565 stormClawStop:569 CLAWFX:575 stormClawRangeFX:576 updateClawFX:606 stormClawSwipe:619 stormFX:667 STHUD:814 drawStormHud:815
 
 ## js/21-vfx-frost.js (228) — น้ำแข็ง (ภาพ): ชิ้นผลึก/หนาม/แผ่นน้ำแข็งชั่วคราว (โผล่ → ค้าง → หด) •…
 FRV:2 _cryG:3 _spkG:3 _plateG:3 _hexG:3 _iceFxM:4 _frostM:4 iceFxM:5 frostM:6 ICEP:8 _im4:8 _iq:8 _ie:8 _ip:8 _is:8 icePool:9 iceBit:10 iceChips:13 updateFRV:14 iceRing:24 chillFX:25 makeSlash:41 _wbGeo:49 crescentGeo:51 makeWaveBlade:54 WGH:68 updateSlashes:69 _glGeo:82 _glMat:82 _glMat2:82 makeGlacier:83 updateGlacierVis:114 updateOrbShots:123
@@ -887,12 +887,12 @@ BRM:9 BFW:12 BSK:13 BROOM_SK:19 broomVert:40 broomMove:53 broomStrike:72 broomSt
 §131 ฝั่งจอ
 broomHead:133 BBEAM:140 _bbGeo:141 broomView:142 broomMountFx:173 broomDismountFx:181 broomBeamFx:183 broomSkFx:199 broomStrikeFx:212 broomFlakFx:217 broomHud:222 broomHudT:223 broomTick:232
 
-## js/70-water-dragon.js (504) — 
+## js/70-water-dragon.js (512) — อัลติน้ำ Dragon of the Deep — มังกรน้ำตัวจริงในเกม (ผู้ใช้รับหน้าตา 2026-11-01 จากตัวอย่า…
 WDG:7 wdgBuild:8 T:9 root:9 fixed:9 rings:10 sides:10 fastNormals:12 geoOf:21 skin:22 faceSkin:50 group:51 head:52 faceTime:54 groundY:54 faceMaterial:55 faceBlue:60 hornBlue:60 ridgeCyan:60 profile:62 headProfile:63 faceGeo:68 fp:68 fc:68 fi:68 faceRings:68 faceSides:68 navy:69 aqua:69 belly:69 flowHi:69 neckBlend:69 headStroke:81 eyePatch:82 waterCrest:97 bodyGeo:123 bodyP:123 bodyUV:123 indices:123 body:129 finShape:131 finGeo:132 finPos:134 finUV:134 finSkin:136 FIN_N:139 fins:139 _fM:140 _fQ:140 _fS:140 _fP:140 limbSkin:142 clawSkin:143 taperedLimb:144 arms:151 bodyLength:161 intro:161 settleWindow:161 tipHz:161 bodyBulk:161 bodyRadius:162 flight:164 quarters:165 step:165 dr:165 dy:165 spiralKnot:166 first:167 entry:167 crest:171 bank:174 corner:174 cruiseEntry:174 quarterHandle:177 leadLength:179 up:183 zAxis:183 yAxis:183 smooth:184 startAt:185 startD:185 startDistance:187 distanceToCruise:187 hoverSpeed:187 fastDuration:187 brakeDuration:187 startRamp:187 fastSpeed:188 progress:189
 §198 ทางบิน: ใช้ระยะทาง (เมตร) ไม่ใช่สัดส่วน เพื่อต่อทางพุ่งลงตอนเล็งเสร็จ…
-dive:199 PA:200 TA:201 DIVE_DOWN:203 DIVE_POUR:203 DIVE_STEP:203 diveDist:204 lastTime:205 lastHeadT:205 headRight:205 bodyState:205 filtered:205 shape:206 gate:260 rune:262 shadowMat:263 shadow:264 ringMat:265 ring:266 glyphMat:267 glyphHi:268 glyphPath:269 water:276 splashGeometry:279 lowWaveGeometry:280 splashBursts:281 pulse:287 outerRing:288 dropletMat:289 drops:289 transform:291 gateAt:292 sprayMaterial:314 spray:314 curlCurve:316 foamMaterial:317 foam:318 particles:319 foamParticles:319 rand:320 bodySprayAt:321 waveSegments:342 waveSheets:342 wavesAt:349 currentConfigs:364 currentMaterial:371 currentSegments:376 currentSides:376 currentMeshes:376 _cC:385 _cR:385 _cV:385 _cRad:385 currentPointTo:386 currentPoint:393 currentSpray:394 currentParticles:395 _cS:396 _cCos:397 _cSin:397 _cPow:397 currentsAt:398
-§463 เล่น
-WDG_YAW:464 wdgGet:465 wdgStart:466 wdgDive:473 wdgKeep:476 wdgEnd:477 wdgTick:478
+dive:199 PA:200 TA:201 DIVE_DOWN:203 DIVE_POUR:203 DIVE_STEP:203 diveDist:204 lastTime:205 lastHeadT:205 headRight:205 bodyState:205 filtered:205 SBUF:209 _sq1:210 _sq2:210 _sv1:210 _sHT:210 _sPrev:210 _sCand:210 _sSide:210 _sUR:210 _sRt:210 _sM:210 _bCos:211 _bSin:211 shape:212 gate:268 rune:270 shadowMat:271 shadow:272 ringMat:273 ring:274 glyphMat:275 glyphHi:276 glyphPath:277 water:284 splashGeometry:287 lowWaveGeometry:288 splashBursts:289 pulse:295 outerRing:296 dropletMat:297 drops:297 transform:299 gateAt:300 sprayMaterial:322 spray:322 curlCurve:324 foamMaterial:325 foam:326 particles:327 foamParticles:327 rand:328 bodySprayAt:329 waveSegments:350 waveSheets:350 wavesAt:357 currentConfigs:372 currentMaterial:379 currentSegments:384 currentSides:384 currentMeshes:384 _cC:393 _cR:393 _cV:393 _cRad:393 currentPointTo:394 currentPoint:401 currentSpray:402 currentParticles:403 _cS:404 _cCos:405 _cSin:405 _cPow:405 currentsAt:406
+§471 เล่น
+WDG_YAW:472 wdgGet:473 wdgStart:474 wdgDive:481 wdgKeep:484 wdgEnd:485 wdgTick:486
 
 ## js/71-perfhud.js (162) — 
 PERF:9 perfNetSample:11 perfNetSend:14 perfNetReceive:20 perfNetFrame:25 FRZ:40 frzAdd:42 frzOk:45 frzFrame:46 SHW:53 shwDiff:54 shwPath:58 shwSig:60 shwWho:61 shwHead:68 shwSrc:69 shwSame:70 shwFrame:71 frzRecv:85 frzIn:87 frzNote:89 FRZ_NAME:93 frzRows:94 perfFrame:96 perfDom:111 perfStats:119 perfGraph:123 _gpuName:136 gpuIntegrated:137 perfRows:138 perfPanel:158 perfText:159
@@ -977,4 +977,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(119 files, 37043 lines)
+(119 files, 37052 lines)

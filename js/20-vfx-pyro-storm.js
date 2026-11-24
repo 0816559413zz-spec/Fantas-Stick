@@ -397,7 +397,9 @@ function tbGet(){if(TBA.length>=TBMAX){const old=TBA.shift();TBF.push(old);}let 
 let TBLUE=0,TBFIRE=0;   // TBFIRE = เส้นไฟนีออน (Blazeform) ไม่มีเส้นคู่
 const tboltB=(...a)=>{const was=TBLUE;TBLUE=1;try{return tbolt(...a);}finally{TBLUE=was;}};   // สายฟ้าฟ้า (ใช้ใน later ของร่างเทพ)
 function tbolt(x1,y1,h1,x2,y2,h2,life,col,w,br){
-  if(col!=='#9fd8ff'&&!tbolt.cy&&!TBFIRE){tbolt.cy=1;try{const o2=tbolt(x1+rnd(-12,12),y1+rnd(-12,12),h1+rnd(-.3,.3),x2+rnd(-12,12),y2+rnd(-12,12),h2+rnd(-.3,.3),life,'#9fd8ff',(w||.14)*(TBLUE?.5:.75),0);o2.amp*=1.6;}finally{tbolt.cy=0;}}   // every bolt carries a cyan companion beside it (user 2026-11-10: make it visible)
+  const lv=tbolt.cy||tbolt.inBr?0:vlod(tx((x1+x2)/2),(h1+h2)/2+GY(x1,y1),tz((y1+y2)/2),Math.hypot(x2-x1,y2-y1)*S3/2+1);   // VLOD (js/44): far/off screen = no cyan twin, fewer branches
+  if(lv>=2&&br)br=lv>=3?0:Math.min(br,1);
+  if(col!=='#9fd8ff'&&!tbolt.cy&&!TBFIRE&&lv<2){tbolt.cy=1;try{const o2=tbolt(x1+rnd(-12,12),y1+rnd(-12,12),h1+rnd(-.3,.3),x2+rnd(-12,12),y2+rnd(-12,12),h2+rnd(-.3,.3),life,'#9fd8ff',(w||.14)*(TBLUE?.5:.75),0);o2.amp*=1.6;}finally{tbolt.cy=0;}}   // every bolt carries a cyan companion beside it (user 2026-11-10: make it visible)
   const o=tbGet();o.A.set(tx(x1),h1+GY(x1,y1),tz(y1));o.B.set(tx(x2),h2+GY(x2,y2),tz(y2));o.path=null;o.life=o.max=life||0.12;o.w=(w||0.14)*(col==='#9fd8ff'?1.2:.85);o.rj=0;o.gk=1;o.gk0=undefined;o.blu=TBLUE;o.fir=TBFIRE;   /* ผู้ใช้ 2026-11-10: เส้นเหลืองบางลง (นีออนจัดเท่าเดิม) • ฟ้าเห็นชัดขึ้น */
   const L=o.A.distanceTo(o.B);o.amp=Math.min(0.55,L*0.11+0.03);o.acc=TBLUE?1:col==='#9fd8ff';   /* ร่างเทพ: ฟ้าทั้งหมด */
   o.len=L;o.orb=!tbolt.cy&&!tbolt.inBr&&o.A.y-o.B.y<3&&L>3?(w||0.14):0;   // เฉพาะเส้นยาว (>3 ม.) — เส้นสั้นรอบตัว (โล่/ออร์บ) ไม่ใส่ ไม่งั้นรวมกันขาวโพลน   // ออร์บต้นเส้นแบบปืนเทสลา (ผู้ใช้ 2026-11-11) — ไม่ใส่ที่กิ่ง/เส้นคู่/ฟ้าผ่าจากฟ้า
@@ -407,16 +409,20 @@ function tbolt(x1,y1,h1,x2,y2,h2,life,col,w,br){
 }
 // สายฟ้าตามเส้นทางที่กำหนด (จุดโลก) — ใช้กับหาง/เกลียวรอบ Railgun
 function tboltP(P,life,w,amp,col){if(col!=='#9fd8ff'&&!tboltP.cy){tboltP.cy=1;try{tboltP(P,life,w*(TBLUE?.5:.75),amp*2.2,'#9fd8ff');}finally{tboltP.cy=0;}}const o=tbGet();o.path=P;o.life=o.max=life;o.w=w*(col==='#9fd8ff'?1.2:.85);o.rj=0;o.amp=amp;o.acc=TBLUE?1:col==='#9fd8ff';o.blu=TBLUE;o.gk=1;o.gk0=undefined;return o;}
-function tbWrite(L,slot,pts,w,taper,c,a){
-  const g=L.geometry,P0=g.attributes.position.array,C0=g.attributes.color.array,cp=cam.position,base=slot*TBN*2;
+// tbWrite4: the 4 layers (halo/glow/body/core) of one bolt share the points → side vector + taper once per point, then
+// write each layer (6v6 CPU 2026-11-24: tbWrite x4 = most of the storm VFX cost). Same output as 4 tbWrite calls.
+const _tbW=new Float32Array(4),_tbA=new Float32Array(4),_tbC=[null,null,null,null],_tbS=new Float32Array(TBN*3),_tbF=new Float32Array(TBN);
+function tbWrite4(slot,pts,taper){const cp=cam.position,base=slot*TBN*2,Ls=TBL.L4;
   for(let i=0;i<TBN;i++){const P=pts[i],Pa=pts[Math.max(0,i-1)],Pb=pts[Math.min(TBN-1,i+1)];
-    _tt.subVectors(Pb,Pa);_tv.subVectors(cp,P);_ts.crossVectors(_tt,_tv).normalize();
-    const t=i/(TBN-1),ww=w*0.5*Math.pow(Math.sin(Math.PI*(taper?Math.min(1,0.08+t*0.92):t)),0.55),v=(base+i*2)*3,cc=(base+i*2)*4;   /* หัว-ท้ายแหลม ไม่ตัดเหลี่ยม (ผู้ใช้ 2026-11-11) */
-    P0[v]=P.x-_ts.x*ww;P0[v+1]=P.y-_ts.y*ww;P0[v+2]=P.z-_ts.z*ww;P0[v+3]=P.x+_ts.x*ww;P0[v+4]=P.y+_ts.y*ww;P0[v+5]=P.z+_ts.z*ww;
-    C0[cc]=C0[cc+4]=c.r;C0[cc+1]=C0[cc+5]=c.g;C0[cc+2]=C0[cc+6]=c.b;C0[cc+3]=C0[cc+7]=a;}
-}
+    _tt.subVectors(Pb,Pa);_tv.subVectors(cp,P);_ts.crossVectors(_tt,_tv).normalize();_tbS[i*3]=_ts.x;_tbS[i*3+1]=_ts.y;_tbS[i*3+2]=_ts.z;
+    const t=i/(TBN-1);_tbF[i]=0.5*Math.pow(Math.sin(Math.PI*(taper?Math.min(1,0.08+t*0.92):t)),0.55);}
+  for(let q=0;q<4;q++){const g=Ls[q].geometry,P0=g.attributes.position.array,C0=g.attributes.color.array,w=_tbW[q],c=_tbC[q],a=_tbA[q],cr=c.r,cg=c.g,cb=c.b;
+    for(let i=0;i<TBN;i++){const P=pts[i],ww=w*_tbF[i],sx=_tbS[i*3]*ww,sy=_tbS[i*3+1]*ww,sz=_tbS[i*3+2]*ww,v=(base+i*2)*3,cc=(base+i*2)*4;
+      P0[v]=P.x-sx;P0[v+1]=P.y-sy;P0[v+2]=P.z-sz;P0[v+3]=P.x+sx;P0[v+4]=P.y+sy;P0[v+5]=P.z+sz;
+      C0[cc]=C0[cc+4]=cr;C0[cc+1]=C0[cc+5]=cg;C0[cc+2]=C0[cc+6]=cb;C0[cc+3]=C0[cc+7]=a;}}}
+const tbSet=(q,w,c,a)=>{_tbW[q]=w;_tbC[q]=c;_tbA[q]=a;};
 function updateBolts(dt){
-  if(!TBL){if(!TBA.length)return;TBL={halo:tbLayer(THREE.NormalBlending,0,1),glow:tbLayer(THREE.AdditiveBlending,1,1),body:tbLayer(THREE.NormalBlending,2,2),core:tbLayer(THREE.NormalBlending,3,0)};TBL.orbA=tbOrbLayer(1.5,4);TBL.orbC=tbOrbLayer(0.55,5);}
+  if(!TBL){if(!TBA.length)return;TBL={halo:tbLayer(THREE.NormalBlending,0,1),glow:tbLayer(THREE.AdditiveBlending,1,1),body:tbLayer(THREE.NormalBlending,2,2),core:tbLayer(THREE.NormalBlending,3,0)};TBL.orbA=tbOrbLayer(1.5,4);TBL.orbC=tbOrbLayer(0.55,5);TBL.L4=[TBL.halo,TBL.glow,TBL.body,TBL.core];}
   for(const L of [TBL.halo,TBL.glow,TBL.body,TBL.core])if(!L.parent){L.userData.keep=true;scene.add(L);}   // ล้างฉากตอนเริ่มเกม/เปลี่ยนแมปเอาเส้นออก → ใส่คืน (บั๊ก: สายฟ้าทุกเส้นหายทั้งเกม)
   let n=0;
   for(let i=TBA.length-1;i>=0;i--){const o=TBA[i];o.life-=dt;if(o.life<=0){TBA.splice(i,1);TBF.push(o);}}
@@ -430,16 +436,13 @@ function updateBolts(dt){
     const k=Math.min(1,o.life/o.max*2.2),tp=!!o.path;
     if(o.domePalette){
       const light=Math.min(1,k*o.gk),pal=o.domePalette;
-      tbWrite(TBL.halo,n,o.pts,o.w*6,true,pal.body,0.25*light);
-      tbWrite(TBL.glow,n,o.pts,o.w*4.6,true,pal.glow,0.82*light);
-      tbWrite(TBL.body,n,o.pts,o.w*1.25,true,pal.body,light);
-      tbWrite(TBL.core,n,o.pts,o.w*0.42,true,pal.core,light);
+      tbSet(0,o.w*6,pal.body,0.25*light);tbSet(1,o.w*4.6,pal.glow,0.82*light);tbSet(2,o.w*1.25,pal.body,light);tbSet(3,o.w*0.42,pal.core,light);tbWrite4(n,o.pts,true);
       n++;continue;
     }
     const bl=o.blu&&o.acc,fi=o.fir,au=Math.min(1,Math.max(0,(o.len-1)/3));
     {const P=o.pts[TBN>>1],cd=P?cam.position.distanceTo(P):9;o.gk=(o.gk0!==undefined?o.gk0:(o.gk0=o.gk))*Math.min(1,Math.max(0.12,(cd-1.2)/5))*(o.len>8?0.62:1);}   /* ผู้ใช้ 2026-11-12: เส้นที่ผ่านใกล้กล้อง (Dash) / เสาฟ้าผ่ายาว ไม่บานขาวเต็มจอ — ลดออร่า+เรือง ไม่ลดตัวเส้น */   /* ออร่ากว้างเฉพาะเส้นยาว — เส้นสั้นรอบตัวรวมกันไม่ขาวโพลน */
-    tbWrite(TBL.halo,n,o.pts,o.w*6,tp,fi?TBC.fBody:bl?TBC.bBody:o.acc?TBC.acc:TBC.body,0.45*au*k*o.gk);   /* ออร่าสีทึบจางๆ ให้เห็นบนพื้นสว่าง (ผู้ใช้ 2026-11-12: BA ออร่าจางไป) */
-    tbWrite(TBL.glow,n,o.pts,o.w*(2.2+2.6*au),tp,fi?TBC.fGlow:bl?TBC.bGlow:o.acc?TBC.accG:TBC.glow,(fi?.85:bl?.75:o.acc?.8:.95)*(0.45+0.55*au)*k*o.gk);tbWrite(TBL.body,n,o.pts,o.w*1.25,tp,fi?TBC.fBody:bl?TBC.bBody:o.acc?TBC.acc:TBC.body,k);tbWrite(TBL.core,n,o.pts,o.w*(bl?.42:.6),tp,fi?TBC.fCore:bl?TBC.bCore:o.acc?TBC.accC:o.gk<1?_tcc.copy(TBC.core).multiplyScalar(0.36+0.64*o.gk):TBC.core,k);n++;
+    tbSet(0,o.w*6,fi?TBC.fBody:bl?TBC.bBody:o.acc?TBC.acc:TBC.body,0.45*au*k*o.gk);   /* ออร่าสีทึบจางๆ ให้เห็นบนพื้นสว่าง (ผู้ใช้ 2026-11-12: BA ออร่าจางไป) */
+    tbSet(1,o.w*(2.2+2.6*au),fi?TBC.fGlow:bl?TBC.bGlow:o.acc?TBC.accG:TBC.glow,(fi?.85:bl?.75:o.acc?.8:.95)*(0.45+0.55*au)*k*o.gk);tbSet(2,o.w*1.25,fi?TBC.fBody:bl?TBC.bBody:o.acc?TBC.acc:TBC.body,k);tbSet(3,o.w*(bl?.42:.6),fi?TBC.fCore:bl?TBC.bCore:o.acc?TBC.accC:o.gk<1?_tcc.copy(TBC.core).multiplyScalar(0.36+0.64*o.gk):TBC.core,k);tbWrite4(n,o.pts,tp);n++;
   }
   {let m=0;const PA=TBL.orbA.geometry.attributes,PC=TBL.orbC.geometry.attributes,seen=[];
     for(const o of TBA){if(!o.orb||m>=TBO_MAX)continue;const P=o.pts[0];if(seen.some(q=>q.distanceToSquared(P)<0.04))continue;seen.push(P);   // จุดเดียวกัน (ลำค้างจากปลายไม้) = ออร์บเดียว

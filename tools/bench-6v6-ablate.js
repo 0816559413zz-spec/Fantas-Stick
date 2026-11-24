@@ -1,7 +1,7 @@
 // Runs tools/bench-6v6.js several times with one feature switched off each time → shows where the GPU/CPU time goes.
 //   node tools/bench-6v6-ablate.js [name ...]      (needs python tools/serve.py; runs one after another so GPU timings are not disturbed)
 const {spawnSync}=require('child_process'),fs=require('fs'),path=require('path'),os=require('os');
-const ALL={base:{},nolook:{nolook:1},noshadow:{noshadow:1},noao:{noao:1},nobloom:{nobloom:1},nofx:{nofx:1},novfx:{pre:'window.__novfx=1;'},fcsNofx:{map:'fcs-file',mode:'siege',nofx:1},fcsNovfx:{map:'fcs-file',mode:'siege',pre:'window.__novfx=1;'},res720:{res:[1280,720]},res1440:{res:[2560,1440]},
+const ALL={base:{},nolook:{nolook:1},noshadow:{noshadow:1},noao:{noao:1},nobloom:{nobloom:1},nofx:{nofx:1},novfx:{pre:'window.__novfx=1;'},novlod:{pre:'WD.VLOD.on=false;'},only0:{only:0},only1:{only:1},only2:{only:2},only6:{only:6},only7:{only:7},only8:{only:8},onlyNone:{only:99},fcsNovlod:{map:'fcs-file',mode:'siege',pre:'WD.VLOD.on=false;'},fcsNofx:{map:'fcs-file',mode:'siege',nofx:1},fcsNovfx:{map:'fcs-file',mode:'siege',pre:'window.__novfx=1;'},res720:{res:[1280,720]},res1440:{res:[2560,1440]},
   // painterly castle (fcs-file): what the paint look costs in a 6v6 fight
   fcs:{map:'fcs-file',mode:'siege'},fcsNoFxcel:{map:'fcs-file',mode:'siege',pre:'WD.PAINT.fxcel=0;WD.PAINT.relight();'},fcsNoBlob:{map:'fcs-file',mode:'siege',pre:'WD.PAINT.blob=0;WD.PAINT.relight();'},
   fcsNoKuw:{map:'fcs-file',mode:'siege',pre:'WD.PAINT.kuw=0;WD.PAINT.relight();'},fcsNoTrees:{map:'fcs-file',mode:'siege',pre:'WD.scene.traverse(o=>{if(o.name==="ptree_inst")o.visible=false;});'}};

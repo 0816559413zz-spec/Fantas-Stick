@@ -95,28 +95,32 @@ function fxGate(L,I,w){if(fxG(L,'x')&&(!vfxExtra()||I.far))return false;if(fxG(L
   const nr=fxG(L,'near');if(nr>0&&cam.position.distanceTo(_fxw.set(tx(w[0]),w[2]+GY(w[0],w[1]),tz(w[1])))>nr)return false;return true;}
 // ---------- ทุกเฟรม ----------
 function updateFx(dt){fxMPUpdate(dt);if(!FXR.inst.length)return;
-  for(let i=FXR.inst.length-1;i>=0;i--){const I=FXR.inst[i];I.t+=dt*(I.o.ts||1);if(I.o.follow!=null)fxAnchor(I);
-    I.far=cam.position.distanceTo(_fxw.set(tx(I.x),I.h+GY(I.x,I.y),tz(I.y)))>60;
+  for(let i=FXR.inst.length-1;i>=0;i--){const I=FXR.inst[i];
+    if(I.lod>=2&&!I.stop){I.sk=!I.sk;if(I.sk){I.dacc=(I.dacc||0)+dt;continue;}}   // far / off screen: tick every other frame (VLOD js/44)
+    const dtI=dt+(I.dacc||0);I.dacc=0;
+    I.t+=dtI*(I.o.ts||1);if(I.o.follow!=null)fxAnchor(I);
+    I.lod=vlod(tx(I.x),I.h+GY(I.x,I.y),tz(I.y),3*I.s,I.own);I.far=I.lod>=2;
     let alive=false;
     for(const S of I.L){const L=S.d;if(S.st===2)continue;
       const at=fxV(fxG(L,'at'),I,0),life=Math.max(0.02,fxV(fxG(L,'life'),I,0)),endL=fxG(L,'end'),loop=fxG(L,'loop');
       if(endL&&!I.stop){alive=true;continue;}
       const lt=(endL?I.t-I.stopT:I.t)-at;
       if(S.st===0){if(lt<0){alive=true;continue;}if(I.stop&&!endL){S.st=2;continue;}
-        const w=fxPos(I,S,0);if(!fxGate(L,I,w)){S.st=2;continue;}S.st=1;S.life=life;S.age=0;S.dt=dt;try{fxSpawn(S,I,w);}catch(e){console.error('fx spawn',L.id,e);S.st=2;continue;}}
-      if(S.st===1){S.age+=dt;const done=loop?(I.stop&&!endL):S.age>=life;
+        const w=fxPos(I,S,0);if(!fxGate(L,I,w)){S.st=2;continue;}S.st=1;S.life=life;S.age=0;S.dt=dtI;try{fxSpawn(S,I,w);}catch(e){console.error('fx spawn',L.id,e);S.st=2;continue;}}
+      if(S.st===1){S.age+=dtI;const done=loop?(I.stop&&!endL):S.age>=life;
         if(done){fxEnd(S,I,false);S.st=2;continue;}
         const k=loop?(S.age%life)/life:Math.min(1,S.age/life);
-        try{fxTick(S,I,k,dt);}catch(e){console.error('fx tick',L.id,e);fxEnd(S,I,true);S.st=2;continue;}alive=true;}}
+        try{fxTick(S,I,k,dtI);}catch(e){console.error('fx tick',L.id,e);fxEnd(S,I,true);S.st=2;continue;}alive=true;}}
     I.kids=I.kids.filter(c=>FXR.inst.includes(c));if(I.kids.length)alive=true;
     if(!alive){FXR.inst.splice(i,1);}}}
 // ---------- สร้างชั้น ----------
-function fxN(I,n){return Math.max(0,Math.round(n*I.cnt*I.k*Math.min(2,I.s)*(I.far?0.5:1)*(combatVfxReduced()?.40:1)));}
+function fxN(I,n){return Math.max(0,Math.round(n*I.cnt*I.k*Math.min(2,I.s)*VLOD_N[I.lod|0]*(combatVfxReduced()?.40:1)));}
+const VLOD_N=[1,0.7,0.45,0.3];   // particle amount by VLOD level
 function fxSpawn(S,I,w){const L=S.d,g=k=>fxG(L,k),V=(k,q)=>fxV(g(k),I,q||0),C=k=>fxCol(g(k),I);
   switch(L.t){
     case 'flash':case 'halo':vfxOnce(()=>FX.flashSprite(w[0],w[1],w[2],C('col'),V('size0')*I.s,V('size')*Math.min(1.5,I.s),S.life,g('k')*Math.min(1.3,I.k)));S.oneshot=1;break;
     case 'ring':SHAPES_Q.push({k:g('vert')?'ringv':'ring',x:w[0],y:w[1],h:w[2],col:C('col'),s1:V('r')*I.s,life:S.life,op:Math.min(1,g('op')*I.k)});S.oneshot=1;break;
-    case 'light':if(!fxIsCurve(g('int'))&&!g('loop')){FX.flashLight(w[0],w[1],w[2],C('col'),V('int')*I.k,V('dist')*Math.sqrt(I.s),S.life);S.oneshot=1;}break;
+    case 'light':if(I.lod>=2){S.oneshot=1;break;}if(!fxIsCurve(g('int'))&&!g('loop')){FX.flashLight(w[0],w[1],w[2],C('col'),V('int')*I.k,V('dist')*Math.sqrt(I.s),S.life);S.oneshot=1;}break;
     case 'screen':{const nm=g('near')||35;if(!nearMe(w[0],w[1],nm*20))break;const sk=V('shake');if(sk>0)shake(sk*Math.min(1.5,I.s));const fl=V('flash');if(fl>0)screenFlash(C('fcol'),fl,S.life);
       const rd=V('radial');if(rd>0)screenRadial(w[0],w[1],w[2],rd,S.life);const kk=V('kick');if(kk>0)screenKick(kk*Math.min(1.5,I.s));const hu=V('hurt');if(hu>0)screenHurt(hu);S.oneshot=1;break;}
     case 'sound':if(nearMe(w[0],w[1],1000))snd(g('name'),{x:w[0],y:w[1],vol:g('vol')});S.oneshot=1;break;
@@ -148,8 +152,8 @@ function fxSpawn(S,I,w){const L=S.d,g=k=>fxG(L,k),V=(k,q)=>fxV(g(k),I,q||0),C=k=
 // ชั้นแบบยิงครั้งเดียว (helper ของเกมจัดการอายุเอง) — ถือว่ามีชีวิตจนครบ life เพื่อให้ไทม์ไลน์/ตัวนับตรง
 function fxTick(S,I,k,dt){const L=S.d;if(S.oneshot)return;const g=q=>fxG(L,q),V=(q)=>fxV(g(q),I,k);
   switch(L.t){
-    case 'light':{const w=fxPos(I,S,k),clarity=combatVfxReduced()?.62:1;LREQ.push({x:tx(w[0]),y:w[2],z:tz(w[1]),col:fxCol(g('col'),I),int:V('int')*I.k*clarity,dist:V('dist')*Math.sqrt(I.s)});break;}
-    case 'emit':{const rate=V('rate')*(L.look==='smoke'?SMOKE_K:1);if(rate>0){S.acc+=rate*dt*I.cnt*I.k*(I.far?0.5:1);const n=Math.floor(S.acc);if(n>0){S.acc-=n;const w=fxPos(I,S,k),kq=VFXB.k;VFXB.k=VFXB.on?VFXB.mul:1;try{fxEmit(S,I,n,w,k);}finally{VFXB.k=kq;}}}break;}
+    case 'light':{if(I.lod>=2)break;const w=fxPos(I,S,k),clarity=combatVfxReduced()?.62:1;LREQ.push({x:tx(w[0]),y:w[2],z:tz(w[1]),col:fxCol(g('col'),I),int:V('int')*I.k*clarity,dist:V('dist')*Math.sqrt(I.s)});break;}
+    case 'emit':{const rate=V('rate')*(L.look==='smoke'?SMOKE_K:1);if(rate>0){S.acc+=rate*dt*I.cnt*I.k*VLOD_N[I.lod|0];const n=Math.floor(S.acc);if(n>0){S.acc-=n;const w=fxPos(I,S,k),kq=VFXB.k;VFXB.k=VFXB.on?VFXB.mul:1;try{fxEmit(S,I,n,w,k);}finally{VFXB.k=kq;}}}break;}
     case 'mesh':fxMeshTick(S,I,k,dt);break;
     case 'warp':fxWarpTick(S,I,k,g,V);break;
     case 'vol':fxVolTick(S,I,k,g,V);break;

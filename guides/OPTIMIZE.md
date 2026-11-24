@@ -344,6 +344,21 @@ Findings:
 - The frame is CPU-bound (CPU 17–19 ms vs GPU 9–15 ms) → next: VFX budget + distance LOD (fewer layers/objects when
   many effects run) and pooling/instancing of the effect meshes; find the heaviest effects with a CPU profile first.
 
+**Round 1 fixes (2026-11-24):** per path (`only<path>` rows, 2 players casting, others idle, baseline none = 9.4 ms CPU):
+water +4.8 ms, storm +2.9, fire +2.6, frost +1.9, earth +1.7, wind +1.3. CPU profiles (`--profile`, `incl.js`-style inclusive time):
+- Water dragon (js/70): `shape()` without per-frame allocations (double-buffered ring state, reused temps) + body normals
+  from the ring frame instead of triangle sums (`WDG.fastN` = old); `wdgTick` 2.35 → 1.52 ms/frame (2 dragons), one
+  `frame()` 1.39 → 1.06 ms; water currents (0.44 ms per dragon) only at VLOD 0. Shots `shots/dragcmp.jpg` (same look).
+- Storm bolts (js/20): `tbWrite4` = side vector + taper once per point for the 4 layers; `updateBolts` 1.23 → 0.58 ms/frame.
+- VLOD (js/44 `vlod`): 0 full / 1 reduced (mid range, or crowd = more than `VLOD.budget` 24 live fx files, others' effects
+  only) / 2 far (>55 m) / 3 off screen. fx files: particle amount `VLOD_N` 1/0.7/0.45/0.3, lights off at 2+, far/off-screen
+  instances tick every other frame; dragon: currents off at 1+, shape every 2nd frame far, hidden + every 4th off screen;
+  bolts: no cyan twin / fewer branches at 2+. Own effects count at half distance. Cinematic particles: only the off-screen
+  step. `?novlod` / `WD.VLOD.on=false` = off. In the clustered bench (everyone within ~10 m, on screen) VLOD itself moves
+  little; it helps real spread-out fights.
+- Whole-bench totals are noisy on this PC while other sessions run (baseline moved 9.4 → 7.5 ms between runs): compare
+  function times from profiles, not totals. Not VFX but big: cloth (capes) `clothTick` 10–18 % of CPU in the 6v6 bench.
+
 ## Benchmarks
 
 - 2026-11-22, combat readability A/B in Team PvP at 1000×560. All 11 classes cast the same 31 skills in an 80-frame test. The default combat presentation reduced median active particles from 2,650 to 1,220 and peak particles from 3,740 to 1,776. Median frame draw calls were 472 versus 461. Shard Storm's landing warning and active edge and Night Waltz's boundary rendered in both runs. `?fullvfx` keeps the original effects for comparison. This fixture measures effect load, not live match FPS.

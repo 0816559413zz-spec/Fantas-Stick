@@ -197,65 +197,73 @@ function progress(t){
 
 // ---- ทางบิน: ใช้ระยะทาง (เมตร) ไม่ใช่สัดส่วน เพื่อต่อทางพุ่งลงตอนเล็งเสร็จได้ ----
 let dive=null;   // {S0,curve,len,t0,table,L1}
-const PA=(s,o)=>{if(dive&&s>dive.S0)return dive.curve.getPointAt(Math.min(.9999,(s-dive.S0)/dive.len));return flight.getPointAt(Math.min(.9999,Math.max(0,s)/totalLength));};
-const TA=s=>{if(dive&&s>dive.S0)return dive.curve.getTangentAt(Math.min(.9999,(s-dive.S0)/dive.len)).normalize();return flight.getTangentAt(Math.min(.9999,Math.max(0,s)/totalLength)).normalize();};
+const PA=(s,o)=>{if(dive&&s>dive.S0)return dive.curve.getPointAt(Math.min(.9999,(s-dive.S0)/dive.len),o);return flight.getPointAt(Math.min(.9999,Math.max(0,s)/totalLength),o);};   // o = optional target
+const TA=(s,o)=>{if(dive&&s>dive.S0)return dive.curve.getTangentAt(Math.min(.9999,(s-dive.S0)/dive.len),o).normalize();return flight.getTangentAt(Math.min(.9999,Math.max(0,s)/totalLength),o).normalize();};
 // ความเร็วเป็นตาราง: ขาขึ้นสร้างความเร็ว พอหัวหันลงพุ่งเป็น DIVE_DOWN เท่า หัวถึงพื้นตรงดาเมจแรก พ้นพื้นแล้วตัวไหลเร็วคงที่จนหางจมตรงดาเมจสุดท้าย
 const DIVE_DOWN=2.2,DIVE_POUR=1.15,DIVE_STEP=1/240;
 function diveDist(t){const q=Math.max(0,t-dive.t0)/DIVE_STEP,T=dive.table,i=Math.min(T.length-2,Math.floor(q));return dive.S0+T[i]+(T[i+1]-T[i])*(q-i);}
 let lastTime=-1,lastHeadT=null,headRight=null,bodyState=null,filtered=null;
+// shape(): no per-frame allocations (2 state buffers swap, temp vectors/quaternions reused) + body normals from the ring
+// frame (radial - R'*tangent) instead of summing triangles (6v6 CPU 2026-11-24: dragon = top VFX cost, OPTIMIZE §W).
+// WDG.fastN = true: old triangle normals (compare)
+const SBUF=[0,1].map(()=>{const A=()=>Array.from({length:rings+1},()=>new T.Vector3());return {centers:A(),tangents:A(),rights:A(),ups:A()};});
+const _sq1=new T.Quaternion(),_sq2=new T.Quaternion(),_sv1=new T.Vector3(),_sHT=new T.Vector3(),_sPrev=new T.Vector3(),_sCand=new T.Vector3(),_sSide=new T.Vector3(),_sUR=new T.Vector3(),_sRt=new T.Vector3(),_sM=new T.Matrix4();
+const _bCos=new Float32Array(sides+1),_bSin=new Float32Array(sides+1);for(let j=0;j<=sides;j++){const a=j/sides*Math.PI*2;_bCos[j]=Math.cos(a);_bSin[j]=Math.sin(a);}
 function shape(t){
  const dt=lastTime<0?1/30:Math.max(0,t-lastTime);
- const advance=dive?diveDist(t):progress(t),ds=(dive?bodyLength+(dive.L1-bodyLength)*smooth((t-dive.t0)/WT_UL.rise):bodyLength)/rings;   // ตัวยืดทีละนิดระหว่างบิน
- const centers=new Array(rings+1),tangents=new Array(rings+1),rights=new Array(rings+1),ups=new Array(rings+1);
+ const advance=dive?diveDist(t):progress(t),ds=(dive?bodyLength+(dive.L1-bodyLength)*smooth((t-dive.t0)/WT_UL.rise):bodyLength)/rings;
+ const SS=bodyState===SBUF[0]?SBUF[1]:SBUF[0],centers=SS.centers,tangents=SS.tangents,rights=SS.rights,ups=SS.ups;
  if(filtered===null||dive)filtered=advance;else filtered+=(advance-filtered)*(1-Math.exp(-dt*18));
- const headT=TA(filtered),rawP=PA(filtered);centers[rings]=rawP.clone();tangents[rings]=headT.clone();let previous=headT.clone();
+ const headT=TA(filtered,_sHT);PA(filtered,centers[rings]);tangents[rings].copy(headT);const previous=_sPrev.copy(headT);
  for(let i=rings-1;i>=0;i--){
-  const distance=(rings-i)*ds,a=Math.max(0,advance-distance),history=TA(a),ramp=smooth(distance/4);
-  const neck=smooth(distance/1.8),tip=smooth((distance-(bodyLength-5))/5),limit=ds/(1.45-.85*tip),candidate=history.clone();
+  const distance=(rings-i)*ds,a=Math.max(0,advance-distance),ramp=smooth(distance/4);
+  const neck=smooth(distance/1.8),tip=smooth((distance-(bodyLength-5))/5),limit=ds/(1.45-.85*tip),candidate=TA(a,_sCand);
   candidate.applyAxisAngle(up,.035*Math.sin(distance*.3-t*2.4)*ramp);
-  if(bodyState&&dt>0){const old=bodyState.tangents[i],change=new T.Quaternion().setFromUnitVectors(old,candidate);candidate.copy(old).applyQuaternion(new T.Quaternion().slerp(change,1-Math.exp(-dt*(12-5*distance/bodyLength+65*tip)))).normalize();}
-  const phase=t*Math.PI*2*tipHz-(bodyLength-distance)*1.15,emerged=smooth((PA(a).y-.8)/1.4);
+  if(bodyState&&dt>0){const old=bodyState.tangents[i];_sq1.setFromUnitVectors(old,candidate);candidate.copy(old).applyQuaternion(_sq2.identity().slerp(_sq1,1-Math.exp(-dt*(12-5*distance/bodyLength+65*tip)))).normalize();}
+  const phase=t*Math.PI*2*tipHz-(bodyLength-distance)*1.15,emerged=smooth((PA(a,_sv1).y-.8)/1.4);
   candidate.applyAxisAngle(up,.95*Math.sin(phase)*tip**1.5*emerged);
-  const tailSide=new T.Vector3().crossVectors(up,candidate);if(tailSide.lengthSq()>.001)candidate.applyAxisAngle(tailSide.normalize(),.5*Math.sin(phase+.8)*tip**1.5*emerged);
-  const bendToHead=new T.Quaternion().setFromUnitVectors(candidate,headT);candidate.applyQuaternion(new T.Quaternion().slerp(bendToHead,1-neck));
-  const bend=previous.angleTo(candidate),q=new T.Quaternion().setFromUnitVectors(previous,candidate);
-  const safe=previous.clone().applyQuaternion(new T.Quaternion().slerp(q,bend>limit?limit/bend:1)).normalize();
-  tangents[i]=safe;centers[i]=centers[i+1].clone().addScaledVector(safe,-ds);previous=safe;
+  const tailSide=_sSide.crossVectors(up,candidate);if(tailSide.lengthSq()>.001)candidate.applyAxisAngle(tailSide.normalize(),.5*Math.sin(phase+.8)*tip**1.5*emerged);
+  _sq1.setFromUnitVectors(candidate,headT);candidate.applyQuaternion(_sq2.identity().slerp(_sq1,1-neck));
+  const bend=previous.angleTo(candidate);_sq1.setFromUnitVectors(previous,candidate);
+  const safe=tangents[i].copy(previous).applyQuaternion(_sq2.identity().slerp(_sq1,bend>limit?limit/bend:1)).normalize();
+  centers[i].copy(centers[i+1]).addScaledVector(safe,-ds);previous.copy(safe);
  }
- // ใกล้พื้น/ตอนพุ่งลง: ตัวไหลตามทางจริงเป๊ะ (ลงรูเดียวกับหัว)
+ // near the ground / diving: the body follows the real path (same hole as the head)
  const lock=dive?smooth((t-dive.t0)/.5):0;
  for(let i=0;i<rings;i++){
-  const a=Math.max(0,filtered-(rings-i)*ds),historyPoint=PA(a),free=centers[i];
-  const unlock=smooth((Math.min(historyPoint.y,free.y)-.4)/2.2)*(1-lock);centers[i]=historyPoint.lerp(free,unlock);
+  const a=Math.max(0,filtered-(rings-i)*ds),historyPoint=PA(a,_sv1),free=centers[i];
+  const unlock=smooth((Math.min(historyPoint.y,free.y)-.4)/2.2)*(1-lock);free.copy(historyPoint.lerp(free,unlock));
  }
- // ตอนบินตามทาง: คลื่นเกลียววิ่งจากคอไปหาง ให้ตัวพลิ้วตลอด หัวอยู่บนทาง และจางใกล้พื้นให้ลงรูเดียวกัน
+ // flying the path: spiral wave neck to tail, fades near the ground
  if(dive){const w=smooth((t-dive.t0)/.6);for(let i=0;i<rings;i++){const c=centers[i],d=(rings-i)*ds,a=w*.7*smooth(d/9)*smooth((c.y-1.5)/6),ph=d*.34-t*7;c.x+=a*Math.sin(ph);c.z+=a*Math.cos(ph);}}
- for(let i=0;i<rings;i++){const lo=centers[Math.max(0,i-1)],hi=centers[i+1];tangents[i]=hi.clone().sub(lo).normalize();}
- const upright=new T.Vector3().crossVectors(up,headT);
+ for(let i=0;i<rings;i++){const lo=centers[Math.max(0,i-1)],hi=centers[i+1];tangents[i].subVectors(hi,lo).normalize();}
+ const upright=_sUR.crossVectors(up,headT);
  if(!headRight)headRight=new T.Vector3(1,0,0);
- if(!dive&&upright.lengthSq()>.001)headRight.copy(upright.normalize());else if(lastHeadT)headRight.applyQuaternion(new T.Quaternion().setFromUnitVectors(lastHeadT,headT));
+ if(!dive&&upright.lengthSq()>.001)headRight.copy(upright.normalize());else if(lastHeadT)headRight.applyQuaternion(_sq1.setFromUnitVectors(lastHeadT,headT));
  headRight.addScaledVector(headT,-headRight.dot(headT)).normalize();
- let right=headRight.clone();
- for(let i=rings;i>=0;i--){if(i<rings)right.applyQuaternion(new T.Quaternion().setFromUnitVectors(tangents[i+1],tangents[i])).normalize();right.addScaledVector(tangents[i],-right.dot(tangents[i])).normalize();rights[i]=right.clone();ups[i]=new T.Vector3().crossVectors(tangents[i],right).normalize();}
- lastTime=t;lastHeadT=headT.clone();
+ const right=_sRt.copy(headRight);
+ for(let i=rings;i>=0;i--){if(i<rings)right.applyQuaternion(_sq1.setFromUnitVectors(tangents[i+1],tangents[i])).normalize();right.addScaledVector(tangents[i],-right.dot(tangents[i])).normalize();rights[i].copy(right);ups[i].crossVectors(tangents[i],right).normalize();}
+ lastTime=t;lastHeadT=(lastHeadT||new T.Vector3()).copy(headT);
+ let NA=bodyGeo.attributes.normal;if(!NA){NA=new T.BufferAttribute(new Float32Array(bodyP.length),3);bodyGeo.setAttribute('normal',NA);}const NB=NA.array,fn=!!WDG.fastN;
  for(let i=0;i<=rings;i++){
-  const rt=rights[i],vertical=ups[i],c0=centers[i],r=bodyRadius(i/rings);
+  const rt=rights[i],vertical=ups[i],c0=centers[i],tg=tangents[i],r=bodyRadius(i/rings),i0=Math.max(0,i-1),i1=Math.min(rings,i+1),dr=(bodyRadius(i1/rings)-bodyRadius(i0/rings))/((i1-i0)*ds);
   for(let j=0;j<=sides;j++){
-   const angle=j/sides*Math.PI*2,ca=Math.cos(angle)*r,sa=Math.sin(angle)*r,k=(i*(sides+1)+j)*3;
+   const cs=_bCos[j],sn=_bSin[j],ca=cs*r,sa=sn*r,k=(i*(sides+1)+j)*3;
    bodyP[k]=c0.x+rt.x*ca+vertical.x*sa;bodyP[k+1]=c0.y+rt.y*ca+vertical.y*sa;bodyP[k+2]=c0.z+rt.z*ca+vertical.z*sa;
+   if(!fn){const nx=rt.x*cs+vertical.x*sn-tg.x*dr,ny=rt.y*cs+vertical.y*sn-tg.y*dr,nz=rt.z*cs+vertical.z*sn-tg.z*dr,l=1/(Math.sqrt(nx*nx+ny*ny+nz*nz)||1);NB[k]=nx*l;NB[k+1]=ny*l;NB[k+2]=nz*l;}
   }
  }
- bodyGeo.attributes.position.needsUpdate=true;fastNormals(bodyGeo);
- const last=rings;head.position.copy(centers[last]).addScaledVector(tangents[last],-.95);head.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(rights[last],ups[last],tangents[last]));
- head.visible=centers[last].y>-1.5;   // ตาเป็นวัสดุเรียบ ไม่ถูกตัดที่พื้น → ซ่อนทั้งหัวเมื่อจมลง
+ bodyGeo.attributes.position.needsUpdate=true;if(fn)fastNormals(bodyGeo);else NA.needsUpdate=true;
+ const last=rings;head.position.copy(centers[last]).addScaledVector(tangents[last],-.95);head.quaternion.setFromRotationMatrix(_sM.makeBasis(rights[last],ups[last],tangents[last]));
+ head.visible=centers[last].y>-1.5;   // eyes are flat material, not cut at the ground: hide the head when sunk
  for(let j=0;j<FIN_N;j++){const i=Math.round((.10+j*.84/(FIN_N-1))*rings),u=i/rings,r=bodyRadius(u),scale=(.24+.94*smooth(u/.70))*(.88+.12*Math.sin(j*1.7));
   _fP.copy(centers[i]).addScaledVector(ups[i],r*.90);_fQ.setFromRotationMatrix(_fM.makeBasis(rights[i],ups[i],tangents[i]));_fS.set(scale*.82,scale,scale);
   fins.setMatrixAt(j,_fM.compose(_fP,_fQ,_fS));}
  fins.instanceMatrix.needsUpdate=true;
  const armIndex=Math.round(.84*rings);
- arms.forEach(({root:ar,pose,sign})=>{ar.position.copy(centers[armIndex]);ar.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(rights[armIndex],ups[armIndex],tangents[armIndex]));pose.rotation.z=sign*(.10+.05*Math.sin(t*2.1));pose.rotation.x=.06*Math.sin(t*1.8);});
+ arms.forEach(({root:ar,pose,sign})=>{ar.position.copy(centers[armIndex]);ar.quaternion.setFromRotationMatrix(_sM.makeBasis(rights[armIndex],ups[armIndex],tangents[armIndex]));pose.rotation.z=sign*(.10+.05*Math.sin(t*2.1));pose.rotation.x=.06*Math.sin(t*1.8);});
  faceTime.value=t;for(const material of [skin,faceSkin,finSkin,limbSkin,clawSkin]){material.uniforms.time.value=t;material.uniforms.uFoamTime.value=t;}
- bodyState={centers,tangents,rights,ups};
+ bodyState=SS;
 }
 const gate=new T.Group();gate.position.set(-3.8,.18,.1);fixed.add(gate);
 // Original water-current sigil. No borrowed star texture or polygonal star.
@@ -335,7 +343,7 @@ function bodySprayAt(t){
   }else{transform.position.set(0,-100,0);transform.scale.setScalar(0);}transform.updateMatrix();mesh.setMatrixAt(i,transform.matrix);}
   mesh.instanceMatrix.needsUpdate=true;
  }
- oldCenters=state.centers.map(p=>p.clone());lastSprayTime=t;
+ oldCenters=state.centers;lastSprayTime=t;   // shape() double-buffers: this array stays intact until the frame after next
 }
 // Short tapered wave sheets travel around and along the body. They are open
 // crests, not rigid rings, so their ends curl and peel away from the silhouette.
@@ -458,7 +466,7 @@ return {root,fixed,
   const V=(lo+hi)/2,VP=V*DIVE_POUR,table=[0];let d=0,VH=0,tail=0;
   for(let q=0;q<rise+WT_UL.n*WT_UL.gap+1;q+=DIVE_STEP){if(q<rise)VH=speed(q,d,V);const v=q<rise?VH:VH+(VP-VH)*smooth((q-rise)/.2);d+=v*DIVE_STEP;table.push(d);if(q>=rise&&q<rise+(WT_UL.n-1)*WT_UL.gap)tail+=v*DIVE_STEP;}
   dive={S0,curve,len,t0:t,table,L1:Math.max(bodyLength,tail)};},
- frame(t){shape(t);gateAt(t);bodySprayAt(t);wavesAt(t);currentsAt(t);}};
+ frame(t,lv){shape(t);gateAt(t);bodySprayAt(t);wavesAt(t);const cur=!lv;if(cur)currentsAt(t);if(currentSpray.visible!==cur){currentSpray.visible=cur;for(const m of currentMeshes)m.visible=cur;}}};   // lv = VLOD level: currents only at full
 }
 // ---------- เล่น ----------
 const WDG_YAW=a=>Math.atan2(Math.cos(a),Math.sin(a));
@@ -483,7 +491,9 @@ function wdgTick(dt){
    if(D.t-D.seen>.6){wdgEnd(D);continue;}   // เจ้าของตาย/อัลติหลุดก่อนพุ่ง
    if(D.t>3.1){const v=VIEW.cur&&VIEW.cur.P.find(q=>q.id===D.id);if(v){const k=1-Math.exp(-dt*1.6);R.position.x+=(tx(v.x)-R.position.x)*k;R.position.z+=(tz(v.y)-R.position.z)*k;}}
   }else if(D.t-D.diveT>WT_UL.rise+WT_UL.n*WT_UL.gap+.4){wdgEnd(D);continue;}
-  D.inst.frame(D.t);
+  // VLOD (js/44): reduced = no water currents • far = shape every 2nd frame • off screen = hidden, every 4th frame
+  const lv=vlod(R.position.x,R.position.y+8,R.position.z,30,D.id===NET.myId),vis=lv<3;if(R.visible!==vis){R.visible=vis;D.inst.fixed.visible=vis;}
+  D.fq=(D.fq||0)+1;if(D.dive||lv<2||D.fq%(lv>=3?4:2)===0)D.inst.frame(D.t,lv);
  }
 }
 // อุ่นตอนนับถอยหลัง: สร้างมังกรไว้ก่อน กดอัลติแล้วไม่ค้าง

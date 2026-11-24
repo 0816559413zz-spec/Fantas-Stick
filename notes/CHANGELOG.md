@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-24 — 6v6 VFX CPU round 1 (OPTIMIZE §W): VFX LOD `vlod` (js/44: crowd/distance/off-screen → fewer particles, no far lights, half-rate ticks; Cinematic keeps full on screen; `?novlod`), water dragon `shape()` alloc-free + ring-frame normals (wdgTick 2.35→1.52 ms; currents only at full LOD), storm `tbWrite4` (updateBolts 1.23→0.58 ms). Review #187.
 - 2026-11-24 — **Map Builder Road tool.** Draw a road by clicking points: it bends smoothly through them, follows the ground, and can have stone curbs. Width and material per road (new Cobblestones and Dirt Path textures, or any textured material). Points stay editable after drawing. The game draws the same road from the map data (no .glb), one merged draw per material.
 - 2026-11-24 — **Town kit props and roads 1.5× bigger too.** Lamps, stalls, carts, fences and the rest of town/* follow the houses (×1.5); roads and paving grow in width/length only. Asset names show the new sizes. town-demo re-laid out (300×150) and re-exported.
 - 2026-11-24 — Measured skill VFX cost in 6v6 (guides/OPTIMIZE.md §W): VFX = CPU −5–6 ms median / −11 ms p95, ~190 draws, GPU −2.6 ms (effect meshes, not particles; particle layer only 0.3 ms). Bench: `novfx`/`fcsNovfx` rows (`window.__novfx`), fx/particle counts in tools/bench-6v6.js.

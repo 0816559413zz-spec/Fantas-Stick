@@ -101,6 +101,18 @@ function palOf(name,col){if(name!=='col'&&VFXPAL[name])return VFXPAL[name];col=c
   const c=new THREE.Color(col),hsl={};c.getHSL(hsl);const f=(l,s)=>'#'+new THREE.Color().setHSL(hsl.h,Math.min(1,hsl.s*s),l).getHexString();
   return _palCache[col]={core:'#ffffff',hi:f(Math.min(0.9,hsl.l+0.25),0.8),main:col,deep:f(Math.max(0.25,hsl.l-0.22),1.2),light:col,sig:''};}
 function _pc(v,P){return typeof v==='string'&&v[0]==='$'?P[v.slice(1)]:v;}
+// ---------- VFX level of detail (user 2026-11-24 "6v6 FPS drops a lot", guides/OPTIMIZE.md §W) ----------
+// vlod(world x,y,z, radius, own) → 0 full • 1 reduced (crowd or mid range) • 2 far • 3 off screen
+// crowd = more live fx-file effects than VLOD.budget → other players' effects drop to 1 (own stay full)
+// Cinematic particles: only the off-screen step (look stays full) • ?novlod = off (bench/compare)
+const VLOD={on:!/[?&]novlod/.test(location.search),near:28,far:55,budget:24,fr:new THREE.Frustum(),M:new THREE.Matrix4(),sp:new THREE.Sphere(),f:-1,crowd:false};
+if(window.WD)window.WD.VLOD=VLOD;
+function vlodPrep(){const f=gl.info.render.frame;if(f===VLOD.f)return;VLOD.f=f;
+  VLOD.M.multiplyMatrices(cam.projectionMatrix,cam.matrixWorldInverse);VLOD.fr.setFromProjectionMatrix(VLOD.M);
+  VLOD.crowd=typeof FXR!=='undefined'&&FXR.inst.length>VLOD.budget;}
+function vlod(x,y,z,r,own){if(!VLOD.on)return 0;vlodPrep();const S=VLOD.sp;S.center.set(x,y,z);S.radius=r||2;
+  if(!VLOD.fr.intersectsSphere(S))return 3;if(gq('particles')>=3)return 0;
+  const d=cam.position.distanceTo(S.center)*(own?0.5:1);return d>VLOD.far?2:d>VLOD.near||VLOD.crowd&&!own?1:0;}
 function playFx(name,x,y,h,o){o=o||{};if(x===undefined||y===undefined||isNaN(x))return;
   if(fxTpl(name,x,y,h,o))return;   // แม่แบบเป็นไฟล์ assets/fx/tpl/ (แก้ในสตูดิโอได้) — ยังไม่โหลด = แบบโค้ดด้านล่าง
   let R=VFXR[name],P=VFXPAL.arcane,tpl=null;

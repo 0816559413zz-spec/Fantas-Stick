@@ -1,5 +1,5 @@
 {
- "next": 187,
+ "next": 188,
  "items": [
   {
    "id": 180,
@@ -3856,6 +3856,23 @@
     "mapbuild.html",
     "/shots/road_builder.jpg",
     "/shots/road_game.jpg"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 187,
+   "title": "สกิลตอน 6v6: ลดภาระ VFX (LOD) + มังกรน้ำ/สายฟ้าเร็วขึ้น",
+   "text": "ลองเล่น 6v6 (หรือห้องบอทเยอะ ๆ) ช่วงนัว ๆ แล้วดูว่า FPS ดีขึ้นไหม และสกิลที่อยู่ไกล/นอกจอดูน้อยลงจนสังเกตได้ไหม • สกิลของเราเองยังเต็มเสมอ • กราฟิก Cinematic = เต็มทุกอย่าง (ลดเฉพาะที่อยู่นอกจอ) • มังกรน้ำ: ภาพเดิม (shots/dragcmp.jpg บนเก่า ล่างใหม่) • ปิดระบบเพื่อเทียบ: เปิดเกมด้วย ?novlod",
+   "kind": "VFX",
+   "who": "Claude",
+   "status": "wait",
+   "created": "2026-11-24",
+   "updated": "2026-11-24",
+   "imgs": [],
+   "links": [
+    "/shots/dragcmp.jpg",
+    "/shots/stormchk.jpg"
    ],
    "feedback": "",
    "reply": ""
