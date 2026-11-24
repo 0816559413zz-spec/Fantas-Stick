@@ -1,5 +1,5 @@
 {
- "next": 192,
+ "next": 193,
  "items": [
   {
    "id": 180,
@@ -3937,6 +3937,22 @@
    "imgs": [],
    "links": [
     "index.html"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 192,
+   "title": "Paint: ปุ่มพื้นมีรูปตัวอย่างจากในเกม",
+   "text": "Map Builder → เครื่องมือ Paint → ปุ่มพื้นทั้ง 21 แบบโชว์ภาพที่ถ่ายจากในเกมจริง (หญ้ามีใบ, หินปูมีก้อน ฯลฯ) แทนสีเรียบ (โหลดหน้า Map Builder ใหม่ก่อน)",
+   "kind": "Map",
+   "who": "Map Builder",
+   "status": "wait",
+   "created": "2026-11-24",
+   "updated": "2026-11-24",
+   "imgs": [],
+   "links": [
+    "mapbuild.html"
    ],
    "feedback": "",
    "reply": ""

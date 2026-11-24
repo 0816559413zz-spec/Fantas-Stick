@@ -8,6 +8,8 @@
 
 ## Latest notes (newest first)
 
+**Map Builder Paint thumbnails (2026-11-24):** the Paint palette shows how each ground surface looks in the game (`mapbuild/surf/<k>.jpg`, `SURF_PAL` + `.pal.tex` in mapbuild.html). Made from a temporary flat map with one patch per surface (`tools/surf-thumbs.mjs`), photographed in a real GPU browser (`tools/surf-thumbs-shots.js`; headless renders without ground detail and shows stripes). New SURF entries need new thumbnails (missing image = plain colour). Review #192.
+
 **FFT ocean, Graphics option น้ำทะเล (2026-11-24, js/67-ocean.js):** Low = old sine sea; High = 3 cascades 128² FFT (Tessendorf, trimmed port of Ultra-Water, MIT); Cinematic = 4 cascades 256² + sun glitter. Same `coastSea` material (js/67-coast) with `#if OCN>0`; shared textures `OCU`; sim runs from a `composer.render` wrapper only when a sea drew in the last 30 frames; `oceanWarm()` at map build compiles the 4 sim shaders. Test: scratchpad-style script (siege fcs-file + 3 bots, `WD.camHook`), shots `shots/ocean.jpg`. Cost headless NVIDIA: +0.3 ms High, +1.2 ms Cinematic. No planar reflection / underwater / physics / caustics.
 
 **Map Builder panel Tilt gizmo (2026-11-24, `mapbuild/app.js` placeGizmo/objectChange):** breakable panels (`pn_wall`) in Rotate mode show the X ring = Tilt `tl` about the length axis (anchor stays yaw-only, so the drag maps straight to `tl`); the Y ring still sets `rot` and keeps `tl`. In-plane roll is still not supported (game panels assume a level base edge). Tested in Map Builder. Review #190.

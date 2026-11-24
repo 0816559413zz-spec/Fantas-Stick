@@ -62,6 +62,7 @@ const helpMat = (c, op = 1) => new THREE.MeshBasicMaterial({ color: c, transpare
 
 // ================= terrain mesh =================
 const steepCol = new THREE.Color('#e0442a'), tmpC = new THREE.Color(), surfLin = SURF.map(s => new THREE.Color(s.c));
+const SURF_PAL = SURF.map(s => Object.assign({ img: 'mapbuild/surf/' + s.k + '.jpg' }, s));   // in-game look of each surface (tools/surf-thumbs.mjs)
 function vcolor(i, j, out, o, overlay) {
   const k = j * M.nx + i, c = surfLin[M.sf[k]] || surfLin[0], n = 0.9 + 0.2 * MD.hash2(i, j) * 0.6 + 0.08 * MD.vnoise(i * 0.11, j * 0.11);
   tmpC.copy(c).multiplyScalar(n);
@@ -1244,7 +1245,8 @@ const h3 = t => el('h3', null, t);
 function seg(items, cur, on) { const d = el('div', { class: 'seg' }); for (const [v, n, tip] of items) d.append(el('button', { class: 'tl-btn' + (v === cur ? ' on' : ''), title: tip || '', onclick: () => on(v) }, n)); return d; }
 function slider(label, key, min, max, step, obj = opt, after) { const out = el('output', null, String(obj[key])); const r = el('input', { type: 'range', min, max, step, value: obj[key], oninput: () => { obj[key] = +r.value; out.textContent = r.value; if (after) after(); need(); } }); return el('div', { class: 'row' }, el('label', null, label), r, out); }
 function check(label, key, obj = opt, after) { const c = el('input', { type: 'checkbox', checked: !!obj[key], onchange: () => { obj[key] = c.checked ? 1 : 0; if (after) after(); need(); } }); return el('label', { class: 'chk' }, c, label); }
-function pal(items, cur, on, cls) { const d = el('div', { class: 'pal ' + (cls || '') }); items.forEach((it, i) => d.append(el('button', { class: i === cur ? 'on' : '', title: it.n, onclick: () => on(i) }, it.c ? el('span', { class: 'sw', style: 'background:' + it.c }) : null, it.n))); return d; }
+function pal(items, cur, on, cls) { const d = el('div', { class: 'pal ' + (cls || '') }); items.forEach((it, i) => d.append(el('button', { class: i === cur ? 'on' : '', title: it.n, onclick: () => on(i) },
+  it.img ? el('span', { class: 'th', style: `background-color:${it.c};background-image:url(${it.img})` }) : it.c ? el('span', { class: 'sw', style: 'background:' + it.c }) : null, it.img ? el('span', null, it.n) : it.n))); return d; }
 function renderOpts() {
   const b = $('opts'); b.textContent = '';
   const brush = () => { b.append(h3('Brush'), slider('Size (radius)', 'rad', 0.5, 40, 0.5), tool !== 'paint' && tool !== 'scatter' ? slider('Strength', 'str', 0.5, 12, 0.5) : null, tool !== 'scatter' ? check('Soft Edge', 'soft') : null); };
@@ -1254,7 +1256,7 @@ function renderOpts() {
     if (opt.smode === 'set') b.append(slider('Height', 'hval', -5, 20, 0.25));
     if (opt.smode === 'ramp') b.append(slider('Width', 'rad', 0.5, 20, 0.5, opt), check('Soft Edge', 'soft'), el('p', { class: 'note' }, 'Drag from the low point to the high point: the ground in between becomes a smooth ramp (width = 2 × this value)')); else brush();
     b.append(el('p', { class: 'note', html: 'Slopes steeper than ~58° (1.6 up per 1 across) can’t be walked up — shown red<br>jump height ~1.4' }));
-  } else if (tool === 'paint') { b.append(h3('Paint'), el('div', { class: 'row' }, el('span', { style: 'flex:1' }, 'Current: ' + SURF[opt.surf].n), pickBtn('surf', v => { opt.surf = v; renderOpts(); }, 'a ground surface')), pal(SURF, opt.surf, i => { opt.surf = i; renderOpts(); })); brush(); b.append(el('p', { class: 'note' }, 'Green = the game grows 3D grass • mud/water/ice/lava are saved as special game surfaces')); }
+  } else if (tool === 'paint') { b.append(h3('Paint'), el('div', { class: 'row' }, el('span', { style: 'flex:1' }, 'Current: ' + SURF[opt.surf].n), pickBtn('surf', v => { opt.surf = v; renderOpts(); }, 'a ground surface')), pal(SURF_PAL, opt.surf, i => { opt.surf = i; renderOpts(); }, 'tex')); brush(); b.append(el('p', { class: 'note' }, 'Green = the game grows 3D grass • mud/water/ice/lava are saved as special game surfaces')); }
   else if (tool === 'road') {
     b.append(h3('Road'), fld('Material', opt, 'rk', { type: 'select', items: MD.DECO_MAT.filter(m => MD.DECO_TEX.has(m[0])), get: () => opt.rk }), slider('Width (m)', 'rw', 1, 16, 0.5), check('Curbs (stone edges)', 'rc'),
       el('p', { class: 'note' }, 'Click points along the way • the road bends smoothly through them and follows the ground • double-click or Enter = finish • crossings: let two roads meet and put a plaza piece on top'));
