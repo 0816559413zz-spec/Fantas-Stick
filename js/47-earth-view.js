@@ -823,7 +823,7 @@ const ERING={geo:null,mat:null};
 // in from the middle of the ring into its slot while the others slide over quickly to make room; a thrown rock leaves and
 // the rest close the gap. The ring keeps turning at the same speed the whole time.
 function earthRockRing(o,p,now,dt){const ek=p.ek;if(ek===undefined||!p.al){if(o.eRing)o.eRing.g.visible=false;return;}
-  if(!ERING.geo){ERING.geo=new THREE.IcosahedronGeometry(0.24,0);ERING.mat=new THREE.MeshStandardMaterial({color:'#b89a72',roughness:0.95,flatShading:true});ERING.mat.userData.keep=true;}
+  if(!ERING.geo){ERING.geo=new THREE.IcosahedronGeometry(0.21,0);ERING.mat=new THREE.MeshStandardMaterial({color:'#b89a72',roughness:0.95,flatShading:true});ERING.mat.userData.keep=true;}
   if(!o.eRing){const g=new THREE.Group();g.position.set(0,1.5,-0.45);o.g.add(g);const pool=[];
     for(let i=0;i<EROCK.max;i++){const m=new THREE.Mesh(ERING.geo,ERING.mat);m.castShadow=true;m.visible=false;g.add(m);pool.push({m,s:0.85+0.3*((i*37)%10)/10,ph:i*1.7});}
     o.eRing={g,pool,live:[],rot:0};}
