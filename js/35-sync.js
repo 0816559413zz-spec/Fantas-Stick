@@ -6,6 +6,7 @@
 // ภาพอย่างเดียว (ดาเมจ/จังหวะยิงของ host ไม่เปลี่ยน) • ทำงานกับโมเดลไฟล์: เรียกหลัง rigStd → แขนซ้าย/ขาตามโค้ด
 const CPOSE_T=0.46,_ce=t=>1-Math.pow(1-t,3),_cs=t=>t*t*(3-2*t),_cb=t=>{const u=t-1;return 1+2.5*u*u*u+1.5*u*u;};   // _cb = ฟาดเลยเป้านิดแล้วเด้งกลับ (มีน้ำหนัก)
 // ผู้ใช้ 2026-10-22 รอบ 2: "เหวี่ยงมากขึ้นกว่านี้หน่อย" → ขยายระยะท่าจากท่ายืนปกติ [แขนขวา x, z, บิดตัว, เอนตัว, แขนซ้าย x, z, (เอียงข้าง, ย่อตัว)]
+const _caJ=[0,0,0,0,0,0];
 const AMP_B=[1.25,1.35,1.75,1.6,1.3,1.3],AMP_S=[1.2,1.3,1.6,1.5,1.2,1.2,1.6,1.4];
 const CP_BEND=[0.13,0.05,0.06,0.09,0.04,0.07,-0.13];   // เอียงตัวตามทิศเหวี่ยงของแต่ละท่า (ยิงปกติ)
 //          [แขนขวา x, แขนขวา z, บิดตัว, เอนตัว, แขนซ้าย x, แขนซ้าย z] ของ ง้าง / ฟาด / ตามแรง
@@ -51,7 +52,7 @@ const CANIM={
   pullback:{d:0.65,st:0.6,tr:null,k:[[0.4,-0.9,-0.7,-0.6,-0.1,-1.3,-0.2,0.06,-0.12,'s'],[1,-1.2,-0.5,-0.4,-0.05,-1.45,-0.1,0.04,-0.08,'s']],tm:[0.3,1]},   // ดึงไม้ไปข้างหลัง มือซ้ายเล็ง เกร็งสั่น (ท่าชาร์จ: Railgun / Terra Auger)
   summon3:{d:0.8,st:0,tr:[0.3,0.75],k:[[0.3,-1.5,0.6,0,0.1,-1.5,-0.6,0,-0.15,'s'],[0.65,-2.2,-1.2,0,-0.15,-2.2,1.2,0,0.08,'o'],[1,-1.9,-1.0,0,-0.1,-1.9,1.0,0,0.04,'s']]},   // สองมือรวบหน้าอก แล้วกางออกเรียกของ (Mirror Legion)
   punchcmd:{d:0.55,st:1,tr:[0.3,0.6],k:[[0.3,-1.0,-0.6,-0.6,-0.1,-1.2,0.3,0.05,-0.1,'s'],[0.5,-1.65,0.05,0.5,0.25,0.2,0.7,-0.06,-0.14,'o'],[1,-1.55,0,0.3,0.12,0,0.6,-0.03,-0.08,'s']]},   // บิดตัวแล้วแทงไม้สั่งต่อย มือซ้ายดึงกลับ (Stonebreaker)
-  rampcast:{d:0.9,st:0.7,tr:[0.47,0.62],k:[[0.13,-0.7,-0.45,0.25,0.12,-2.5,0.75,0.04,-0.1,'s'],[0.2,-0.6,-0.35,0.12,0.3,-0.55,0.3,0,-0.24,'i'],[0.36,-0.55,-0.35,0.1,0.32,-0.52,0.3,0,-0.26,'s'],[0.44,-0.5,-0.3,0.1,0.35,-0.48,0.3,0,-0.29,'s'],[0.53,-2.85,-0.2,0,-0.1,-2.9,0.25,0,0.05,'o'],[1,-2.3,-0.15,0,-0.03,-2.3,0.2,0,0,'s']],tm:[0.36,0.46]},   // Rampart: ตบพื้นแล้วยกขึ้น
+  rampcast:{d:0.9,st:0,tr:[0.47,0.62],k:[[0.13,-0.75,-0.45,0.22,0.1,-2.3,0.7,0.04,-0.04,'s'],[0.2,-0.65,-0.35,0.12,0.24,-0.6,0.3,0,-0.12,'i'],[0.36,-0.6,-0.35,0.1,0.26,-0.56,0.3,0,-0.13,'s'],[0.44,-0.55,-0.3,0.1,0.28,-0.52,0.3,0,-0.14,'s'],[0.53,-2.85,-0.2,0,-0.06,-2.9,0.25,0,0.03,'o'],[1,-2.3,-0.15,0,-0.02,-2.3,0.2,0,0,'s']],tm:[0.36,0.46],j:[[0.13,0.45,0.35,1.1,-0.25,-0.18],[0.2,1.15,0.95,0.25,-0.62,-0.5],[0.44,1.25,1.05,0.35,-0.66,-0.55],[0.53,0.12,0.08,0.4,-0.06,-0.05],[1,0.05,0.04,0.25,0,0]]},   // Rampart: ตบพื้นแล้วยกขึ้น (เข่าย่อ ศอกซ้ายงอ)
   ground:{d:0.6,st:0.5,tr:[0.3,0.6],k:[[0.35,-2.6,-0.3,0.2,-0.1,-0.8,0.6,0,0.05,'s'],[0.6,-0.5,-0.1,-0.1,0.45,-0.5,0.5,0,-0.3,'o'],[1,-0.6,-0.1,0,0.35,-0.5,0.5,0,-0.2,'s']]},   // ฟาดไม้ลงพื้นตรงหน้า ย่อตัว (Mud Swamp)
   clap:{d:0.6,st:0.4,tr:[0.3,0.6],k:[[0.35,-1.5,-1.3,0,-0.05,-1.5,1.3,0,-0.05,'s'],[0.55,-1.5,0.5,0,0.15,-1.5,-0.5,0,-0.15,'o'],[1,-1.4,0.35,0,0.1,-1.4,-0.35,0,-0.1,'s']],tm:[0.55,0.9]},   // กางแขนกว้างแล้วบีบเข้าหากัน (Tectonic Crush บีบ)
   burst:{d:0.55,st:0,tr:[0.3,0.65],k:[[0.35,-0.9,0.8,0,0.3,-0.9,-0.8,0,-0.25,'s'],[0.55,-2.0,-1.3,0,-0.25,-2.0,1.3,0,0.1,'o'],[1,-1.6,-1.0,0,-0.1,-1.6,1.0,0,0.03,'s']]},   // ห่อตัวแล้วระเบิดกางออก (Dust Burst)
@@ -82,7 +83,7 @@ CANIM.railrelease={d:0.65,st:0.6,two:[0,0.45],k:[[0.12,-1.45,-0.08,-0.16,-0.22,-
 CANIM.rendfar={d:1.5,st:0.5,tr:[0.64,0.8],k:[[0.14,-0.7,-0.15,0,0.14,-0.3,0.4,0,-0.08,'s'],[0.64,-0.72,-0.15,0,0.16,-0.3,0.4,0,-0.09,'s'],[0.74,-2.65,0.1,0.12,-0.15,-0.6,0.6,0,0.05,'o'],[0.9,-2.5,0.1,0.1,-0.1,-0.5,0.55,0,0.02,'s'],[1,-1.8,0,0,0,-0.4,0.4,0,0,'s']]};
 CANIM.dragonland={d:0.7,st:0,k:[[0.12,-0.8,-0.1,0.12,0.34,-0.55,0.65,0.06,-0.28,'o'],[0.45,-1.1,-0.1,0.06,0.12,-0.5,0.4,0.02,-0.1,'s'],[1,-1.0,-0.1,0,0,-0.3,0.3,0,0,'s']]};
 // ขาแยก/ก้าว/ลงน้ำหนักต่างกันตามท่า (เฉพาะตอนหยุดเดิน; ไม่แย่งท่าวิ่ง)
-const SKFEET={rampcast:[0.38,-0.38,0.18,-0.18],sweep:[0.25,-0.5,0.1,-0.12],powerup:[-0.25,-0.15,0.16,-0.16],ultraise:[0.25,-0.4,0.13,-0.12],rend:[-0.45,0.25,0.1,-0.06],slam:[-0.65,-0.35,0.18,-0.18],wrap:[-0.4,-0.25,0.08,-0.08],forge:[0.3,-0.4,0.1,-0.1],line:[-0.5,0.3,0.1,-0.08],siphon:[0.35,-0.3,0.15,-0.15],orbs:[0.25,-0.25,0.1,-0.1],upflick:[-0.45,0.3,0.1,-0.08],snap:[0.3,-0.4,0.12,-0.08],pullback:[0.35,-0.45,0.12,-0.12],summon3:[-0.2,-0.2,0.18,-0.18],punchcmd:[-0.5,0.35,0.1,-0.1],ground:[-0.6,0.25,0.15,-0.1],clap:[-0.25,-0.25,0.2,-0.2],burst:[-0.45,-0.25,0.2,-0.2],skycall:[0.3,-0.45,0.1,-0.1],wallpush:[-0.55,0.3,0.15,-0.12],vxpull:[0.5,-0.4,0.14,-0.14],dome:[-0.35,-0.25,0.2,-0.2],tidecall:[0.3,-0.25,0.1,-0.12],wavecast:[0.3,-0.6,0.14,-0.12],cagecast:[-0.5,0.3,0.1,-0.1],moonarts:[0.2,-0.3,0.12,-0.12],dragoncall:[0.25,-0.5,0.13,-0.13],dragoncommand:[-0.5,0.35,0.12,-0.1],fireflare:[-0.35,-0.2,0.2,-0.2],frostbreath:[-0.25,-0.25,0.14,-0.14],godcall:[0.25,-0.4,0.15,-0.15],windlaunch:[-0.6,0.35,0.12,-0.12],wingrise:[-0.3,-0.2,0.18,-0.18],windvoid:[-0.45,0.3,0.12,-0.12],heavenslam:[-0.6,-0.25,0.18,-0.18]};
+const SKFEET={sweep:[0.25,-0.5,0.1,-0.12],powerup:[-0.25,-0.15,0.16,-0.16],ultraise:[0.25,-0.4,0.13,-0.12],rend:[-0.45,0.25,0.1,-0.06],slam:[-0.65,-0.35,0.18,-0.18],wrap:[-0.4,-0.25,0.08,-0.08],forge:[0.3,-0.4,0.1,-0.1],line:[-0.5,0.3,0.1,-0.08],siphon:[0.35,-0.3,0.15,-0.15],orbs:[0.25,-0.25,0.1,-0.1],upflick:[-0.45,0.3,0.1,-0.08],snap:[0.3,-0.4,0.12,-0.08],pullback:[0.35,-0.45,0.12,-0.12],summon3:[-0.2,-0.2,0.18,-0.18],punchcmd:[-0.5,0.35,0.1,-0.1],ground:[-0.6,0.25,0.15,-0.1],clap:[-0.25,-0.25,0.2,-0.2],burst:[-0.45,-0.25,0.2,-0.2],skycall:[0.3,-0.45,0.1,-0.1],wallpush:[-0.55,0.3,0.15,-0.12],vxpull:[0.5,-0.4,0.14,-0.14],dome:[-0.35,-0.25,0.2,-0.2],tidecall:[0.3,-0.25,0.1,-0.12],wavecast:[0.3,-0.6,0.14,-0.12],cagecast:[-0.5,0.3,0.1,-0.1],moonarts:[0.2,-0.3,0.12,-0.12],dragoncall:[0.25,-0.5,0.13,-0.13],dragoncommand:[-0.5,0.35,0.12,-0.1],fireflare:[-0.35,-0.2,0.2,-0.2],frostbreath:[-0.25,-0.25,0.14,-0.14],godcall:[0.25,-0.4,0.15,-0.15],windlaunch:[-0.6,0.35,0.12,-0.12],wingrise:[-0.3,-0.2,0.18,-0.18],windvoid:[-0.45,0.3,0.12,-0.12],heavenslam:[-0.6,-0.25,0.18,-0.18]};
 // รอบ 2: ใส่ให้สกิลที่เดิมมีแต่ท่าค้าง (ไม่เหวี่ยง) ด้วย — ท่านี้เล่นหลังไฟล์สาย (lateSkillPose) จึงทับท่าค้างช่วงสั้น ๆ แล้วกลับท่าเดิม
 const SKANIM={ringofembers:'sweep',blazeform:'fireflare',colossus:'novaup',kindle:'upflick',ignitionsnap:'snap',
   frostforge:'forge',glacierrend:'rend',permafrost:'slam',cryoshell:'wrap',frostaura:'frostbreath',mirrorlegion:'mlraise',
@@ -95,8 +96,8 @@ SKFEET.rendfar=[-0.75,0.5,0.1,-0.08];   /* ขาหน้าก้าวออ�
 function skAnim(ev){const o=PM3.get(ev.id);let n=SKANIM[ev.s];if(ev.s==='glacierrend'){const v=VIEW.cur&&VIEW.cur.P.find(q=>q.id===ev.id);if(v&&v.fr&&v.fr[0]!==0)n='rendfar';}if(!o||!n)return;if(ev.s==='stormdome'&&!ev.g)return;o.caN=n;o.caT=0;o.cpT=0;o.cgd=2.2;}
 const _caT=[0,0,0,0,0,0,0,0],_caR=[0,0,0,0,0,0,0,0];
 function skillPose(o,p,dt,now){
-  const A=CANIM[o.caN];if(!A){o.caN=null;return false;}
-  o.caT+=dt;const u=o.caT/A.d;if(u>=1){o.caN=null;o.b.rotation.z=0;return false;}
+  const A=CANIM[o.caN];if(!A){o.caN=null;o.caJ=null;return false;}
+  o.caT+=dt;const u=o.caT/A.d;if(u>=1){o.caN=null;o.caJ=null;o.b.rotation.z=0;return false;}
   const R=o.armR.rotation,L=o.armL.rotation,c=o.cpb||(o.cpb=[R.x,R.z,o.b.rotation.y,0,L.x,L.z,0,0]);
   const rest=_caR;rest[0]=R.x;rest[1]=R.z;rest[2]=o.b.rotation.y;rest[3]=0;rest[4]=L.x;rest[5]=L.z;rest[6]=0;rest[7]=0;
   if(o.caT<=dt)for(let i=0;i<8;i++)c[i]=rest[i];
@@ -113,6 +114,12 @@ function skillPose(o,p,dt,now){
   const ks=A.k[0][0],st=A.st*w*(u<ks?0:Math.min(1,(u-ks)/0.15));
   if(st>0.01&&(o.vsp||0)<0.6){o.legs[1].rotation.x=-0.42*st;o.legs[0].rotation.x=0.3*st;}
   const feet=SKFEET[o.caN];if(feet&&(o.vsp||0)<0.6){const fw=w*_cs(Math.min(1,u/0.16));o.legs[0].rotation.x=lerp(o.legs[0].rotation.x,feet[0],fw);o.legs[1].rotation.x=lerp(o.legs[1].rotation.x,feet[1],fw);o.legs[0].rotation.z=feet[2]*fw;o.legs[1].rotation.z=feet[3]*fw;}
+  // joints (user 2026-11-24: crouch with the knees, not by sinking the whole body; bend the free elbow)
+  if(A.j){let i=0;while(i<A.j.length-1&&u>A.j[i][0])i++;const B=A.j[i],P0=i?A.j[i-1]:[0,0,0,0,0,0],f=_cs(clamp((u-P0[0])/Math.max(0.001,B[0]-P0[0]),0,1)),J=_caJ;
+    for(let n=1;n<6;n++)J[n]=lerp(P0[n],B[n],f);
+    if((o.vsp||0)<0.6){o.legs[0].rotation.x=lerp(o.legs[0].rotation.x,J[4],w);o.legs[1].rotation.x=lerp(o.legs[1].rotation.x,J[5],w);}
+    o.caJ=[J[1]*w,J[2]*w,J[3]*w];}
+  else o.caJ=null;
   if(A.tr&&u>A.tr[0]&&u<A.tr[1]){if(!o.ctr){const col=CPCOL[getKit(p.id).path]||'#ffffff';o.ctr=trailNew({col:'#ffffff',col2:col,w:0.06,life:0.2,k:1.3});}
     o.tip.updateWorldMatrix(true,false);o.tip.getWorldPosition(_tv1);trailPoint(o.ctr,_tv1.x,_tv1.y,_tv1.z);}
   else if(o.ctr){trailStop(o.ctr);o.ctr=null;}
@@ -224,6 +231,11 @@ function jumpArmPose(o,p,weight,casting){
   }
   return weight;
 }
+// cast-pose left elbow bend (free hand only — the wand hand follows the code arm), restores the clip pose first
+const _caEQ=new THREE.Quaternion(),_caEX=new THREE.Vector3(1,0,0);
+function caElbowL(o,a){const m=o.fileModel;if(!m)return;let k=o.caEL;if(!k||k.m!==m){const b=m.getObjectByName('forearm_L');k=o.caEL=b?{b,m,base:new THREE.Quaternion(),ap:new THREE.Quaternion(),on:false}:{m};}
+  if(!k.b)return;const q=k.b.quaternion;if(k.on&&q.equals(k.ap))q.copy(k.base);if(Math.abs(a)<0.003){k.on=false;return;}
+  k.base.copy(q);q.multiply(_caEQ.setFromAxisAngle(_caEX,-a));k.ap.copy(q);k.on=true;}
 function jumpElbowPose(o,weight){
   const a=o.jumpArms||(o.jumpArms={
     elbows:['forearm_R','forearm_L'].map(n=>o.fileModel.getObjectByName(n)).filter(Boolean)
@@ -423,6 +435,8 @@ function syncPlayers(P,mode,now,dt){
       rigSync(o,dt,false,jumpWeight,jumpArmWeight);windForearm(o);stormBowForearm(o);earthFistForearm(o);natForearmR(o);
       if(domeKnee)dpKnees(o,0,domeKnee);
       else if(jumpWeight)dpKnees(o,o.jumpLegs.p[4]*jumpWeight,o.jumpLegs.p[5]*jumpWeight);
+      else if(o.caJ)dpKnees(o,o.caJ[0],o.caJ[1]);
+      caElbowL(o,o.caJ&&!jumpArmWeight?o.caJ[2]:0);
       if(jumpArmWeight)jumpElbowPose(o,jumpArmWeight);
     }
     jumpCloakPose(o,jumpWeight?(o.jumpLegs.p[6]*jumpWeight):0);
