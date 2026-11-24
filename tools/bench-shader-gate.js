@@ -3,6 +3,7 @@
 // Run all configs + pass/fail: node tools/shader-gate.js   (one page: node tools/headless.js --url "index.html?nosw#mode=tdm" --game --js tools/bench-shader-gate.js --timeout 400 --quiet)
 const sleep=HL.sleep,G=()=>WD.G,O=Object.fromEntries(new URLSearchParams(location.hash.slice(1)));
 const mode=O.mode||'siege',N=+(O.n||3600),shift=+(O.shift||0);
+for(let i=0;i<900&&WD.PRE&&WD.PRE.on&&WD.PRE.st!==2;i++)await sleep(100);   // like a player: CLICK TO BEGIN waits for the entry preload
 document.getElementById('btnSolo').click();
 for(let i=0;i<60&&WD.screen!=='lobby';i++)await sleep(100);
 G().mode=mode;if(O.map)G().mapPick=O.map;WD.broadcastLobby&&WD.broadcastLobby();
@@ -24,4 +25,5 @@ for(let f=0;f<N;f++){
   if(ms>150)slow.push({f,ms:Math.round(ms)});
   if(f%10===0)await sleep(0);}
 const S=WD.SHW;
-return {gate:S.n===0?'PASS':'FAIL',mode,map:WD.builtMap||G().map,paths:used,armed:S.armed,shaders:S.n,slow,list:S.L.map(e=>`${e.ms}ms ${e.name} | ${e.diff} | ${e.who.join(' ; ')}`),errs:HL.errs.slice(0,5),files:WD.warm.rec?{'warm-rec.json':JSON.stringify(WD.warmRecDump())}:undefined};
+return {pre:{ms:Math.round(WD.PRE.ms),st:WD.PRE.st,log:WD.warm.log.filter(l=>/preload|timeout|compile|evr|evload/.test(l)).map(l=>l.slice(0,40)).slice(0,12),q:WD.warm.q.slice(0,5),rerr:(WD.warm.rerr||[]).length},gate:S.n===0?'PASS':'FAIL',mode,map:WD.builtMap||G().map,paths:used,armed:S.armed,shaders:S.n,slow,list:S.L.map(e=>`${e.ms}ms ${e.name} | ${e.diff} | ${e.who.join(' ; ')}
+      key…${e.key.slice(-150)}${e.src?String.fromCharCode(10)+'      src '+e.src:''}`),errs:HL.errs.slice(0,5),files:WD.warm.rec?{'warm-rec.json':JSON.stringify(WD.warmRecDump())}:undefined};

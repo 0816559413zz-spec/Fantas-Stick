@@ -1,3 +1,11 @@
+// Sword Guard sheet material (own function: the entry preload builds it too, js/51)
+function frGuardMat(){return new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,
+        uniforms:{t:{value:0},a:{value:0},c:{value:new THREE.Color(hdr('#bfeaff',1.3))}},
+        vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+        // soft shield sheet (no lines): solid faint glow, fades out toward the left/right ends and top/bottom, slow shimmer
+        fragmentShader:'uniform float t,a;uniform vec3 c;varying vec2 vUv;void main(){vec2 q=vUv*2.0-1.0;float sd=abs(q.x);'+
+          'float f=(1.0-smoothstep(0.2,1.0,sd))*(1.0-smoothstep(0.45,1.0,abs(q.y)));float sh=0.9+0.1*sin(t*2.0+q.x*2.0+q.y*3.0);'+
+          'gl_FragColor=vec4(c*f*sh*a,1.0);}'});}
 // ---------- ภาพของสายน้ำแข็ง: ดาบ/ขวานน้ำแข็งที่ปลายไม้ ท่าฟัน โล่อัศวิน ไถล แช่แข็งตัวเอง ออร่า ร่างแยก ----------
 function iceMat(op,em){return new THREE.MeshStandardMaterial({color:'#c4e6fa',emissive:em||'#3a8ac0',emissiveIntensity:0.45,roughness:0.5,metalness:0,transparent:true,opacity:op,flatShading:true});}
 function iceRim(geo,s){return new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:hdr('#9fe0ff',1.4),transparent:true,opacity:0.35,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.BackSide}));}
@@ -229,13 +237,7 @@ function frostFX(o,p,pz,now,dt){
   // โล่อัศวินน้ำแข็ง (แทนโล่ฟองสบู่)
   // Sword Guard: very faint ripple spreading left/right from the sword, fading out to the sides; brighter on a blocked hit
   if(p.sh&&o.grdC){
-    if(!o.gwave){const M=new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,
-        uniforms:{t:{value:0},a:{value:0},c:{value:new THREE.Color(hdr('#bfeaff',1.3))}},
-        vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
-        // soft shield sheet (no lines): solid faint glow, fades out toward the left/right ends and top/bottom, slow shimmer
-        fragmentShader:'uniform float t,a;uniform vec3 c;varying vec2 vUv;void main(){vec2 q=vUv*2.0-1.0;float sd=abs(q.x);'+
-          'float f=(1.0-smoothstep(0.2,1.0,sd))*(1.0-smoothstep(0.45,1.0,abs(q.y)));float sh=0.9+0.1*sin(t*2.0+q.x*2.0+q.y*3.0);'+
-          'gl_FragColor=vec4(c*f*sh*a,1.0);}'});
+    if(!o.gwave){const M=frGuardMat();
       // curved like a shield: arc of a cylinder bowed toward the front
       const geo=new THREE.CylinderGeometry(2.2,2.2,1.6,32,1,true,-0.8,1.6);geo.translate(0,0,-2.2);
       o.gwave=new THREE.Mesh(geo,M);o.gwave.frustumCulled=false;o.g.add(o.gwave);}

@@ -91,7 +91,7 @@ function thornsAlong(pts,rad,every,s=1,twist=2.4){const out=[],tg=V3(),nr=V3(),b
 // ---------- อนุภาค ----------
 function Pool(geo,mat,max){const im=new T.InstancedMesh(geo,mat,max);im.frustumCulled=false;add(im);const P=[],D=new T.Object3D(),C=new T.Color(),C2=new T.Color();
   im.setColorAt(0,C.set('#fff'));im.count=0;
-  return {P,add(o){if(P.length<max)P.push(Object.assign({age:0,life:1,size:.1,spin:0,rot:rnd(0,6),g:0,drag:0,grow:0,fade:1},o));},
+  return {P,im,add(o){if(P.length<max)P.push(Object.assign({age:0,life:1,size:.1,spin:0,rot:rnd(0,6),g:0,drag:0,grow:0,fade:1},o));},
     upd(dt){for(let i=P.length-1;i>=0;i--){const p=P[i];p.age+=dt;if(p.age>=p.life){P.splice(i,1);continue;}if(p.v){p.v.y-=p.g*dt;p.v.multiplyScalar(Math.max(0,1-p.drag*dt));p.p.addScaledVector(p.v,dt);}if(p.floor!==undefined&&p.p.y<p.floor){p.p.y=p.floor;if(p.v)p.v.multiplyScalar(.4);}p.rot+=p.spin*dt;}
       P.forEach((p,i)=>{const k=p.age/p.life,f=p.fade?1-Math.pow(k,1.6):1,s=p.size*(1+p.grow*k)*(p.fin?Math.min(1,p.age/p.fin):1)*(p.shrink?f:1);
         D.position.copy(p.p);D.rotation.set(p.rot,p.rot*.6+(p.ry||0),p.rot*1.3);if(p.sx)D.scale.set(s*p.sx,s,s);else D.scale.setScalar(Math.max(1e-4,s));D.updateMatrix();im.setMatrixAt(i,D.matrix);

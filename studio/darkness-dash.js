@@ -264,8 +264,8 @@ function stDarkSlashArea(parent,[x,z],radius,floorAt){
     for(let i=0;i<p.count;i++)p.setZ(i,floorAt(p.getX(i),-p.getY(i)));
   }
   const floor=new THREE.Mesh(floorGeometry,new THREE.ShaderMaterial({
-    uniforms:{strength:{value:0},turn:{value:0}},transparent:true,depthWrite:false,toneMapped:false,
-    vertexShader:`varying vec2 vPlane; void main(){vPlane=position.xy/${radius.toFixed(2)};
+    uniforms:{strength:{value:0},turn:{value:0},radius:{value:radius}},transparent:true,depthWrite:false,toneMapped:false,   // radius as a uniform: same shader source every cast (no new program)
+    vertexShader:`uniform float radius; varying vec2 vPlane; void main(){vPlane=position.xy/radius;
       gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
     fragmentShader:`uniform float strength,turn; varying vec2 vPlane;
       void main(){

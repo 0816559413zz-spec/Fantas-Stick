@@ -1953,7 +1953,8 @@ function drawLightHud(x,y,me){
 preloadReg('light',()=>Promise.all([loadModel(LG_ULT_ASSET),loadModel(LG_CRYSTAL_ASSET)]).then(()=>{
   const out=[],V=lgBuildSovereign();if(V&&V.g){V.g.visible=true;out.push(V.g);}
   out.push(lgSovereignChestBeam(),lgSovereignPalmBeam(),lgSovereignScorchTrail());
-  try{out.push(lgSovereignCrystal());}catch(e){}try{out.push(lgCrystalMesh(1));}catch(e){}   // crystal core (own geometry attributes)
+  try{out.push(lgSovereignCrystal());}catch(e){}try{out.push(lgCrystalMesh(1));}catch(e){}
+  try{out.push(new THREE.Mesh(new THREE.PlaneGeometry(1,1),lgLinkMat()));}catch(e){}   // link strand between linked allies   // crystal core (own geometry attributes)
   // ult strike / blast pieces (add themselves to the scene at the warm spot; warmGather keeps them)
   try{lgSovereignArrival(lgWorld(WARM_X,WARM_Y,1));}catch(e){}
   for(const k of ['impact','blast','inner'])try{lgImpactDome(WARM_X,WARM_Y,0,1.2,1,k);}catch(e){}

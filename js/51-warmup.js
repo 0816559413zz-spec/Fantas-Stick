@@ -170,7 +170,9 @@ function warmCharVariants(){
     ['dark',src=>stDarkTintMat(src,false,one,one),()=>true],['darkS',src=>stDarkTintMat(src,true,one,one),()=>true],
     ['darkF',()=>stDarkTintMat(flash,false,one,one),()=>true],
     ['darkClip',src=>deathClipMat(stDarkTintMat(src,false,one,one),one4),()=>true],   // slash-split death of a Darkness-tinted body   // Darkness tint over a hit flash
-    ...WARM.cvx];   // registered body overlays (preloadCharMat: class outline shells etc.)
+    ['darkFClip',()=>deathClipMat(stDarkTintMat(flash,false,one,one),one4),()=>true],   // slash-split death while hit-flashed under the Darkness tint
+    ...WARM.cvx,   // registered body overlays (preloadCharMat: class outline shells etc.)
+    ...WARM.cvx.flatMap(([n,mk,ok])=>[['d'+n,src=>stDarkTintMat(mk(src),false,one,one),ok],['dS'+n,src=>stDarkTintMat(mk(src),true,one,one),ok]])];   // Darkness tint copies every material of the model, shells included
   const roots=[...PM3.values(),...GWARM.chars.values()];
   for(const o of roots){const r=o&&o.g;if(!r||!o.fileModel)continue;   // whole actor: body + wand + darkness gear (scythe) etc.
     r.traverse(m=>{if(!m.isMesh||m.isInstancedMesh||!m.material||Array.isArray(m.material)||m.material.isShaderMaterial)return;const src=m.material;
@@ -211,6 +213,16 @@ function warmTick(v){
 // it is placed far off-map and kept in WARM.hold). `?nopreload` = old per-match path.
 const PRE={on:!/[?&]nopreload/.test(location.search),st:0,n:0,best:0,t0:0,ms:0,cb:[],smp:[],max:45000};
 function preloadReg(id,...f){(WARM.reg[id]||(WARM.reg[id]=[])).push(...f);}
+// See-through copies like deathDissolve (js/48) makes of whatever a dying player carries (weapon FX, orbs): returns a group to add
+function warmDissolve(root){const out=new THREE.Group(),L=[];root.updateMatrixWorld(true);
+  root.traverse(p=>{if(!(p.isMesh||p.isPoints||p.isLine)||p.isSkinnedMesh||!p.material||Array.isArray(p.material))return;const s=p.material,m=s.clone();
+    m.transparent=true;m.depthWrite=false;m.forceSinglePass=true;if(!s.isShaderMaterial){m.onBeforeCompile=s.onBeforeCompile;const k=s.customProgramCacheKey();m.customProgramCacheKey=()=>k;}
+    const c=p.clone(false);c.material=m;c.frustumCulled=false;p.matrixWorld.decompose(c.position,c.quaternion,c.scale);L.push(c);});
+  for(const c of L)out.add(c);return out;}
+// Dragon Flame / storm slam circle: runes go through instz (instanced, no instance colour) — never built by the FX-file warm-up
+preloadReg('frost',()=>new THREE.Mesh(new THREE.PlaneGeometry(1,1),frGuardMat()));   // frost knight Sword Guard sheet (built on first block)
+preloadReg('storm',()=>{const o={g:new THREE.Group()};stormWaveMake(o,{g:0,id:0});return o.g;});   // storm bow wave (ShaderMaterial + bolt tubes)
+preloadReg('pyro',()=>{const g=makeDfCircle(false);g.visible=true;return g;});preloadReg('storm',()=>{const g=makeDfCircle(true);g.visible=true;return g;});
 function preProg(){return PRE.st===2?1:PRE.st===1?PRE.best:0;}
 function preFin(){if(PRE.st===1){PRE.st=2;PRE.ms=performance.now()-PRE.t0;WARM.log.push('preload '+PRE.ms.toFixed(0)+'ms');}
   const cb=PRE.cb;PRE.cb=[];for(const f of cb)try{f();}catch(e){console.warn('preload cb',e);}}

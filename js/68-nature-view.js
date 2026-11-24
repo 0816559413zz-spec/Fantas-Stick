@@ -892,12 +892,18 @@ function natPlantHud(me,v){
 // Preload (PRELOAD-STANDARD step 4): tree / wall FX with the runtime shader patches they get in a fight (tree hit glow,
 // wall scorch) — the FX file warm-up builds them without. One instance each, detached like warmFxEnd.
 preloadReg('nature',()=>{
+  // the tree / wall shells turn transparent to fade out: warm a see-through copy of every shader patch stage they pass through
+  const out=[],trW=new Set(),trWarm=I=>{for(const S of I.L){const m=S.inner&&S.inner.material;if(!m||!m.isMeshStandardMaterial||m.transparent)continue;
+    const k=m.customProgramCacheKey();if(trW.has(k))continue;trW.add(k);out.push(new THREE.Mesh(S.inner.geometry,warmTrCopy(m)));}};
   for(const name of ['nature/tree_summon','nature/tree_break_study','nature/tree_expire_study','nature/wood_wall_growth_study','nature/wood_wall_break_study','nature/wood_wall_expire_study']){
     const tree=name.includes('tree_');
-    try{const f=natStartStudy(name,{x:WARM_X,y:WARM_Y,h:0,a:0,age:0});
-      warmFxRun(f,Math.min(6,(fxData(name)||{}).dur||3),.1,I=>{try{if(tree)natTreeGlow(I,0);else natWearWall(I,[0,0,0]);}catch(e){}});}
+    for(const hit of [1,0])try{const f=natStartStudy(name,{x:WARM_X,y:WARM_Y,h:0,a:0,age:0});   // hit = tree hit glow / wall scorch patch; 0 = never hit (other key)
+      warmFxRun(f,Math.min(6,(fxData(name)||{}).dur||3),.1,I=>{if(hit)try{if(tree)natTreeGlow(I,0);else natWearWall(I,[0,0,0]);}catch(e){}trWarm(I);});}
     catch(e){console.warn('warm nature',name,e);}}
   // summoned plants (lotus with bubble + auras, turret ground/wall, seed ball): built by the plant sync, not by events
-  const out=[];for(const k of ['lotus','turret','turretW','ball'])try{const v=natPlantView({k:k==='turretW'?'turret':k,wall:k==='turretW'});if(v&&v.g)out.push(v.g);}catch(e){console.warn('warm nature plant',k,e);}
+  for(const k of ['lotus','turret','turretW','ball'])try{const v=natPlantView({k:k==='turretW'?'turret':k,wall:k==='turretW'});if(v&&v.g)out.push(v.g);}catch(e){console.warn('warm nature plant',k,e);}
   return out;
+},()=>{   // particle pools (leaf/spark/dirt/puff/chip): InstancedMesh + instanceColor; the pools sit at count 0 (hidden) until a skill fires
+  const F=natFx(),M4=new THREE.Matrix4(),W=new THREE.Color('#fff');
+  return F.POOLS.map(p=>{const m=new THREE.InstancedMesh(p.im.geometry,p.im.material,1);m.setMatrixAt(0,M4);m.setColorAt(0,W);m.frustumCulled=false;return m;});
 });

@@ -61,8 +61,13 @@ function shwSig(m){try{return 's'+m.side+(m.transparent?' tr':'')+(m.fog===false
 function shwWho(pg){const out=[];
   for(const sc of [scene,fxScene])sc.traverse(o=>{if(out.length>=3||!o.material)return;
     for(const m of [].concat(o.material)){const pr=m&&gl.properties.get(m);if(!pr)continue;
-      if(pr.currentProgram===pg||(pr.programs&&[...pr.programs.values()].includes(pg))){out.push((sc===fxScene?'fx:':'')+shwPath(o)+' ['+(m.name||m.type)+(out.length?'':' '+shwSig(m))+']');break;}}});
+      if(pr.currentProgram===pg||(pr.programs&&[...pr.programs.values()].includes(pg))){out.push((sc===fxScene?'fx:':'')+shwPath(o)+(o.isInstancedMesh?'{IM '+o.count+'/'+o.instanceMatrix.count+(o.instanceColor?' col':'')+' '+(o.geometry.type||'')+' v'+(o.geometry.attributes.position?o.geometry.attributes.position.count:0)+(o.name?' '+o.name:'')+'}':'')+' ['+(m.name||m.type)+(out.length?'':' '+shwSig(m))+']');break;}}});
   return out.length?out:['(not in scene: shadow/depth or already gone)'];}
+// diagnosis: an older program with the exact same GLSL = the program key changed although the shader did not
+// (e.g. a ShaderMaterial source id was dropped and handed out again) • returns how its key differs, '' = really new GLSL
+function shwHead(pg){try{const c=gl.getContext(),sh=c.getAttachedShaders(pg.program)||[];return sh.map(x=>{const t=c.getShaderSource(x),i=t.indexOf('void main');return t.slice(Math.max(0,i-220),i+60).replace(/\s+/g,' ');}).join(' ‖ ');}catch(e){return '';}}   // ShaderMaterial: start of its own GLSL (find the owner)
+function shwSrc(pg){const c=gl.getContext(),sh=c.getAttachedShaders(pg.program)||[];return sh.map(x=>c.getShaderSource(x)).join('');}
+function shwSame(pg,L){try{const s=shwSrc(pg);for(const q of L){if(q===pg||!SHW.seen.has(q))continue;if(shwSrc(q)===s){const a=pg.cacheKey.split(','),b=q.cacheKey.split(',');const d=[];for(let i=0;i<Math.max(a.length,b.length)&&d.length<3;i++)if(a[i]!==b[i])d.push(i+':'+String(b[i]).slice(0,20)+'>'+String(a[i]).slice(0,20));return d.join(' ')||'identical key';}}}catch(e){}return '';}
 function shwFrame(gap){
   const L=gl.info.programs;if(!L)return;
   const play=screen==='game'&&G&&G.ph==='play';
@@ -72,7 +77,8 @@ function shwFrame(gap){
   SHW.len=L.length;
   for(const pg of L){if(SHW.seen.has(pg))continue;SHW.seen.add(pg);
     if(!SHW.armed)continue;
-    const e={t:new Date().toTimeString().slice(0,8),ms:Math.round(gap),name:pg.name||'?',diff:shwDiff(pg),who:shwWho(pg),key:pg.cacheKey};
+    const e={t:new Date().toTimeString().slice(0,8),ms:Math.round(gap),name:pg.name||'?',diff:shwDiff(pg),who:shwWho(pg),key:pg.cacheKey,same:shwSame(pg,L),src:/^\d/.test(pg.cacheKey)?shwHead(pg):''};
+    if(e.same)e.who[0]+=' ⟨same source as an older program: '+e.same+'⟩';
     SHW.n++;SHW.L.push(e);if(SHW.L.length>40)SHW.L.shift();
     console.warn('[shader mid-match]',e.ms+'ms',e.name,e.diff,e.who.join(' | '));
     if(DEV.on)toast('⚠ shader ใหม่กลางแมตช์ '+e.ms+'ms: '+e.name+' — '+e.who[0]);}}

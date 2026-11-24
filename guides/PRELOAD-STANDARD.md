@@ -226,6 +226,24 @@ Rule: **light changes = uniform changes, never structural changes.**
   Ward Drain, Nightfall, unnamed `Scene>Mesh` ShaderMaterials) → next: dump their source in the mixed bench
   (`WD.SHW.L[i].key` + `gl.getAttachedShaders`) and find which branch builds them.
 
+**Step 4 status (round 4, 2026-11-24):**
+- **Bench fix:** `tools/bench-shader-gate.js` clicked Solo before the entry preload finished → the countdown cut the preload
+  short (`preFin`) and the rehearsal steps never ran. It now waits for `PRE.st===2` like a player at CLICK TO BEGIN. Several
+  "never-seen" Darkness sources of round 3 were this, not missing preload.
+- Gate output now prints each program's key tail and, for ShaderMaterials, the GLSL around `void main` (`shwHead`, js/71) → the
+  owner is one `grep` away. `shwSame` flags a program whose GLSL equals an older one (key-only duplicate).
+- Added at entry: Nature particle pools with instance colour (`natFx().POOLS`, leaf pool = the old 700-cap group); see-through
+  copies of every Nature tree/wall patch stage, with and without the hit patch (`trWarm`); wind ult dust `PointsMaterial`
+  (no map); Dragon Flame / storm circle (`makeDfCircle`, instz runes); frost Sword Guard (`frGuardMat`); storm bow wave
+  (`stormWaveMake`, + its bolt tubes); light link strand (`lgLinkMat`); Darkness gear death-dissolve copies (`warmDissolve`, js/51);
+  char variants `darkFClip` + Darkness tint over every outline shell (`d*` / `dS*` of `WARM.cvx`).
+- Breakable panel rubble (`pnlBuild`, js/28-pnl-build) starts with 1 empty instance + instance colour, so the map warm-up compiles
+  it (and its shadow depth): was a 0.41 s freeze at the first wall break.
+- `studio/darkness-dash.js` cast floor: radius is a uniform (was baked into the source → new program per cast).
+- Gate (r4f + r4g): **siege 0 / 0, tdm 0 / 0 — GATE PASS, slow frames 0 everywhere** (round 3: 18 / 23, 12 / 13).
+  Rule learned: anything that starts at `count 0` (pools) or `visible=false` is skipped by the warm compile — give it one real
+  (zero-size) instance or register a builder.
+
 **Step 5 status (round 1, 2026-11-23):**
 - Already in place before step 5: Map Builder light points (`light` objects → `mlsPoint`, the 8 map light slots) and
   Indoor Light Zones (`lz` → `uPtG.y`). Not yet done: the 8/12/16 slot measurement on a real GPU.

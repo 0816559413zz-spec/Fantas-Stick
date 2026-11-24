@@ -1149,4 +1149,5 @@ preloadReg('darkness',()=>loadModel('dark_scythe').then(()=>{
   try{stDarkFlowArm(root);stDarkFlowFlames(root);stDarkFlowOrbs(root);}catch(e){console.warn('warm dark flow',e);}
   try{stDarkTargetMark(root);}catch(e){console.warn('warm dark mark',e);}   // mark over marked targets (vertex-alpha colours)
   try{const sc=stCreateScythePreview(root,{wrap:'C',manual:true,scale:1});const sc2=stCreateScythePreview(root,{wrap:'C',manual:true,scale:1});stChaseScytheOpacity(sc2)(.5);}catch(e){console.warn('warm dark scythe',e);}
+  try{root.add(warmDissolve(root));}catch(e){console.warn('warm dark dissolve',e);}   // death dissolve of the gear (blade edge, orb tails)
   return root;}));

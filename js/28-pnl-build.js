@@ -205,7 +205,8 @@ function pnlBuild(){
     if(p.mode!=='g'&&!p.tl){
       const S=PNDEF.pile.sp*S3,W=Lm+2*S,D=Tm+2*S,hg=new THREE.PlaneGeometry(W,D,Math.max(2,Math.ceil(W/0.35)),12);hg.rotateX(-Math.PI/2);
       const hm=new THREE.Mesh(hg,new THREE.MeshStandardMaterial({color:PN_HEAP[p.mat]||'#7a6a5a',roughness:1,flatShading:true}));hm.position.set(cx,0,cz);hm.rotation.y=-p.a;hm.receiveShadow=true;hm.visible=false;grp.add(hm);
-      const rm=new THREE.InstancedMesh(rg,new THREE.MeshStandardMaterial({color:'#ffffff',roughness:0.95,flatShading:true}),n*6);rm.count=0;rm.castShadow=rm.receiveShadow=true;rm.frustumCulled=false;grp.add(rm);
+      const rm=new THREE.InstancedMesh(rg,new THREE.MeshStandardMaterial({color:'#ffffff',roughness:0.95,flatShading:true}),n*6);rm.setMatrixAt(0,new THREE.Matrix4().makeScale(0,0,0));rm.setColorAt(0,new THREE.Color('#fff'));rm.count=1;   // 1 empty instance + colour: the map warm-up compiles the rubble shader (+ its shadow) now, not on the first break (~0.4 s)
+      rm.castShadow=rm.receiveShadow=true;rm.frustumCulled=false;grp.add(rm);
       e.heap=hm;e.rub=rm;}
     PNV.list.push(e);
   }

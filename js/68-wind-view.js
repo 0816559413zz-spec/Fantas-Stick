@@ -438,3 +438,7 @@ function poseWindWings(W,big,dt,guard){
   for(const {piv,sd} of d.sides){const S=d.fs&&d.fs[sd],q=S&&S.t>=0?Math.sin(Math.min(1,S.t/0.42)*Math.PI):0;piv.scale.setScalar(1+0.3*q);piv.rotation.y=-sd*(0.3+sw+wrap*1.0+fl+0.32*q);piv.rotation.z=sd*(fl*0.35-wrap*0.45+0.12*q);}   // q = ปีกที่ยิงขนนก ยืดขึ้นและขยับมาหน้าแว้บหนึ่ง
   d.uWT.value=d.t;d.uWrap.value=wrap;for(const f of d.fe){const i=f.userData.i;f.rotation.z=Math.sin(d.t*2.0-i*0.3)*0.03-(i<10?i*0.07:0.2)*wrap;}
   d.circle.rotation.z=d.t*(0.25+boost);d.circle.visible=wrap<0.5;}
+
+// Preload (PRELOAD-STANDARD step 4 r4): ultimate blade-wear dust = plain PointsMaterial (no map) — other Points warmed all carry a map.
+preloadReg('wind',()=>{const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(3),3));
+  const p=new THREE.Points(g,new THREE.PointsMaterial({color:'#a8ffe0',size:0.17,transparent:true,depthWrite:false,depthTest:false,toneMapped:false}));p.frustumCulled=false;return p;});
