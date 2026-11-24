@@ -458,13 +458,13 @@ iceMat:10 iceRim:11 makeIceSword:12 makeIceAxe:31 makeKiteShield:47
 §59 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
 makeIceCrown:63 frostCrown:68 FWS:74 FWA:74 _fwM:75 _fwM2:75 _fwX:75 _fwY:75 _fwZ:75 _fwP:75 _fwS:75 _fwQ:75 _eo:76 _ei:76 _ss:76 fwAim:78 fwWeapons:79 FWP:81 FWT:81 fwChop:82 fwSweep:83 FF_RISE:84 fwIdle:85 fwSwing:88 FWL_N:100 fwLink:101 fwMat:104 SLIDE_POSE:107 _slQ:109 frostSlideHead:110 _slAx:116 frostFX:117
 
-## js/35-sync.js (815) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+## js/35-sync.js (832) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 §2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
 CPOSE_T:7 _ce:7 _cs:7 _cb:7 _caJ:9 _caJ0:9 AMP_B:10 AMP_S:10 CP_BEND:11 CPOSE:13 _cpT:21 _cpR:21 CGUARD:21 CP_STEP:22 CPCOL:23 castStyle:24 castStart:25
 §26 ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเห…
-CANIM:31 SKFEET:86 SKANIM:88 skAnim:96 _caT:97 _caR:97 skillPose:98 _g2:136 wandTwoHand:137 characterPoseMix:144 characterStance:145 JUMP_LEGS:152 jumpLegPose:161 jumpCloakTurn:198 jumpCloakEuler:198 jumpCloakPose:199 jumpArmBaseR:218 jumpArmBaseL:218 jumpElbowAxis:219 jumpElbowTurn:219 jumpElbowPivot:220 clearJumpArms:221 jumpArmPose:230 _caEQ:241 _caEX:241 caElbowL:242 jumpElbowPose:245 CBLOCK:272 CBLOCK_PATH:273 blockPose:274 castPose:280 lateSkillPose:286 castPose0:287 clearCharacterCast:316 hitRecoilPose:321 syncPlayers:330 syncEnemies:462 projGeo:502 tailGeo:503 _t1:504 makeProj:505 _a:526 _b:526 PJFX:528 syncProj:529 _awT:630 animateWorld:631
-§672 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
-_v:673 toScreen:674 BURNC:682 burnNum:683 NAMETAG:697 nameTag:698 _hsO:704 hudSight:705 SIGHT:718 sightA:719 drawLabels:723 TEXTAG:758 textTag:759 drawTexts:763 HITM:775 DIRI:775 drawXh:777 drawCrosshair:787
+CANIM:31 SKFEET:86 SKANIM:88 skAnim:96 _caT:97 _caR:97 skillPose:98 _g2:136 wandTwoHand:137 characterPoseMix:144 characterStance:145 JUMP_LEGS:152 jumpLegPose:161 jumpCloakTurn:198 jumpCloakEuler:198 jumpCloakPose:199 jumpArmBaseR:218 jumpArmBaseL:218 jumpElbowAxis:219 jumpElbowTurn:219 jumpElbowPivot:220 clearJumpArms:221 jumpArmPose:230 _caEQ:241 _caEX:241 caElbowL:242 _caRQ:245 _caRV:245 caElbowR:246 jumpElbowPose:256 CBLOCK:283 CBLOCK_PATH:284 blockPose:285 castPose:291 lateSkillPose:297 castPose0:298 clearCharacterCast:327 hitRecoilPose:332 syncPlayers:341 syncEnemies:479 projGeo:519 tailGeo:520 _t1:521 makeProj:522 _a:543 _b:543 PJFX:545 syncProj:546 _awT:647 animateWorld:648
+§689 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
+_v:690 toScreen:691 BURNC:699 burnNum:700 NAMETAG:714 nameTag:715 _hsO:721 hudSight:722 SIGHT:735 sightA:736 drawLabels:740 TEXTAG:775 textTag:776 drawTexts:780 HITM:792 DIRI:792 drawXh:794 drawCrosshair:804
 
 ## js/36-modes-view.js (171) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 healTex:22 makeItem:23 syncModeObjs:39
@@ -966,4 +966,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(118 files, 35848 lines)
+(118 files, 35865 lines)

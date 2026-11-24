@@ -1473,3 +1473,4 @@
 - 2026-11-24 Earth Rampart cast anim: anticipation, accelerating palm slam, hold, overshoot yank; keyframe ease 'i'
 - 2026-11-24 Cast animation joints: CANIM j keys (knees, thighs, left elbow); Rampart crouches with knees; guides/ANIMATION.md
 - 2026-11-24 All cast poses get auto knees/elbow/stagger stance (CANIM joint layer); Rampart bigger elbow + staggered wide stance
+- 2026-11-24 Natural arms/legs everywhere: resting elbow bends (wand follows right elbow), relaxed staggered idle stance with soft knees

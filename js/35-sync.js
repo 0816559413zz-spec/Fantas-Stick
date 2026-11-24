@@ -125,7 +125,7 @@ function skillPose(o,p,dt,now){
     J[1]=k;J[2]=k*0.85;J[3]=ax<-2.3?0.45:ax<-1.0?0.6:0.85;J[4]=-0.12-k*0.5;J[5]=0.16-k*0.42;J[6]=0.12;J[7]=-0.12;}   // thigh ≈ half the knee bend = foot stays planted
   if(still&&(A.j||!SKFEET[o.caN])){const fw=w*_cs(Math.min(1,u/0.12));o.legs[0].rotation.x=lerp(o.legs[0].rotation.x,J[4],fw);o.legs[1].rotation.x=lerp(o.legs[1].rotation.x,J[5],fw);
     o.legs[0].rotation.z=lerp(o.legs[0].rotation.z,J[6],fw);o.legs[1].rotation.z=lerp(o.legs[1].rotation.z,J[7],fw);}
-  o.caJ=[(still?J[1]:J[1]*0.4)*w,(still?J[2]:J[2]*0.4)*w,J[3]*w];
+  o.caJ=[(still?J[1]:J[1]*0.4)*w,(still?J[2]:J[2]*0.4)*w,J[3]*w*(A.two?0.15:1)];o.caJR=(_caT[0]<-2.3?0.25:0.4)*w;
   if(A.tr&&u>A.tr[0]&&u<A.tr[1]){if(!o.ctr){const col=CPCOL[getKit(p.id).path]||'#ffffff';o.ctr=trailNew({col:'#ffffff',col2:col,w:0.06,life:0.2,k:1.3});}
     o.tip.updateWorldMatrix(true,false);o.tip.getWorldPosition(_tv1);trailPoint(o.ctr,_tv1.x,_tv1.y,_tv1.z);}
   else if(o.ctr){trailStop(o.ctr);o.ctr=null;}
@@ -242,6 +242,17 @@ const _caEQ=new THREE.Quaternion(),_caEX=new THREE.Vector3(1,0,0);
 function caElbowL(o,a){const m=o.fileModel;if(!m)return;let k=o.caEL;if(!k||k.m!==m){const b=m.getObjectByName('forearm_L');k=o.caEL=b?{b,m,base:new THREE.Quaternion(),ap:new THREE.Quaternion(),on:false}:{m};}
   if(!k.b)return;const q=k.b.quaternion;if(k.on&&q.equals(k.ap))q.copy(k.base);if(Math.abs(a)<0.003){k.on=false;return;}
   k.base.copy(q);q.multiply(_caEQ.setFromAxisAngle(_caEX,-a));k.ap.copy(q);k.on=true;}
+const _caRQ=new THREE.Quaternion(),_caRV=new THREE.Vector3();
+function caElbowR(o,a){const m=o.fileModel;if(!m)return;let k=o.caER;
+  if(!k||k.m!==m){const b=m.getObjectByName('forearm_R');k=o.caER=b?{b,m,base:new THREE.Quaternion(),ap:new THREE.Quaternion(),on:false,wp:new THREE.Vector3(),wq:new THREE.Quaternion(),tp:new THREE.Vector3(),awp:new THREE.Vector3(),awq:new THREE.Quaternion(),atp:new THREE.Vector3()}:{m};}
+  if(!k.b)return;const q=k.b.quaternion,W=o.wandG,T=o.tip;
+  if(k.on){if(q.equals(k.ap))q.copy(k.base);if(W.position.equals(k.awp)&&W.quaternion.equals(k.awq)){W.position.copy(k.wp);W.quaternion.copy(k.wq);T.position.copy(k.tp);}}
+  if(Math.abs(a)<0.003){k.on=false;return;}
+  k.base.copy(q);k.wp.copy(W.position);k.wq.copy(W.quaternion);k.tp.copy(T.position);
+  _caRQ.setFromAxisAngle(_caEX,-a);q.multiply(_caRQ);k.ap.copy(q);
+  W.position.sub(jumpElbowPivot).applyQuaternion(_caRQ).add(jumpElbowPivot);W.quaternion.premultiply(_caRQ);
+  T.position.sub(jumpElbowPivot).applyQuaternion(_caRQ).add(jumpElbowPivot);T.getWorldPosition(o.tipW||(o.tipW=new THREE.Vector3()));
+  k.awp.copy(W.position);k.awq.copy(W.quaternion);k.atp.copy(T.position);k.on=true;}
 function jumpElbowPose(o,weight){
   const a=o.jumpArms||(o.jumpArms={
     elbows:['forearm_R','forearm_L'].map(n=>o.fileModel.getObjectByName(n)).filter(Boolean)
@@ -386,6 +397,7 @@ function syncPlayers(P,mode,now,dt){
       else{o.b.rotation.x=p.ds?0.4:wfly?0:Math.min(0.12,v.sp*0.01);o.b.position.y=wfly?0:Math.abs(Math.cos(o.walk))*0.05*Math.min(1,v.sp/5);}
       o.legs[0].rotation.x=sw*0.75;o.legs[1].rotation.x=-sw*0.75;
       o.legs[0].rotation.z=o.legs[1].rotation.z=0;
+      {const still=1-Math.min(1,v.sp/1.2);if(still>0&&!p.fl){o.legs[0].rotation.x+=-0.14*still;o.legs[1].rotation.x+=0.06*still;o.legs[0].rotation.z=0.07*still;o.legs[1].rotation.z=-0.07*still;}}   // relaxed stance (user 2026-11-24)
       o.armL.rotation.x=-sw*0.55;o.armL.rotation.z=0.15;
       o.armR.rotation.x=o.cpT>0?-0.35+sw*0.4:lerp(-0.35+sw*0.4,-1.55,ck);o.armR.rotation.z=-0.12;o.b.rotation.y=0;
     }
@@ -441,8 +453,13 @@ function syncPlayers(P,mode,now,dt){
       rigSync(o,dt,false,jumpWeight,jumpArmWeight);windForearm(o);stormBowForearm(o);earthFistForearm(o);natForearmR(o);
       if(domeKnee)dpKnees(o,0,domeKnee);
       else if(jumpWeight)dpKnees(o,o.jumpLegs.p[4]*jumpWeight,o.jumpLegs.p[5]*jumpWeight);
-      else if(o.caJ)dpKnees(o,o.caJ[0],o.caJ[1]);
-      caElbowL(o,o.caJ&&!jumpArmWeight?o.caJ[2]:0);
+      // natural arms everywhere (user 2026-11-24): elbows never fully straight (walk/run clips already bend knees + elbows, so less there)
+      const wk=!p.fl&&!p.dn&&!o.caN&&(v.sp||0)>0.6?Math.min(1,v.sp/5):0,sw=Math.sin(o.walk||0);
+      if(o.caJ)dpKnees(o,o.caJ[0],o.caJ[1]);
+      else if(!wk&&!p.fl&&!p.dn&&!jumpWeight&&!domeKnee&&Math.abs(o.legs[0].rotation.x)<0.2&&Math.abs(o.legs[1].rotation.x)<0.2){   // relaxed stance when nothing else poses the legs: one foot a little forward, slightly apart, soft knees
+        o.stK=Math.min(1,(o.stK||0)+dt*4);const k=o.stK;dpKnees(o,0.14*k,0.1*k);}
+      else o.stK=0;
+      if(!jumpArmWeight){caElbowL(o,o.caJ?o.caJ[2]:0.45*(1-0.6*wk));caElbowR(o,o.caJ?o.caJR:0.35*(1-0.6*wk));}
       if(jumpArmWeight)jumpElbowPose(o,jumpArmWeight);
     }
     jumpCloakPose(o,jumpWeight?(o.jumpLegs.p[6]*jumpWeight):0);

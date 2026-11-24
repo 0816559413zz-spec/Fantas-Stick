@@ -38,6 +38,10 @@ rips to the target), the big result on the release.
   small stagger (right foot forward) and spread. Poses with an authored `SKFEET` keep their thighs, still get knees/elbow.
 - Stand **staggered and a bit wide**, not feet parallel (user 2026-11-24).
 - Skill → pose name: `SKANIM` in `js/35-sync.js`.
+- **Always-on arm/leg layer** (render loop after `rigSync`, js/35-sync.js): elbows rest bent (left 0.45, right 0.35;
+  less while walking because the walk/run clip already bends them); right elbow bends the `forearm_R` bone and carries
+  the wand around the elbow pivot (`caElbowR`), so the wand stays in the hand. Standing still: right foot ~0.14 forward,
+  left a little back, feet slightly apart, soft knees (0.14 / 0.10). Walk/run clips already flex knees — don't add more.
 
 ## 4. Settings that worked (log)
 

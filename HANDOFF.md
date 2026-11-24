@@ -1,6 +1,6 @@
 # HANDOFF — Fantas Stick (was "Wizard Duel") (repo: Fantas-Stick)
 
-**Animation rules (2026-11-24, user):** read `guides/ANIMATION.md` before any pose work — crouch with knees, bend the free elbow, timing beats (wind-up → ease-in strike → hold → overshoot). Every cast anim now gets an automatic joint layer (knees from body drop+lean, left elbow from arm height, staggered stance) unless it carries explicit `j` keys (knees/thighs/left elbow/spread) in `CANIM` (js/35-sync.js; `dpKnees`, `caElbowL`), new ease `'i'`.
+**Animation rules (2026-11-24, user):** read `guides/ANIMATION.md` before any pose work — crouch with knees, bend the free elbow, timing beats (wind-up → ease-in strike → hold → overshoot). Always-on layer: resting elbow bends both arms (`caElbowR` carries the wand), relaxed staggered idle stance; every cast anim also gets an automatic joint layer (knees from body drop+lean, left elbow from arm height, staggered stance) unless it carries explicit `j` keys (knees/thighs/left elbow/spread) in `CANIM` (js/35-sync.js; `dpKnees`, `caElbowL`), new ease `'i'`.
 
 **Dash on bridges/wall tops (2026-11-24):** Fire (pyro) charge-dash and the default dodge checked `p.z<0.5` (absolute height), so standing on a bridge / castle wall / raised floor counted as airborne and Dash did nothing. Now `p.z-groundH(p.x,p.y,p.z)<0.5` (js/06-pyro.js `pyroDash`, js/11-host.js). Dragonfall / Storm Dome start height also uses the floor you stand on.
 
