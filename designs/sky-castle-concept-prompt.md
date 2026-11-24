@@ -45,3 +45,26 @@ Avoid: text, logos, watermark, modern buildings, guns, realistic faces, heavy ou
 
 - ภาพนี้เป็น **คอนเซ็ปต์อ้างอิง** ยังไม่ใช่ผังแผนที่ที่ล็อก (ตามแนวทาง `notes/PROJECT-DESIGN-DIRECTION.md`)
 - ถ้าจะใช้กับเกมจริง: ภาพที่ได้ → ส่งต่อเข้า Map Editor / Sketch เพื่อกำหนดผังสนามก่อน
+
+---
+
+# พรอมต์ B — วาดแมพปราสาทปัจจุบัน (fcs) เป็นภาพสีน้ำมุมสูง
+
+Ref เพิ่ม: `designs/sky-castle_ref/03_current_map_overview.webp` (ภาพมุมสูงแมพจริงในเกม = **ผัง/ภูมิประเทศ**)
+แนบ 2 รูป: `03` (ผัง) + `02_style_watercolor_castle.png` (สไตล์) แล้ววางพรอมต์:
+
+```
+Use the two attached images. Image 1 is a 3D game-engine overview of a map: use it ONLY for the layout and terrain. Image 2 is the art-style reference.
+
+Repaint Image 1 as a single hand-painted watercolor and ink concept-art illustration, aerial three-quarter view, landscape 16:9.
+
+KEEP THE LAYOUT from Image 1: a grassy hill range with pine forests on the upper-left; a long rocky peninsula jutting into a calm lake, with cliffs on its sides; on the peninsula a walled medieval castle courtyard with a tall gothic castle keep with pointed spires at the far end, a plaza with stone paving, small buildings and a blue-roofed hall near the entrance; a second headland on the right with a small gate tower; two small sea stacks (rocks) in the water; wide open lake in the foreground.
+
+STYLE (from Image 2): traditional watercolor with sepia ink linework, soft translucent washes, paper texture, loose wet-on-wet edges, sandstone and cream castle stone, moss-green and ochre grass, deep teal-blue water with pale brush ripples, soft blue-grey shadows, white paper vignette at the edges. Hand-painted, NOT 3D render, NOT photoreal.
+
+IMPROVE: make the castle keep the clear focal point with warm detailed stone, banners and tiny windows; add a few wizards flying on broomsticks above the courtyard and lake for scale; light mist over the water; a few birds; clouds in a pale sky. Golden-hour light from the upper left.
+
+Avoid: text, logos, watermark, modern objects, UI, red debug overlays, grid lines.
+```
+
+หมายเหตุ: ภาพ 03 มีกรอบแดง/เส้นดีบักในตัวปราสาท (โซนเกม) — พรอมต์สั่งให้ไม่เอาติดมา
