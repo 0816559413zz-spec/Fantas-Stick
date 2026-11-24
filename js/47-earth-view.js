@@ -803,7 +803,12 @@ function eRampTick(v,dt,now){
     if(R.up&&R.t-R.tu>0.2){if(R.holo)scene.remove(R.holo);EV.rcall.splice(i,1);}}}
 // ===== Terra Isle (user 2026-11-24, ref: floating island chunk): earthy top split into soft colour zones, same hue
 // but darker jagged rock underneath (shadow side), a few boulders on top. Seeded so every client builds the same isle.
-SKANIM.terraisle='punchcmd';   // caster just points the wand where the Stand punches
+// Terra Isle cast (user 2026-11-24): pull the wand back low (wind-up) → thrust it at the spot, accelerating (crack at 0.15 s)
+// → hold pointed, left palm pressing low, tremble while the ground rumbles → scoop both hands up with overshoot as the
+// isle comes out (0.5 s) → settle. Knees bend on the hold, straighten on the lift (joint keys j).
+CANIM.islecast={d:0.9,st:0,tr:[0.12,0.2],tm:[0.2,0.5],k:[[0.11,-0.5,-0.3,0.25,0.08,-0.6,0.5,0,-0.06,'s'],[0.17,-1.45,-0.05,0.05,0.18,-0.9,0.35,0,-0.1,'i'],[0.5,-1.4,-0.05,0.05,0.2,-0.75,0.4,0,-0.12,'s'],[0.6,-2.5,-0.1,0,-0.08,-2.4,0.35,0,0.03,'o'],[1,-2.0,-0.1,0,-0.03,-1.9,0.3,0,0,'s']],
+  j:[[0.11,0.5,0.4,1.0,-0.35,0.18,0.14,-0.14],[0.17,0.75,0.6,0.5,-0.55,0.1,0.18,-0.18],[0.5,0.85,0.7,0.55,-0.6,0.08,0.18,-0.18],[0.6,0.2,0.15,0.4,-0.25,0.15,0.14,-0.14],[1,0.12,0.1,0.45,-0.2,0.12,0.12,-0.12]]};
+SKANIM.terraisle='islecast';
 const EISLE={top:['#c99b62','#a66f3c','#8e9850','#d6b781','#a9603d'],mat:null,geo:new Map()};
 function eIsleGeo(seed){if(EISLE.geo.has(seed))return EISLE.geo.get(seed);
   const R=eRng(seed),rad=ISLE.v.r*S3,n=24,o1=R()*10,o2=R()*10,Z=EISLE.top.map(c=>new THREE.Color(c)),pts=[];
@@ -832,6 +837,10 @@ function eIsleMesh(seed){if(!EISLE.mat){EISLE.mat=new THREE.MeshStandardMaterial
 // Stand punch: big Stand rises, cocks a fist high, slams it into the ground (accelerating), holds/strains, then yanks up
 // no Stand (user 2026-11-24): ground cracks at the spot, rumbles with dust, then the isle comes up on its own
 function eIsleTick(dt,now){for(let i=EV.icall.length-1;i>=0;i--){const R=EV.icall[i];R.t+=dt;const t=R.t,P=ISLE.v.punch,L=ISLE.v.lift;
+    {const co=PM3.get(R.id);if(co&&!R.cx)R.cx=simOf(co.g.position);}
+    if(R.cx&&t>=0.08&&t<P+0.02){const u=clamp((t-0.08)/(P-0.08),0,1),e=u*u*u,q=Math.max(0,e-0.08);   // gold streak rips from the wand to the spot
+      for(let k=0;k<3;k++){const f=Math.max(0,e-k*0.03);PARTS.push({x:R.cx.x+(R.x-R.cx.x)*f+rnd(-3,3),y:R.cx.y+(R.y-R.cx.y)*f+rnd(-3,3),h:0.15+0.9*(1-f),vx:0,vy:0,vh:0.4,life:0.3,max:0.3,col:k?'#ffc94a':'#fff2c0',size:3-k*0.6,g:0});}
+      if((R.ck=(R.ck||0)+dt)>0.025&&q>0){R.ck=0;dfCracks(R.cx.x+(R.x-R.cx.x)*q,R.cx.y+(R.y-R.cx.y)*q,0.06,18,'#bfa57a',0.5);}}
     if(!R.hit&&t>=P){R.hit=1;dfCracks(R.x,R.y,0.06,90,'#a98a62',1);eChunks(R.x,R.y,0.2,8,180,7,0.18);ring(R.x,R.y,'#ffd27a',60,0.3,0.15);shake(0.3);}
     if(R.hit&&t<L){const k=(t-P)/Math.max(0.01,L-P);if(Math.random()<0.4+0.5*k)burst(R.x+rnd(-60,60),R.y+rnd(-60,60),ECOL.dust,2,90,0.4,2,{h:0.1,vh:[0.5,2],g:5});if(Math.random()<0.25)shake(0.05+0.1*k);}
     if(t>L+0.2)EV.icall.splice(i,1);}}

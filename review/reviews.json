@@ -1,5 +1,5 @@
 {
- "next": 167,
+ "next": 168,
  "items": [
   {
    "id": 157,
@@ -3507,6 +3507,23 @@
     "/shots/motion_earth_isle.gif",
     "/shots/earth_isle_sheet.jpg",
     "/shots/earth_isle_look.jpg"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 167,
+   "title": "Earth: ท่าร่าย Terra Isle",
+   "text": "ดึงไม้ต่ำไปหลัง → แทงไม้ไปที่จุด (เร่ง) พื้นแตก + เส้นแสงทองวิ่งไป → ค้าง เข่าย่อ มือซ้ายกดต่ำ เกร็งสั่น → ช้อนสองมือขึ้นแรงตอนเกาะโผล่ → ผ่อน • เกาะลอยขึ้นเร็วขึ้นอีก (~0.8 วิ ถึงยอด)",
+   "kind": "Skill",
+   "who": "Earth",
+   "status": "wait",
+   "created": "2026-11-24T17:30:00",
+   "updated": "2026-11-24T17:30:00",
+   "imgs": [],
+   "links": [
+    "/shots/motion_earth_islecast.gif",
+    "/shots/earth_islecast_sheet.jpg"
    ],
    "feedback": "",
    "reply": ""
