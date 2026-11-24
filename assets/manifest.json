@@ -499,6 +499,11 @@
    "file": "maps/tonelab.glb",
    "data": "maps/tonelab.json",
    "v": 2
+  },
+  "town-demo": {
+   "file": "maps/town-demo.glb",
+   "data": "maps/town-demo.json",
+   "v": 1
   }
  },
  "ptex": {}
