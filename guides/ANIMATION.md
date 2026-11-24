@@ -50,3 +50,4 @@ rips to the target), the big result on the release.
   hold with tremble to 0.4 s, yank with `'o'` at 0.48 s (both arms up, knees straighten), settle.
   v2: left elbow 1.5 on the wind-up / 0.75 on the slam, stance right foot forward (thigh −0.9) left back, spread ±0.22. Gold line from the
   palm to the wall uses ease-in (slow then fast). Wall rises at 0.4 s.
+- **Earth Terra Isle Stand** (2026-11-24, user: one hand, bend over, plunge, pull): `standPose({one,lean,cock,reach})` js/47 — lean 0→0.6 + cock over 0.2 s, plunge with cubic ease-in to 0.5 s (lean 1, body twist 0.22, left hand braced on the knee), strain/tremble to 0.8 s, pull with overshoot 0.35 s (elbow bends as it pulls, body straightens a little past upright). Stand beside the spot so the player sees it in profile.

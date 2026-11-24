@@ -156,6 +156,12 @@ function standPose(S,k){const R=S.R,L=S.L;
   if(k.lift!==undefined){const y=k.lift,st=k.strain||0,sh=(k.shake||0)*Math.sin((k.t||0)*55),sh2=(k.shake||0)*Math.sin((k.t||0)*47+1.3);   // Rampart heave: grip low, shake while straining, then yank overhead
     for(const [A,s] of [[R,1],[L,-1]]){A.up.rotation.x=lerp(-0.75-0.15*st,-2.7,y)+sh*0.09;A.up.rotation.z=s*lerp(0.4,0.22,y)+(s>0?sh:sh2)*0.07;A.fo.rotation.x=lerp(-0.55,-0.12,y)+sh2*0.08;}
     S.body.rotation.x=lerp(0.5+0.12*st,-0.28,y)+sh*0.025;S.body.rotation.z=sh2*0.02;S.head.rotation.x=lerp(0.25,-0.3,y);dip+=lerp(0.25+0.1*st,-0.1,y);}
+  if(k.one){const ln=k.lean||0,ck=k.cock||0,rc=k.reach||0,sh=(k.shake||0)*Math.sin((k.t||0)*55),sh2=(k.shake||0)*Math.sin((k.t||0)*47+1.3);   // Terra Isle: bend over, plunge ONE hand into the ground, pull it up
+    // right arm: cocked back (ck) → straight down into the ground → pulled up to the chest, elbow bending as it pulls (rc)
+    R.up.rotation.x=lerp(lerp(-0.3,-1.25,ck),-1.85,rc)+sh*0.08;R.up.rotation.z=lerp(0.12,0.3,rc)+sh2*0.05;R.fo.rotation.x=lerp(lerp(-0.12,-1.5,ck),-1.25,rc);
+    // left arm braces on the knee while bent over, swings back for balance on the pull
+    L.up.rotation.x=lerp(lerp(-0.2,-0.65,ln),0.35,rc);L.up.rotation.z=lerp(-0.25,-0.55,rc);L.fo.rotation.x=lerp(-0.3,-1.0,ln*(1-rc));
+    S.body.rotation.x=lerp(0.05,0.95,ln)*(1-rc)+lerp(0,-0.15,rc)+sh*0.02;S.body.rotation.y=0.22*ln*(1-rc);S.body.rotation.z=sh2*0.015;S.head.rotation.x=lerp(0,0.35,ln)*(1-rc);dip+=0.35*ln*(1-rc);}
   S.body.position.y=Math.sin((k.t||0)*3)*0.08-dip;S.body.position.z=0;
   if(S.legs){const on=!!k.run;S.legs.visible=on;S.ab.visible=on;S.lo.visible=!on;}
   if(k.run)standRun(S,k);}
@@ -827,10 +833,11 @@ function eIsleMesh(seed){if(!EISLE.mat){EISLE.mat=new THREE.MeshStandardMaterial
 function eIsleTick(dt,now){for(let i=EV.icall.length-1;i>=0;i--){const R=EV.icall[i];R.t+=dt;const c=Math.cos(R.a),sn=Math.sin(R.a),G=R.G,t=R.t;
     const P=ISLE.v.punch,L=ISLE.v.lift,px=-sn,py=c;   // perpendicular: Stand stands to the right of the spot
     // lift curve: raise fist (0..0.25) → slam down, accelerating (to P) → grip + strain (to L) → pull up with overshoot (L..L+0.35)
-    const lift=t<0.25?_cs(t/0.25):t<P?1-Math.pow((t-0.25)/(P-0.25),3):t<L?0:0.5*_cb(Math.min(1,(t-L)/0.35));   // pull ends at chest height (hands stay in view)
-    const strain=t>=P&&t<L?1:0,pull=t<L?0:Math.min(1,(t-L)/0.35);
+    // one hand (user 2026-11-24): lean down + cock (0..0.2) → plunge, accelerating (to P) → strain in the ground (to L) → pull up (L..L+0.35)
+    const lean=t<0.2?_cs(t/0.2)*0.6:t<P?0.6+0.4*Math.pow((t-0.2)/(P-0.2),2):1,cock=t<0.2?_cs(t/0.2):t<P?1-Math.pow((t-0.2)/(P-0.2),3):0;
+    const strain=t>=P&&t<L?1:0,pull=t<L?0:Math.min(1,(t-L)/0.35),reach=t<L?0:_cb(pull);
     G.g.position.copy(eW(R.x+px*85-c*20,R.y+py*85-sn*20,-0.5+0.35*Math.min(1,t/0.2)-0.3*strain+0.2*pull));G.g.rotation.y=Math.atan2(-px,-py);
-    standOp(G,t<L+0.55?Math.min(1,t/0.15):Math.max(0,1-(t-L-0.55)/0.3));standPose(G,{t:now/1000,lift,strain,shake:strain});
+    standOp(G,t<L+0.55?Math.min(1,t/0.15):Math.max(0,1-(t-L-0.55)/0.3));standPose(G,{t:now/1000,one:1,lean:lean*(1-_cs(pull)),cock,reach,shake:strain});
     if(!R.hit&&t>=P){R.hit=1;dfCracks(R.x,R.y,0.06,90,'#a98a62',1);eChunks(R.x,R.y,0.2,10,200,8,0.2);burst(R.x,R.y,ECOL.dust,18,220,0.5,3,{h:0.2,vh:[1,4],g:6});ring(R.x,R.y,'#ffd27a',60,0.3,0.15);shake(0.45);}
     if(strain&&Math.random()<0.5)burst(R.x+rnd(-60,60),R.y+rnd(-60,60),ECOL.dust,2,80,0.4,2,{h:0.1,vh:[0.5,2],g:5});
     if(t>L+0.95){disposeObj(G.g);EV.icall.splice(i,1);}}}

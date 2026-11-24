@@ -29,7 +29,7 @@ HOUSES:239 HAIRC:244 HAIRSTY:246 WOODC:249 WOODN:250 WCOREC:251 WCOREN:252 WANDS
 ## js/02-fcs-data.js (3) — 
 FCS_DATA:3
 
-## js/02-fcs-rooms.js (100) — FCS room pieces (rule: guides/MAP-ROOMS.md — user 2026-11-20: every room/courtyard is a s…
+## js/02-fcs-rooms.js (100) — 
 FCS_ROOMS:11 fcsRoomAdd:12 FCS_C0:13 fcsRoomOf:14 fcsCut:15
 §16 gen context (called from genFcs)
 fcsRoomK:17 roomWall:27 roomCol:36 roomFloor:38 roomCeil:44 fcsCeilAt:46 fcsCeilClamp:54
@@ -202,7 +202,7 @@ windUltCast:504 windUltTick:507 windUltSweep:532 windFloatZ:540 windShieldPitch:
 §551 สกิล (ผู้ใช้ 2026-11-08: รีดีไซน์ทั้งชุด — id เดิมไว้ให้ชุดสกิล/tune/…
 W_WL:553 W_DR:559 W_VX:565 W_VO:571 W_FW:577 W_UL:587
 
-## js/10-net.js (210) — 
+## js/10-net.js (210) — เครือข่าย (PeerJS / WebRTC)
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NET_QMAX:70 NETU:72 netUndelta:73 setStatus:79 hostGame:81 hostPeer:90 netConnect:110 joinWatch:121 joinFail:136 netLost:142 joinGame:157 joinPeer:168 clientOnData:183 leave:198 leaveRoom:200
 
 ## js/11-host.js (494) — 
@@ -270,10 +270,8 @@ bombTick:347 modeSnap:360
 §385 สร้าง snapshot ส่งให้ทุกเครื่อง
 r1:386 DEFP:388 packP:389 unpackP:390 makeSnap:391 PROF:409 pf:410 hostSent:411 hostLoop:412 HLW:427 pingN:437
 
-## js/15-siege.js (277) — 🏰 โหมดบุกปราสาท (siege) — แบบ Basic ตาม designs/castle-gameplay-concept.md + แผนที่ js/0…
-SGV:12 SG_TEAM:25 sgF:26 sgCore:27 sgInZone:28 sgSpawn:29 sgInit:30 sgWallsApply:39 sgWallDmg:43 sgWallHit:49 sgWallEnv:50 sgInput:55 sgStop:63 sgTick:64 sgCoreDown:100 sgPhaseGo:113 sgEnd:121 sgResult:123 sgSnap:129
-§135 บอทเล่นบุกปราสาท: ฝ่ายบุก = เดินไปแกนแล้วร่าย (เจอศัตรูใกล้ = สู้ก่อน…
-SGB:138 sgBotTarget:140
+## js/15-siege.js (277) — 
+SGV:12 SG_TEAM:25 sgF:26 sgCore:27 sgInZone:28 sgSpawn:29 sgInit:30 sgWallsApply:39 sgWallDmg:43 sgWallHit:49 sgWallEnv:50 sgInput:55 sgStop:63 sgTick:64 sgCoreDown:100 sgPhaseGo:113 sgEnd:121 sgResult:123 sgSnap:129 SGB:138 sgBotTarget:140
 §150 team plan (user 2026-11-22: don't trickle in one by one)
 SGT:153 sgTeamPlan:154 sgBotMode:175 sgBreachAim:189 sgBotGoal:196 sgUnstick:212 sgBotThink:225
 
@@ -396,7 +394,7 @@ hallBuild:39 hallEnv:85
 §87 mood: blend by how far the camera is inside the hall rect (3 m soft e…
 hallPre:88 hallPost:97
 
-## js/28-fcs-props.js (156) — FCS room props — look + destruction (user 2026-11-20). Gameplay side: RPK / roomProp in j…
+## js/28-fcs-props.js (156) — 
 FRP:11 FRP_PV:12 FRP_PB:13 frpMat:16
 §26 part builders: local metres, x along the prop, z across, y up. push(g…
 frpBuild:27 fcsPropsBuild:75 fcsPropsView:101 fcsRoomBrkFx:110 FRP_DEB:111 frpDebris:114 _frM:128 _frQ:128 _frS:128 frpSet:129 frpDebrisTick:130
@@ -599,36 +597,36 @@ WB:298 wbInit:299 wbBegin:309 wbEnd:310 fxWarpMake:311 fxWarpTick:324
 §332 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:335 fxVolLoad:336 fxVolTex:340 fxVolSet:343 fxVolReady:344 fxVolMake:345 fxVolTick:348 fxPreAssets:353 fxAssetsWait:355
 
-## js/47-earth-view.js (1119) — 
+## js/47-earth-view.js (1126) — 
 ECOL:9 EGUARD_BIG:14 EGUARD:14 EV:15 eW:16 EARTH_FIST_SCALE:17 eYaw:18
 §19 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
 ETEX:20 eTex:21 eFadeTex:35 eMat:37 eTMat:38 rockGeo:39 ROCKU:45 rockMesh:46 coneMesh:48 _eChunkM:50 eChunks:51
 §53 Stand (บล็อกหิน/ทรายครึ่งตัวบน)
 makeStand:55
 §92 Rampage: เกราะลมหน้า Stand (ผู้ใช้: เหมือนอุกกาบาตตกโลก ต้านลม — เปลื…
-makeBow:94 EBOW:103 _RIM:103 eRampWind:104 eSpikes:116 standOp:121 _ikDn:124 eArmIK:125 PK:132 standPose:134 _eRq:164 _eRq2:164 _eRx:164 standRun:165 eState:183 eStandOf:184 eGiantOf:185 eSandFall:187 eAppear:188 eAim:190
-§193 วงเตือนบนพื้น (BA ชาร์จ / จุดปาเสา): วงเข้มก่อน แล้วสีอ่อนค่อย ๆ เติม…
-makeWarn:194 eWarnAt:199 eStoneDir:200 eStonePrep:204 eFistCharge:212 eStonePunch:229 eFistEase:241 eFistMotion:242 eFistPose:246 eFistPlayerPose:271 eWrathPillarDir:288 eWrathBoostRock:289 eWrathStand:314 eWrathPlayerPose:389 _eForearmAxis:406 _eForearmQ:406 earthFistForearm:407
-§418 ทุกเฟรม: ผู้เล่นสายดิน (เรียกจาก syncPlayers)
-earthFX:419
-§493 สว่าน (ref: designs/earth_ref/drill_ref.png): หินแหลมเรียวเป็นตัวหลัก…
-eSteelEnv:495 eHeatTex:500 EDR:505 eDrillGeo:506 makeDrill:512 drillHeat:519
-§521 เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายห…
-ePillarVeins:522 makePillar:540
-§546 กระสุนหิน
-earthFistMat:548 makeEarthFist:552 eFistCrumble:568 earthProjMesh:591 SLAB:601 makeSlab:602 eSlabGeo:607 eSlabMats:618 slabCracks:685
-§688 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
-earthClear:689 eMergePartial:697 eMergeKids:702 eMakeSO:710
-§729 Rampart wall (user 2026-11-23 v2): fused rounded boulders, uneven top…
-ERAMP:730 eRng:731 eBlock:734 eRampGeo:749 eRampMats:765 eRampMesh:773 eRampHolo:777 eRampPlace:778 eRampTick:780
-§798 Terra Isle (user 2026-11-24, ref: floating island chunk): earthy top …
-EISLE:801 eIsleGeo:802 eIsleTint:822 eIsleMesh:824 eIsleTick:827 syncEarth:837 earthFog:885 eMudScreen:888 _eOlMat:895 eOutlines:897 _eCamT:902 eAnim:903 eDebris:904 eWave:906 eAirWave:908 esbImpact:911
-§918 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
-earthEfx:919 eWindOut:1035 eAirCone:1041 eDrillFly:1043
-§1047 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
-earthMudZone:1048 earthMudSink:1055
-§1056 HUD ใต้เป้าเล็ง
-ESM:1058 eSmooth:1059 ESF:1062 eShieldFx:1063 eChips:1068 eShieldSegs:1071 eShieldNum:1085 eShieldArc:1089 drawEarthHud:1102
+makeBow:94 EBOW:103 _RIM:103 eRampWind:104 eSpikes:116 standOp:121 _ikDn:124 eArmIK:125 PK:132 standPose:134 _eRq:170 _eRq2:170 _eRx:170 standRun:171 eState:189 eStandOf:190 eGiantOf:191 eSandFall:193 eAppear:194 eAim:196
+§199 วงเตือนบนพื้น (BA ชาร์จ / จุดปาเสา): วงเข้มก่อน แล้วสีอ่อนค่อย ๆ เติม…
+makeWarn:200 eWarnAt:205 eStoneDir:206 eStonePrep:210 eFistCharge:218 eStonePunch:235 eFistEase:247 eFistMotion:248 eFistPose:252 eFistPlayerPose:277 eWrathPillarDir:294 eWrathBoostRock:295 eWrathStand:320 eWrathPlayerPose:395 _eForearmAxis:412 _eForearmQ:412 earthFistForearm:413
+§424 ทุกเฟรม: ผู้เล่นสายดิน (เรียกจาก syncPlayers)
+earthFX:425
+§499 สว่าน (ref: designs/earth_ref/drill_ref.png): หินแหลมเรียวเป็นตัวหลัก…
+eSteelEnv:501 eHeatTex:506 EDR:511 eDrillGeo:512 makeDrill:518 drillHeat:525
+§527 เสายักษ์ (ref: designs/earth_ref/pillar_ref.png): เสาเหลี่ยมยาว ปลายห…
+ePillarVeins:528 makePillar:546
+§552 กระสุนหิน
+earthFistMat:554 makeEarthFist:558 eFistCrumble:574 earthProjMesh:597 SLAB:607 makeSlab:608 eSlabGeo:613 eSlabMats:624 slabCracks:691
+§694 สิ่งก่อสร้าง + ฝุ่น (เรียกจาก render loop)
+earthClear:695 eMergePartial:703 eMergeKids:708 eMakeSO:716
+§735 Rampart wall (user 2026-11-23 v2): fused rounded boulders, uneven top…
+ERAMP:736 eRng:737 eBlock:740 eRampGeo:755 eRampMats:771 eRampMesh:779 eRampHolo:783 eRampPlace:784 eRampTick:786
+§804 Terra Isle (user 2026-11-24, ref: floating island chunk): earthy top …
+EISLE:807 eIsleGeo:808 eIsleTint:828 eIsleMesh:830 eIsleTick:833 syncEarth:844 earthFog:892 eMudScreen:895 _eOlMat:902 eOutlines:904 _eCamT:909 eAnim:910 eDebris:911 eWave:913 eAirWave:915 esbImpact:918
+§925 event "efx" ของสายดิน (เรียกจากต้น efxFX) — คืน true = จัดการแล้ว
+earthEfx:926 eWindOut:1042 eAirCone:1048 eDrillFly:1050
+§1054 บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้ว…
+earthMudZone:1055 earthMudSink:1062
+§1063 HUD ใต้เป้าเล็ง
+ESM:1065 eSmooth:1066 ESF:1069 eShieldFx:1070 eChips:1075 eShieldSegs:1078 eShieldNum:1092 eShieldArc:1096 drawEarthHud:1109
 
 ## js/48-ragdoll.js (419) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 _ragFw:41 ragBones:42 ragBasis:49 ragTargets:57 ragStart:63 ragBack:96 ragFloor:97 ragStep:98 ragPose:163 ragWrite:178 ragRestore:190 ragEnd:194 ragTick:196 ragHideDead:240 clearDeathFades:249 deathClipMat:259 deathSlashSplit:266 DD_ALPHA:320 deathDissolve:321 deathVisualSync:395
@@ -803,7 +801,7 @@ H4PF:204 h4PfMode:205 h4PfAvatar:207 h4Portrait:209 h4PfRead:220 h4MapBox:227
 ## js/66-hudlay.js (34) — HUD layout (HUD Editor, user 2026-11-24)
 HUDL_DEF:5 HUDL:11 HL0:12 hlGet:13 hudHs:14 hlSet:16 hlJson:20 hlApplyDom:22 hlBegin:26 hlEnd:28 hlBox:30 HL_DEMO_FEED:31
 
-## js/67-backdrop.js (141) — ฉากหลังนอกพื้นที่เล่น (ผู้ใช้ 2026-10-28: "ทำ LOD หลอกตาของนอกแมพ ให้รู้สึกว่าแมพกว้าง")
+## js/67-backdrop.js (141) — 
 BACKDROP:8
 §66 noise เล็ก ๆ (คงที่ต่อ seed)
 bdHash:67 bdNoise:68 bdFbm:69 bdEdge:71 bdRing:73 bdPaint:79 bdTree:82 buildBackdrop:89 bdTower:137 backdropHide:141
@@ -889,7 +887,7 @@ PERF:9 perfNetSample:11 perfNetSend:14 perfNetReceive:20 perfNetFrame:25 FRZ:40 
 ## js/72-dash-pose.js (85) — 
 DPOSE:12 DPT:24 _dpQ:25 _dpX:25 _dpP:25 dpMix:26 dpKnees:28 dpStyle:36 DPDBG:41 dashPose:42 dpApply:75
 
-## js/73-tune.js (141) — แผงปรับค่า 🎚️ (F8 / ปุ่ม "ปรับค่า" ในเมนูพัก และหน้าแรก) — ปรับตัวเลขในเกมสดๆ แล้วเซฟลง …
+## js/73-tune.js (141) — 
 TUNE:8 tuneNum:9 tuneBuild:15
 §80 ใช้ / เก็บค่า
 tuneSetVal:81 tuneApplyFile:84 tuneJson:88
@@ -966,4 +964,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(118 files, 36070 lines)
+(118 files, 36077 lines)
