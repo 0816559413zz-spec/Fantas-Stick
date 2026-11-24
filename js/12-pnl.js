@@ -5,7 +5,7 @@
 // Cell stage st: 0 ok • 1 cracked • 2 outer skin gone (layer) • 3 broken (hole). Panels with the same group g support each other:
 //   a cell stays up while connected (through unbroken cells) to a grounded cell; cut off = falls (el 'fall').
 // Data (px = sim px, 20 px = 1 m): {x,y px = middle of the base edge, a angle (length axis = (cos a, sin a)), L len px, T thick px, z0 base m, H height m (along the slab),
-//   tl tilt rad (0 = upright wall; roofs lean the slab about its length axis), sh 'tri' = gable triangle (cells above the slopes do not exist),
+//   tl tilt rad (0 = upright wall; roofs lean the slab about its length axis), sh 'tri' = triangle (ap apex 0..1 along L, default 0.5) • 'trap' = slanted top (hr right height 0..1 of H); cells above the top edge do not exist,
 //   ho openings [[u0,u1,z0,z1] m from the left end, up to 4] (cells inside do not exist, the shader cuts the exact edge), cs cell m, hp, mat, m, thru, g, nb unbreakable}
 // 3D frame (z in px too): U along the length • W up the slab = cos(tl)·Z + sin(tl)·N0 • V slab normal = cos(tl)·N0 − sin(tl)·Z • N0 = (−sin a, cos a, 0)
 // Old houses (OBS k:'house') are rebuilt as panel groups at map load (pnlHouseConv) — js/12-buildings BLDG stays empty.
@@ -23,14 +23,17 @@ function pnlGen(id){
   const M=MAPS[id],L=((M&&M.pnl)||[]).concat((M&&M.pnH)||[]);
   PNL=L.map((d,i)=>{const cs=d.cs||1,one=d.nb&&!(d.ho&&d.ho.length),nc=one?1:Math.max(1,Math.round(d.L/20/cs)),nr=one?1:Math.max(1,Math.round(d.H/cs)),n=nc*nr,Md=PNDEF.mat[d.mat]||PNDEF.mat.brick,mx=d.hp||Md.hp,a=d.a||0,tl=d.tl||0;
     const c=Math.cos(a),s=Math.sin(a),ct=Math.cos(tl),stl=Math.sin(tl),zb=pnGT(d.x,d.y)+(d.z0||0),hl=d.L/2,Hp=d.H*20;
-    const p={i,d,x:d.x,y:d.y,a,c,s,tl,W:[-s*stl,c*stl,ct],V:[-s*ct,c*ct,-stl],hl,ht:Math.max(1.5,(d.T||6)/2),zb,H:d.H,Hp,nc,nr,cw:d.L/nc,chp:Hp/nr,chh:d.H/nr,tri:d.sh==='tri',
+    const p={i,d,x:d.x,y:d.y,a,c,s,tl,W:[-s*stl,c*stl,ct],V:[-s*ct,c*ct,-stl],hl,ht:Math.max(1.5,(d.T||6)/2),zb,H:d.H,Hp,nc,nr,cw:d.L/nc,chp:Hp/nr,chh:d.H/nr,tri:!!pnTP(d),tp:pnTP(d),
       mode:d.m||'p',thru:d.thru!==0,nb:!!d.nb,mat:d.mat||'brick',g:d.g,max:mx,hp:new Float32Array(n).fill(mx),st:new Uint8Array(n),ex:new Uint8Array(n).fill(1),burnT:0,t:0,ver:1,ph:null,phv:0};
-    if(p.tri)for(let k=0;k<n;k++){const u=Math.abs(pnCU(p,k%nc)),w=(((k/nc)|0)+0.5)*p.chp;if(w>Hp*(1-u/hl)+p.chp*0.25)p.ex[k]=0;}
+    if(p.tri)for(let k=0;k<n;k++){const u=pnCU(p,k%nc),w=(((k/nc)|0)+0.5)*p.chp;if(w>Hp*pnTopF(p.tp,(u+hl)/(2*hl))+p.chp*0.25)p.ex[k]=0;}
     if(d.ho)for(let k=0;k<n;k++){const u=(pnCU(p,k%nc)+hl)/20,z=(((k/nc)|0)+0.5)*p.chh;if(d.ho.some(q=>u>q[0]&&u<q[1]&&z>q[2]&&z<q[3]))p.ex[k]=0;}   // openings (door / windows)
     const ex=hl+p.ht+Math.abs(p.W[0])*Hp+Math.abs(p.W[1])*Hp;p.bb=[d.x-ex,d.y-ex,d.x+ex,d.y+ex];
     return p;});
   PNL._id=id;pnlLinks();return PNL;
 }
+// shaped top edge: tp = [left height, apex position, right height] (fractions; null = rectangle) • pnTopF = top height fraction at t 0..1 along L
+function pnTP(d){if(d.sh==='tri'){const k=d.ap==null?0.5:+d.ap;return [0,Math.max(0,Math.min(1,k)),0];}if(d.sh==='trap'){const r=d.hr==null?0.5:+d.hr;return [1,0,Math.max(0,Math.min(1,r))];}return null;}
+function pnTopF(tp,t){if(!tp)return 1;const [a,k,b]=tp;if(t<k)return a+(1-a)*t/k;return k<1?1+(b-1)*(t-k)/(1-k):1;}
 const pnLoc=(p,x,y)=>{const dx=x-p.x,dy=y-p.y;return [dx*p.c+dy*p.s,-dx*p.s+dy*p.c];};   // horizontal (upright panels)
 const pnWorld=(p,u,v)=>[p.x+u*p.c-v*p.s,p.y+u*p.s+v*p.c];
 const pnCU=(p,col)=>-p.hl+(col+0.5)*p.cw;

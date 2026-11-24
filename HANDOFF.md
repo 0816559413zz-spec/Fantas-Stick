@@ -1341,3 +1341,5 @@ Latest only — full history in `notes/CHANGELOG.md` (add new entries there too)
 **Crystal Aegis 2026-11-18:** เทสต์ห้องฝึกบน `c3e1153` แล้ว 0 ผลึกกางไม่ได้, 1–3 ผลึกบล็อกด้านหน้า ±60° เท่ากัน, โดนด้านหลังหัก HP ปกติ, บล็อก 30 ดาเมจใช้เกจ 25 / 16.67 / 10, กระสุนเข้าจากด้านหน้าให้ผลตรงกัน, กางไว้กินเกจ 3 แต้ม/วิ และฟื้น 4.05 แต้ม/วิ ภาพโล่กว้างขึ้นตามผลึก ข้อต่อไปลอง 2v2 ออนไลน์กับคนจริง
 
 - 2026-11-22: breakable floors/slopes standable (pnlTopH in js/12-pnl.js; floor needs same Group as its walls) • Map Builder box select (drag empty space, Shift/Ctrl adds). Bots on panel floors not done yet.
+
+- 2026-11-24: pn_wall shapes: Triangle apex `ap`, Slanted Top `sh:trap` `hr` (pnTP/pnTopF in js/12-pnl.js + mapbuild/model.js, mesh pnlGeo + shader uTp); Round Tower draw mode (Breakable Panel tool). See guides/MAP-BUILDER.md.

@@ -7,7 +7,7 @@
 const PNV={list:[],mats:new Map()};
 const PN_MI={brick:0,plaster:1,stone:2,wood:3,glass:4,metal:5,roof:6,snowroof:7,timber:8,litwin:9};
 const PN_GLSL=`
-uniform sampler2D uDmg;uniform vec3 uSz;uniform vec2 uOff;uniform float uRec;uniform float uTri;uniform vec4 uHo[4];uniform float uNHo;
+uniform sampler2D uDmg;uniform vec3 uSz;uniform vec2 uOff;uniform float uRec;uniform float uTri;uniform vec3 uTp;uniform vec4 uHo[4];uniform float uNHo;
 float pnH(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float pnN(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(pnH(i),pnH(i+vec2(1.,0.)),f.x),mix(pnH(i+vec2(0.,1.)),pnH(i+vec2(1.,1.)),f.x),f.y);}
 // running-bond units: x edge distance, y id hash, zw unit centre (q space)
@@ -27,7 +27,7 @@ vec4 pnU(vec2 q){
 vec3 pnF(vec2 lp){return texture2D(uDmg,clamp((lp+uSz.xy*0.5)/uSz.xy,0.001,0.999)).rgb;}
 // material depth at local (x,y): 0 intact • uRec outer skin gone • 9 through
 float pnM(vec2 lp){
-  if(uTri>0.5&&lp.y+uSz.y*0.5>uSz.y*(1.-abs(lp.x)/(uSz.x*0.5)))return 9.;   // gable triangle
+  if(uTri>0.5){float t=lp.x/uSz.x+0.5,f=t<uTp.y?uTp.x+(1.-uTp.x)*t/max(uTp.y,1e-4):1.+(uTp.z-1.)*(t-uTp.y)/max(1.-uTp.y,1e-4);if(lp.y+uSz.y*0.5>uSz.y*f)return 9.;}   // shaped top (triangle / slanted)
   vec2 hp=lp+uSz.xy*0.5;for(int i=0;i<4;i++){if(float(i)>=uNHo)break;vec4 h=uHo[i];if(hp.x>h.x&&hp.x<h.y&&hp.y>h.z&&hp.y<h.w)return 9.;}   // openings
   vec2 s=lp;float n=pnN(lp*2.3)*0.6+pnN(lp*6.1)*0.4;
 #if PNM==0||PNM==2||PNM==3||PNM==6||PNM==7
@@ -108,11 +108,12 @@ function pnlCls(p){   // depth class per cell: 0 full • 1 core • 2 gone
 const PN_ZU={brick:[0.17,0.12],stone:[0.4,0.21],plaster:[0.15,0.15],wood:[0.11,0.3],timber:[0.15,0.15],roof:[0.15,0.1],snowroof:[0.15,0.1]};
 function pnlGeo(p,cls,Lm,H,Tm,rec){
   const hL=Lm/2,hH=H/2,hT=Tm/2,cz=hT-rec,cw=Lm/p.nc,ch=H/p.nr,ho=(p.d.ho||[]).slice(0,4),tri=p.tri;
-  const slope=x=>tri?-hH+H*(1-Math.abs(x)/hL):1e9;
+  const tp=p.tp,slope=x=>tri?-hH+H*pnTopF(tp,(x+hL)/Lm):1e9;
   const xs=new Set([-hL,hL]),ys=new Set([-hH,hH]);
   for(let i=1;i<p.nc;i++)xs.add(-hL+i*cw);for(let j=1;j<p.nr;j++)ys.add(-hH+j*ch);
   for(const q of ho){xs.add(Math.max(-hL,Math.min(hL,q[0]-hL)));xs.add(Math.max(-hL,Math.min(hL,q[1]-hL)));ys.add(Math.max(-hH,Math.min(hH,q[2]-hH)));ys.add(Math.max(-hH,Math.min(hH,q[3]-hH)));}
-  if(tri){xs.add(0);for(const y of ys){const u=hL*(1-(y+hH)/H);xs.add(u);xs.add(-u);}}
+  if(tri){const [a,k,b]=tp,ax=t=>-hL+t*Lm;xs.add(ax(k));   // apex + where each row line meets the sloped top
+    for(const y of ys){const f=(y+hH)/H;if(a<1&&f>=a&&f<=1)xs.add(ax(k*(f-a)/(1-a)));if(b<1&&f>=b&&f<=1)xs.add(ax(k+(1-k)*(1-f)/(1-b)));}}
   const X=[...xs].sort((a,b)=>a-b).filter((v,i,a)=>!i||v-a[i-1]>1e-4),Y=[...ys].sort((a,b)=>a-b).filter((v,i,a)=>!i||v-a[i-1]>1e-4),NX=X.length-1,NY=Y.length-1,NN=NX*NY;
   // per sub-rect: GE geometric presence (not opening / above gable) • C damage class 0 full / 1 core / 2 gone • CL gable-clipped (T0/T1 top)
   const GE=new Uint8Array(NN),C=new Uint8Array(NN),CL=new Uint8Array(NN),T0=new Float32Array(NN),T1=new Float32Array(NN);
@@ -196,7 +197,7 @@ function pnlBuild(){
     const n=p.st.length,data=new Uint8Array(n*4),tex=new THREE.DataTexture(data,p.nc,p.nr,THREE.RGBAFormat);
     tex.magFilter=tex.minFilter=THREE.LinearFilter;tex.needsUpdate=true;
     const Lm=p.hl*2*S3,Tm=p.ht*2*S3,cx=tx(p.x),cz=tz(p.y),mid=pnP3(p,0,p.Hp/2);
-    const U={uDmg:{value:tex},uSz:{value:new THREE.Vector3(Lm,p.H,Tm)},uOff:{value:new THREE.Vector2(cx*p.c+cz*p.s,p.tl?p.H/2:p.zb+p.H/2)},uRec:{value:Math.min(0.12,Tm*0.4)},uTri:{value:p.tri?1:0},uNHo:{value:Math.min(4,(p.d.ho||[]).length)},uHo:{value:[0,1,2,3].map(i=>{const h=(p.d.ho||[])[i]||[0,0,0,0];return new THREE.Vector4(h[0],h[1],h[2],h[3]);})}};
+    const U={uDmg:{value:tex},uSz:{value:new THREE.Vector3(Lm,p.H,Tm)},uOff:{value:new THREE.Vector2(cx*p.c+cz*p.s,p.tl?p.H/2:p.zb+p.H/2)},uRec:{value:Math.min(0.12,Tm*0.4)},uTri:{value:p.tri?1:0},uTp:{value:new THREE.Vector3(...(p.tp||[1,0,1]))},uNHo:{value:Math.min(4,(p.d.ho||[]).length)},uHo:{value:[0,1,2,3].map(i=>{const h=(p.d.ho||[])[i]||[0,0,0,0];return new THREE.Vector4(h[0],h[1],h[2],h[3]);})}};
     const mat=pnlMat(p.mat);mat.userData.U=U;
     const rec=U.uRec.value,cls=pnlCls(p),m=new THREE.Mesh(pnlGeo(p,cls,Lm,p.H,Tm,rec),mat);m.position.set(tx(mid[0]),mid[2],tz(mid[1]));m.rotation.order='YXZ';m.rotation.y=-p.a;m.rotation.x=p.tl;m.castShadow=m.receiveShadow=true;
     grp.add(m);

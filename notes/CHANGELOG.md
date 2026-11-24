@@ -1459,3 +1459,4 @@
 - 2026-11-23 Light: always float at BA height, BA charge 0.6 s + new dmg/rates, calmer beam
 - 2026-11-23 Earth Rampart replaces Terra Auger (wall + push)
 - 2026-11-23 Earth Rampart v2: hologram aim, Stand heave, fused-boulder wall, no push (protocol v109)
+- 2026-11-24: breakable panel shapes — Triangle with movable apex (ap), Slanted Top (sh trap, hr), Round Tower draw mode in the Breakable Panel tool (ring of panels, one group)

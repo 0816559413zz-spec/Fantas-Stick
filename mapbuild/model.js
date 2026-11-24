@@ -175,10 +175,14 @@ export function pnFrame(M, o) {
   const r = o.rot || 0, tl = o.tl || 0, ct = Math.cos(tl), st = Math.sin(tl), U = [Math.cos(r), 0, -Math.sin(r)], N0 = [Math.sin(r), 0, Math.cos(r)];
   return { U, W: [st * N0[0], ct, st * N0[2]], V: [ct * N0[0], -st, ct * N0[2]], B: [o.x, gh(M, o.x, o.z) + (o.y || 0), o.z] };
 }
-// cell exists (gable triangle / openings) — mirror of pnlGen ex
+// shaped top edge (mirror of js/12-pnl.js): tp = [left, apex position, right] height fractions, null = rectangle
+// sh 'tri' = triangle, ap apex 0..1 along the length (0.5 = gable, 0/1 = right-angled) • sh 'trap' = slanted top, hr = right end height 0..1 of H
+export function pnTP(o) { if (o.sh === 'tri') { const k = o.ap == null ? 0.5 : +o.ap; return [0, Math.max(0, Math.min(1, k)), 0]; } if (o.sh === 'trap') { const r = o.hr == null ? 0.5 : +o.hr; return [1, 0, Math.max(0, Math.min(1, r))]; } return null; }
+export function pnTopF(tp, t) { if (!tp) return 1; const [a, k, b] = tp; if (t < k) return a + (1 - a) * t / k; return k < 1 ? 1 + (b - 1) * (t - k) / (1 - k) : 1; }
+// cell exists (shaped top / openings) — mirror of pnlGen ex
 export function pnExists(o, d, k) {
   const col = k % d.nc, r = (k / d.nc) | 0, cw = d.L / d.nc, ch = d.H / d.nr, u = -d.L / 2 + (col + 0.5) * cw, z = (r + 0.5) * ch;
-  if (o.sh === 'tri' && z > d.H * (1 - Math.abs(u) / (d.L / 2)) + ch * 0.25) return false;
+  const tp = pnTP(o); if (tp && z > d.H * pnTopF(tp, u / d.L + 0.5) + ch * 0.25) return false;
   if (o.ho && o.ho.some(q => u + d.L / 2 > q[0] && u + d.L / 2 < q[1] && z > q[2] && z < q[3])) return false;
   return true;
 }
@@ -386,7 +390,7 @@ export function gameData(M, dim) {
     else if (o.t === 'light') lights.push({ x: X, y: Y, h: r2(o.y == null ? 2.2 : o.y), col: o.c || '#ffb060', int: o.int == null ? 2.4 : o.int, dist: o.dist || 14 });
     else if (o.t === 'pn_wall') pnl.push(Object.assign({ x: X, y: Y, a: +(-rot).toFixed(4), L: r1((o.L || 4) * PX), T: r1((o.T || 0.3) * PX), H: r2(o.sy || 3), cs: o.cs || 1, mat: o.mat || 'brick', m: o.m === 'pn' ? 'p' : o.m || 'p' }, o.m === 'pn' ? { np: 1 } : {},
       o.y ? { z0: r2(o.y) } : {}, o.hp ? { hp: o.hp } : {}, o.thru === 0 ? { thru: 0 } : {}, o.g != null && o.g !== '' ? { g: o.g } : {},
-      o.tl ? { tl: +(+o.tl).toFixed(4) } : {}, o.sh === 'tri' ? { sh: 'tri' } : {}, o.ho && o.ho.length ? { ho: o.ho.slice(0, 4) } : {}, o.nb ? { nb: 1 } : {}));   // breakable panel (js/12-pnl)
+      o.tl ? { tl: +(+o.tl).toFixed(4) } : {}, o.sh === 'tri' ? Object.assign({ sh: 'tri' }, o.ap != null && +o.ap !== 0.5 ? { ap: +(+o.ap).toFixed(3) } : {}) : o.sh === 'trap' ? { sh: 'trap', hr: +(o.hr == null ? 0.5 : +o.hr).toFixed(3) } : {}, o.ho && o.ho.length ? { ho: o.ho.slice(0, 4) } : {}, o.nb ? { nb: 1 } : {}));   // breakable panel (js/12-pnl)
     else if (o.t === 'house') houses.push(Object.assign({ x: X, y: Y, w: r1(160 * (o.sx || 1)), d: r1(130 * (o.sz || 1)), ry: +rot.toFixed(3) }, o.brk === 0 ? { nb: 1 } : {}));   // nb = unbreakable (inspector 'Breakable' off)
     else if (OBJ[o.t] && OBJ[o.t].cat === 'game') props.push(Object.assign({ k: o.t, x: X, y: Y, a: +rot.toFixed(3) }, o.brk === 0 ? { nb: 1 } : {}));
     else { const d = dim(o); if (!d) continue; const cs = objCircles(M, o, d); if (!cs.length) continue;

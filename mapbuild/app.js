@@ -22,7 +22,7 @@ const el = (tag, props, ...kids) => { const e = document.createElement(tag); if 
 let M = null, online = false, dirty = false, saveT = 0, list = [];
 let tool = 'select', sel = null, msel = [];   // sel = {k:'wall'|'floor'|'obj', id, pt?} = primary (Inspector, gizmo) • msel = more items picked with Shift/Ctrl
 const opt = { smode: 'up', rad: 4, str: 4, soft: 1, hval: 2, surf: 0, wall: 0, wth: 1, wh: 3.5, wc: '#8a8478', wm: 'stone', wcurve: 0, wbrk: 0, floor: 0, fw: 4, fh: 3, fauto: 1, obj: 'spawn', cat: 'sys',
-  rrot: 1, rscale: 0, dens: 3, snap: 0, part: 'wall', pp: {}, csnap: 1, psnap: 1, prim: { c: '#8a8478', sx: 2, sy: 2, sz: 2 }, pn: { pre: 0, mat: 'brick', m: 'p', thru: 1, sy: 3.6, T: 0.3, cs: 0.6, hp: 0, y: 0 },
+  rrot: 1, rscale: 0, dens: 3, snap: 0, part: 'wall', pp: {}, csnap: 1, psnap: 1, prim: { c: '#8a8478', sx: 2, sy: 2, sz: 2 }, pn: { pre: 0, mat: 'brick', m: 'p', thru: 1, sy: 3.6, T: 0.3, cs: 0.6, hp: 0, y: 0, draw: 'line', sides: 12 },
   bm: 'up', brad: 40, bstr: 4, bh: 0, bs: 1, btd: 200, sr: 6, sh: 20, bpre: 'coast', bseed: 1 };   // b* = backdrop tool
 const show = { steep: true, col: false, grid: false, sky: true, area: true, bd: true };
 let undo = [], redo = [];
@@ -290,15 +290,17 @@ function markerMesh(o) {
   else if (o.t === 'ring') { const r = add(new THREE.TorusGeometry(2, 0.12, 8, 28), helpMat(c), 0, 0, 0); }
   else if (o.t === 'light') { add(new THREE.SphereGeometry(0.28, 12, 8), helpMat(o.c || c), 0, 0, 0); const l = new THREE.PointLight(o.c || c, (o.int == null ? 2.4 : o.int) * 6, o.dist || 14, 1.6); g.add(l); }
   else if (o.t === 'pn_wall') { const L = o.L || 4, H = o.sy || 3, T = o.T || 0.3, sh = new THREE.Shape();
-    if (o.sh === 'tri') { sh.moveTo(-L / 2, 0); sh.lineTo(L / 2, 0); sh.lineTo(0, H); sh.lineTo(-L / 2, 0); } else { sh.moveTo(-L / 2, 0); sh.lineTo(L / 2, 0); sh.lineTo(L / 2, H); sh.lineTo(-L / 2, H); sh.lineTo(-L / 2, 0); }
+    const tp = MD.pnTP(o) || [1, 0, 1], X = t => -L / 2 + t * L;   // shaped top: left height, apex, right height (fractions)
+    { const P = [[-L / 2, 0], [L / 2, 0], [L / 2, tp[2] * H], [X(tp[1]), H], [-L / 2, tp[0] * H]].filter((q, i, a) => i === 0 || Math.hypot(q[0] - a[i - 1][0], q[1] - a[i - 1][1]) > 1e-4);
+      if (Math.hypot(P[0][0] - P.at(-1)[0], P[0][1] - P.at(-1)[1]) < 1e-4) P.pop(); sh.moveTo(...P[0]); for (const q of P.slice(1)) sh.lineTo(...q); sh.lineTo(...P[0]); }
     for (const q of o.ho || []) { const h = new THREE.Path(), a = q[0] - L / 2, b = q[1] - L / 2; h.moveTo(a, q[2]); h.lineTo(a, q[3]); h.lineTo(b, q[3]); h.lineTo(b, q[2]); h.lineTo(a, q[2]); sh.holes.push(h); }
     const geo = new THREE.ExtrudeGeometry(sh, { depth: T, bevelEnabled: false }); geo.translate(0, 0, -T / 2); if (o.tl) geo.rotateX(o.tl);
     const b = add(geo, mat(MD.PN_COL[o.mat || 'brick'] || c), 0, 0, 0); b.castShadow = true;
     if (o.mat === 'litwin' || o.mat === 'glass') { b.material = b.material.clone(); b.material.transparent = true; b.material.opacity = 0.6; }
     const cs = o.cs || 1, one = o.nb && !(o.ho && o.ho.length), nc = one ? 1 : Math.max(1, Math.round(L / cs)), nr = one ? 1 : Math.max(1, Math.round(H / cs)), pts = [];   // unbreakable = no cell lines
     for (const zf of [T / 2 + 0.01, -T / 2 - 0.01]) {   // cell lines on both faces
-      for (let i = 1; i < nc; i++) { const x = -L / 2 + i * L / nc, top = o.sh === 'tri' ? H * (1 - Math.abs(x) / (L / 2)) : H; pts.push(x, 0, zf, x, top, zf); }
-      for (let j = 1; j < nr; j++) { const y = j * H / nr, hw = o.sh === 'tri' ? L / 2 * (1 - y / H) : L / 2; pts.push(-hw, y, zf, hw, y, zf); } }
+      for (let i = 1; i < nc; i++) { const x = -L / 2 + i * L / nc; pts.push(x, 0, zf, x, H * MD.pnTopF(tp, i / nc), zf); }
+      for (let j = 1; j < nr; j++) { const y = j * H / nr, f = y / H, [a, k, b] = tp, xl = f <= a ? -L / 2 : X(k * (f - a) / (1 - a)), xr = f <= b ? L / 2 : X(k + (1 - k) * (1 - f) / (1 - b)); if (xr > xl) pts.push(xl, y, zf, xr, y, zf); } }
     const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3)); if (o.tl) lg.rotateX(o.tl); g.add(new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ color: '#2a2a2a', transparent: true, opacity: 0.45 }))); }
   else if (o.t === 'house') { const b = add(new THREE.BoxGeometry(8, 4.2, 6.5), mat('#b08a5a'), 0, 2.1, 0); b.castShadow = true; const r = add(PRIM.cone(), mat('#7a4a36'), 0, 4.2, 0); r.scale.set(6.2, 2.6, 5); add(new THREE.BoxGeometry(1.2, 2.2, 0.2), helpMat('#3a2a1c'), 0, 1.1, 3.3); }
   else if (o.t === 'ptree' || o.t === 'ppine') { add(new THREE.CylinderGeometry(0.3, 0.45, 3, 8), mat('#6a4a2c'), 0, 1.5, 0).castShadow = true; const top = o.t === 'ptree' ? add(new THREE.IcosahedronGeometry(2.6, 1), mat(c), 0, 5, 0) : add(new THREE.ConeGeometry(2, 5.5, 8), mat(c), 0, 4.6, 0); top.castShadow = true; }
@@ -720,6 +722,12 @@ cv.addEventListener('pointerdown', e => {
     pushUndo('t'); stroke = { k: 'sculpt', inv, h0: hover.y, seed: Math.random() * 99 };
   } else if (tool === 'paint') { if (!hover) return; if (e.altKey) { opt.surf = M.sf[clamp(Math.round(hover.z / C), 0, M.ny - 1) * M.nx + clamp(Math.round(hover.x / C), 0, M.nx - 1)]; renderOpts(); return; } pushUndo('t'); stroke = { k: 'paint', inv }; paintSurf(inv); }
   else if (tool === 'scatter') { if (!hover) return; pushUndo('o'); stroke = { k: 'scatter', inv, acc: 1 }; }
+  else if (tool === 'pnl' && opt.pn.draw === 'round') {   // round tower: click centre, click radius → closed ring of panels
+    if (!hover) return; const p = [snapV(hover.x), snapV(hover.z)];
+    if (!draft) { pushUndo('o'); draft = { pts: [p], base: hover.on === 'floor' ? +hover.y.toFixed(2) : null, round: 1 }; need(); return; }
+    const c = draft.pts[0], r = Math.hypot(p[0] - c[0], p[1] - c[1]); if (r < 0.5) return;
+    draft.pts = pnRing(c, r); finishPnl(true);
+  }
   else if (tool === 'wall' || tool === 'pnl') {
     if (!hover) return;
     if (!draft) { pushUndo('o'); draft = { pts: [], base: hover.on === 'floor' ? +hover.y.toFixed(2) : null, h: opt.wh }; }
@@ -804,6 +812,7 @@ cv.addEventListener('pointermove', e => {
   else if (drag && drag.k === 'box') boxDraw(drag, e);
   else if (drag && drag.k === 'ramp' && hover) drawLine([[drag.a.x, drag.a.z], [hover.x, hover.z]]);
   else if (drag && drag.k === 'floor' && hover) { const p = [[drag.a.x, drag.a.z], [hover.x, hover.z]]; drawLine(p); }
+  else if (tool === 'pnl' && draft && draft.round && hover) { const c = draft.pts[0], r = Math.hypot(hover.x - c[0], hover.z - c[1]); if (r > 0.3) { const P = pnRing(c, r); P.push(P[0]); drawLine(P); } }
   else if ((tool === 'wall' || tool === 'pnl') && draft && hover) drawLine([...draft.pts, [hover.x, hover.z]]);
   else if (tool === 'castle' && fdraft && hover) { const l = [...fdraft.pts, [snapC(hover.x), snapC(hover.z)]]; if (l.length > 2) l.push(l[0]); if (fdraft.base != null) l.y = fdraft.base; drawLine(l); }
   need();
@@ -1101,6 +1110,7 @@ function finishPnl(closed) {
   if (!add.length) { undo.pop(); return; }
   M.objs.push(...add); sel = { k: 'obj', id: add[add.length - 1].id }; syncObjs(); changed(); renderSide(); stat(add.length + ' panels (group ' + g + ')', 'ok');
 }
+function pnRing(c, r) { const n = Math.max(3, Math.round(opt.pn.sides || 12)), P = []; for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2; P.push([+(c[0] + Math.cos(a) * r).toFixed(3), +(c[1] + Math.sin(a) * r).toFixed(3)]); } return P; }   // ring points (radius = to the panel centre line corners)
 function pnCut(it, kind) {   // opening = hole in the same panel (+ a lit glass pane for windows, same group)
   const q = MD.pnOpening(it, kind); if (!q || !M.objs.includes(it)) { stat('Can’t cut: panel too short/low, or it already has 4 openings', 'err'); return; }
   pushUndo('o'); if (it.g == null || it.g === '') it.g = MD.pnNewGroup(M); it.ho = (it.ho || []).concat([q]);
@@ -1118,7 +1128,9 @@ function pnFields(it) {
   return [fld('Material', it, 'mat', { type: 'select', items: MD.PN_MAT, get: () => mat }), fld('Break Mode', it, 'm', { type: 'select', items: MD.PN_MODE, get: () => it.m || 'p', after: () => { resync(); renderSide(); } }),
     it.m === 'l' ? fld('Breaks Through (off = damage only)', it, 'thru', { type: 'checkbox', get: () => it.thru !== 0, set: v => { if (v) delete it.thru; else it.thru = 0; } }) : null,
     fld('Length', it, 'L', { min: 0.2 }), fld('Height (along panel)', it, 'sy', { min: 0.2 }), fld('Thickness', it, 'T', { min: 0.03, step: 0.05 }), fld('Cell Size', it, 'cs', { min: 0.2, step: 0.05 }),
-    fld('Tilt (deg, roof)', it, 'tl', { deg: 1, nullable: 1, ph: '0 = upright' }), fld('Shape', it, 'sh', { type: 'select', items: [['', 'Rectangle'], ['tri', 'Triangle (gable)']], get: () => it.sh || '', set: v => { if (v) it.sh = v; else delete it.sh; } }),
+    fld('Tilt (deg, roof)', it, 'tl', { deg: 1, nullable: 1, ph: '0 = upright' }), fld('Shape', it, 'sh', { type: 'select', items: [['', 'Rectangle'], ['tri', 'Triangle'], ['trap', 'Slanted Top']], get: () => it.sh || '', set: v => { if (v) it.sh = v; else delete it.sh; }, after: () => { resync(); renderSide(); } }),
+    it.sh === 'tri' ? fld('Apex Position (0 left • 0.5 middle • 1 right)', it, 'ap', { nullable: 1, ph: '0.5', min: 0, max: 1, step: 0.05 }) : null,
+    it.sh === 'trap' ? fld('Right End Height (0..1 of Height)', it, 'hr', { nullable: 1, ph: '0.5', min: 0, max: 1, step: 0.05 }) : null,
     it.ho && it.ho.length ? el('div', { class: 'row' }, el('label', null, 'Openings: ' + it.ho.length), el('button', { class: 'tl-btn', onclick: () => { pushUndo('o'); delete it.ho; resync(); renderSide(); } }, 'Clear Openings')) : null,
     fld('Unbreakable (one solid piece, no cells)', it, 'nb', { type: 'checkbox', get: () => !!it.nb, set: v => { if (v) it.nb = 1; else delete it.nb; }, after: () => { resync(); renderSide(); } }),
     fld('HP per cell', it, 'hp', { nullable: 1, ph: 'material default (' + MD.PN_HP[mat] + ')', min: 1, step: 5 }),
@@ -1187,6 +1199,8 @@ function renderOpts() {
       check('Curved (through points)', 'wcurve'), check('Breakable (in segments)', 'wbrk'), el('p', { class: 'note' }, 'Start the click on an upper floor = wall/rail standing on that floor (doesn’t block below) • thinner walls use more colliders'));
   } else if (tool === 'pnl') { const q = opt.pn;
     b.append(h3('Panel Preset'), pal(MD.PN_PRESET.map(p => ({ n: p.n, c: MD.PN_COL[p.mat] })), q.pre, i => { const P = MD.PN_PRESET[i]; Object.assign(q, { pre: i, mat: P.mat, m: P.m, thru: P.thru === 0 ? 0 : 1, sy: P.sy, T: P.T, cs: P.cs, y: P.y || 0, hp: 0 }); renderOpts(); }, 'one'),
+      h3('Draw'), selRow('Shape', [['line', 'Line (click point by point)'], ['round', 'Round Tower (centre → radius)']], q.draw, v => { q.draw = v; draft = null; drawLine(null); renderOpts(); }),
+      ...(q.draw === 'round' ? [slider('Sides (more = rounder)', 'sides', 6, 32, 1, q), el('p', { class: 'note' }, 'Click the centre, then click again for the radius • one panel per side, all in one group (they hold each other up)')] : []),
       h3('Settings'), selRow('Material', MD.PN_MAT, q.mat, v => { q.mat = v; renderOpts(); }), selRow('Break Mode', MD.PN_MODE, q.m, v => { q.m = v; renderOpts(); }), ...(q.m === 'l' ? [check('Breaks Through (off = damage only)', 'thru', q)] : []),
       slider('Height', 'sy', 0.3, 12, 0.1, q), slider('Thickness', 'T', 0.05, 1.5, 0.05, q), slider('Cell Size', 'cs', 0.25, 3, 0.05, q), slider('Base Offset', 'y', 0, 10, 0.1, q), slider('HP per cell (0 = material default)', 'hp', 0, 500, 5, q),
       el('p', { class: 'note', html: 'Break modes: <b>Holes</b> = breaks into cells, leaves rubble • <b>Skin Peel</b> = crack → outer skin falls (still blocks) → through • <b>Whole Panel</b> = HP as one piece (glass/door)<br>HP by material: ' + MD.PN_HP[q.mat] + ' per cell • parts that must not break: use normal walls/boxes<br>Select a panel, then press "Cut Door/Window" or "Test Break" in the Inspector' }));
