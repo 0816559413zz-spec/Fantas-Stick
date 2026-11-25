@@ -11,7 +11,7 @@ PATHS.push({id:'light',n:'สายแสง',ic:'✨',col:'#ffe9a8',d:'ซั�
   combo:'Crystal Bond ส่งคริสตัลให้เพื่อน (กัน/ตีแรงขึ้น) • เก็บไว้เอง = ลำแสง/โล่แรงสุด • Empower Light บัฟทั้งเราและเพื่อน • Light Step วาร์ปไปหาเพื่อน ให้โล่ลดดาเมจ'});
 const LTV=PATHS[LIGHTP].v={max:3,linkR:650,linkPick:160,sendT:0.3,holdT:0.4,allyDR:0.05,allyDmg:0.05,
   baRange:600,baCharge:0.6,heatT:8,heatIdle:2,heatDrain:2,ohT:2,baFloat:0.5,baRise:1.3,baMove:0.7,ba0:[5,1.0],ba1:[7,0.5],ba2:[12,0.5],ba3:[15,0.4],baW:[10,14,18,22],
-  shHp:[0,120,180,300],shReg:1,
+  shHp:[0,50,80,120],shReg:1,   // user 2026-11-25: shield back for Radiance only, less health (was 120/180/300)
   dsDist:250,dsAllyR:900,dsPick:180,dsCd:8,dsDmg:15,dsR:150,dsDR:0.3,dsDRT:2,
   prismT:0};   // 0 = ปริซึมอยู่ตลอดจนเรียกคืน/ลิงก์ใหม่ (ผู้ใช้ 2026-11-18)
 PATHS[LIGHTP].vn={max:'คริสตัลสูงสุด',linkR:'ลิงก์ • ระยะหลุด',allyDR:'คริสตัลกับเพื่อน • กันดาเมจ/ชิ้น',allyDmg:'คริสตัลกับเพื่อน • ตีแรง/ชิ้น',
