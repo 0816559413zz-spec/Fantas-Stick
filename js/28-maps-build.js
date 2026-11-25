@@ -555,6 +555,7 @@ function fileMapBody(id,F,T,night,W,fb){
   if(PNL.length)try{pnlBuild();}catch(e){console.error('pnlBuild',e);}
   FCSC.torch=[];if(MAPS[id].rooms)try{fcsPropsBuild();}catch(e){console.error('fcsPropsBuild',e);}
   if(MAPS[id].deco)try{fcsDecoFile(MAPS[id].deco);}catch(e){console.error('fcsDecoFile',e);}   // decor drawn by the game (js/28-fcs-castle.js)   // breakable room props (js/28-fcs-props.js)   // Map Builder siege map: fences + spawn pads (js/28-fcs-build.js)
+  if(MAPS[id].water)try{pondBuild(MAPS[id].water);}catch(e){console.error('pondBuild',e);}   // Map Builder water (js/67-pond.js)
   fileMapFx(F.fx);
   W.userData.lights=(F.lights||[]).map(L=>({abs:1,x:tx(L.x),y:GY(L.x,L.y)+(L.h||2),z:tz(L.y),col:L.col||'#ffb060',int:L.int||2,dist:L.dist||14}));
   if(!F.file)return;

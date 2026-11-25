@@ -1,5 +1,5 @@
 {
- "next": 201,
+ "next": 202,
  "items": [
   {
    "id": 194,
@@ -4097,6 +4097,26 @@
    "created": "2026-11-25",
    "updated": "2026-11-25",
    "imgs": [],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 201,
+   "title": "Map Builder: เครื่องมือน้ำ 💧 + ผิวน้ำในเกม (ภาพอย่างเดียว)",
+   "text": "Map Builder มีเครื่องมือ 💧 Water (ปุ่ม H): ลากกรอบ = พื้นที่น้ำ, ระดับตั้งให้เอง, ติ๊ก Dig Basin = ขุดแอ่งให้ด้วย. แก้ทีหลังด้วย Select (ย้าย/หมุน/ขยาย/ระดับ) + Inspector (Look 4 แบบ, Auto Level, Dig Basin). ในเกมเป็นผิวน้ำจริง: สีตื้น-ลึกตามความลึก ฟองตามตลิ่ง คลื่นเล็ก ประกายแดด. ยังไม่มีผลกับการเล่น. วิธีดู: Map Builder เปิดแมพ Water Demo (water-demo) แล้วกด ▶ Play หรือเปิดลิงก์เกมด้านล่าง",
+   "kind": "Map",
+   "who": "Map Builder",
+   "status": "wait",
+   "created": "2026-11-25",
+   "updated": "2026-11-25",
+   "imgs": [
+    "review/img/r201-water-lake.jpg",
+    "review/img/r201-water-overview.jpg"
+   ],
+   "links": [
+    "mapbuild.html?id=water-demo",
+    "index.html?nosw&playmap=water-demo"
+   ],
    "feedback": "",
    "reply": ""
   }

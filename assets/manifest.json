@@ -509,6 +509,11 @@
    "file": "maps/ruin-demo.glb",
    "data": "maps/ruin-demo.json",
    "v": 4
+  },
+  "water-demo": {
+   "file": "maps/water-demo.glb",
+   "data": "maps/water-demo.json",
+   "v": 1
   }
  },
  "ptex": {}

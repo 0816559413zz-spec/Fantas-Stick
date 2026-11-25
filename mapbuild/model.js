@@ -58,6 +58,8 @@ export const OBJ = {
   // flying rules (any mode): Broom Zone = brooms allowed inside (box up to Top) • Wind Push = pushes players along Direction
   brz: { n: 'Broom Zone', cat: 'mode', c: '#8ad0ff', note: 'rectangle + Top height • Team = who may fly here • outside = rider falls off (siege rule)' },
   wind: { n: 'Wind Push Zone', cat: 'mode', c: '#b8f0e0', note: 'rectangle • Direction (deg, map compass like Rotation) + Strength • e.g. edges of floating islands' },
+  // water surface (2026-11-25): flat see-through water at Level y (m, absolute — not above ground) • the ground cuts the shoreline
+  water: { n: 'Water Surface', cat: 'water', c: '#3fa0d8', note: 'flat water at Level (m) • ground higher than the level hides it = the shore • dig the bed lower (Dig Basin / Sculpt) • look only, no gameplay yet' },
   // room helpers
   ceil: { n: 'Ceiling', cat: 'room', c: '#c77dff', note: 'keeps players/fliers/camera below the ceiling • roofed rooms ≥ 20 high' },
   lz: { n: 'Indoor Light Zone', cat: 'room', c: '#7fb0ff', note: 'camera inside = dim cool indoor light • glass / lit windows inside get sun beams • Height Above Ground = roof (camera above it = outdoor)' },
@@ -74,6 +76,24 @@ export const RPK = {
 };
 for (const k in RPK) OBJ['rp_' + k] = { n: RPK[k].n, cat: 'room', c: '#a07a56', rp: k };
 export const isRP = t => t.startsWith('rp_');
+// water looks (game js/67-pond.js WATER_LOOK keeps the colours)
+export const WATER_LOOK = [['lake', 'Lake (blue)'], ['clear', 'Clear (turquoise)'], ['swamp', 'Swamp (green)'], ['dark', 'Deep (dark)']];
+export const WATER_COL = { lake: '#3a8fb0', clear: '#4cc6c4', swamp: '#5e6e3c', dark: '#24506a' };
+// water rect: is map point (x,z) inside (local u/v in m, >0 = inside distance to the nearest edge)
+export function waterIn(o, x, z) { const cs = Math.cos(o.rot || 0), sn = Math.sin(o.rot || 0), dx = x - o.x, dz = z - o.z, u = dx * cs - dz * sn, v = dx * sn + dz * cs;
+  return Math.min((o.sx || 1) / 2 - Math.abs(u), (o.sz || 1) / 2 - Math.abs(v)); }
+// grid index box covering a (rotated) water rect
+export function waterBox(M, o) { const r = Math.hypot(o.sx || 1, o.sz || 1) / 2;
+  return [clamp(Math.floor((o.x - r) / C), 0, M.nx - 1), clamp(Math.floor((o.z - r) / C), 0, M.ny - 1), clamp(Math.ceil((o.x + r) / C), 0, M.nx - 1), clamp(Math.ceil((o.z + r) / C), 0, M.ny - 1)]; }
+// level just under the lowest ground along the rect edge (water stays inside a dug bed)
+export function waterAutoLevel(M, o) { const [i0, j0, i1, j1] = waterBox(M, o); let mn = Infinity, mx = -Infinity;
+  for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) { const d = waterIn(o, i * C, j * C); if (d < 0 || d > 0.75) continue; const h = M.hg[j * M.nx + i]; if (h < mn) mn = h; if (h > mx) mx = h; }
+  return mn < Infinity ? +(mn - 0.15).toFixed(2) : +(gh(M, o.x, o.z) - 0.15).toFixed(2); }
+// dig a smooth oval bed inside the rect: depth m below the level at the middle, bank 0.3 m above the level at the edge (only lowers the ground)
+export function waterDig(M, o, depth) { const [i0, j0, i1, j1] = waterBox(M, o), lv = o.y || 0, cs = Math.cos(o.rot || 0), sn = Math.sin(o.rot || 0), a = (o.sx || 1) / 2, b = (o.sz || 1) / 2;
+  for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) { const dx = i * C - o.x, dz = j * C - o.z, u = (dx * cs - dz * sn) / a, v = (dx * sn + dz * cs) / b, r = Math.hypot(u, v); if (r >= 1) continue;
+    const w = r < 0.55 ? 1 : 1 - (r - 0.55) / 0.45, s = w * w * (3 - 2 * w), t = lv + 0.3 - (depth + 0.3) * s, k = j * M.nx + i; if (t < M.hg[k]) M.hg[k] = clamp(+t.toFixed(2), HMIN, HMAX); }
+  return [i0, j0, i1, j1]; }
 // axis-aligned rectangle areas (size sx×sz, no rotation in the game)
 export const AREA = new Set(['phase', 'ceil', 'lz', 'sgHold', 'sgLoot', 'brz', 'wind']);
 // decor drawn by the game (MAP-STANDARD round 4): the same builder the code rooms use (js/28-fcs-castle.js fcsDecoKit) — no collision,
@@ -411,7 +431,7 @@ export function gameData(M, dim) {
       const g = gh(M, x, z), h = top - 0.15 - g; if (h === h && h < 1e9 && h > (ramp ? 0.3 : TSTEP)) put({ x, z, r, hgt: h }, null, { k: 'flr' }); }
   }
   const spawns = [], espawn = [], rings = [], tasks = [], props = [], houses = [], lights = [];
-  const sg = { cores: [], sp: { A: {}, B: {} }, phases: [], bw: [], hold: { A: {}, B: {} }, loot: {}, items: [] }, ceil = [], lz = [], rprops = [], deco = [], pnl = [], broom = [], wind = [];
+  const sg = { cores: [], sp: { A: {}, B: {} }, phases: [], bw: [], hold: { A: {}, B: {} }, loot: {}, items: [] }, ceil = [], lz = [], rprops = [], deco = [], pnl = [], broom = [], wind = [], water = [];
   const rect = o => { const w = (o.sx || 1) * PX, d = (o.sz || 1) * PX; return { x0: r1(o.x * PX - w / 2), y0: r1(o.z * PX - d / 2), x1: r1(o.x * PX + w / 2), y1: r1(o.z * PX + d / 2) }; };
   for (const o of allObjs) {
     const X = r1(o.x * PX), Y = r1(o.z * PX), rot = o.rot || 0;
@@ -423,6 +443,7 @@ export function gameData(M, dim) {
     else if (o.t === 'sgItem') sg.items.push({ ph: o.ph || 1, x: X, y: Y, t: Math.max(1, Math.min(3, Math.round(o.tier || 1))) });
     else if (o.t === 'brz') broom.push(Object.assign(rect(o), { top: r2(o.top == null ? 60 : o.top), tm: o.tm === 'A' || o.tm === 'B' ? o.tm : '' }));   // tm '' = both teams
     else if (o.t === 'wind') { const a = (o.dir || 0) * Math.PI / 180; wind.push(Object.assign(rect(o), { dx: r2(Math.sin(a)), dy: r2(Math.cos(a)), s: r2(o.str == null ? 8 : o.str) })); }   // push direction in map px axes (x right, y down)
+    else if (o.t === 'water') water.push(Object.assign({ x: X, y: Y, w: r1((o.sx || 1) * PX), h: r1((o.sz || 1) * PX), lv: r2(o.y || 0), k: o.k || 'lake' }, rot ? { a: +rot.toFixed(4) } : {}));   // js/67-pond.js (a = three rotation.y)
     else if (o.t === 'lz') lz.push(Object.assign(rect(o), { top: r2(o.y == null ? 22 : o.y), k: r2(o.k == null ? 1 : o.k) }));   // indoor light zone (js/28-fcs-hall.js)
     else if (o.t === 'ceil') ceil.push(Object.assign(rect(o), { h: r2(o.y == null ? 21 : o.y) }, o.zmax != null ? { zmax: r2(o.zmax) } : {}));
     else if (o.t === 'dc_road') { if ((o.pts || []).length > 1) { const cs = Math.cos(rot), sn = Math.sin(rot);   // drawn road: points -> absolute map px
@@ -483,6 +504,7 @@ export function gameData(M, dim) {
   if (sg.cores.length || sg.bw.length || sg.phases.length || Object.keys(sg.sp.A).length || Object.keys(sg.sp.B).length) data.siege = sg;
   if (broom.length) data.broom = broom;
   if (wind.length) data.wind = wind;
+  if (water.length) data.water = water;
   if (ceil.length) data.ceil = ceil;
   if (lz.length) data.lz = lz;
   if (rprops.length) data.rprops = rprops;
