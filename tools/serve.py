@@ -28,6 +28,7 @@
 #   POST /api/mb-del?id=<id>        → ถอดออกจากเกม + ย้ายต้นฉบับไป maps/build/_deleted/
 #   POST /api/mb-asset?name=<ชื่อ>&label=&cat= → เพิ่ม Asset เอง: เก็บ .glb ลง assets/mapkit/ + ลงทะเบียนใน assets/mapkit/kit.json (user)
 #   GET  /api/sb-skills             → รายการสกิลจากโค้ดเกม (js/*.js: PATHS, PBASIC, defSpell) ให้ปุ่ม Import ของสตอรี่บอร์ด — อ่านสดทุกครั้ง ไม่มีไฟล์ค้าง
+#   GET  /api/hud-designs / GET|POST /api/hud-design?id= {doc,png,md} / POST /api/hud-design-del?id= / POST /api/hud-design-img?name= → HUD Editor โหมดออกแบบ: huddesign/<id>.json|.jpg(.png)|.md + huddesign/HUDDESIGN.md
 #   GET  /api/sketches              → รายชื่อสเก็ตช์ (sketch.html) ใน sketch/
 #   GET/POST /api/sketch?id=<id>    → อ่าน/บันทึก {doc, png} → sketch/<id>.json + .png + .md แล้วเขียน sketch/SKETCH.md (ให้ Claude อ่าน)
 #   POST /api/sketch-del?id=<id>    → ย้ายไป sketch/_deleted/ (กู้คืนได้) • POST /api/sketch-img?name=<ชื่อ> → เก็บรูปพื้นหลังลง sketch/img/
@@ -776,6 +777,78 @@ def sk_post(self, u, q):
     sk_index()
     return self._json(200, {'ok': True, 'id': sid})
 
+# ---------- HUD designs (hudedit.html, design mode): hand-drawn HUD references for Claude ----------
+HDD = os.path.join(ROOT, 'huddesign')
+
+def hd_list():
+    out = []
+    if os.path.isdir(HDD):
+        for f in sorted(os.listdir(HDD)):
+            if not f.endswith('.json'):
+                continue
+            p = os.path.join(HDD, f)
+            try:
+                j = json.load(open(p, encoding='utf-8'))
+                out.append({'id': f[:-5], 'img': j.get('img') or 'huddesign/%s.png' % f[:-5], 'name': j.get('name') or f[:-5], 'n': len(j.get('objs', [])), 'w': j.get('w'), 'h': j.get('h'), 't': os.path.getmtime(p)})
+            except Exception:
+                pass
+    return out
+
+def hd_index():
+    os.makedirs(HDD, exist_ok=True)
+    L = ['# HUD designs (hudedit.html → ✎ ออกแบบ)', '',
+         '> เขียนอัตโนมัติจาก HUD Editor โหมดออกแบบ. ผู้ใช้วาด HUD ที่อยากได้ทับภาพเกม (ภาพอ้างอิง ยังไม่ใช่ HUD จริงในเกม).',
+         '> แต่ละอัน: ภาพ `huddesign/<id>.jpg` หรือ `.png` (**เปิดด้วย Read ก่อน**), `huddesign/<id>.md` (โน้ต + รายการชิ้น HUD/สกิล/ข้อความ + ตำแหน่ง), `huddesign/<id>.json` (ข้อมูลดิบ).', '']
+    for m in sorted(hd_list(), key=lambda m: -m['t']):
+        L.append('- **%s** (`%s`) %s×%s, %d ชิ้น — `%s` • `huddesign/%s.md` • แก้ล่าสุด %s' % (m['name'], m['id'], m['w'], m['h'], m['n'], m['img'], m['id'], time.strftime('%Y-%m-%d %H:%M', time.localtime(m['t']))))
+    if len(L) == 4:
+        L.append('- (ยังไม่มีแบบ)')
+    open(os.path.join(HDD, 'HUDDESIGN.md'), 'w', encoding='utf-8').write('\n'.join(L) + '\n')
+
+def hd_post(self, u, q):
+    if u.path == '/api/hud-design-img':
+        name = re.sub(r'[^a-zA-Z0-9_\-]', '_', q.get('name', ['img'])[0])[:60] or 'img'
+        data, ext = img_body(self._body())
+        d = os.path.join(HDD, 'img'); os.makedirs(d, exist_ok=True)
+        for e2 in ('png', 'jpg'):
+            if e2 != ext and os.path.exists(os.path.join(d, name + '.' + e2)):
+                os.remove(os.path.join(d, name + '.' + e2))
+        with open(os.path.join(d, name + '.' + ext), 'wb') as f: f.write(data)
+        return self._json(200, {'ok': True, 'path': 'huddesign/img/' + name + '.' + ext})
+    sid = q_id(u)
+    if not sid:
+        return self._json(400, {'ok': False, 'err': 'id ใช้ได้เฉพาะ a-z 0-9 _ -'})
+    os.makedirs(HDD, exist_ok=True)
+    if u.path == '/api/hud-design-del':
+        d = os.path.join(HDD, '_deleted'); os.makedirs(d, exist_ok=True); st = time.strftime('%Y%m%d-%H%M%S')
+        for ext in ('.json', '.md', '.png', '.jpg'):
+            p = os.path.join(HDD, sid + ext)
+            if os.path.exists(p):
+                os.replace(p, os.path.join(d, sid + '_' + st + ext))
+        di = os.path.join(HDD, 'img')   # its background / pasted pictures too
+        for f in (os.listdir(di) if os.path.isdir(di) else []):
+            if f.startswith(sid + '-'):
+                os.replace(os.path.join(di, f), os.path.join(d, st + '_' + f))
+        hd_index()
+        return self._json(200, {'ok': True})
+    try:
+        b = json.loads(self._body().decode('utf-8')); doc = b['doc']
+        assert isinstance(doc.get('objs'), list)
+    except Exception as e:
+        return self._json(400, {'ok': False, 'err': 'ข้อมูลผิดรูปแบบ: ' + str(e)})
+    doc['id'] = sid
+    open(os.path.join(HDD, sid + '.json'), 'w', encoding='utf-8').write(json.dumps(doc, ensure_ascii=False, separators=(',', ':')))
+    if b.get('png'):
+        data, ext = img_body(b['png'].encode('ascii'))
+        for e2 in ('png', 'jpg'):
+            if e2 != ext and os.path.exists(os.path.join(HDD, sid + '.' + e2)):
+                os.remove(os.path.join(HDD, sid + '.' + e2))
+        open(os.path.join(HDD, sid + '.' + ext), 'wb').write(data)
+    if b.get('md'):
+        open(os.path.join(HDD, sid + '.md'), 'w', encoding='utf-8').write(b['md'])
+    hd_index()
+    return self._json(200, {'ok': True, 'id': sid})
+
 def fx_list():
     out = {}
     for d, _, fs in os.walk(FXD):
@@ -826,6 +899,13 @@ class H(SimpleHTTPRequestHandler):
                 return self._json(200, {'ok': True, 'map': json.load(open(os.path.join(MBD, q_id(u) + '.json'), encoding='utf-8'))})
             except Exception as e:
                 return self._json(404, {'ok': False, 'err': str(e)})
+        if u.path == '/api/hud-designs':
+            return self._json(200, hd_list())
+        if u.path == '/api/hud-design':
+            p = os.path.join(HDD, q_id(u) + '.json')
+            if not q_id(u) or not os.path.exists(p):
+                return self._json(404, {'ok': False, 'err': 'ไม่มีแบบนี้'})
+            return self._json(200, json.load(open(p, encoding='utf-8')))
         if u.path == '/api/sketches':
             return self._json(200, sk_list())
         if u.path == '/api/sketch':
@@ -966,6 +1046,8 @@ class H(SimpleHTTPRequestHandler):
                 open(os.path.join(MAPD, mid + '.png'), 'wb').write(data)
             maps_index()
             return self._json(200, {'ok': True, 'id': mid})
+        if u.path in ('/api/hud-design', '/api/hud-design-del', '/api/hud-design-img'):
+            return hd_post(self, u, q)
         if u.path in ('/api/sketch', '/api/sketch-del', '/api/sketch-img'):
             return sk_post(self, u, q)
         if u.path in ('/api/mb', '/api/mb-export', '/api/mb-publish','/api/mb-unexport', '/api/mb-del', '/api/mb-asset'):

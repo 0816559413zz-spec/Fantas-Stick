@@ -21,7 +21,7 @@ User-defined rules for all Claude sessions in this repo (language, style, scope)
 | Environment interaction / destruction | `guides/Destruction.md`, `designs/element-surfaces.md`, `designs/battlefield.md`; skills that hit terrain; map docs |
 | Bug fix | `bugs/BUGS.md` entry + the code area only |
 | Tool UI | `guides/TOOL-UI-RULES.md`, `hub/tools.json` |
-| HUD (in-match) | `HANDOFF.md` HUD Editor entry; `js/66-hud4.js`, `js/66-hudlay.js`, `css/hud4.css`, `js/38-hud.js`; layout `assets/hud/layout.json` (edited in `hudedit.html`) |
+| HUD (in-match) | `HANDOFF.md` HUD Editor entry; `js/66-hud4.js`, `js/66-hudlay.js`, `css/hud4.css`, `js/38-hud.js`; layout `assets/hud/layout.json` (edited in `hudedit.html`); hand-drawn HUD designs `huddesign/HUDDESIGN.md` → open `huddesign/<id>.jpg|png` with Read (drawing tool `hub/huddraw.js`, reference only) |
 | Graphics / perf / loading, or anything adding lights, materials, shaders, code-built meshes | `guides/PRELOAD-STANDARD.md` (rules + plan), `guides/OPTIMIZE.md` |
 
 Keep this table updated when a new system or doc appears.

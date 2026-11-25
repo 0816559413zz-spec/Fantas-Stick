@@ -29,7 +29,7 @@ HOUSES:242 HAIRC:247 HAIRSTY:249 WOODC:252 WOODN:253 WCOREC:254 WCOREN:255 WANDS
 ## js/02-fcs-data.js (3) — 
 FCS_DATA:3
 
-## js/02-fcs-rooms.js (100) — FCS room pieces (rule: guides/MAP-ROOMS.md — user 2026-11-20: every room/courtyard is a s…
+## js/02-fcs-rooms.js (100) — 
 FCS_ROOMS:11 fcsRoomAdd:12 FCS_C0:13 fcsRoomOf:14 fcsCut:15
 §16 gen context (called from genFcs)
 fcsRoomK:17 roomWall:27 roomCol:36 roomFloor:38 roomCeil:44 fcsCeilAt:46 fcsCeilClamp:54
@@ -277,16 +277,14 @@ bombTick:347 modeSnap:360
 §385 สร้าง snapshot ส่งให้ทุกเครื่อง
 r1:386 DEFP:388 packP:389 unpackP:390 makeSnap:391 PROF:409 pf:410 hostSent:411 hostLoop:412 HLW:427 pingN:437
 
-## js/15-siege.js (352) — 🏰 โหมดบุกปราสาท (siege) — แบบ Basic ตาม designs/castle-gameplay-concept.md + แผนที่ js/0…
+## js/15-siege.js (353) — 
 SGV:13 SG_TEAM:28
 §29 loot-phase items (designs/castle-gameplay-concept.md "ลำดับแมตช์ใหม่"…
-SG_ITEMS:34 SG_ITEM_T:37 SG_CARRY:38 sgF:39 sgCore:40 sgInZone:41 sgSpawn:42 sgInit:43 sgWallsApply:52 sgWallDmg:56 sgWallHit:62 sgWallEnv:63 sgInput:68 sgStop:76 sgTick:77 sgCoreDown:119 sgPhaseGo:133
-§141 loot phase (after core b = S.ph-1 fell, between the retreat and the n…
-sgLootR:142 sgHasLoot:143 sgLootGo:144 sgLootEnd:152 sgItemsTick:157 sgEnd:169 sgResult:171 sgSnap:177
-§185 บอทเล่นบุกปราสาท: ฝ่ายบุก = เดินไปแกนแล้วร่าย (เจอศัตรูใกล้ = สู้ก่อน…
-SGB:188 sgBotTarget:190
-§200 team plan (user 2026-11-22: don't trickle in one by one)
-SGT:203 sgTeamPlan:204 sgBotMode:225 sgBreachAim:239 sgBotGoal:246 sgBotIn:265 sgBotLoot:274 sgUnstick:286 sgBotThink:299
+SG_ITEMS:34 SG_ITEM_T:37 SG_CARRY:38 sgF:39 sgCore:40 sgInZone:41 sgSpawn:42 sgInit:43 sgWallsApply:52 sgWallDmg:57 sgWallHit:63 sgWallEnv:64 sgInput:69 sgStop:77 sgTick:78 sgCoreDown:120 sgPhaseGo:134
+§142 loot phase (after core b = S.ph-1 fell, between the retreat and the n…
+sgLootR:143 sgHasLoot:144 sgLootGo:145 sgLootEnd:153 sgItemsTick:158 sgEnd:170 sgResult:172 sgSnap:178 SGB:189 sgBotTarget:191
+§201 team plan (user 2026-11-22: don't trickle in one by one)
+SGT:204 sgTeamPlan:205 sgBotMode:226 sgBreachAim:240 sgBotGoal:247 sgBotIn:266 sgBotLoot:275 sgUnstick:287 sgBotThink:300
 
 ## js/16-voice.js (89) — 
 VOICE:4 rosterIds:5 toggleMic:6 voiceSync:20 teamOn:37 teamOf:38 applyVoiceGates:39 VAC:49 onIncomingCall:50 voiceLevels:62 speakingIds:70 updateVoiceUI:76
@@ -355,7 +353,7 @@ onfOutlineMat:4 onFireFX:6 statusFX:17 fx:44
 §251 overlay: เลือกบัฟ / สรุปผล
 choosePick:252 syncOverlays:257 showOver:278
 
-## js/27-world.js (611) — โลก 3D (Three.js + Bloom) — 1 หน่วย 3D = 20 พิกเซลของระบบเกม
+## js/27-world.js (611) — 
 S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 PTG:15 gl:23
 §37 เงานุ่มแบบ PCSS (contact-hardening): ใกล้จุดสัมผัสคม ไกลจากวัตถุที่บั…
 PCSS:40 scene:67 cam:69 composer:70
@@ -381,7 +379,7 @@ CITY_STY:181 CITY_VEH:188 cityFacade:190 CITYK:203 _cZ:204 _cT:204 _cR:204 _cC:2
 §259 ตึกไฮไลต์ล้มทั้งตึก (ขั้น 7)
 _ctA:262 _ctB:262 _ctC:262 cityTowerPose:263 cityTowerAnim:271 cityTowerRubble:278 CAREA:292 cityAreaSync:293 cityViewSync:305 cityDebris:349 cityFX:358
 
-## js/28-fcs-build.js (419) — ภาพแผนที่ First Castle Strike (แบบ Basic: กล่อง/ทรงพื้นฐาน ยังไม่มีโมเดลจริง) + ภาพ/HUD โ…
+## js/28-fcs-build.js (419) — 
 buildFcs:5 fcsBridge:41 fcsRubbleMat:64 fcsCore:79 FCSB:105 fcsParView:106 FSH_V:120 FSH_B:121 fcsShellMat:123 fcsBlocks:138 fcsShellBuild:150 fcsParFall:165 fcsFallTick:172 fcsShellView:184 FPILE:192 _rfP:194 _rfQ:194 _rfS:194 fcsFadeList:195 fcsRubbleFade:200 fcsShellFall:204 fcsPileTick:213 fcsShellClear:231 EFS3:234 fcsFences:235 _efC:252 _efM:252 _efS:252 _efZ:252 efsView:253
 §279 ภาพโหมด (ลูกข่ายทุกเครื่องจาก snapshot M.sg)
 SGV3:280 sgClearView:281 sgFileBuild:284 sgViewBuild:290 SGVZR:310 sgBarrier:313 sgSync:327 sgLootSync:350 sgDust:371 sgFx:372
@@ -407,14 +405,14 @@ hallBuild:39 hallEnv:85
 §87 mood: blend by how far the camera is inside the hall rect (3 m soft e…
 hallPre:88 hallPost:97
 
-## js/28-fcs-props.js (156) — FCS room props — look + destruction (user 2026-11-20). Gameplay side: RPK / roomProp in j…
+## js/28-fcs-props.js (156) — 
 FRP:11 FRP_PV:12 FRP_PB:13 frpMat:16
 §26 part builders: local metres, x along the prop, z across, y up. push(g…
 frpBuild:27 fcsPropsBuild:75 fcsPropsView:101 fcsRoomBrkFx:110 FRP_DEB:111 frpDebris:114 _frM:128 _frQ:128 _frS:128 frpSet:129 frpDebrisTick:130
 §139 wall hit marks (event 'rwh'): decal quads on the wall face, ring buff…
 frpMarkTex:140 fcsWallHit:144
 
-## js/28-maps-build.js (834) — สร้างแผนที่
+## js/28-maps-build.js (848) — สร้างแผนที่
 CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:47 _prewarmed:49 prewarmShaders:50 batchStatic:69 makeCandles:94 updateCandles:103 buildCastle:112 buildHogsmeade:178 buildGreatHall:253 buildForest:323
 §420 ทุ่งหญ้าฮอกวอตส์ (เย็น)
 ringTrees:421 grassTex:430 buildMeadow:431
@@ -425,7 +423,9 @@ buildLake:451
 §474 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน guides…
 makeSnow:475 makeFireflies:482 makeSnitch:489 fileMapFx:496
 §506 แผนที่จากไฟล์ Blender (guides/MAP-DESIGN.md)
-terrGeo:508 buildFileMap:516 fileMapLight:522 fileMapBody:539 replaceMeadowTufts:583 tickM:625 TRPAD:626 ARPAD:626 SHPAD:626 signTex:627 testSign:628 buildTest:635 buildRuins:740 buildPitch:765
+terrGeo:508 buildFileMap:516 fileMapLight:522
+§539 Phase layers (Map Builder "Phase Layer", user 2026-11-25)
+PHL:542 PHK:542 phOf:543 phLayers:544 phTick:545 fileMapBody:552 replaceMeadowTufts:597 tickM:639 TRPAD:640 ARPAD:640 SHPAD:640 signTex:641 testSign:642 buildTest:649 buildRuins:754 buildPitch:779
 
 ## js/28-pnl-build.js (327) — Breakable panels — view (state = PNL in js/12-pnl.js)
 PNV:7 PN_BATCH:8 PN_MI:9 PN_GLSL:10 pnlMat:66 PN_RUB:138 PN_HEAP:139 pnlCls:146 PN_ZU:155 pnlGeo:156 pnlBuild:240 pnlBatch:266 pnlBatSet:288 pnlSyncOne:293 pnlView:316 pnlFX:319
@@ -514,12 +514,12 @@ bpOpen:53 bpOn:53 bpKey:53 bpShow:55 bpSync:57 hovEl:127
 §128 หน้าตั้งค่า
 setRow:129 setTog:130 setTab:131 XHC:132 XHN:132 setOpts:133 SET_ICO:135 SET_EN:138 gfxPanel:141 renderSettings:148 drawXhPrev:171 openSettings:172 closeSettings:174 modeIcon:230 modeTitle:231 renderLobby:232
 
-## js/41-debug.js (221) — 
+## js/41-debug.js (222) — 
 botBrain:6 _obsKeep:50 balArena:51 _balStash:54 balIsolate:55 balReset:58 balDuel:64 balTour:80 balTeamReset:95 balTeam:104 balCoop:132 balSpellTest:148
-§169 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
-SWK:170 swSetup:171
-§190 เช็คการ์ดจอตอนเปิดเกม
-GPUC:193 gpuCheck:194
+§170 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
+SWK:171 swSetup:172
+§191 เช็คการ์ดจอตอนเปิดเกม
+GPUC:194 gpuCheck:195
 
 ## js/42-fire-vfx.js (356) — ไฟแบบใหม่ (2026-10-19): shader ไฟเคลื่อนไหวจริง (noise ไหล) ใช้กับลูก…
 FIRE_U:4 FIRE_GLSL:5 fireMat:27
@@ -657,7 +657,7 @@ CLOTH:10 CLOTH_LITE:28 CL_ROWS:29 CL_NC:29 CL_GAP:29 CL_IN:29 _clV:30 _clA:30 _c
 §229 other players: low-res cloth on the batched body (student_all_batch)
 clLiteSetup:231 clLiteShow:258 clLiteTick:259 clLiteDraw:270 clOuterNormals:277
 
-## js/50-grass.js (432) — ลม + หญ้า 3D (ภาพบนเครื่องตัวเองล้วน ไม่แตะโฮสต์/โปรโตคอล)
+## js/50-grass.js (432) — 
 AIR:10 AIR_MAP:17 AIR_NG:20 airGust:21 airGustOff:26 airEnv:27 airGs:28 airMark:30 airForMap:33 _airV:34 airAt:35 airGv:41 airTick:42
 §45 ต่อเข้ากับเอฟเฟกต์เดิม (ไม่ต้องแก้ทุกสกิล): แสงวาบ = ลมกระโชก • วงคลื…
 CLW:54
@@ -672,7 +672,7 @@ GR_NOISE:162 GR_LIVE:167 SNOWU:188 GR_SNOW:189 grLive:191 GR_GLSL_V:201 GR_BEGIN
 §409 สกิลลม → หญ้า (ภาพล้วน เรียกจาก windEfx js/68)
 WIND_GRASS:411 airWind:425
 
-## js/51-warmup.js (432) — อุ่นเครื่องช่วงนับถอยหลัง (ผู้ใช้ 2026-10-21: "ช่วงนับถอยหลังให้โหลดสิ่งที่ต้องใช้ — กดสก…
+## js/51-warmup.js (432) — 
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_SLICE:13 WARM_X:14 WARM_Y:14 warmKeep:16 warmStaticModels:22 glReady:31 warmCompile:32 warmDraw:35 WARM_SKIP:45 warmAssets:48 warmFx:58 warmNow:71 warmFxRun:79 warmFxEnd:82 warmGather:84 warmPaths:86 warmFrame:88 warmStep:90 preloadCharMat:158 warmTrCopy:161 warmCharVariants:164 warmQueue:184 WARM_LOBBY:190 warmLobbyTick:191 warmTick:198
 §209 Entry loader (PRELOAD-STANDARD step 3, 2026-11-23)
 PRE:215 preloadReg:216 warmDissolve:218 preProg:234 preFin:235 preStart:237
@@ -821,7 +821,7 @@ h4UltX:202
 §209 รูปตัวละครเรา (FFA / TDM แทนแผนที่ย่อ)
 H4PF:211 h4PfMode:212 h4PfAvatar:214 h4Portrait:216 h4PfRead:227 h4MapBox:234
 
-## js/66-hudlay.js (34) — HUD layout (HUD Editor, user 2026-11-24)
+## js/66-hudlay.js (35) — HUD layout (HUD Editor, user 2026-11-24)
 HUDL_DEF:5 HUDL:11 HL0:12 hlGet:13 hudHs:14 hlSet:16 hlJson:20 hlApplyDom:22 hlBegin:26 hlEnd:28 hlBox:30 HL_DEMO_FEED:31
 
 ## js/66-hudmin.js (74) — Minimal HUD (Settings > หน้าจอ > รูปแบบ HUD, user 2026-11-25)
@@ -908,7 +908,7 @@ BRM:9 BFW:12 BSK:13 BROOM_SK:19 broomVert:40 broomMove:53 broomStrike:72 broomSt
 §131 ฝั่งจอ
 broomHead:133 BBEAM:140 _bbGeo:141 broomView:142 broomMountFx:173 broomDismountFx:181 broomBeamFx:183 broomSkFx:199 broomStrikeFx:212 broomFlakFx:217 broomHud:222 broomHudT:223 broomTick:232
 
-## js/70-water-dragon.js (512) — อัลติน้ำ Dragon of the Deep — มังกรน้ำตัวจริงในเกม (ผู้ใช้รับหน้าตา 2026-11-01 จากตัวอย่า…
+## js/70-water-dragon.js (512) — 
 WDG:7 wdgBuild:8 T:9 root:9 fixed:9 rings:10 sides:10 fastNormals:12 geoOf:21 skin:22 faceSkin:50 group:51 head:52 faceTime:54 groundY:54 faceMaterial:55 faceBlue:60 hornBlue:60 ridgeCyan:60 profile:62 headProfile:63 faceGeo:68 fp:68 fc:68 fi:68 faceRings:68 faceSides:68 navy:69 aqua:69 belly:69 flowHi:69 neckBlend:69 headStroke:81 eyePatch:82 waterCrest:97 bodyGeo:123 bodyP:123 bodyUV:123 indices:123 body:129 finShape:131 finGeo:132 finPos:134 finUV:134 finSkin:136 FIN_N:139 fins:139 _fM:140 _fQ:140 _fS:140 _fP:140 limbSkin:142 clawSkin:143 taperedLimb:144 arms:151 bodyLength:161 intro:161 settleWindow:161 tipHz:161 bodyBulk:161 bodyRadius:162 flight:164 quarters:165 step:165 dr:165 dy:165 spiralKnot:166 first:167 entry:167 crest:171 bank:174 corner:174 cruiseEntry:174 quarterHandle:177 leadLength:179 up:183 zAxis:183 yAxis:183 smooth:184 startAt:185 startD:185 startDistance:187 distanceToCruise:187 hoverSpeed:187 fastDuration:187 brakeDuration:187 startRamp:187 fastSpeed:188 progress:189
 §198 ทางบิน: ใช้ระยะทาง (เมตร) ไม่ใช่สัดส่วน เพื่อต่อทางพุ่งลงตอนเล็งเสร็จ…
 dive:199 PA:200 TA:201 DIVE_DOWN:203 DIVE_POUR:203 DIVE_STEP:203 diveDist:204 lastTime:205 lastHeadT:205 headRight:205 bodyState:205 filtered:205 SBUF:209 _sq1:210 _sq2:210 _sv1:210 _sHT:210 _sPrev:210 _sCand:210 _sSide:210 _sUR:210 _sRt:210 _sM:210 _bCos:211 _bSin:211 shape:212 gate:268 rune:270 shadowMat:271 shadow:272 ringMat:273 ring:274 glyphMat:275 glyphHi:276 glyphPath:277 water:284 splashGeometry:287 lowWaveGeometry:288 splashBursts:289 pulse:295 outerRing:296 dropletMat:297 drops:297 transform:299 gateAt:300 sprayMaterial:322 spray:322 curlCurve:324 foamMaterial:325 foam:326 particles:327 foamParticles:327 rand:328 bodySprayAt:329 waveSegments:350 waveSheets:350 wavesAt:357 currentConfigs:372 currentMaterial:379 currentSegments:384 currentSides:384 currentMeshes:384 _cC:393 _cR:393 _cV:393 _cRad:393 currentPointTo:394 currentPoint:401 currentSpray:402 currentParticles:403 _cS:404 _cCos:405 _cSin:405 _cPow:405 currentsAt:406
@@ -921,7 +921,7 @@ PERF:9 perfNetSample:11 perfNetSend:14 perfNetReceive:20 perfNetFrame:25 FRZ:40 
 ## js/72-dash-pose.js (85) — 
 DPOSE:12 DPT:24 _dpQ:25 _dpX:25 _dpP:25 dpMix:26 dpKnees:28 dpStyle:36 DPDBG:41 dashPose:42 dpApply:75
 
-## js/73-tune.js (141) — แผงปรับค่า 🎚️ (F8 / ปุ่ม "ปรับค่า" ในเมนูพัก และหน้าแรก) — ปรับตัวเลขในเกมสดๆ แล้วเซฟลง …
+## js/73-tune.js (141) — 
 TUNE:8 tuneNum:9 tuneBuild:15
 §80 ใช้ / เก็บค่า
 tuneSetVal:81 tuneApplyFile:84 tuneJson:88
@@ -998,4 +998,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(122 files, 38197 lines)
+(122 files, 38214 lines)
