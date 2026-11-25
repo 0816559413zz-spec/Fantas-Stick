@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "desc": "Fire: charge in the burning left hand, release whip with twist, quick shot",
+  "tags": ["stance", "preview"],
+  "dur": 5.0,
+  "layers": [
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 5.0},
+    {"id": "stance", "t": "code", "fn": "studio_class_stance", "at": 0, "life": 5.0, "args": {"layer":"anchor","cls":"pyro","style":"a","run":[99,99],"acts":[{"t":0.6,"a":"hold","d":2.0},{"t":3.8,"a":"fire"}]}}
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "desc": "Frost: skills cast with the LEFT-hand wand (mirrored): Frostforge, Glacier Rend, Frost Aura",
+  "tags": ["stance", "preview"],
+  "dur": 6.0,
+  "layers": [
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 6.0},
+    {"id": "stance", "t": "code", "fn": "studio_class_stance", "at": 0, "life": 6.0, "args": {"layer":"anchor","cls":"frost","style":"b","run":[99,99],"fmode":0,"acts":[{"t":0.6,"a":"skill","id":"frostforge"},{"t":2.2,"a":"skill","id":"glacierrend"},{"t":4.0,"a":"skill","id":"frostaura"}]}}
+  ]
+}

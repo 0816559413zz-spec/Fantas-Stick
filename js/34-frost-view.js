@@ -71,6 +71,59 @@ function frostCrown(o,on,dt,now){
   const hd=o.fileModel&&(o.hdBone||(o.hdBone=o.fileModel.getObjectByName('head')));let y=2.35;if(hd){hd.updateWorldMatrix(true,false);hd.getWorldPosition(_tv1);o.g.worldToLocal(_tv1);y=_tv1.y+0.55;}
   const e=1-Math.pow(1-o.crownK,3);C.position.set(0,y+0.06*Math.sin(now/420),0);C.rotation.y=now/1400;C.rotation.z=0.06*Math.sin(now/900);C.scale.setScalar(Math.max(0.01,e*1.5));
   if(on&&Math.random()<0.25){C.getWorldPosition(_tv2);const q=simOf(_tv2);PARTS.push({x:q.x+rnd(-8,8),y:q.y+rnd(-8,8),h:q.h+rnd(0,0.2),vx:0,vy:0,vh:rnd(-0.6,-0.2),life:0.6,max:0.6,col:Math.random()<0.5?'#ffffff':'#9fe0ff',size:1.4,g:0});}}
+const FW_MID=.6;   // blade centre (local units from the handle)
+// swap beats (seconds into FROST_SWAP_T). out = sword -> wand, back = wand -> sword
+const FSW={out:{hold:.15,palm:.42,flick:.55,burst:.68,set:.74},back:{hold:.1,up:.42,form:.2,whole:.45,stop:.85,set:.85},
+  armPalm:[-1.45,.3],armFlick:[-1.05,-1.45],armUp:[-2.95,-.12],yawPalm:-.08,yawFlick:-.42,yawUp:-.15,swScale:.55};
+const _fsV=new THREE.Vector3(),_fsW=new THREE.Vector3(),_fsC=new THREE.Vector3(),_fsD=new THREE.Vector3();
+const _fsEase=t=>{t=clamp(t,0,1);return t*t*(3-2*t);};
+// arms + body during the swap (called in js/35 after readyStance, before rigSync). Right arm = the empty sword hand.
+function frostSwapPose(o){const sw=o.fwSw;if(!sw)return;const t=sw.t,R=o.armR.rotation,B=o.b.rotation;
+  const pose=(ax,az,yaw,w)=>{R.x=lerp(R.x,ax,w);R.z=lerp(R.z,az,w);R.y=lerp(R.y,0,w);B.y=lerp(B.y,yaw,w);};
+  let beat3=0,b3=0;
+  if(sw.out){const F=FSW.out;
+    if(t<F.flick){const w=_fsEase((t-F.hold)/(F.palm-F.hold));if(w>0)pose(FSW.armPalm[0],FSW.armPalm[1],FSW.yawPalm,w);}
+    else if(t<F.set){const k=clamp((t-F.flick)/(F.burst-F.flick),0,1),e=1-Math.pow(1-k,3);   // fast flick out to the right
+      pose(lerp(FSW.armPalm[0],FSW.armFlick[0],e),lerp(FSW.armPalm[1],FSW.armFlick[1],e),lerp(FSW.yawPalm,FSW.yawFlick,e),1);}
+    else{beat3=1;b3=_fsEase((t-F.set)/(FROST_SWAP_T-F.set));}}
+  else{const F=FSW.back;
+    if(t<F.set){const w=_fsEase((t-F.hold)/(F.up-F.hold));if(w>0)pose(FSW.armUp[0],FSW.armUp[1],FSW.yawUp,w);}
+    else{beat3=1;b3=_fsEase((t-F.set)/(FROST_SWAP_T-F.set));}}
+  // beat 3: the stance just changed - fade from the last beat-2 pose into the new stance instead of popping
+  const C=sw.cap||(sw.cap={R:new THREE.Quaternion(),L:new THREE.Quaternion(),b:new THREE.Vector3(),bp:new THREE.Vector3(),l0:new THREE.Vector3(),l1:new THREE.Vector3(),ok:0});
+  if(beat3&&C.ok){const k=1-b3;
+    o.armR.quaternion.slerp(C.R,k);o.armL.quaternion.slerp(C.L,k);
+    B.x=lerp(B.x,C.b.x,k);B.y=lerp(B.y,C.b.y,k);B.z=lerp(B.z,C.b.z,k);o.b.position.x=lerp(o.b.position.x,C.bp.x,k);
+    for(let i=0;i<2;i++){const L=o.legs[i].rotation,c=i?C.l1:C.l0;L.x=lerp(L.x,c.x,k);L.z=lerp(L.z,c.z,k);}}
+  else if(!beat3){C.R.copy(o.armR.quaternion);C.L.copy(o.armL.quaternion);C.b.set(B.x,B.y,B.z);C.bp.copy(o.b.position);
+    C.l0.set(o.legs[0].rotation.x,0,o.legs[0].rotation.z);C.l1.set(o.legs[1].rotation.x,0,o.legs[1].rotation.z);C.ok=1;}}
+// ice shards for the swap (sim-space PARTS) at world point c; dir = world direction they fly; gather = pull inward
+function fsShards(c,n,dir,spd,gather,big){big=big||1;const q=simOf(c);for(let i=0;i<n;i++){const an=Math.random()*6.283,r=gather?rnd(22,40):rnd(0,6);
+  let vx=Math.cos(an)*rnd(15,45),vy=Math.sin(an)*rnd(15,45),vh=rnd(-.3,1);
+  if(gather){vx=-Math.cos(an)*r*3;vy=-Math.sin(an)*r*3;vh=rnd(-.6,.6);}else if(dir){const s=rnd(.6,1.2)*spd;vx+=dir.x*20*s;vy+=dir.z*20*s;vh+=dir.y*s;}
+  PARTS.push({x:q.x+Math.cos(an)*r,y:q.y+Math.sin(an)*r,h:q.h+(gather?rnd(-.6,.6):rnd(-.2,.2)),vx,vy,vh,life:gather?.32:rnd(.35,.6),max:.6,col:Math.random()<.45?'#ffffff':'#9fe0ff',size:rnd(1.3,2.6)*big,g:gather?0:1.2});}}
+// sword on the right palm during the swap (called in js/35 after the bones are final, so it never trails the hand)
+function frostSwapLate(o,dt){const sw=o.fwSw;if(!sw||!o.fw)return;const G=o.fw.g;if(!G.visible)return;
+  const h=stLoc(o,'hand_R',_fsV);if(!h)return;const t=sw.t,yaw=o.b.rotation.y,fx=Math.sin(yaw),fz=Math.cos(yaw);   // body forward in o.g space
+  let C,bx,by,bz,nx,ny,nz,sc=FWS*(sw.out?FSW.swScale:.8),stick=1;
+  if(sw.out){const F=FSW.out;stick=_fsEase((t-F.hold)/(F.palm-F.hold));
+    const k=clamp((t-F.hold)/(F.burst-F.hold),0,1);sw.a=(sw.a||0)+dt*(3+k*k*42);   // spin builds toward the flick
+    C=_fsC.copy(h).add(_fsW.set(fx*.45,.02,fz*.45));const c=Math.cos(sw.a),s=Math.sin(sw.a);   // pinwheel in the body's front plane
+    bx=c*fz;by=s;bz=-c*fx;nx=fx;ny=0;nz=fz;
+    if(t>F.burst-.04)sc*=Math.max(.05,1-(t-(F.burst-.04))/.04);
+    if(!sw.burst&&t>=F.burst-.02){sw.burst=1;const W=o.g.localToWorld(_fsW.copy(C)),R=_fsD.set(-fz,0,fx).transformDirection(o.g.matrixWorld);   // body right in world
+      fsShards(W,48,R,4.5,0,1.7);fsShards(W,14,null,0,0,1.4);}}
+  else{const F=FSW.back,k=clamp((t-F.whole)/(F.stop-F.whole),0,1);   // flat spin above the raised hand, slowing to a stop
+    sw.a=(sw.a||0)+dt*lerp(26,0,_fsEase(k));
+    C=_fsC.copy(h).add(_fsW.set(0,.42,0));const c=Math.cos(sw.a),s=Math.sin(sw.a);bx=c;by=0;bz=s;nx=0;ny=1;nz=0;
+    sc*=Math.max(.02,_fsEase((t-F.form)/(F.whole-F.form)));
+    if(t>=F.set){const e=_fsEase((t-F.set)/(FROST_SWAP_T-F.set));stick=1-e;}   // hand lowers: sword drifts back to its normal float
+    if(t<F.whole){const W=o.g.localToWorld(_fsW.copy(C));fsShards(W,3,null,0,1);}
+    else if(t<F.stop&&Math.random()<.5){const W=o.g.localToWorld(_fsW.copy(C));fsShards(W,1,null,0);}}
+  if(stick<=0)return;
+  fwAim(bx,by,bz,nx,ny,nz);const P=_fsD.copy(C).addScaledVector(_fsW.set(bx,by,bz).normalize(),-FW_MID*sc);
+  G.position.lerp(P,stick);G.quaternion.slerp(_fwQ,stick);G.scale.setScalar(lerp(G.scale.x,sc,stick));
+  if(Math.random()<.35&&!(sw.out&&sw.burst)){const W=o.g.localToWorld(_fsW.copy(C));fsShards(W,1,null,0);}}
 const FWS=1.3,FWA=[[-2.75,0,1.5],[2.75,0,1.5]];   // ขนาดอาวุธลอย • จุดของเล่มเสริมตอนอัลติ (= mirrorPos ฝั่ง host: หน้า 30 px ข้าง 55 px)
 const _fwM=new THREE.Matrix4(),_fwM2=new THREE.Matrix4(),_fwX=new THREE.Vector3(),_fwY=new THREE.Vector3(),_fwZ=new THREE.Vector3(),_fwP=new THREE.Vector3(),_fwS=new THREE.Vector3(FWS,FWS,FWS),_fwQ=new THREE.Quaternion();
 const _eo=t=>1-Math.pow(1-t,3),_ei=t=>t*t*t,_ss=t=>t*t*(3-2*t);
@@ -129,7 +182,18 @@ function frostFX(o,p,pz,now,dt){
   if(!o.fw){o.fw=fwWeapons();o.g.add(o.fw.g);o.sword=o.fw.sword;o.axe=o.fw.axe;o.fwLk=fwLink();scene.add(o.fwLk);(o.g.userData.extra||(o.g.userData.extra=[])).push(o.fwLk);}
   else if(!o.sword.userData.file&&MODELS.ready.get('mesh_ice_sword')&&MODELS.ready.get('mesh_ice_axe')){   // โมเดลไฟล์โหลดเสร็จทีหลัง → สลับเป็นแบบไฟล์
     for(const k of ['sword','axe']){const old=o[k],nw=k==='sword'?makeIceSword():makeIceAxe();nw.position.set(0,0,0);nw.scale.copy(old.scale);old.parent.add(nw);old.parent.remove(old);disposeTree(old);o[k]=o.fw[k]=nw;}}
-  o.fw.g.visible=fwOn;o.sword.visible=!ff;o.axe.visible=!!ff;
+  // mode swap (user 2026-11-25, 3 beats): sword -> wand = hold sword pose / right palm comes forward, the sword follows the
+  // palm spinning faster, flick out to the right and it shatters / settle into the wand stance. wand -> sword = raise the right
+  // hand overhead, ice gathers into a sword spinning flat above it, the spin slows, lower into the sword stance.
+  // Arms/body: frostSwapPose (after readyStance), sword on the palm: frostSwapLate (after the bones are final) - both below.
+  if(o.fMel===undefined)o.fMel=melee;
+  if(melee!==o.fMel){o.fMel=melee;o.fwSw={t:0,out:!melee,cap:null,burst:0};}
+  const sw=o.fwSw;if(sw){sw.t+=dt;if(sw.t>=FROST_SWAP_T||p.fl||p.dn)o.fwSw=null;}
+  const swOn=!!o.fwSw;
+  // stance follows the beat: sword stance until the wand beat starts, and back
+  o.fRanged=swOn?(sw.out?sw.t>=FSW.out.set:sw.t<FSW.back.set):!melee;
+  const swShow=swOn&&(sw.out?sw.t<FSW.out.burst:sw.t>=FSW.back.form);
+  o.fw.g.visible=swOn?swShow:fwOn;o.sword.visible=!ff;o.axe.visible=!!ff;
   if(o.wandG)o.wandG.visible=true;o.tip.visible=true;   // ถือไม้ตลอด: โหมดประชิดก็ร่ายคาถาบังคับอาวุธลอย
   if(!melee&&!p.fl){o.tip.getWorldPosition(_pw);const q=simOf(_pw);
     for(let i=0;i<3;i++){const an=now/120+i*2.094;PARTS.push({x:q.x+Math.cos(an)*9,y:q.y+Math.sin(an)*9,h:q.h+Math.sin(an*1.5)*0.15,vx:-Math.sin(an)*50,vy:Math.cos(an)*50,vh:0,life:0.08,max:0.08,col:i?'#bfeaff':'#ffffff',size:1.5,g:0});}
@@ -189,11 +253,13 @@ function frostFX(o,p,pz,now,dt){
     o.grdC=[cx,cy,cz,pt];ax=-1.85-pt*0.95;az=-0.05;by=0.6;bx=0;}   // body turned diagonal, head turned back to the cursor (frostSlideHead)
   // วางอาวุธ: ช่วงฟันจริงวางตรงทุกเฟรม (ทางโค้งคม ไม่ตัดมุม) • นอกนั้นไล่ตามนุ่ม ๆ
   fwAim(P.bx,P.by,P.bz,P.nx,P.ny,P.nz);_fwP.set(P.x,P.y,P.z);
-  {const G=o.fw.g;if(P.strike||!o.fwInit){G.position.copy(_fwP);G.quaternion.copy(_fwQ);o.fwInit=1;}else{const r=Math.min(1,dt*P.rate);G.position.lerp(_fwP,r);G.quaternion.slerp(_fwQ,r);}}
+  {const G=o.fw.g;if(P.strike||!o.fwInit){G.position.copy(_fwP);G.quaternion.copy(_fwQ);o.fwInit=1;}else{const r=Math.min(1,dt*P.rate);G.position.lerp(_fwP,r);G.quaternion.slerp(_fwQ,r);}
+    if(!o.fwSw&&G.scale.x!==FWS)G.scale.setScalar(FWS);}
   o.fwStrike=fwOn&&P.strike;
   const sm=(o.swT>0||o.grDown>0||o.grUp>0||o.mlcT>0)?Math.min(1,dt*30):Math.min(1,dt*10);
   fa.ax+=(ax-fa.ax)*sm;fa.az+=(az-fa.az)*sm;fa.by+=(by-fa.by)*sm;fa.bx+=(bx-fa.bx)*sm;
   const meleeAction=melee&&(p.sh||o.swT>0||o.grDown>0||o.grUp>0||o.slamT>0||o.mlcT>0||(flags&32));
+  o.fPose=(meleeAction&&!o.caN||rpose)&&!p.fl;   // js/35 mirrors this to the left (wand) hand
   if((meleeAction&&!o.caN||rpose)&&!p.fl){o.armR.rotation.x=fa.ax;o.armR.rotation.z=fa.az;o.b.rotation.y=fa.by;if(Math.abs(fa.bx)>0.01)o.b.rotation.x+=fa.bx;
     if(rpose){o.armL.rotation.x=lerp(-0.2,-1.6,o.grUp>0?1:0.5);o.armL.rotation.z=0.25;}
     if(melee&&!p.sh){const act=o.swT>0||o.grDown>0||(flags&32)||o.mlcT>0;o.armL.rotation.x=act?-0.75:-0.4;o.armL.rotation.z=act?0.8:0.35;}}   // มือซ้ายกางทรงตัวตอนร่าย

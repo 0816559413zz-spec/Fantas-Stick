@@ -1,5 +1,5 @@
 {
- "next": 195,
+ "next": 198,
  "items": [
   {
    "id": 194,
@@ -3984,6 +3984,64 @@
    "imgs": [],
    "links": [
     "index.html"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 195,
+   "title": "Frost: สลับโหมดดาบ↔ไม้ 3 จังหวะ + ร่ายทุกท่าด้วยมือซ้าย",
+   "text": "รอบ 2 (ผู้ใช้ 2026-11-25): ดาบ→ไม้ = ค้างท่าดาบ / มือขวามาหน้า ดาบตามฝ่ามือหมุนเร็วขึ้น สะบัดออกขวาแล้วดาบแตก / เข้าท่าเตรียมใช้ไม้ • ไม้→ดาบ = ชูมือขวาสุด น้ำแข็งรวมเป็นดาบหมุนแนวนอนบนมือ ค่อยๆ ช้าลง แล้วเอามือลงเข้าท่าฟัน • ระหว่างสลับ (1.3 วิ) เดิน/กระโดดได้ โจมตี/สกิล/หลบไม่ได้ (ยังไม่ commit) • รอบ 3: ตอนร่ายไม้มือซ้ายหันตามแขน (ไม่ค้างทิศท่ายืน) ทุกท่า + ท่าถือไม้ ไม้ชี้ไปข้างหน้า ไม่เฉียงมาก",
+   "kind": "VFX / แอนิเมชัน",
+   "who": "Character",
+   "status": "wait",
+   "created": "2026-11-25",
+   "updated": "2026-11-25",
+   "imgs": [],
+   "links": [
+    "/shots/stance/send4/r4_frost_wand_all_front.gif",
+    "/shots/stance/send4/r4_frost_wand_all_side.gif",
+    "/shots/stance/send4/r4_frost_swap_front.gif",
+    "/shots/stance/send4/r4_frost_swap_side.gif",
+    "/studio.html?fx=stance/frost_wand_all"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 196,
+   "title": "Fire: ชาร์จ BA + Kindle ใช้มือไฟซ้าย",
+   "text": "ชาร์จ: มือไฟกางเฉียงออกข้างค่อนหลัง ตัวบิดง้าง • ปล่อย: สะบัดมือไปอีกฝั่งพร้อมบิดตัว • Kindle: ลอยหันข้าง เล็งด้วยมือไฟ — รอบ 2: ขาไม่พับแปลกแล้ว (ขาห้อยสบายๆ) • แขนไฟ: เพิ่มลิ้นไฟลุกขึ้นจากแขนเสื้อ (mesh 9 ชิ้น ไม่เพิ่มอนุภาค) (ยังไม่ commit) • รอบ 3: แขนไฟท่วมทั้งแขน (มองไม่เห็นแขนเสื้อ) ลิ้นไฟเตี้ยลง",
+   "kind": "VFX / แอนิเมชัน",
+   "who": "Character",
+   "status": "wait",
+   "created": "2026-11-25",
+   "updated": "2026-11-25",
+   "imgs": [],
+   "links": [
+    "/shots/stance/send4/r4_pyro_a_front.gif",
+    "/shots/stance/send4/r4_pyro_a_left.gif",
+    "/shots/stance/send3/r3_pyro_kindle_front.gif",
+    "/shots/stance/send3/r3_pyro_kindle_side.gif",
+    "/shots/stance/send2/pyro_charge.gif"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 197,
+   "title": "ทุกคลาส: แขนอีกข้างบิดสวนตอนบิดตัว",
+   "text": "ยิงปกติ + สกิล (CANIM) ทุกคลาส ยกเว้นคลาสที่มีท่าของตัวเองแล้ว (Nature ฯลฯ): ตอนง้างแขนว่างยื่นไปหน้า ตอนฟาดดึงกลับ (ยังไม่ commit)",
+   "kind": "VFX / แอนิเมชัน",
+   "who": "Character",
+   "status": "wait",
+   "created": "2026-11-25",
+   "updated": "2026-11-25",
+   "imgs": [],
+   "links": [
+    "/shots/stance/send2/counter_water.gif",
+    "/shots/stance/send2/counter_earth.gif",
+    "/shots/stance/send2/counter_storm.gif"
    ],
    "feedback": "",
    "reply": ""

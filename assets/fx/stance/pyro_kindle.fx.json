@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "desc": "Fire: Kindle hover, side-on aim with the fire hand, shot",
+  "tags": ["stance", "preview"],
+  "dur": 4.0,
+  "layers": [
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 4.0},
+    {"id": "stance", "t": "code", "fn": "studio_class_stance", "at": 0, "life": 4.0, "args": {"layer":"anchor","cls":"pyro","style":"a","run":[99,99],"acts":[{"t":0.6,"a":"skill","id":"kindle"},{"t":2.2,"a":"fire"}]}}
+  ]
+}

@@ -59,7 +59,7 @@ async function main(){
   let url=A.url||(A.game?'index.html?nosw':'');
   if(gif&&A.fx){
     const query=new URLSearchParams({fx:A.fx});
-    for(const key of ['map','cam','at','dist','look','oyaw','opitch','seed'])if(A[key]!==undefined)query.set(key,A[key]);
+    for(const key of ['map','cam','at','dist','look','lookh','oyaw','opitch','seed'])if(A[key]!==undefined)query.set(key,A[key]);
     url='studio.html?'+query;
   }
   if(!url)throw new Error('ต้องมี --url, --game หรือ --fx สำหรับอัด GIF');

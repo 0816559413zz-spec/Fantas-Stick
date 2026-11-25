@@ -210,7 +210,7 @@ function gpuCheck(){
 }
 setTimeout(gpuCheck,1500);
 window.WD.GPU=GPUC;
-Object.assign(window.WD,{STANCES,STANCE_STYLE,STANCE_WAND,setHeadDown:v=>HEAD_DOWN=v,QUAL,applyQuality,GQ,gq,gqPreset,gqSet,moonL,fxEv:ev=>fx(ev),HVB,PFB,ptexUse,ptexLoad,CURL,PLIT,PSYS,fireVol,bot:botDebug,bots,lobbyBotAdd,lobbyBotFill,BOT_LV,ar:()=>G.ar,hudSight,SIGHT,obs:()=>OBS});
+Object.assign(window.WD,{STANCES,STANCE_STYLE,STANCE_WAND,KINDLE_AIM,CTWIST,CPOSE,CANIM,setHeadDown:v=>HEAD_DOWN=v,QUAL,applyQuality,GQ,gq,gqPreset,gqSet,moonL,fxEv:ev=>fx(ev),HVB,PFB,ptexUse,ptexLoad,CURL,PLIT,PSYS,fireVol,bot:botDebug,bots,lobbyBotAdd,lobbyBotFill,BOT_LV,ar:()=>G.ar,hudSight,SIGHT,obs:()=>OBS});
 // เทส/วัดผล: เดินลูปโฮสต์ 1 รอบด้วยมือ (hostTick + snapshot + เอฟเฟกต์) — ใช้ตอนหน้าต่างถูกซ่อนแล้ว setInterval ช้า
 // prop / โมเดลจากไฟล์ (ดีบัก)
 Object.defineProperties(window.WD,{TERR:{get:()=>TERR},MAPID:{get:()=>MAPID},OBS:{get:()=>OBS},PROPS:{get:()=>PROPS},PROPON:{get:()=>PROPON},BRK:{get:()=>BRK},BRKV:{get:()=>BRKV},BLDON:{get:()=>BLDON},HSTOP:{get:()=>HSTOP}});Object.assign(window.WD,{MAPS,RANDOM_MAPS,FMAPS,loadMapData,terrT,groundH,terrSolid,setMapVars,buildWorld,PROPDEF,genProps,MODELS,loadModel,modelManifest,useProp,hitProp,damageEnv,bldRay,aimClip,aimRay3,collideWorld,PM3,EM3,JM3,animTick,playVfx,playFlip,fileFx,zoneFx,VFXL,FLIPL,FLIPS,fx});

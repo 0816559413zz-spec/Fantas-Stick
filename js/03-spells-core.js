@@ -5,6 +5,7 @@ const REGEN={wait:5,rate:15};
 // Frost right-click Sword Guard (user 2026-11-23): only class with a guard. Front half-circle, blocks `block` of each hit
 // into a guard worth `hp` damage (shieldE 0..100 = guard HP %), slow walk, can still attack. No time drain.
 const FROST_GUARD={block:0.6,hp:100};
+const FROST_SWAP_T=1.3;   // Frost sword<->wand swap animation length (user 2026-11-25): host locks attacks/skills/dodge this long, js/34 plays the 3 beats
 const shieldAllowed=p=>!SHIELD_OFF||p.pathIdx===1;
 // =====================================================================
 //  ระบบคาถาใหม่: สาย (path) × คาถา (spell) + สถานะ (status effects)

@@ -273,6 +273,7 @@ function updatePlayer(p,dt,acting){
   if(p.novaT>0){if(!p.alive||p.downed)p.novaT=0;else{p.novaT-=dt;if(p.novaT<=0)pyroNova(p);}}
   if(p.colos>0){p.colos-=dt;if(p.colos<=0||!p.alive||p.downed){p.colos=0;emit({k:'efx',z:'colend',x:p.x,y:p.y,h:p.z+2,id:p.id});}}
   if(p.fmCd>0)p.fmCd-=dt;
+  if(p.fswT>0)p.fswT-=dt;
   if(p.slam3){p.slam3.t-=dt;if(p.slam3.t<=0)frostSlam3(p);}
   if(p.frostCut)frostCutTick(p,dt);
   if(p.hover>0){p.hover-=dt;if(p.hover<=0||!(p.kindle>0))p.hover=0;}
@@ -452,12 +453,13 @@ function updatePlayer(p,dt,acting){
   if(p.mlCast>0)return;   // กำลังร่าย Mirror Legion: ทำอะไรไม่ได้
   if(p.dark?.ultUntil>G.time)return;
   const B=PBASIC[p.pathIdx|0]||PBASIC[0];
-  if(pr.v&&p.pathIdx===1&&!(p.fmCd>0)&&!(p.cryo>0)&&!(p.mirror>0)){p.fmode=p.fmode===1?0:1;p.fmCd=1;p.cmbT=0;emit({k:'efx',z:'fswap',x:p.x,y:p.y,h:p.z+1,id:p.id,m:p.fmode});}
+  if(pr.v&&p.pathIdx===1&&!(p.fmCd>0)&&!(p.cryo>0)&&!(p.mirror>0)){p.fmode=p.fmode===1?0:1;p.fmCd=FROST_SWAP_T;p.fswT=FROST_SWAP_T;p.cmbT=0;p.shieldOn=false;emit({k:'efx',z:'fswap',x:p.x,y:p.y,h:p.z+1,id:p.id,m:p.fmode});}
   // กระโดด (Space) ทุกสาย
   if(pr.jp&&!(p.cryo>0)&&!(p.mudT>0)&&!p.wr&&!p.dchgOn&&p.z<=groundH(p.x,p.y,p.z)+(p.pathIdx===LIGHTP?LTV.baFloat+0.05:0.05)&&!(p.colos>0)){
     p.vz=PLAY.jump;p.jumpAir=true;p.airPose=1;
     emit({k:'efx',z:'jump',x:p.x,y:p.y,h:p.z,id:p.id});
   }
+  if(p.fswT>0)return;   // Frost mode-swap animation (user 2026-11-25): walk/jump only, no attacks/skills/dodge until it ends
   if(p.cryo>0){if(pr.q)castSlot(p,0);if(pr.e)castSlot(p,1);if(pr.r)castSlot(p,2);if(pr.f)castSlot(p,3);return;}
   if(p.dfall||(p.sdome&&!stormDomeDash(p))||p.shk>0||(p.mudT>0&&!p.ramp)){}else if(B.dash){if(B.dash(p,inp,pr,dt,setCd))return;}
   else if(pr.sp&&p.cd.dodge<=0&&p.z-groundH(p.x,p.y,p.z)<0.5){   // height above the floor under you (bridges/wall tops count as ground)

@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "desc": "Frost wand mode: basic shots, Glacier Rend, Frostforge, Permafrost, Frost Aura, Mirror Legion - all with the LEFT-hand wand",
+  "tags": ["stance", "preview"],
+  "dur": 12.0,
+  "layers": [
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 12.0},
+    {"id": "stance", "t": "code", "fn": "studio_class_stance", "at": 0, "life": 12.0, "args": {"layer":"anchor","cls":"frost","style":"b","run":[99,99],"fmode":1,"acts":[{"t":0.5,"a":"fire"},{"t":1.0,"a":"fire"},{"t":1.8,"a":"skill","id":"glacierrend"},{"t":3.6,"a":"skill","id":"frostforge"},{"t":4.4,"a":"fire"},{"t":5.6,"a":"skill","id":"permafrost"},{"t":7.4,"a":"skill","id":"frostaura"},{"t":9.0,"a":"ult","id":"mirrorlegion"}]}}
+  ]
+}

@@ -101,22 +101,24 @@ function fireShieldFX(o,p,on,dt,detail=true){
   u.outer.rotation.y+=dt*0.5;u.inner.rotation.y-=dt*0.8;u.m1.uniforms.uHeat.value=-0.08+(u.age<0.3?0.2*(1-u.age/0.3):0);
   if(detail&&Math.random()<0.5){const an=rnd(0,6.283);PARTS.push({x:p.x+Math.cos(an)*26,y:p.y+Math.sin(an)*26,h:(o.zs||0)+rnd(1.6,2.6),vx:Math.cos(an)*rnd(5,20),vy:Math.sin(an)*rnd(5,20),vh:rnd(1.5,3),life:0.5,max:0.5,col:'#ffc04a',size:1.3,g:-0.6});}
 }
+const KINDLE_AIM={yaw:-1.1,lx:-1.35,lz:1.0,rx:.45,rz:-.5,l0:-.45,l1:.28};   // Kindle hover aim with the fire hand (tune: WD.KINDLE_AIM)
 function pyroFX(o,p,pz,now,dt){
   const a=p.a||0,ca=Math.cos(a),sa=Math.sin(a);
   o.pyroOn=getKit(p.id).path===0;
+  o.pyHand=o.pyroOn&&typeof stanceOf==='function'&&stanceOf(o)?.fx==='fireArm';
   if(o.pyroOn&&!FSEQ.fire_column){fireSeqLoad('fire_column');fireSeqLoad('df_impact');fireSeqLoad('df_dive');}   // เสาไฟ bake (2.8 MB) โหลดเมื่อมีสาย Pyro ในเกมเท่านั้น
   dragonfallFX(o,p,pz,now,dt);
   // ชาร์จลูกไฟ (กดค้าง): อนุภาคไฟถูกดูดเข้ามารวมเป็นลูกไฟที่ปลายไม้ / Kindle พร้อม: ไฟลุกที่ปลายไม้
   // ชาร์จเต็ม: แฟลชครั้งเดียว + วงไฟ บอกว่าเต็มแล้ว
   const cgFull=(p.cg||0)>=1,dcFull=(p.dc||0)>=1;
-  if(cgFull&&!o.cgFull){pyTip(o);const s=simOf(_pw);burst(s.x,s.y,'#ffd27a',26,220,0.35,2.4,{h:s.h,g:0});FX.flashLight(s.x,s.y,s.h,'#ffb347',1.6,6,0.2);if(p.id===NET.myId)snd('buff');
+  if(cgFull&&!o.cgFull){pyFire(o);const s=simOf(_pw);burst(s.x,s.y,'#ffd27a',26,220,0.35,2.4,{h:s.h,g:0});FX.flashLight(s.x,s.y,s.h,'#ffb347',1.6,6,0.2);if(p.id===NET.myId)snd('buff');
     o.cgBurst=0.25;ring(p.x,p.y,'#ff8a2a',45,0.3,pz+0.1);for(let i=0;i<12;i++){const an=i/12*6.283;flame(p.x+Math.cos(an)*14,p.y+Math.sin(an)*14,pz+0.05,{vx:Math.cos(an)*70,vy:Math.sin(an)*70,vh:rnd(5,8),life:0.32,size:rnd(7,10),g:-2,drag:3});}}
   if(dcFull&&!o.dcFull){ring(p.x,p.y,'#ffb347',70,0.4,pz+0.15);burst(p.x,p.y,'#ff7a2a',40,260,0.45,3,{h:pz+0.3,vh:[2,6],g:-1});FX.flashLight(p.x,p.y,pz+0.8,'#ff8a3a',5,12,0.3);if(p.id===NET.myId)snd('buff');}
   o.cgFull=cgFull;o.dcFull=dcFull;
   // ลูกไฟชาร์จแบบ B (ผู้ใช้เลือก 2026-10-22): เส้นแสงดูดเข้า + วงหด (ซ้อนอนุภาคเดิม) • เต็ม = แฟลช/วงช็อกขาว
   if(p.cg>0&&o.pyroOn){if(!o.cgFx)o.cgFx=fxPlay('fire/fireball_charge',{x:p.x,y:p.y,h:pz,aim:false});   // ไม่ follow: วางที่ปลายไม้เองทุกเฟรม (follow = ไปจับปลายไม้ท่ายืน → แสงที่สะโพก)if(cgFull&&!o.cgFx2)o.cgFx2=fxPlay('fire/fireball_full',{x:p.x,y:p.y,h:pz,follow:p.id})||1;
     // ลูกไฟที่ปลายไม้ (ผู้ใช้ 2026-11-11): ระหว่างชาร์จเล็กจาง • เต็ม = ใหญ่ ทึบ นีออนสว่าง
-    pyTip(o);const s=simOf(_pw),k=cgFull?'cgRd':'cgHd';if(cgFull&&o.cgHd){fxStop(o.cgHd);o.cgHd=null;}
+    pyFire(o);const s=simOf(_pw),k=cgFull?'cgRd':'cgHd';if(cgFull&&o.cgHd){fxStop(o.cgHd);o.cgHd=null;}
     if(!o[k]){o[k]=fxPlay(cgFull?'fire/fireball_ready':'fire/fireball_hold',{x:s.x,y:s.y,h:Math.max(0,s.h-GY(s.x,s.y)),aim:false,s:cgFull?0.55:0.7});if(o[k]&&o[k]!==1)o[k].k=0.7;}   // เล็ก/จางลง (ผู้ใช้ 2026-11-15: เต็มแล้วบังจอ)
     const I=o[k];if(I&&I!==1){I.x=s.x;I.y=s.y;I.h=Math.max(0,s.h-GY(s.x,s.y));}
     {const C=o.cgFx;if(C&&C!==1){const hh=Math.max(0,s.h-GY(s.x,s.y));C.x=s.x;C.y=s.y;C.h=hh;C.fz=hh;C.wand=[s.x,s.y,hh];}}}
@@ -126,8 +128,13 @@ function pyroFX(o,p,pz,now,dt){
   if(dcFull){for(let i=0;i<4;i++){const an=now/120+i*Math.PI/2;PARTS.push({x:p.x+Math.cos(an)*30,y:p.y+Math.sin(an)*30,h:pz+0.15,vx:0,vy:0,vh:rnd(2.5,4.5),life:0.4,max:0.4,col:i%2?'#ffd27a':'#ff6a1a',size:3.5,g:-1});}}
   if((p.cg||0)>0||p.kd>0){
     // ชาร์จลูกไฟ: ง้างไม้ไว้ข้างไหล่ขวา ตัวบิดหันไหล่ขวาไปหลัง มือซ้ายยื่นไปหน้าเหมือนประคองไฟ • ยิ่งเต็มยิ่งสั่น (ปล่อย = พุ่งแทงแรง castPose ท่า 3)
-    if(p.cg>0){const k=Math.min(1,p.cg),tr=(Math.sin(now/27)*0.06+Math.sin(now/61)*0.03)*k;o.b.position.y-=0.06*k;o.b.rotation.x+=Math.sin(now/340)*0.03*k;o.armR.rotation.x=lerp(-1.45,-2.05,k)+tr;o.armR.rotation.z=lerp(-0.15,-0.7,k);o.armL.rotation.x=lerp(-0.6,-1.35,k)+tr;o.armL.rotation.z=lerp(0.3,-0.1,k);o.b.rotation.y=lerp(0,-0.45,k)+Math.sin(now/290)*0.06*k;o.b.rotation.x-=0.06*k;o.armR.updateMatrixWorld(true);}   // ชาร์จ: ตัวบิดมากขึ้นตามแรง + โยกหายใจ
-    pyTip(o);const s=simOf(_pw),k=p.kd>0?1:p.cg,full=k>=1;
+    if(p.cg>0){const k=Math.min(1,p.cg),tr=(Math.sin(now/27)*0.06+Math.sin(now/61)*0.03)*k;o.b.position.y-=0.06*k;o.b.rotation.x+=Math.sin(now/340)*0.03*k;
+      if(o.pyHand){   // user 2026-11-24: charge in the burning LEFT hand, held out to the side and a little behind; body loads the twist, wand arm counters forward
+        const e=_cs(Math.min(1,k*1.6));o.armL.rotation.x=lerp(-0.4,0.55,e)+tr;o.armL.rotation.z=lerp(0.5,1.12,e);o.armR.rotation.x=lerp(-0.6,-1.15,e)-tr*0.5;o.armR.rotation.z=lerp(-0.1,0.3,e);
+        o.b.rotation.y=lerp(0,0.55,e)+Math.sin(now/290)*0.05*k;o.b.rotation.x+=0.04*e;o.cgPose=e;}
+      else{o.armR.rotation.x=lerp(-1.45,-2.05,k)+tr;o.armR.rotation.z=lerp(-0.15,-0.7,k);o.armL.rotation.x=lerp(-0.6,-1.35,k)+tr;o.armL.rotation.z=lerp(0.3,-0.1,k);o.b.rotation.y=lerp(0,-0.45,k)+Math.sin(now/290)*0.06*k;o.b.rotation.x-=0.06*k;}
+      o.armR.updateMatrixWorld(true);}   // ชาร์จ: ตัวบิดมากขึ้นตามแรง + โยกหายใจ
+    pyFire(o);const s=simOf(_pw),k=p.kd>0?1:p.cg,full=k>=1;
     for(let i=0;i<2+Math.floor(k*2);i++){const an=rnd(0,6.283),r=rnd(25,55),hv=rnd(-0.9,0.9);
       PARTS.push({x:s.x+Math.cos(an)*r,y:s.y+Math.sin(an)*r,h:s.h+hv,vx:-Math.cos(an)*r/0.28,vy:-Math.sin(an)*r/0.28,vh:-hv/0.28,life:0.28,max:0.28,col:i%2?'#ffd27a':'#fff0b0',size:rnd(1.2,2),g:0,drag:0});}
     // เปลวส้มแดงวนรอบแกน
@@ -209,8 +216,12 @@ function pyroFX(o,p,pz,now,dt){
   // Kindle ลอยเล็ง: ขาหน้าพับยกเข่าขึ้น (ชายผ้าหน้าเปิดตาม) ขาหลังเหยียดลง ยื่นไม้ไปข้างหน้า มือซ้ายประคอง (แบบ Freja) — ค่อยๆ เข้า/ออกท่า
   {const on=p.hv&&p.kd>0;o.kAimK=(o.kAimK||0)+((on?1:0)-(o.kAimK||0))*Math.min(1,dt*12);const k=o.kAimK;
     if(o.cloak)o.cloak.kick=k>0.01?k:0;
-    if(k>0.01){o.legs[0].rotation.x=lerp(o.legs[0].rotation.x,-1.45,k);o.legs[0].scale.y=lerp(1,0.6,k);o.legs[1].rotation.x=lerp(o.legs[1].rotation.x,0.12,k);o.legs[1].scale.y=lerp(1,1.08,k);o.b.rotation.x=lerp(o.b.rotation.x,-0.12,k);
-      o.armR.rotation.x=lerp(o.armR.rotation.x,-1.55,k);o.armR.rotation.z=lerp(o.armR.rotation.z,-0.06,k);o.armL.rotation.x=lerp(o.armL.rotation.x,-1.3,k);o.armL.rotation.z=lerp(o.armL.rotation.z,0.55,k);}
+    if(k>0.01){const K=KINDLE_AIM,fh=o.pyHand;   // fire-hand aim: legs hang loose (front knee a little up, back leg trailing) - the folded kick leg looked broken side-on (user 2026-11-25)
+      o.legs[0].rotation.x=lerp(o.legs[0].rotation.x,fh?K.l0:-1.45,k);o.legs[0].scale.y=lerp(1,fh?1:0.6,k);o.legs[1].rotation.x=lerp(o.legs[1].rotation.x,fh?K.l1:0.12,k);o.legs[1].scale.y=lerp(1,fh?1:1.08,k);o.b.rotation.x=lerp(o.b.rotation.x,-0.12,k);
+      if(fh){o.legs[0].rotation.z=lerp(o.legs[0].rotation.z,0,k);o.legs[1].rotation.z=lerp(o.legs[1].rotation.z,0,k);}
+      if(o.pyHand){const K=KINDLE_AIM;o.b.rotation.y=lerp(o.b.rotation.y,K.yaw,k);o.armL.rotation.x=lerp(o.armL.rotation.x,K.lx,k);o.armL.rotation.z=lerp(o.armL.rotation.z,K.lz,k);
+        o.armR.rotation.x=lerp(o.armR.rotation.x,K.rx,k);o.armR.rotation.z=lerp(o.armR.rotation.z,K.rz,k);}   // user 2026-11-24: side-on while floating, burning left hand aims, wand arm back
+      else{o.armR.rotation.x=lerp(o.armR.rotation.x,-1.55,k);o.armR.rotation.z=lerp(o.armR.rotation.z,-0.06,k);o.armL.rotation.x=lerp(o.armL.rotation.x,-1.3,k);o.armL.rotation.z=lerp(o.armL.rotation.z,0.55,k);}}
     else if(o.legs[0].scale.y!==1){o.legs[0].scale.y=o.legs[1].scale.y=1;}}
   // Kindle ลอยกลางอากาศ: ไฟพ่นลงจากใต้เท้า
   if(p.hv){for(let i=0;i<4;i++)PARTS.push({x:p.x+rnd(-8,8),y:p.y+rnd(-8,8),h:pz+rnd(-0.1,0.2),vx:rnd(-20,20),vy:rnd(-20,20),vh:rnd(-5,-2.5),life:rnd(0.25,0.4),max:0.4,col:i?'#ff8a2a':'#ffe08a',size:rnd(2.4,3.6),g:2,drag:2,smoke:i===3});LREQ.push({x:tx(p.x),y:pz,z:tz(p.y),col:'#ff8a3a',int:2,dist:8});}
@@ -344,6 +355,8 @@ function pyroNovaCharge(o,dt,now){
   if(!(o.novaT>0)&&(o.nvFx||o.nvFx2)){for(const kk of ['nvFx','nvFx2'])if(o[kk]){if(o[kk]!==1)fxStop(o[kk]);o[kk]=null;}}
 }
 // ปลายไม้หลังใส่ท่าแล้ว (js/35 เก็บ o.tipW ทุกเฟรม) — อ่าน o.tip ตรง ๆ ระหว่าง sync ได้ตำแหน่งท่ายืน = ลูกไฟไปโผล่ที่สะโพก
+// Fire with the burning-arm stance charges/aims with the LEFT hand (user 2026-11-24): fire point = in front of the left palm
+function pyFire(o){if(!o.pyHand)return pyTip(o);const h=o.fileModel&&o.fileModel.getObjectByName('hand_L');if(!h)return pyTip(o);h.getWorldPosition(_pw);_pw.y+=0.1;return _pw;}
 function pyTip(o){if(o.tipW&&performance.now()-(o.tipWT||0)<200)return _pw.copy(o.tipW);return o.tip.getWorldPosition(_pw);}
 // Blazeform (ผู้ใช้ 2026-11-11): เส้นไฟนีออนจากตัวเราไปหาศัตรูทุกคนในระยะออร่า • ขอบตัวเรืองส้มแบบอัลติ Nature
 //   • คนที่อยู่ในระยะ (ถ้าเป็นเรา) ขอบจอแดงส้มเบา ๆ

@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "desc": "Frost: sword slash, swap to wand (sword spins + breaks up), left-hand wand casts, swap back",
+  "tags": ["stance", "preview"],
+  "dur": 7.2,
+  "layers": [
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 7.2},
+    {"id": "stance", "t": "code", "fn": "studio_class_stance", "at": 0, "life": 7.2, "args": {"layer":"anchor","cls":"frost","style":"b","run":[99,99],"fmode":0,"acts":[{"t":0.8,"a":"fire"},{"t":2.0,"a":"swap"},{"t":3.6,"a":"fire"},{"t":4.4,"a":"fire"},{"t":5.6,"a":"swap"}]}}
+  ]
+}

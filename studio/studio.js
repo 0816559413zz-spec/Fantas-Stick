@@ -56,6 +56,7 @@ gl.domElement.addEventListener('pointermove',e=>{
 });
 const _stv=new THREE.Vector3();
 function stCam(c){if(ST.cam==='game'||!ST.fx)return;const A=stAnchor();if(!A)return;const lk=(+SQ.get('look')||0)*20,lx=A.x+Math.cos(A.a)*lk,ly=A.y+Math.sin(A.a)*lk,T=_stv.set(tx(lx),GY(lx,ly)+(MK.ws==='fx'&&ST_NATURE_TREE_PREVIEWS.has(ST.name)?13.7:1.1),tz(ly));   // ?look=<m> = มองไปข้างหน้า N ม. (ภาพสตอรี่บอร์ดที่ผู้ร่าย+เป้าอยู่ในภาพเดียว)
+  if(SQ.has('lookh'))T.y+=+SQ.get('lookh')||0;   // ?lookh=<m> raise the camera target (airborne previews)
   if(ST.name===ST_DARKNESS_DASH&&ST.cam==='orbit'&&!SQ.has('cam')&&!SQ.has('look')){T.x+=3.9;T.z-=4.2;}
   if(ST.cam==='orbit'&&!SQ.has('look')){
     if(ST.name===ST_DARKNESS_QUICK_DASH)T.x+=4.4;

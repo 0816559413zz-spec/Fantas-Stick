@@ -7,8 +7,12 @@
 const CPOSE_T=0.46,_ce=t=>1-Math.pow(1-t,3),_cs=t=>t*t*(3-2*t),_cb=t=>{const u=t-1;return 1+2.5*u*u*u+1.5*u*u;};   // _cb = ฟาดเลยเป้านิดแล้วเด้งกลับ (มีน้ำหนัก)
 // ผู้ใช้ 2026-10-22 รอบ 2: "เหวี่ยงมากขึ้นกว่านี้หน่อย" → ขยายระยะท่าจากท่ายืนปกติ [แขนขวา x, z, บิดตัว, เอนตัว, แขนซ้าย x, z, (เอียงข้าง, ย่อตัว)]
 const _caJ=[0,0,0,0,0,0,0,0],_caJ0=[0,0,0,0,0,0,0,0];
+// free (left) arm counters the torso twist like a thrower: right shoulder comes forward -> left arm pulls back/out, and the
+// reverse on the wind-up. dTw = twist away from where the cast started. Nature keeps its own authored arms.
+const CTWIST={x:.6,z:.22,max:.9};
+function counterArm(o,T,rest,w,skip){if(skip||o.posePath===NATUREP)return;const d=clamp(T[2]-rest[2],-CTWIST.max,CTWIST.max);T[4]+=CTWIST.x*d*w;T[5]+=CTWIST.z*d*w;}
 const AMP_B=[1.25,1.35,1.75,1.6,1.3,1.3],AMP_S=[1.2,1.3,1.6,1.5,1.2,1.2,1.6,1.4];
-const CP_BEND=[0.13,0.05,0.06,0.09,0.04,0.07,-0.13];   // เอียงตัวตามทิศเหวี่ยงของแต่ละท่า (ยิงปกติ)
+const CP_BEND=[0.13,0.05,0.06,0.09,0.04,0.07,-0.13,-0.1];   // เอียงตัวตามทิศเหวี่ยงของแต่ละท่า (ยิงปกติ)
 //          [แขนขวา x, แขนขวา z, บิดตัว, เอนตัว, แขนซ้าย x, แขนซ้าย z] ของ ง้าง / ฟาด / ตามแรง
 const CPOSE=[
   [[-2.7,-0.75,-0.4,-0.06,-0.5,0.45],[-1.3,0.3,0.3,0.12,0.3,0.7],[-1.45,0.05,0.12,0.05,0.1,0.5]],
@@ -17,12 +21,13 @@ const CPOSE=[
   [[-1.0,-0.6,-0.6,-0.12,-0.8,0.35],[-1.65,0,0.32,0.3,-1.55,-0.3],[-1.6,-0.05,0.12,0.15,-1.3,-0.15]],   // 3 = ท่าใหญ่: มือซ้ายดันออกไปพร้อมไม้ (สองมือ)
   [[-3.05,-0.15,-0.15,-0.15,-0.3,0.4],[-0.9,0.05,0.1,0.25,0.3,0.6],[-1.2,-0.05,0.05,0.1,0.1,0.45]],
   [[-1.2,-0.7,-0.5,-0.05,-0.4,0.4],[-1.7,-0.1,0.35,0.15,0.4,0.7],[-1.6,-0.15,0.15,0.08,0.2,0.5]],
-  [[-2.2,0.55,0.45,-0.04,-0.3,0.7],[-1.35,-0.55,-0.3,0.12,-0.5,0.25],[-1.45,-0.35,-0.1,0.05,-0.3,0.35]]];   // 6 = ฟันย้อนมือ (backhand) จากบนซ้ายไปขวา — สลับกับท่า 0 ให้ยิงปกติเหวี่ยงซ้าย-ขวา
+  [[-2.2,0.55,0.45,-0.04,-0.3,0.7],[-1.35,-0.55,-0.3,0.12,-0.5,0.25],[-1.45,-0.35,-0.1,0.05,-0.3,0.35]],
+  [[-0.55,-0.35,0.55,-0.06,0.55,1.15],[0.35,-0.75,-0.6,0.2,-1.7,-0.3],[0.15,-0.5,-0.3,0.1,-1.45,-0.05]]];   // 7 = Fire: throw with the burning LEFT hand (user 2026-11-24): load out-side-back, whip forward across + twist, wand arm swings back   // 6 = ฟันย้อนมือ (backhand) จากบนซ้ายไปขวา — สลับกับท่า 0 ให้ยิงปกติเหวี่ยงซ้าย-ขวา
 const _cpT=[0,0,0,0,0,0],_cpR=[0,0,0,0,0,0];
-const CP_STEP=[0,0,0.7,1,0.4,0.8,0.3];   // ก้าวขา (ยืนนิ่ง) ของแต่ละท่า
+const CP_STEP=[0,0,0.7,1,0.4,0.8,0.3,0.9];   // ก้าวขา (ยืนนิ่ง) ของแต่ละท่า
 const CPCOL=['#ffb347','#bfeaff','#ffe27a','#c9a46a','#c9a46a','#c9a46a','#d8b46a'];   // สีหางแสงปลายไม้ตามสาย (pyro frost storm … earth)
 function castStyle(t,n){if(t==='iceboulder')return [0,6][n%2];   /* Frost ยิงไกลเสริม: มือเดียว สลับฟาดขวา-ย้อนซ้าย (ผู้ใช้ 2026-11-16 ไม่เอาสองมือ) */if(t==='pfire'||t==='pfireb')return 3;if(t==='icicle'||t==='b_frost')return [0,6,2][n%3];return [0,6,2,0,6,1][n%6];}   // ยิงปกติ: ฟันขวา→ย้อนมือซ้าย→แทง... สลับไปมา
-function castStart(o,t,style){o.castN=(o.castN|0)+1;o.cpS=style===undefined?castStyle(t,o.castN):style;o.cpT=CPOSE_T;o.caN=null;}
+function castStart(o,t,style){o.castN=(o.castN|0)+1;o.cpS=style===undefined?(o.posePath===0&&(t==='pfire'||t==='pfireb')?7:castStyle(t,o.castN)):style;o.cpT=CPOSE_T;o.caN=null;}
 // ---------- ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเหวี่ยงไม้คทา ... บิดเอวบิดตัว ... ท่าใหญ่ใช้ 2 มือ")
 // host ส่ง event {k:'sk',id,s:สกิล} ตอนร่ายสำเร็จ → SKANIM เลือกท่า • สกิลที่มีท่าของตัวเองในไฟล์สายอยู่แล้ว (Kindle, Dragonfall,
 // Ignition Snap, Railgun, Triple Strike, ร่างเทพ, Frost ลอยอาวุธ, สายดินสั่ง Stand) ไม่ใส่ที่นี่ — ไฟล์สายรันทีหลังจึงทับท่านี้อยู่แล้ว
@@ -108,6 +113,7 @@ function skillPose(o,p,dt,now){
   let j=0;while(j<A.k.length-1&&u>A.k[j][0])j++;
   const K=A.k[j],P=j?A.k[j-1]:null,u0=P?P[0]:0,f=Math.min(1,(u-u0)/Math.max(0.001,K[0]-u0)),e=K[9]==='o'?_cb(f):K[9]==='i'?f*f*f:_cs(f);
   for(let i=0;i<8;i++){const a=lerp(P?P[i+1]:rest[i],K[i+1],e);_caT[i]=lerp(rest[i],rest[i]+(a-rest[i])*AMP_S[i],w);}
+  counterArm(o,_caT,rest,w,!!A.two||/^nat/.test(o.caN));
   _caT[0]=Math.max(-3.35,_caT[0]);_caT[4]=Math.max(-3.35,_caT[4]);
   if(A.ci&&u>A.ci[0]&&u<A.ci[1]){const q=(u-A.ci[0])/(A.ci[1]-A.ci[0])*Math.PI*2;_caT[0]+=0.32*Math.sin(q)*w;_caT[1]+=0.32*(Math.cos(q)-1)*w;}   // วนไม้เป็นวง
   if(A.tm&&u>A.tm[0]&&u<A.tm[1]){const tr=(Math.sin(now/23)+Math.sin(now/37))*0.03*w;_caT[0]+=tr;_caT[4]+=tr;_caT[3]+=tr*0.3;}   // เกร็งสั่น (ออกแรง)
@@ -294,6 +300,9 @@ const STANCES={
       head:-.06,br:{T:4.2,y:.014,spine:.02,arm:.02},run:{lean:.12,spine:.08,rx:.35,lx:-.15,head:.05},wandL:1,fx:'frostBreath'},
     b:{name:'Guard',yaw:-28,lean:0,spine:.14,chest:.08,rx:-.05,rz:-.55,elR:.3,lx:-1.5,ly:-.9,lz:-.2,elL:1.3,legR:.32,legL:-.4,spR:.24,spL:.2,kR:.42,kL:.3,wandDir:[-.3,-.9,.35],
       head:.1,br:{T:3,y:.02,spine:.03,arm:.02},run:{lean:.18,spine:.12,rx:.3,lx:-.1,head:.05},wandL:1,fx:'frostGround'}},
+  frostWand:{   // Frost in wand mode (user 2026-11-24): body turned left, wand hand out to the side a little behind, away from the body
+    a:{name:'Wand',yaw:-40,lean:0,spine:.06,chest:.04,rx:-.35,rz:-.28,elR:.5,lx:.3,lz:.72,elL:.3,legR:.2,legL:-.26,spR:.18,spL:.2,kR:.12,kL:.08,wandDir:[.85,-.18,-.3],
+      head:.04,br:{T:3.6,y:.015,spine:.02,arm:.03},run:{lean:.14,spine:.08,rx:-.1,lx:.45,head:.04},wandL:1,fx:'frostGround'}},
   pyro:{
     a:{name:'Brawler',yaw:36,lean:.03,spine:.18,chest:.1,rx:-.38,rz:-.28,elR:1.45,lx:-1.0,lz:.28,elL:.95,legR:-.36,legL:.3,spR:.24,spL:.24,kR:.5,kL:.45,
       head:.12,br:{T:3,y:.01,spine:.02,arm:.02},bounce:{T:.9,y:.03},run:{lean:.2,spine:.1,rx:.25,lx:.1,head:.05},fx:'fireArm'},
@@ -303,8 +312,8 @@ const STANCES={
     a:{name:'Water spiral',same:1,lzAdd:.42,lxAdd:-.25,fx:'waterSpiral'},   // user 2026-11-24: many water spirals turning round the LEFT arm, outside the sleeve, a clear water orb at the hand with water flowing round inside it
     b:{name:'Water hem',same:1,fx:'waterHem'}}     // user 2026-11-24: the cloak hem is running water
 };
-const STANCE_PICK={darkness:'b',frost:'b',pyro:'a',water:'a'};   // user's picks 2026-11-24 (Stalker, Guard, Brawler, Water spiral)
-function stanceOf(o){const id=PATHS[o.posePath]?.id,S=STANCES[id];return S?S[STANCE_STYLE[o.posePath]||STANCE_PICK[id]||'a']:null;}
+const STANCE_PICK={darkness:'b',frost:'b',frostWand:'a',pyro:'a',water:'a'};   // user's picks 2026-11-24 (Stalker, Guard, Brawler, Water spiral)
+function stanceOf(o){const id0=PATHS[o.posePath]?.id,id=id0==='frost'&&o.fRanged?'frostWand':id0,S=STANCES[id];return S?S[STANCE_STYLE[o.posePath]||STANCE_PICK[id]||'a']||S.a:null;}
 const _stQ=new THREE.Quaternion(),_stX=new THREE.Vector3(1,0,0),_stZ=new THREE.Vector3(0,0,1);
 // waist bend on the spine + chest bones (the rig only drives arms/thighs), so legs stay straight and the head stays level
 function stanceSpine(o,weight){const m=o.fileModel;if(!m)return;
@@ -327,15 +336,21 @@ function stanceWand(o,left){
 // aim the left-hand wand: rotate it about its grip so the tip points along S.wandDir [forward, right, up] (body frame),
 // then put the glowing tip sprite on the real tip
 const _swA=new THREE.Vector3(),_swB=new THREE.Vector3(),_swD=new THREE.Vector3(),_swQ=new THREE.Quaternion(),_swQ2=new THREE.Quaternion(),_swP=new THREE.Vector3();
-function stanceWandTip(o,S){
-  if(!o.wandL||!o.tip||!o.fileModel)return;const hL=stBone(o,'hand_L');const w=hL&&hL.children.find(c=>/^wand_/.test(c.name)&&c.visible);if(!w)return;
+// casting (user 2026-11-25 "animation must follow the wand arm"): the wand turns from the stance direction to point on along
+// the forearm (elbow -> hand -> wand tip), like the right-handed wand does in every cast pose
+const _swE=new THREE.Vector3(),_swH=new THREE.Vector3();
+function stanceWandTip(o,S,dt){
+  if(!o.wandL||!o.tip||!o.fileModel)return;
+  const cast=!!(o.caN||o.cpT>0||o.castT>0||o.fPose||o.mlcT>0);o.wCastK=(o.wCastK||0)+((cast?1:0)-(o.wCastK||0))*Math.min(1,(dt||.016)*(cast?16:7));const hL=stBone(o,'hand_L');const w=hL&&hL.children.find(c=>/^wand_/.test(c.name)&&c.visible);if(!w)return;
   const wg=w.geometry||(w.getObjectByProperty('isMesh',true)||{}).geometry;if(!wg)return;   // wand may load as a Group
   const E=w.userData.ends||(w.userData.ends=(()=>{wg.computeBoundingBox();const b=wg.boundingBox,cx=(b.min.x+b.max.x)/2,cz=(b.min.z+b.max.z)/2;
     return {grip:new THREE.Vector3(cx,b.max.y,cz),tip:new THREE.Vector3(cx,b.min.y,cz)};})());
   w.position.set(...STANCE_WAND.pos);w.quaternion.copy(w.userData.wR.q);w.updateWorldMatrix(true,false);
-  if(S&&S.wandDir){const grip=_swA.copy(E.grip).applyMatrix4(w.matrixWorld),cur=_swB.copy(E.tip).applyMatrix4(w.matrixWorld).sub(grip).normalize();
-    const qb=o.b.getWorldQuaternion(_swQ2),d=S.wandDir;
+  const ck=o.wCastK||0,fa=ck>.001&&stBone(o,'forearm_L');
+  if(S&&S.wandDir||fa){const grip=_swA.copy(E.grip).applyMatrix4(w.matrixWorld),cur=_swB.copy(E.tip).applyMatrix4(w.matrixWorld).sub(grip).normalize();
+    const qb=o.b.getWorldQuaternion(_swQ2),d=S&&S.wandDir||[1,0,0];
     const want=_swD.set(-d[1],d[2],d[0]).applyQuaternion(qb).normalize();   // body frame: +z forward, -x right, +y up
+    if(fa){fa.getWorldPosition(_swE);hL.getWorldPosition(_swH);want.lerp(_swH.sub(_swE).normalize(),ck).normalize();}
     const q=_swQ.setFromUnitVectors(cur,want),wp=w.getWorldPosition(_swP).sub(grip).applyQuaternion(q).add(grip);
     const wq=w.getWorldQuaternion(new THREE.Quaternion()).premultiply(q);
     w.parent.getWorldQuaternion(_swQ2).invert();w.quaternion.copy(_swQ2.multiply(wq));w.position.copy(w.parent.worldToLocal(wp));w.updateWorldMatrix(true,false);}
@@ -376,15 +391,18 @@ function stMatNew(k){let m;   // own material per piece when each fades on its o
 function stRibbon(n,mat){const g=new THREE.BufferGeometry(),idx=[];g.setAttribute('position',new THREE.BufferAttribute(new Float32Array((n+1)*2*3),3).setUsage(THREE.DynamicDrawUsage));
   for(let i=0;i<n;i++){const a=i*2;idx.push(a,a+1,a+2,a+1,a+3,a+2);}g.setIndex(idx);const m=new THREE.Mesh(g,mat);m.userData.n=n;return m;}
 function stRibbonSet(m,f){const A=m.geometry.attributes.position,a=A.array,n=m.userData.n;for(let i=0;i<=n;i++)f(i/n,a,i*6);A.needsUpdate=true;m.geometry.computeVertexNormals();m.geometry.computeBoundingSphere();}
+const FIRE_TONGUES=9;   // Fire class arm: flame tongues (cost: one small fire-shader mesh each)
 const ST_GEO={ball:new THREE.SphereGeometry(1,20,14),drop:new THREE.SphereGeometry(1,10,8),plane:new THREE.PlaneGeometry(1,1),shard:new THREE.OctahedronGeometry(1,0)};
 function stBuild(o,kind){
   const g=new THREE.Group();g.name='Class look '+kind;g.userData={kind,parts:{}};const P=g.userData.parts;
   const add=(m,list)=>{m.renderOrder=3;m.frustumCulled=false;g.add(m);(P[list]||(P[list]=[])).push(m);return m;};
-  if(kind==='fireArm'||kind==='fireTorch'){const torch=kind==='fireTorch',n=torch?9:7;
-    for(let i=0;i<n;i++)add(new THREE.Mesh(ST_GEO.ball,fireMat({mode:'ball',disp:.42,flow:[0,1,0],scale:[2.4,2.4,2.4],speed:1.7,int:1.25,op:.92,seed:i*7.3})),'arm');
+  if(kind==='fireArm'||kind==='fireTorch'){const torch=kind==='fireTorch',n=torch?9:10;   // user 2026-11-25: the whole arm under fire (sleeve hidden), flames short
+    for(let i=0;i<n;i++)add(new THREE.Mesh(ST_GEO.ball,fireMat({mode:'ball',disp:.42,flow:[0,1,0],scale:[2.4,2.4,2.4],speed:1.7,int:1.05,op:.92,seed:i*7.3})),'arm');
     add(new THREE.Mesh(ST_GEO.ball,fireMat({mode:'ball',disp:.5,flow:[0,1,0],scale:[2,2,2],speed:1.9,int:1.35,op:.95,seed:3.1})),'hand');
     if(torch)add(new THREE.Mesh(ST_GEO.ball,fireMat({mode:'ball',disp:.6,flow:[0,1,0],scale:[1.6,1.6,1.6],speed:2.2,int:1.2,op:.85,seed:9.4})),'hand');
-    for(let i=0;i<6;i++)add(new THREE.Sprite(new THREE.SpriteMaterial({map:stTex('soft'),color:'#ffb347',transparent:true,depthWrite:false,blending:THREE.AdditiveBlending})),'ember');}
+    for(let i=0;i<6;i++)add(new THREE.Sprite(new THREE.SpriteMaterial({map:stTex('soft'),color:'#ffb347',transparent:true,depthWrite:false,blending:THREE.AdditiveBlending})),'ember');
+    // flame tongues licking up off the sleeve (user 2026-11-25: arm should read as fire) - few meshes, no per-frame PARTS
+    for(let i=0;i<FIRE_TONGUES;i++)add(new THREE.Mesh(ST_GEO.ball,fireMat({mode:'ball',disp:.55,flow:[0,1,0],scale:[2,2,2],speed:2.3,int:.95,op:.9,seed:11+i*3.7})),'tongue');}
   else if(kind==='inkDrip'){for(let i=0;i<7;i++)add(new THREE.Mesh(ST_GEO.drop,stMat('ink')),'drop');for(let i=0;i<4;i++)add(new THREE.Sprite(stMatNew('inkSmoke')),'wisp');}
   else if(kind==='footMist'){for(let i=0;i<14;i++)add(new THREE.Sprite(stMatNew('mist')),'mist');}
   else if(kind==='frostBreath'){for(let i=0;i<4;i++)add(new THREE.Sprite(stMatNew('breath')),'puff');for(let i=0;i<7;i++)add(new THREE.Sprite(stMatNew('glint')),'glint');}
@@ -414,7 +432,11 @@ function stanceFX(o,p,now,dt,detail){
   const fwd=_stF.set(0,0,1).applyQuaternion(o.b.quaternion);fwd.y=0;fwd.normalize();   // facing in o.g space
   if(kind==='fireArm'||kind==='fireTorch'){const torch=kind==='fireTorch';
     P.arm.forEach((m,i)=>{const u=.12+.86*i/(P.arm.length-1);if(!stArmPt(o,u,m.position))return;m.position.y+=.03;
-      const r=(torch?.12:.07)+(torch?.05:.02)*u,w=1+.18*Math.sin(t*7.3+i*1.7);m.scale.set(r*w,r*(1.8+.45*Math.sin(t*5.1+i)),r*w);});
+      const r=(torch?.12:.135)+(torch?.05:.03)*u,w=1+.12*Math.sin(t*7.3+i*1.7);m.position.y+=.03;m.scale.set(r*w,r*(1.55+.3*Math.sin(t*5.1+i)),r*w);});
+    if(P.tongue)P.tongue.forEach((m,i)=>{const n=P.tongue.length,T=.55+.12*(i%3),c=t/T+i/n,a=c-Math.floor(c),k=Math.floor(c);   // each tongue: born on the sleeve, rises, thins out
+      const h=Math.sin(k*12.9898+i*78.233)*43758.5453,u=.12+.84*(h-Math.floor(h));if(!stArmPt(o,u,m.position))return;
+      m.position.y+=.1+a*.13;m.position.x+=Math.sin(k*3.1+i)*.03;m.position.z+=Math.cos(k*2.3+i)*.03;
+      const r=.06*(1-a*.75)*(.8+.4*u);m.scale.set(r,r*(1.7+a*.6),r);});
     const h=stLoc(o,'hand_L',_stH);if(h){P.hand[0].position.copy(h).y+=torch?.16:.06;const s=torch?.17:.075;P.hand[0].scale.set(s,s*(torch?2.3:1.8)*(1+.12*Math.sin(t*9)),s);
       if(P.hand[1]){P.hand[1].position.copy(h).y+=.48+.05*Math.sin(t*6);P.hand[1].scale.set(.11,.3*(1+.2*Math.sin(t*8.3)),.11);}
       P.ember.forEach((m,i)=>{const a=stCyc(t,1.1,i,6);m.position.copy(h);m.position.x+=Math.sin(i*2.1+t)*.12*a;m.position.z+=Math.cos(i*1.3+t)*.12*a;m.position.y+=.1+a*(torch?.9:.6);
@@ -577,6 +599,13 @@ function blockPose(o,p,dt,now){
   R.x=lerp(R.x,B[0]+br,w);R.z=lerp(R.z,B[1],w);o.b.rotation.y+=B[2]*w;o.b.rotation.x+=(B[3]+br*0.5)*w;L.x=lerp(L.x,B[4]-br,w);L.z=lerp(L.z,B[5],w);o.b.position.y-=0.1*w;
   if(!(p.wv>1)){o.legs[0].rotation.x=lerp(o.legs[0].rotation.x,0.22,w);o.legs[1].rotation.x=lerp(o.legs[1].rotation.x,-0.3,w);o.legs[0].rotation.z=0.1*w;o.legs[1].rotation.z=-0.1*w;}
 }
+// Left-handed wand (Frost, user 2026-11-24 "do it for every skill"): the right-handed cast result is mirrored across the
+// body: arms swap (z flips), twist/roll/side-shift flip, legs swap, knee/elbow layers swap. Mirror is its own inverse.
+function poseMirror(o){const R=o.armR.rotation,L=o.armL.rotation,rx=R.x,rz=R.z,ry=R.y;
+  R.x=L.x;R.z=-L.z;R.y=-L.y;L.x=rx;L.z=-rz;L.y=-ry;
+  o.b.rotation.y=-o.b.rotation.y;o.b.rotation.z=-o.b.rotation.z;o.b.position.x=-o.b.position.x;
+  const a=o.legs[0].rotation,b=o.legs[1].rotation,ax=a.x,az=a.z;a.x=b.x;a.z=-b.z;b.x=ax;b.z=-az;
+  if(o.caJ){const j=o.caJ,eR=o.caJR||0;o.caJ=[j[1],j[0],eR];o.caJR=j[2];}}
 function castPose(o,p,v,dt,now){
   if(o.emo&&!o.caN&&!(o.cpT>0)){o.vsp=v.sp;if(emotePose(o,p,dt))return;}   // อีโมต (js/52)
   if(o.caN){if(p.fl||p.dn){o.caN=null;o.b.rotation.z=0;if(o.ctr){trailStop(o.ctr);o.ctr=null;}}else{o.vsp=v.sp;blockPose(o,p,dt,now);return;}}   // ท่าสกิลเล่นทีหลัง (lateSkillPose)
@@ -599,6 +628,7 @@ function castPose0(o,p,v,dt,now){
     else if(k<k1)a=lerp(K[0][i],K[1][i],_cb((k-k0)/(k1-k0)));
     else a=lerp(K[1][i],K[2][i],_cs(clamp((k-hold)/(1-hold),0,1)));
     a=rest[i]+(a-rest[i])*AMP_B[i];T[i]=lerp(rest[i],a,w);}
+  counterArm(o,T,rest,w,(o.cpS|0)===3||(o.cpS|0)===7);
   T[0]=Math.max(-3.35,T[0]);T[4]=Math.max(-3.35,T[4]);
   if((o.cpS|0)===1){if(k<k1){const u=k/k1*Math.PI*2;T[0]+=0.3*Math.sin(u)*w;T[1]+=0.3*(Math.cos(u)-1)*w;}}   // วนข้อมือเป็นวงแล้วสะบัด
   const r=1-Math.exp(-dt*(k>=k0&&k<hold?65:31));for(let i=0;i<6;i++)c[i]+=(T[i]-c[i])*r;
@@ -732,7 +762,9 @@ function syncPlayers(P,mode,now,dt){
     if(o.caN){lateSkillPose(o,p,dt,now);castBaseR.copy(o.armR.quaternion);castBaseL.copy(o.armL.quaternion);}
     if(o.novaT>0||o.nvFx||o.nvFx2)pyroNovaCharge(o,dt,now);if(o.mlcT>0||o.mlcX)frostMlCast(o,p,dt,now);
     waterCharacterPose(o,p,dt,now);windCharacterPose(o,p,dt,now,v);windLatePose(o,p,dt);stormBowView(o,p,dt,now);stormStaffView(o,p,dt,now);dashPose(o,p,dt,now);   // ท่าพุ่ง (js/72) ทับท่าอื่นตอนพุ่ง
-    natHookPose(o);natEmpPose(o);   // Nature Dash / thorn line poses must run before rigSync or the rigged arm never sees them
+    natHookPose(o);natEmpPose(o);
+    if(o.wandL&&(casting||o.fPose||o.castPoseWeight!=null)){const sc=o.castPoseWeight!=null&&o.armR.quaternion.equals(castBaseR)&&o.armL.quaternion.equals(castBaseL);
+      poseMirror(o);if(sc){castBaseR.copy(o.armR.quaternion);castBaseL.copy(o.armL.quaternion);}}   // Nature Dash / thorn line poses must run before rigSync or the rigged arm never sees them
     const domeKnee=stormDomePose(o,p,pz,now);
     const whip=p.nt?.[0];
     const whipImpact=o.weaponContact?.kind==='whip'&&o.weaponContact.swing===whip?.[0]?o.weaponContact:null;
@@ -774,6 +806,7 @@ function syncPlayers(P,mode,now,dt){
     const jumpArmWeight=p.sh||activeWhip?0:jumpWeight*ready*liftOff;
     jumpArmPose(o,jumpArmWeight);
     hitRecoilPose(o,dt);
+    frostSwapPose(o);
     if(o.rig){
       if(ready&&o.stSpine)stanceSpine(o,ready);else stanceSpineOff(o);
       rigSync(o,dt,false,Math.max(jumpWeight,ready),Math.max(jumpArmWeight,ready));windForearm(o);stormBowForearm(o);earthFistForearm(o);natForearmR(o);
@@ -799,7 +832,8 @@ function syncPlayers(P,mode,now,dt){
     natureCharacter(o,p,now,dt,detail);
     darknessCharacter(o,p,myP,now);
     stanceFX(o,p,now,dt,detail);
-    if(o.wandLM!==o.fileModel){o.wandL=false;o.wandLM=o.fileModel;}stanceWand(o,stanceOf(o)?.wandL);stanceWandTip(o,stanceOf(o));
+    frostSwapLate(o,dt);
+    if(o.wandLM!==o.fileModel){o.wandL=false;o.wandLM=o.fileModel;}stanceWand(o,stanceOf(o)?.wandL);stanceWandTip(o,stanceOf(o),dt);
     o.tip.getWorldPosition(o.tipW||(o.tipW=new THREE.Vector3()));o.tipWT=performance.now();
     frostWandLink(o,now);
     if(detail&&o.wspk)wandSparks(o,dt);

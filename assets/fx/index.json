@@ -2007,8 +2007,41 @@
    "dur": 0,
    "n": 2
   },
+  "stance/counter_earth": {
+   "v": "e94a22c3",
+   "desc": "Earth: basic rock throws + Stone Mark, free arm counters the body twist",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 5,
+   "n": 2
+  },
+  "stance/counter_storm": {
+   "v": "0e0253be",
+   "desc": "Storm: basic attacks + Thunder Line, free arm counters the body twist",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 5,
+   "n": 2
+  },
+  "stance/counter_water": {
+   "v": "000c73a3",
+   "desc": "Water: basic attacks + Riptide, free arm counters the body twist",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 5,
+   "n": 2
+  },
   "stance/darkness_a": {
-   "v": "98a10c4d",
+   "v": "015735b6",
    "desc": "Stance preview — darkness style a (idle breathing, short run, idle)",
    "pal": "",
    "tags": [
@@ -2020,7 +2053,7 @@
    "n": 2
   },
   "stance/darkness_b": {
-   "v": "b91a6533",
+   "v": "f4b02d33",
    "desc": "Stance preview — darkness style b (idle breathing, short run, idle)",
    "pal": "",
    "tags": [
@@ -2032,7 +2065,7 @@
    "n": 2
   },
   "stance/frost_a": {
-   "v": "614f055e",
+   "v": "73f4ab1e",
    "desc": "Stance preview — frost style a (idle breathing, short run, idle)",
    "pal": "",
    "tags": [
@@ -2044,7 +2077,7 @@
    "n": 2
   },
   "stance/frost_b": {
-   "v": "bb93ad61",
+   "v": "d2cf0a27",
    "desc": "Stance preview — frost style b (idle breathing, short run, idle)",
    "pal": "",
    "tags": [
@@ -2055,8 +2088,41 @@
    "dur": 5.6,
    "n": 2
   },
+  "stance/frost_skills": {
+   "v": "01b52c19",
+   "desc": "Frost: skills cast with the LEFT-hand wand (mirrored): Frostforge, Glacier Rend, Frost Aura",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 6,
+   "n": 2
+  },
+  "stance/frost_swap": {
+   "v": "d8719223",
+   "desc": "Frost: sword slash, swap to wand (sword spins + breaks up), left-hand wand casts, swap back",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 7.2,
+   "n": 2
+  },
+  "stance/frost_wand_all": {
+   "v": "301467c7",
+   "desc": "Frost wand mode: basic shots, Glacier Rend, Frostforge, Permafrost, Frost Aura, Mirror Legion - all with the LEFT-hand wand",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 12,
+   "n": 2
+  },
   "stance/pyro_a": {
-   "v": "e9df6f92",
+   "v": "0930c710",
    "desc": "Stance preview — pyro style a (idle breathing, short run, idle)",
    "pal": "",
    "tags": [
@@ -2068,7 +2134,7 @@
    "n": 2
   },
   "stance/pyro_b": {
-   "v": "da8799e7",
+   "v": "88353b27",
    "desc": "Stance preview — pyro style b (idle breathing, short run, idle)",
    "pal": "",
    "tags": [
@@ -2079,8 +2145,30 @@
    "dur": 5.6,
    "n": 2
   },
+  "stance/pyro_charge": {
+   "v": "7f749242",
+   "desc": "Fire: charge in the burning left hand, release whip with twist, quick shot",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 5,
+   "n": 2
+  },
+  "stance/pyro_kindle": {
+   "v": "29e265e3",
+   "desc": "Fire: Kindle hover, side-on aim with the fire hand, shot",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 4,
+   "n": 2
+  },
   "stance/water_a": {
-   "v": "d1968a85",
+   "v": "ec2bb9d7",
    "desc": "Stance preview — water style a (idle breathing, short run, idle)",
    "pal": "",
    "tags": [
@@ -2092,7 +2180,7 @@
    "n": 2
   },
   "stance/water_b": {
-   "v": "f9e00461",
+   "v": "23075d61",
    "desc": "Stance preview — water style b (idle breathing, short run, idle)",
    "pal": "",
    "tags": [

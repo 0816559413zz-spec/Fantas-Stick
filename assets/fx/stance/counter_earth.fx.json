@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "desc": "Earth: basic rock throws + Stone Mark, free arm counters the body twist",
+  "tags": ["stance", "preview"],
+  "dur": 5.0,
+  "layers": [
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 5.0},
+    {"id": "stance", "t": "code", "fn": "studio_class_stance", "at": 0, "life": 5.0, "args": {"layer":"anchor","cls":"earth","style":"a","run":[99,99],"acts":[{"t":0.5,"a":"fire"},{"t":1.1,"a":"fire"},{"t":2.4,"a":"skill","id":"stonemark"}]}}
+  ]
+}

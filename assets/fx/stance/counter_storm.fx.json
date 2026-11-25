@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "desc": "Storm: basic attacks + Thunder Line, free arm counters the body twist",
+  "tags": ["stance", "preview"],
+  "dur": 5.0,
+  "layers": [
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 5.0},
+    {"id": "stance", "t": "code", "fn": "studio_class_stance", "at": 0, "life": 5.0, "args": {"layer":"anchor","cls":"storm","style":"a","run":[99,99],"acts":[{"t":0.5,"a":"fire"},{"t":1.2,"a":"fire"},{"t":1.9,"a":"fire"},{"t":2.9,"a":"skill","id":"thunderline"}]}}
+  ]
+}
