@@ -513,7 +513,7 @@
   "water-demo": {
    "file": "maps/water-demo.glb",
    "data": "maps/water-demo.json",
-   "v": 1
+   "v": 2
   }
  },
  "ptex": {}

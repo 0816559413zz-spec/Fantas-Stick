@@ -304,8 +304,8 @@ function markerMesh(o) {
   if (o.t === 'wind') { areaMesh(o, g, c, 0.3); const a = (o.dir || 0) * Math.PI / 180, L = Math.max(3, Math.min(o.sx || 1, o.sz || 1) * 0.4), ar = new THREE.Group();   // arrow = push direction
     const sh = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.2, L), helpMat(c)); sh.position.z = L / 2; ar.add(sh); const hd = new THREE.Mesh(new THREE.ConeGeometry(1.2, 2.4, 12), helpMat(c)); hd.rotation.x = Math.PI / 2; hd.position.z = L + 1.2; ar.add(hd);
     ar.traverse(m => m.isMesh && noPick(m)); ar.position.y = 1.5; ar.rotation.y = a; g.add(ar); const l = labelSprite('Wind ' + (o.str == null ? 8 : o.str), c); l.position.y = 3.4; g.add(l); return g; }
-  if (o.t === 'water') { const wc = MD.WATER_COL[o.k] || c, sx = o.sx || 1, sz = o.sz || 1;
-    const f = noPick(new THREE.Mesh(new THREE.PlaneGeometry(sx, sz).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: wc, roughness: 0.15, metalness: 0.1, transparent: true, opacity: 0.62, depthWrite: false })));
+  if (o.t === 'water') { const D0 = MD.WATER_DEF[o.k] || MD.WATER_DEF.lake, wc = new THREE.Color(o.cs || D0.sh).lerp(new THREE.Color(o.cd || D0.dp), 0.5), sx = o.sx || 1, sz = o.sz || 1;
+    const f = noPick(new THREE.Mesh(new THREE.PlaneGeometry(sx, sz).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: wc, roughness: 0.15, metalness: 0.1, transparent: true, opacity: 0.45 + 0.4 * (1 - (o.cl != null ? o.cl : D0.cl)), depthWrite: false })));
     f.renderOrder = 2; g.add(f); const e = noPick(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(sx, 0.05, sz)), new THREE.LineBasicMaterial({ color: '#bfe8ff', transparent: true, opacity: 0.7 }))); e.userData.area = 1; g.add(e);
     const hd = new THREE.Mesh(new THREE.OctahedronGeometry(0.6), helpMat('#bfe8ff')); hd.position.y = 0.6; g.add(hd); const l = labelSprite('Water ' + (o.y || 0).toFixed(1) + ' m', '#bfe8ff'); l.position.y = 2; l.userData.area = 1; g.add(l); return g; }
   if (o.t === 'lz') { areaMesh(o, g, c, 0); const l = labelSprite('Indoor light', c); l.position.y = 1.4; g.add(l); return g; }   // drawn at its Top height
@@ -1411,7 +1411,15 @@ function renderSide() {
         it.t === 'brz' ? fld('Top (m above ground)', it, 'top', { get: () => it.top == null ? 60 : it.top, min: 2 }) : null,
         it.t === 'wind' ? fld('Direction (deg, 0 = +Z)', it, 'dir', { get: () => it.dir || 0, step: 15 }) : null, it.t === 'wind' ? fld('Strength', it, 'str', { get: () => it.str == null ? 8 : it.str, min: 0 }) : null,
         ...(it.t === 'water' ? [fld('Width (X)', it, 'sx', { min: 1 }), fld('Length (Z)', it, 'sz', { min: 1 }), fld('Level (m, absolute)', it, 'y', { step: 0.05 }),
-          fld('Look', it, 'k', { type: 'select', items: MD.WATER_LOOK, get: () => it.k || 'lake' }),
+          fld('Look (preset)', it, 'k', { type: 'select', items: MD.WATER_LOOK, get: () => it.k || 'lake', set: v => { it.k = v; for (const q of MD.WATER_OPT) delete it[q]; }, after: () => { resync(); renderSide(); } }),
+          h3('Water Colour + Waves'),
+          fld('Shallow Colour (edge)', it, 'cs', { type: 'color', get: () => it.cs || (MD.WATER_DEF[it.k] || MD.WATER_DEF.lake).sh }),
+          fld('Deep Colour (middle)', it, 'cd', { type: 'color', get: () => it.cd || (MD.WATER_DEF[it.k] || MD.WATER_DEF.lake).dp }),
+          fld('Clarity (0 murky – 1 clear)', it, 'cl', { get: () => it.cl != null ? it.cl : (MD.WATER_DEF[it.k] || MD.WATER_DEF.lake).cl, min: 0, max: 1, step: 0.05 }),
+          fld('Wave Height (×, 0 = still)', it, 'wh', { get: () => it.wh != null ? it.wh : 1, min: 0, max: 4, step: 0.1 }),
+          fld('Wave Speed (×)', it, 'ws', { get: () => it.ws != null ? it.ws : 1, min: 0, max: 4, step: 0.1 }),
+          fld('Foam (×)', it, 'fo', { get: () => it.fo != null ? it.fo : 1, min: 0, max: 3, step: 0.1 }),
+          el('button', { class: 'tl-btn', title: 'Clear the colour/wave changes: back to the Look preset', onclick: () => editSel(o => { for (const q of MD.WATER_OPT) delete o[q]; }) }, 'Reset to Look'),
           el('div', { class: 'seg' }, el('button', { class: 'tl-btn', title: 'Level = just under the lowest ground along the edge', onclick: () => editSel(o => { o.y = MD.waterAutoLevel(M, o); }) }, 'Auto Level'),
             el('button', { class: 'tl-btn', title: 'Carve a smooth oval bed (Basin Depth in the Water tool settings) — only lowers the ground', onclick: () => { pushUndo('a'); waterDigNow(it); syncObj(it); } }, 'Dig Basin ' + opt.wdep + ' m'))] : []),
         MD.AREA.has(it.t) ? fld('Width (X)', it, 'sx', { min: 1 }) : null, MD.AREA.has(it.t) ? fld('Length (Z)', it, 'sz', { min: 1 }) : null,

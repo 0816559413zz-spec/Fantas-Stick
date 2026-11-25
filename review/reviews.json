@@ -4103,7 +4103,7 @@
   {
    "id": 201,
    "title": "Map Builder: เครื่องมือน้ำ 💧 + ผิวน้ำในเกม (ภาพอย่างเดียว)",
-   "text": "Map Builder มีเครื่องมือ 💧 Water (ปุ่ม H): ลากกรอบ = พื้นที่น้ำ, ระดับตั้งให้เอง, ติ๊ก Dig Basin = ขุดแอ่งให้ด้วย. แก้ทีหลังด้วย Select (ย้าย/หมุน/ขยาย/ระดับ) + Inspector (Look 4 แบบ, Auto Level, Dig Basin). ในเกมเป็นผิวน้ำจริง: สีตื้น-ลึกตามความลึก ฟองตามตลิ่ง คลื่นเล็ก ประกายแดด. ยังไม่มีผลกับการเล่น. วิธีดู: Map Builder เปิดแมพ Water Demo (water-demo) แล้วกด ▶ Play หรือเปิดลิงก์เกมด้านล่าง",
+   "text": "Map Builder มีเครื่องมือ 💧 Water (ปุ่ม H): ลากกรอบ = พื้นที่น้ำ, ระดับตั้งให้เอง, ติ๊ก Dig Basin = ขุดแอ่งให้ด้วย. แก้ทีหลังด้วย Select (ย้าย/หมุน/ขยาย/ระดับ) + Inspector (Look 4 แบบ, Auto Level, Dig Basin). ในเกมเป็นผิวน้ำจริง: สีตื้น-ลึกตามความลึก ฟองตามตลิ่ง คลื่นเล็ก ประกายแดด. ยังไม่มีผลกับการเล่น. วิธีดู: Map Builder เปิดแมพ Water Demo (water-demo) แล้วกด ▶ Play หรือเปิดลิงก์เกมด้านล่าง • เพิ่มแล้ว: แก้สี/คลื่นรายผืนใน Inspector (สีตื้น, สีลึก, ความใส, ความสูงคลื่น, ความเร็วคลื่น, ฟอง + ปุ่ม Reset to Look) — ใน water-demo มีบ่อสีม่วงน้ำนิ่ง และลำธารคลื่นแรง",
    "kind": "Map",
    "who": "Map Builder",
    "status": "wait",
@@ -4111,7 +4111,8 @@
    "updated": "2026-11-25",
    "imgs": [
     "review/img/r201-water-lake.jpg",
-    "review/img/r201-water-overview.jpg"
+    "review/img/r201-water-overview.jpg",
+    "review/img/r201-water-custom.jpg"
    ],
    "links": [
     "mapbuild.html?id=water-demo",

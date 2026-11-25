@@ -76,7 +76,9 @@ export const RPK = {
 };
 for (const k in RPK) OBJ['rp_' + k] = { n: RPK[k].n, cat: 'room', c: '#a07a56', rp: k };
 export const isRP = t => t.startsWith('rp_');
-// water looks (game js/67-pond.js WATER_LOOK keeps the colours)
+// water looks: defaults the Inspector shows (game js/67-pond.js WATER_LOOK keeps the same values) • sh shallow, dp deep colour, cl clarity 0..1
+export const WATER_DEF = { lake: { sh: '#4fa6b4', dp: '#143f5c', cl: 0.25 }, clear: { sh: '#6fdcd2', dp: '#1b7392', cl: 0.5 }, swamp: { sh: '#6e7a42', dp: '#1e2a16', cl: 0.1 }, dark: { sh: '#3a7088', dp: '#071a2a', cl: 0.07 } };
+export const WATER_OPT = ['cs', 'cd', 'cl', 'wh', 'ws', 'fo'];   // optional per-water overrides (shallow/deep colour, clarity, wave height/speed, foam)
 export const WATER_LOOK = [['lake', 'Lake (blue)'], ['clear', 'Clear (turquoise)'], ['swamp', 'Swamp (green)'], ['dark', 'Deep (dark)']];
 export const WATER_COL = { lake: '#3a8fb0', clear: '#4cc6c4', swamp: '#5e6e3c', dark: '#24506a' };
 // water rect: is map point (x,z) inside (local u/v in m, >0 = inside distance to the nearest edge)
@@ -443,7 +445,7 @@ export function gameData(M, dim) {
     else if (o.t === 'sgItem') sg.items.push({ ph: o.ph || 1, x: X, y: Y, t: Math.max(1, Math.min(3, Math.round(o.tier || 1))) });
     else if (o.t === 'brz') broom.push(Object.assign(rect(o), { top: r2(o.top == null ? 60 : o.top), tm: o.tm === 'A' || o.tm === 'B' ? o.tm : '' }));   // tm '' = both teams
     else if (o.t === 'wind') { const a = (o.dir || 0) * Math.PI / 180; wind.push(Object.assign(rect(o), { dx: r2(Math.sin(a)), dy: r2(Math.cos(a)), s: r2(o.str == null ? 8 : o.str) })); }   // push direction in map px axes (x right, y down)
-    else if (o.t === 'water') water.push(Object.assign({ x: X, y: Y, w: r1((o.sx || 1) * PX), h: r1((o.sz || 1) * PX), lv: r2(o.y || 0), k: o.k || 'lake' }, rot ? { a: +rot.toFixed(4) } : {}));   // js/67-pond.js (a = three rotation.y)
+    else if (o.t === 'water') water.push(Object.assign({ x: X, y: Y, w: r1((o.sx || 1) * PX), h: r1((o.sz || 1) * PX), lv: r2(o.y || 0), k: o.k || 'lake' }, rot ? { a: +rot.toFixed(4) } : {}, ...WATER_OPT.filter(q => o[q] != null).map(q => ({ [q]: o[q] }))));   // js/67-pond.js (a = three rotation.y)
     else if (o.t === 'lz') lz.push(Object.assign(rect(o), { top: r2(o.y == null ? 22 : o.y), k: r2(o.k == null ? 1 : o.k) }));   // indoor light zone (js/28-fcs-hall.js)
     else if (o.t === 'ceil') ceil.push(Object.assign(rect(o), { h: r2(o.y == null ? 21 : o.y) }, o.zmax != null ? { zmax: r2(o.zmax) } : {}));
     else if (o.t === 'dc_road') { if ((o.pts || []).length > 1) { const cs = Math.cos(rot), sn = Math.sin(rot);   // drawn road: points -> absolute map px
