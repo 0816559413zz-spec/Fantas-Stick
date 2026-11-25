@@ -224,6 +224,13 @@ function warmDissolve(root){const out=new THREE.Group(),L=[];root.updateMatrixWo
 preloadReg('frost',()=>new THREE.Mesh(new THREE.PlaneGeometry(1,1),frGuardMat()));   // frost knight Sword Guard sheet (built on first block)
 preloadReg('storm',()=>{const o={g:new THREE.Group()};stormWaveMake(o,{g:0,id:0});return o.g;});   // storm bow wave (ShaderMaterial + bolt tubes)
 preloadReg('pyro',()=>{const g=makeDfCircle(false);g.visible=true;return g;});preloadReg('storm',()=>{const g=makeDfCircle(true);g.visible=true;return g;});
+// Countdown first-frame programs (2026-11-25, bench-entry): built on players / the map at match start, never warmed before.
+preloadReg('frost',()=>loadModel('mesh_ice_sword').then(()=>fileWeapon('mesh_ice_sword',-0.66,0.5)),   // file ice sword (DoubleSide ice shader)
+  ()=>{const m=mistMesh(),c=new THREE.InstancedMesh(m.geometry,m.material,1);c.frustumCulled=false;fxScene.add(c);return c;});   // frost mist puffs (fxScene)
+preloadReg('wind',()=>makeWindWings());   // wind wings on the body
+preloadReg('all',()=>[ambMesh(0),ambMesh(1)],   // ambient dust / mist (fxScene, js/75)
+  ()=>{const N=Object.values(PROPDEF).map(D=>D.model);   // props (surf look) are made per match
+    return Promise.all(N.map(n=>loadModel(n).catch(()=>null))).then(()=>N.map(n=>MODELS.ready.get(n)?modelInst(n):null).filter(Boolean));});
 function preProg(){return PRE.st===2?1:PRE.st===1?PRE.best:0;}
 function preFin(){if(PRE.st===1){PRE.st=2;PRE.ms=performance.now()-PRE.t0;WARM.log.push('preload '+PRE.ms.toFixed(0)+'ms');}
   const cb=PRE.cb;PRE.cb=[];for(const f of cb)try{f();}catch(e){console.warn('preload cb',e);}}
@@ -348,7 +355,7 @@ function lobbyMapTick(dt){
   if(NET.isHost&&G&&G.ph==='lobby'&&typeof hostMapNext==='function'){const id=hostMapNext(true);if(id&&id!==G.map){G.map=id;broadcastLobby();return;}}
   const id=LOBBY.map;if(id&&id!==LMAP.au){LMAP.au=id;audioPrefetch(id,LOBBY.mode);}
   if(id&&id!==builtMap&&mapReady(id)){setMapVars(id);buildWorld(id);return;}
-  if(id&&id===builtMap){grassPrebake();taaWarm();}}   // grass map bake (~0.4 s) here, not in the first countdown frame
+  if(id&&id===builtMap){grassPrebake();taaWarm();fcsTorchSync();}}   // torch batch (fcs castle) is built lazily on the first game frame   // grass map bake (~0.4 s) here, not in the first countdown frame
 // ตัวละครอุ่นเครื่องหมดหน้าที่เมื่อแมตช์เริ่มวาดแล้ว (เชดเดอร์ถูก pinPrograms ตรึงไว้, geometry/วัสดุของไฟล์เป็น keep) → ทิ้งหลังเข้าเกม 2 วิ
 // เดิมเก็บไว้ตลอด + เพิ่มทุกลุคใหม่ (บอทสุ่มลุคทุกครั้งที่เติม) → ค้างในฉากหลายร้อย mesh, three ยังคำนวณ matrix ทุกเฟรม (OPTIMIZE §H)
 // รอบหน้าในห้องรอ gameWarmTick สร้างใหม่ตามคนที่อยู่จริง (GWARM.key='' บังคับให้อุ่นใหม่)

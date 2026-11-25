@@ -391,7 +391,14 @@ water +4.8 ms, storm +2.9, fire +2.6, frost +1.9, earth +1.7, wind +1.3. CPU pro
   bench-entry countdown: siege fcs-file programs 30 → 11, max gap 1031 → 493 ms; valley 658–697 → 384 ms; play still 0 programs.
   Left: ~0.3–0.45 s in frames 0 and 3, mostly time outside JS (GPU process) plus player model builds (`makeStudent`/`useFileModel`,
   already spread over frames); 11 programs from match-only objects (props `prop_crate`/`torch_batch`, frost weapon `ice_sword`,
-  Darkness waltz trail, siege visuals). Next: warm those materials in the lobby too.
+  Darkness waltz trail, siege visuals).
+- **Round 2 (2026-11-25):** entry preload now builds them (js/51 `preloadReg`: file ice sword, frost mist, wind wings, ambient
+  dust/mist, base prop models under id `all`; js/68-darkness-view: live BA scythe trail) and the lobby builds the fcs torch batch
+  (`fcsTorchSync` in `lobbyMapTick`). Countdown programs 11 → 3 (left: one MeshStandard warm-copy key, one vertex-alpha
+  MeshBasic, one PointsMaterial — owners not found). Countdown max gap in the same session: before 610–612 ms, after 525–533 ms;
+  entry preload +0.3–0.5 s (within noise). A second match in the same page has only a 132 ms gap with 0 programs, so the rest
+  is first-use GPU work that is not program linking (likely first draws / uploads of match-only objects, e.g. ANGLE per-layout
+  variants). Not pursued further.
 
 ## Benchmarks
 - 2026-11-22, combat readability A/B in Team PvP at 1000×560. All 11 classes cast the same 31 skills in an 80-frame test. The default combat presentation reduced median active particles from 2,650 to 1,220 and peak particles from 3,740 to 1,776. Median frame draw calls were 472 versus 461. Shard Storm's landing warning and active edge and Night Waltz's boundary rendered in both runs. `?fullvfx` keeps the original effects for comparison. This fixture measures effect load, not live match FPS.
