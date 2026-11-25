@@ -275,20 +275,41 @@ function paintScene(id,sc){
     else{const ms=Array.isArray(o.material)?o.material:[o.material];
       const gt=PAINT.maps[id].ground!==undefined?PAINT.maps[id].ground:PAINT.ground;if(gt&&/^ground/i.test(nm))for(const m of ms)if(m.color&&!m.userData.ptG){m.userData.ptG=1;m.color.multiply(new THREE.Color(gt[0],gt[1],gt[2]));}   // พื้นหญ้า: เขียวเหลืองสดแบบโดนแดด (สีใบหญ้าตามพื้น)
       ms.forEach(paintApply);}});
-  PAINT.n=n;sc.add(paintShafts());
+  PAINT.n=n;sc.add(paintShafts(sc));
 }
-// ลำแสงลอดใบไม้: แผ่นแสงยาวเอียงตามทิศแดด (additive) กระจายทั่วป่า รวมเป็น mesh เดียว
-function paintShafts(){
-  const R=mulberry(5150),P=[],UV=[],I=[],a=LDIR.clone().normalize(),w1=new THREE.Vector3().crossVectors(a,new THREE.Vector3(0,1,0)).normalize(),w2=new THREE.Vector3().crossVectors(a,w1).normalize();
-  const N=Math.round(MW*MH/90000);
-  for(let i=0;i<N;i++){const x=R()*MW,y=R()*MH,gx=tx(x),gz=tz(y),gy=GY(x,y),L=16+R()*10,wd=1.6+R()*3.4;
-    for(const w of [w1,w2]){const k=P.length/3;
-      for(const [u,t] of [[0,0],[1,0],[1,1],[0,1]]){const s=(u-0.5)*wd,d=-1.5+t*L;P.push(gx+w.x*s+a.x*d,gy+w.y*s+a.y*d,gz+w.z*s+a.z*d);UV.push(u,t);}
-      I.push(k,k+1,k+2,k,k+2,k+3);}}
-  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(UV,2));g.setIndex(I);
-  const tex=texCanvas(64,128,(c)=>{const im=c.createImageData(64,128);for(let y=0;y<128;y++)for(let x=0;x<64;x++){const u=x/63,t=1-y/127,e=Math.pow(Math.sin(u*Math.PI),1.6)*Math.min(1,t*5)*Math.pow(1-t,0.7),p=(y*64+x)*4,v=Math.round(e*255);im.data[p]=im.data[p+1]=im.data[p+2]=v;im.data[p+3]=255;}c.putImageData(im,0,0);});
-  const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({map:tex,color:new THREE.Color('#fff3b8').multiplyScalar(PAINT.shaft),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,fog:false,side:THREE.DoubleSide,name:'paint_glow_shaft'}));m.material.userData.noBake=true;
-  m.renderOrder=5;m.frustumCulled=false;m.name='paint_shafts';return m;}
+// ลำแสงลอดใบไม้ (round 2, user 2026-11-25 "แก้ให้เนียนขึ้น"): only in gaps between trees inside a forest (>= 3 trees within 9 m,
+// no trunk closer than 1.6 m, never under a ceiling / near castle floors), one sheet per beam that turns round the sun axis to face
+// the camera (no edge-on lines / X shapes), soft sides, fades near the ground, near the camera (3-12 m) and far away (55-105 m),
+// slow shimmer. One mesh, one draw.
+function paintTreePts(sc){const P=[],m4=new THREE.Matrix4(),v=new THREE.Vector3();sc.updateMatrixWorld(true);
+  sc.traverse(o=>{if(o.isInstancedMesh&&o.name==='ptree_inst'){for(let i=0;i<o.count;i++){o.getMatrixAt(i,m4);m4.premultiply(o.matrixWorld);v.setFromMatrixPosition(m4);P.push(v.x,v.z);}}
+    else if(o.isMesh&&/^forest_tree/i.test(o.name||'')){o.getWorldPosition(v);P.push(v.x,v.z);}});
+  return P;}
+function paintShafts(sc){
+  const T=paintTreePts(sc),nT=T.length/2,R=mulberry(5150),a=LDIR.clone().normalize();
+  const near=(x,z,r)=>{let n=0,dmin=1e9;for(let i=0;i<T.length;i+=2){const d=Math.hypot(T[i]-x,T[i+1]-z);if(d<r)n++;if(d<dmin)dmin=d;}return [n,dmin];};
+  const built=(gx,gy)=>{if(typeof fcsCeilAt==='function'&&fcsCeilAt(gx,gy,0)<Infinity)return true;
+    for(const o of OBS)if(o.k!=='col'){const rr=(o.r||0)+Math.max(Math.abs(o.hx||0),Math.abs(o.hy||0))+60;if(Math.abs(o.x-gx)<rr&&Math.abs(o.y-gy)<rr)return true;}return false;};
+  const P=[],C=[],I=[],N=Math.min(220,Math.round(nT/3));
+  for(let k=0,tries=0;k<N&&tries<N*30;tries++){const ti=Math.floor(R()*nT)*2,an=R()*Math.PI*2,rd=2.5+R()*3.5,x=T[ti]+Math.cos(an)*rd,z=T[ti+1]+Math.sin(an)*rd;
+    const [n,dmin]=near(x,z,9);if(n<3||dmin<1.6)continue;
+    const gx=x/S3+MW/2,gy=z/S3+MH/2;if(gx<0||gy<0||gx>MW||gy>MH||built(gx,gy))continue;
+    const y=GY(gx,gy),L=11+R()*7,w=1.4+R()*2.4,sd=R()*6.283,q=P.length/3;
+    for(const [u,t] of [[-1,0],[1,0],[1,1],[-1,1]]){P.push(x,y,z);C.push(u,t,w,L,sd);}
+    I.push(q,q+1,q+2,q,q+2,q+3);k++;}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));const ib=new THREE.InterleavedBuffer(new Float32Array(C),5);g.setAttribute('aC',new THREE.InterleavedBufferAttribute(ib,4,0));g.setAttribute('aS',new THREE.InterleavedBufferAttribute(ib,1,4));
+  g.setIndex(I);
+  const U={uT:{value:0},uA:{value:a},uC:{value:new THREE.Color('#fff3b8').multiplyScalar(PAINT.shaft)}};
+  const m=new THREE.Mesh(g,new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,fog:false,
+    vertexShader:'attribute vec4 aC;attribute float aS;uniform vec3 uA;varying vec2 vU;varying float vF,vS;'+
+      'void main(){float d=-1.5+aC.y*aC.w;vec3 mid=position+uA*(aC.w*0.45);vec3 V=cameraPosition-mid;float dv=length(V);vec3 sd=cross(uA,V/dv);float sl=length(sd);sd=sl>1e-3?sd/sl:vec3(1.,0.,0.);'+
+      'vec3 w=position+uA*d+sd*(aC.x*0.5*aC.z);vU=aC.xy;vS=aS;vF=smoothstep(.12,.45,sl)*smoothstep(3.,12.,dv)*(1.-smoothstep(55.,105.,dv));gl_Position=projectionMatrix*viewMatrix*vec4(w,1.);}',
+    fragmentShader:'uniform float uT;uniform vec3 uC;varying vec2 vU;varying float vF,vS;'+
+      'void main(){float e=1.-vU.x*vU.x;e=e*e*e;float t=vU.y;float a=e*smoothstep(0.,.12,t)*pow(1.-t,1.2)*vF*(.72+.28*sin(uT*.45+vS)*sin(uT*.31+vS*1.7));'+
+      'gl_FragColor=vec4(uC*a*1.7,1.);}'}));
+  m.material.name='paint_glow_shaft';m.material.userData.noBake=true;m.userData.noBatch=1;
+  m.onBeforeRender=()=>{U.uT.value=performance.now()/1000;};
+  m.renderOrder=5;m.frustumCulled=false;m.name='paint_shafts';m.visible=P.length>0;return m;}
 // ---------- ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเรียบที่สุด = ปื้นสีเรียบ ขอบคม ----------
 // PAINT.kuwQ: 'full' = 4×13 taps (QUAL high) • 'fast' = 4×4 bilinear taps, each tap averages a 2×2 texel block (auto)
 // • off on low and on auto once it steps down (QUAL.lvl>=1). One program per session (mode is fixed at entry).
