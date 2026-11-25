@@ -70,10 +70,13 @@ function windLatePose(o,p,dt){const R=o.armR.rotation;if(p.wn&&p.al&&!p.dn&&(p.s
   if(o.wld){o.g.visible=true;const S=o.wld;S.t+=dt;const u=S.t,H=S.air?W_UL.landA:W_UL.land,L=o.armL.rotation,sm=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);},n=sm(u/0.2),w=1-sm((u-H)/0.3),a=o.legs[0].position.x>0?o.legs[0]:o.legs[1],b=a===o.legs[0]?o.legs[1]:o.legs[0],F=S.air?[-2.3,0.42,0.3,0.4,0.75,0,-0.65,0.25,0.2,1.3]:[0.2,-0.12,0.95,0.95,0.55,-0.78,-1.3,0.6,1.9,1.6],v=(d,i)=>lerp(d,F[i],n);   // จบแดช: พื้น = Superhero landing • บิน = ก้มหน้า คทายื่นหน้าเฉียงซ้าย ขางอข้างหนึ่ง • ไหลต่อจากท่าพุ่ง ไม่รีเซ็ตกลางทาง
     if(u>H+0.3)o.wld=null;else{R.x=lerp(R.x,v(1.0,0),w);R.z=lerp(R.z,v(-0.35,1),w);L.x=lerp(L.x,v(-0.9,2),w);L.z=lerp(L.z,v(0.3,3),w);o.b.rotation.x+=v(S.air?0.96:1.05,4)*w;o.b.position.y+=v(S.air?0.4:0.9,5)*w;a.rotation.x+=v(-0.75,6)*w;b.rotation.x+=v(0.45,7)*w;o.wkn=[v(0.5,8)*w,v(1.1,9)*w];}}
   if(o.wtl!==undefined){o.wtl+=dt;const u=o.wtl,T=W_VO.tlD,L=o.armL.rotation,sm=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};   // Tailwind: ไขว้ไม้ลงซ้ายล่างระดับเข่า ย่อตัว แล้วตวัดขึ้นเร็ว ปล่อยลม
-    if(u<T+0.7){const d=sm(u/(T*0.9)),a=sm((u-T)/0.09),w=d*(1-sm((u-T-0.35)/0.35));R.x=lerp(R.x,lerp(-0.35,-2.7,a),w);R.z=lerp(R.z,lerp(1.0,-0.25,a),w);L.x=lerp(L.x,lerp(0.3,-0.5,a),w);L.z=lerp(L.z,0.4,w);o.b.rotation.y+=lerp(0.5,-0.25,a)*w;o.b.rotation.x+=lerp(0.28,-0.14,a)*w;o.b.position.y-=0.24*(1-a)*w;for(const l of o.legs)l.rotation.x+=0.32*(1-a)*w;}else o.wtl=undefined;}
+    // user 2026-11-25: gather low, then the LEFT palm opens forward along the wind path (palm circle flares)
+    if(u<T+0.7){const d=sm(u/(T*0.9)),a=sm((u-T)/0.09),w=d*(1-sm((u-T-0.35)/0.35)),ap=clamp(p.wn?.[12]||0,-1,1)*.5;o.wPalm=Math.max(o.wPalm||0,u<T+0.45?1:0);L.x=lerp(L.x,lerp(0.2,-1.5-ap,a),w);L.z=lerp(L.z,lerp(0.9,0.1,a),w);R.x=lerp(R.x,lerp(-0.3,0.2,a),w);R.z=lerp(R.z,-0.3,w);o.b.rotation.y+=lerp(0.5,-0.25,a)*w;o.b.rotation.x+=lerp(0.28,-0.14,a)*w;o.b.position.y-=0.24*(1-a)*w;for(const l of o.legs)l.rotation.x+=0.32*(1-a)*w;}else o.wtl=undefined;}
   if(o.wdb!==undefined){o.wdb+=dt;const u=o.wdb,T=W_WL.dbTele,L=o.armL.rotation,sm=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};   // Downburst: ชูไม้ขึ้นฟ้า ตัวแอ่นมองขึ้น → ฟาดไม้ลงชี้เป้า ตัวโน้ม ย่อขานิด ปีกกดลงมาหน้า → ค้างแป๊บแล้วคืนท่า
-    if(u<T){const k=sm(u/(T*0.8));R.x=lerp(R.x,-3.05,k);R.z=lerp(R.z,0.08,k);L.x=lerp(L.x,-0.5,k);L.z=lerp(L.z,0.55,k);o.b.rotation.x-=0.24*k;}
-    else if(u<T+0.72){const a=sm((u-T)/0.05),ov=a*Math.max(0,1-(u-T-0.05)/0.16),h=1-sm((u-T-0.42)/0.3);R.x=lerp(R.x,lerp(-3.05,-0.72,a)+0.42*ov,h);R.z=lerp(R.z,0,h);L.x=lerp(L.x,lerp(-0.5,0.32,a),h);L.z=lerp(L.z,lerp(0.55,0.2,a),h);o.b.rotation.x+=(lerp(-0.24,0.26,a)+0.12*ov)*h;o.b.position.y-=0.06*a*h;for(const l of o.legs)l.rotation.x-=0.14*a*h;}
+    // user 2026-11-25: the LEFT palm opens toward the target (palm circle flares), wand arm stays low
+    const ap=clamp(p.wn?.[12]||0,-1,1)*.75;o.wPalm=Math.max(o.wPalm||0,u<T+0.5?1:0);
+    if(u<T){const k=sm(u/(T*0.8));L.x=lerp(L.x,-2.6,k);L.z=lerp(L.z,0.3,k);R.x=lerp(R.x,0.1,k);R.z=lerp(R.z,-0.3,k);o.b.rotation.x-=0.2*k;o.b.rotation.y-=0.25*k;}
+    else if(u<T+0.72){const a=sm((u-T)/0.05),ov=a*Math.max(0,1-(u-T-0.05)/0.16),h=1-sm((u-T-0.42)/0.3);L.x=lerp(L.x,lerp(-2.6,-1.45-ap,a)+0.25*ov,h);L.z=lerp(L.z,lerp(0.3,0.12,a),h);R.x=lerp(R.x,0.1,h);R.z=lerp(R.z,-0.3,h);o.b.rotation.x+=(lerp(-0.2,0.22,a)+0.1*ov)*h;o.b.rotation.y-=0.25*h;o.b.position.y-=0.06*a*h;for(const l of o.legs)l.rotation.x-=0.14*a*h;}
     else o.wdb=undefined;}
   if(o.wdc!==undefined){o.wdc+=dt;const u=o.wdc,T=WNV.dsCh,e=Math.min(1,u/(T*0.7)),k=e*e*(3-2*e),L=o.armL.rotation;   // Dash ชาร์จ: ย่อตัวลงนิด โน้มตัว เข่างอ ลดไม้กับมือซ้ายลงต่ำ เตรียมส่งตัวขึ้น
     if(u>T+0.15)o.wdc=undefined;else{R.x=lerp(R.x,0.4,k);R.z=lerp(R.z,-0.22,k);L.x=lerp(L.x,0.4,k);L.z=lerp(L.z,0.22,k);o.b.rotation.x+=0.3*k;o.b.position.y-=0.2*k;for(const l of o.legs)l.rotation.x-=0.65*k;}}
@@ -82,9 +85,11 @@ function windLatePose(o,p,dt){const R=o.armR.rotation;if(p.wn&&p.al&&!p.dn&&(p.s
   if(o.wbk!==undefined){o.wbk+=dt;const u=o.wbk,sl=Math.exp(-6*u),a=_cs(Math.min(1,u/0.1)),w=u<0.3?1:Math.max(0,1-(u-0.3)/0.25),L=o.armL.rotation;R.x=lerp(R.x,lerp(0.25,-1.6,a),w);R.z=lerp(R.z,lerp(-0.18,-0.1,a),w);L.x=lerp(L.x,lerp(0.25,-1.6,a),w);L.z=lerp(L.z,lerp(0.18,0.1,a),w);   // แทงแขนออก: ศอกเหยียดไปพร้อมแขน
     o.b.rotation.x+=0.2*sl;o.legs[0].rotation.x-=0.2*sl;o.legs[1].rotation.x-=0.2*sl;o.faW=1-a;if(u>0.55)o.wbk=undefined;}
   if(o.wbc!==undefined){o.wbc+=dt;const u=o.wbc,T=0.6,x0=Math.min(1,u/T),k=1-(1-x0)*(1-x0),L=o.armL.rotation;if(u<T){R.x=lerp(R.x,0.25,k);R.z=lerp(R.z,-0.18,k);L.x=lerp(L.x,0.25,k);L.z=lerp(L.z,0.18,k);o.b.rotation.x-=0.3*k;o.legs[0].rotation.x+=0.3*k;o.legs[1].rotation.x+=0.3*k;o.faW=k;if(p.id===NET.myId)o.b.rotation.x+=clamp(pitch,0,1.1)*0.5*k;}else{o.wbc=undefined;o.wbk=0;}}   // เยื้องตัวบนไปหลัง ขาอยู่ที่เดิม • ศอกงอ ปลายแขนยังชี้หน้า   // ง้าง: ตัวเอนไปหลัง ดึงมือเข้า   // ระเบิดกำแพง: ผลักมือออก ตัวสะท้อนกลับ
-  if(o.wob){const B=o.wob,T0=0.35;B.t+=dt;const t=B.t,up=t<T0?Math.min(1,t/0.16):1,k=t<T0?0:_cs(Math.min(1,(t-T0)/0.1)),out=t<T0+0.3?1:Math.max(0,1-(t-T0-0.3)/0.25);
-    const sx=-2.25,sz=B.s>0?-0.95:1.05,x=lerp(sx,-1.5,k),z=lerp(sz,-0.1,k),w=up*out,L=o.armL.rotation,lx=B.s>0?-1.5:-1.8,lz=B.s>0?-0.75:0.7;
-    R.x=lerp(R.x,x,w);R.z=lerp(R.z,z,w);L.x=lerp(L.x,lerp(lx,0.35,k),w);L.z=lerp(L.z,lerp(lz,0.3,k),w);o.b.rotation.y+=lerp(-B.s*0.55,B.s*0.3,k)*w;   // ชาร์จ: บิดตัวไปข้างที่ง้าง มืออีกข้างตามไปประคอง • ปล่อย: บิดสวนมาอีกทาง
+  if(o.wob){const B=o.wob,T0=0.35;B.t+=dt;const t=B.t,up=t<T0?_cs(Math.min(1,t/0.22)):1,k=t<T0?0:_cs(Math.min(1,(t-T0)/0.09)),out=t<T0+0.3?1:Math.max(0,1-(t-T0-0.3)/0.25);
+    // user 2026-11-25: the LEFT hand throws the ball it made: swing a little out to the side (and back), flick to the target, return
+    const w=up*out,L=o.armL.rotation,ap=clamp(p.wn?.[12]||0,-1,1)*.75;
+    L.x=lerp(L.x,lerp(-0.75,-1.55-ap,k),w);L.z=lerp(L.z,lerp(1.25,0.05,k),w);R.x=lerp(R.x,lerp(-0.2,0.15,k),w);R.z=lerp(R.z,lerp(-0.35,-0.5,k),w);
+    o.b.rotation.y+=lerp(0.35,-0.32,k)*w;   // ชาร์จ: บิดตัวไปข้างที่ง้าง มืออีกข้างตามไปประคอง • ปล่อย: บิดสวนมาอีกทาง
     if(t>T0){const u=t-T0,r=Math.exp(-9*u)*Math.sin(22*u);o.b.rotation.x-=0.34*r;o.b.position.y+=0.07*r;o.b.position.z-=0.12*r;}   // ปล่อย: แรงกระแทกดันตัวถอยแล้วเด้งกลับ
     if(t>T0+0.55)o.wob=null;return;}
   if(o.wfu!==undefined){o.wfu+=dt;const u=o.wfu,w=u<0.15?u/0.15:u<0.55?1:Math.max(0,1-(u-0.55)/0.3);R.x=lerp(R.x,-3,w);R.z=lerp(R.z,0.12,w);if(u>0.85)o.wfu=undefined;}
@@ -93,6 +98,47 @@ function windLatePose(o,p,dt){const R=o.armR.rotation;if(p.wn&&p.al&&!p.dn&&(p.s
 const _faX=new THREE.Vector3(1,0,0),_faQ=new THREE.Quaternion(),_faT=new THREE.Quaternion(),WF_ELBOW=-1.9;
 function windForearm(o){const w=o.faW||0;if(w<=0.002)return;o.faW=0;if(o.faB===undefined){o.faB=null;const a=o.g.getObjectByName('forearm_R'),b=o.g.getObjectByName('forearm_L');if(a&&b)o.faB=[[a,a.quaternion.clone()],[b,b.quaternion.clone()]];}
   if(!o.faB)return;_faQ.setFromAxisAngle(_faX,WF_ELBOW);for(const [b,q0] of o.faB){_faT.copy(q0).multiply(_faQ);b.quaternion.slerp(_faT,w);}}
+// ---------- Palm sigil + palm wind ball (user 2026-11-25) ----------
+// a small green wind circle always floats just past the LEFT palm (brightens when Downburst / Tailwind open the palm);
+// while wind balls are available (flying) a ball builds on the palm from swirling motes over the shot gap, is thrown,
+// then builds again; Slipstream makes it ready at once. Time-driven meshes (no PARTS), placed after the bones are final.
+let _wpTex=null;
+function wpSigilTex(){if(_wpTex)return _wpTex;const N=128,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),C=N/2;
+  {const g=x.createRadialGradient(C,C,0,C,C,C);g.addColorStop(0,'rgba(200,255,215,0.55)');g.addColorStop(0.7,'rgba(120,255,160,0.18)');g.addColorStop(1,'rgba(120,255,160,0)');x.fillStyle=g;x.fillRect(0,0,N,N);}
+  x.strokeStyle='rgba(225,255,235,1)';x.lineCap='round';
+  x.lineWidth=6;x.beginPath();x.arc(C,C,C-6,0,6.283);x.stroke();x.lineWidth=3;x.beginPath();x.arc(C,C,C-16,0,6.283);x.stroke();
+  for(let i=0;i<3;i++){const a=i*2.094;x.lineWidth=6;x.beginPath();x.arc(C+Math.cos(a)*14,C+Math.sin(a)*14,22,a+0.6,a+2.6);x.stroke();}   // three wind swirls
+  for(let i=0;i<12;i++){const a=i*0.5236;x.lineWidth=2;x.beginPath();x.moveTo(C+Math.cos(a)*(C-10),C+Math.sin(a)*(C-10));x.lineTo(C+Math.cos(a)*(C-6),C+Math.sin(a)*(C-6));x.stroke();}
+  _wpTex=new THREE.CanvasTexture(c);return _wpTex;}
+const _wpN=new THREE.Vector3(),_wpO=new THREE.Vector3();
+const WP={r:.22,build:W_FW.fbCd-0.35,ballR:.15,gap:.1},_wpH=new THREE.Vector3(),_wpF=new THREE.Vector3(),_wpD=new THREE.Vector3(),_wpQ=new THREE.Quaternion(),_wpZ=new THREE.Vector3(0,0,1);
+function windPalmLate(o,p,dt,now){
+  const on=p.wn&&p.al&&!p.dn&&!p.gh&&o.g.visible&&o.fileModel;
+  if(!on){if(o.wpG)o.wpG.visible=false;return;}
+  if(!o.wpG){const g=new THREE.Group();g.name='Wind palm';
+    const sig=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({map:wpSigilTex(),color:'#2fe070',transparent:true,depthWrite:false,side:THREE.DoubleSide}));
+    const ball=new THREE.Mesh(new THREE.IcosahedronGeometry(1,2),windShellMat()),core=new THREE.Mesh(new THREE.SphereGeometry(1,12,8),new THREE.MeshBasicMaterial({color:'#8fffb4',transparent:true,opacity:.6,depthWrite:false}));
+    const motes=[];for(let i=0;i<7;i++){const m=new THREE.Sprite(new THREE.SpriteMaterial({map:stTex('soft'),color:i%2?'#b8ffd0':'#ffffff',transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));g.add(m);motes.push(m);}
+    for(const m of [sig,ball,core]){m.renderOrder=3;m.frustumCulled=false;g.add(m);}motes.forEach(m=>{m.renderOrder=3;m.frustumCulled=false;});
+    g.userData={sig,ball,core,motes};o.g.add(g);o.wpG=g;o.wbB=o.wbB??1;}
+  const G=o.wpG,U=G.userData,h=stLoc(o,'hand_L',_wpH),f=stLoc(o,'forearm_L',_wpF);G.visible=!!(h&&f);if(!G.visible)return;
+  const dir=_wpD.copy(h).sub(f).normalize(),t=now/1000;
+  // sigil just past the palm, facing along the forearm
+  o.wPalm=Math.max(0,(o.wPalm||0)-dt*2.2);const fl=_cs(Math.min(1,o.wPalm));
+  U.sig.position.copy(h).addScaledVector(dir,WP.gap);
+  {const yw=o.b.rotation.y,aim=clamp(dir.x*Math.sin(yw)+dir.z*Math.cos(yw),0,1),n=_wpN.set(Math.cos(yw)*.6-Math.sin(yw)*.5,.45,-Math.sin(yw)*.6-Math.cos(yw)*.5).normalize().lerp(dir,Math.max(fl,aim)).normalize();   // hanging hand: tilted out-back-up so both the player's camera and others read it; palm forward = face the target
+   U.sig.quaternion.copy(_wpQ.setFromUnitVectors(_wpZ,n));(U.sig.userData.n||(U.sig.userData.n=new THREE.Vector3())).copy(n);}U.sig.rotateZ(t*.9);
+  U.sig.scale.setScalar(WP.r*2*(1+.45*fl)*(1+.04*Math.sin(t*3)));U.sig.material.opacity=Math.min(1,.7+.3*fl+.06*Math.sin(t*4.1));U.sig.material.color.set(fl>.05?'#7dffa8':'#2fe070');
+  // palm ball (only while wind balls are usable)
+  const orb=(p.wn[14]|0)>0;
+  if(o.wbRel>=0){o.wbRel-=dt;if(o.wbRel<0){o.wbB=0;o.wbRel=-1;}}   // thrown at the end of the swing
+  else if(orb&&o.wbB<1)o.wbB=Math.min(1,o.wbB+dt/WP.build);
+  const k=orb?o.wbB:0,e=_cs(k),c=_wpF.copy(h).addScaledVector(dir,WP.gap).addScaledVector(U.sig.userData.n||dir,WP.ballR*1.3);
+  U.ball.visible=U.core.visible=e>.02;U.ball.position.copy(c);U.core.position.copy(c);
+  U.ball.scale.setScalar(WP.ballR*e*(1+.06*Math.sin(t*7)));U.ball.rotation.set(t*2.3,t*3.1,0);U.core.scale.setScalar(WP.ballR*.8*e);
+  // motes spiral in while it builds (and idle swirl when full)
+  U.motes.forEach((m,i)=>{const a=stCyc(t,.55,i,7),an=i*.9+t*6,r=(k<1?.32:.16)*(1-a)+WP.ballR*.6;m.visible=orb;if(!orb)return;
+    m.position.copy(c).add(_wpO.set(Math.cos(an)*r,Math.sin(an*1.3)*r*.6,Math.sin(an)*r));m.scale.setScalar(.035*(1-a*.5));m.material.opacity=(k<1?.9:.35)*Math.sin(a*Math.PI);});}
 function windFX(o,p,pz,now,dt){
   const A=p.wn;
   if(A&&!WV.shPre){WV.shPre=1;fxMeshLoad('wind_wall_shell');window.WD?.fx?.load?.('wind/shield_fly');}   // โหลดโมเดลโล่ล่วงหน้า ไม่งั้นยกโล่ครั้งแรกไม่เห็นโล่ทั้งครั้ง
@@ -184,11 +230,11 @@ function windEfx(ev){
     case 'wnsb':fxPlay('wind/shield_burst',{x,y,h:H,follow:ev.id});if(near)shake(0.25);return true;
     case 'wnpv':{const o=PM3.get(ev.id);if(o){o.wpv={t:0,n:ev.n};if(o.wWings)o.wWings.userData.pv=0,o.wWings.userData.pvE=W_DR.vWind+W_DR.vGap*ev.n;}fxPlay('wind/plume_cast',{x,y,h:H,aim:false,follow:ev.id});if(near)snd('whoosh',{x,y,vol:0.8});return true;}   // ง้างปีก + กางแขน แล้วดันไปข้างหน้าตอนขนพุ่ง
     case 'wnpf':{const o=PM3.get(ev.id);if(o&&o.wWings){const d=o.wWings.userData;(d.fs||(d.fs={}))[-ev.n]={t:0};}if(o&&o.wpv)o.wpv.s=ev.n;if(near)snd('whoosh',{x,y,vol:0.22});return true;}   // ยิงทีละขน: ปีกข้างนั้นยืดออก (sd=+1 คือซ้าย, n=+1 คือขวา)
-    case 'wnsl':{const o=PM3.get(ev.id);if(o){o.wsl={t:0,T:ev.t,d:ev.n,s:ev.m,gs:ev.n>=2&&!ev.w};if(o.wWings){const u=o.wWings.userData;u.sl=0;u.slD=ev.n;u.slT=ev.t;}}if(ev.n===0){fxPlay(ev.m?'wind/slip_fwd':'wind/slip_fwd_g',{x,y,h:H,a,aim:false,follow:ev.id});fxPlay(ev.m?'wind/slip_fwd_w':'wind/slip_fwd_gw',{x,y,h:H,a});}else if(ev.n===1){fxPlay(ev.m?'wind/slip_back':'wind/slip_back_g',{x,y,h:H,a,aim:false,follow:ev.id});fxPlay(ev.m?'wind/slip_back_w':'wind/slip_back_gw',{x,y,h:H,a});}else if(!ev.w){fxPlay('wind/slip_fwd_g',{x,y,h:H,a,aim:false,follow:ev.id});fxPlay('wind/slip_fwd_gw',{x,y,h:H,a});}else{const g=ev.w?'':'_g';fxPlay('wind/slip_side_'+(ev.m<0?'l':'r')+g,{x,y,h:H,a,aim:false,follow:ev.id});fxPlay('wind/slip_side_w'+g,{x,y,h:H,a});}if(near)snd('whoosh',{x,y,vol:0.8});return true;}   // ท่าแดช 4 ทิศ
+    case 'wnsl':{const o=PM3.get(ev.id);if(o){o.wsl={t:0,T:ev.t,d:ev.n,s:ev.m,gs:ev.n>=2&&!ev.w};o.wbB=1;o.wbRel=-1;if(o.wWings){const u=o.wWings.userData;u.sl=0;u.slD=ev.n;u.slT=ev.t;}}if(ev.n===0){fxPlay(ev.m?'wind/slip_fwd':'wind/slip_fwd_g',{x,y,h:H,a,aim:false,follow:ev.id});fxPlay(ev.m?'wind/slip_fwd_w':'wind/slip_fwd_gw',{x,y,h:H,a});}else if(ev.n===1){fxPlay(ev.m?'wind/slip_back':'wind/slip_back_g',{x,y,h:H,a,aim:false,follow:ev.id});fxPlay(ev.m?'wind/slip_back_w':'wind/slip_back_gw',{x,y,h:H,a});}else if(!ev.w){fxPlay('wind/slip_fwd_g',{x,y,h:H,a,aim:false,follow:ev.id});fxPlay('wind/slip_fwd_gw',{x,y,h:H,a});}else{const g=ev.w?'':'_g';fxPlay('wind/slip_side_'+(ev.m<0?'l':'r')+g,{x,y,h:H,a,aim:false,follow:ev.id});fxPlay('wind/slip_side_w'+g,{x,y,h:H,a});}if(near)snd('whoosh',{x,y,vol:0.8});return true;}   // ท่าแดช 4 ทิศ
     case 'wnse':fxPlay('wind/slip_shot',{x,y,h:H,aim:false,follow:ev.id});if(near)snd('whoosh',{x,y,vol:0.6});return true;
     case 'wndome':windDome(x,y,H,ev.r);if(near)snd('hit',{x,y,vol:0.3});return true;
     case 'wnpb':windDome(x,y,H,ev.r||22,true);fxPlay('wind/plume_pop',{x,y,h:H,aim:false});if(near)snd('hit',{x,y,vol:0.5});return true;
-    case 'wndb':fxPlay('wind/downburst',{x,y,h:H,aim:false});wwCue(ev.id,'db');{const o=PM3.get(ev.id);if(o)o.wdb=0;}if(near)snd('cast_pull',ev);return true;   // ชูไม้ แล้วฟาดลง ลมถึงพื้นตอนฟาด
+    case 'wndb':fxPlay('wind/downburst',{x,y,h:H,aim:false});wwCue(ev.id,'db');wwCue(ev.id,'cf');{const o=PM3.get(ev.id);if(o)o.wdb=0;}if(near)snd('cast_pull',ev);return true;   // ชูไม้ แล้วฟาดลง ลมถึงพื้นตอนฟาด
     case 'wndg':if(near){snd('whoosh',{x,y,vol:0.9});shake(0.16);}return true;
     case 'wndt':if(me){const d=Math.hypot(x-me.x,y-me.y);if(d<W_WL.dbR+250)shake(d<W_WL.dbR+30?0.07:0.03);}return true;   // พื้นในวงสั่นเป็นจังหวะตามลมกด
     case 'wndc':fxPlay('wind/dash_charge',{x,y,h:H,aim:false});wwCue(ev.id,'du');{const o=PM3.get(ev.id);if(o)o.wdc=0;}return true;   // ย่อตัว ลมวนเข้าเท้า
@@ -213,7 +259,7 @@ function windEfx(ev){
     case 'wnvxstun':fxPlay('wind/wall_hit',{x,y,h:0,a:Math.random()*6.283});if(near)shake(0.15);return true;   // ลมรัดตัว = สตัน 0.5 วิ
     case 'wnvxcap':fxPlay('wind/ba_hit',{x,y,h:Math.max(0,H-0.2),a:Math.random()*6.283});return true;
     case 'wnorb':fxPlay('wind/gale_orb_boom',{x,y,h:H,aim:false});if(near){snd('boom',{x,y,vol:0.5});shake(0.25);}return true;
-    case 'wnoc':{fxPlay('wind/gale_orb_charge',{x,y,h:H,follow:ev.id});const o=PM3.get(ev.id);if(o)o.wob={s:ev.n,t:0};if(near)snd('cast_pull',{x,y,vol:0.4});return true;}   // ง้างไม้ไปข้าง ลูกลมก่อตัวที่ปลายไม้
+    case 'wnoc':{const o=PM3.get(ev.id);if(o){o.wob={s:ev.n,t:0};o.wbRel=0.35;}wwCue(ev.id,'cf');if(near)snd('cast_pull',{x,y,vol:0.4});return true;}   // ง้างไม้ไปข้าง ลูกลมก่อตัวที่ปลายไม้
     case 'wnol':fxPlay('wind/gale_orb_launch',{x,y,h:H,a,aim:false});if(near)snd('whoosh',{x,y,vol:0.6});return true;
     case 'wnwc':{fxPlay('wind/wall_launch',{x,y,h:H,a,aim:false,follow:ev.id,s:1.3});const o=PM3.get(ev.id);if(o)o.wbc=0;if(near)snd('cast_pull',{x,y,vol:0.5});return true;}   // ง้างก่อนปล่อยโล่
     case 'wnwb':{fxPlay('wind/wall_blast',{x,y,h:H,a,aim:false});windDome(x,y,H,62,true);later(0.26,()=>windSuckFx({x,y,h:H,r:ev.r||W_BLAST_SUCK}));if(near){snd('boom',{x,y,vol:0.45});shake(0.2);}return true;}
@@ -258,7 +304,7 @@ function windEfx(ev){
     case 'wnsowave':fxPlay('wind/sonic_wave',{x,y,h:H,aim:false});if(near)snd('hit',ev);return true;
     case 'wnsocancel':{const o=PM3.get(ev.id);if(o){o.wso=undefined;if(o.wWings&&o.wWings.userData.sup)o.wWings.userData.sup.dis=1.9;}}return true;
     case 'wnsoend':return true;
-    case 'wntl':{const o=PM3.get(ev.id);if(o)o.wtl=0;(WV.tl||(WV.tl=[])).push({x,y,ca:Math.cos(a),sa:Math.sin(a),t:0,tm:ev.tm});}fxPlay('wind/tailwind',{x,y,h:H,a});if(near)snd('whoosh',ev);return true;
+    case 'wntl':{const o=PM3.get(ev.id);if(o)o.wtl=0;wwCue(ev.id,'cf');(WV.tl||(WV.tl=[])).push({x,y,ca:Math.cos(a),sa:Math.sin(a),t:0,tm:ev.tm});}fxPlay('wind/tailwind',{x,y,h:H,a});if(near)snd('whoosh',ev);return true;
     case 'wnsoon':if(mine)toast('สกิลนี้ของสายลมยังทำไม่เสร็จ (ขั้นที่ 2-3)');return true;
   }
   return false;
@@ -272,7 +318,15 @@ function windShellMat(){if(!_wShellM){_wShellM=new THREE.ShaderMaterial({uniform
     'float f=sin(vU.y*40.+sin(vU.x*6.+uT*2.)*1.2)*0.5+0.5;float flow=smoothstep(0.86,1.,sin(vU.x*18.-uT*5.+vU.y*3.)*0.5+0.5)*smoothstep(0.6,1.,f);'+
     'float a=clamp(fr*0.5+ed*0.95+flow*0.5+0.08,0.,0.9);vec3 c=mix(vec3(0.15,0.85,0.35),vec3(0.75,1.,0.8),clamp(ed+flow*0.6,0.,1.));gl_FragColor=vec4(c,a);}'});_wShellM.userData.keep=true;}
   return _wShellM;}
+// Slipstream charges: small slanted dash streaks (a fat head + thin trailing tail) stacked top to bottom
+function windSlipHud(x,y,n,full,frac){const H=7,gap=4,y0=y-(n*H+(n-1)*gap)/2;
+  const shape=(px,py,w)=>{cx.beginPath();cx.moveTo(px,py+H);cx.lineTo(px+w*.62,py+H);cx.lineTo(px+w,py+H/2);cx.lineTo(px+w*.62+3,py);cx.lineTo(px+5,py);cx.closePath();};
+  cx.save();for(let i=0;i<n;i++){const py=y0+i*(H+gap),k=i<full?1:i===full?frac:0,W=18;   // i 0 = top
+    shape(x,py,W);cx.fillStyle='rgba(0,0,0,0.38)';cx.fill();
+    if(k>0){cx.save();shape(x,py,W);cx.clip();cx.fillStyle=k>=1?'#a4ff7e':'rgba(164,255,126,0.45)';cx.fillRect(x,py,W*k,H);cx.restore();}}
+  cx.restore();}
 function drawWindHud(x,y,A,me){   // ผู้ใช้ 2026-11-16: HUD สายลมโชว์แค่ Slipstream (ไม่โชว์ Shift/Dash, Downburst, เกจ Gale, ข้อความ)
+  if((A[15]|0)>0)drawReticleTimer(cx,x,y,Math.min(58,SH*.12),(A[15]|0)/100);   // Featherwing time left (user 2026-11-25, like the Radiance ult ring)
   const kit=getKit(me.id),slip=kit.ids.indexOf(SPELLS.vortexbind.i);if(slip<0)return;
   const slipKey=slotKey(SLOTK[SKORD.indexOf(slip+1)].toUpperCase()),n=W_VX.sMax,x0=x-(n-1)*13;
   const icon=(id,ix,iy,r,fill,ready,key)=>{cx.beginPath();cx.arc(ix,iy,r,0,6.283);cx.fillStyle='rgba(8,24,18,0.55)';cx.fill();
@@ -280,7 +334,7 @@ function drawWindHud(x,y,A,me){   // ผู้ใช้ 2026-11-16: HUD สา�
     cx.lineWidth=2.5;cx.strokeStyle='rgba(0,0,0,0.5)';cx.beginPath();cx.arc(ix,iy,r+2,0,6.283);cx.stroke();
     if(fill>0){cx.strokeStyle=ready?'#a4ff7e':'#5fbf5a';cx.beginPath();cx.arc(ix,iy,r+2,-Math.PI/2,-Math.PI/2+6.283*fill);cx.stroke();}
     if(key){cx.font='600 10px Kanit,sans-serif';cx.textAlign='center';cx.fillStyle='rgba(234,255,241,0.8)';cx.fillText(key,ix,iy+r+12);}};
-  hudPips(x,y+26,n,A[10]|0,(A[13]||0)/100,'#c4f5cf');   // minimal (user 2026-11-24)
+  windSlipHud(x+34,y,n,A[10]|0,(A[13]||0)/100);   // user 2026-11-25: dash-shaped charges stacked vertically, plain green
 }
 // ---------- ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) + ลูกศรทางดัน (คลิกซ้าย) ----------
 function wvAimGhost(p,A,h){
@@ -433,7 +487,9 @@ function poseWindWings(W,big,dt,guard){
   d.gl=(d.gl||0)+((d.du>=0||d.gh?1:0)-(d.gl||0))*Math.min(1,dt*9);sw=lerp(sw,-0.3,d.gl);sc*=1+0.1*d.gl;   // Dash + ร่อน: กางปีกออกค้างไว้ ไม่กระพือ (ผู้ใช้ 2026-11-09)
   if(d.sup){const q=windWingSup(d,dt);if(q){if(q.add!==undefined)sw+=q.add;else sw=q.sw;sc=Math.max(sc,q.sc);boost=Math.max(boost,q.b);}}
   sw+=d.airSw||0;   // ท่าบิน: ไปหน้า ปีกลู่หลัง • ถอยหลัง ปีกมาหน้า
-  const fl=Math.sin(d.t*(big?3.2:1.2))*(0.04+0.14*d.flap)*(1-wrap)*(1-d.gl);
+  // user 2026-11-25: wings feel alive - slow idle drift, gentle visible flap in flight, a small flutter after casts; spread still while gliding
+  if(d.cf>=0){d.cf+=dt;if(d.cf>0.9)d.cf=-1;}const cfl=d.cf>=0?0.13*Math.sin(d.cf*11)*Math.exp(-d.cf*3.2):0;
+  const fl=(Math.sin(d.t*(big?2.6:1.1))*(0.06+0.17*d.flap)+0.025*Math.sin(d.t*0.53+1.3)+cfl)*(1-wrap)*(1-d.gl);
   d.boost.value=boost;
   W.scale.setScalar(sc*(1-0.35*wrap));
   for(const {piv,sd} of d.sides){const S=d.fs&&d.fs[sd],q=S&&S.t>=0?Math.sin(Math.min(1,S.t/0.42)*Math.PI):0;piv.scale.setScalar(1+0.3*q);piv.rotation.y=-sd*(0.3+sw+wrap*1.0+fl+0.32*q);piv.rotation.z=sd*(fl*0.35-wrap*0.45+0.12*q);}   // q = ปีกที่ยิงขนนก ยืดขึ้นและขยับมาหน้าแว้บหนึ่ง

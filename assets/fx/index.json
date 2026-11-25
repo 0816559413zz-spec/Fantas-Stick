@@ -2008,7 +2008,7 @@
    "n": 2
   },
   "stance/counter_earth": {
-   "v": "e94a22c3",
+   "v": "01b164d2",
    "desc": "Earth: basic rock throws + Stone Mark, free arm counters the body twist",
    "pal": "",
    "tags": [
@@ -2019,7 +2019,7 @@
    "n": 2
   },
   "stance/counter_storm": {
-   "v": "0e0253be",
+   "v": "fd1fef97",
    "desc": "Storm: basic attacks + Thunder Line, free arm counters the body twist",
    "pal": "",
    "tags": [
@@ -2030,7 +2030,7 @@
    "n": 2
   },
   "stance/counter_water": {
-   "v": "000c73a3",
+   "v": "297d5742",
    "desc": "Water: basic attacks + Riptide, free arm counters the body twist",
    "pal": "",
    "tags": [
@@ -2089,7 +2089,7 @@
    "n": 2
   },
   "stance/frost_skills": {
-   "v": "01b52c19",
+   "v": "6e93838f",
    "desc": "Frost: skills cast with the LEFT-hand wand (mirrored): Frostforge, Glacier Rend, Frost Aura",
    "pal": "",
    "tags": [
@@ -2100,7 +2100,7 @@
    "n": 2
   },
   "stance/frost_swap": {
-   "v": "d8719223",
+   "v": "bcf7135f",
    "desc": "Frost: sword slash, swap to wand (sword spins + breaks up), left-hand wand casts, swap back",
    "pal": "",
    "tags": [
@@ -2111,7 +2111,7 @@
    "n": 2
   },
   "stance/frost_wand_all": {
-   "v": "301467c7",
+   "v": "ee730f92",
    "desc": "Frost wand mode: basic shots, Glacier Rend, Frostforge, Permafrost, Frost Aura, Mirror Legion - all with the LEFT-hand wand",
    "pal": "",
    "tags": [
@@ -2119,6 +2119,28 @@
     "preview"
    ],
    "dur": 12,
+   "n": 2
+  },
+  "stance/light_lean": {
+   "v": "e844073d",
+   "desc": "Light lean: walking W / S / A / D tilts the body that way; firing keeps the arms on the target",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 9,
+   "n": 2
+  },
+  "stance/light_ult": {
+   "v": "8676a70f",
+   "desc": "Radiance ult round 2: thicker 1.4 s beams, hold right click = X guard + hex shield on the duo, shield breaks = 2 s daze, time up = forced finish",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 14.5,
    "n": 2
   },
   "stance/pyro_a": {
@@ -2146,7 +2168,7 @@
    "n": 2
   },
   "stance/pyro_charge": {
-   "v": "7f749242",
+   "v": "c1656191",
    "desc": "Fire: charge in the burning left hand, release whip with twist, quick shot",
    "pal": "",
    "tags": [
@@ -2157,7 +2179,7 @@
    "n": 2
   },
   "stance/pyro_kindle": {
-   "v": "29e265e3",
+   "v": "8d100405",
    "desc": "Fire: Kindle hover, side-on aim with the fire hand, shot",
    "pal": "",
    "tags": [
@@ -2189,6 +2211,17 @@
     "water"
    ],
    "dur": 5.6,
+   "n": 2
+  },
+  "stance/wind_air": {
+   "v": "738bc5b4",
+   "desc": "Wind: Featherwing flight - palm sigil, wind ball builds on the left palm, hand throw, Slipstream makes it ready at once, Downburst palm; then Tailwind + feathers on the ground",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 11,
    "n": 2
   },
   "start/aura": {

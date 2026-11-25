@@ -276,7 +276,8 @@ function damage(t,amt,srcId,kind,noFlash=false,impact){
   if(t.ovc>0)amt*=1.15;
   if(t.blaze>0)amt*=BLAZEF.v.taken;
   if(t.mrk>0&&kind!=='burn')amt*=1.12;
-  if(!t.isM&&!t.isE)amt*=lightDmgIn(t);   // สายแสง: คริสตัลกับคู่หู กัน 5%/ชิ้น • Light Step 30% • อัลติ 30%
+  if(!t.isM&&!t.isE)amt*=lightDmgIn(t);
+  if(t.lgXsh&&!t.isM&&!t.isE)amt=lightHexAbsorb(t,amt);   // Radiance X guard hex shield (js/09-light)   // สายแสง: คริสตัลกับคู่หู กัน 5%/ชิ้น • Light Step 30% • อัลติ 30%
   if(t.dr){amt*=t.dr.f;if(src&&src!==t&&kind!=='burn'&&kind!=='zone'&&!(t.drCd>0)){addPoison(src,t.id,1);t.drCd=1;}}
   if(t.lgUltWard?.hp>0){const absorbed=Math.min(t.lgUltWard.hp,amt);t.lgUltWard.hp-=absorbed;amt-=absorbed;
     emit({k:'block',x:t.x,y:t.y,h:t.z+1.2});if(amt<=0.01)return;}

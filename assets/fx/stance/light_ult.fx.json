@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "desc": "Radiance ult round 2: thicker 1.4 s beams, hold right click = X guard + hex shield on the duo, shield breaks = 2 s daze, time up = forced finish",
+  "tags": ["stance", "preview"],
+  "dur": 14.5,
+  "layers": [
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 14.5},
+    {"id": "stance", "t": "code", "fn": "studio_class_stance", "at": 0, "life": 14.5, "args": {"layer":"anchor","cls":"light","style":"a","run":[99,99],"acts":[{"t":0.2,"a":"link"},{"t":0.5,"a":"ult","id":"radiantsovereign"},{"t":1.6,"a":"hold","d":1.8},{"t":4.0,"a":"shield","d":2.6},{"t":4.6,"a":"hit","dmg":60},{"t":5.4,"a":"hit","dmg":120},{"t":8.2,"a":"hold","d":1.6}]}}
+  ]
+}

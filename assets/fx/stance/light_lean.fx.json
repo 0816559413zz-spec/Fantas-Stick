@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "desc": "Light lean: walking W / S / A / D tilts the body that way; firing keeps the arms on the target",
+  "tags": ["stance", "preview"],
+  "dur": 9.0,
+  "layers": [
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 9.0},
+    {"id": "stance", "t": "code", "fn": "studio_class_stance", "at": 0, "life": 9.0, "args": {"layer":"anchor","cls":"light","style":"a","run":[99,99],"acts":[{"t":0.6,"a":"move","d":1.4,"mx":1,"my":0},{"t":2.4,"a":"move","d":1.4,"mx":0,"my":1},{"t":4.2,"a":"move","d":1.4,"mx":0,"my":-1},{"t":6.0,"a":"move","d":1.8,"mx":1,"my":0},{"t":6.0,"a":"hold","d":1.8}]}}
+  ]
+}

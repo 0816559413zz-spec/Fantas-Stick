@@ -369,7 +369,9 @@ function lgSkinSovereign(g){
   for(const a of arms)a.lower.attach(a.mark);
   return {arms,curls:mesh.morphTargetInfluences};
 }
-function lgPoseSovereign(V,shot,gesture,opening,bob,finish,lean,release,fireAge,dt){
+// X guard (user 2026-11-25): both forearms cross in an X in front of the chest • xs = seconds since the hex shield broke (-1 = no)
+const _lgX={u:new THREE.Vector3(),l:new THREE.Vector3(),h:new THREE.Vector3()};
+function lgPoseSovereign(V,shot,gesture,opening,bob,finish,lean,release,fireAge,dt,cross=0,xs=-1){
   const blend=1-Math.exp(-20*dt),speed=1-Math.exp(-76*dt);
   const amount=gesture?gesture[1]:0;
   const recoil=gesture?lightFormRecoil(gesture[6]??-1):0;
@@ -381,7 +383,10 @@ function lgPoseSovereign(V,shot,gesture,opening,bob,finish,lean,release,fireAge,
     const jolt=fireAge>=0 ? .027*Math.sin(fireAge*62)+.013*Math.sin(fireAge*104) : 0;
     V.turn.set(lightFinishPitch(finish,lean)*(1-.24*release)+jolt-kick,0,jolt*.66,'YXZ');
   }
-  V.hover.quaternion.slerp(V.turnQ.setFromEuler(V.turn),shot||finish>=.89?speed:blend);
+  if(cross>0)V.turn.x+=.12*Math.min(1,cross);
+  if(xs>=0){const d=Math.exp(-xs*3.2),sh=Math.exp(-xs*5);   // hard jolt back, then a shaky daze until the stun ends
+    V.turn.x+=-.55*Math.exp(-xs*7)+.07*Math.sin(xs*46)*sh+.05*Math.sin(xs*3.1)*(1-sh)*Math.min(1,(2-xs)*2);V.turn.z+=.18*Math.sin(xs*29)*sh+.04*Math.sin(xs*2.3)*d;}
+  V.hover.quaternion.slerp(V.turnQ.setFromEuler(V.turn),shot||finish>=.89||xs>=0&&xs<.3?speed:blend);
   V.inverse.copy(V.hover.quaternion).invert();
   V.hover.position.copy(LIGHT_FORM_PIVOT).applyQuaternion(V.hover.quaternion).negate().add(LIGHT_FORM_PIVOT);
   V.hover.position.y+=bob-LIGHT_FORM_BASE;
@@ -413,6 +418,10 @@ function lgPoseSovereign(V,shot,gesture,opening,bob,finish,lean,release,fireAge,
     pose.upper.lerp(arm.releaseUpper,drive).normalize();
     pose.lower.lerp(arm.releaseLower,drive).normalize();
     pose.hand.lerp(arm.releaseLower,drive).normalize();
+    if(cross>0){const s=arm.sign,X=_lgX;   // elbow forward-down, forearm up across to the other shoulder, one arm a little in front
+      X.u.set(s*.32,-.42,.85).normalize();X.l.set(-s*.82,.5,.22+s*.07).normalize();X.h.set(-s*.55,.8,.12).normalize();
+      pose.upper.lerp(X.u,cross).normalize();pose.lower.lerp(X.l,cross).normalize();pose.hand.lerp(X.h,cross).normalize();V.curls[index]=Math.max(V.curls[index],.7*cross);}
+    if(xs>=0&&xs<2){const k=Math.min(1,xs/.12)*Math.min(1,(2-xs)*2);pose.upper.lerp(arm.restingUpper,.5*k).normalize();pose.lower.lerp(arm.restingLower,.6*k).normalize();}   // arms go slack in the daze
     if(!leading&&shot){
       pose.upper.z+=.016*recoil*arm.guard;
       pose.lower.y-=.024*recoil*arm.guard;
@@ -899,6 +908,56 @@ function lgReturnMark(){
   glints.rotation.x=-Math.PI/2;glints.position.y=.012;root.add(glints);
   return {root,base,glints,crystal:null};
 }
+// hex shield on the linked duo while the X guard is held: winks in fast, fades out, bursts when it breaks
+let _lgHexTex=null;
+function lgHexTex(){if(_lgHexTex)return _lgHexTex;const N=256,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),s=N/8,h=s*Math.sqrt(3)/2;
+  x.fillStyle='rgba(255,214,140,0.13)';x.fillRect(0,0,N,N);x.strokeStyle='rgba(255,236,190,1)';x.lineWidth=3;
+  for(let r=-1;r<N/h+1;r++)for(let q=-1;q<N/(s*1.5)+1;q++){const cx=q*s*1.5,cy=r*h*2+(q%2?h:0);x.beginPath();for(let k=0;k<6;k++){const a=k*Math.PI/3;x[k?'lineTo':'moveTo'](cx+Math.cos(a)*s*.98,cy+Math.sin(a)*s*.98);}x.closePath();x.stroke();}
+  _lgHexTex=new THREE.CanvasTexture(c);_lgHexTex.wrapS=_lgHexTex.wrapT=THREE.RepeatWrapping;_lgHexTex.repeat.set(4,2);return _lgHexTex;}
+const LG_XG={in:.35,out:.25,head:.36,patches:9};
+const lgXIn=t=>{t=clamp(t,0,1);const c=1.7;return 1+(c+1)*Math.pow(t-1,3)+c*Math.pow(t-1,2);};   // ease-out with a small settle past 1
+// thin hexagon patches popping at a few spots around the god form while the X guard is up (like the old fire-shield patches)
+const _lgHP=new THREE.Vector3(),_lgHN=new THREE.Vector3(),_lgHZ=new THREE.Vector3(0,0,1);
+function lgSelfHex(S,V,k,now,dt){
+  if(!S.selfHex){const g=new THREE.Group();g.name='Radiance X guard patches';const geo=new THREE.CircleGeometry(1,6);
+    for(let i=0;i<LG_XG.patches;i++){const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({map:lgHexTex(),color:'#ffe3a6',transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));
+      m.renderOrder=5;m.userData={t:-Math.random()*.9,dir:new THREE.Vector3()};g.add(m);}scene.add(g);S.selfHex=g;}
+  const g=S.selfHex;g.visible=k>.02;if(S.xGlow&&!g.visible)S.xGlow.visible=false;if(!g.visible)return;V.heart.getWorldPosition(_lgHP);
+  for(const m of g.children){const d=m.userData;d.t+=dt;const L=.9;
+    if(d.t>=L||d.t<0&&d.t+dt>=0){d.t=Math.max(0,d.t-L);const a=Math.random()*6.283,y=Math.random()*1.6-.6;d.dir.set(Math.cos(a),y,Math.sin(a)).normalize();d.s=.3+Math.random()*.22;}
+    if(d.t<0){m.visible=false;continue;}m.visible=true;const u=d.t/L,f=Math.sin(u*Math.PI);
+    m.position.copy(_lgHP).addScaledVector(d.dir,1.75);m.quaternion.setFromUnitVectors(_lgHZ,d.dir);m.scale.setScalar(d.s*(.85+.15*u));
+    m.material.opacity=.75*f*k;}
+  // chest crystal glow while guarding
+  if(!S.xGlow){S.xGlow=new THREE.Sprite(new THREE.SpriteMaterial({map:lgGlowTex(),color:'#ffe7a8',transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));S.xGlow.renderOrder=7;scene.add(S.xGlow);}
+  S.xGlow.visible=true;S.xGlow.position.copy(_lgHP);S.xGlow.scale.setScalar(1.1+.25*Math.sin(now*.012));S.xGlow.material.opacity=Math.min(1,k)*(.75+.2*Math.sin(now*.012));}
+function lgHexShield(S,U,xm,now,dt){const a=PM3.get(U[2]);
+  if(!S.hex){const m=new THREE.Mesh(new THREE.IcosahedronGeometry(1,3),new THREE.MeshBasicMaterial({map:lgHexTex(),color:'#ffd98a',transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));
+    m.name='Radiance hex shield';m.renderOrder=4;m.visible=false;m.userData.k=0;m.userData.brk=-1;scene.add(m);S.hex=m;}
+  const m=S.hex,D=m.userData;if(!a){m.visible=false;return;}
+  if(xm===1&&D.k<=0)D.in=0;if(xm===1)D.in=(D.in||0)+dt;
+  if(xm===2&&D.brk<0&&D.k>.05)D.brk=0;if(D.brk>=0){D.brk+=dt;if(D.brk>.3){D.brk=-1;D.k=0;}}
+  if(xm!==2&&D.brk<0)D.k=xm===1?Math.min(1,D.k+dt/.08):Math.max(0,D.k-dt/.35);   // wink in 0.08 s, fade out 0.35 s
+  m.visible=D.k>.01||D.brk>=0;if(!m.visible)return;
+  a.g.getWorldPosition(m.position);m.position.y+=1.05;
+  const pop=xm===1?1+.28*Math.exp(-(D.in||0)*18):1,b=D.brk>=0?1+D.brk*1.6:1;m.scale.set(.85*pop*b,1.3*pop*b,.85*pop*b);
+  m.rotation.y=now*.0004;m.material.map.offset.y=now*.00005;
+  const hp=(U[11]|0)/100;m.material.opacity=D.brk>=0?.9*(1-D.brk/.3):D.k*(.55+.25*hp+.1*Math.sin(now*.006))*(xm===1&&D.in<.12?1.6:1);}
+// Light lean (user 2026-11-25): floating Light tilts toward where it moves (WASD: forward / back / sideways, up to ~12°);
+// while firing (beam or a cast) the arms take the tilt back off so the aim stays on the target
+const LG_LEAN={fwd:.21,back:.12,side:.16,rate:7,leg:1.3,legSide:.7,sway:.05,cloak:.35};   // cloak = cloth wind while floating (1 = walking)
+function lightLeanPose(o,p,v,dt,ready){
+  if(o.posePath!==LIGHTP||p.lt?.[14]||p.dn||!p.al){o.lgLean=null;if(o.clAir!=null&&o.posePath!==LIGHTP)o.clAir=null;return;}
+  o.clAir=LG_LEAN.cloak;
+  const L=o.lgLean||(o.lgLean={x:0,z:0}),st=clamp(v.sp/6,0,1),f=clamp(v.lvz/4,-1,1),sd=clamp(v.lvx/4,-1,1);
+  const tx=(f>=0?LG_LEAN.fwd*f:LG_LEAN.back*f)*st,tz=-LG_LEAN.side*sd*st,r=Math.min(1,dt*LG_LEAN.rate);
+  L.x+=(tx-L.x)*r;L.z+=(tz-L.z)*r;
+  const rl=ready*(.06+.15*clamp(v.lvz/4,0,1))*st;   // forward lean readyStance already put on
+  o.b.rotation.x+=L.x-rl;o.b.rotation.z+=L.z;
+  {const t=performance.now()/1000,sw=LG_LEAN.sway*(.4+.6*st);   // floating legs: together, trail back with the lean, drift sideways, slow sway (no steps)
+   o.legs.forEach((l,i)=>{l.rotation.x=lerp(l.rotation.x,LG_LEAN.leg*L.x+.06+sw*Math.sin(t*1.7+i*.9),.85);l.rotation.z=lerp(l.rotation.z,-LG_LEAN.legSide*L.z+(i?-.04:.04),.85);});}
+  const fire=(p.lt?.[4]|0)!==0||o.caN||o.cpT>0||o.castT>0;o.lgLeanFire=(o.lgLeanFire||0)+((fire?1:0)-(o.lgLeanFire||0))*Math.min(1,dt*14);
+  const k=o.lgLeanFire;if(k>.001){o.armR.rotation.x-=L.x*k;o.armL.rotation.x-=L.x*k;o.armR.rotation.z-=L.z*k;o.armL.rotation.z-=L.z*k;}}
 function lgUltVisual(o,p,S,U,alive,now,dt){
   const form=!!(U&&U[0]>1&&alive);
   const shot=form&&U[6];
@@ -936,6 +995,8 @@ function lgUltVisual(o,p,S,U,alive,now,dt){
       mark.crystal.rotation.set(.12,now*.0026,-.18);
     }
   }else if(S.returnMark)S.returnMark.root.visible=false;
+  if(!(U&&alive)&&S.hex)S.hex.visible=false;
+  if(!(U&&alive)&&S.selfHex){S.selfHex.visible=false;if(S.xGlow)S.xGlow.visible=false;}
   if(form&&!S.sovereign)S.sovereign=lgBuildSovereign();
   const V=S.sovereign;
   if(V){
@@ -968,7 +1029,10 @@ function lgUltVisual(o,p,S,U,alive,now,dt){
         const detail=THREE.MathUtils.smoothstep(opening,f.start*.52,f.end*.69);
         f.material.opacity=f.alpha*Math.max(detail,bloom*.68)*fade;
       }
-      if(V.head)V.head.rotation.x=.67*load*(1-drive)-.11*drive*(1-release)+.095*surge;
+      // X guard timing (user 2026-11-25 round 2): arms travel in ~0.35 s with a small settle, head bows; release uncrosses in 0.25 s
+      {const xm=U[10]|0;if(xm===1){S.xT=(S.xT||0)+dt;S.xR=0;}else if(S.xT>0){S.xR=(S.xR||0)+dt;if(S.xR>=LG_XG.out){S.xT=0;S.xR=0;}}
+        const ein=S.xT>0?lgXIn(S.xT/LG_XG.in):0,eout=S.xR>0?1-_cs(Math.min(1,S.xR/LG_XG.out)):1;S.xc=S.xT>0?ein*eout:0;}
+      if(V.head)V.head.rotation.x=.67*load*(1-drive)-.11*drive*(1-release)+.095*surge+LG_XG.head*Math.min(1,S.xc);
       for(const w of V.wings){
         const flap=now*.0032+w.phase;
         const knock=releasing?THREE.MathUtils.smoothstep(fireAge,.048,.14)*(1-THREE.MathUtils.smoothstep(fireAge,.14,.35)):0;
@@ -981,7 +1045,10 @@ function lgUltVisual(o,p,S,U,alive,now,dt){
         w.current.material.uniforms.launch.value=fireAge;
       }
       const bob=.135*open*Math.sin(now*.003)*(1-load);
-      lgPoseSovereign(V,rigShot,gesture,opening,bob,finish,U[9]||.26,release,fireAge,dt);
+      const xm=U[10]|0;
+      if(xm===2){if(S.xBrkAt==null)S.xBrkAt=now;}else S.xBrkAt=null;
+      lgPoseSovereign(V,rigShot,gesture,opening,bob,finish,U[9]||.26,release,fireAge,dt,S.xc||0,S.xBrkAt==null?-1:(now-S.xBrkAt)/1000);
+      lgHexShield(S,U,xm,now,dt);lgSelfHex(S,V,S.xc||0,now,dt);
       V.crossClock.value+=dt*(charging?-lerp(.92,4.2,finish):releasing?4.65:.58);
       V.crossCharge.value=(load+.46*channel+.34*impact)*fade;
       V.gather.visible=(charging&&finish>.02)||releasing||dissolving;
@@ -1033,12 +1100,13 @@ function lgUltVisual(o,p,S,U,alive,now,dt){
       V.blast.material.opacity=(launch ? .98 : .73)*(1-wave)**1.65;
       lgPosePalmWaves(V,shot?shotAge:-1);
       V.heart.visible=open*fade>.02;
-      V.heart.scale.setScalar(1.66+.06*Math.sin(now*.005)+.13*surge+.42*load+.22*drive*(1-release));
+      const xg=Math.min(1,S.xc||0);
+      V.heart.scale.setScalar(1.66+.06*Math.sin(now*.005)+.13*surge+.42*load+.22*drive*(1-release)+xg*(.38+.06*Math.sin(now*.012)));
       V.heart.rotation.y=.16+.19*Math.sin(now*.003+.5);
       V.heartFx.collar.material.opacity=.94*open*fade;
       V.heartFx.rim.material.opacity=(.67+.29*load)*open*fade;
       V.heartFx.uniforms.alpha.value=open*fade;
-      V.heartFx.uniforms.charge.value=.32*surge+finish*(1-.68*release);
+      V.heartFx.uniforms.charge.value=.32*surge+finish*(1-.68*release)+xg*(.85+.15*Math.sin(now*.012));
       V.halo.position.copy(V.haloHome).lerp(V.heart.position,.70*drive);
       const haloOpen=THREE.MathUtils.smoothstep(opening,.48,1);
       V.halo.scale.setScalar((.36+.64*haloOpen)*(1-.74*drive)*fade);
@@ -1216,7 +1284,8 @@ function lgSovereignPalmBeam(){
         vec3 color=mix(edge,hot,clamp(.16+.83*facing+.15*moving,0.,1.));
         gl_FragColor=vec4(color*(1.+.26*ignite),tip*(.78+.21*facing));
       }`});
-  const beam=lgTube(coreMat,.70,30);beam.name='SovereignPalmBeam';beam.renderOrder=6;
+  const beam=lgTube(coreMat,1.3,30);beam.name='SovereignPalmBeam';   // thicker to match the 30-wide hitbox (user 2026-11-25, was .70 / 1.43)
+ beam.renderOrder=6;
   const sheathMat=new THREE.ShaderMaterial({uniforms,vertexShader,transparent:true,depthWrite:false,
     side:THREE.DoubleSide,toneMapped:false,
     fragmentShader:`uniform float time,lengthM,ignite;varying vec2 path;varying vec3 n,v;
@@ -1231,7 +1300,7 @@ function lgSovereignPalmBeam(){
         float face=gl_FrontFacing ? 1. : .52;
         gl_FragColor=vec4(gold,tip*face*(.065*rim+.69*weave*(.19+.81*packet))*(1.+.20*ignite));
       }`});
-  const sheath=lgTube(sheathMat,1.43,36);sheath.name='SovereignPalmCurrent';sheath.renderOrder=7;beam.add(sheath);
+  const sheath=lgTube(sheathMat,2.5,36);sheath.name='SovereignPalmCurrent';sheath.renderOrder=7;beam.add(sheath);
   const seeds=[];
   for(let i=0;i<26;i++)seeds.push(i/26,(i*17%29)/29,(i*11%31)/31);
   for(let i=0;i<22;i++)seeds.push(i/22,(i*13%23)/23,1+(i*7%23)/23);
@@ -1925,6 +1994,7 @@ function drawLightHud(x,y,me){
   const L=me.lt;
   if(L[14]?.[0]===2){
     drawReticleTimer(cx,x,y,Math.min(58,SH*.12),L[14][1]/LT_UL.t);
+    if((L[14][10]|0)===1){const R=Math.min(58,SH*.12),w=56,k=(L[14][11]|0)/100;cx.save();cx.fillStyle='rgba(0,0,0,0.45)';cx.fillRect(x-w/2,y+R+10,w,3);cx.fillStyle='#ffe1a0';cx.fillRect(x-w/2,y+R+10,w*k,3);cx.restore();}   // X guard hex shield left (user: bar only, no number)
     return;
   }
   if(L[20])drawCrystalBondHud(me);

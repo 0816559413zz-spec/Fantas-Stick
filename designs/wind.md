@@ -251,3 +251,9 @@
 - Dash = ร่างลม: ออกจากวงล็อคด้วยอะไร? (เดิมคือ Dash)
 - อัลติ
 - ชื่อสกิล
+
+## Round 2026-11-25 (user): palm sigil + hand-thrown wind ball
+- Same idle pose. A small green wind sigil always at the LEFT palm. Downburst and Tailwind: raise the hand toward the aim, open palm, the sigil flares.
+- Featherwing: the hand makes the wind ball on the palm (motes swirl in), after a throw it builds again; Slipstream makes it ready at once. Throw: swing a little out to the side, flick toward the target, back. Wind balls unlimited while flying (same 1.55 s gap), landed = feathers again. Flight 5 → 6 s, cooldown 10 → 12 s, timer ring at the cursor like the Radiance ult.
+- Wings: gentle life; gliding = spread open; only Featherwing flaps clearly (still soft); most skills just a small flutter.
+- Feathers 1500 → 1700. Slipstream charges HUD: minimal dash shapes stacked vertically, green.

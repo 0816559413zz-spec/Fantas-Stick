@@ -697,7 +697,7 @@ function syncPlayers(P,mode,now,dt){
     o.hitT=Math.max(0,(o.hitT||0)-dt);
     o.b.position.set(0,0,0);o.b.rotation.set(0,0,0);   // one-frame pose offsets must not build up (body drifted back / stayed tilted)
     if(o.darkGear?.visible||nature||o.natureWhipView?.vine.visible)o.armR.rotation.y=0;   // BA wand twist is applied fresh each frame
-    const hoverPose=!!p.lt?.[0]&&!!p.lt[4]&&!p.fl&&!p.dn;
+    const hoverPose=(posePath===LIGHTP||!!p.lt?.[0]&&!!p.lt[4])&&!p.fl&&!p.dn;   // Light always floats: no walk cycle on the legs (user 2026-11-25)
     if(o.anim)animTick(o,{down:!!p.dn,fly:!!p.fl,sp:hoverPose||p.wn&&p.wn[5]>=1||(p.fr&&p.fr[3]&1)?0:v.sp,castT:o.castT,hitT:o.hitT},dt,isMe?1:!detail&&!o.castT&&!o.hitT&&!p.ds?3:animLod(g));
     if(!o.fileModel)updateCloth(o.cloak,v.lvx,v.lvz,v.sp*(p.fl?1.4:1),now,dt);   // มีโมเดลไฟล์ = ผ้าคลุมโค้ดซ่อนอยู่ (ผ้าจริงคือ js/49)
     o.bsp=v.sp;broomView(o,p,dt,now);o.cocoon.visible=!!p.rt;   // ไม้กวาด: เอียงเลี้ยว + อนิเมชันเรียก/เก็บ (js/69)
@@ -807,6 +807,7 @@ function syncPlayers(P,mode,now,dt){
     jumpArmPose(o,jumpArmWeight);
     hitRecoilPose(o,dt);
     frostSwapPose(o);
+    lightLeanPose(o,p,v,dt,ready);
     if(o.rig){
       if(ready&&o.stSpine)stanceSpine(o,ready);else stanceSpineOff(o);
       rigSync(o,dt,false,Math.max(jumpWeight,ready),Math.max(jumpArmWeight,ready));windForearm(o);stormBowForearm(o);earthFistForearm(o);natForearmR(o);
@@ -833,6 +834,7 @@ function syncPlayers(P,mode,now,dt){
     darknessCharacter(o,p,myP,now);
     stanceFX(o,p,now,dt,detail);
     frostSwapLate(o,dt);
+    windPalmLate(o,p,dt,now);
     if(o.wandLM!==o.fileModel){o.wandL=false;o.wandLM=o.fileModel;}stanceWand(o,stanceOf(o)?.wandL);stanceWandTip(o,stanceOf(o),dt);
     o.tip.getWorldPosition(o.tipW||(o.tipW=new THREE.Vector3()));o.tipWT=performance.now();
     frostWandLink(o,now);

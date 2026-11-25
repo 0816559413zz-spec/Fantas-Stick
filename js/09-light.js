@@ -11,7 +11,7 @@ PATHS.push({id:'light',n:'สายแสง',ic:'✨',col:'#ffe9a8',d:'ซั�
   combo:'Crystal Bond ส่งคริสตัลให้เพื่อน (กัน/ตีแรงขึ้น) • เก็บไว้เอง = ลำแสง/โล่แรงสุด • Empower Light บัฟทั้งเราและเพื่อน • Light Step วาร์ปไปหาเพื่อน ให้โล่ลดดาเมจ'});
 const LTV=PATHS[LIGHTP].v={max:3,linkR:650,linkPick:160,sendT:0.3,holdT:0.4,allyDR:0.05,allyDmg:0.05,
   baRange:600,baCharge:0.6,heatT:8,heatIdle:2,heatDrain:2,ohT:2,baFloat:0.5,baRise:1.3,baMove:0.7,ba0:[5,1.0],ba1:[7,0.5],ba2:[12,0.5],ba3:[15,0.4],baW:[10,14,18,22],
-  shHp:[0,120,180,300],shReg:1,
+  shHp:[0,50,80,120],shReg:1,   // user 2026-11-25: shield back for Radiance only, less health (was 120/180/300)
   dsDist:250,dsAllyR:900,dsPick:180,dsCd:8,dsDmg:15,dsR:150,dsDR:0.3,dsDRT:2,
   prismT:0};   // 0 = ปริซึมอยู่ตลอดจนเรียกคืน/ลิงก์ใหม่ (ผู้ใช้ 2026-11-18)
 PATHS[LIGHTP].vn={max:'คริสตัลสูงสุด',linkR:'ลิงก์ • ระยะหลุด',allyDR:'คริสตัลกับเพื่อน • กันดาเมจ/ชิ้น',allyDmg:'คริสตัลกับเพื่อน • ตีแรง/ชิ้น',
@@ -358,13 +358,24 @@ function lightUltSnap(u){
   return [u.phase,Math.round(u.t*100)/100,u.ally,Math.round(u.home.x),Math.round(u.home.y),
     Math.round(u.home.h*100)/100,shot?[u.arm,...shot.map(v=>Math.round(v*100)/100)]:0,
     Math.round((u.finish||0)*100)/100,u.pose?u.pose.map(v=>Math.round(v*100)/100):0,
-    u.phase>=3?Math.round(u.lean*1000)/1000:0];
+    u.phase>=3?Math.round(u.lean*1000)/1000:0,
+    u.xsh?1:u.xStun>0?2:0,Math.round(Math.max(0,u.xHp)/LT_UL.xCap*100),u.xBrk?1:0];   // [10] X guard 0/1 held/2 broken-stun • [11] shield left % • [12] used up
 }
+// X guard on/off (hold right click in god form): the linked duo gets the hex shield
+function lightXGuard(p,u,on){const a=G.players[u.ally];u.xsh=on?1:0;if(a)a.lgXsh=on?p.id:null;
+  emit({k:'efx',z:on?'lgxon':'lgxoff',x:Math.round(a?a.x:p.x),y:Math.round(a?a.y:p.y),h:(a?a.z:p.z)+1,id:p.id,t:a?a.id:null});}
+// damage into a duo under the hex shield: 70% of it is stopped until the shield has stopped 100 in total, then it breaks
+function lightHexAbsorb(t,amt){const o=G.players[t.lgXsh],u=o&&o.lgUlt;if(!u||!u.xsh||u.ally!==t.id){t.lgXsh=null;return amt;}
+  const stop=Math.min(amt*LT_UL.xDR,u.xHp);u.xHp-=stop;amt-=stop;
+  if(u.xHp<=1e-6){u.xHp=0;u.xsh=0;u.xBrk=1;u.xStun=LT_UL.xStun;u.burst=0;u.wind=0;u.shot=null;t.lgXsh=null;
+    emit({k:'efx',z:'lgxbrk',x:Math.round(t.x),y:Math.round(t.y),h:(t.z||0)+1,id:o.id,t:t.id});}
+  return amt;}
 function lightUltEnd(p,restore=true,show=true){
   const u=p.lgUlt;
   if(!u)return;
   const a=G.players[u.ally];
   if(a?.lgUltWard?.owner===p.id)a.lgUltWard=null;
+  if(a&&a.lgXsh===p.id)a.lgXsh=null;
   const origin=restore&&u.phase===5?{x2:p.x,y2:p.y,h2:p.z}:null;
   p.lgUlt=null;
   if(restore&&u.phase>1){
@@ -431,13 +442,15 @@ function lightUltTick(p,inp,dt,canAct,finishPressed){
   if(u.phase<4&&(!ally||ally.id!==u.ally||ally.team!==p.team||ally.lgFrom!==p.id)){lightUltEnd(p);return;}
   lightSkillsTick(p,dt);
   p.shieldOn=false;p.wSpd=0;p.vx=p.vy=p.vz=p.mvx=p.mvy=0;
+  p.inv=Math.max(p.inv||0,0.05);   // god form can't be hurt (user 2026-11-25)
   if(u.phase===1){
     u.cast-=dt;
     if(u.cast>0)return;
     u.phase=2;
     emit({k:'efx',z:'lgultform',x:ally.x,y:ally.y,h:(ally.z||0)+LT_UL.hover,id:p.id,t:ally.id});
   }else u.t=Math.max(0,u.t-dt);
-  if(u.t<=0&&u.phase===2){lightUltEnd(p);return;}
+  const forced=u.t<=0&&u.phase===2;   // time up = the finish fires anyway (user 2026-11-25)
+  if(forced&&u.xsh)lightXGuard(p,u,false);
   if(u.phase<4){p.x=ally.x;p.y=ally.y;p.z=(ally.z||0)+LT_UL.hover;}
   p._px=p.x;p._py=p.y;
   const look=u.target||inp;
@@ -457,7 +470,9 @@ function lightUltTick(p,inp,dt,canAct,finishPressed){
     }
     return;
   }
-  if(canAct&&p.sil<=0&&finishPressed){
+  if(u.xStun>0){u.xStun-=dt;u.burst=0;u.wind=0;u.rest=LT_UL.baRest;if(!forced)return;}   // shield broke: stunned 2 s
+  if(!forced){const want=canAct&&!!inp.sh&&!u.xBrk;if(want!==!!u.xsh)lightXGuard(p,u,want);if(u.xsh){u.burst=0;u.wind=0;u.rest=LT_UL.baRest;return;}}   // X guard: no shooting
+  if(forced||canAct&&p.sil<=0&&finishPressed){
     const ground=Number.isFinite(inp.gx)&&inp.gx>=0&&Number.isFinite(inp.gy)&&inp.gy>=0;
     const ax=ground?inp.gx:Number.isFinite(inp.ax)?inp.ax:p.x+Math.cos(p.ang)*LT_UL.finishRange;
     const ay=ground?inp.gy:Number.isFinite(inp.ay)?inp.ay:p.y+Math.sin(p.ang)*LT_UL.finishRange;
@@ -513,12 +528,15 @@ const LT_VS_S=defSpell(LIGHTP,{id:'veiledshard',v:{t:5,r:300,dmg:6,tick:0.5,slow
   d:'วางพายุใบมีดคริสตัลลงพื้นตรงเพื่อนที่ Bond อยู่ (ไม่มี Bond = ที่ตัวเรา) • หลังผลึกตก วงอยู่กับที่ 5 วิ รัศมี 300 • ศัตรูในวงโดน 6 ดาเมจทุก 0.5 วิ + ช้า 30%',
   cast(p,S){const a=lightAlly(p),c=a||p;p.lgVeil={x:c.x,y:c.y,h:c.z||0,wind:LT_VS_RELEASE+LT_VS_TRAVEL,t:S.v.t,k:0};emit({k:'efx',z:'lgveil',x:Math.round(c.x),y:Math.round(c.y),h:c.z||0,r:S.v.r,id:p.id,t:a?a.id:undefined});}});
 const LT_VS=LT_VS_S.v;
-const LT_UL=defSpell(LIGHTP,{id:'radiantsovereign',v:{t:8,shield:75,dr:0.3,cast:0.45,hover:3.08,
-  baRange:800,baDmg:12,baTick:0.20,baHold:0.7,baRest:0.39,baWindup:0.14,width:12,
-  finishCast:0.92,finishRise:2.65,finishRelease:0.38,finishDelay:0.14,finishDissolve:0.65,finishRange:900,finishR:300,finishDmg:80,finishSlow:0.4,finishSlowT:2},
+// user 2026-11-25: 10 s, beams held 2x (1.4 s) but 8 dmg / 0.2 s, beam hitbox 30, finish 50 dmg r 400 with a longer charge + beam,
+// forced finish when time runs out, caster can't be hurt, hold right click = X guard: duo gets a hex shield (70% less dmg, absorbs 100)
+const LT_UL=defSpell(LIGHTP,{id:'radiantsovereign',v:{t:10,shield:75,dr:0.3,cast:0.45,hover:3.08,
+  baRange:800,baDmg:8,baTick:0.20,baHold:1.4,baRest:0.39,baWindup:0.14,width:30,
+  finishCast:1.3,finishRise:2.65,finishRelease:0.8,finishDelay:0.14,finishDissolve:0.65,finishRange:900,finishR:400,finishDmg:50,finishSlow:0.4,finishSlowT:2,
+  xDR:0.7,xCap:100,xStun:2},
   vn:{t:'อยู่ (วิ)',shield:'คู่หู • โล่',dr:'คู่หู • ลดดาเมจ',baDmg:'ลำแสงแขน • ดาเมจต่อฮิต',finishDmg:'ท่าสุดท้าย • ดาเมจ'},
   role:'ult',ult:true,n:'Radiant Sovereign',ic:'👑',cd:0,
-  d:'ลิงก์คู่หูแล้วแปลงร่างเหนือหัวเขา 8 วิ • คู่หูได้โล่ 75 และลดดาเมจ 30% • คลิกซ้ายค้างยิงลำแสงสลับแขน • กดอัลติซ้ำเพื่อชาร์จแล้วปล่อยลำแสงสั้นจากอก • จุดกระทบระเบิดหลังลำแสงแตะพื้น โดน 80 ดาเมจและช้า 40% 2 วิ จากนั้นสลายร่าง 1 วิแล้ววาร์ปกลับจุดเดิม',
+  d:'ลิงก์คู่หูแล้วแปลงร่างเหนือหัวเขา 10 วิ (ไม่โดนดาเมจ) • คลิกขวาค้าง = ไขว้แขน X: คู่หูได้โล่หกเหลี่ยม ลด 70% (กันได้รวม 100) แตก = สตัน 2 วิ ใช้ไม่ได้อีก • หมดเวลา = ยิงปิดท้ายเอง • คู่หูได้โล่ 75 และลดดาเมจ 30% • คลิกซ้ายค้างยิงลำแสงสลับแขน • กดอัลติซ้ำเพื่อชาร์จแล้วปล่อยลำแสงสั้นจากอก • จุดกระทบระเบิดหลังลำแสงแตะพื้น โดน 80 ดาเมจและช้า 40% 2 วิ จากนั้นสลายร่าง 1 วิแล้ววาร์ปกลับจุดเดิม',
   cast(p,S){
     const a=lightAlly(p);
     if(!a||a.team!==p.team||a.lgFrom!==p.id){
@@ -527,7 +545,7 @@ const LT_UL=defSpell(LIGHTP,{id:'radiantsovereign',v:{t:8,shield:75,dr:0.3,cast:
     if(p.lgUlt||p.shieldOn||p.fly||p.dash>0)return false;
     p.lgBeam=0;p.lgChg=0;p.lgFl=0;
     a.lgUltWard={owner:p.id,hp:S.v.shield};
-    p.lgUlt={phase:1,t:S.v.t,cast:S.v.cast,ally:a.id,arm:1,burst:0,rest:0,wind:0,home:{x:p.x,y:p.y,h:p.z}};
+    p.lgUlt={phase:1,t:S.v.t,cast:S.v.cast,ally:a.id,arm:1,burst:0,rest:0,wind:0,home:{x:p.x,y:p.y,h:p.z},xsh:0,xHp:S.v.xCap,xBrk:0,xStun:0};
     emit({k:'efx',z:'lgult',x:p.x,y:p.y,h:p.z,id:p.id,t:a.id});
   }}).v;
 PATHS[LIGHTP].def=['crystalbond','shardvolley','empowerlight','sanctumcrystal'];

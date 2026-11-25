@@ -256,3 +256,10 @@ ref: `designs/light_ref/ult_god_ref.webp` (ร่างทองเรือง�
 - BA ชาร์จ 0.6 วิ (เดิม 1.4) • 0 คริสตัล 5/1.0 วิ (เท่าเดิม) • 1 = 7/0.5 • 2 = 12/0.5 • 3 = 15/0.4
 - ลำแสงสั่น/เต้นน้อยลง
 - ไม่มีคลิกขวา/ไม่มีกำแพง (คลิกขวาไม่บังคับทุกคลาส)
+
+## Ult round 2 + lean (user 2026-11-25)
+- Lean: walking WASD tilts the floating body toward the move direction; while firing the arms keep aiming (body tilt taken off the arms).
+- Ult: 10 s • each beam held 2x (1.4 s) • damage like a normal 3-crystal shot → 8 every 0.2 s • beam hitbox 12 → 30, visibly thicker • final shot 50 damage, wider (r 400), longer charge + longer beam before the blast • when time runs out the final shot always fires • can't be hurt in the god form • duo dies → back to the start point.
+- New in the ult: hold right click = cross arms in an X on the chest (can't shoot); the duo below gets a full-body hexagon shield: −70% damage, but the 70% part only covers 100 damage; minimal bar (no number) while up; winks in fast, fades out. Break: strong jolt + stunned 2 s, then normal pose; the shield icon goes dark and can't be used again this ult (user: no cooldown).
+- Round 2 (user 2026-11-25): the X must animate (arms travel in, head bows), chest crystal glows, thin hexagon patches pop at a few spots around the god form (like the old fire shield). Floating legs must not walk. Cloak stuck out stiff when floating fast → less cloth wind while floating.
+- **Shield back (user 2026-11-25):** "radiance is so suck at surviving" → Crystal Aegis on again for Radiance only (others stay off except Frost), less health 50 / 80 / 120 (1/2/3 crystals). Blocks projectiles and melee from the front; players walk through it. No ragdoll/push.
