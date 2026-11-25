@@ -2200,8 +2200,41 @@
    "dur": 7,
    "n": 2
   },
+  "stance/storm_g1": {
+   "v": "05d9c5cf",
+   "desc": "Storm hand look g1 (user 2026-11-25, pick one of 3): idle, zap dash (left palm dive, hold, rise), Thunder Line cast",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 6,
+   "n": 2
+  },
+  "stance/storm_g3": {
+   "v": "825b8445",
+   "desc": "Storm hand look g3 (user 2026-11-25, pick one of 3): idle, zap dash (left palm dive, hold, rise), Thunder Line cast",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 6,
+   "n": 2
+  },
+  "stance/storm_g4": {
+   "v": "178c3448",
+   "desc": "Storm hand look g4 (user 2026-11-25, pick one of 3): idle, zap dash (left palm dive, hold, rise), Thunder Line cast",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 6,
+   "n": 2
+  },
   "stance/storm_now": {
-   "v": "2bfcf360",
+   "v": "c4d18bd1",
    "desc": "Storm: current idle + run (before the class stance)",
    "pal": "",
    "tags": [
@@ -2209,6 +2242,39 @@
     "preview"
    ],
    "dur": 5,
+   "n": 2
+  },
+  "stance/storm_sk_a": {
+   "v": "23c7b344",
+   "desc": "Storm skill animations set A (user 2026-11-25, pick per skill): Thunder Line, Triple Strike, Storm Orbs",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 6.6,
+   "n": 2
+  },
+  "stance/storm_sk_b": {
+   "v": "b02c2390",
+   "desc": "Storm skill animations set B (user 2026-11-25, pick per skill): Thunder Line, Triple Strike, Storm Orbs",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 6.6,
+   "n": 2
+  },
+  "stance/storm_sk_c": {
+   "v": "e7d43023",
+   "desc": "Storm skill animations set C (user 2026-11-25, pick per skill): Thunder Line, Triple Strike, Storm Orbs",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 6.6,
    "n": 2
   },
   "stance/water_a": {

@@ -7,6 +7,7 @@ FXCODE.studio_class_stance=(_x,_y,_h,args,instance)=>{
   const path=PATHS.findIndex(p=>p.id===args.cls);if(path<0)return;
   if((me.pathIdx|0)!==path){setKit(me,String(path));me.kt=me.kit;try{WD.broadcastLobby();}catch(e){}}
   STANCE_STYLE[path]=args.style||'a';
+  if(args.anim)STORM_ANIM_V=args.anim;
   const home=ST.home||(ST.home={x:me.x,y:me.y});resetBody(me,home.x,home.y);me.z=groundH(me.x,me.y);
   if(args.fmode!==undefined)me.fmode=args.fmode;me.fmCd=0;
   for(const k in me.cd)me.cd[k]=0;
@@ -32,6 +33,7 @@ FXCODE.studio_class_stance=(_x,_y,_h,args,instance)=>{
       else if(a.a==='hit'){const al=G.players.stAlly;if(al)try{damage(al,a.dmg||40,foe?foe.id:'x','aoe');}catch(e){}}
       else if(a.a==='swap'){me.fmode=me.fmode===1?0:1;me.fmCd=me.fswT=FROST_SWAP_T;me.cmbT=0;emit({k:'efx',z:'fswap',x:me.x,y:me.y,h:me.z+1,id:me.id,m:me.fmode});}   // same as the host's V key
       else if(a.a==='dash'){me.cd.dodge=0;inp.c.sp++;}
+      else if(a.a==='set'){me[a.k]=a.v;}   // e.g. Storm stacks {a:'set',k:'lst',v:4}
       else if(a.a==='fire'||a.a==='hold')me.cd.basic=0;
     }
     inp.fire=fire;inp.sh=sh;

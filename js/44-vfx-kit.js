@@ -219,7 +219,9 @@ const BF_EXTRA={iceboom:['ice',1.2],glacier:['ice',1],slam3:['ice',1.3],gwave:['
   epunch:['earth',0.6],eslam:['earth',1.2],ecbslam:['earth',1.3],ecrush:['earth',1.2],ewland:['earth',1],eaugboom:['earth',1.3],
   esbhit:['earth',0.8],erhit:['earth',0.6],ewallup:['earth',0.8],estdbreak:['earth',1],ebreakw:['earth',0.8]};
 const BF={on:true,last:new Map()};
+const BF_SKIP={sline:1};   // no battlefield smoke/dust/marks for these (user 2026-11-25: Thunder Line)
 function bfAfter(ev,H){if(!BF.on||ev.x===undefined||isNaN(ev.x))return;
+  if(ev.k==='efx'&&BF_SKIP[ev.z])return;
   let el=null,s=1,x=ev.x,y=ev.y,h=H;
   if(ev.k==='efx'){if(ev.z==='dfdive'&&ev.g)return;const X=BF_EXTRA[ev.z];
     if(X){[el,s]=X;if(ev.x2!==undefined){x=ev.x2;y=ev.y2;}if(ev.h===undefined)h=0;}

@@ -108,7 +108,8 @@ const an=a+rnd(-1.05,1.05),rr=R*rnd(0.55,1.05);PARTS.push({x:px+Math.cos(an)*rr,
       if(ev.n)floatText(x,y,'⚡'+ev.n,'#fff27a',18,H+2.6);break;}
     case 'slup':if(near)snd('cast_ebolt',ev);break;
     case 'sline':{const a=ev.a,c=Math.cos(a),sn=Math.sin(a),L=ev.len,N=Math.max(3,Math.round(L/110));   // ผู้ใช้ 2026-11-11: ลดเอฟเฟกมาก เส้นบาง ไม่ระเบิดที่พื้น (โดมเล็กจาก storm/line_mix)
-      for(let i=0;i<=N;i++){const d=L*i/N,px=x+c*d,py=y+sn*d;later(0.3*i/N,()=>{(ev.g?tboltB:tbolt)(px+rnd(-10,10),py+rnd(-10,10),H+9,px+rnd(-6,6),py+rnd(-6,6),H+0.1,0.16,0,0.09,0);if(i%2===0){SHAPES_Q.push({k:'decal',x:px,y:py,col:'#1a1408',s1:1.1,life:3,op:0.45});for(let k=0;k<5;k++)PARTS.push({x:px,y:py,h:H+0.1,vx:rnd(-90,90),vy:rnd(-90,90),vh:rnd(2,5),life:.35,max:.35,col:ev.g?'#7feaff':'#ffe27a',size:1.6,g:9,drag:1});}});}
+      for(let i=0;i<=N;i++){const d=L*i/N,px=x+c*d,py=y+sn*d;if(d<70)continue;   // nothing at the caster's feet (user 2026-11-25: no smoke under us)
+        later(0.3*i/N,()=>{(ev.g?tboltB:tbolt)(px+rnd(-10,10),py+rnd(-10,10),H+9,px+rnd(-6,6),py+rnd(-6,6),H+0.1,0.16,0,0.09,0);if(i%2===0){SHAPES_Q.push({k:'decal',x:px,y:py,col:'#1a1408',s1:1.1,life:3,op:0.45});for(let k=0;k<5;k++)PARTS.push({x:px,y:py,h:H+0.1,vx:rnd(-90,90),vy:rnd(-90,90),vh:rnd(2,5),life:.35,max:.35,col:ev.g?'#7feaff':'#ffe27a',size:1.6,g:9,drag:1});}});}
       if(near){snd('zap',ev);shake(2.6);}break;}   // ผู้ใช้ 2026-11-15: ฟ้าผ่าต้องสั่น + มี impact (รอยไหม้ + สะเก็ด)
     case 'ssiph':{const T=ev.tg||[];
       // ผู้ใช้ 2026-10-23: ใช้ตัวเลือกรอบ 3 แบบ 1 (เทสลา) แต่สีเหลือง — ส่วนต่อศัตรู (siphon_y ยืดตามระยะ) + ส่วนรอบตัวเรา (siphon_yself)

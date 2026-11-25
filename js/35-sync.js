@@ -99,7 +99,27 @@ const SKANIM={ringofembers:'sweep',blazeform:'fireflare',colossus:'novaup',kindl
 Object.assign(SKANIM,{poisondart:'natthrow',bloom:'natthrow',sporecloud:'natspell',vinelash:'natraise',thornburst:'natraise',worldtree:'natsummon',radiantsovereign:'novaup',lgrecall:'pullback'});
 SKANIM.railgun_release='railrelease';SKANIM.terraauger_release='ground';
 SKFEET.rendfar=[-0.75,0.5,0.1,-0.08];   /* ขาหน้าก้าวออกไปด้านหน้า ขาหลังยันหลัง ให้ท่าก้มดูมีน้ำหนักตามฟิสิกส์ (ผู้ใช้ 2026-11-16) */SKANIM.dragonfall_land='dragonland';SKFEET.dragonland=[-0.8,0.3,0.12,-0.1];SKFEET.wingflick=[-0.45,0.3,0.12,-0.12];
-function skAnim(ev){const o=PM3.get(ev.id);let n=SKANIM[ev.s];if(ev.s==='glacierrend'){const v=VIEW.cur&&VIEW.cur.P.find(q=>q.id===ev.id);if(v&&v.fr&&v.fr[0]!==0)n='rendfar';}if(!o||!n)return;if(ev.s==='stormdome'&&!ev.g)return;o.caN=n;o.caT=0;o.cpT=0;}
+function skAnim(ev){const o=PM3.get(ev.id);let n=SKANIM[ev.s];if(ev.s==='glacierrend'){const v=VIEW.cur&&VIEW.cur.P.find(q=>q.id===ev.id);if(v&&v.fr&&v.fr[0]!==0)n='rendfar';}{const v=STORM_ANIM_V||STORM_ANIM_PICK[ev.s],sv=v&&'st_'+ev.s+'_'+v;if(sv&&CANIM[sv])n=sv;}if(!o||!n)return;if(ev.s==='stormdome'&&!ev.g)return;o.caN=n;o.caT=0;o.cpT=0;}
+// ---- Storm skill animations, 3 to pick per skill (user 2026-11-25): bigger twists, counter-turns, slow wind-up -> fast hit -> hit-stop -> slow settle
+//   no wand any more: the gold right hand leads. nc = authored both arms (no auto counter-arm)
+Object.assign(CANIM,{
+  // Thunder Line
+  st_thunderline_a:{d:.6,st:.9,nc:1,k:[[.32,-2.95,-.35,-.6,-.2,-1.25,.35,.05,.02,'s'],[.4,-3.0,-.3,-.66,-.22,-1.3,.38,.06,.03,'s'],[.5,-.85,.05,.75,.48,.55,.5,-.04,-.2,'i'],[.68,-.9,.05,.78,.46,.55,.5,-.04,-.2,'s'],[1,-1.2,-.1,.3,.15,.2,.4,0,-.06,'s']]},   // A slam: arm up high behind, body turned back, slow at the top -> hammer the palm down-forward, bent over, hold
+  st_thunderline_b:{d:.65,st:.6,nc:1,tm:[.5,.72],k:[[.3,-.75,.3,-.35,0,-.55,.4,.02,-.05,'s'],[.38,-.72,.32,-.38,0,-.58,.42,.02,-.06,'s'],[.5,-1.62,-.47,.42,.18,-.2,.45,-.03,-.09,'i'],[.72,-1.62,-.47,.44,.18,-.2,.45,-.03,-.09,'s'],[1,-1.25,-.05,.18,.08,-.25,.4,0,-.03,'s']]},   // B push, one hand (user round 2): right hand pulls back only a little, drives forward with the twist, held tense (shake), then back; left arm stays calm • armR.z -.47 = palm on the skill line despite the twist (measured: hand within ~2° of the aim)
+  st_thunderline_c:{d:.6,st:.8,nc:1,k:[[.3,-1.6,.95,-.95,.05,.35,.55,.08,-.04,'s'],[.4,-1.62,1.0,-1.0,.06,.38,.58,.09,-.05,'s'],[.5,-1.35,-1.1,.7,.22,-.7,-.2,-.08,-.12,'o'],[.68,-1.35,-1.05,.68,.22,-.7,-.2,-.08,-.12,'s'],[1,-1.1,-.6,.25,.08,-.3,.3,0,-.03,'s']]},   // C chop: hand cocked at the left shoulder, body wound left -> backhand slash out to the right-front, hold
+  // Triple Strike (call down at a point)
+  st_triplestrike_a:{d:.7,st:.5,nc:1,k:[[.38,-3.15,-.25,-.25,-.25,-.9,.5,0,.04,'i'],[.48,-3.2,-.22,-.28,-.27,-.95,.52,0,.05,'s'],[.58,-1.0,.05,.55,.38,.45,.45,0,-.16,'o'],[.75,-1.0,.05,.55,.38,.45,.45,0,-.16,'s'],[1,-1.25,-.05,.2,.12,.15,.4,0,-.05,'s']]},   // A grab the sky: reach up (speeding up), hang at the top -> yank the fist down at the target, hold
+  st_triplestrike_b:{d:.7,st:.6,nc:1,k:[[.35,-1.55,.1,.85,.02,-2.9,.55,-.06,0,'s'],[.5,-1.6,.12,.9,.02,-3.0,.58,-.07,0,'s'],[.56,-1.75,.15,1.0,.08,-2.6,.75,-.09,-.03,'o'],[.75,-1.72,.14,.98,.07,-2.65,.72,-.09,-.03,'s'],[1,-1.35,.05,.4,.03,-1.0,.5,0,0,'s']]},   // B aim + call: side-on like an archer, right palm points at the spot, left hand raised to the sky, a sharp snap, hold
+  st_triplestrike_c:{d:.7,st:.7,nc:1,k:[[.3,-2.6,.4,-1.15,-.12,-2.6,-.4,.05,.02,'s'],[.42,-3.0,-.2,.85,-.2,-3.0,.2,-.05,.04,'i'],[.55,-.7,-.1,.55,.5,-.7,.1,0,-.22,'o'],[.74,-.72,-.1,.55,.48,-.72,.1,0,-.22,'s'],[1,-1.2,-.1,.2,.15,-.6,.4,0,-.05,'s']]},   // C spin call: both arms up, wind far left, whip round to the right overhead -> both crash down in front, hold
+  // Storm Orbs (two orbs float behind)
+  st_stormorbs_a:{d:.65,st:.3,nc:1,k:[[.35,-1.25,.55,0,.1,-1.25,-.55,0,-.06,'s'],[.48,-1.2,.62,0,.12,-1.2,-.62,0,-.08,'s'],[.58,.4,-1.3,0,-.18,.4,1.3,0,.02,'o'],[.75,.38,-1.28,0,-.17,.38,1.28,0,.02,'s'],[1,-.1,-.6,0,-.04,-.1,.6,0,0,'s']]},   // A gather + fling: palms cup in front of the chest (slowing), then fling both back-out wide, chest open, hold
+  st_stormorbs_b:{d:.65,st:.4,nc:1,k:[[.35,-2.4,.75,-.75,.0,.45,.4,.06,0,'s'],[.46,-2.45,.8,-.8,0,.48,.42,.07,0,'s'],[.56,-2.6,-1.05,.6,-.12,-.6,.15,-.07,0,'o'],[.75,-2.55,-1.0,.58,-.11,-.6,.15,-.07,0,'s'],[1,-.9,-.45,.2,-.03,-.2,.35,0,0,'s']]},   // B shoulder toss: hand reaches over the left shoulder, body turned -> flick it back over the right shoulder, hold
+  st_stormorbs_c:{d:.65,st:.2,nc:1,tm:[.1,.46],k:[[.38,.3,-.35,-.1,.28,.3,.35,0,-.26,'s'],[.46,.32,-.36,-.1,.3,.32,.36,0,-.28,'s'],[.56,-.4,-1.4,.05,-.22,-.4,1.4,0,.06,'o'],[.75,-.4,-1.38,.05,-.2,-.4,1.38,0,.05,'s'],[1,-.15,-.6,0,-.05,-.15,.6,0,0,'s']]},   // C charge burst: crouch with fists low, shaking -> burst up, arms flung wide, leaning back, hold
+});
+Object.assign(SKFEET,{st_thunderline_a:[-.55,.35,.14,-.12],st_thunderline_b:[.3,-.45,.16,-.16],st_thunderline_c:[-.4,.3,.12,-.1],st_triplestrike_a:[-.35,.3,.12,-.12],st_triplestrike_b:[.4,-.45,.14,-.1],st_triplestrike_c:[-.45,.35,.16,-.16],
+  st_stormorbs_a:[.15,-.2,.14,-.14],st_stormorbs_b:[.3,-.35,.12,-.12],st_stormorbs_c:[-.2,-.2,.2,-.2]});
+let STORM_ANIM_V=null;   // studio arg 'anim' forces a set
+const STORM_ANIM_PICK={thunderline:'b',stormorbs:'c'};   // user's picks per skill (2026-11-25); skills not listed keep their old animation
 const _caT=[0,0,0,0,0,0,0,0],_caR=[0,0,0,0,0,0,0,0];
 function skillPose(o,p,dt,now){
   const A=CANIM[o.caN];if(!A){o.caN=null;o.caJ=null;return false;}
@@ -113,7 +133,7 @@ function skillPose(o,p,dt,now){
   let j=0;while(j<A.k.length-1&&u>A.k[j][0])j++;
   const K=A.k[j],P=j?A.k[j-1]:null,u0=P?P[0]:0,f=Math.min(1,(u-u0)/Math.max(0.001,K[0]-u0)),e=K[9]==='o'?_cb(f):K[9]==='i'?f*f*f:_cs(f);
   for(let i=0;i<8;i++){const a=lerp(P?P[i+1]:rest[i],K[i+1],e);_caT[i]=lerp(rest[i],rest[i]+(a-rest[i])*AMP_S[i],w);}
-  counterArm(o,_caT,rest,w,!!A.two||/^nat/.test(o.caN));
+  counterArm(o,_caT,rest,w,!!A.two||!!A.nc||/^nat/.test(o.caN));
   _caT[0]=Math.max(-3.35,_caT[0]);_caT[4]=Math.max(-3.35,_caT[4]);
   if(A.ci&&u>A.ci[0]&&u<A.ci[1]){const q=(u-A.ci[0])/(A.ci[1]-A.ci[0])*Math.PI*2;_caT[0]+=0.32*Math.sin(q)*w;_caT[1]+=0.32*(Math.cos(q)-1)*w;}   // วนไม้เป็นวง
   if(A.tm&&u>A.tm[0]&&u<A.tm[1]){const tr=(Math.sin(now/23)+Math.sin(now/37))*0.03*w;_caT[0]+=tr;_caT[4]+=tr;_caT[3]+=tr*0.3;}   // เกร็งสั่น (ออกแรง)
@@ -316,6 +336,8 @@ const STANCES={
     a:{name:'Charged',yaw:8,lean:0,spine:.24,chest:.14,rx:.7,rz:-.62,elR:.25,lx:-.08,lz:.46,elL:.6,legR:-.1,legL:.07,spR:.3,spL:.3,kR:.04,kL:.04,
       head:-.08,br:{T:3.2,y:.016,spine:.03,arm:.03},run:{lean:.2,spine:.1,rx:1.0,rz:-.3,elR:.05,lx:.95,lz:.28,elL:.05,swing:.12,head:-.06},fx:'stormArc'}}   // run (user 2026-11-25): both arms trail back-down, straight
 };
+// Storm hand looks (user 2026-11-25, 3 to pick; no wand in all three): g1 gold gauntlets always • g3 gold only while casting/dashing • g4 gold lightning streaks up the forearms
+for(const [k,gold,name] of [['g1','glove','Gold gauntlets'],['g3','skill','Gold on cast'],['g4','streak','Gold streaks']])STANCES.storm[k]={...STANCES.storm.a,name,gold,noWand:1};
 const STANCE_PICK={darkness:'b',frost:'b',frostWand:'a',pyro:'a',water:'a',storm:'a'};   // user's picks 2026-11-24 (Stalker, Guard, Brawler, Water spiral)
 function stanceOf(o){const id0=PATHS[o.posePath]?.id,id=id0==='frost'&&o.fRanged?'frostWand':id0,S=STANCES[id];return S?S[STANCE_STYLE[o.posePath]||STANCE_PICK[id]||'a']||S.a:null;}
 const _stQ=new THREE.Quaternion(),_stX=new THREE.Vector3(1,0,0),_stZ=new THREE.Vector3(0,0,1);
@@ -398,12 +420,49 @@ function stRibbonSet(m,f){const A=m.geometry.attributes.position,a=A.array,n=m.u
 const FIRE_TONGUES=9;   // Fire class arm: flame tongues (cost: one small fire-shader mesh each)
 // Storm class look (user 2026-11-25): small lightning arcs flicker over the whole body all the time — not many, random, very fast
 // round 2 (user): bigger arcs, most of them crawl the wand (hand -> tip), a few on the left hand, fewer on the body
-const ST_ARC={n:13,body:4,wand:6,seg:7,life:[.06,.13],gap:[.03,.2],len:[.22,.45],jit:.11,w:.03,glow:2.1,
+const ST_ARC={n:13,body:4,wand:6,dash:10,seg:7,life:[.06,.13],gap:[.03,.2],len:[.22,.45],jit:.11,w:.03,glow:2.1,
   bones:[['hips','spine',.32],['spine','chest',.3],['chest','neck',.24],['upper_arm_L','forearm_L',.15],['forearm_L','hand_L',.15],['upper_arm_R','forearm_R',.15],['forearm_R','hand_R',.15],['thigh_L','shin_L',.34],['thigh_R','shin_R',.34],['shin_L','foot_L',.42],['shin_R','foot_R',.42]]};   // radius = out past the robe/sleeves
 // glow round an arc fades out to both edges (user 2026-11-25: no flat band 'aura', soft + thin)
 let _stArG=null;function stArcGlowTex(){if(_stArG)return _stArG;const c=document.createElement('canvas');c.width=4;c.height=64;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,64);
   g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.5,'rgba(255,255,255,1)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,4,64);_stArG=new THREE.CanvasTexture(c);return _stArG;}
 function stRibbonUV(m){const n=m.userData.n,uv=new Float32Array((n+1)*4);for(let i=0;i<=n;i++){uv[i*4]=i/n;uv[i*4+1]=0;uv[i*4+2]=i/n;uv[i*4+3]=1;}m.geometry.setAttribute('uv',new THREE.BufferAttribute(uv,2));}
+// ---- Storm gold hands (user 2026-11-25) ----
+// hand: a gold shell over the hand • forearm/upper arm: tubes with a streaky texture that fades up the arm (no hard cut at the wrist)
+const ST_GOLD={tube:new THREE.CylinderGeometry(1,1,1,14,1,true),streaks:3,coatIn:.08,coatOut:.55,handR:.125,foreR:.15,upR:.16,fore:.62};
+let _stGT=null;function stGoldTex(){if(_stGT)return _stGT;const W=128,H=128,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+  for(let i=0;i<46;i++){const px=Math.random()*W,len=H*(.25+Math.random()*.75),w=2+Math.random()*7,g=x.createLinearGradient(0,H,0,H-len);   // v=0 at the hand end: streaks rise from the hand, ragged tops
+    g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.7,'rgba(255,255,255,.8)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(px,H-len,w,len);x.fillRect(px-W,H-len,w,len);}
+  _stGT=new THREE.CanvasTexture(c);_stGT.wrapS=THREE.RepeatWrapping;return _stGT;}
+function stGoldMat(tube){return tube?new THREE.MeshStandardMaterial({color:'#ffcf3a',emissive:'#ffa800',emissiveIntensity:1.1,metalness:.35,roughness:.3,map:stGoldTex(),alphaMap:stGoldTex(),transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide})
+  :new THREE.MeshStandardMaterial({color:'#ffd54a',emissive:'#ffb000',emissiveIntensity:1.2,metalness:.35,roughness:.28,transparent:true,opacity:0});}
+const _sgGA=new THREE.Vector3(),_sgGB=new THREE.Vector3(),_sgGC=new THREE.Vector3(),_sgY=new THREE.Vector3(0,1,0);
+function stTube(m,a,b,r,frac){const d=_sgGC.copy(a).sub(b),L=d.length()*frac;if(L<1e-4){m.visible=false;return;}d.normalize();m.position.copy(b).addScaledVector(d,L/2);m.quaternion.setFromUnitVectors(_sgY,d);m.scale.set(r,L,r);}   // from b (hand end) toward a
+function stormGold(o,S,P,dt,t){
+  if(S.noWand&&o.fileModel){const h=stBone(o,'hand_R');if(h)for(const c of h.children)if(/^wand_/.test(c.name))c.visible=false;if(o.tip)o.tip.visible=false;}
+  const cast=!!(o.caN||o.cpT>0||o.castT>0||o.stBmK>0),dash=o.dp&&o.dp.st==='zap',dGo=dash&&o.dp.ph==='go';
+  // coat level per side: 0 none .. 1 full (hand + streaky forearm); arm = upper arm too (dash: right arm)
+  const want=S.gold==='glove'?1:S.gold==='skill'?(cast||dash?1:0):0;o.sgK=(o.sgK||0)+(want-(o.sgK||0))*Math.min(1,dt*(want>(o.sgK||0)?1/ST_GOLD.coatIn:1/ST_GOLD.coatOut));
+  if(dGo)o.sgD=1;else o.sgD=Math.max(0,(o.sgD||0)-dt/(DPT.zapHold+DPT.zapUp+.2));const dk=_cs(o.sgD||0);   // dash coat fades out as the pose rises
+  for(const sd of [0,1]){const nm=sd?'R':'L',sh=stLoc(o,'upper_arm_'+nm,_sgGA),el=stLoc(o,'forearm_'+nm,_sgGB),hd=stLoc(o,'hand_'+nm,_stArE);
+    const H=P.gHand.find(m=>m.userData.sd===sd),F=P.gFore.find(m=>m.userData.sd===sd),U=P.gUpper.find(m=>m.userData.sd===sd);
+    const k=Math.max(o.sgK,sd?dk:0),ku=sd?dk:0;if(!(sh&&el&&hd)){H.visible=F.visible=U.visible=false;continue;}
+    H.visible=k>.01;H.position.copy(hd);H.scale.setScalar(ST_GOLD.handR*(1+.05*Math.sin(t*9+sd)));H.material.opacity=k;H.material.emissiveIntensity=1.1+.4*Math.sin(t*13+sd*2);
+    F.visible=k>.01;stTube(F,el,hd,ST_GOLD.foreR,ku>.01?1:ST_GOLD.fore);F.material.opacity=k*(.85+.15*Math.sin(t*7));F.material.map.offset.x=t*.05;
+    U.visible=ku>.01;if(U.visible){stTube(U,sh,el,ST_GOLD.upR,1);U.material.opacity=ku;}}
+  // g4: gold zigzag streaks crawling up each forearm (persistent, re-jittered fast)
+  P.gStreak.forEach((m,i)=>{const on=S.gold==='streak';m.visible=on;if(!on)return;const d=m.userData,nm=d.sd?'R':'L';d.t-=dt;
+    const el=stLoc(o,'forearm_'+nm,_sgGA),hd=stLoc(o,'hand_'+nm,_sgGB);if(!el||!hd){m.visible=false;return;}
+    if(d.t<=0){d.t=.07+Math.random()*.08;const ax=_sgGC.copy(el).sub(hd),len=ax.length();ax.normalize();const side=_stArD.set(Math.random()-.5,Math.random()-.5,Math.random()-.5).cross(ax).normalize(),pts=d.p||(d.p=[]),reach=.45+Math.random()*.5;
+      (d.wv||(d.wv=new THREE.Vector3())).crossVectors(ax,side).normalize();
+      for(let j=0;j<=ST_ARC.seg;j++){const f=j/ST_ARC.seg,q=pts[j]||(pts[j]=new THREE.Vector3());q.copy(hd).addScaledVector(ax,f*len*reach).addScaledVector(side,.15+(Math.random()-.5)*.04).addScaledVector(d.wv,(Math.random()-.5)*.05);}}
+    const w=.016,V=d.wv,pts=d.p;stRibbonSet(m,(u,a2,i6)=>{const j=Math.round(u*ST_ARC.seg),q=pts[j],ww=w*(1-u*.7);a2[i6]=q.x-V.x*ww;a2[i6+1]=q.y-V.y*ww;a2[i6+2]=q.z-V.z*ww;a2[i6+3]=q.x+V.x*ww;a2[i6+4]=q.y+V.y*ww;a2[i6+5]=q.z+V.z*ww;});});
+  // dash: many blue + yellow arcs shorting round the right arm, thinning out as the coat fades
+  P.darc.forEach((m,i)=>{const live=dk>.02&&Math.random()<.35+.6*dk;m.visible=live;if(!live)return;const d=m.userData;
+    const a=stLoc(o,i%3?'forearm_R':'upper_arm_R',_sgGA),b=stLoc(o,i%3?'hand_R':'forearm_R',_sgGB);if(!a||!b){m.visible=false;return;}
+    const ax=_sgGC.copy(b).sub(a),len=ax.length();ax.normalize();const side=_stArD.set(Math.random()-.5,Math.random()-.5,Math.random()-.5).cross(ax).normalize(),pts=d.p||(d.p=[]),u0=Math.random()*.6;
+    (d.wv||(d.wv=new THREE.Vector3())).crossVectors(ax,side).normalize();
+    for(let j=0;j<=ST_ARC.seg;j++){const f=j/ST_ARC.seg,q=pts[j]||(pts[j]=new THREE.Vector3());q.copy(a).addScaledVector(ax,(u0+f*.45)*len).addScaledVector(side,.12+(Math.random()-.5)*.1).addScaledVector(d.wv,(Math.random()-.5)*.12);}
+    const w=ST_ARC.w*.8,V=d.wv;m.material.opacity=.6+.4*dk;stRibbonSet(m,(u,a2,i6)=>{const j=Math.round(u*ST_ARC.seg),q=pts[j];a2[i6]=q.x-V.x*w;a2[i6+1]=q.y-V.y*w;a2[i6+2]=q.z-V.z*w;a2[i6+3]=q.x+V.x*w;a2[i6+4]=q.y+V.y*w;a2[i6+5]=q.z+V.z*w;});});}
 const _stArA=new THREE.Vector3(),_stArB=new THREE.Vector3(),_stArC=new THREE.Vector3(),_stArD=new THREE.Vector3(),_stArE=new THREE.Vector3();
 const ST_GEO={ball:new THREE.SphereGeometry(1,20,14),drop:new THREE.SphereGeometry(1,10,8),plane:new THREE.PlaneGeometry(1,1),shard:new THREE.OctahedronGeometry(1,0)};
 function stBuild(o,kind){
@@ -419,7 +478,10 @@ function stBuild(o,kind){
   else if(kind==='inkDrip'){for(let i=0;i<7;i++)add(new THREE.Mesh(ST_GEO.drop,stMat('ink')),'drop');for(let i=0;i<4;i++)add(new THREE.Sprite(stMatNew('inkSmoke')),'wisp');}
   else if(kind==='footMist'){for(let i=0;i<14;i++)add(new THREE.Sprite(stMatNew('mist')),'mist');}
   else if(kind==='stormArc'){for(let i=0;i<ST_ARC.n;i++){const m=add(stRibbon(ST_ARC.seg,new THREE.MeshBasicMaterial({color:i%4===3?'#7fe8ff':'#fff3a0',transparent:true,depthWrite:false,side:THREE.DoubleSide})),'arc');m.userData.t=-Math.random()*.3;
-    m.userData.src=i<ST_ARC.body?0:i<ST_ARC.body+ST_ARC.wand?1:2;const gl=add(stRibbon(ST_ARC.seg,new THREE.MeshBasicMaterial({map:stArcGlowTex(),color:i%4===3?'#38d8ff':'#ffc21c',transparent:true,opacity:.35,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide})),'arcGlow');stRibbonUV(gl);m.userData.gl=gl;}}
+    m.userData.src=i<ST_ARC.body?0:i<ST_ARC.body+ST_ARC.wand?1:2;const gl=add(stRibbon(ST_ARC.seg,new THREE.MeshBasicMaterial({map:stArcGlowTex(),color:i%4===3?'#38d8ff':'#ffc21c',transparent:true,opacity:.35,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide})),'arcGlow');stRibbonUV(gl);m.userData.gl=gl;}
+    for(let i=0;i<ST_ARC.dash;i++){const m=add(stRibbon(ST_ARC.seg,new THREE.MeshBasicMaterial({color:i%2?'#7fe8ff':'#fff3a0',transparent:true,depthWrite:false,side:THREE.DoubleSide})),'darc');m.visible=false;}
+    for(const sd of [0,1]){add(new THREE.Mesh(ST_GEO.ball,stGoldMat(0)),'gHand').userData.sd=sd;add(new THREE.Mesh(ST_GOLD.tube,stGoldMat(1)),'gFore').userData.sd=sd;add(new THREE.Mesh(ST_GOLD.tube,stGoldMat(1)),'gUpper').userData.sd=sd;}
+    for(let i=0;i<ST_GOLD.streaks*2;i++){const m=add(stRibbon(ST_ARC.seg,new THREE.MeshBasicMaterial({color:'#ffd23a',transparent:true,depthWrite:false,side:THREE.DoubleSide})),'gStreak');m.userData.sd=i%2;m.userData.t=0;}}
   else if(kind==='frostBreath'){for(let i=0;i<4;i++)add(new THREE.Sprite(stMatNew('breath')),'puff');for(let i=0;i<7;i++)add(new THREE.Sprite(stMatNew('glint')),'glint');}
   else if(kind==='frostGround'){const d=add(new THREE.Mesh(ST_GEO.plane,stMat('frost')),'decal');d.rotation.x=-Math.PI/2;
     for(let i=0;i<5;i++)add(new THREE.Mesh(ST_GEO.shard,stMat('ice')),'shard');for(let i=0;i<5;i++)add(new THREE.Sprite(stMatNew('glint')),'glint');}
@@ -461,10 +523,12 @@ function stanceFX(o,p,now,dt,detail){
       P.drop.forEach((m,i)=>{const a=stCyc(t,1.3,i,P.drop.length),q=st[i];if(a<q.a){q.x=h.x+(Math.random()-.5)*.07;q.y=h.y-.06;q.z=h.z+(Math.random()-.5)*.07;}q.a=a;
         const fall=a<.25?a/.25*.03:.03+(a-.25)*(a-.25)*2.4;m.position.set(q.x,q.y-fall,q.z);const sz=.03*(a<.25?.5+a*2:1-(a-.25)*.6);m.scale.set(sz,sz*(a<.25?1+a*3:1.9),sz);m.visible=m.position.y>.02;});
       P.wisp.forEach((m,i)=>{const a=stCyc(t,2.2,i,4),an=t*.9+i*1.57;m.position.set(h.x+Math.cos(an)*.09,h.y-.04+a*.18,h.z+Math.sin(an)*.09);m.scale.setScalar(.12+a*.2);m.material.opacity=.45*Math.sin(a*Math.PI);});}
-  }else if(kind==='stormArc'){   // each arc: pick a body segment, a zigzag along its surface, lives 0.05-0.11 s, waits 0.05-0.35 s, again
+  }else if(kind==='stormArc'){stormGold(o,S,P,dt,t);   // gold hands / dash arm coat (user 2026-11-25)
+    // each arc: pick a body segment, a zigzag along its surface, lives 0.05-0.11 s, waits 0.05-0.35 s, again
     P.arc.forEach(m=>{const d=m.userData;d.t+=dt;
       if(d.t>=(d.L||0)){d.t=-(ST_ARC.gap[0]+Math.random()*(ST_ARC.gap[1]-ST_ARC.gap[0]));d.L=ST_ARC.life[0]+Math.random()*(ST_ARC.life[1]-ST_ARC.life[0]);
-        let sg,a,b;if(d.src===1&&o.tip){sg=['hand_R','tip',.05];a=stLoc(o,'hand_R',_stArA);b=o.g.worldToLocal(o.tip.getWorldPosition(_stArB));}   // along the wand
+        let sg,a,b;if(d.src===1&&S.noWand){sg=['forearm_R','hand_R',.07];a=stLoc(o,'forearm_R',_stArA);b=stLoc(o,'hand_R',_stArB);if(a&&b)b.addScaledVector(_stArC.copy(b).sub(a),.35);}   // no wand: these crawl round the right hand
+        else if(d.src===1&&o.tip){sg=['hand_R','tip',.05];a=stLoc(o,'hand_R',_stArA);b=o.g.worldToLocal(o.tip.getWorldPosition(_stArB));}   // along the wand
         else if(d.src===2){sg=['forearm_L','hand_L',.07];a=stLoc(o,'forearm_L',_stArA);b=stLoc(o,'hand_L',_stArB);if(a&&b)b.addScaledVector(_stArC.copy(b).sub(a),.35);}   // round the left hand
         else{sg=ST_ARC.bones[Math.random()*ST_ARC.bones.length|0];a=stLoc(o,sg[0],_stArA);b=stLoc(o,sg[1],_stArB);}d.ok=!!(a&&b);
         if(d.ok){const ax=_stArB.sub(_stArA),len=ax.length();ax.normalize();const side=_stArC.set(Math.random()-.5,Math.random()-.5,Math.random()-.5).cross(ax).normalize();
