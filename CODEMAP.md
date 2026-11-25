@@ -120,7 +120,7 @@ WRATH_READY_T:319 WRATH_THROW_SWING_T:320 WRATH_DRAW_T:321 WRATH_HEAD:322 WRATH:
 §385 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
 updateEarth:386 earthSnapP:400 earthSnapW:416
 
-## js/09-light.js (564) — 
+## js/09-light.js (582) — 
 LIGHTP:8 LTV:12 lgOn:19 lightShieldPitch:20 lightShieldGauge:21 lightClearBond:22 lightReset:26 lightAlly:32 lightLinkPos:33 lightUnlink:34 lightReleaseAlly:52 lightBondTarget:59 lightBondTap:79 lightRecall:94
 §95 ทุกเฟรม
 lightTick:96 lightSlotOf:113
@@ -129,7 +129,7 @@ lightBeamAng:115 lightBeamPitch:117 lightBeamLength:119 lightHeatTick:134 lightB
 §177 Dash Light Step: วาร์ป 250 ตามทิศเดิน • เล็งคู่หู (ไม่เกิน 900) = วาร…
 lightStepBehind:178 lightDash:191 lightDmgOut:221 lightDmgIn:222 lightSnapP:223
 §229 สกิล
-lightSkillsTick:230 LIGHT_FORM_BASE:269 LIGHT_FORM_SCALE:270 LIGHT_FORM_PIVOT:271 LIGHT_FORM_PALM:272 LIGHT_FORM_PALM_DEPTH:272 LIGHT_FORM_HEART_Y:273 LIGHT_FORM_HEART_Z:273 lightFinishDrive:274 lightFinishPitch:275 lightFinishPush:276 lightFormAngles:277 lightFormRecoil:282 lightFormHand:286 LIGHT_FORM_ARMS:297 lightArmRest:306 _lightArmWork:307 lightArmPose:309 lightFormOpenPalm:337 lightArmAim:349 lightUltSnap:356 lightUltEnd:363 _lightFormAngles:377 _lightFormTurn:377 _lightFormHand:377 _lightFormAimLocal:378 _lightFormUpLocal:378 lightUltOrigin:379 lightUltRay:396 lightUltBeamHit:403 lightUltFinish:418 lightUltTick:429 lightSanEnd:491 lightAimPt:492 LT_BOND:494 LT_VO:497 LT_EM:504 LT_SC:507 LT_VS_RELEASE:511 LT_VS_TRAVEL:511 LT_VS_S:512 LT_VS:515 LT_UL:516 lightAllyHit:535 lightQueueTick:538
+lightSkillsTick:230 LIGHT_FORM_BASE:269 LIGHT_FORM_SCALE:270 LIGHT_FORM_PIVOT:271 LIGHT_FORM_PALM:272 LIGHT_FORM_PALM_DEPTH:272 LIGHT_FORM_HEART_Y:273 LIGHT_FORM_HEART_Z:273 lightFinishDrive:274 lightFinishPitch:275 lightFinishPush:276 lightFormAngles:277 lightFormRecoil:282 lightFormHand:286 LIGHT_FORM_ARMS:297 lightArmRest:306 _lightArmWork:307 lightArmPose:309 lightFormOpenPalm:337 lightArmAim:349 lightUltSnap:356 lightXGuard:365 lightHexAbsorb:368 lightUltEnd:373 _lightFormAngles:388 _lightFormTurn:388 _lightFormHand:388 _lightFormAimLocal:389 _lightFormUpLocal:389 lightUltOrigin:390 lightUltRay:407 lightUltBeamHit:414 lightUltFinish:429 lightUltTick:440 lightSanEnd:506 lightAimPt:507 LT_BOND:509 LT_VO:512 LT_EM:519 LT_SC:522 LT_VS_RELEASE:526 LT_VS_TRAVEL:526 LT_VS_S:527 LT_VS:530 LT_UL:533 lightAllyHit:553 lightQueueTick:556
 
 ## js/09-nature-ba.js (182) — 
 NATURE_BA_TEST:2 NATURE_WHIP:3 natureWhipEnabled:4 NAT_SLAM:8 NAT_LINE:8 natureEmpNear:9 natureEmpHit:10 natureWhipHit:19 natureWhipBasic:42 NATURE_READY_YAW:66 NW_RINGS:67 NW_SIDES:67 nwCounterTurn:68 nwAimTurn:68 nwArmAim:68 nwRootAim:69 nwUp:69 nwPhase:70 nwEase:71 nwSwingAngle:72 nwRightRelease:78 natureWhipPose:81 natureWhipVisualMake:120 nwWandTipWorld:142 natureWhipWand:143 natureWhipView:163
@@ -162,7 +162,7 @@ waterDragonTick:203
 §217 ทุกเฟรม (ทั้งเกม)
 updateWater:218 waterSnapP:224 waterSnapW:228 WT_RP:231 WT_FM:234 WT_CG:236 WT_AB:241 WT_MW:244 WT_UL:246
 
-## js/09-wind.js (601) — 
+## js/09-wind.js (602) — 
 WINDP:8 WNV:12
 §19 ตัวช่วย
 wOn:20 wGain:21 wSeg:23 wFoeNear:24
@@ -187,24 +187,24 @@ windVoidCast:287 windVoidTick:289
 §300 รูปแบบการเล่นสายลม (ผู้ใช้ 2026-11-08): บนพื้น = อ่อนลงทันที • บิน (F…
 windAir:303 windSpin:303 windAirborne:304 windLift:305 windSink:306 windSlam:307 windSinkZ:309 windTargetZ:310 windSlotOf:314 windCdCut:315 windSlow:316
 §318 Featherwing: กด → หมุนตัวบินวนขึ้น → บิน 8 วิ (ผู้ใช้ 2026-11-08)
-windFlyTick:322 windFastOn:334 windFastOff:337 windFocusEnd:340 windAirMove:342 windFlick:351 windFocusAct:357 windOrbLaunch:360 windOrbBoom:365
-§368 Downburst (ผู้ใช้ 2026-11-08): ลมกดจากฟ้าลงพื้นต่อเนื่อง — วงดาเมจ + …
-§369 Tailwind (เดิม Windblade): ร่องลมจากตัวเราไปตามทิศเล็ง — เพื่อน+ตัวเร…
-windTailCast:370 windTailIn:373 windTailTick:374 windDownCast:379 windPressDown:386 windDownTick:389
-§396 Windup (เดิม Aegis Gale): ลมพัดขึ้น — วางวงลมตรงจุดเล็ง รอ 0.45 วิ แล…
-windUpCast:398 windUpTick:405
-§412 Wind Push (เดิม Windrift): ยิงลมแรงไปทางที่เล็ก
-§415 Plume Volley (ผู้ใช้ 2026-11-09): ขนนกนีออนจากสองปีกสลับกันทีละอันเร็…
-windVolleyCast:416 windVolleyTick:417 windPlumeShoot:418 windFeatherBoom:428 windPlumeBoom:429 windPushCast:431 windPushHit:434
-§440 Windforce (เดิม Vortex Bind): พุ่งด้วยลม
-§443 Slipstream (ผู้ใช้ 2026-11-08): แดชหมุนหลบตามทิศเดิน • 2 ชาร์จ 5 วิ/อ…
-windSlipCast:444 windSlipTick:449 windForceCast:450 windSmash:456 windAheadHit:460 windForceTick:466
-§486 Windblade (เดิม Void Spheres): ใบมีดลมเล็ก ๆ รัว ๆ
-windBladeCast:488 windBladeTick:490 windBladeHit:494
-§500 อัลติ Sonic Boom Strike (เดิม Eye of Heaven)
-windUltCast:504 windUltTick:507 windUltSweep:532 windFloatZ:540 windShieldPitch:543 windSnapP:547 windSnapW:548
-§551 สกิล (ผู้ใช้ 2026-11-08: รีดีไซน์ทั้งชุด — id เดิมไว้ให้ชุดสกิล/tune/…
-W_WL:553 W_DR:559 W_VX:565 W_VO:571 W_FW:577 W_UL:587
+windFlyTick:322 windFastOn:334 windFastOff:337 windFocusEnd:340 windAirMove:342 windFlick:351 windFocusAct:357 windOrbLaunch:361 windOrbBoom:366
+§369 Downburst (ผู้ใช้ 2026-11-08): ลมกดจากฟ้าลงพื้นต่อเนื่อง — วงดาเมจ + …
+§370 Tailwind (เดิม Windblade): ร่องลมจากตัวเราไปตามทิศเล็ง — เพื่อน+ตัวเร…
+windTailCast:371 windTailIn:374 windTailTick:375 windDownCast:380 windPressDown:387 windDownTick:390
+§397 Windup (เดิม Aegis Gale): ลมพัดขึ้น — วางวงลมตรงจุดเล็ง รอ 0.45 วิ แล…
+windUpCast:399 windUpTick:406
+§413 Wind Push (เดิม Windrift): ยิงลมแรงไปทางที่เล็ก
+§416 Plume Volley (ผู้ใช้ 2026-11-09): ขนนกนีออนจากสองปีกสลับกันทีละอันเร็…
+windVolleyCast:417 windVolleyTick:418 windPlumeShoot:419 windFeatherBoom:429 windPlumeBoom:430 windPushCast:432 windPushHit:435
+§441 Windforce (เดิม Vortex Bind): พุ่งด้วยลม
+§444 Slipstream (ผู้ใช้ 2026-11-08): แดชหมุนหลบตามทิศเดิน • 2 ชาร์จ 5 วิ/อ…
+windSlipCast:445 windSlipTick:450 windForceCast:451 windSmash:457 windAheadHit:461 windForceTick:467
+§487 Windblade (เดิม Void Spheres): ใบมีดลมเล็ก ๆ รัว ๆ
+windBladeCast:489 windBladeTick:491 windBladeHit:495
+§501 อัลติ Sonic Boom Strike (เดิม Eye of Heaven)
+windUltCast:505 windUltTick:508 windUltSweep:533 windFloatZ:541 windShieldPitch:544 windSnapP:548 windSnapW:549
+§552 สกิล (ผู้ใช้ 2026-11-08: รีดีไซน์ทั้งชุด — id เดิมไว้ให้ชุดสกิล/tune/…
+W_WL:554 W_DR:560 W_VX:566 W_VO:572 W_FW:578 W_UL:588
 
 ## js/10-net.js (210) — 
 PREFIX:4 NET:5 RC:9 TURN_SERVERS:12 ICE:13 PEER_OPT:14 TURN_URL:16 ICE_READY:18 JN:22 LAG:24 lagDo:25 hostSend:26 LOBBY:27 genCode:28 sendAll:29 NETD_KEYS:33 NETD:33 netDeltaReset:34 netDelta:35 NET_MAX:49 _netTE:49 netSendSnap:50 NET_QMAX:70 NETU:72 netUndelta:73 setStatus:79 hostGame:81 hostPeer:90 netConnect:110 joinWatch:121 joinFail:136 netLost:142 joinGame:157 joinPeer:168 clientOnData:183 leave:198 leaveRoom:200
@@ -214,12 +214,12 @@ G:4 EVL:4 EVN:4 hostLast:4 tickN:4 emit:5 feed:6 banner:7 plist:8 cleanName:9 fr
 §232 ลูปหลักฝั่งโฮสต์
 hostTick:233 angDiff:250 cH:252 vR:253 updatePlayer:255 hitProp:484 damagePropsIn:491 nearUseProp:492 useProp:493
 
-## js/12-buildings.js (446) — environment damage / rays / collision shared by breakable things
+## js/12-buildings.js (447) — environment damage / rays / collision shared by breakable things
 BLDON:4 bldMoundH:5 damageEnv:7 bldRay:16 aimClip:21 aimLineH:29 aimRay3:30 projEl:57 bldPush:62 updateBldg:68
 §69 ของบังในแผนที่ไฟล์ที่พังได้ (หิน เสา รูปปั้น ต้นไม้ โคมไฟ ลัง ...) — …
 BRKDEF:73 BRK_M:73 BRK_MCOL:73 BRK:74 genBrk:75 brkApply:82 brkStage:87 hitBrk:88 damageBrkIn:96 brkSnap:102 brkParse:103
 §104 ตารางช่อง (spatial grid) สำหรับแมพใหญ่: หาเฉพาะของใกล้ ๆ แทนวนทุกชิ้น…
-SG:107 OCX:109 OCY:109 obsD2:110 obsEach:111 obsBox:112 sgObs:113 sgProps:113 sgGrid:114 sgNear:121 _sgCR:126 _sgCW:126 _sgCB:126 _sgCO:126 _sgPO:126 _sgPB:126 _sgPP:126 _sgM:126 _sgE:126 _sgA:126 _cwLast:128 collideWorld:129 shoot:170 eShoot:198 foesOf:205 breakShield:213 ULT_RATE:220 ultActive:221 gainUlt:222 lifesteal:223 impactProjectile:225 damage:226 playerDown:302 killProj:325 explode:337 hitTarget:349 hitProjectileTarget:353 updateProjectiles:370 projStep:378
+SG:107 OCX:109 OCY:109 obsD2:110 obsEach:111 obsBox:112 sgObs:113 sgProps:113 sgGrid:114 sgNear:121 _sgCR:126 _sgCW:126 _sgCB:126 _sgCO:126 _sgPO:126 _sgPB:126 _sgPP:126 _sgM:126 _sgE:126 _sgA:126 _cwLast:128 collideWorld:129 shoot:170 eShoot:198 foesOf:205 breakShield:213 ULT_RATE:220 ultActive:221 gainUlt:222 lifesteal:223 impactProjectile:225 damage:226 playerDown:303 killProj:326 explode:338 hitTarget:350 hitProjectileTarget:354 updateProjectiles:371 projStep:379
 
 ## js/12-city-dmg.js (270) — เมืองพังได้ (designs/city-bot-battle.md ขั้น 4) — ข้อมูลที่ทุกเครื่อง…
 CITY_FL:8 CITY_PW:8 CDMG:9 CITYD:16 cityOn:17 cityLayout:19 cityReset:29 cityApplyBox:45 cityApplyItem:46 cityHex:47 cityMark:48 cityRampSync:49 cityPanelAt:51 cityHitPanel:56 cityTowerStart:70 cityTowerStrip:76 cityTowerFall:80 cityHitItem:91 cityHitObs:100 _sgCD:105 cityDamageIn:107 cityTick:118 _sgCM:129 cityMoundH:130 cityMounds:140
@@ -465,7 +465,7 @@ iceMat:10 iceRim:11 makeIceSword:12 makeIceAxe:31 makeKiteShield:47
 §59 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
 makeIceCrown:63 frostCrown:68 FW_MID:74 FSW:76 _fsV:78 _fsW:78 _fsC:78 _fsD:78 _fsEase:79 frostSwapPose:81 fsShards:101 frostSwapLate:106 FWS:127 FWA:127 _fwM:128 _fwM2:128 _fwX:128 _fwY:128 _fwZ:128 _fwP:128 _fwS:128 _fwQ:128 _eo:129 _ei:129 _ss:129 fwAim:131 fwWeapons:132 FWP:134 FWT:134 fwChop:135 fwSweep:136 FF_RISE:137 fwIdle:138 fwSwing:141 FWL_N:153 fwLink:154 fwMat:157 SLIDE_POSE:160 _slQ:162 frostSlideHead:163 _slAx:169 frostWandLink:170 frostFX:178
 
-## js/35-sync.js (1203) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+## js/35-sync.js (1205) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 §2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
 CPOSE_T:7 _ce:7 _cs:7 _cb:7 _caJ:9 _caJ0:9 CTWIST:12 counterArm:13 AMP_B:14 AMP_S:14 CP_BEND:15 CPOSE:17 _cpT:26 _cpR:26 CP_STEP:27 CPCOL:28 castStyle:29 castStart:30
 §31 ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเห…
@@ -473,9 +473,9 @@ CANIM:36 SKFEET:92 SKANIM:94 skAnim:102 _caT:103 _caR:103 skillPose:104 _g2:145 
 §284 Class stances (designs/class-stances.md, user 2026-11-24)
 STANCE_STYLE:291 STANCES:292 STANCE_PICK:315 stanceOf:316 _stQ:317 _stX:317 _stZ:317 stanceSpine:319 stanceSpineOff:323 STANCE_WAND:325 stanceWand:326 _swA:338 _swB:338 _swD:338 _swQ:338 _swQ2:338 _swP:338 _swE:341 _swH:341 stanceWandTip:342 _stV:358 _stV2:358 _stV3:358
 §359 Class look (always-on small VFX that tell the class, STANCES[..].fx)
-stBone:361 stLoc:362 stArmPt:363 ST_TEX:366 stTex:367 ST_MAT:375 stMat:376 stMatNew:377 stRibbon:391 stRibbonSet:393 FIRE_TONGUES:394 ST_GEO:395 stBuild:396 _stF:425 _stH:425 stCyc:426 stanceFX:427 classStance:517 natureReadyEuler:539 natureReadyArm:539 readyStance:540 jumpShoulders:578 CBLOCK:594 CBLOCK_PATH:595 blockPose:596 poseMirror:604 castPose:609 lateSkillPose:615 castPose0:616 clearCharacterCast:645 hitRecoilPose:650 syncPlayers:659 syncEnemies:850 projGeo:890 tailGeo:891 _t1:892 makeProj:893 _a:914 _b:914 PJFX:916 syncProj:917 _awT:1018 animateWorld:1019
-§1060 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
-_v:1061 toScreen:1062 BURNC:1070 burnNum:1071 NAMETAG:1085 nameTag:1086 _hsO:1092 hudSight:1093 SIGHT:1106 sightA:1107 drawLabels:1111 TEXTAG:1146 textTag:1147 drawTexts:1151 HITM:1163 DIRI:1163 drawXh:1165 drawCrosshair:1175
+stBone:361 stLoc:362 stArmPt:363 ST_TEX:366 stTex:367 ST_MAT:375 stMat:376 stMatNew:377 stRibbon:391 stRibbonSet:393 FIRE_TONGUES:394 ST_GEO:395 stBuild:396 _stF:425 _stH:425 stCyc:426 stanceFX:427 classStance:517 natureReadyEuler:539 natureReadyArm:539 readyStance:540 jumpShoulders:578 CBLOCK:594 CBLOCK_PATH:595 blockPose:596 poseMirror:604 castPose:609 lateSkillPose:615 castPose0:616 clearCharacterCast:645 hitRecoilPose:650 syncPlayers:659 syncEnemies:852 projGeo:892 tailGeo:893 _t1:894 makeProj:895 _a:916 _b:916 PJFX:918 syncProj:919 _awT:1020 animateWorld:1021
+§1062 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
+_v:1063 toScreen:1064 BURNC:1072 burnNum:1073 NAMETAG:1087 nameTag:1088 _hsO:1094 hudSight:1095 SIGHT:1108 sightA:1109 drawLabels:1113 TEXTAG:1148 textTag:1149 drawTexts:1153 HITM:1165 DIRI:1165 drawXh:1167 drawCrosshair:1177
 
 ## js/36-modes-view.js (171) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 healTex:22 makeItem:23 syncModeObjs:39
@@ -847,10 +847,10 @@ OCEAN:6 OC_COMMON:9 OC_VERT:17 OC_INIT:18 OC_EVOLVE:30 OC_FFT:37 OC_ASM:43 ocJon
 ## js/68-darkness-view.js (1154) — 
 nightWaltzStrip:2 nightWaltzBorder:80 stDarkVeilGround:118 darkFxMesh:195 drawDarknessHud:201 drawDarkHudBar:220 darknessMarkView:227 darkWaveViews:237 darkActiveViews:237 darkViewRoot:238 darkViewTemp:245 darknessClear:257 darkDeathRoots:265 darkDeathClear:268 darkWorldAt:282 darkMarkWind:285 darkMarkLaunch:313 darkMarkContact:325 darkViewNow:338 darkFlowHud:338 darkIdleWeaponPose:339 darkBAGroundImpact:343 darkSettleWeapon:358 darkBlendWeapon:369 darkShowWeaponReturn:392 darkTrailHistory:399 darkDashView:438 darknessCharacter:484 darknessEfx:727 stDarkShieldInk:1024 stDarkVeilBlade:1067 stWardDrainPool:1104
 
-## js/68-light-view.js (1963) — 
-LGV:7 LGSH:9 LGSH_L:11 _lgM4:14 _lgQ:14 _lgSV:14 _lgS:14 _lgC:14 _lgC2:14 lgGlowTex:15 lgNeon:17 lgEmpFx:25 lgWallBurn:44 lgShardSpawn:60 lgShardTick:64 lgBaCore:65 lgCrDim:108 lgEmpBeam:112 lgNeonCrystal:126 lgSanctumFloorTex:136 lgSanctumMoteTex:147 lgHoneyTex:162 lgShield:166 _lgShieldEuler:202 lightShieldEv:203 LGPOSE:206 _lgLeanBase:207 _lgLeanUndo:207 _lgGlass:208 _lgCore:208 _lgGeo:208 _lgEdge:208 _lgEdgeM:208 lgCrystalMesh:210 lgState:218 _lgV:219 _lgW:219 lgWorld:220 LG_ULT_ASSET:223 LG_CRYSTAL_ASSET:223 LG_ULT_INTRO:224 LG_ULT_ARRIVAL_FX:224 LG_ULT_TIME:225 lgUltMaterials:226 lgSovereignFinishes:227 lgSovereignMaterials:228 lgSovereignFinish:289 lgSovereignCrystal:310 lgSkinSovereign:319 lgPoseSovereign:372 lgSovereignHeart:448 LG_SASH_X:474 LG_SASH_Z:474 lgSovereignRibbon:475 lgSovereignFlare:534 LG_PALM_TRAVEL:547 LG_PALM_SCORCH_LIFE:548 LG_PALM_SCORCH_SLOTS:548 lgPalmGateOffset:549 lgSovereignPalmWaves:551 lgPosePalmWaves:560 lgPoseBeamWaves:566 lgSovereignPalmGate:578 lgSovereignScorchTrail:588 lgPalmScorch:616 lgSovereignCrossSparks:652 lgSovereignGather:675 lgSovereignWingCurrent:708 lgSovereignChargeSeal:737 lgSovereignChestRecoil:754 lgSovereignSeal:764 lgSovereignArmSigils:780 lgBuildSovereign:811 lgReturnMark:888 lgUltVisual:902 lgWardVisual:1139 _lgBeamM:1155 lgBeamMat:1156 lgSovereignChestBeam:1159 lgSovereignPalmBeam:1196 _lgLinkM:1266 lgLinkMat:1267 lgUnitTube:1270 lgTube:1271 lgAim:1279 lightFX:1280 lgBaseObjects:1523 lgClearBase:1524 lgClear:1525 lightDropView:1532 lgAllyEmpEnd:1538
-§1542 เหตุการณ์
-lgBlip:1544 lgArcFx:1548 lgFlyFx:1551 lgSovereignArrival:1552 lightFxTick:1591 LG_BLAST_EXPAND:1595 LG_BLAST_HOLD:1595 lgImpactDome:1596 lgBlastFloor:1636 lgBlastThreads:1667 lgFitGround:1695 lgGroundWarning:1704 lightEfx:1717 _lgHq:1874 _lgHy:1874 lgProcHead:1876 lightHeadPose:1891 LGHUD:1899 lgBondScreen:1900 drawCrystalBondHud:1901 drawLightHud:1924
+## js/68-light-view.js (2033) — 
+LGV:7 LGSH:9 LGSH_L:11 _lgM4:14 _lgQ:14 _lgSV:14 _lgS:14 _lgC:14 _lgC2:14 lgGlowTex:15 lgNeon:17 lgEmpFx:25 lgWallBurn:44 lgShardSpawn:60 lgShardTick:64 lgBaCore:65 lgCrDim:108 lgEmpBeam:112 lgNeonCrystal:126 lgSanctumFloorTex:136 lgSanctumMoteTex:147 lgHoneyTex:162 lgShield:166 _lgShieldEuler:202 lightShieldEv:203 LGPOSE:206 _lgLeanBase:207 _lgLeanUndo:207 _lgGlass:208 _lgCore:208 _lgGeo:208 _lgEdge:208 _lgEdgeM:208 lgCrystalMesh:210 lgState:218 _lgV:219 _lgW:219 lgWorld:220 LG_ULT_ASSET:223 LG_CRYSTAL_ASSET:223 LG_ULT_INTRO:224 LG_ULT_ARRIVAL_FX:224 LG_ULT_TIME:225 lgUltMaterials:226 lgSovereignFinishes:227 lgSovereignMaterials:228 lgSovereignFinish:289 lgSovereignCrystal:310 lgSkinSovereign:319 _lgX:373 lgPoseSovereign:374 lgSovereignHeart:457 LG_SASH_X:483 LG_SASH_Z:483 lgSovereignRibbon:484 lgSovereignFlare:543 LG_PALM_TRAVEL:556 LG_PALM_SCORCH_LIFE:557 LG_PALM_SCORCH_SLOTS:557 lgPalmGateOffset:558 lgSovereignPalmWaves:560 lgPosePalmWaves:569 lgPoseBeamWaves:575 lgSovereignPalmGate:587 lgSovereignScorchTrail:597 lgPalmScorch:625 lgSovereignCrossSparks:661 lgSovereignGather:684 lgSovereignWingCurrent:717 lgSovereignChargeSeal:746 lgSovereignChestRecoil:763 lgSovereignSeal:773 lgSovereignArmSigils:789 lgBuildSovereign:820 lgReturnMark:897 _lgHexTex:912 lgHexTex:913 LG_XG:917 lgXIn:918 _lgHP:920 _lgHN:920 _lgHZ:920 lgSelfHex:921 lgHexShield:934 LG_LEAN:948 lightLeanPose:949 lgUltVisual:961 lgWardVisual:1207 _lgBeamM:1223 lgBeamMat:1224 lgSovereignChestBeam:1227 lgSovereignPalmBeam:1264 _lgLinkM:1335 lgLinkMat:1336 lgUnitTube:1339 lgTube:1340 lgAim:1348 lightFX:1349 lgBaseObjects:1592 lgClearBase:1593 lgClear:1594 lightDropView:1601 lgAllyEmpEnd:1607
+§1611 เหตุการณ์
+lgBlip:1613 lgArcFx:1617 lgFlyFx:1620 lgSovereignArrival:1621 lightFxTick:1660 LG_BLAST_EXPAND:1664 LG_BLAST_HOLD:1664 lgImpactDome:1665 lgBlastFloor:1705 lgBlastThreads:1736 lgFitGround:1764 lgGroundWarning:1773 lightEfx:1786 _lgHq:1943 _lgHy:1943 lgProcHead:1945 lightHeadPose:1960 LGHUD:1968 lgBondScreen:1969 drawCrystalBondHud:1970 drawLightHud:1993
 
 ## js/68-nature-art.js (171) — 
 naturePlantArt:2 Turret:3 auraTextures:44 auraTex:45 LotusAura:88 glowWallTex:92 M_BUB:95 M_BUBRIM:96 M_DRIP:97 M_POOL:98 lotusPetalVeins:100 Lotus:127
@@ -877,22 +877,24 @@ waterEfx:216
 §245 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
 drawWaterHud:246
 
-## js/68-wind-view.js (445) — 
+## js/68-wind-view.js (501) — 
 WV:6 WN_BODY:8 WN_AIR_FEET:8 WF_POSE:12 WF_FEET:12 WF_REF:12 WF_ROLL:12 _wfP:13 _wfF:13 windFlyPose:14 WTLF:24 windTailDraw:25 windTailFeel:31 windCharacterPose:33 wvState:50 wvAlive:51
 §52 ทุกเฟรมของผู้เล่นสายลม: ปีกติดหลัง / ปีกห่อตอนยกโล่ / ดูดลมชาร์จเกจ
-wfeSwing:53 wfeTwist:53 W_BLAST_SUCK:54 WFE_HOLD:55 WFE_TURN:55 windLatePose:57 _faX:93 _faQ:93 _faT:93 WF_ELBOW:93 windForearm:94 windFX:96
-§128 กำแพงลมจาก snapshot (ตามตำแหน่ง/ลบเมื่อหมด)
-syncWind:129 wvWall:142 wvHitFx:143 wvAimFx:144
-§145 ตา Eye of Heaven: ตำแหน่งตาบนฟ้า (ตรงกับ EYE ใน tools/wind-eye-ult-ge…
-wvEyePos:146 wvEyeSeen:147
-§148 เหตุการณ์ (efx z 'wn…')
-WDOME_G:150 WDOME_V:151 WDOME_F:152 windDome:153 windSuckFx:162 windEfx:173
-§266 HUD รอบเป้าเล็ง: GaleBurst / Downburst / Dash / Slipstream
-_wShellM:268 windShellMat:269 drawWindHud:275
-§285 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
-wvAimGhost:286
-§297 ปีกเวทสายลมติดหลัง: ขนนก 8+4 เส้นต่อข้าง ทำจากสายลม (shader) + ริบบิ้…
-WWS:299 WWU:299 WW_NOISE:300 _wwMat:305 wwMats:306 wwFeatherGeo:352 WW_PRI:363 WW_COV:365 WW_RIB:366 _wwGeo:367 _wsupG:369 _wsupD:369 windSupDust:370 windSupDustTick:374 windWingSup:375 makeWindWings:397 wwCue:411 poseWindWings:415
+wfeSwing:53 wfeTwist:53 W_BLAST_SUCK:54 WFE_HOLD:55 WFE_TURN:55 windLatePose:57 _faX:98 _faQ:98 _faT:98 WF_ELBOW:98 windForearm:99
+§101 Palm sigil + palm wind ball (user 2026-11-25)
+_wpTex:105 wpSigilTex:106 _wpN:113 _wpO:113 WP:114 _wpH:114 _wpF:114 _wpD:114 _wpQ:114 _wpZ:114 windPalmLate:115 windFX:142
+§174 กำแพงลมจาก snapshot (ตามตำแหน่ง/ลบเมื่อหมด)
+syncWind:175 wvWall:188 wvHitFx:189 wvAimFx:190
+§191 ตา Eye of Heaven: ตำแหน่งตาบนฟ้า (ตรงกับ EYE ใน tools/wind-eye-ult-ge…
+wvEyePos:192 wvEyeSeen:193
+§194 เหตุการณ์ (efx z 'wn…')
+WDOME_G:196 WDOME_V:197 WDOME_F:198 windDome:199 windSuckFx:208 windEfx:219
+§312 HUD รอบเป้าเล็ง: GaleBurst / Downburst / Dash / Slipstream
+_wShellM:314 windShellMat:315 windSlipHud:322 drawWindHud:328
+§339 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
+wvAimGhost:340
+§351 ปีกเวทสายลมติดหลัง: ขนนก 8+4 เส้นต่อข้าง ทำจากสายลม (shader) + ริบบิ้…
+WWS:353 WWU:353 WW_NOISE:354 _wwMat:359 wwMats:360 wwFeatherGeo:406 WW_PRI:417 WW_COV:419 WW_RIB:420 _wwGeo:421 _wsupG:423 _wsupD:423 windSupDust:424 windSupDustTick:428 windWingSup:429 makeWindWings:451 wwCue:465 poseWindWings:469
 
 ## js/69-broom.js (236) — ไม้กวาด (ผู้ใช้ 2026-10-29): บินแบบเครื่องบิน + ยิงลำแสงตามสาย + อนิเ…
 BRM:9 BFW:12 BSK:13 BROOM_SK:19 broomVert:40 broomMove:53 broomStrike:72 broomStrikeTick:81 broomFlak:89 broomAct:100 broomOff:107 broomBeam:109
@@ -989,4 +991,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(120 files, 37856 lines)
+(120 files, 38004 lines)

@@ -1,5 +1,5 @@
 {
- "next": 198,
+ "next": 201,
  "items": [
   {
    "id": 194,
@@ -4043,6 +4043,60 @@
     "/shots/stance/send2/counter_earth.gif",
     "/shots/stance/send2/counter_storm.gif"
    ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "title": "Light: อัลติ Radiant Sovereign รอบ 2 + โล่ X",
+   "text": "10 วิ • ยิงค้าง 1.4 วิ (8 ดาเมจทุก 0.2 วิ) • ลำแสงใหญ่ขึ้น (hitbox 30) • ยิงปิดท้าย 50 กว้าง 400 ชาร์จ/ลำแสงนานขึ้น • หมดเวลา = ยิงปิดท้ายเอง • ร่างเทพไม่โดนดาเมจ • คู่หูตาย = กลับจุดเดิม • คลิกขวาค้าง = ไขว้แขน X คู่หูได้โล่หกเหลี่ยม ลด 70% (กันรวม 100) มี bar • โล่แตก = กระตุกแรง สตั้น 2 วิ ไอคอนมืดจนจบอัลติ (ยังไม่ commit) • รอบ 2: ไขว้แขนมีจังหวะ (~0.35 วิ เด้งนิด) หัวก้ม คริสตัลอกสว่าง + แผ่นหกเหลี่ยมบาง ๆ โผล่รอบตัวเป็นจุด ๆ",
+   "links": [
+    "/shots/stance/send6/r6_light_ult_front.gif",
+    "/shots/stance/send5/r5_light_ult_front.gif",
+    "/shots/stance/send5/r5_light_ult_side.gif",
+    "/studio.html?fx=stance/light_ult"
+   ],
+   "id": 198,
+   "kind": "VFX / แอนิเมชัน",
+   "who": "Character",
+   "status": "wait",
+   "created": "2026-11-25",
+   "updated": "2026-11-25",
+   "imgs": [],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "title": "Light: โน้มตัวตามทิศเดิน แขนเล็งค้างตอนยิง",
+   "text": "W/S/A/D เอียงตัวตามทิศ (สูงสุด ~12°) • ตอนยิง (ลำแสง/สกิล) แขนหักมุมโน้มออก เล็งเป้าเหมือนเดิม (ยังไม่ commit) • รอบ 2: ลอยแล้วขาไม่ก้าว (ขาชิด ลู่ตามที่โน้ม) • ผ้าคลุมโดนลมน้อยลงตอนลอย ไม่ชี้แข็งไปข้างหลัง",
+   "links": [
+    "/shots/stance/send6/r6_light_lean_side.gif",
+    "/shots/stance/send6/r6_light_lean_front.gif"
+   ],
+   "id": 199,
+   "kind": "VFX / แอนิเมชัน",
+   "who": "Character",
+   "status": "wait",
+   "created": "2026-11-25",
+   "updated": "2026-11-25",
+   "imgs": [],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "title": "Wind: วงเวทฝ่ามือ + ลูกลมสร้างบนมือ + ท่าใหม่",
+   "text": "วงเวทเขียวที่ฝ่ามือซ้ายตลอด • บินแล้วลูกลมก่อตัวบนฝ่ามือ (อนุภาควนเข้า) ยิงด้วยมือ: เหวี่ยงออกข้าง สะบัดไปทางเป้า กลับ • Slipstream = ลูกพร้อมทันที • Downburst/Tailwind แบฝ่ามือไปทางเล็ง วงเวทสว่าง • ปีกขยับเบา ๆ / กระพือตอนบิน • ลูกลมไม่จำกัดตอนบิน (ลงพื้น = ขนนก) • ขนนก 1700 • บิน 6 วิ คูล 12 • วงเวลาที่เคอร์เซอร์ • ตัวนับ Slipstream เป็นทรงแดชแนวตั้ง (ยังไม่ commit)",
+   "links": [
+    "/shots/stance/send5/r5_wind_air_front.gif",
+    "/shots/stance/send5/r5_wind_air_left.gif",
+    "/studio.html?fx=stance/wind_air"
+   ],
+   "id": 200,
+   "kind": "VFX / แอนิเมชัน",
+   "who": "Character",
+   "status": "wait",
+   "created": "2026-11-25",
+   "updated": "2026-11-25",
+   "imgs": [],
    "feedback": "",
    "reply": ""
   }

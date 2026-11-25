@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "desc": "Wind: Featherwing flight - palm sigil, wind ball builds on the left palm, hand throw, Slipstream makes it ready at once, Downburst palm; then Tailwind + feathers on the ground",
+  "tags": ["stance", "preview"],
+  "dur": 11.0,
+  "layers": [
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 11.0},
+    {"id": "stance", "t": "code", "fn": "studio_class_stance", "at": 0, "life": 11.0, "args": {"layer":"anchor","cls":"wind","style":"a","run":[99,99],"acts":[{"t":0.4,"a":"skill","id":"featherwing"},{"t":1.6,"a":"hold","d":2.2},{"t":3.9,"a":"skill","id":"vortexbind"},{"t":4.3,"a":"fire"},{"t":5.4,"a":"skill","id":"aegisgale"},{"t":8.4,"a":"skill","id":"voidspheres"},{"t":9.9,"a":"hold","d":0.9}]}}
+  ]
+}

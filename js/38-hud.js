@@ -319,7 +319,7 @@ function slotState(me,v,ci){
   const st={ratio:0,txt:'',ready:true,hl:false,dim:false};
   const locked=v&&v.mode==='br'&&BR_LOCK[ci]&&!(me.ul||'').split(',').includes(BR_LOCK[ci]);
   if(ci>=0){st.ratio=me.cd[ci]/me.cm[ci];if(me.cd[ci]>0){st.ready=false;st.txt=me.cd[ci]<1?me.cd[ci].toFixed(1):String(Math.ceil(me.cd[ci]));}}
-  else if(ci===-1)st.ready=me.se>5;
+  else if(ci===-1){st.ready=me.se>5;const U=me.lt?.[14];if(U&&U[0]>1&&U[12]){st.ready=false;st.dim=true;}}   // Radiance X guard used up: icon dark
   else if(ci===-3){st.ready=true;st.hl=!!me.fl;}
   else if(ci===-4){const A=me.ea||[],c=eSmooth('cb',A[10]|0);   // BA ชาร์จสายดิน: ชาร์จอยู่ = เรือง • คูลดาวน์ 6 วิ (ค่าปัดขึ้นจาก snapshot → นับถอยเองให้ลื่น)
     if(A[9]>0)st.hl=true;else if(A[0]>0){st.ready=false;st.ratio=1;}else if(c>0){st.ready=false;st.ratio=c/6;st.txt=c<1?c.toFixed(1):String(Math.ceil(c));}}

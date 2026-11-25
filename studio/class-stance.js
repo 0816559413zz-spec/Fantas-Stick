@@ -17,18 +17,25 @@ FXCODE.studio_class_stance=(_x,_y,_h,args,instance)=>{
     if(me.inp!==inp)me.inp=inp;const t=ST.t,on=t>=run[0]&&t<run[1];
     inp.ax=inp.gx=me.x+400;inp.ay=inp.gy=me.y;inp.ah=0;inp.mx=on?1:0;inp.my=0;
     if(foe){foe.x=me.x+400;foe.y=me.y;}
-    let fire=0;
+    let fire=0,sh=0;
     for(const a of acts){
       if(a.a==='hold'&&t>=a.t&&t<a.t+(a.d||1))fire=1;
       if(a.a==='fire'&&t>=a.t&&t<a.t+.12)fire=1;
+      if(a.a==='shield'&&t>=a.t&&t<a.t+(a.d||1))sh=1;
       if(a.done||t<a.t)continue;a.done=true;
       if(a.a==='skill'){for(const k in me.cd)me.cd[k]=0;me.kitIds[0]=a.id;inp.hq=1;try{castSlot(me,0);}catch(e){}inp.hq=0;}
       else if(a.a==='ult'){me.ultId=a.id;me.ult=100;try{castUlt(me);}catch(e){}}
+      else if(a.a==='link'){   // Light: a teammate stands next to us, linked (Radiance ult needs a duo)
+        CLOTH_LITE.ON=false;   // preview duo is added mid-run: its low-res cloth started from NaN here (studio only), use the bone cloak
+        let al=G.players.stAlly;if(!al){addPlayer('stAlly','Duo','#ffffff',null,String(PATHS.findIndex(q=>q.id==='water')));al=G.players.stAlly;}
+        al.team=me.team;resetBody(al,me.x+(a.dx||0),me.y+(a.dy||-70));al.alive=true;al.downed=false;al.hp=al.maxHp;al.bot=false;al.inp=emptyInput();me.lgA=al.id;al.lgFrom=me.id;al.lgN=1;}
+      else if(a.a==='hit'){const al=G.players.stAlly;if(al)try{damage(al,a.dmg||40,foe?foe.id:'x','aoe');}catch(e){}}
       else if(a.a==='swap'){me.fmode=me.fmode===1?0:1;me.fmCd=me.fswT=FROST_SWAP_T;me.cmbT=0;emit({k:'efx',z:'fswap',x:me.x,y:me.y,h:me.z+1,id:me.id,m:me.fmode});}   // same as the host's V key
       else if(a.a==='dash'){me.cd.dodge=0;inp.c.sp++;}
       else if(a.a==='fire'||a.a==='hold')me.cd.basic=0;
     }
-    inp.fire=fire;
+    inp.fire=fire;inp.sh=sh;
+    for(const a of acts)if(a.a==='move'&&t>=a.t&&t<a.t+(a.d||1)){inp.mx=a.mx||0;inp.my=a.my||0;}   // walk any direction (WASD), aim stays at the target
     // during a seek / GIF export the studio does not run the game or pose the players: step the host and pose here
     if(FXSTUDIO.seek){try{hostTick(STD);const base=makeSnap(),evl=EVL;EVL=[];onSnap(Object.assign({},base,{ev:evl}));const v=VIEW.cur;if(v)syncPlayers(v.P,v.mode,stVnow,STD);}catch(e){console.warn('stance tick',e);}}
   };

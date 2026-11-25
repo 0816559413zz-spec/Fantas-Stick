@@ -221,7 +221,7 @@ function clRun(C,dt,W){const o=C.o;
   if(mv>0||ry){const P=C.P,Q=C.Q;for(let i=0;i<C.N*3;i+=3){let x=P[i]-cx,z=P[i+2]-cz;P[i]=cx+x*cr+z*sr+tx0;P[i+1]+=ty0;P[i+2]=cz-x*sr+z*cr+tz0;x=Q[i]-cx;z=Q[i+2]-cz;Q[i]=cx+x*cr+z*sr+tx0;Q[i+1]+=ty0;Q[i+2]=cz-x*sr+z*cr+tz0;}}
   const bv=_clA.copy(dl).multiplyScalar((1-mv)/st);
   // ลมปะทะ: ความเร็วตัว (กรองนุ่ม) ดันผ้าไปข้างหลังคงที่ ไม่กระชาก
-  const ak=1-Math.exp(-3.5*st);C.air.x+=(-dl.x/st*CLOTH.AIR-C.air.x)*ak;C.air.z+=(-dl.z/st*CLOTH.AIR-C.air.z)*ak;
+  const ak=1-Math.exp(-3.5*st),AIRk=CLOTH.AIR*(C.o.clAir??1);C.air.x+=(-dl.x/st*AIRk-C.air.x)*ak;C.air.z+=(-dl.z/st*AIRk-C.air.z)*ak;   // o.clAir: per-character wind (Light floating = less, user 2026-11-25)
   const gy=GY(_clV.x/S3+MW/2,_clV.z/S3+MH/2)+0.02;
   const H=C.h||CLOTH.STEP;if(C.hl&&C.hl!==H){const r=H/C.hl,P=C.P,Q=C.Q;for(let i=0;i<C.N*3;i++)Q[i]=P[i]-(P[i]-Q[i])*r;}C.hl=H;   // step size changed: keep velocity per second
   C.acc=Math.min(C.acc+Math.min(dt,0.1),H*2);while(C.acc>=H-1e-6){clStep(C,H,gy,C.capV,bv,W);C.acc-=H;}}   // ≤2 ก้าวต่อเฟรม: เฟรมช้า = ไม่คำนวณผ้าเพิ่ม (เดิม 4 → ยิ่งช้ายิ่งหนัก)
