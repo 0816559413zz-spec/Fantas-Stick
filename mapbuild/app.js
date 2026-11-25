@@ -320,10 +320,13 @@ function markerMesh(o) {
     { const P = [[-L / 2, 0], [L / 2, 0], [L / 2, tp[2] * H], [X(tp[1]), H], [-L / 2, tp[0] * H]].filter((q, i, a) => i === 0 || Math.hypot(q[0] - a[i - 1][0], q[1] - a[i - 1][1]) > 1e-4);
       if (Math.hypot(P[0][0] - P.at(-1)[0], P[0][1] - P.at(-1)[1]) < 1e-4) P.pop(); sh.moveTo(...P[0]); for (const q of P.slice(1)) sh.lineTo(...q); sh.lineTo(...P[0]); }
     for (const q of o.ho || []) { const h = new THREE.Path(), a = q[0] - L / 2, b = q[1] - L / 2; h.moveTo(a, q[2]); h.lineTo(a, q[3]); h.lineTo(b, q[3]); h.lineTo(b, q[2]); h.lineTo(a, q[2]); sh.holes.push(h); }
+    if (o.hc && o.hc.length) { const d = MD.pnDims(o), cw = L / d.nc, ch = H / d.nr, e = 0.004, on = new Set(o.hc.filter(q => q[0] < d.nc && q[1] < d.nr).map(q => q[1] * d.nc + q[0]));   // punched cells: one hole per row run
+      for (let r = 0; r < d.nr; r++) for (let c = 0; c < d.nc; c++) { if (!on.has(r * d.nc + c) || on.has(r * d.nc + c - 1) && c > 0) continue; let c2 = c; while (c2 + 1 < d.nc && on.has(r * d.nc + c2 + 1)) c2++;
+        const a = -L / 2 + c * cw + e, b = -L / 2 + (c2 + 1) * cw - e, y0 = r * ch + e, y1 = (r + 1) * ch - e, h = new THREE.Path(); h.moveTo(a, y0); h.lineTo(a, y1); h.lineTo(b, y1); h.lineTo(b, y0); h.lineTo(a, y0); sh.holes.push(h); } }
     const geo = new THREE.ExtrudeGeometry(sh, { depth: T, bevelEnabled: false }); geo.translate(0, 0, -T / 2); if (o.tl) geo.rotateX(o.tl);
     const b = add(geo, mat(MD.PN_COL[o.mat || 'brick'] || c), 0, 0, 0); b.castShadow = true;
     if (o.mat === 'litwin' || o.mat === 'glass') { b.material = b.material.clone(); b.material.transparent = true; b.material.opacity = 0.6; }
-    const cs = o.cs || 1, one = o.nb && !(o.ho && o.ho.length), nc = one ? 1 : Math.max(1, Math.round(L / cs)), nr = one ? 1 : Math.max(1, Math.round(H / cs)), pts = [];   // unbreakable = no cell lines
+    const cs = o.cs || 1, one = o.nb && !(o.ho && o.ho.length) && !(o.hc && o.hc.length), nc = one ? 1 : Math.max(1, Math.round(L / cs)), nr = one ? 1 : Math.max(1, Math.round(H / cs)), pts = [];   // unbreakable = no cell lines
     for (const zf of [T / 2 + 0.01, -T / 2 - 0.01]) {   // cell lines on both faces
       for (let i = 1; i < nc; i++) { const x = -L / 2 + i * L / nc; pts.push(x, 0, zf, x, H * MD.pnTopF(tp, i / nc), zf); }
       for (let j = 1; j < nr; j++) { const y = j * H / nr, f = y / H, [a, k, b] = tp, xl = f <= a ? -L / 2 : X(k * (f - a) / (1 - a)), xr = f <= b ? L / 2 : X(k + (1 - k) * (1 - f) / (1 - b)); if (xr > xl) pts.push(xl, y, zf, xr, y, zf); } }
@@ -804,6 +807,7 @@ cv.addEventListener('pointerdown', e => {
   else if (tool === 'place') { if (!hover) return; pushUndo('o'); const o = placeObj(hover); if (opt.rrot && isVisual(o)) { ghostRot = Math.random() * 6.2832; } changed(); colDirty(); }
   else if (tool === 'select') {
     if (PNT.on) { const h = pickItem(), it2 = h && h.ref && h.ref.k === 'obj' && find(h.ref); if (it2 && it2.t === 'pn_wall') { pnTestHit(it2, h.p, e.shiftKey); return; } }
+    if (PNH.on) { const h = pickItem(), it2 = h && h.ref && h.ref.k === 'obj' && find(h.ref); if (it2 && it2.t === 'pn_wall') { pnHoleHit(it2, h.p, e.shiftKey); return; } }
     const fh = freeHandles();
     if (fh && !fdraft) { const r = cv.getBoundingClientRect(); let best = -1, bd = 12;
       fh.forEach((q, i) => { v3.set(q.x - M.W / 2, q.y, q.z - M.H / 2).project(camera); const d = Math.hypot((v3.x + 1) / 2 * r.width + r.left - e.clientX, (1 - v3.y) / 2 * r.height + r.top - e.clientY); if (d < bd) { bd = d; best = i; } });
@@ -1210,6 +1214,7 @@ function pnFields(it) {
     fld('Tilt (deg, roof)', it, 'tl', { deg: 1, nullable: 1, ph: '0 = upright' }), fld('Shape', it, 'sh', { type: 'select', items: [['', 'Rectangle'], ['tri', 'Triangle'], ['trap', 'Slanted Top']], get: () => it.sh || '', set: v => { if (v) it.sh = v; else delete it.sh; }, after: () => { resync(); renderSide(); } }),
     it.sh === 'tri' ? fld('Apex Position (0 left • 0.5 middle • 1 right)', it, 'ap', { nullable: 1, ph: '0.5', min: 0, max: 1, step: 0.05 }) : null,
     it.sh === 'trap' ? fld('Right End Height (0..1 of Height)', it, 'hr', { nullable: 1, ph: '0.5', min: 0, max: 1, step: 0.05 }) : null,
+    it.hc && it.hc.length ? el('div', { class: 'row' }, el('label', null, 'Punched cells: ' + it.hc.length), el('button', { class: 'tl-btn', onclick: () => { pushUndo('o'); delete it.hc; resync(); renderSide(); colDirty(); } }, 'Clear Punched')) : null,
     it.ho && it.ho.length ? el('div', { class: 'row' }, el('label', null, 'Openings: ' + it.ho.length), el('button', { class: 'tl-btn', onclick: () => { pushUndo('o'); delete it.ho; resync(); renderSide(); } }, 'Clear Openings')) : null,
     fld('Unbreakable (one solid piece, no cells)', it, 'nb', { type: 'checkbox', get: () => !!it.nb, set: v => { if (v) it.nb = 1; else delete it.nb; }, after: () => { resync(); renderSide(); } }),
     fld('HP per cell', it, 'hp', { nullable: 1, ph: 'material default (' + MD.PN_HP[mat] + ')', min: 1, step: 5 }),
@@ -1217,11 +1222,23 @@ function pnFields(it) {
     el('p', { class: 'note' }, d.nc + ' × ' + d.nr + ' = ' + d.nc * d.nr + ' cells (each ' + (d.L / d.nc).toFixed(2) + ' × ' + (d.H / d.nr).toFixed(2) + ' m) • ' + ((it.m || 'p') === 'g' ? 'HP (whole panel) ' + hp : 'HP ' + hp + ' per cell') + ' • Touching panels in the same group hold each other up — nothing reaching the ground = falls'),
     el('div', { class: 'seg' }, el('button', { class: 'tl-btn', title: 'Cut a 1.4 × 2.4 m door in the middle of the panel (max 4 openings per panel)', onclick: () => pnCut(it, 'door') }, 'Cut Door'),
       el('button', { class: 'tl-btn', title: 'Cut a 1.2 × 1.2 m window, 1 m above the base, with a lit glass pane', onclick: () => pnCut(it, 'window') }, 'Cut Window'),
-      el('button', { class: 'tl-btn' + (PNT.on ? ' on' : ''), title: 'Click a panel to break one cell at a time and see what falls with it', onclick: () => { PNT.on = !PNT.on; if (!PNT.on) PNT.br.clear(); pnTestDraw(); renderSide(); } }, PNT.on ? 'Stop Test Break' : 'Test Break')),
-    PNT.on ? el('p', { class: 'note' }, 'Click a breakable panel = break 1 cell (Shift = 3×3) • red = broken • orange = will fall • not saved to the file') : null];
+      el('button', { class: 'tl-btn' + (PNT.on ? ' on' : ''), title: 'Click a panel to break one cell at a time and see what falls with it', onclick: () => { PNT.on = !PNT.on; PNH.on = false; if (!PNT.on) PNT.br.clear(); pnTestDraw(); renderSide(); } }, PNT.on ? 'Stop Test Break' : 'Test Break'),
+      el('button', { class: 'tl-btn' + (PNH.on ? ' on' : ''), title: 'Click cells to punch holes that are saved in the map (the game starts with them missing)', onclick: () => { PNH.on = !PNH.on; if (PNH.on && PNT.on) { PNT.on = false; PNT.br.clear(); pnTestDraw(); } renderSide(); } }, PNH.on ? 'Stop Punching' : 'Punch Holes')),
+    PNT.on ? el('p', { class: 'note' }, 'Click a breakable panel = break 1 cell (Shift = 3×3) • red = broken • orange = will fall • not saved to the file') : null,
+    PNH.on ? el('p', { class: 'note' }, 'Click a cell on any breakable panel = punch a hole (click again = fill it) • Shift = 3×3 • saved in the map: the game starts with these cells missing (no rubble) • cells left hanging with no support fall at the start like any loose piece') : null];
 }
 // editor test-break: broken cells per panel id (not saved) → red = broken, orange = would fall (same support rules as the game)
 const PNT = { on: false, br: new Map() }, gPnT = new THREE.Group();
+const PNH = { on: false };   // Punch Holes mode: click toggles saved holes (o.hc [col,row])
+function pnHoleHit(o, pt, big) {
+  const d = MD.pnDims(o), F = MD.pnFrame(M, o), D = [pt.x + M.W / 2 - F.B[0], pt.y - F.B[1], pt.z + M.H / 2 - F.B[2]], dot = A => A[0] * D[0] + A[1] * D[1] + A[2] * D[2], u = dot(F.U), w = dot(F.W);
+  const c0 = Math.floor((u + d.L / 2) / (d.L / d.nc)), r0 = Math.floor(w / (d.H / d.nr)); if (c0 < 0 || c0 >= d.nc || r0 < 0 || r0 >= d.nr) return;
+  const cur = new Set((o.hc || []).filter(q => q[0] < d.nc && q[1] < d.nr).map(q => q[1] * d.nc + q[0])), fill = cur.has(r0 * d.nc + c0), R = big ? 1 : 0, bare = Object.assign({}, o, { hc: null });
+  pushUndo('o');
+  for (let a = -R; a <= R; a++) for (let b = -R; b <= R; b++) { const cc = c0 + a, rr = r0 + b, k = rr * d.nc + cc; if (cc < 0 || cc >= d.nc || rr < 0 || rr >= d.nr || !MD.pnExists(bare, d, k)) continue; if (fill) cur.delete(k); else cur.add(k); }
+  if (cur.size) o.hc = [...cur].sort((x, y) => x - y).map(k => [k % d.nc, (k / d.nc) | 0]); else delete o.hc;
+  syncObj(o); changed(); colDirty(); renderSide(); pnTestDraw();
+}
 function pnTestDraw() {
   if (!gPnT.parent && gObjs.parent) gObjs.parent.add(gPnT);
   for (const c of [...gPnT.children]) { gPnT.remove(c); c.geometry.dispose(); }
@@ -1534,7 +1551,7 @@ async function openMap(id) {
   try { const r = await (await fetch('/api/mb?id=' + id)).json(); if (!r.ok) throw new Error(r.err); setMap(MD.unpack(r.map)); localStorage.setItem('mb_last', id); stat('Opened', 'ok'); refreshVer(); } catch (e) { stat('Couldn’t open: ' + e.message, 'err'); }
 }
 function setMap(m) {
-  M = m; sel = null; msel = []; undo = []; redo = []; draft = null; PNT.br.clear(); dirty = false; GD = null;
+  M = m; sel = null; msel = []; undo = []; redo = []; draft = null; PNT.br.clear(); PNH.on = false; dirty = false; GD = null;
   buildTerrain(); buildBd(); applySky(); syncAll(); fit(); renderList(); renderSide(); renderOpts();
   if (M.rooms && M.rooms.length) loadRooms().then(() => { if (M === m) { syncAll(); renderSide(); } });   // room prefabs (room-*.json)
   for (const o of M.objs) if (isKit(o)) kitTpl(kitId(o)).then(() => { clearTimeout(setMap.t); setMap.t = setTimeout(() => { if (M === m) { syncObjs(); updSel(); colDirty(); } }, 60); });
@@ -1684,7 +1701,7 @@ $('oArea').onchange = e => { show.area = e.target.checked; gObjs.traverse(m => {
 $('oGrid').onchange = e => { show.grid = e.target.checked; buildGrid(); need(); };
 $('oSky').onchange = e => { show.sky = e.target.checked; applySky(); };
 addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
-window.__mb = { get M() { return M; }, get tool() { return tool; }, makeWater, gameView, gameViewClose, get RX() { return RX; }, loadRooms, MD, opt, placePart, syncParts, partNode, gParts, castleProto, cam, camApply, setTool, gameData, buildExport, exportGame, save, setMap, syncAll, need, kitTpl, KIT, get sel() { return sel; }, set sel(v) { sel = v; renderSide(); updSel(); }, pushUndo, changed, colDirty, updTerrain, afterTerrain, applyRamp, makeFloor, placeObj, doUndo };
+window.__mb = { get M() { return M; }, get tool() { return tool; }, makeWater, pnHoleHit, gameView, gameViewClose, get RX() { return RX; }, loadRooms, MD, opt, placePart, syncParts, partNode, gParts, castleProto, cam, camApply, setTool, gameData, buildExport, exportGame, save, setMap, syncAll, need, kitTpl, KIT, get sel() { return sel; }, set sel(v) { sel = v; renderSide(); updSel(); }, pushUndo, changed, colDirty, updTerrain, afterTerrain, applyRamp, makeFloor, placeObj, doUndo };
 (async () => {
   renderTools(); $('hint').textContent = HINT[tool];
   await Promise.all([loadKit(), refreshList()]);

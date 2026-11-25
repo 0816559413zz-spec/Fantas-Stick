@@ -148,6 +148,7 @@ function pnlCls(p){   // depth class per cell: 0 full • 1 core • 2 gone
   for(let k=0;k<n;k++)c[k]=!p.ex[k]?3:p.st[k]>=3?2:p.st[k]>=2?1:0;
   for(let k=0;k<n;k++)if(c[k]===3){const col=k%p.nc,r=(k/p.nc)|0;let b=2;   // missing cell (opening / gable): follow its live neighbours (exact edge comes from the clip)
     for(const [dc,dr] of [[-1,0],[1,0],[0,-1],[0,1]]){const cc=col+dc,rr=r+dr;if(cc<0||rr<0||cc>=p.nc||rr>=p.nr)continue;const q=c[rr*p.nc+cc];if(q<b)b=q;}c[k]=b;}
+  if(p.d.hc)for(const [cc,rr] of p.d.hc)if(cc>=0&&cc<p.nc&&rr>=0&&rr<p.nr)c[rr*p.nc+cc]=2;   // Map Builder punched cells: gone (cut edges like damage)
   return c;
 }
 // stair size along a cut edge [horizontal, vertical] m per material (brick-sized bites)

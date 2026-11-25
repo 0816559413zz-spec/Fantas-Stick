@@ -205,6 +205,12 @@ Tool: ศูนย์รวม Tool → **Map Builder** • โค้ด: `mapbu
 ## Claude แก้แผนที่เอง
 แก้ `maps/build/<id>.json` ได้ตรง ๆ (ยกเว้น `hg`/`sf` ที่เป็น base64 — ใช้ `mapbuild/model.js`: `unpack` → แก้ `M.hg[j*nx+i]` → `pack`) แล้วเปิด Map Builder กด **⬆ ส่งเข้าเกม** (ต้องใช้เบราว์เซอร์สร้าง .glb) หรือสั่งจากคอนโซลของหน้า: `await __mb.exportGame()`
 
+## แผ่นพัง: เจาะรูทีละ cell (Punch Holes) — 2026-11-25
+- เลือกแผ่นพัง → Inspector ปุ่ม **Punch Holes** → คลิก cell บนแผ่นพังแผ่นไหนก็ได้ = เจาะรู, คลิกซ้ำ = ปิดรู, Shift = 3×3 (ถ้า cell กลางเป็นรูอยู่ = ปิดทั้ง 3×3) • ปุ่มเดิมกดอีกครั้ง (Stop Punching) = ออก • **Clear Punched** = ล้างทั้งหมด
+- เก็บเป็น `hc: [[col,row]…]` บน obj `pn_wall` (col 0 = ปลายซ้าย, row 0 = ล่างสุด, ตาม Cell Size) → ส่งออก `data.pnl[].hc` • **เปลี่ยน Length/Height/Cell Size ทีหลัง = รูขยับตามตาราง cell ใหม่** (cell นอกตารางถูกข้าม)
+- เกม: `pnlGen` js/12-pnl ตั้ง `ex=0` (ไม่มี cell ตั้งแต่เริ่ม: ไม่ชน ไม่มีกองเศษ) • `pnlCls` js/28-pnl-build ให้เป็นช่องว่าง ขอบแตกเป็นขั้นอิฐแบบรอยพัง (ต่างจาก Cut Door/Window ที่ขอบตรง) • แผ่นที่ติ๊ก Unbreakable แต่มีรูเจาะ = แบ่ง cell ตามปกติ
+- editor: รูวาดเป็น hole ต่อแถว (`objMesh`), กฎค้ำ (`pnExists`) นับ cell ที่เจาะว่าไม่มี → Test Break เห็นว่าอะไรจะร่วง
+
 ## แผงพัง: รูปทรง + หอกลม + ลากคลุมเลือก (2026-11-22/24)
 - **Shape ใน Inspector ของ pn_wall:** Rectangle • Triangle (`sh:'tri'`, ช่อง Apex Position `ap` 0 = ยอดชิดซ้าย/มุมฉาก, 0.5 = จั่ว, 1 = ชิดขวา) • Slanted Top (`sh:'trap'`, ช่อง Right End Height `hr` 0..1 ของ Height — ซ้ายสูงเต็ม หมุน 180° ถ้าอยากสลับข้าง) • เกม: `pnTP`/`pnTopF` (js/12-pnl.js) = ช่องเหนือขอบบนไม่มีอยู่, mesh `pnlGeo` + shader `uTp` ตัดขอบตรง • model.js มีสำเนา `pnTP`/`pnTopF`
 - **หอกลม:** เครื่องมือ Breakable Panel → Draw Shape = Round Tower → คลิกจุดกลาง แล้วคลิกอีกครั้งที่รัศมี → ได้แผงรอบวง `Sides` แผ่น (6–32) กลุ่มเดียวกัน (ค้ำกันเอง) • แก้ทีละแผ่นได้ตามปกติ

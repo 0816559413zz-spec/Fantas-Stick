@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-25 — **Punch holes in breakable panels.** In Map Builder, Punch Holes lets you click any cell of a breakable panel to make a hole (click again to fill, Shift for 3×3). The holes are saved; in the game those cells are missing from the start, with broken brick-like edges and no rubble.
 - 2026-11-25 — **Storm has its own stance:** wide legs, body bent forward a little, wand hand back with lightning crawling along the wand, small arcs at the free hand; arms trail back when running; while firing the beam the body twists and the right hand reaches far forward.
 - 2026-11-25 — **Water colour and waves.** Each water area can now set its own shallow and deep colour, clarity, wave height (0 = still), wave speed and foam in the Map Builder Inspector; Reset to Look goes back to the preset.
 - 2026-11-25 — **Radiance gets its shield back** (the only class besides Frost): right click raises the crystal hexagon shield in front, blocks projectiles and melee, you can still walk through it. Smaller: 50 / 80 / 120 by crystals held.

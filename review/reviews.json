@@ -1,5 +1,5 @@
 {
- "next": 203,
+ "next": 204,
  "items": [
   {
    "id": 194,
@@ -4135,6 +4135,25 @@
     "/shots/stance/storm2/storm_c_front.gif",
     "/shots/stance/storm2/storm_c_side.gif",
     "/studio.html?fx=stance/storm_a"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 203,
+   "title": "Map Builder: แผ่นพังเจาะรูทีละ cell (Punch Holes)",
+   "text": "เลือกแผ่นพัง → Inspector ปุ่ม Punch Holes → คลิก cell = เจาะรู, คลิกซ้ำ = ปิด, Shift = 3×3, Clear Punched = ล้าง. บันทึกลงแมพ: ในเกม cell พวกนี้หายตั้งแต่เริ่ม (ไม่มีกองเศษ เดิน/ยิงผ่านได้) ขอบรูแตกเป็นขั้นอิฐแบบรอยพัง. วิธีดู: Map Builder เปิดแมพที่มีแผ่นพัง (เช่น Breakable Panel Demo) → เลือกแผ่น → Punch Holes → คลิกบนแผ่น → ▶ Play. รูปตัวอย่าง: ประตูโค้ง + หน้าต่าง 2 ช่องบนกำแพงอิฐ, ช่องรอบ cell กลางบนกำแพงหิน",
+   "kind": "Map",
+   "who": "Map Builder",
+   "status": "wait",
+   "created": "2026-11-25",
+   "updated": "2026-11-25",
+   "imgs": [
+    "review/img/r203-pnhole-arch.jpg",
+    "review/img/r203-pnhole-ring.jpg"
+   ],
+   "links": [
+    "mapbuild.html"
    ],
    "feedback": "",
    "reply": ""

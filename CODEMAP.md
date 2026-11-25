@@ -235,10 +235,10 @@ BSKV:10 BSKN:11 bskBuild:14 bskGround:38 bskOutline:40 bskSegs:53 bskInPoly:63 b
 ## js/12-launch.js (39) — 
 LAUNCH:4 launch:10 launchTick:22 launchWall:31 launchWallHit:39
 
-## js/12-pnl.js (225) — Breakable panels (แผ่นพัง) — Map Builder pn_wall → data.pnl (guides/D…
-PNDEF:13 PN_BODY:17 PN_CH:18 PNL:19 PNG:19 pnGT:20 sgPnl:21 _sgPN:22 _sgPN2:22 _sgPN3:22 pnlGen:23 pnTP:36 pnTopF:37 pnLoc:38 pnWorld:39 pnCU:40 pnL3:42 pnP3:44 pnCellPos:45 pnCellUW:46 pnSolid:47 pnMark:48 pnlLinks:50 pnlSupport:68 pnEmit:76 pnBreakAll:80 pnStage:81 pnlHit:83 pnDmgCell:97 pnHitFx:102 pnlEnv:104 pnSeg:114 pnlRay:121 pnlSolidAt:126 pnlProj:129 pnlCollide:135 pnPileCols:153 pnPileAt:157 pnlTopH:162 pnlMoundH:171 pnlTick:173 pnlSnap:179 pnlParse:184
-§190 old houses → panel groups (same footprint as BLDDEF: walls wh m, gabl…
-PN_HOUSE:193 pnHouse:194 pnlHouseConv:222
+## js/12-pnl.js (226) — Breakable panels (แผ่นพัง) — Map Builder pn_wall → data.pnl (guides/D…
+PNDEF:13 PN_BODY:17 PN_CH:18 PNL:19 PNG:19 pnGT:20 sgPnl:21 _sgPN:22 _sgPN2:22 _sgPN3:22 pnlGen:23 pnTP:37 pnTopF:38 pnLoc:39 pnWorld:40 pnCU:41 pnL3:43 pnP3:45 pnCellPos:46 pnCellUW:47 pnSolid:48 pnMark:49 pnlLinks:51 pnlSupport:69 pnEmit:77 pnBreakAll:81 pnStage:82 pnlHit:84 pnDmgCell:98 pnHitFx:103 pnlEnv:105 pnSeg:115 pnlRay:122 pnlSolidAt:127 pnlProj:130 pnlCollide:136 pnPileCols:154 pnPileAt:158 pnlTopH:163 pnlMoundH:172 pnlTick:174 pnlSnap:180 pnlParse:185
+§191 old houses → panel groups (same footprint as BLDDEF: walls wh m, gabl…
+PN_HOUSE:194 pnHouse:195 pnlHouseConv:223
 
 ## js/13-enemies.js (171) — ศัตรู (โหมด Co-op)
 spawnEnemy:2 setupWave:19 bossPhase:36 enemySlam:44 updateEnemies:55
@@ -427,8 +427,8 @@ makeSnow:475 makeFireflies:482 makeSnitch:489 fileMapFx:496
 §506 แผนที่จากไฟล์ Blender (guides/MAP-DESIGN.md)
 terrGeo:508 buildFileMap:516 fileMapLight:522 fileMapBody:539 replaceMeadowTufts:583 tickM:625 TRPAD:626 ARPAD:626 SHPAD:626 signTex:627 testSign:628 buildTest:635 buildRuins:740 buildPitch:765
 
-## js/28-pnl-build.js (326) — Breakable panels — view (state = PNL in js/12-pnl.js)
-PNV:7 PN_BATCH:8 PN_MI:9 PN_GLSL:10 pnlMat:66 PN_RUB:138 PN_HEAP:139 pnlCls:146 PN_ZU:154 pnlGeo:155 pnlBuild:239 pnlBatch:265 pnlBatSet:287 pnlSyncOne:292 pnlView:315 pnlFX:318
+## js/28-pnl-build.js (327) — Breakable panels — view (state = PNL in js/12-pnl.js)
+PNV:7 PN_BATCH:8 PN_MI:9 PN_GLSL:10 pnlMat:66 PN_RUB:138 PN_HEAP:139 pnlCls:146 PN_ZU:155 pnlGeo:156 pnlBuild:240 pnlBatch:266 pnlBatSet:288 pnlSyncOne:293 pnlView:316 pnlFX:319
 
 ## js/29-characters.js (441) — ระบบผ้า (เสื้อคลุมพลิ้วตามการเคลื่อนที่)
 makeCloak:2 updateCloth:10 wandNamed:34 wandSparks:83
@@ -995,4 +995,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(121 files, 38114 lines)
+(121 files, 38116 lines)
