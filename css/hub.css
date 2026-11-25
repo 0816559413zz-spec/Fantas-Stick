@@ -405,6 +405,21 @@ body.hS-room .hGo.on{display:flex;animation:hUp .6s var(--h-ease) .15s both}
 .sx .srow.kb{grid-template-columns:1fr 100px;margin:2px 0;align-items:center}
 .sx .srow.kb>span{font-size:14px}
 .sx .crnote{color:var(--h-mute)}
+/* compact strips (user 2026-11-25): label + value on one row, alternating bands, options = segmented bar */
+.sx #setBody .srow:not(.kb){grid-template-columns:minmax(110px,36%) 1fr;align-items:center;gap:12px;margin:0;padding:4px 10px;min-height:32px;box-sizing:border-box;border-bottom:1px solid rgba(255,255,255,.05)}
+.sx #setBody .srow:not(.kb):nth-of-type(odd){background:rgba(255,255,255,.035)}
+.sx #setBody .srow:not(.kb):hover{background:rgba(226,194,122,.07)}
+.sx #setBody .srow:not(.kb)>span{font:400 14px var(--h-sans);grid-column:auto}
+.sx #setBody .srow:has(input[type=range]){grid-template-columns:minmax(110px,36%) 1fr 52px}
+.sx #setBody .srow b{text-align:right}
+.sx #setBody .segs{display:flex;flex-wrap:nowrap;gap:0;border:1px solid rgba(255,255,255,.16);border-radius:4px;overflow:hidden;padding:0}
+.sx #setBody .seg{flex:1 1 0;min-width:0;justify-content:center;padding:4px 3px;font:300 12px var(--h-sans);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:1px solid rgba(255,255,255,.1);transition:background .25s,color .25s}
+.sx #setBody .seg:first-child{border-left:0}
+.sx #setBody .seg::before,.sx #setBody .seg::after{display:none}
+.sx #setBody .seg:hover{background:rgba(255,255,255,.06)}
+.sx #setBody .seg.on{color:#1a1406;font-weight:500;background:linear-gradient(180deg,#f3dc94,#d9b46a);box-shadow:0 0 10px rgba(243,220,148,.35)}
+.sx #setBody h3.sec{margin:16px 0 6px}
+.sx #setBody .crnote{font-size:12px}
 .sx .sxFoot{display:flex;justify-content:flex-end;gap:12px;margin-top:22px}
 .sx .sxFoot button{background:none;border:1px solid rgba(255,255,255,.25);border-radius:22px;padding:9px 22px;font:300 14px var(--h-sans);color:var(--h-ink);letter-spacing:.06em;cursor:pointer;transition:all .3s}
 .sx .sxFoot button.pri{border-color:#e2c27a;color:#f3dc94;background:linear-gradient(180deg,rgba(226,194,122,.16),rgba(226,194,122,.04))}

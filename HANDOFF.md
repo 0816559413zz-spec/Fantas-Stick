@@ -8,6 +8,8 @@
 
 ## Latest notes (newest first)
 
+- 2026-11-25 — **Settings rows are compact strips** (user: too much scrolling). `css/hub.css` (`.sx #setBody` block): label and value on one row, alternating bands, option buttons as one segmented bar (gold = picked), sliders on the same row. Graphics tab ~45% shorter. CSS only; key-bind rows unchanged.
+
 **Countdown freeze, part 2 (2026-11-25):** the first countdown frame did the grass map bake (~0.4 s) and linked the TAA shader (~115 ms). Both moved to the lobby, once the next map is built: `lobbyMapTick` (js/51) → `grassPrebake()` (js/50, shares `grassForMap()` with `grassTick`) and `taaWarm()` (js/27, `taaQuad()` builds the quad). bench-entry countdown max gap siege fcs-file 1031 → 493 ms, valley ~680 → 384 ms; countdown programs 30 → 11. Also fixed `stanceWandTip` (js/35) crashing every frame (272 errors) when the wand model is a Group. Left: OPTIMIZE §X.
 
 **Night perf/preload session (2026-11-24):** gate fixes in js/68-nature-view (Nature hand gear: Darkness tint + fade copies), js/51 (`c*` shell × death clip variants; pyro fire volume death-dissolve copy). Lobby audio prefetch `audioPrefetch(id,mode)` js/18, called once per lobby map from `lobbyMapTick`. fx-check particle triangle budget (`res.est` from `fxLintMesh`, summary per model). Measured, not changed: `drawLabels` <0.8 % CPU, OBS grid already exists (`sgObs`), fx sub-timers already exist. Open: countdown still has one 0.7–1.1 s frame gap (bench-entry) = GPU stall from the 26–31 programs made by `hostStart` objects; slicing `warmDraw` did not help (tried, reverted). Details `guides/OPTIMIZE.md` §X.

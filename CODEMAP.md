@@ -672,18 +672,18 @@ GR_NOISE:162 GR_LIVE:167 SNOWU:188 GR_SNOW:189 grLive:191 GR_GLSL_V:201 GR_BEGIN
 §409 สกิลลม → หญ้า (ภาพล้วน เรียกจาก windEfx js/68)
 WIND_GRASS:411 airWind:425
 
-## js/51-warmup.js (425) — อุ่นเครื่องช่วงนับถอยหลัง (ผู้ใช้ 2026-10-21: "ช่วงนับถอยหลังให้โหลดสิ่งที่ต้องใช้ — กดสก…
+## js/51-warmup.js (432) — อุ่นเครื่องช่วงนับถอยหลัง (ผู้ใช้ 2026-10-21: "ช่วงนับถอยหลังให้โหลดสิ่งที่ต้องใช้ — กดสก…
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_SLICE:13 WARM_X:14 WARM_Y:14 warmKeep:16 warmStaticModels:22 glReady:31 warmCompile:32 warmDraw:35 WARM_SKIP:45 warmAssets:48 warmFx:58 warmNow:71 warmFxRun:79 warmFxEnd:82 warmGather:84 warmPaths:86 warmFrame:88 warmStep:90 preloadCharMat:158 warmTrCopy:161 warmCharVariants:164 warmQueue:184 WARM_LOBBY:190 warmLobbyTick:191 warmTick:198
 §209 Entry loader (PRELOAD-STANDARD step 3, 2026-11-23)
-PRE:215 preloadReg:216 warmDissolve:218 preProg:227 preFin:228 preStart:230
-§243 Event rehearsal (PRELOAD-STANDARD step 4, 2026-11-23)
-WARM_REC_SKIP:249 warmRec:250 warmRecDump:252 WARM_EVFLAGS:253 WARM_EVX:254 WARM_EVY:254 warmEvShift:255 warmRehearse:260 preTick:267
-§277 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
-warmOutline:288
-§305 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
-GWARM:310 gameWarmTick:311 LMAP:344 lobbyMapTick:345 gameWarmFree:355
-§361 Shader never seen before mid-match: compile in the background, hide t…
-SHR:369 shrLights:373 IMZ:378 imzPre:385 imzPost:387 shrRoot:388 shrCollect:389 shrPending:395 shReadyPre:399 shReadyPost:420
+PRE:215 preloadReg:216 warmDissolve:218 preProg:234 preFin:235 preStart:237
+§250 Event rehearsal (PRELOAD-STANDARD step 4, 2026-11-23)
+WARM_REC_SKIP:256 warmRec:257 warmRecDump:259 WARM_EVFLAGS:260 WARM_EVX:261 WARM_EVY:261 warmEvShift:262 warmRehearse:267 preTick:274
+§284 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
+warmOutline:295
+§312 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
+GWARM:317 gameWarmTick:318 LMAP:351 lobbyMapTick:352 gameWarmFree:362
+§368 Shader never seen before mid-match: compile in the background, hide t…
+SHR:376 shrLights:380 IMZ:385 imzPre:392 imzPost:394 shrRoot:395 shrCollect:396 shrPending:402 shReadyPre:406 shReadyPost:427
 
 ## js/52-social.js (172) — 
 §6 แชท: Enter = พิมพ์ / Enter อีกที = ส่ง / Esc = ปิด • ข้อความขึ้นมุมซ้…
@@ -845,7 +845,7 @@ bdNearKit:405
 ## js/67-ocean.js (132) — 
 OCEAN:6 OC_COMMON:9 OC_VERT:17 OC_INIT:18 OC_EVOLVE:30 OC_FFT:37 OC_ASM:43 ocJon:49 ocMat:50 oceanSim:51 oceanSpectrum:67 oceanStep:71 oceanFree:77 OCU:79 oceanTick:81 oceanRun:87 oceanWarm:93 OC_GLSL_V:97 OC_GLSL_F:99
 
-## js/68-darkness-view.js (1153) — 
+## js/68-darkness-view.js (1154) — 
 nightWaltzStrip:2 nightWaltzBorder:80 stDarkVeilGround:118 darkFxMesh:195 drawDarknessHud:201 drawDarkHudBar:220 darknessMarkView:227 darkWaveViews:237 darkActiveViews:237 darkViewRoot:238 darkViewTemp:245 darknessClear:257 darkDeathRoots:265 darkDeathClear:268 darkWorldAt:282 darkMarkWind:285 darkMarkLaunch:313 darkMarkContact:325 darkViewNow:338 darkFlowHud:338 darkIdleWeaponPose:339 darkBAGroundImpact:343 darkSettleWeapon:358 darkBlendWeapon:369 darkShowWeaponReturn:392 darkTrailHistory:399 darkDashView:438 darknessCharacter:484 darknessEfx:727 stDarkShieldInk:1024 stDarkVeilBlade:1067 stWardDrainPool:1104
 
 ## js/68-light-view.js (1963) — 
@@ -990,4 +990,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(120 files, 37732 lines)
+(120 files, 37740 lines)
