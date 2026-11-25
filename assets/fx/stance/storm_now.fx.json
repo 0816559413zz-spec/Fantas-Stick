@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "desc": "Storm: current idle + run (before the class stance)",
+  "tags": ["stance", "preview"],
+  "dur": 5.0,
+  "layers": [
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 5.0},
+    {"id": "stance", "t": "code", "fn": "studio_class_stance", "at": 0, "life": 5.0, "args": {"layer":"anchor","cls":"storm","style":"a","run":[2.6,4.2]}}
+  ]
+}

@@ -310,9 +310,13 @@ const STANCES={
       head:-.04,br:{T:4,y:.018,spine:.03,arm:.03},run:{lean:.14,spine:.06,rx:.3,lx:.1,head:.04},fx:'fireTorch'}},
   water:{   // same shared pose (user) - only the class look changes
     a:{name:'Water spiral',same:1,lzAdd:.42,lxAdd:-.25,fx:'waterSpiral'},   // user 2026-11-24: many water spirals turning round the LEFT arm, outside the sleeve, a clear water orb at the hand with water flowing round inside it
-    b:{name:'Water hem',same:1,fx:'waterHem'}}     // user 2026-11-24: the cloak hem is running water
+    b:{name:'Water hem',same:1,fx:'waterHem'}},     // user 2026-11-24: the cloak hem is running water
+  storm:{   // user 2026-11-25: legs spread left-right (right foot a touch ahead), legs straight, upper body bent forward a little;
+            // free LEFT arm out from the body, hanging, forearm lifted a bit; wand hand out and slightly back so the wand sits behind the body
+    a:{name:'Charged',yaw:8,lean:0,spine:.24,chest:.14,rx:.7,rz:-.62,elR:.25,lx:-.08,lz:.46,elL:.6,legR:-.1,legL:.07,spR:.3,spL:.3,kR:.04,kL:.04,
+      head:-.08,br:{T:3.2,y:.016,spine:.03,arm:.03},run:{lean:.2,spine:.1,rx:1.0,rz:-.3,elR:.05,lx:.95,lz:.28,elL:.05,swing:.12,head:-.06},fx:'stormArc'}}   // run (user 2026-11-25): both arms trail back-down, straight
 };
-const STANCE_PICK={darkness:'b',frost:'b',frostWand:'a',pyro:'a',water:'a'};   // user's picks 2026-11-24 (Stalker, Guard, Brawler, Water spiral)
+const STANCE_PICK={darkness:'b',frost:'b',frostWand:'a',pyro:'a',water:'a',storm:'a'};   // user's picks 2026-11-24 (Stalker, Guard, Brawler, Water spiral)
 function stanceOf(o){const id0=PATHS[o.posePath]?.id,id=id0==='frost'&&o.fRanged?'frostWand':id0,S=STANCES[id];return S?S[STANCE_STYLE[o.posePath]||STANCE_PICK[id]||'a']||S.a:null;}
 const _stQ=new THREE.Quaternion(),_stX=new THREE.Vector3(1,0,0),_stZ=new THREE.Vector3(0,0,1);
 // waist bend on the spine + chest bones (the rig only drives arms/thighs), so legs stay straight and the head stays level
@@ -392,6 +396,15 @@ function stRibbon(n,mat){const g=new THREE.BufferGeometry(),idx=[];g.setAttribut
   for(let i=0;i<n;i++){const a=i*2;idx.push(a,a+1,a+2,a+1,a+3,a+2);}g.setIndex(idx);const m=new THREE.Mesh(g,mat);m.userData.n=n;return m;}
 function stRibbonSet(m,f){const A=m.geometry.attributes.position,a=A.array,n=m.userData.n;for(let i=0;i<=n;i++)f(i/n,a,i*6);A.needsUpdate=true;m.geometry.computeVertexNormals();m.geometry.computeBoundingSphere();}
 const FIRE_TONGUES=9;   // Fire class arm: flame tongues (cost: one small fire-shader mesh each)
+// Storm class look (user 2026-11-25): small lightning arcs flicker over the whole body all the time — not many, random, very fast
+// round 2 (user): bigger arcs, most of them crawl the wand (hand -> tip), a few on the left hand, fewer on the body
+const ST_ARC={n:13,body:4,wand:6,seg:7,life:[.06,.13],gap:[.03,.2],len:[.22,.45],jit:.11,w:.03,glow:2.1,
+  bones:[['hips','spine',.32],['spine','chest',.3],['chest','neck',.24],['upper_arm_L','forearm_L',.15],['forearm_L','hand_L',.15],['upper_arm_R','forearm_R',.15],['forearm_R','hand_R',.15],['thigh_L','shin_L',.34],['thigh_R','shin_R',.34],['shin_L','foot_L',.42],['shin_R','foot_R',.42]]};   // radius = out past the robe/sleeves
+// glow round an arc fades out to both edges (user 2026-11-25: no flat band 'aura', soft + thin)
+let _stArG=null;function stArcGlowTex(){if(_stArG)return _stArG;const c=document.createElement('canvas');c.width=4;c.height=64;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,64);
+  g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.5,'rgba(255,255,255,1)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,4,64);_stArG=new THREE.CanvasTexture(c);return _stArG;}
+function stRibbonUV(m){const n=m.userData.n,uv=new Float32Array((n+1)*4);for(let i=0;i<=n;i++){uv[i*4]=i/n;uv[i*4+1]=0;uv[i*4+2]=i/n;uv[i*4+3]=1;}m.geometry.setAttribute('uv',new THREE.BufferAttribute(uv,2));}
+const _stArA=new THREE.Vector3(),_stArB=new THREE.Vector3(),_stArC=new THREE.Vector3(),_stArD=new THREE.Vector3(),_stArE=new THREE.Vector3();
 const ST_GEO={ball:new THREE.SphereGeometry(1,20,14),drop:new THREE.SphereGeometry(1,10,8),plane:new THREE.PlaneGeometry(1,1),shard:new THREE.OctahedronGeometry(1,0)};
 function stBuild(o,kind){
   const g=new THREE.Group();g.name='Class look '+kind;g.userData={kind,parts:{}};const P=g.userData.parts;
@@ -405,6 +418,8 @@ function stBuild(o,kind){
     for(let i=0;i<FIRE_TONGUES;i++)add(new THREE.Mesh(ST_GEO.ball,fireMat({mode:'ball',disp:.55,flow:[0,1,0],scale:[2,2,2],speed:2.3,int:.95,op:.9,seed:11+i*3.7})),'tongue');}
   else if(kind==='inkDrip'){for(let i=0;i<7;i++)add(new THREE.Mesh(ST_GEO.drop,stMat('ink')),'drop');for(let i=0;i<4;i++)add(new THREE.Sprite(stMatNew('inkSmoke')),'wisp');}
   else if(kind==='footMist'){for(let i=0;i<14;i++)add(new THREE.Sprite(stMatNew('mist')),'mist');}
+  else if(kind==='stormArc'){for(let i=0;i<ST_ARC.n;i++){const m=add(stRibbon(ST_ARC.seg,new THREE.MeshBasicMaterial({color:i%4===3?'#7fe8ff':'#fff3a0',transparent:true,depthWrite:false,side:THREE.DoubleSide})),'arc');m.userData.t=-Math.random()*.3;
+    m.userData.src=i<ST_ARC.body?0:i<ST_ARC.body+ST_ARC.wand?1:2;const gl=add(stRibbon(ST_ARC.seg,new THREE.MeshBasicMaterial({map:stArcGlowTex(),color:i%4===3?'#38d8ff':'#ffc21c',transparent:true,opacity:.35,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide})),'arcGlow');stRibbonUV(gl);m.userData.gl=gl;}}
   else if(kind==='frostBreath'){for(let i=0;i<4;i++)add(new THREE.Sprite(stMatNew('breath')),'puff');for(let i=0;i<7;i++)add(new THREE.Sprite(stMatNew('glint')),'glint');}
   else if(kind==='frostGround'){const d=add(new THREE.Mesh(ST_GEO.plane,stMat('frost')),'decal');d.rotation.x=-Math.PI/2;
     for(let i=0;i<5;i++)add(new THREE.Mesh(ST_GEO.shard,stMat('ice')),'shard');for(let i=0;i<5;i++)add(new THREE.Sprite(stMatNew('glint')),'glint');}
@@ -446,6 +461,21 @@ function stanceFX(o,p,now,dt,detail){
       P.drop.forEach((m,i)=>{const a=stCyc(t,1.3,i,P.drop.length),q=st[i];if(a<q.a){q.x=h.x+(Math.random()-.5)*.07;q.y=h.y-.06;q.z=h.z+(Math.random()-.5)*.07;}q.a=a;
         const fall=a<.25?a/.25*.03:.03+(a-.25)*(a-.25)*2.4;m.position.set(q.x,q.y-fall,q.z);const sz=.03*(a<.25?.5+a*2:1-(a-.25)*.6);m.scale.set(sz,sz*(a<.25?1+a*3:1.9),sz);m.visible=m.position.y>.02;});
       P.wisp.forEach((m,i)=>{const a=stCyc(t,2.2,i,4),an=t*.9+i*1.57;m.position.set(h.x+Math.cos(an)*.09,h.y-.04+a*.18,h.z+Math.sin(an)*.09);m.scale.setScalar(.12+a*.2);m.material.opacity=.45*Math.sin(a*Math.PI);});}
+  }else if(kind==='stormArc'){   // each arc: pick a body segment, a zigzag along its surface, lives 0.05-0.11 s, waits 0.05-0.35 s, again
+    P.arc.forEach(m=>{const d=m.userData;d.t+=dt;
+      if(d.t>=(d.L||0)){d.t=-(ST_ARC.gap[0]+Math.random()*(ST_ARC.gap[1]-ST_ARC.gap[0]));d.L=ST_ARC.life[0]+Math.random()*(ST_ARC.life[1]-ST_ARC.life[0]);
+        let sg,a,b;if(d.src===1&&o.tip){sg=['hand_R','tip',.05];a=stLoc(o,'hand_R',_stArA);b=o.g.worldToLocal(o.tip.getWorldPosition(_stArB));}   // along the wand
+        else if(d.src===2){sg=['forearm_L','hand_L',.07];a=stLoc(o,'forearm_L',_stArA);b=stLoc(o,'hand_L',_stArB);if(a&&b)b.addScaledVector(_stArC.copy(b).sub(a),.35);}   // round the left hand
+        else{sg=ST_ARC.bones[Math.random()*ST_ARC.bones.length|0];a=stLoc(o,sg[0],_stArA);b=stLoc(o,sg[1],_stArB);}d.ok=!!(a&&b);
+        if(d.ok){const ax=_stArB.sub(_stArA),len=ax.length();ax.normalize();const side=_stArC.set(Math.random()-.5,Math.random()-.5,Math.random()-.5).cross(ax).normalize();
+          const u0=d.src===1?Math.random()*.2:Math.random()*.7,span=d.src===1?len*(.75+Math.random()*.45):Math.min(len*.8,ST_ARC.len[0]+Math.random()*(ST_ARC.len[1]-ST_ARC.len[0])),r=sg[2],pts=d.p||(d.p=[]);
+          const off=_stArD.copy(side).multiplyScalar(r);const tw=_stArE.crossVectors(ax,side);(d.wv||(d.wv=new THREE.Vector3())).copy(tw).add(side).normalize();
+          for(let i=0;i<=ST_ARC.seg;i++){const f=i/ST_ARC.seg,j=i&&i<ST_ARC.seg?ST_ARC.jit:0;const q=pts[i]||(pts[i]=new THREE.Vector3());
+            q.copy(_stArA).addScaledVector(ax,u0*len+f*span).add(off).addScaledVector(side,(Math.random()-.5)*j).addScaledVector(tw,(Math.random()-.5)*j*1.6);}}}
+      const on=d.t>=0&&d.ok;m.visible=on;d.gl.visible=on;if(!on)return;const k=1-d.t/d.L,w=ST_ARC.w*(.6+.4*k)*(d.src===1?.8:1),pts=d.p;
+      m.material.opacity=k>.5?1:k*2;d.gl.material.opacity=.35*m.material.opacity;
+      const V=d.wv,rib=(M,W)=>stRibbonSet(M,(u,a2,i6)=>{const i=Math.round(u*ST_ARC.seg),q=pts[i];a2[i6]=q.x-V.x*W;a2[i6+1]=q.y-V.y*W;a2[i6+2]=q.z-V.z*W;a2[i6+3]=q.x+V.x*W;a2[i6+4]=q.y+V.y*W;a2[i6+5]=q.z+V.z*W;});
+      rib(m,w);rib(d.gl,w*ST_ARC.glow);});
   }else if(kind==='footMist'){
     P.mist.forEach((m,i)=>{const a=stCyc(t,4.5,i,P.mist.length),an=i*2.4+t*.15,r=.3+a*.95;m.position.set(Math.cos(an)*r,.08+a*.22,Math.sin(an)*r);
       m.scale.set(.8+a*1.1,.35+a*.45,1);m.material.opacity=.9*Math.sin(a*Math.PI);});
@@ -524,10 +554,10 @@ function classStance(o,S,v,now,weight,stride,step,forward,rise){
   o.b.position.x=lerp(o.b.position.x,S.sway?S.sway.x*sw*(1-run):0,weight);
   const kneeDrop=.09*((S.kR||0)+(S.kL||0))*(1-run);
   o.b.position.y=lerp(o.b.position.y,-.045-kneeDrop+B.y*br*(1-.6*run)+(S.bounce?S.bounce.y*bn*(1-run):0)+rise*run,weight);
-  const swing=step*run;
-  o.armR.rotation.set(lerp(o.armR.rotation.x,lerp(S.rx,R.rx??S.rx,run)-B.arm*br+.3*swing,weight),(S.ry||0)*weight,lerp(o.armR.rotation.z,S.rz,weight));
-  o.armL.rotation.set(lerp(o.armL.rotation.x,lerp(S.lx,R.lx??S.lx,run)+B.arm*br-.3*swing,weight),(S.ly||0)*weight,lerp(o.armL.rotation.z,S.lz,weight));   // ry/ly = upper-arm twist (turns the elbow bend plane)
-  o.readyElbowL=S.elL+.04*br;o.readyElbowR=S.elR;
+  const swing=step*run*(R.swing??1);   // run.swing / rz / lz / elR / elL: optional per-stance running arms
+  o.armR.rotation.set(lerp(o.armR.rotation.x,lerp(S.rx,R.rx??S.rx,run)-B.arm*br+.3*swing,weight),(S.ry||0)*weight,lerp(o.armR.rotation.z,lerp(S.rz,R.rz??S.rz,run),weight));
+  o.armL.rotation.set(lerp(o.armL.rotation.x,lerp(S.lx,R.lx??S.lx,run)+B.arm*br-.3*swing,weight),(S.ly||0)*weight,lerp(o.armL.rotation.z,lerp(S.lz,R.lz??S.lz,run),weight));   // ry/ly = upper-arm twist (turns the elbow bend plane)
+  o.readyElbowL=lerp(S.elL,R.elL??S.elL,run)+.04*br;o.readyElbowR=lerp(S.elR,R.elR??S.elR,run);
   for(let side=0;side<2;side++){const leg=o.legs[side].rotation,base=side?S.legL:S.legR;
     leg.x=lerp(leg.x,-lean+base*(1-run*.7)+(side?step:-step)*run*.55,weight);   // -lean keeps the legs upright under a body lean
     leg.z=lerp(leg.z,(side?1:-1)*(side?S.spL:S.spR)*(1-.55*run),weight);}

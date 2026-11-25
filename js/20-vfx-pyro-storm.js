@@ -674,10 +674,15 @@ function stormFX(o,p,pz,now,dt){
   // ลำสายฟ้า (กดค้าง): สายฟ้าหนาจากปลายไม้ไปทุกเป้าที่ล็อก
   const bmT=f&1&&!god?(M[7]||[]):[];   // ล็อกเป้าแล้ว = ลำหลักวิ่งเข้าหาเป้า ไม่พุ่งตรงไปข้างหน้าอีก (ผู้ใช้ 2026-11-10)
   if(f&1&&!god&&!bmT.length){if(!o.bmFx)o.bmFx=fxPlay('storm/beam_b',{x:p.x,y:p.y,h:pz,follow:p.id});}else if(o.bmFx){fxStop(o.bmFx);o.bmFx=null;}
+  if(!(f&1)||god)o.stBmK=0;
   if(f&1&&!god){
     // ท่ายิงลำแสงแบบดวลในหนัง (Priori Incantatem): แขนขวายื่นตรงเกร็ง มือซ้ายจับข้อมือประคอง ตัวเอนหลังต้านแรง ไหล่ขวาออก ขากาง • สั่นตลอด
-    {const tr=Math.sin(now/31)*0.06+Math.sin(now/53)*0.035;o.armR.rotation.x=-1.5+tr;o.armR.rotation.z=-0.05+tr*0.5;o.armL.rotation.x=-1.3+tr;o.armL.rotation.z=-0.42;
-      o.b.rotation.y=0.28+Math.sin(now/260)*0.08;o.b.rotation.x-=0.1+Math.sin(now/170)*0.03;o.b.position.y-=0.05;   // ยิงลำค้าง: ตัวโยกต้านแรง ไม่นิ่ง
+    {const tr=Math.sin(now/31)*0.06+Math.sin(now/53)*0.035;
+     if(stanceOf(o)?.fx==='stormArc'){o.stBmK=Math.min(1,(o.stBmK||0)+dt*9);const k=_cs(o.stBmK);   // user 2026-11-25: twist left so the right shoulder leads, right hand reaches far forward, held while firing; left arm back-down
+       o.armR.rotation.x=lerp(o.armR.rotation.x,-1.55+tr,k);o.armR.rotation.z=lerp(o.armR.rotation.z,.18+tr*.5,k);o.armL.rotation.x=lerp(o.armL.rotation.x,.7,k);o.armL.rotation.z=lerp(o.armL.rotation.z,.4,k);
+       o.b.rotation.y=lerp(o.b.rotation.y,.95+Math.sin(now/260)*.05,k);o.b.rotation.x-=.04*k;o.b.position.y-=.04*k;o.faW=Math.max(o.faW||0,0);o.readyElbowR=.02;}
+     else{o.armR.rotation.x=-1.5+tr;o.armR.rotation.z=-0.05+tr*0.5;o.armL.rotation.x=-1.3+tr;o.armL.rotation.z=-0.42;
+      o.b.rotation.y=0.28+Math.sin(now/260)*0.08;o.b.rotation.x-=0.1+Math.sin(now/170)*0.03;o.b.position.y-=0.05;}   // ยิงลำค้าง: ตัวโยกต้านแรง ไม่นิ่ง
      if((o.vsp||0)<0.6){o.legs[1].rotation.x=-0.3;o.legs[0].rotation.x=0.25;o.legs[1].rotation.z=0.12;o.legs[0].rotation.z=-0.12;}}
     o.bmT=(o.bmT||0)-dt;
     if(o.bmT<=0){o.bmT=0.05;o.tip.getWorldPosition(_pw);const q=simOf(_pw),T=M[7]||[];

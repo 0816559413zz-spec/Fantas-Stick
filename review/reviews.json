@@ -1,5 +1,5 @@
 {
- "next": 202,
+ "next": 203,
  "items": [
   {
    "id": 194,
@@ -4116,6 +4116,24 @@
    "links": [
     "mapbuild.html?id=water-demo",
     "index.html?nosw&playmap=water-demo"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 202,
+   "title": "Storm: ท่ายืนประจำคลาส + สายฟ้าทั่วตัว",
+   "text": "ขากางซ้ายขวา ขาขวานำนิด ตัวบนก้ม แขนซ้ายกางห้อย มือขวาเฉียงหลัง ไม้อยู่หลังตัว • สายฟ้าแลบสุ่มเร็ว ส่วนใหญ่ที่ไม้ มีที่มือซ้าย ตัวน้อย แสงรอบจางนุ่ม • วิ่ง: แขนลู่หลังตรง • ยิงลำแสง: บิดตัว มือขวายื่นไกลค้าง (ผู้ใช้ผ่าน 2026-11-25)",
+   "kind": "VFX / แอนิเมชัน",
+   "who": "Character",
+   "status": "wait",
+   "created": "2026-11-25",
+   "updated": "2026-11-25",
+   "imgs": [],
+   "links": [
+    "/shots/stance/storm2/storm_c_front.gif",
+    "/shots/stance/storm2/storm_c_side.gif",
+    "/studio.html?fx=stance/storm_a"
    ],
    "feedback": "",
    "reply": ""

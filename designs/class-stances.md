@@ -57,3 +57,8 @@ User asked (before sleeping): body twist with the other arm countering, natural,
 - **Fire arm** (user: "more fire, don't make it lag"): flame tongues born on the sleeve rise and thin out (`FIRE_TONGUES` = 9 small fire-shader meshes, no extra particles); blobs a bit bigger and less white.
 - **Kindle** (user: leg looked weird): with the fire-hand aim the folded/shrunk kick leg is gone; legs hang loose (`KINDLE_AIM.l0/l1`).
 - **Round 3 (user 2026-11-25):** Frost animations must follow the wand arm -> while casting the left-hand wand blends from the stance direction to point on along the forearm (`o.wCastK`, `stanceWandTip`), so it no longer points back behind the head in cast poses; wand-mode stance wand points forward, less diagonal (`frostWand.wandDir [.85,-.18,-.3]`). Fire: the whole arm under fire again (10 bigger blobs hide the sleeve) but the flames are short. Preview `stance/frost_wand_all` (wand basics, Glacier Rend, Frostforge, Permafrost, Frost Aura, Mirror Legion).
+
+## Storm (user 2026-11-25)
+- Pose: legs spread left-right (right foot a touch ahead, not forward), legs straight, only the upper body bends forward a little; left arm (no wand) out from the body hanging, forearm lifted a bit; wand slightly behind the body, right hand out diagonally back a little.
+- Lightning over the body all the time, small, random, very fast — round 2: bigger, most on the wand, some on the left hand, fewer on the body; glow must fade soft + thin (no flat band).
+- Run: both arms back-down, straight. Beam BA: twist left (right shoulder leads), right hand reaches far, held while firing.

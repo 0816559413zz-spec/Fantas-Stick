@@ -2189,6 +2189,28 @@
    "dur": 4,
    "n": 2
   },
+  "stance/storm_a": {
+   "v": "60d70ebb",
+   "desc": "Storm class stance (user 2026-11-25): idle with body lightning, beam (twist, right hand far forward), run (arms back-down)",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 7,
+   "n": 2
+  },
+  "stance/storm_now": {
+   "v": "2bfcf360",
+   "desc": "Storm: current idle + run (before the class stance)",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 5,
+   "n": 2
+  },
   "stance/water_a": {
    "v": "ec2bb9d7",
    "desc": "Stance preview — water style a (idle breathing, short run, idle)",
