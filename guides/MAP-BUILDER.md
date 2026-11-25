@@ -130,6 +130,15 @@ Tool: ศูนย์รวม Tool → **Map Builder** • โค้ด: `mapbu
 - ปุ่ม **+ New** เปิดหน้าตั้งค่า (`newDlg` mapbuild/app.js): Name, id, Description • Size (Small 80×50 / Medium 120×75 / Large 150×90 / Huge 200×130 / Custom = ใส่ W×H เอง) • Starting Ground (ผิวพื้น) • Starting Shape (`NEW_TERR`: Flat / Gentle Hills / Valley ขอบยก / Plateau กลางสูง — `newTerrain` สุ่ม seed, ลาดเดินได้ แล้วปั้นต่อเอง) • Backdrop (ฉากหลัง preset หรือ none, เรียก `bdCreate`) • Sky, Main Style, Music, Outer Border • Playable Modes (ต้องติ๊กอย่างน้อย 1), random pool, autoProps
 - ทุกค่าแก้ทีหลังได้ใน Inspector (Map / Playable Modes) และเครื่องมือ Backdrop
 
+## Phase Layer: ของที่โผล่/หายตามเฟส — 2026-11-25
+- ระบบมาตรฐาน ไม่บังคับ: แมพที่ไม่ตั้งอะไร = เหมือนเดิมทุกอย่าง
+- เลือกของ (kit / primitive) หรือกำแพง (เลือกหลายชิ้นพร้อมกันได้) → Inspector หัวข้อ **Phase Layer**: `Show from phase` (`pa`, ว่าง = 1) • `Show until phase` (`pb`, ว่าง = ถึงจบ) → `MD.vpOf(o)` = `[a,b]`
+- ตัวอย่างป่าไฟไหม้: ต้นไม้ปกติ "until 1" + ต้นไม้ไหม้/ตอไม้ "from 2" วางจุดเดียวกัน → แกน 1 แตก = ป่าเปลี่ยนทันที
+- ดูใน editor: แถบ Scene ช่อง **Phase** (All / 1–6) = ซ่อนของที่ไม่อยู่ในเฟสนั้น (`phViewApply`)
+- ส่งออก: node ใน .glb มี extras `vp` (ไม่รวม mesh กับของอื่น) • ที่ชน `data.obs[].vp`
+- เกม (`phTick` js/28-maps-build.js): ทุกเฟรม + ตอนเฟสเปลี่ยน (`sgWallsApply`) เทียบ `SGPH` → ซ่อน node + ที่ชนเป็น hgt 0 (ของที่พังไปแล้วยังพังอยู่) • ต้นไม้ลม (`ptreeScene`) / ของพังได้ (`brkSetup`) แยก instanced mesh ตามช่วงเฟส • โหมดอื่น = เฟส 1 • dev: `WD.phSet(n)` ดูเฟสโดยไม่ต้องเล่นบุกปราสาท
+- ยังไม่รองรับ: พื้นชั้นบน, ชิ้นปราสาท, decor `dc_*`, แผ่นพัง, น้ำ, สีพื้น (ทาพื้นไหม้), เอฟเฟกต์ตอนเปลี่ยน (ควัน/ไฟ) — สลับทันที; จังหวะ/เอฟเฟกต์ตอนเปลี่ยนรอทีม gameplay
+
 ## น้ำ (Water) — เครื่องมือ 💧 (ปุ่ม H) 2026-11-25
 - ลากกรอบบนพื้น = พื้นที่น้ำ (คลิกเฉย ๆ = 12 × 12 ม.) • ระดับน้ำตั้งให้เองที่ใต้พื้นต่ำสุดตามขอบกรอบ 0.15 ม. • ติ๊ก **Dig Basin when placing** (ค่าเริ่ม = เปิด) = ขุดแอ่งรีนุ่ม ๆ ลึก Basin Depth (ขุดลงอย่างเดียว ไม่ถมขึ้น) • ปิด = ใช้พื้นเดิม (ขุดเองด้วย Sculpt → Lower ก่อน)
 - น้ำ = แผ่นเรียบที่ระดับ `y` (ม. **ค่าจริง ไม่ใช่สูงจากพื้น**) — พื้นที่สูงกว่าระดับจะบังน้ำ → ตลิ่งเป็นรูปตามพื้นเอง • หมุนได้ • ปรับด้วย Select: ย้าย/หมุน/R ขยาย, ลูกศรเขียวหรือ PgUp/PgDn = ระดับ • Inspector: Width/Length/Level/Look + ปุ่ม Auto Level, Dig Basin • วางจาก Place → หมวด Water ได้ด้วย

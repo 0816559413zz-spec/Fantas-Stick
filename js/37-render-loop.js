@@ -102,7 +102,7 @@ function renderGame(v,P,E,me,dt,now){
     detailCull.volume.setFromProjectionMatrix(detailCull.matrix.multiplyMatrices(cam.projectionMatrix,cam.matrixWorldInverse));
   }
   let t0=performance.now();
-  if(!FXSTUDIO.seek){syncPlayers(P,v.mode,now,dt);pf('p.sync',t0);let t1=performance.now();grassTick(dt);pf('p.grass',t1);t1=performance.now();QUAL.clA+=dt;{const cs=qualCS();if(!cs||QUAL.frame%(cs+1)===0){clothTick(QUAL.clA);QUAL.clA=0;}}pf('p.cloth',t1);gameWarmFree(dt);}pf('players',t0);   // grassTick = ลม + หญ้า (js/50) • clothTick = ผ้าคลุมจริงของเรา (js/49)
+  if(!FXSTUDIO.seek){syncPlayers(P,v.mode,now,dt);pf('p.sync',t0);let t1=performance.now();phTick();grassTick(dt);pf('p.grass',t1);t1=performance.now();QUAL.clA+=dt;{const cs=qualCS();if(!cs||QUAL.frame%(cs+1)===0){clothTick(QUAL.clA);QUAL.clA=0;}}pf('p.cloth',t1);gameWarmFree(dt);}pf('players',t0);   // grassTick = ลม + หญ้า (js/50) • clothTick = ผ้าคลุมจริงของเรา (js/49)
   if(me&&me.al&&!me.fl&&!me.dn){const o=PM3.get(me.id);if(o){const k=Math.floor(o.walk/Math.PI);if(o.stepK!==undefined&&k!==o.stepK)snd('step',{vol:0.35,rev:0.1});o.stepK=k;}}t0=performance.now();
   syncEnemies(E,P,now,dt);pf('enemies',t0);t0=performance.now();
   let t1=t0;   // projMode แยกย่อยให้ WD.PROF (pm.proj / pm.earth / ...) — รวมยังเป็น 'projMode' เหมือนเดิม

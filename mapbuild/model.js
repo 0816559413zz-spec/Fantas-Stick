@@ -122,6 +122,9 @@ Object.assign(OBJ, {
   dc_flag: { n: 'Tower Flag', cat: 'deco', c: '#9a1c20' }, dc_post: { n: 'Flame on Pole', cat: 'deco', c: '#ffb060' },
 });
 export const isDeco = t => t.startsWith('dc_');
+// Phase layers (user 2026-11-25): pa = shown from siege phase N (default 1), pb = shown up to phase N (default: to the end) → [a,b] or null.
+// Objects (kits / prims) + walls only: look (.glb node extras vp) + collision (obs vp, game hgt 0 outside). Other modes stay at phase 1.
+export const vpOf = o => (o.pa > 1 || o.pb > 0) ? [Math.max(1, o.pa | 0 || 1), o.pb > 0 ? o.pb | 0 : 99] : null;
 // game systems bound by tag, not by map name (MAP-STANDARD §1.7)
 export const SYS_WALL = [['', '(none)'], ['fence', 'Burnable Fence'], ['stonewall', 'Stone Wall (cracks/burns)']];
 export const SYS_FLOOR = [['', '(none)'], ['eggshell', 'Eggshell Break (bridge)']];
@@ -418,7 +421,7 @@ export function gameData(M, dim) {
       let gi = null;
       if (w.brk && !P) { gi = brk.length; brkOf.set('w' + w.id + ':' + ci, gi); const L = R[R.length - 1][2] - R[0][2];
         brk.push({ h: r2(w.h), vh: r2(w.h), v: r1(L * w.th * w.h), m: w.m || 'stone', n: 'wall_' + w.id + '_' + ci }); }
-      for (const c of chunkCircles(M, w, R)) put(c, gi, P ? { k: 'fcf', fid: fid(c) } : null);
+      const vp = vpOf(w); for (const c of chunkCircles(M, w, R)) put(c, gi, Object.assign(P ? { k: 'fcf', fid: fid(c) } : {}, vp ? { vp } : {}));
     });
   }
   // floors that are solid underneath (sol 1, or auto = a ramp/stair starting at the ground): collision circles below the slab, tops just under the
@@ -467,7 +470,7 @@ export function gameData(M, dim) {
     else { const d = dim(o); if (!d) continue; const cs = objCircles(M, o, d); if (!cs.length) continue;
       let gi = null; const isBrk = o.brk == null ? d.brk : o.brk;
       if (isBrk) { gi = brk.length; brkOf.set('o' + o.id, gi); brk.push({ h: r2(d.h), vh: r2(d.h), v: r1(d.ex * 2 * d.ez * 2 * d.h), m: d.m || 'stone', n: 'obj_' + o.id }); }
-      for (const c of cs) put(c, gi); }
+      const vp = vpOf(o); for (const c of cs) put(c, gi, vp ? { vp } : null); }
   }
   spawns.sort((a, b) => (a.t == null ? -1 : a.t) - (b.t == null ? -1 : b.t));
   // siege target walls/gate (axis-aligned bounding rect of the wall) + tagged systems
@@ -527,6 +530,9 @@ export function check(M, G) {
   else if (c.spawns < 6) add('warn', 'General spawns: ' + c.spawns + ' points (6 spread apart recommended)');
   else add('ok', 'General spawns: ' + c.spawns + ' points');
   if (has('tdm') && !siegeOnly) { if (c.red >= 3 && c.blue >= 3) add('ok', 'Team spawns: red ' + c.red + ' / blue ' + c.blue); else add('warn', 'Team mode: team spawns red ' + c.red + ' / blue ' + c.blue + ' (3 per side recommended — none = the game splits the general spawns left/right)'); }
+  { const L = M.objs.concat(M.walls).filter(o => vpOf(o)), bad = L.find(o => o.pb > 0 && (o.pa || 1) > o.pb);
+    if (bad) add('err', 'Phase layer: “Show from phase” is after “Show until phase”', bad.x != null ? [bad.x, bad.z] : null);
+    else if (L.length) add(has('siege') ? 'ok' : 'warn', 'Phase layers: ' + L.length + ' items change by siege phase' + (has('siege') ? '' : ' — this map has no Siege mode, so phase 1 always shows')); }
   if (M.modes && M.modes.includes('race') && c.rings < 10) add('warn', 'Broom race: rings ' + c.rings + ' (need 10)');
   if (M.modes && M.modes.includes('imp') && c.tasks < 6) add('warn', 'Find Voldemort: task points ' + c.tasks + ' (6–8 recommended)');
   if (has('coop') && c.espawn && c.espawn < 4) add('warn', 'Co-op: Monster spawns: ' + c.espawn + ' (4+ recommended, or none to let the game spawn along the edges)');

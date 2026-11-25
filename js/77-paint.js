@@ -256,9 +256,9 @@ function paintApply(m){return paintPatch(m,true);}
 // tree shape with the shared wind material (any map, paint look or not). Called from buildFileMap before brkSetup/batchStatic.
 function ptreeScene(sc){
   const K=paintKit(),G=new Map(),m4=new THREE.Matrix4();sc.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(sc.matrixWorld).invert();
-  sc.traverse(o=>{if(o.isMesh&&!o.isInstancedMesh&&o.material&&o.material.name==='paint_tree'){let L=G.get(o.geometry);if(!L)G.set(o.geometry,L=[]);L.push(o);}});
+  sc.traverse(o=>{if(o.isMesh&&!o.isInstancedMesh&&o.material&&o.material.name==='paint_tree'){const vp=phOf(o),k=o.geometry.uuid+'|'+(vp||'');let L=G.get(k);if(!L)G.set(k,L=Object.assign([],{geo:o.geometry,vp}));L.push(o);}});   // vp = phase layer (js/28-maps-build): one instanced mesh per range
   let n=0;
-  for(const [geo,L] of G){const im=new THREE.InstancedMesh(geo,K.mat,L.length);im.name='ptree_inst';im.customDepthMaterial=K.dmat;
+  for(const L of G.values()){const geo=L.geo,im=new THREE.InstancedMesh(geo,K.mat,L.length);im.name='ptree_inst';im.customDepthMaterial=K.dmat;if(L.vp)im.userData.vp=L.vp;
     L.forEach((o,i)=>im.setMatrixAt(i,m4.multiplyMatrices(inv,o.matrixWorld)));im.instanceMatrix.needsUpdate=true;im.computeBoundingSphere();
     im.castShadow=L.some(o=>o.castShadow);im.receiveShadow=true;sc.add(im);for(const o of L)o.parent.remove(o);n+=L.length;}
   return n;}

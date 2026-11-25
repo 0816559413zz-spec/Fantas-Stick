@@ -1,5 +1,5 @@
 {
- "next": 206,
+ "next": 207,
  "items": [
   {
    "id": 194,
@@ -4188,6 +4188,26 @@
    "imgs": [],
    "links": [
     "index.html"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 206,
+   "title": "ระบบมาตรฐาน: ของโผล่/หายตามเฟส (Phase Layer)",
+   "text": "ระบบกลาง ไม่บังคับ — แมพไหนไม่ตั้ง = เหมือนเดิม. เลือกของหรือกำแพงใน Map Builder → Inspector หัวข้อ Phase Layer ตั้ง \"Show from phase\" / \"Show until phase\". ในบุกปราสาท แกน N แตก = เฟส N+1 ของจะสลับทันที (ทั้งหน้าตาและที่ชน). ตัวอย่างป่าไฟไหม้: ต้นไม้ \"until 1\" + ต้นไม้ไหม้ \"from 2\" จุดเดียวกัน. วิธีดู: Map Builder แถบ Scene ช่อง Phase เลือก 1/2 = ดูทีละเฟส. รูป: แมพทดลอง เฟส 1 (ต้นไม้ + กำแพง) และเฟส 2 (หิน + กล่องแดง แทน) ในเกม. ยังไม่มี: ทาพื้นไหม้, ควัน/ไฟตอนเปลี่ยน, decor/พื้นชั้นบน/แผ่นพัง/น้ำ",
+   "kind": "Map",
+   "who": "Map Builder",
+   "status": "wait",
+   "created": "2026-11-25",
+   "updated": "2026-11-25",
+   "imgs": [
+    "review/img/r206-phase-1.jpg",
+    "review/img/r206-phase-2.jpg",
+    "review/img/r206-phase-mb.jpg"
+   ],
+   "links": [
+    "mapbuild.html"
    ],
    "feedback": "",
    "reply": ""

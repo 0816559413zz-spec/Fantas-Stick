@@ -536,6 +536,19 @@ function fileMapLight(F){
   }
   return night;
 }
+// ---------- Phase layers (Map Builder "Phase Layer", user 2026-11-25) ----------
+// .glb nodes (userData.vp from glTF extras) and obs entries with vp=[a,b] exist only while a <= SGPH <= b (siege phase, js/02-fcs; other modes stay 1).
+// Swap is instant (look + collision: hgt 0 outside, like sgWallsApply). Checked every frame (js/37) + on siege phase changes (js/15-siege).
+let PHL=[],PHK='';
+function phOf(o){for(let q=o;q;q=q.parent)if(q.userData&&q.userData.vp)return q.userData.vp;return null;}
+function phLayers(sc,skip){PHL=[];sc.traverse(o=>{if(o.userData&&Array.isArray(o.userData.vp)){PHL.push(o);skip.add(o);}});PHK='';phTick();}
+function phTick(){
+  const p=SGPH||1,k=MAPID+'|'+p+'|'+PHL.length;if(k===PHK)return;PHK=k;
+  for(const o of PHL){const v=o.userData.vp;o.visible=p>=v[0]&&p<=v[1];}
+  for(const o of OBS){if(!o.vp)continue;const on=p>=o.vp[0]&&p<=o.vp[1];
+    if(!on&&!o.phz&&o.hgt>0){o.h0=o.hgt;o.hgt=0;if(o.top!==undefined){o.t0=o.top;o.top-=o.h0;}o.phz=1;}   // file obs collide by absolute top (js/02-data)
+    else if(on&&o.phz){o.hgt=o.h0;if(o.t0!==undefined)o.top=o.t0;o.phz=0;}}   // phz: only undo what we zeroed (broken pieces stay broken)
+}
 function fileMapBody(id,F,T,night,W,fb){
   if(T){
     const tex=t=>{t=t.clone();t.repeat.set(1,1);t.needsUpdate=true;return t;};
@@ -574,6 +587,7 @@ function fileMapBody(id,F,T,night,W,fb){
     ptDone(typeof ptreeScene==='function'?ptreeScene(sc):0);   // Map Builder wind trees → InstancedMesh + wind material (js/77)
     if(typeof paintScene==='function')paintScene(id,sc);   // ลุคภาพวาด: ต้นไม้ใหม่ + ลายพู่กัน (js/77)
     brkSetup(sc,skip);   // ของบังที่พังได้: แยกออกจาก batch (js/23)
+    phLayers(sc,skip);   // phase layers (after ptree/brk instancing, which keep vp per instanced mesh): own nodes, never batched
     batchStatic(sc,skip);
     if(meadowGrass)sc.add(meadowGrass);
     if(gltf.animations&&gltf.animations.length){const mx=new THREE.AnimationMixer(sc);for(const c of gltf.animations)mx.clipAction(c).play();W.userData.mixer=mx;}

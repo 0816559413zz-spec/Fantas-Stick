@@ -1395,6 +1395,26 @@ function decoFields(it) {   // inspector rows for dc_* decor
   if (t === 'cloth') F.push(fld('Color', it, 'c', { type: 'color' }));
   return F;
 }
+// ---------- Phase layers (user 2026-11-25): items shown only in some siege phases (e.g. forest → burnt forest after a point falls) ----------
+// pa = from phase (blank = 1), pb = until phase (blank = to the end). Objects (kits/prims) + walls: look + collision. Scene bar "Phase" previews one phase.
+const phOk = (r, o) => o && (r.k === 'wall' || (r.k === 'obj' && isVisual(o)));
+function phSection(box, S) {
+  const L = S.filter(r => phOk(r, find(r))).map(find); if (!L.length) return; const it = L[0];
+  const num = (key, label, ph) => { const i = el('input', { class: 'tl-in', type: 'number', min: 1, step: 1, placeholder: ph, value: it[key] > 0 ? it[key] : '',
+    onchange: () => { const v = i.value === '' ? 0 : Math.max(1, Math.round(+i.value)); pushUndo('o'); for (const o of L) { if (v && !(key === 'pa' && v === 1)) o[key] = v; else delete o[key]; } resync(); renderSide(); changed(); phViewNeed(); } });
+    return el('div', { class: 'row' }, el('label', null, label), i); };
+  const vp = MD.vpOf(it);
+  box.append(section('Phase Layer' + (L.length > 1 ? ' — ' + L.length + ' items' : ''), !!vp, num('pa', 'Show from phase', '1'), num('pb', 'Show until phase', 'to the end'),
+    el('p', { class: 'note' }, (vp ? 'Shown in phases ' + vp[0] + (vp[1] >= 99 ? '+' : '–' + vp[1]) + '. ' : 'Always shown. ') + 'Siege: when core N falls the game goes to phase N+1 and swaps these at once (look + collision). Other modes always use phase 1 • e.g. forest trees "until 1" + burnt trees "from 2" • preview with Phase on the Scene bar')));
+}
+let PV = 0, pvDirty = true; const phViewNeed = () => { pvDirty = true; need(); };
+function phViewApply() {   // hide items outside the previewed phase (flag phHid so other show/hide toggles are left alone)
+  if (!pvDirty && !PV) return; pvDirty = false; const hid = (n, o) => { const v = o && MD.vpOf(o), out = PV > 0 && v && (PV < v[0] || PV > v[1]);
+    if (out && n.visible) { n.visible = false; n.userData.phHid = 1; } else if (!out && n.userData.phHid) { n.visible = true; delete n.userData.phHid; } };
+  const AM = ALLM(), W = new Map(AM.walls.map(w => [w.id, w]));
+  for (const [id, n] of objNode) hid(n, find({ k: 'obj', id }));
+  for (const n of gWalls.children) hid(n, W.get(n.userData.wid));
+}
 function section(title, open, ...kids) { const d = el('details', { class: 'sec', open }); d.append(el('summary', null, title), ...kids.filter(Boolean)); return d; }
 function renderSide() {
   const box = $('side'); box.textContent = ''; if (!M) return;
@@ -1477,6 +1497,7 @@ function renderSide() {
     box.append(section('Group' + (S.length > 1 ? ' — ' + S.length + ' selected' : ''), true, el('div', { class: 'row' }, el('label', null, 'Hierarchy group'), inp, dl),
       el('div', { class: 'seg' }, el('button', { class: 'tl-btn', title: 'Ctrl+G', onclick: grpNew }, 'New Group'), cur ? el('button', { class: 'tl-btn', title: 'Ctrl+Shift+G', onclick: () => grpSet('', S) }, 'Ungroup') : null, cur ? el('button', { class: 'tl-btn', onclick: () => grpSelect(cur) }, 'Select Group') : null),
       el('p', { class: 'note' }, 'Folders in the Hierarchy only (the game ignores them) • type a name to move the selection into that group')));
+    phSection(box, S);
     const PW = S.map(find).filter(o => o && o.t === 'pn_wall');   // whole house / group at once (same as a panel's Unbreakable)
     if (PW.length > 1) { const all = PW.every(o => o.nb), cb = el('input', { type: 'checkbox', checked: all, onchange: () => { pushUndo('o'); for (const o of PW) { if (cb.checked) o.nb = 1; else delete o.nb; syncObj(o); } renderSide(); changed(); } });
       box.lastChild.append(el('label', { class: 'chk', title: 'Breakable panels in the selection become one solid piece each (same as Unbreakable on a single panel)' }, cb, 'Unbreakable — ' + PW.length + ' breakable panels in the selection' + (all || !PW.some(o => o.nb) ? '' : ' (some)'))); } }
@@ -1630,12 +1651,12 @@ async function buildExport() {
   const G = gameData(), sc = new THREE.Scene(), R = new THREE.Group(); R.name = 'mb_root'; R.position.set(-M.W / 2, 0, -M.H / 2); sc.add(R);
   R.add(groundExport());
   // static meshes merge per material AND style (userData.style on the merged node → game style presets, MAP-STANDARD §1.5)
-  const bucket = new Map(), put = (mesh, geo, st) => { st = st || M.style || ''; const k = mesh.material.uuid + '|' + st; if (!bucket.has(k)) bucket.set(k, { m: mesh.material, g: [], st }); bucket.get(k).g.push(geo); };
+  const bucket = new Map(), put = (mesh, geo, st, vp) => { st = st || M.style || ''; const k = mesh.material.uuid + '|' + st + '|' + (vp || ''); if (!bucket.has(k)) bucket.set(k, { m: mesh.material, g: [], st, vp }); bucket.get(k).g.push(geo); };   // vp = phase layer (own node per range)
   const AM = ALLM(), styleOf = (k, id) => { const it = (k === 'wall' ? AM.walls : k === 'floor' ? AM.floors : AM.parts).find(q => q.id === id); return it && it.style; };
   let tris = 0;
   for (const w of gWalls.children) { const wd = AM.walls.find(q => q.id === w.userData.wid); if (wd && (wd.sg || wd.sys === 'fence' || wd.vis === 0)) continue;   // siege targets + burnable fences: the game draws them
-    const gi = G.brkOf.get('w' + w.userData.wid + ':' + w.userData.ci), st = styleOf('wall', w.userData.wid) || M.style;
-    if (gi != null) { const c = new THREE.Mesh(w.geometry, w.material); c.name = w.name; c.userData = { brk: gi }; if (st) c.userData.style = st; R.add(c); } else put(w, w.geometry, st); }
+    const gi = G.brkOf.get('w' + w.userData.wid + ':' + w.userData.ci), st = styleOf('wall', w.userData.wid) || M.style, vp = wd && MD.vpOf(wd);
+    if (gi != null) { const c = new THREE.Mesh(w.geometry, w.material); c.name = w.name; c.userData = { brk: gi }; if (st) c.userData.style = st; if (vp) c.userData.vp = vp; R.add(c); } else put(w, w.geometry, st, vp); }
   for (const f of gFloors.children) { const fd = AM.floors.find(q => q.id === f.userData.wid); if (fd && fd.vis === 0) continue; f.updateMatrix(); put(f, f.geometry.clone().applyMatrix4(f.matrix), styleOf('floor', f.userData.wid)); }
   const flat = g => { g = g.index ? g.toNonIndexed() : g; g.deleteAttribute('uv'); return g; };   // same attribute set as the hand-made wall/floor geometry so they merge
   for (const g of gParts.children) for (const nd of g.children) {
@@ -1645,9 +1666,9 @@ async function buildExport() {
     if (gi != null) { const c = nd.clone(true); c.userData = { brk: gi }; if (pst || M.style) c.userData.style = pst || M.style; c.name = 'part_' + o.id; c.traverse(m => { if (m !== c) m.userData = {}; }); R.add(c); }
     else { nd.updateMatrix(); nd.traverse(m => { if (m.isMesh) put(m, flat(m.geometry.clone().applyMatrix4(nd.matrix)), pst); }); }
   }
-  let n = 0; for (const b of bucket.values()) { const g = b.g.length > 1 ? mergeGeometries(b.g, false) : b.g[0]; const m = new THREE.Mesh(g, b.m); m.name = 'mb_static_' + (n++); if (b.st) m.userData.style = b.st; R.add(m); }
+  let n = 0; for (const b of bucket.values()) { const g = b.g.length > 1 ? mergeGeometries(b.g, false) : b.g[0]; const m = new THREE.Mesh(g, b.m); m.name = 'mb_static_' + (n++); if (b.st) m.userData.style = b.st; if (b.vp) m.userData.vp = b.vp; R.add(m); }
   for (const o of AM.objs) { if (!isVisual(o) || o.vis === 0 || (isKit(o) && !tplNow(kitId(o)))) continue; const src = objNode.get(o.id); if (!src) continue; const c = src.clone(true); const a = isKit(o) && KIT.byId.get(kitId(o));
-    c.userData = {}; const gi = G.brkOf.get('o' + o.id); if (gi != null) c.userData.brk = gi; c.traverse(m => { if (m !== c) m.userData = {}; if (m.isMesh && ((a && a.ns) || o.glow)) m.userData.ns = 1; }); R.add(c); }
+    c.userData = {}; const gi = G.brkOf.get('o' + o.id), vp = MD.vpOf(o); if (gi != null) c.userData.brk = gi; if (vp) c.userData.vp = vp; c.traverse(m => { if (m !== c) m.userData = {}; if (m.isMesh && ((a && a.ns) || o.glow)) m.userData.ns = 1; }); R.add(c); }
   sc.updateMatrixWorld(true); sc.traverse(o => { if (o.isMesh) tris += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count) / 3; });
   const glb = await new GLTFExporter().parseAsync(sc, { binary: true });
   return { G, glb, tris: Math.round(tris) };
@@ -1693,7 +1714,7 @@ function frame(t) {
   if (fly.size && drag && drag.k === 'orbit') { camera.getWorldDirection(v3); v3.y = 0; v3.normalize(); const sp = Math.max(8, cam.dist * 0.9) * dt * (fly.fast ? 3 : 1), fw = (fly.has('KeyW') ? 1 : 0) - (fly.has('KeyS') ? 1 : 0), rt = (fly.has('KeyD') ? 1 : 0) - (fly.has('KeyA') ? 1 : 0);
     { const L = bdLim(); cam.x = clamp(cam.x + (v3.x * fw - v3.z * rt) * sp, L.x0, L.x1); cam.z = clamp(cam.z + (v3.z * fw + v3.x * rt) * sp, L.z0, L.z1); } if (fly.has('KeyE')) cam.dist *= 1 + dt; if (fly.has('KeyQ')) cam.dist = Math.max(3, cam.dist * (1 - dt * 0.9)); camApply(); }
   if (!dirtyView) return; dirtyView = false;
-  drawRing(); updGhost(); updPartGhost(); gCol.visible = show.col; renderer.render(scene, camera);
+  drawRing(); updGhost(); updPartGhost(); phViewApply(); gCol.visible = show.col; renderer.render(scene, camera);
 }
 
 // Capture the current view as PNG: helpers hidden, up to 2x resolution (max 4096 px); download + copy to shots/ when online
@@ -1727,6 +1748,7 @@ $('oSteep').onchange = e => { show.steep = e.target.checked; updTerrain(0, 0, M.
 $('oCol').onchange = e => { show.col = e.target.checked; buildCol(); need(); };
 $('oArea').onchange = e => { show.area = e.target.checked; gObjs.traverse(m => { if (m.userData.area) m.visible = show.area; }); need(); };
 $('oGrid').onchange = e => { show.grid = e.target.checked; buildGrid(); need(); };
+$('phView').onchange = e => { PV = +e.target.value; phViewNeed(); };
 $('oSky').onchange = e => { show.sky = e.target.checked; applySky(); };
 addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
 window.__mb = { get M() { return M; }, get tool() { return tool; }, makeWater, pnHoleHit, gameView, gameViewClose, get RX() { return RX; }, loadRooms, MD, opt, placePart, syncParts, partNode, gParts, castleProto, cam, camApply, setTool, gameData, buildExport, exportGame, save, setMap, syncAll, need, kitTpl, KIT, get sel() { return sel; }, set sel(v) { sel = v; renderSide(); updSel(); }, pushUndo, changed, colDirty, updTerrain, afterTerrain, applyRamp, makeFloor, placeObj, doUndo };
