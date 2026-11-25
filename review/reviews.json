@@ -1,5 +1,5 @@
 {
- "next": 205,
+ "next": 206,
  "items": [
   {
    "id": 194,
@@ -4172,6 +4172,22 @@
    ],
    "links": [
     "mapbuild.html"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 205,
+   "title": "HUD แบบ Minimal (ตั้งค่า → หน้าจอ → รูปแบบ HUD)",
+   "text": "เข้าเกมโหมดไหนก็ได้ • ตั้งค่า → หน้าจอ → รูปแบบ HUD: เต็ม = HUD เดิม / Minimal = เส้นบาง ตัวอักษรขาว ไม่มีอนุภาค: ซ้ายล่าง แผนที่ย่อ + ทีม + เลือดตัวเลขใหญ่ + แถบโล่ • ขวาล่าง ช่องสกิล 4 ช่อง + ช่องเล็ก + อัลติ • ป้ายบนและ kill feed เป็นตัวหนังสือเปล่า • ภาพเทียบ shots/hudmin.jpg / shots/hudfull.jpg",
+   "kind": "UI",
+   "who": "HUD",
+   "status": "wait",
+   "created": "2026-11-25",
+   "updated": "2026-11-25",
+   "imgs": [],
+   "links": [
+    "index.html"
    ],
    "feedback": "",
    "reply": ""

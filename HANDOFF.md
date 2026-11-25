@@ -8,6 +8,8 @@
 
 ## Latest notes (newest first)
 
+- 2026-11-25 — **Minimal HUD mode** (user: BF1-like minimal). Settings → หน้าจอ → รูปแบบ HUD (`SET.hud` 0 Full / 1 Minimal). New `js/66-hudmin.js` + `css/hudmin.css` (#hm DOM): bottom-left minimap (`hmMapBox`, minimap also shown in FFA/TDM instead of the portrait) + team + HP number/bar + shield; bottom-right 4 skill slots in SKORD order + small slots + ultimate. No particles/looping animation/filters. `hud4Draw` branches early; shared helpers `h4Shield`, `h4Ammo` (js/66-hud4). Top bar + kill feed draw as plain text in Minimal (js/38). HUD Editor offsets do not apply to Minimal yet. Review #205 wait.
+
 **Map Builder New Map settings (2026-11-25):** `+ New` dialog (`newDlg` mapbuild/app.js) now sets size preset (`NEW_SIZES`), starting ground, starting shape (`NEW_TERR` + `newTerrain`: flat/hills/bowl/plateau, random seed), backdrop (`bdCreate`), sky, style, music, outer border, playable modes, random pool, autoProps before the map is made. Review #204.
 
 **Breakable panels: Punch Holes per cell (2026-11-25):** Map Builder Inspector button Punch Holes (`PNH`, `pnHoleHit` mapbuild/app.js): click a cell = toggle, Shift = 3×3, Clear Punched. Saved as `pn_wall.hc [[col,row]]` → `data.pnl[].hc`; game `pnlGen` js/12-pnl sets `ex=0`, `pnlCls` js/28-pnl-build makes them class 2 (gone, damage-style stepped edges; without this missing cells copied their neighbours and stayed drawn). `pnExists` (model) skips them. Unbreakable + holes = normal cells. Tested on a temp map (arch door + windows in brick, ring in stone). Review #203.

@@ -74,6 +74,7 @@ function h4Set(key,v,fn){if(H4.cache[key]===v)return;H4.cache[key]=v;fn(v);}
 function hud4Draw(me,v){
   const k=getKit(me.id),lay=me.id+'|'+k.path+'|'+k.ids.join(',')+'|'+k.ult+'|'+(me.ea?1:0)+'|'+(me.fr?me.fr[0]:'')+'|'+(me.ea&&me.ea[0]>0?1:0)+'|'+(me.ea&&me.ea[8]?1:0)+'|'+(NOBROOM.has(v&&v.mode)&&!devBroomOk()?1:0)+(h4God(me)?'|g':'');
   h4OrdLoad(k);
+  if(hudMin()){if(H4.el&&!H4.el.hidden)H4.el.hidden=true;natPlantHud(me,v);hudMinDraw(me,v,lay);h4Ammo(me);return;}   // Minimal HUD (js/66-hudmin)
   if(!H4.el||H4.lay!==lay){H4.lay=lay;h4Build(me,v);}
   natPlantHud(me,v);
   H4.drawn=true;if(H4.el.hidden)H4.el.hidden=false;
@@ -89,20 +90,13 @@ function hud4Draw(me,v){
   for(let i=0;i<nx;i++){const f=clamp((xh-i*per)/per,0,1);h4Set('s'+(nh+i),f.toFixed(3),x=>H4.seg[nh+i][1].style.width=x*100+'%');}
   h4Set('hp',hpv,x=>Q.hp.textContent=x);h4Set('mh',me.mh,x=>Q.mh.textContent='/ '+x);h4Set('xh',xh,x=>Q.xh.textContent=x>0?'+'+x:'');
   h4Set('low',hr<0.35&&me.al,x=>H4.el.classList.toggle('low',x));
-  {const ek=me.ek,on=ek!==undefined&&me.al;let A=document.getElementById('h4Ammo');   // Earth rock ammo: 8 tiny pips under the crosshair, refilling one shows partial
-    if(on&&!A){A=document.body.appendChild(Object.assign(document.createElement('div'),{id:'h4Ammo'}));A.innerHTML='<i></i>'.repeat(EROCK.max);}
-    if(A){A.style.display=on?'':'none';if(on)h4Set('ek',ek,()=>{const k=A.children;for(let i=0;i<k.length;i++){const f=clamp(ek-i,0,1);k[i].style.opacity=f>=1?'0.95':(0.15+0.35*f).toFixed(2);k[i].style.transform=f>=1?'':'scale('+(0.6+0.4*f).toFixed(2)+')';}});}}
+  h4Ammo(me);
   h4Set('rg',!!(me.rg&&me.al),x=>{H4.el.classList.toggle('regen',x);const f=document.getElementById('rgFx')||document.body.appendChild(Object.assign(document.createElement('div'),{id:'rgFx'}));f.classList.toggle('on',x);});
-  // The secondary bar shows shield HP, Darkness guard time, or Stand HP.
-  const stand=me.ea,standBroken=stand&&stand[0]>0;
-  const darkness=k.path===DARKP;
-  const shieldFill=darkness?(me.dk?.[4]??DARK_V.shieldTime)/DARK_V.shieldTime:
-    stand?(standBroken?1-eSmooth('stb',stand[0])/Math.max(1,ERV.standOff):stand[7]/300):me.se/100;
-  const shieldText=stand?(standBroken?'Stand แตก':(stand[7]|0)+' / 300'):k.path===1?'การ์ดดาบ '+Math.round((me.se||0)*FROST_GUARD.hp/100):'โล่';
-  h4Set('sb',clamp(shieldFill,0,1).toFixed(3),x=>Q.subB.style.width=x*100+'%');
-  h4Set('st',shieldText,x=>Q.subT.textContent=x);
-  h4Set('sk',!!standBroken,x=>Q.sub.classList.toggle('brk',x));
-  h4Set('sh',SHIELD_OFF&&!stand&&k.path!==1&&k.path!==LIGHTP,x=>Q.sub.style.display=x?'none':'');
+  {const [sf,stx,sbk,shide]=h4Shield(me,k);
+  h4Set('sb',sf.toFixed(3),x=>Q.subB.style.width=x*100+'%');
+  h4Set('st',stx,x=>Q.subT.textContent=x);
+  h4Set('sk',sbk,x=>Q.sub.classList.toggle('brk',x));
+  h4Set('sh',shide,x=>Q.sub.style.display=x?'none':'');}
   {let s='';for(const [bit,ic] of STATUS_ICO)if((me.fm|0)&bit)s+=`<span>${ic}</span>`;h4Set('ch',s,x=>Q.chips.innerHTML=x);}
   h4Set('ed',!locked&&screen==='game',x=>{H4.el.classList.toggle('edit',x);if(!x)h4Pick(null);});   // เมาส์ว่าง (Esc/เมนู) = ลากสลับไพ่ได้
   // ช่องสกิล (ไพ่ + ไอคอนเล็ก)
@@ -132,6 +126,16 @@ function hud4Draw(me,v){
   const pf=h4PfMode(v);h4Set('pf',pf,x=>Q.map.classList.toggle('pf',x));if(pf)h4Portrait(me,Q.pf);
   h4Set('mini',!!SET.mini||pf,x=>Q.map.classList.toggle('off',!x));
 }
+// Earth rock ammo: 8 tiny pips under the crosshair, refilling one shows partial (shared by Full + Minimal HUD)
+function h4Ammo(me){const ek=me.ek,on=ek!==undefined&&me.al;let A=document.getElementById('h4Ammo');
+  if(on&&!A){A=document.body.appendChild(Object.assign(document.createElement('div'),{id:'h4Ammo'}));A.innerHTML='<i></i>'.repeat(EROCK.max);}
+  if(A){A.style.display=on?'':'none';if(on&&A._ek!==ek){A._ek=ek;const k=A.children;for(let i=0;i<k.length;i++){const f=clamp(ek-i,0,1);k[i].style.opacity=f>=1?'0.95':(0.15+0.35*f).toFixed(2);k[i].style.transform=f>=1?'':'scale('+(0.6+0.4*f).toFixed(2)+')';}}}}
+// Secondary bar: shield HP, Darkness guard time, or Stand HP → [fill 0..1, text, Stand broken, hidden]
+function h4Shield(me,k){const stand=me.ea,standBroken=!!(stand&&stand[0]>0),darkness=k.path===DARKP;
+  const fill=darkness?(me.dk?.[4]??DARK_V.shieldTime)/DARK_V.shieldTime:
+    stand?(standBroken?1-eSmooth('stb',stand[0])/Math.max(1,ERV.standOff):stand[7]/300):me.se/100;
+  const text=stand?(standBroken?'Stand แตก':(stand[7]|0)+' / 300'):k.path===1?'การ์ดดาบ '+Math.round((me.se||0)*FROST_GUARD.hp/100):'โล่';
+  return [clamp(fill,0,1),text,standBroken,!!(SHIELD_OFF&&!stand&&k.path!==1&&k.path!==LIGHTP)];}
 // ---------- ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง ----------
 // นาฬิกาทราย: ทรายบน = เวลาคูลดาวน์ที่เหลือ (--r ของไพ่) ไหลลงล่าง • ตัวเลขวินาทีใต้แก้ว
 function h4Glass(ci){const t='h4t'+ci,b='h4b'+ci;
@@ -190,8 +194,8 @@ function h4UltCard(face,au){
 // กดอัลติ: ไพ่สมบูรณ์ถูกดึงออกจากกอง ลอยขึ้น แล้วไหม้สลาย (เหมือนไพ่สกิล) • กองเหลือแต่เงาเศษไพ่ เริ่มสะสมใหม่
 function h4UltUse(){const Q=H4.q;h4Fx(Q.uc,'h4UXuse',`<div class="bits">${h4Bits(26)}</div>`,1100);Q.uc.classList.remove('used');void Q.uc.offsetWidth;Q.uc.classList.add('used');}
 // เรียกท้ายทุกเฟรมจาก render loop: เฟรมนี้ไม่ได้วาด HUD (ชนะ/แพ้, โหมด imp, ไม่มีตัวเรา) = ซ่อน
-function hud4Frame(){if(H4.el&&!H4.drawn&&!H4.el.hidden){H4.el.hidden=true;if(NPH.el)NPH.el.hidden=true;}H4.drawn=false;}
-function hud4Hide(){try{if(H4.el)H4.el.hidden=true;if(NPH.el)NPH.el.hidden=true;}catch(e){}}   // setScreen เรียกได้ตั้งแต่ตอนโหลดไฟล์ (H4 ยังไม่พร้อม)
+function hud4Frame(){if(H4.el&&!H4.drawn&&!H4.el.hidden){H4.el.hidden=true;if(NPH.el)NPH.el.hidden=true;}H4.drawn=false;hudMinFrame();}
+function hud4Hide(){try{if(H4.el)H4.el.hidden=true;if(NPH.el)NPH.el.hidden=true;if(HM.el)HM.el.hidden=true;}catch(e){}}   // setScreen เรียกได้ตั้งแต่ตอนโหลดไฟล์ (H4 ยังไม่พร้อม)
 // ---------- ไพ่อัลติกลางจอ (ผู้ใช้ 2026-11-01) ----------
 // หน้า (ยังไม่เต็ม): ธาตุเติมจากล่างขึ้นตาม --p (ไฟลุก / น้ำแข็งเกาะ / ไฟฟ้าเหลืองมีสายฟ้า / ดินถม / ลมเขียวหมุน / น้ำคลื่น) •
 // ไอคอนอัลติจางดำ + ตัวเลข % ใหญ่ • หลัง (เต็ม): พลิกไพ่ → โลโก้อัลติเรือง + ออร่าธาตุ (h4AuBits เดิม) • แถบเกจใต้ไพ่
@@ -227,4 +231,4 @@ function h4PfRead(){if(!H4PF.pend)return;H4PF.pend=false;const N=H4PF.N;
   }catch(e){}}
 // กรอบแผนที่ย่อ (พิกัดจอ px) — js/38 drawMinimap วาดลงตรงนี้ • ตรงกับ .h4Me/.h4Map ใน css (left 24, bottom 24, กว้าง 176 × --hs)
 // follows the 'left' block of the HUD Editor layout (scaled around the screen's bottom-left like .h4L)
-function h4MapBox(){const hs=Math.max(0.62,Math.min(1.15,SH/900,SW/1400)),L=hlGet('left'),k=L.s,S=176*hs*k;return {x:24*hs*k+L.x*hs,y:SH-(24*hs+176*hs)*k+L.y*hs,S,hide:!!L.hide};}
+function h4MapBox(){const hs=Math.max(0.62,Math.min(1.15,SH/900,SW/1400));if(hudMin())return hmMapBox(hs);const L=hlGet('left'),k=L.s,S=176*hs*k;return {x:24*hs*k+L.x*hs,y:SH-(24*hs+176*hs)*k+L.y*hs,S,hide:!!L.hide};}

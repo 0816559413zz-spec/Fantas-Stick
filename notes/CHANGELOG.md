@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-25 — **Minimal HUD.** New setting Settings → หน้าจอ → รูปแบบ HUD: Minimal shows a clean HUD with thin lines and white text (minimap, team, health and shield bottom-left; skills and ultimate bottom-right; plain-text score and kill feed), with no particles or moving effects. Full keeps the current HUD.
 - 2026-11-25 — **New Map settings.** In Map Builder, + New now asks for size, ground, starting shape (flat, hills, valley, plateau), backdrop, sky, style, music, border and playable modes before creating the map.
 - 2026-11-25 — **Punch holes in breakable panels.** In Map Builder, Punch Holes lets you click any cell of a breakable panel to make a hole (click again to fill, Shift for 3×3). The holes are saved; in the game those cells are missing from the start, with broken brick-like edges and no rubble.
 - 2026-11-25 — **Storm has its own stance:** wide legs, body bent forward a little, wand hand back with lightning crawling along the wand, small arcs at the free hand; arms trail back when running; while firing the beam the body twists and the right hand reaches far forward.

@@ -489,12 +489,12 @@ lastFrame:2 HSTOP:5 hitStop:6 FXSTUDIO:8
 §9 เก็บ shader ที่ compile แล้วไว้ตลอดเกม (ผู้ใช้ 2026-11-02 "เล่นกับบอท…
 PINMAX:13 PINNED:13 KEEPSRC:16 pinPrograms:22 frame:25 _fpsAcc:42 _fpsN:42 _fpsLast:42 render:43 detailCull:89 viewDetailAt:92 renderGame:99
 
-## js/38-hud.js (489) — 
+## js/38-hud.js (492) — 
 hudPips:2 hudArc:6 drawReticleTimer:8
 §17 HUD
 rr:18 SLOTS:19 fmtTime:20
 §21 ชิ้นส่วน HUD ธีมทอง-น้ำเงิน
-HG:22 HG2:22 HUDF:24 hudTick:25 readyPulse:27 diaPath:29 plate:31 frameBox:37 bossTrail:45 drawBossBar:46 spellDia:66 thinBar:95 drawHUD:100 raceRankClient:182 drawModeHUD:186 MM:224 MMB:225 drawMinimap:226 slotKey:302 mySlots:303 STATUS_ICO:312 SLOTS_IMP:313 BR_LOCK:314 CLUSTER:316 E_NEEDSTAND:317 slotState:318 drawBottom:342 drawBoard:357 FHUD:382 FHTEX:383 fhFrame:384 FH_EDGE:387 FH_CORE:387 fhMix:388 FHC:390 fhLayer:391 drawFireHeat:394 SNAPB:478 snapBanner:479 drawSnapBanner:480
+HG:22 HG2:22 HUDF:24 hudTick:25 readyPulse:27 diaPath:29 plate:31 frameBox:37 bossTrail:45 drawBossBar:46 spellDia:66 thinBar:95 drawHUD:100 raceRankClient:185 drawModeHUD:189 MM:227 MMB:228 drawMinimap:229 slotKey:305 mySlots:306 STATUS_ICO:315 SLOTS_IMP:316 BR_LOCK:317 CLUSTER:319 E_NEEDSTAND:320 slotState:321 drawBottom:345 drawBoard:360 FHUD:385 FHTEX:386 fhFrame:387 FH_EDGE:390 FH_CORE:390 fhMix:391 FHC:393 fhLayer:394 drawFireHeat:397 SNAPB:481 snapBanner:482 drawSnapBanner:483
 
 ## js/39-menu.js (355) — 
 myLook:5 myColor:5 myKit:5 myName:6 renderMyHouse:9
@@ -810,19 +810,22 @@ BKICO:376 buffShow:380
 §399 จอมืดตอนเริ่มแมตช์ (ผู้ใช้ 2026-10-23: กระตุกตอนเริ่มแมตช์แรก)
 BRIEF_PIC:403 gameCover:404
 
-## js/66-hud4.js (230) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
-H4E:5 H4:15 h4God:16 h4Pal:17 hud4Col:19 h4Parts:21 h4AuBits:26 h4Key:41 h4Ico:42 h4Build:43 h4Set:73 hud4Draw:74
-§135 ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง
-h4Glass:137 h4Bits:143 h4Fx:145 h4CardUse:147 h4GlassOut:151 h4Place:155 h4OrdKey:158 h4OrdLoad:159 h4Swap:162 h4Pick:165 h4AltKey:167 h4CardWire:171
-§182 ไพ่อัลติ
-H4SH:184 h4UltCard:186 h4UltUse:191 hud4Frame:193 hud4Hide:194
-§195 ไพ่อัลติกลางจอ (ผู้ใช้ 2026-11-01)
-h4UltX:198
-§205 รูปตัวละครเรา (FFA / TDM แทนแผนที่ย่อ)
-H4PF:207 h4PfMode:208 h4PfAvatar:210 h4Portrait:212 h4PfRead:223 h4MapBox:230
+## js/66-hud4.js (234) — HUD รอบ 4 (ผู้ใช้ 2026-10-23, designs/hud-full-mock.html)
+H4E:5 H4:15 h4God:16 h4Pal:17 hud4Col:19 h4Parts:21 h4AuBits:26 h4Key:41 h4Ico:42 h4Build:43 h4Set:73 hud4Draw:74 h4Ammo:130 h4Shield:134
+§139 ไพ่สกิล: นาฬิกาทราย / ท่าใช้ / สลับตำแหน่ง
+h4Glass:141 h4Bits:147 h4Fx:149 h4CardUse:151 h4GlassOut:155 h4Place:159 h4OrdKey:162 h4OrdLoad:163 h4Swap:166 h4Pick:169 h4AltKey:171 h4CardWire:175
+§186 ไพ่อัลติ
+H4SH:188 h4UltCard:190 h4UltUse:195 hud4Frame:197 hud4Hide:198
+§199 ไพ่อัลติกลางจอ (ผู้ใช้ 2026-11-01)
+h4UltX:202
+§209 รูปตัวละครเรา (FFA / TDM แทนแผนที่ย่อ)
+H4PF:211 h4PfMode:212 h4PfAvatar:214 h4Portrait:216 h4PfRead:227 h4MapBox:234
 
 ## js/66-hudlay.js (34) — HUD layout (HUD Editor, user 2026-11-24)
 HUDL_DEF:5 HUDL:11 HL0:12 hlGet:13 hudHs:14 hlSet:16 hlJson:20 hlApplyDom:22 hlBegin:26 hlEnd:28 hlBox:30 HL_DEMO_FEED:31
+
+## js/66-hudmin.js (74) — Minimal HUD (Settings > หน้าจอ > รูปแบบ HUD, user 2026-11-25)
+HM:6 hudMin:7 hmSet:8 hmHs:9 hmMapBox:11 hmBuild:12 hudMinDraw:35 hudMinFrame:73
 
 ## js/67-backdrop.js (141) — 
 BACKDROP:8
@@ -995,4 +998,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(121 files, 38116 lines)
+(122 files, 38197 lines)
