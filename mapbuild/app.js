@@ -1562,18 +1562,46 @@ function dlg(title, body, okText, onOk) {
   d.append(el('h2', null, title), body, err, el('div', { class: 'btns' }, el('button', { class: 'tl-btn', onclick: () => d.close() }, 'Cancel'), el('button', { class: 'tl-btn pri', onclick: async () => { try { const r = await onOk(); if (r !== false) d.close(); } catch (e) { err.textContent = e.message; } } }, okText)));
   d.showModal();
 }
+// New Map: everything the Map panel / Playable Modes / Backdrop set, chosen before the map exists (user 2026-11-25)
+const NEW_SIZES = [['s', 'Small (80 × 50)', 80, 50], ['m', 'Medium (120 × 75)', 120, 75], ['l', 'Large (150 × 90)', 150, 90], ['xl', 'Huge (200 × 130)', 200, 130], ['c', 'Custom', 0, 0]];
+const NEW_TERR = [['flat', 'Flat'], ['hills', 'Gentle Hills'], ['bowl', 'Valley (raised edges)'], ['plateau', 'Plateau (high middle)']];
+function newTerrain(m, k, seed) {   // starting ground shape (walkable slopes, sculpt from there)
+  if (k === 'flat') return; const { nx, ny, W, H } = m, fb = (x, z) => { let v = 0, a = 1, t = 0, f = 1; for (let i = 0; i < 3; i++) { v += a * MD.vnoise(x * f + seed * 13, z * f - seed * 7); t += a; a *= 0.5; f *= 2.1; } return v / t; };
+  const ss = t => t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t);
+  for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) { const x = i * MD.C, z = j * MD.C, ex = Math.abs(x / W - 0.5) * 2, ez = Math.abs(z / H - 0.5) * 2, e = Math.max(ex, ez); let h = 0;
+    if (k === 'hills') h = (fb(x * 0.025, z * 0.025) - 0.5) * 11;
+    else if (k === 'bowl') h = 6 * ss((e - 0.55) / 0.45) + (fb(x * 0.03, z * 0.03) - 0.5) * 1.5;
+    else if (k === 'plateau') h = 4 * (1 - ss((e - 0.35) / 0.4)) + (fb(x * 0.03, z * 0.03) - 0.5) * 1.2;
+    m.hg[j * nx + i] = +h.toFixed(2); }
+}
 function newDlg() {
-  const v = { name: 'New Map', id: '', W: 100, H: 70, surf: 0 }, body = el('div');
-  const f = (label, key, type, extra) => { const i = el('input', Object.assign({ class: 'tl-in', type: type || 'text', value: v[key], oninput: () => { v[key] = type === 'number' ? +i.value : i.value; } }, extra || {})); body.append(el('div', { class: 'row' }, el('label', null, label), i)); return i; };
-  f('Name', 'name'); f('id (English)', 'id', 'text', { placeholder: 'e.g. cliffs' }); f('Width (m)', 'W', 'number', { min: 30, max: 260, step: 10 }); f('Length (m)', 'H', 'number', { min: 30, max: 260, step: 10 });
-  body.append(el('div', { class: 'row' }, el('label', null, 'Starting Ground'), el('select', { class: 'tl-sel', onchange: e => { v.surf = +e.target.value; }, html: SURF.map((s, i) => `<option value="${i}">${s.n}</option>`).join('') })),
-    el('p', { class: 'note', html: 'Size guide: castle courtyard 80×50 (small) • hall 120×75 • meadow 150×90 (large)<br>2–6 players, longer side 100–150 recommended' }));
+  const v = { name: 'New Map', id: '', desc: '', size: 'm', W: 120, H: 75, surf: 0, terr: 'flat', sky: 'day', style: '', music: '', modes: ['coop', 'ffa', 'duel', 'tdm'], random: 0, autoProps: 1, skirt: 40, bd: '' }, body = el('div', { class: 'newmap', style: 'max-height:70vh;overflow-y:auto;min-width:380px;padding-right:6px' });
+  const row = (label, ...c) => el('div', { class: 'row' }, el('label', null, label), ...c);
+  const inp = (key, type, extra) => { const i = el('input', Object.assign({ class: 'tl-in', type: type || 'text', value: v[key], oninput: () => { v[key] = type === 'number' ? +i.value : i.value; } }, extra || {})); return i; };
+  const sel = (key, items, after) => el('select', { class: 'tl-sel', onchange: e => { v[key] = e.target.value; if (after) after(); }, html: items.map(([k, n]) => `<option value="${k}"${String(k) === String(v[key]) ? ' selected' : ''}>${n}</option>`).join('') });
+  const wI = inp('W', 'number', { min: 30, max: 260, step: 10 }), hI = inp('H', 'number', { min: 30, max: 260, step: 10 }), sizeRow = row('Width × Length (m)', wI, hI);
+  const sizeSync = () => { const S = NEW_SIZES.find(q => q[0] === v.size); if (S && S[2]) { v.W = S[2]; v.H = S[3]; wI.value = v.W; hI.value = v.H; } sizeRow.style.display = v.size === 'c' ? '' : 'none'; };
+  const modes = el('div', { class: 'pal' }); for (const [k, n] of MD.MODES) { const c = el('input', { type: 'checkbox', checked: v.modes.includes(k), onchange: () => { v.modes = MD.MODES.map(m => m[0]).filter(m => m === k ? c.checked : v.modes.includes(m)); } }); modes.append(el('label', { class: 'chk' }, c, n)); }
+  const chk = (key, label) => { const c = el('input', { type: 'checkbox', checked: !!v[key], onchange: () => { v[key] = c.checked ? 1 : 0; } }); return el('label', { class: 'chk' }, c, label); };
+  body.append(h3('Map'), row('Name', inp('name')), row('id (English)', inp('id', 'text', { placeholder: 'e.g. cliffs' })), row('Description', inp('desc', 'text', { placeholder: 'shown in the lobby' })),
+    h3('Size + Ground'), row('Size', sel('size', NEW_SIZES.map(q => [q[0], q[1]]), sizeSync)), sizeRow,
+    row('Starting Ground', sel('surf', SURF.map((q, i) => [i, q.n]))), row('Starting Shape', sel('terr', NEW_TERR)),
+    row('Backdrop', sel('bd', [['', '(none)'], ...BD.BD_PRESETS])),
+    h3('Look'), row('Sky', sel('sky', MD.SKY)), row('Main Style', sel('style', MD.STYLE)), row('Music', sel('music', MD.MUSIC.map(m => [m, m || '(default)']))), row('Outer Border (m)', inp('skirt', 'number', { min: 0, step: 5 })),
+    h3('Playable Modes'), modes, chk('random', 'In the random map pool'), chk('autoProps', 'Let the game place crates/barrels randomly (if none placed)'),
+    el('p', { class: 'note', html: 'Everything here can be changed later in the Inspector (Map, Playable Modes) and the Backdrop tool<br>2–6 players: longer side 100–150 recommended' }));
+  sizeSync();
   dlg('New Map', body, 'Create', async () => {
     const id = v.id.trim().toLowerCase(); if (!/^[a-z0-9][a-z0-9_-]{0,40}$/.test(id)) throw new Error('id Only a-z 0-9 _ - allowed');
     if (list.some(m => m.id === id)) throw new Error('That id already exists');
+    if (!v.modes.length) throw new Error('Tick at least one Playable Mode');
     const W = clamp(Math.round(v.W), 30, 260), H = clamp(Math.round(v.H), 30, 260);
     if (dirty) await save();
-    const m = MD.newMap({ id, name: v.name || id, W, H, surf: v.surf }); setMap(m); if (!await save()) throw new Error($('stat').textContent); await refreshList();
+    const m = MD.newMap({ id, name: v.name || id, W, H, surf: +v.surf });
+    Object.assign(m, { desc: v.desc || '', sky: v.sky, music: v.music, modes: v.modes.slice(), random: v.random, autoProps: v.autoProps, skirt: Math.max(0, +v.skirt || 0) }); if (v.style) m.style = v.style;
+    newTerrain(m, v.terr, Math.random() * 50);
+    setMap(m); if (v.bd) bdCreate(v.bd, 1 + Math.floor(Math.random() * 999));
+    if (!await save()) throw new Error($('stat').textContent); await refreshList();
   });
 }
 function resizeDlg() {

@@ -126,6 +126,10 @@ Tool: ศูนย์รวม Tool → **Map Builder** • โค้ด: `mapbu
 - **LOD ใกล้ขอบ (2026-11-23):** ใกล้ขอบละเอียดเท่าพื้นที่เล่น → ลดตามระยะ: ต้นสนจริง → สนเบา → กรวย, หิน/พุ่ม/เฟิร์นใกล้ขอบ, หญ้าขึ้นต่อนอกขอบ 36 ม. + สีหญ้าริมขอบรับสีพื้นแผนที่ (ค่าใน `BD_LOD` js/67-coast) • กราฟิก Low = แบบเดิม • `?nobdlod` = ปิด
 - แผนที่โค้ด `fcs` ยังใช้ฉากหลังหน้าผาแบบโค้ด (`BACKDROP.fcs.coast`) • `fcs-file` ใช้แบบโค้ดจนกว่าจะสร้าง Backdrop ใน Map Builder แล้วส่งเข้าเกม
 
+## New Map: ตั้งค่าก่อนสร้าง — 2026-11-25
+- ปุ่ม **+ New** เปิดหน้าตั้งค่า (`newDlg` mapbuild/app.js): Name, id, Description • Size (Small 80×50 / Medium 120×75 / Large 150×90 / Huge 200×130 / Custom = ใส่ W×H เอง) • Starting Ground (ผิวพื้น) • Starting Shape (`NEW_TERR`: Flat / Gentle Hills / Valley ขอบยก / Plateau กลางสูง — `newTerrain` สุ่ม seed, ลาดเดินได้ แล้วปั้นต่อเอง) • Backdrop (ฉากหลัง preset หรือ none, เรียก `bdCreate`) • Sky, Main Style, Music, Outer Border • Playable Modes (ต้องติ๊กอย่างน้อย 1), random pool, autoProps
+- ทุกค่าแก้ทีหลังได้ใน Inspector (Map / Playable Modes) และเครื่องมือ Backdrop
+
 ## น้ำ (Water) — เครื่องมือ 💧 (ปุ่ม H) 2026-11-25
 - ลากกรอบบนพื้น = พื้นที่น้ำ (คลิกเฉย ๆ = 12 × 12 ม.) • ระดับน้ำตั้งให้เองที่ใต้พื้นต่ำสุดตามขอบกรอบ 0.15 ม. • ติ๊ก **Dig Basin when placing** (ค่าเริ่ม = เปิด) = ขุดแอ่งรีนุ่ม ๆ ลึก Basin Depth (ขุดลงอย่างเดียว ไม่ถมขึ้น) • ปิด = ใช้พื้นเดิม (ขุดเองด้วย Sculpt → Lower ก่อน)
 - น้ำ = แผ่นเรียบที่ระดับ `y` (ม. **ค่าจริง ไม่ใช่สูงจากพื้น**) — พื้นที่สูงกว่าระดับจะบังน้ำ → ตลิ่งเป็นรูปตามพื้นเอง • หมุนได้ • ปรับด้วย Select: ย้าย/หมุน/R ขยาย, ลูกศรเขียวหรือ PgUp/PgDn = ระดับ • Inspector: Width/Length/Level/Look + ปุ่ม Auto Level, Dig Basin • วางจาก Place → หมวด Water ได้ด้วย

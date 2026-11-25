@@ -1,5 +1,5 @@
 {
- "next": 204,
+ "next": 205,
  "items": [
   {
    "id": 194,
@@ -4151,6 +4151,24 @@
    "imgs": [
     "review/img/r203-pnhole-arch.jpg",
     "review/img/r203-pnhole-ring.jpg"
+   ],
+   "links": [
+    "mapbuild.html"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 204,
+   "title": "Map Builder: ตั้งค่าก่อนสร้างแมพใหม่ (+ New)",
+   "text": "กด + New แล้วจะมีหน้าตั้งค่าก่อนสร้าง: ชื่อ/id/คำอธิบาย, ขนาด (Small/Medium/Large/Huge/Custom), ผิวพื้น, รูปพื้นเริ่มต้น (เรียบ/เนินเตี้ย/หุบขอบยก/ที่ราบสูงกลาง), ฉากหลัง, ท้องฟ้า, สไตล์, เพลง, ขอบนอก, โหมดที่เล่นได้, สุ่มลงพูล, ของสุ่ม. แก้ทีหลังได้ใน Inspector. วิธีดู: Map Builder → + New",
+   "kind": "Map",
+   "who": "Map Builder",
+   "status": "wait",
+   "created": "2026-11-25",
+   "updated": "2026-11-25",
+   "imgs": [
+    "review/img/r204-newmap.jpg"
    ],
    "links": [
     "mapbuild.html"
