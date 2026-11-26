@@ -353,22 +353,24 @@ onfOutlineMat:4 onFireFX:6 statusFX:17 fx:44
 §251 overlay: เลือกบัฟ / สรุปผล
 choosePick:252 syncOverlays:257 showOver:278
 
-## js/27-world.js (611) — โลก 3D (Three.js + Bloom) — 1 หน่วย 3D = 20 พิกเซลของระบบเกม
+## js/27-world.js (645) — 
 S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 PTG:15 gl:23
 §37 เงานุ่มแบบ PCSS (contact-hardening): ใกล้จุดสัมผัสคม ไกลจากวัตถุที่บั…
 PCSS:40 scene:67 cam:69 composer:70
 §71 ท่อภาพ (post-processing): ฉาก → ชั้นเอฟเฟกต์นุ่ม (FXPass) → แสงฟุ้ง →…
-rpass:74 fxScene:76 SOFTU:78 SOFT_GLSL:79 FXMATS:81 fxMat:82 softify:84 HAZE_U:89 AOU:93 GFX:99 AO_ON:100 AO_HEAD:101 AO_CALC:105 AO_COPY:119
-§140 TAA (ลบขอบหยักแบบสะสมหลายเฟรม) — กราฟิกสูงเท่านั้น • ปิดด้วย ?notaa
-TAA:143 TAA_FRAG:144 _taaH:159 taaWanted:160 taaBegin:161 taaEnd:169 taaFinish:170 taaQuad:172 taaWarm:175 taaResolve:177 AO_RT:186 fxPass:211 bloom:212 GRADEU:219 gradePass:240 aaPass:258
-§260 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
-GQ_OPT:263 GQ_PRE:286 GQ_NAME:293 GQ:294 gq:297 gqSave:298 gqPreset:299 gqSet:300 gqMode:303 gqSync:304 QUAL:305 QUAL_NAME:307 qDyn:308 qualPR:309 gqShadowSize:314 applyQuality:315 qualTick:341
-§357 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
-qualCS:361 CULL:362 cullTick:363 texCanvas:374 glowTex:375 stoneTex:376 runeTex:382 glowMats:390 glowMat:391 STONEM:393 stoneMat:394 shadowAll:395
-§398 clear midday sky (user refs 2026-11-24: anime key-art noon) — baked O…
-SKYC:403 skyBakeClear:405 skyBake:492 SKY:497 hemi:529 moonL:531 LDIR:535 setSky:536 SKYB:552 skyFollow:553
-§554 เงาตามผู้เล่น
-SHD:558 _shF:559 _shR:559 _shU:559 _shC:559 _shY:559 SHD_DM:563 shadowDepthSplit:564 shadowFollow:569 shadowSoft:589 LPOOL:591 MLS_N:597 MLS:597 mlsPoint:599 _mlsP:601 mlsInScene:602 mlsTick:603
+rpass:74 fxScene:76 SOFTU:78 SOFT_GLSL:79 FXMATS:81 fxMat:82 softify:84 HAZE_U:89 AOU:93 GFX:99 AO_ON:100 AO_HEAD:101 AO_CALC:105
+§119 Wet ground + reflections (rain, js/76-weather.js) — pixels whose dept…
+WETU:122 WET_GLSL:124 WET_MAIN:132 AO_COPY:151
+§173 TAA (ลบขอบหยักแบบสะสมหลายเฟรม) — กราฟิกสูงเท่านั้น • ปิดด้วย ?notaa
+TAA:176 TAA_FRAG:177 _taaH:192 taaWanted:193 taaBegin:194 taaEnd:202 taaFinish:203 taaQuad:205 taaWarm:208 taaResolve:210 AO_RT:219 fxPass:244 bloom:245 GRADEU:252 gradePass:273 aaPass:291
+§293 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
+GQ_OPT:296 GQ_PRE:320 GQ_NAME:327 GQ:328 gq:331 gqSave:332 gqPreset:333 gqSet:334 gqMode:337 gqSync:338 QUAL:339 QUAL_NAME:341 qDyn:342 qualPR:343 gqShadowSize:348 applyQuality:349 qualTick:375
+§391 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
+qualCS:395 CULL:396 cullTick:397 texCanvas:408 glowTex:409 stoneTex:410 runeTex:416 glowMats:424 glowMat:425 STONEM:427 stoneMat:428 shadowAll:429
+§432 clear midday sky (user refs 2026-11-24: anime key-art noon) — baked O…
+SKYC:437 skyBakeClear:439 skyBake:526 SKY:531 hemi:563 moonL:565 LDIR:569 setSky:570 SKYB:586 skyFollow:587
+§588 เงาตามผู้เล่น
+SHD:592 _shF:593 _shR:593 _shU:593 _shC:593 _shY:593 SHD_DM:597 shadowDepthSplit:598 shadowFollow:603 shadowSoft:623 LPOOL:625 MLS_N:631 MLS:631 mlsPoint:633 _mlsP:635 mlsInScene:636 mlsTick:637
 
 ## js/28-city-build.js (386) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
@@ -412,20 +414,20 @@ frpBuild:27 fcsPropsBuild:75 fcsPropsView:101 fcsRoomBrkFx:110 FRP_DEB:111 frpDe
 §139 wall hit marks (event 'rwh'): decal quads on the wall face, ring buff…
 frpMarkTex:140 fcsWallHit:144
 
-## js/28-maps-build.js (850) — สร้างแผนที่
-CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:47 _prewarmed:49 prewarmShaders:50 batchStatic:69 makeCandles:94 updateCandles:103 buildCastle:112 buildHogsmeade:178 buildGreatHall:253 buildForest:323
-§420 ทุ่งหญ้าฮอกวอตส์ (เย็น)
-ringTrees:421 grassTex:430 buildMeadow:431
-§450 ทะเลสาบน้ำแข็ง (กลางคืน)
-buildLake:451
-§472 ซากลานประลอง (เย็น ทราย)
-§473 Test Place (ห้องฝึก): พื้นตารางเรียบๆ กลางวัน + วงโซนเสกมอนสเตอร์
-§474 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน guides…
-makeSnow:475 makeFireflies:482 makeSnitch:489 fileMapFx:496
-§506 แผนที่จากไฟล์ Blender (guides/MAP-DESIGN.md)
-terrGeo:508 buildFileMap:516 fileMapLight:522
-§539 Phase layers (Map Builder "Phase Layer", user 2026-11-25)
-PHL:542 PHK:542 PHGD:542 PHGG:542 phOf:543 phLayers:544 phTick:545 fileMapBody:554 replaceMeadowTufts:599 tickM:641 TRPAD:642 ARPAD:642 SHPAD:642 signTex:643 testSign:644 buildTest:651 buildRuins:756 buildPitch:781
+## js/28-maps-build.js (851) — สร้างแผนที่
+CANDLESYS:2 builtMap:3 builtKey:3 world:3 TORCHES:3 CANDLES:3 FIREFLIES:3 CRYSTAL:3 RUNE:3 SNITCH:3 BANNERS:3 SNOW:3 WCACHE:5 WCACHE_MAX:5 wkey:7 buildWorld:8 addW:48 _prewarmed:50 prewarmShaders:51 batchStatic:70 makeCandles:95 updateCandles:104 buildCastle:113 buildHogsmeade:179 buildGreatHall:254 buildForest:324
+§421 ทุ่งหญ้าฮอกวอตส์ (เย็น)
+ringTrees:422 grassTex:431 buildMeadow:432
+§451 ทะเลสาบน้ำแข็ง (กลางคืน)
+buildLake:452
+§473 ซากลานประลอง (เย็น ทราย)
+§474 Test Place (ห้องฝึก): พื้นตารางเรียบๆ กลางวัน + วงโซนเสกมอนสเตอร์
+§475 บรรยากาศที่ใช้ร่วมกัน (แผนที่จากโค้ด + แผนที่จากไฟล์ผ่าน fx ใน guides…
+makeSnow:476 makeFireflies:483 makeSnitch:490 fileMapFx:497
+§507 แผนที่จากไฟล์ Blender (guides/MAP-DESIGN.md)
+terrGeo:509 buildFileMap:517 fileMapLight:523
+§540 Phase layers (Map Builder "Phase Layer", user 2026-11-25)
+PHL:543 PHK:543 PHGD:543 PHGG:543 phOf:544 phLayers:545 phTick:546 fileMapBody:555 replaceMeadowTufts:600 tickM:642 TRPAD:643 ARPAD:643 SHPAD:643 signTex:644 testSign:645 buildTest:652 buildRuins:757 buildPitch:782
 
 ## js/28-pnl-build.js (327) — Breakable panels — view (state = PNL in js/12-pnl.js)
 PNV:7 PN_BATCH:8 PN_MI:9 PN_GLSL:10 pnlMat:66 PN_RUB:138 PN_HEAP:139 pnlCls:146 PN_ZU:155 pnlGeo:156 pnlBuild:240 pnlBatch:266 pnlBatSet:288 pnlSyncOne:293 pnlView:316 pnlFX:319
@@ -488,10 +490,10 @@ ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 heal
 §140 หน้าประชุมโหวต (หาลอร์ดโวลเดอมอร์)
 meetKey:141 myVoted:141 castVote:142 syncMeeting:148
 
-## js/37-render-loop.js (131) — ลูปเรนเดอร์
+## js/37-render-loop.js (132) — ลูปเรนเดอร์
 lastFrame:2 HSTOP:5 hitStop:6 FXSTUDIO:8
 §9 เก็บ shader ที่ compile แล้วไว้ตลอดเกม (ผู้ใช้ 2026-11-02 "เล่นกับบอท…
-PINMAX:13 PINNED:13 KEEPSRC:16 pinPrograms:22 frame:25 _fpsAcc:42 _fpsN:42 _fpsLast:42 render:43 detailCull:89 viewDetailAt:92 renderGame:99
+PINMAX:13 PINNED:13 KEEPSRC:16 pinPrograms:22 frame:25 _fpsAcc:42 _fpsN:42 _fpsLast:42 render:43 detailCull:90 viewDetailAt:93 renderGame:100
 
 ## js/38-hud.js (492) — 
 hudPips:2 hudArc:6 drawReticleTimer:8
@@ -518,13 +520,13 @@ bpOpen:53 bpOn:53 bpKey:53 bpShow:55 bpSync:57 hovEl:127
 §128 หน้าตั้งค่า
 setRow:129 setTog:130 setTab:131 XHC:132 XHN:132 setOpts:133 SET_ICO:135 SET_EN:138 gfxPanel:141 renderSettings:148 drawXhPrev:171 openSettings:172 closeSettings:174 modeIcon:230 modeTitle:231 renderLobby:232
 
-## js/41-debug.js (222) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
+## js/41-debug.js (223) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
 §5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
 botBrain:6 _obsKeep:50 balArena:51 _balStash:54 balIsolate:55 balReset:58 balDuel:64 balTour:80 balTeamReset:95 balTeam:104 balCoop:132 balSpellTest:148
-§170 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
-SWK:171 swSetup:172
-§191 เช็คการ์ดจอตอนเปิดเกม
-GPUC:194 gpuCheck:195
+§171 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
+SWK:172 swSetup:173
+§192 เช็คการ์ดจอตอนเปิดเกม
+GPUC:195 gpuCheck:196
 
 ## js/42-fire-vfx.js (356) — ไฟแบบใหม่ (2026-10-19): shader ไฟเคลื่อนไหวจริง (noise ไหล) ใช้กับลูก…
 FIRE_U:4 FIRE_GLSL:5 fireMat:27
@@ -935,10 +937,11 @@ tuneOpenF:96 tuneFmt:97 tuneRow:98 tuneRefresh:101 tuneMsg:109 tuneToggle:110 tu
 §138 API สำหรับเครื่องมือแยก tune.html (เปิดเกมใน iframe แล้วเรียกผ่าน WD)
 tuneDump:139 tuneSetKey:140
 
-## js/74-look.js (102) — 
-LOOK:17 lookPreset:38 lookMap:40 lookName:41 lookEnvFor:42 lookApply:52 lookRays:69 _lkV:74 lookRaysFrame:76 lookRefresh:83
-§84 ลงทะเบียนในเครื่องมือปรับค่า (js/73-tune.js): 1 หมวด "🌗 Look" แยกส่ว…
-LOOK_F:85 lookRegister:91 lookTest:96
+## js/74-look.js (105) — Look 🌗 — พรีเซ็ตลุคของฉาก: แสงรอบตัวจากท้องฟ้า (IBL) + ความสว่าง + คอนทราสต์ + ย้อมสีเงา…
+§12 ฟิลด์: sky = ท้องฟ้าที่ถ่ายเป็นแสง ('night'|'sunset') • warm = ทิศย้อ…
+LOOK:17 lookPreset:41 lookMap:43 lookName:44 lookEnvFor:45 lookApply:55 lookRays:72 _lkV:77 lookRaysFrame:79 lookRefresh:86
+§87 ลงทะเบียนในเครื่องมือปรับค่า (js/73-tune.js): 1 หมวด "🌗 Look" แยกส่ว…
+LOOK_F:88 lookRegister:94 lookTest:99
 
 ## js/75-ambient.js (52) — 
 AMBX:9 AMBX_V:10 AMBX_F:24 ambMesh:27 ambQual:39 ambFrame:40
@@ -952,6 +955,9 @@ surfSync:49 surfQuality:53
 §54 ใส่ผิวเข้าวัสดุ
 SURF_VS:55 SURF_VS_BODY:56 SURF_FS:67 SURF_FS_BODY:68 surfOk:98 surfApply:99 surfScene:111
 §112 ปรับค่า (tune.html / F8)
+
+## js/76-weather.js (100) — Weather: central system for every map (user 2026-11-26)
+WX:10 WX_N:11 WX_S:11 wxParse:12 wxPick:13 wxMap:15 wxRainMesh:18 wxSplashMesh:31 _wxF:43 wxSplashTick:44 wxSound:50 wxTick:59 _wxV:77 _wxT:77 _wxR:77 _wxP:77 _wxN:77 _wxQ:77 _wxC:77 wxPre:78
 
 ## js/77-dev.js (315) — Dev Mode: ทดสอบแมพ/สกิลในแมตช์จริง (ผู้ใช้ 2026-11-18)
 DEV:5 devOn:10 devOff:11 devSoloOk:12 devHold:13 devBroomOk:14 dvMe:15 devSave:16
@@ -970,25 +976,25 @@ _dvCyl:274 _dvMat:275 devOverlay:276
 §296 2D overlay map: spawn zones + capture zones + players (click = warp)
 _dvMap:297 _dvY:301 devMapDraw:302
 
-## js/77-paint.js (372) — 
-PAINT:12 paintOn:22 paintMap:24 kuwOn:33 paintLights:34
-§43 VFX สีสด (ทดลอง): บนแมพสว่าง เอฟเฟกต์เรืองแสงเดิมซีดเป็นขาว-เหลืองอ่อ…
-_ptHSL:44 paintVivid:45 paintVfx:47
-§57 ไฟก้อนหลอมรวม (blob / metaball) — ภาพอ้างอิงผู้ใช้ 2026-11-11: ไฟเป็น…
-BLOB:59 blobPre:60 blobFire:61 paintGrass:83
-§84 ภาพผิว: เปลือกไม้ (ครึ่งซ้าย) + ใบไม้ปาดพู่กัน 4 แบบ (ครึ่งขวา 2×2)
-paintAtlas:85 paintStrokeTex:109
-§117 ต้นไม้
-paintTreeGeo:118 paintCanopy:161 paintKit:165
-§192 tree wind (user 2026-11-23: trees more alive)
-PTW:194 PTW_HEAD:197 PTW_BODY:199 PTW_FS:219 ptWindTick:222
-§226 ลายพู่กันบนผิว (ต่อท้าย onBeforeCompile เดิมของวัสดุ เหมือน js/76)
-PT_VS:227 PT_VS_BODY:228 PT_FS:229 PT_FS_BODY:230 paintPatch:240 paintApply:254 ptreeScene:257
-§265 ฉากของแมพ (เรียกจาก buildFileMap ก่อน brkSetup/batchStatic)
-paintScene:266 paintTreePts:284 paintShafts:288
-§313 ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเร…
-kuwQ:316 KUW_LOOP:317 kuwMat:319 paintRT:336 paintKuw:337
-§353 ปรับค่า (tune.html / F8)
+## js/77-paint.js (373) — 
+PAINT:12 paintOn:23 paintMap:25 kuwOn:34 paintLights:35
+§44 VFX สีสด (ทดลอง): บนแมพสว่าง เอฟเฟกต์เรืองแสงเดิมซีดเป็นขาว-เหลืองอ่อ…
+_ptHSL:45 paintVivid:46 paintVfx:48
+§58 ไฟก้อนหลอมรวม (blob / metaball) — ภาพอ้างอิงผู้ใช้ 2026-11-11: ไฟเป็น…
+BLOB:60 blobPre:61 blobFire:62 paintGrass:84
+§85 ภาพผิว: เปลือกไม้ (ครึ่งซ้าย) + ใบไม้ปาดพู่กัน 4 แบบ (ครึ่งขวา 2×2)
+paintAtlas:86 paintStrokeTex:110
+§118 ต้นไม้
+paintTreeGeo:119 paintCanopy:162 paintKit:166
+§193 tree wind (user 2026-11-23: trees more alive)
+PTW:195 PTW_HEAD:198 PTW_BODY:200 PTW_FS:220 ptWindTick:223
+§227 ลายพู่กันบนผิว (ต่อท้าย onBeforeCompile เดิมของวัสดุ เหมือน js/76)
+PT_VS:228 PT_VS_BODY:229 PT_FS:230 PT_FS_BODY:231 paintPatch:241 paintApply:255 ptreeScene:258
+§266 ฉากของแมพ (เรียกจาก buildFileMap ก่อน brkSetup/batchStatic)
+paintScene:267 paintTreePts:285 paintShafts:289
+§314 ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเร…
+kuwQ:317 KUW_LOOP:318 kuwMat:320 paintRT:337 paintKuw:338
+§354 ปรับค่า (tune.html / F8)
 
 ## js/78-dev-ui.js (248) — Dev Mode UI (user 2026-11-20): one floating window, many small column…
 §10 orbit camera
@@ -1003,4 +1009,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(122 files, 38325 lines)
+(123 files, 38466 lines)

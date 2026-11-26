@@ -13,6 +13,7 @@ var PAINT={on:!/[?&]nopaint\b/.test(location.search),cur:null,kit:null,
   kuw:1,kuwR:1.0,shaft:0.2,grass:[1.3,1.28,0.9],ground:[1.5,1.3,0.55],stroke:0.5,strokeHue:0.6,sat:1.32,sun:3.4,
   maps:{'fcs-file':{sky:'clear',fog:['#c4e2f6',320,1300],look:'clear',weather:'clear:100',sun:1.5,hemi:0.55,hemiC:'#cfe2f2',hemiG:'#7e8a62',ground:null},   // siege castle (Map Builder file map), user 2026-11-24: clear day (clear look, neutral sky fill) • coast look steps aside (js/67 backdropLook)
     fcs:{sky:'day',fog:['#b4e0d0',220,1300],look:'paint',weather:'clear:100'},   // old code castle: sky/fog/light only
+    'shibuya-demo':{sky:'night',fog:['#1a2030',35,380],look:'citynight',weather:'rain:100',sun:0.35,sunC:'#9fb2ff',hemi:0.32,hemiC:'#5a6a98',hemiG:'#1e1e28',ground:null},   // rainy city night test map (js/76 weather + reflections)
     forest:{sky:'day',fog:['#9fdccc',30,260],look:'paint',weather:'clear:100',
     back:{near:{col:'#4a8a3c',col2:'#35703a'},trees:{col:['#2f6e3c','#3d8440','#28603a']},mid:{col:'#5f9c88',lit:'#b4dcb0',tint:'#8cc4a6'},
       mist:[{d:235,h:45,col:'#d4f0dc',a:0.6}],far:{col:'#8cbcc0',lit:'#e0f4e0',tint:'#b0dcd0',snow:'#f6fff4'}}}},
@@ -37,7 +38,7 @@ function paintLights(id){
   paintGrass();paintVfx();
   if(!PAINT.cur){PTG.x=0;return;}   // saturation: Look preset (js/74 GFX.sat)
   const mo=PAINT.maps[PAINT.cur]||{};hemi.color.set(mo.hemiC||'#86dcea');hemi.groundColor.set(mo.hemiG||'#4f9a58');hemi.intensity=mo.hemi!==undefined?mo.hemi:LOOK.P.paint.hemi;   // per-map overrides: sun / hemi / exp / ground
-  moonL.color.set('#fff0bc');moonL.intensity=mo.sun!==undefined?mo.sun:PAINT.sun;if(mo.exp!==undefined)gl.toneMappingExposure=mo.exp;GFX.sat=GRADEU.uSat.value=PAINT.sat;
+  moonL.color.set(mo.sunC||'#fff0bc');moonL.intensity=mo.sun!==undefined?mo.sun:PAINT.sun;if(mo.exp!==undefined)gl.toneMappingExposure=mo.exp;GFX.sat=GRADEU.uSat.value=PAINT.sat;
   PAINT.KU.uK.value=PAINT.kuw;PTG.x=PAINT.cel;
 }
 // ---------- VFX สีสด (ทดลอง): บนแมพสว่าง เอฟเฟกต์เรืองแสงเดิมซีดเป็นขาว-เหลืองอ่อน → ดันความสด + กดสีซีดให้เข้ม, ไฟไล่ เหลือง→ส้ม→แดง→ม่วงแดง, แสงฟุ้งเบาลง ----------

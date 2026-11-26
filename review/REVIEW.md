@@ -3,6 +3,18 @@
 > เขียนอัตโนมัติจาก `review.html` (ผ่าน `tools/serve.py`) — อย่าแก้ไฟล์นี้ตรง ๆ, แก้ `review/reviews.json` แล้วรัน `python tools/serve.py --review-md`.
 > **Claude:** ทำเฉพาะหัวข้อสถานะ **✏️ ขอแก้** — อ่านความเห็นผู้ใช้ (`ความเห็นผู้ใช้`) + เปิดรูปด้วย Read → แก้ → ตั้ง `status:"wait"` + เขียน `reply` (ไทยสั้น ๆ ว่าแก้อะไร) เพื่อส่งกลับให้ผู้ใช้รีวิวใหม่. อย่าตั้ง `ok` เอง (ผู้ใช้เป็นคนกดผ่าน). งานที่ **⏳ รอ** = รอผู้ใช้ ไม่ต้องทำอะไร
 
+## #209 แมพทดสอบชิบุย่ากลางคืน + ระบบฝน + เงาสะท้อนพื้นเปียก
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Map • สาย/ส่วน: Map + Graphics
+
+**วิธีดู / อะไรรอรีวิว:**
+แมพ shibuya-demo สร้างจากแผนที่จริง (OpenStreetMap) ปั้นตึกใน Blender ลุคภาพวาด cel กลางคืน ฝนตก. ระบบฝนเป็นระบบกลาง: ตั้งช่อง Weather ของแมพไหนก็ได้ เช่น rain:100 หรือ clear:60,rain:40. ตัวเลือกใหม่ Settings > กราฟิก > เงาสะท้อนพื้นเปียก (ปิด / หลอก / SSR / Planar). รูป: SSR, Planar, มุมผู้เล่น. ป้ายร้านเป็นคำทั่วไป ไม่มีแบรนด์จริง. วิธีดู: Map Builder เปิด shibuya-demo แล้วกด ▶ Play (หรือ index.html?playmap=shibuya-demo) แล้วลองสลับตัวเลือกเงาสะท้อน
+
+- ลิงก์/ไฟล์: `mapbuild.html`
+- ลิงก์/ไฟล์: `index.html?playmap=shibuya-demo`
+- รูป: `review/img/r209-shibuya-ssr.jpg`
+- รูป: `review/img/r209-shibuya-planar.jpg`
+- รูป: `review/img/r209-shibuya-player.jpg`
+
 ## #208 ระบบมาตรฐาน: พื้นไหม้ตามเฟส (Phase Ground)
 - สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Map • สาย/ส่วน: Map Builder
 

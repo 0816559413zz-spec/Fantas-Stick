@@ -37,6 +37,7 @@ function buildWorld(id){
   }
   if(typeof backdropLook==='function')backdropLook(id);   // per-map sky/fog/light from BACKDROP[id].look (js/67-coast) — cached maps too
   if(typeof paintLights==='function')paintLights(id);
+  if(typeof wxMap==='function')wxMap(id,FM);   // weather pick (js/76)
   gl.shadowMap.needsUpdate=true;
   const ext=Math.max(MW,MH)*S3/2+12;
   Object.assign(moonL.shadow.camera,{left:-ext,right:ext,top:ext,bottom:-ext,near:1,far:400});

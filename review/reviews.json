@@ -1,5 +1,5 @@
 {
- "next": 209,
+ "next": 210,
  "items": [
   {
    "id": 194,
@@ -4243,6 +4243,27 @@
    ],
    "links": [
     "mapbuild.html"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 209,
+   "title": "แมพทดสอบชิบุย่ากลางคืน + ระบบฝน + เงาสะท้อนพื้นเปียก",
+   "text": "แมพ shibuya-demo สร้างจากแผนที่จริง (OpenStreetMap) ปั้นตึกใน Blender ลุคภาพวาด cel กลางคืน ฝนตก. ระบบฝนเป็นระบบกลาง: ตั้งช่อง Weather ของแมพไหนก็ได้ เช่น rain:100 หรือ clear:60,rain:40. ตัวเลือกใหม่ Settings > กราฟิก > เงาสะท้อนพื้นเปียก (ปิด / หลอก / SSR / Planar). รูป: SSR, Planar, มุมผู้เล่น. ป้ายร้านเป็นคำทั่วไป ไม่มีแบรนด์จริง. วิธีดู: Map Builder เปิด shibuya-demo แล้วกด ▶ Play (หรือ index.html?playmap=shibuya-demo) แล้วลองสลับตัวเลือกเงาสะท้อน",
+   "kind": "Map",
+   "who": "Map + Graphics",
+   "status": "wait",
+   "created": "2026-11-26",
+   "updated": "2026-11-26",
+   "imgs": [
+    "review/img/r209-shibuya-ssr.jpg",
+    "review/img/r209-shibuya-planar.jpg",
+    "review/img/r209-shibuya-player.jpg"
+   ],
+   "links": [
+    "mapbuild.html",
+    "index.html?playmap=shibuya-demo"
    ],
    "feedback": "",
    "reply": ""

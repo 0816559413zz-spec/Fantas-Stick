@@ -18,6 +18,8 @@ export const SURF = [
   { k: 'ice', n: 'Ice (slippery)', c: '#a9d4e8', env: 'ice' }, { k: 'lava', n: 'Lava', c: '#d8521e', env: 'lava' },
   // เพิ่มท้ายตาราง (ห้ามแทรกกลาง — ดัชนีถูกเก็บในไฟล์แผนที่) • โทนจางสำหรับป่าหมอก (แมพ gorge)
   { k: 'moss', n: 'Moss', c: '#575837' }, { k: 'litter', n: 'Leaf Litter/Forest Soil', c: '#5d4a34' }, { k: 'gravel', n: 'Pebbles', c: '#7a7569' }, { k: 'duff', n: 'Pine Needles', c: '#4b4332' }, { k: 'trail', n: 'Forest Path (dark dirt)', c: '#6f5b44' },
+  // city (shibuya-demo, 2026-11-26)
+  { k: 'asphalt', n: 'Asphalt Road', c: '#2c2d31' }, { k: 'sidewalk', n: 'Sidewalk Tiles', c: '#6e6b66' },
 ];
 export const WALL_PRESET = [
   { n: 'Stone Wall', th: 1, h: 3.5, c: '#8a8478', m: 'stone' }, { n: 'Castle Wall', th: 2, h: 6, c: '#77736c', m: 'stone' },

@@ -34,6 +34,9 @@ LOOK.P.meadow=Object.assign({},LOOK.P.dusk,{hemi:0.18,con:1.16,split:0.15});
 // 2026-11-24 user picked the "warm" variant (Tone Lab dayvar): warmer highlights, lighter blue shade, more saturation
 LOOK.P.clear=Object.assign({},LOOK.P.dusk,{sky:'clear',warm:true,env:0.45,tr:0.9,tg:1.0,tb:1.12,hemi:0.5,amb:0.08,exp:0.97,con:1.04,split:0.08,sat:1.32,bloomT:1.25,tone:0,rays:0.2,haze:0.3,hazeK:1.2,hazeH:0.05,
   dust:0.25,dustS:0.6,dustK:0.8,mist:0.15,mistA:0.05,mistS:1,mistH:2.0,mistL:0.3,mistK:1.0,flow:1,lo:[0.9,0.98,1.12],hi:[1.08,1.04,0.9]});
+// citynight = rainy city night (shibuya-demo, 2026-11-26): dark blue fill, no dust (rain), low wet mist, saturated neon, no moon rays
+LOOK.P.citynight=Object.assign({},LOOK.P.night,{env:0.45,tr:0.7,tg:0.82,tb:1.25,hemi:0.14,amb:0.08,exp:1.0,con:1.18,split:0.14,sat:1.25,bloomT:0.7,rays:0,haze:0.75,hazeK:1.6,hazeH:0.08,
+  dust:0,mist:0.35,mistA:0.06,mistS:1.6,mistH:1.6,mistL:0.4,mistK:1.0,flow:1.4});
 LOOK.map={lake:'snow',ruins:'sand',meadow:'meadow'};
 function lookPreset(name,from,over){LOOK.P[name]=Object.assign({},LOOK.P[from],over||{});if(typeof lookRegister==='function')lookRegister(name);return LOOK.P[name];}
 // แมพนี้ใช้พรีเซ็ตไหน (ถูกเรียกจาก js/28 ก่อน setSky) — เก็บใน globalThis เพราะ setSky รันก่อนไฟล์นี้ตอนโหลดโมดูลครั้งแรก
