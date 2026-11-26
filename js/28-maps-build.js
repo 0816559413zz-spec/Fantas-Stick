@@ -539,11 +539,13 @@ function fileMapLight(F){
 // ---------- Phase layers (Map Builder "Phase Layer", user 2026-11-25) ----------
 // .glb nodes (userData.vp from glTF extras) and obs entries with vp=[a,b] exist only while a <= SGPH <= b (siege phase, js/02-fcs; other modes stay 1).
 // Swap is instant (look + collision: hgt 0 outside, like sgWallsApply). Checked every frame (js/37) + on siege phase changes (js/15-siege).
-let PHL=[],PHK='';
+let PHL=[],PHK='',PHGD=new Set(),PHGG=-1;   // PHGD = phase-ground rects already painted into SCAR (js/50) for SCAR.gen PHGG
 function phOf(o){for(let q=o;q;q=q.parent)if(q.userData&&q.userData.vp)return q.userData.vp;return null;}
 function phLayers(sc,skip){PHL=[];sc.traverse(o=>{if(o.userData&&Array.isArray(o.userData.vp)){PHL.push(o);skip.add(o);}});PHK='';phTick();}
 function phTick(){
-  const p=SGPH||1,k=MAPID+'|'+p+'|'+PHL.length;if(k===PHK)return;PHK=k;
+  const p=SGPH||1,k=MAPID+'|'+p+'|'+PHL.length+'|'+(SCAR.gen|0);if(k===PHK)return;PHK=k;
+  const PG=MAPS[MAPID]&&MAPS[MAPID].phg;   // phase ground: scorch rects from their phase on (one-way: siege phases only go up; cleared with SCAR each match)
+  if(PG&&SCAR.D){if(PHGG!==SCAR.gen){PHGG=SCAR.gen;PHGD.clear();}PG.forEach((g,i)=>{if(p>=g.ph&&!PHGD.has(i)){PHGD.add(i);const a=tx(g.x0),b=tx(g.x1),c=tz(g.y0),d=tz(g.y1);scarRect(Math.min(a,b),Math.min(c,d),Math.max(a,b),Math.max(c,d),g.k,g.a);}});}
   for(const o of PHL){const v=o.userData.vp;o.visible=p>=v[0]&&p<=v[1];}
   for(const o of OBS){if(!o.vp)continue;const on=p>=o.vp[0]&&p<=o.vp[1];
     if(!on&&!o.phz&&o.hgt>0){o.h0=o.hgt;o.hgt=0;if(o.top!==undefined){o.t0=o.top;o.top-=o.h0;}o.phz=1;}   // file obs collide by absolute top (js/02-data)

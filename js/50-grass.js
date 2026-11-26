@@ -61,7 +61,7 @@ const GRASS={ON:true,DENS:43,H:0.32,W:0.034,MAXN:640000,CAP:640000,distK:[0.8,1,
 // ล้างเมื่อเข้าหน้าเกม (แมตช์ใหม่ — setScreen js/19) / เปลี่ยนแผนที่ • ทุกเครื่องทาที่จุดเดียวกัน (มาจาก event ของโฮสต์) • ภาพล้วน ไม่แตะโปรโตคอล
 const SCAR={RES:2,w:0,h:0,D:null,tex:null,dirty:false,key:'',clearNext:true,empty:null,U:{uScar:{value:null},uScarMap:{value:new THREE.Vector4(0,0,1,1)},uGrLo:{value:0},uFire:{value:null}}};
 SCAR.empty=new THREE.DataTexture(new Uint8Array(4),1,1);SCAR.empty.needsUpdate=true;SCAR.U.uScar.value=SCAR.empty;SCAR.U.uFire.value=SCAR.empty;
-function scarReset(){const b=GRASS.box;if(!b)return;
+function scarReset(){const b=GRASS.box;if(!b)return;SCAR.gen=(SCAR.gen||0)+1;   // gen: phase ground (phTick js/28-maps-build) repaints after a reset
   const w=Math.min(1024,Math.max(8,Math.round(b[2]*SCAR.RES))),h=Math.min(1024,Math.max(8,Math.round(-b[3]*SCAR.RES)));
   if(!SCAR.tex||SCAR.w!==w||SCAR.h!==h){if(SCAR.tex)SCAR.tex.dispose();SCAR.w=w;SCAR.h=h;SCAR.D=new Uint8Array(w*h*4);
     SCAR.tex=new THREE.DataTexture(SCAR.D,w,h,THREE.RGBAFormat);SCAR.tex.magFilter=SCAR.tex.minFilter=THREE.LinearFilter;}
@@ -81,6 +81,17 @@ function scarPaint(X,Z,r,kind,a){if(!SCAR.D||!(r>0)||!(a>0))return;
     D[p+ch]=nv;
     if(ch===0)D[p+1]*=1-k;   // ไฟละลายน้ำแข็ง
     if(ch===2&&k*255>o*0.5)D[p+3]=Math.round(((Math.atan2(dy/h*b.w,dx/w*b.z)/6.2832)+1)%1*255);}   // ทิศล้ม = ออกจากจุดระเบิด
+  SCAR.dirty=true;}
+// whole rect (map phase ground, js/28-maps-build phTick): X0..X1 / Z0..Z1 in 3D units, ragged noisy edge ~2.6 units, a = strength (max, never lighter)
+function scarRect(X0,Z0,X1,Z1,kind,a){if(!SCAR.D||!(a>0))return;
+  const b=SCAR.U.uScarMap.value,w=SCAR.w,h=SCAR.h,D=SCAR.D,ch=kind==='burn'?0:kind==='frost'?1:2,E=2.6;
+  const u=X=>(X-b.x)/b.z*w,v=Z=>(Z-b.y)/b.w*h,ua=u(X0-E),ub=u(X1+E),va=v(Z0-E),vb=v(Z1+E),i0=Math.max(0,Math.floor(Math.min(ua,ub))),i1=Math.min(w-1,Math.ceil(Math.max(ua,ub))),j0=Math.max(0,Math.floor(Math.min(va,vb))),j1=Math.min(h-1,Math.ceil(Math.max(va,vb)));   // box w/h can be negative (Z flips)
+  const hn=(x,y)=>{const s=Math.sin(x*127.1+y*311.7)*43758.5453;return s-Math.floor(s);},vn=(x,y)=>{const ix=Math.floor(x),iy=Math.floor(y),fx=x-ix,fy=y-iy,sx=fx*fx*(3-2*fx),sy=fy*fy*(3-2*fy);
+    return (hn(ix,iy)*(1-sx)+hn(ix+1,iy)*sx)*(1-sy)+(hn(ix,iy+1)*(1-sx)+hn(ix+1,iy+1)*sx)*sy;};
+  for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){const X=b.x+(i+0.5)/w*b.z,Z=b.y+(j+0.5)/h*b.w,din=Math.min(X-X0,X1-X,Z-Z0,Z1-Z);   // >0 inside
+    const n=vn(X*0.35,Z*0.35)*0.7+vn(X*1.1,Z*1.1)*0.3,e=(din+E*(n-0.4)*2.4)/E;if(e<=0)continue;
+    const k=Math.min(1,e)*a*(0.82+0.18*vn(X*2.3,Z*2.3)),p=(j*w+i)*4,nv=Math.round(255*k);if(nv>D[p+ch])D[p+ch]=nv;
+    if(ch===0)D[p+1]=Math.round(D[p+1]*(1-k));if(ch===2&&!D[p+3])D[p+3]=Math.round(hn(i,j)*255);}
   SCAR.dirty=true;}
 // รอยจากสกิล (เรียกจาก bfAfter js/44 ตามธาตุ + ขนาด s 0.45–1.8) • x,y = พิกัดเกม
 function grassScar(x,y,el,s){const X=tx(x),Z=tz(y),r=0.8+2.1*s;

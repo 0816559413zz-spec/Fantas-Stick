@@ -1412,7 +1412,7 @@ function phViewApply() {   // hide items outside the previewed phase (flag phHid
   if (!pvDirty && !PV) return; pvDirty = false; const hid = (n, o) => { const v = o && MD.vpOf(o), out = PV > 0 && v && (PV < v[0] || PV > v[1]);
     if (out && n.visible) { n.visible = false; n.userData.phHid = 1; } else if (!out && n.userData.phHid) { n.visible = true; delete n.userData.phHid; } };
   const AM = ALLM(), W = new Map(AM.walls.map(w => [w.id, w]));
-  for (const [id, n] of objNode) hid(n, find({ k: 'obj', id }));
+  for (const [id, n] of objNode) { const o = find({ k: 'obj', id }); hid(n, o && o.t === 'phg' ? { pa: o.ph || 2 } : o); }   // phase ground marker: shown from its phase
   for (const n of gWalls.children) hid(n, W.get(n.userData.wid));
 }
 function section(title, open, ...kids) { const d = el('details', { class: 'sec', open }); d.append(el('summary', null, title), ...kids.filter(Boolean)); return d; }
@@ -1446,6 +1446,9 @@ function renderSide() {
         it.t === 'sgItem' ? fld('Tier (1-3)', it, 'tier', { min: 1, max: 3, step: 1 }) : null,
         it.t === 'brz' ? fld('Who may fly', it, 'tm', { type: 'select', items: [['', 'Both teams'], ['A', 'Attackers only'], ['B', 'Defenders only']], get: () => it.tm || '' }) : null,
         it.t === 'brz' ? fld('Top (m above ground)', it, 'top', { get: () => it.top == null ? 60 : it.top, min: 2 }) : null,
+        it.t === 'phg' ? fld('From phase', it, 'ph', { get: () => it.ph || 2, min: 1, step: 1 }) : null,
+        it.t === 'phg' ? fld('Look', it, 'k', { type: 'select', items: MD.PHG_K, get: () => it.k || 'burn' }) : null,
+        it.t === 'phg' ? fld('Strength (0–1)', it, 'a', { get: () => it.a == null ? 1 : it.a, min: 0, max: 1, step: 0.05 }) : null,
         it.t === 'wind' ? fld('Direction (deg, 0 = +Z)', it, 'dir', { get: () => it.dir || 0, step: 15 }) : null, it.t === 'wind' ? fld('Strength', it, 'str', { get: () => it.str == null ? 8 : it.str, min: 0 }) : null,
         ...(it.t === 'water' ? [fld('Width (X)', it, 'sx', { min: 1 }), fld('Length (Z)', it, 'sz', { min: 1 }), fld('Level (m, absolute)', it, 'y', { step: 0.05 }),
           fld('Look (preset)', it, 'k', { type: 'select', items: MD.WATER_LOOK, get: () => it.k || 'lake', set: v => { it.k = v; for (const q of MD.WATER_OPT) delete it[q]; }, after: () => { resync(); renderSide(); } }),

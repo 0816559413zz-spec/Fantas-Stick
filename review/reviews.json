@@ -1,5 +1,5 @@
 {
- "next": 208,
+ "next": 209,
  "items": [
   {
    "id": 194,
@@ -4224,6 +4224,25 @@
    "imgs": [],
    "links": [
     "index.html"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 208,
+   "title": "ระบบมาตรฐาน: พื้นไหม้ตามเฟส (Phase Ground)",
+   "text": "ต่อจาก Phase Layer: Map Builder วางของ → Siege Mode → Phase Ground ลากกรอบ ตั้ง From phase (เริ่ม 2), Look (ไหม้ดำ / หญ้าหาย / น้ำแข็ง), Strength. ในเกมพอถึงเฟสนั้น พื้นและหญ้าในกรอบจะไหม้ทันที ขอบหยักแบบธรรมชาติ (ใช้ระบบรอยไหม้เดียวกับสกิลไฟ). รูป: แมพทดลอง เฟส 1 (ต้นไม้ปกติ) และเฟส 2 (ต้นไม้หาย หินแทน พื้นไหม้ดำ). วิธีดู: วางกรอบ Phase Ground ในแมพบุกปราสาท แล้วเล่นจนแกน 1 แตก",
+   "kind": "Map",
+   "who": "Map Builder",
+   "status": "wait",
+   "created": "2026-11-26",
+   "updated": "2026-11-26",
+   "imgs": [
+    "review/img/r208-phg-1.jpg",
+    "review/img/r208-phg-2.jpg"
+   ],
+   "links": [
+    "mapbuild.html"
    ],
    "feedback": "",
    "reply": ""

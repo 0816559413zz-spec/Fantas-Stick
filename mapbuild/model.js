@@ -57,6 +57,7 @@ export const OBJ = {
   sgItem: { n: 'Item Spawn (after core N)', cat: 'mode', c: '#ffe08a', note: 'point inside the Loot Area • Tier 1–3 (item kinds: team gameplay decides)' },
   // flying rules (any mode): Broom Zone = brooms allowed inside (box up to Top) • Wind Push = pushes players along Direction
   brz: { n: 'Broom Zone', cat: 'mode', c: '#8ad0ff', note: 'rectangle + Top height • Team = who may fly here • outside = rider falls off (siege rule)' },
+  phg: { n: 'Phase Ground (burnt / bare)', cat: 'mode', c: '#7a4a2a', note: 'rectangle • from phase N the game scorches the ground + grass here (burnt / bare / frozen look) • e.g. burnt forest floor' },
   wind: { n: 'Wind Push Zone', cat: 'mode', c: '#b8f0e0', note: 'rectangle • Direction (deg, map compass like Rotation) + Strength • e.g. edges of floating islands' },
   // water surface (2026-11-25): flat see-through water at Level y (m, absolute — not above ground) • the ground cuts the shoreline
   water: { n: 'Water Surface', cat: 'water', c: '#3fa0d8', note: 'flat water at Level (m) • ground higher than the level hides it = the shore • dig the bed lower (Dig Basin / Sculpt) • look only, no gameplay yet' },
@@ -97,7 +98,8 @@ export function waterDig(M, o, depth) { const [i0, j0, i1, j1] = waterBox(M, o),
     const w = r < 0.55 ? 1 : 1 - (r - 0.55) / 0.45, s = w * w * (3 - 2 * w), t = lv + 0.3 - (depth + 0.3) * s, k = j * M.nx + i; if (t < M.hg[k]) M.hg[k] = clamp(+t.toFixed(2), HMIN, HMAX); }
   return [i0, j0, i1, j1]; }
 // axis-aligned rectangle areas (size sx×sz, no rotation in the game)
-export const AREA = new Set(['phase', 'ceil', 'lz', 'sgHold', 'sgLoot', 'brz', 'wind']);
+export const AREA = new Set(['phase', 'ceil', 'lz', 'sgHold', 'sgLoot', 'brz', 'wind', 'phg']);
+export const PHG_K = [['burn', 'Burnt (black ground + grass)'], ['flat', 'Bare (no grass)'], ['frost', 'Frozen']];
 // decor drawn by the game (MAP-STANDARD round 4): the same builder the code rooms use (js/28-fcs-castle.js fcsDecoKit) — no collision,
 // not in the .glb. k = material key: stone/dark (castle ashlar), roof, lit (glowing window), wood, iron, carpet, slit (dark opening)
 // y = lift of the shape centre above the ground (roof/cloth: base/top) • rot = yaw (roof ridge, cloth/shield facing)
@@ -437,7 +439,7 @@ export function gameData(M, dim) {
       const g = gh(M, x, z), h = top - 0.15 - g; if (h === h && h < 1e9 && h > (ramp ? 0.3 : TSTEP)) put({ x, z, r, hgt: h }, null, { k: 'flr' }); }
   }
   const spawns = [], espawn = [], rings = [], tasks = [], props = [], houses = [], lights = [];
-  const sg = { cores: [], sp: { A: {}, B: {} }, phases: [], bw: [], hold: { A: {}, B: {} }, loot: {}, items: [] }, ceil = [], lz = [], rprops = [], deco = [], pnl = [], broom = [], wind = [], water = [];
+  const sg = { cores: [], sp: { A: {}, B: {} }, phases: [], bw: [], hold: { A: {}, B: {} }, loot: {}, items: [] }, ceil = [], lz = [], rprops = [], deco = [], pnl = [], broom = [], wind = [], water = [], phg = [];
   const rect = o => { const w = (o.sx || 1) * PX, d = (o.sz || 1) * PX; return { x0: r1(o.x * PX - w / 2), y0: r1(o.z * PX - d / 2), x1: r1(o.x * PX + w / 2), y1: r1(o.z * PX + d / 2) }; };
   for (const o of allObjs) {
     const X = r1(o.x * PX), Y = r1(o.z * PX), rot = o.rot || 0;
@@ -448,6 +450,7 @@ export function gameData(M, dim) {
     else if (o.t === 'sgLoot') { const q = rect(o), k = o.ph || 1; (sg.loot[k] = sg.loot[k] || []).push({ x1: q.x0, y1: q.y0, x2: q.x1, y2: q.y1 }); }
     else if (o.t === 'sgItem') sg.items.push({ ph: o.ph || 1, x: X, y: Y, t: Math.max(1, Math.min(3, Math.round(o.tier || 1))) });
     else if (o.t === 'brz') broom.push(Object.assign(rect(o), { top: r2(o.top == null ? 60 : o.top), tm: o.tm === 'A' || o.tm === 'B' ? o.tm : '' }));   // tm '' = both teams
+    else if (o.t === 'phg') phg.push(Object.assign(rect(o), { ph: Math.max(1, o.ph | 0 || 2), k: o.k || 'burn', a: r2(o.a == null ? 1 : o.a) }));   // phase ground scorch (js/28-maps-build phTick → scarRect js/50)
     else if (o.t === 'wind') { const a = (o.dir || 0) * Math.PI / 180; wind.push(Object.assign(rect(o), { dx: r2(Math.sin(a)), dy: r2(Math.cos(a)), s: r2(o.str == null ? 8 : o.str) })); }   // push direction in map px axes (x right, y down)
     else if (o.t === 'water') water.push(Object.assign({ x: X, y: Y, w: r1((o.sx || 1) * PX), h: r1((o.sz || 1) * PX), lv: r2(o.y || 0), k: o.k || 'lake' }, rot ? { a: +rot.toFixed(4) } : {}, ...WATER_OPT.filter(q => o[q] != null).map(q => ({ [q]: o[q] }))));   // js/67-pond.js (a = three rotation.y)
     else if (o.t === 'lz') lz.push(Object.assign(rect(o), { top: r2(o.y == null ? 22 : o.y), k: r2(o.k == null ? 1 : o.k) }));   // indoor light zone (js/28-fcs-hall.js)
@@ -511,6 +514,7 @@ export function gameData(M, dim) {
   if (broom.length) data.broom = broom;
   if (wind.length) data.wind = wind;
   if (water.length) data.water = water;
+  if (phg.length) data.phg = phg;
   if (ceil.length) data.ceil = ceil;
   if (lz.length) data.lz = lz;
   if (rprops.length) data.rprops = rprops;
@@ -530,7 +534,7 @@ export function check(M, G) {
   else if (c.spawns < 6) add('warn', 'General spawns: ' + c.spawns + ' points (6 spread apart recommended)');
   else add('ok', 'General spawns: ' + c.spawns + ' points');
   if (has('tdm') && !siegeOnly) { if (c.red >= 3 && c.blue >= 3) add('ok', 'Team spawns: red ' + c.red + ' / blue ' + c.blue); else add('warn', 'Team mode: team spawns red ' + c.red + ' / blue ' + c.blue + ' (3 per side recommended — none = the game splits the general spawns left/right)'); }
-  { const L = M.objs.concat(M.walls).filter(o => vpOf(o)), bad = L.find(o => o.pb > 0 && (o.pa || 1) > o.pb);
+  { const L = M.objs.concat(M.walls).filter(o => vpOf(o) || o.t === 'phg'), bad = L.find(o => o.pb > 0 && (o.pa || 1) > o.pb);
     if (bad) add('err', 'Phase layer: “Show from phase” is after “Show until phase”', bad.x != null ? [bad.x, bad.z] : null);
     else if (L.length) add(has('siege') ? 'ok' : 'warn', 'Phase layers: ' + L.length + ' items change by siege phase' + (has('siege') ? '' : ' — this map has no Siege mode, so phase 1 always shows')); }
   if (M.modes && M.modes.includes('race') && c.rings < 10) add('warn', 'Broom race: rings ' + c.rings + ' (need 10)');
