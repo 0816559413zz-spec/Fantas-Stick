@@ -158,6 +158,9 @@ const MAPS={
 // แผนที่ที่สุ่มได้ (ป่ามืดเอาออกจากการสุ่มตามที่ผู้ใช้ขอ — ยังเลือกเองในล็อบบี้ได้)
 // แผนที่ที่ปิดไว้ชั่วคราว (ไฟล์ยังอยู่ครบ ไม่สุ่ม/เลือกไม่ได้) — ใส่ id ลงชุดนี้ • greathall เคยปิด 2026-10-27 (ข้ามโต๊ะไม่ได้) แก้แล้ว
 const MAP_OFF=new Set([]);
+// test / demo maps (user 2026-11-26): kept loadable (Map Builder ▶ Play = ?playmap=<id>) but never in the map picker or the random pool.
+// Rule by id (MAP-STANDARD): *-demo, demo-*, tmp-*, test-*, tonelab • MAP_OFF gets them in regFileMap
+const MAP_TEST=/(^|-)demo($|-)|^tmp-|^test-|^tonelab$/;
 const PLAYMAP=new URLSearchParams(location.search).get('playmap')||'';   // Map Builder "ทดลองเล่น": index.html?playmap=<id>[&pm=<โหมด>] → เริ่มเล่นคนเดียวบนแผนที่นั้นทันที (js/40)
 const RANDOM_MAPS=['castle','pitch','hogsmeade','greathall','meadow','lake','ruins'];
 let MAPID='castle',MW=W,MH=H,OBS=MAPS.castle.obs;
@@ -168,6 +171,7 @@ function setMapVars(id){if(!MAPS[id])id='castle';pnlHouseConv(id);MAPID=id;MW=MA
 const FMAPS={pend:new Map(),fail:new Set()};
 function b64i16(b){const bin=atob(b),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);const v=new Int16Array(u.buffer),f=new Float32Array(v.length);for(let i=0;i<v.length;i++)f[i]=v[i]===-32768?NaN:v[i]/100;return f;}
 function regFileMap(id,e,d){
+  if(MAP_TEST.test(id))MAP_OFF.add(id);   // test map: hidden from menus/random
   const obs=(d.obs||[]).map(o=>Object.assign({x:o.x,y:o.y,r:o.r,hgt:o.hgt,k:o.k||'col',fm:1},o.ring!=null?{ring:o.ring}:{},o.b!=null?{b:o.b}:{},o.st?{st:1}:{},o.bot!=null?{bot:o.bot}:{},o.fid!=null?{fid:o.fid}:{},o.vp?{vp:o.vp}:{},o.hx!=null?{hx:o.hx,hy:o.hy}:{}));   // hx,hy = capsule half axis (straight walls, js/12-buildings obsD2)   // fid = fence section (k:'fcf', js/12-efs)   // bot = วงชนลอย เริ่มสูงจากพื้นเท่านี้ (กำแพง/ของบนพื้นชั้นบนจาก Map Builder — ไม่ขวางคนข้างล่าง)   // st = ยืนบนหลังได้ (โต๊ะห้องโถง) — groundH js/04   // b = กลุ่มของบังที่พังได้ (d.brk[b]) • ring = ความสูงห่วงควิดดิช (k:'hoop')
   (d.houses||[]).forEach((h,i)=>obs.push({x:h.x,y:h.y,r:Math.max(h.w,h.d)/2,k:'house',hgt:10,w:h.w,d:h.d,s:(i*0.37)%1,ry:h.ry||0,nb:h.nb?1:0}));
   const terr={c:d.c,nx:d.nx,ny:d.ny,g:b64i16(d.g),fl:(d.fl||[]).map(f=>({x0:f.x0,y0:f.y0,nx:f.nx,ny:f.ny,top:b64i16(f.top),bot:b64i16(f.bot)}))};
@@ -202,7 +206,7 @@ function loadAllMapData(){return modelManifest().then(m=>Promise.all(Object.keys
 // เครื่องลูก: ยังไม่มีข้อมูลแผนที่นี้ → สั่งโหลดแล้วรอ snapshot ถัดไป (โหลดไม่ได้ = ใช้แผนที่สำรอง)
 function mapReady(id){if(MAPS[id]||FMAPS.fail.has(id))return true;loadMapData(id);return false;}
 function modeMap(M){return M&&M.mapF&&MAPS[M.mapF]?M.mapF:M&&M.map;}   // a mode's fixed map: Map Builder version (mapF, e.g. siege fcs-file) once loaded, else the code map
-function mapOkFor(id,mode){if(MAP_OFF.has(id))return false;if(MAPS[id]&&MAPS[id].only&&MAPS[id].only!==mode)return false;/* only = แผนที่เฉพาะโหมด (ปราสาท First Castle Strike) */const f=MAPS[id]&&MAPS[id].fm;return !f||!f.modes||f.modes.includes(mode);}
+function mapOkFor(id,mode){if(MAP_OFF.has(id)&&id!==PLAYMAP)return false;if(MAPS[id]&&MAPS[id].only&&MAPS[id].only!==mode)return false;/* only = แผนที่เฉพาะโหมด (ปราสาท First Castle Strike) */const f=MAPS[id]&&MAPS[id].fm;return !f||!f.modes||f.modes.includes(mode);}
 // ---------- ของประกอบฉากที่พังได้ / ใช้ได้ (prop) ----------
 // ตำแหน่งสุ่มแบบ seed จากชื่อแผนที่ → ทุกเครื่องคำนวณได้ตรงกันเอง ส่งในเน็ตแค่สถานะ (snapshot PB: 1 ตัวต่อชิ้น 0=ปกติ 1=พัง 2=ใช้แล้ว)
 // ตัวเลข (hp/ขนาด/จำนวน/โหมดที่เปิด) เป็นค่าตั้งต้นให้ทีมเกมเพลย์ปรับ • model = ชื่อใน assets/manifest.json (ไม่มีไฟล์ = ใช้โมเดลจากโค้ด)

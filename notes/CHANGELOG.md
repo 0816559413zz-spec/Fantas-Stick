@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-26 — **Test maps hidden.** Demo and test maps (names ending in -demo, starting with tmp- or test-, and tonelab) no longer show in the game's map picker or random pool; Map Builder's Play button still opens them.
 - 2026-11-26 — **Burnt ground by phase.** A Phase Ground area in Map Builder scorches the ground and grass inside it (or clears the grass, or frosts it) once the siege reaches a chosen phase, for scenes like a forest burning after a point falls.
 - 2026-11-25 — **Storm: new dash and skill moves.** Dash dives hand-first (left palm forward, legs wide, gold lightning on the right arm), holds a moment, then rises. Thunder Line: a one-hand palm push with a body twist, palm lined up with the strike, no smoke at your feet. Storm Orbs: crouch and burst open.
 - 2026-11-25 — **Softer forest light shafts.** The sunbeams in painterly forests now appear only in gaps between trees (not over open paths or inside the castle), always face the camera so they never show as thin lines or X shapes, have soft edges, fade out close up and far away, and shimmer slowly.
