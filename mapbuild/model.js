@@ -376,11 +376,14 @@ export function objCircles(M, o, d) {
   if (d.cb) {   // kit shapes (tools/ruin-assets.mjs): collision boxes [cx,cz,w,d,h,y0] in model metres replace the bbox footprint ([] = none, e.g. platforms: floors give it)
     const s = d.s || 1, k = o.cs == null ? 1 : o.cs, rot = o.rot || 0, cs = Math.cos(rot), sn = Math.sin(rot), out = [];
     for (const [cx, cz, w, dd, h, y0] of d.cb) { const lx = cx * s, lz = cz * s;
-      out.push(...objCircles(M, { x: o.x + lx * cs + lz * sn, z: o.z - lx * sn + lz * cs, rot, y: o.y, cs: 1 }, { ex: w * s * k / 2, ez: dd * s * k / 2, h: h * s, yo: (y0 || 0) * s, col: 1, cs: 1 })); }
+      out.push(...objCircles(M, { x: o.x + lx * cs + lz * sn, z: o.z - lx * sn + lz * cs, rot, y: o.y, cs: 1 }, { ex: Math.abs(w) * s * k / 2, ez: Math.abs(dd) * s * k / 2, h: h * s, yo: (y0 || 0) * s, col: 1, cs: 1, bx: 1 })); }
     return out;
   }
   const k = (o.cs == null ? d.cs || 1 : o.cs), ex = d.ex * k, ez = d.ez * k, g = gh(M, o.x, o.z), lift = (o.y || 0) + (d.yo || 0), top = g + lift + d.h, out = [];
   const add = (x, z, r) => { const gg = gh(M, x, z), c = { x, z, r, top, hgt: top - gg }; if (lift > 0.3) c.bot = g + lift - gg; if (c.hgt > 0.05 && r > 0.05) out.push(c); };
+  if (d.bx && Math.min(ex, ez) > 0.02) {   // box: one collider, half axis along the long side + half width w, small round corner (2026-11-26, was a chain of circles)
+    const rot = o.rot || 0, long = ex >= ez, rc = Math.min(0.1, Math.min(ex, ez)), a = (long ? ex : ez) - rc, ax = long ? Math.cos(rot) : Math.sin(rot), az = long ? -Math.sin(rot) : Math.cos(rot);
+    add(o.x, o.z, rc); if (out.length) Object.assign(out[0], { hx: ax * Math.max(a, 0.01), hz: az * Math.max(a, 0.01), w: (long ? ez : ex) - rc }); return out; }
   if (Math.abs(ex - ez) < 0.2 * Math.max(ex, ez) || Math.max(ex, ez) < 0.5) { add(o.x, o.z, Math.max(ex, ez)); return out; }
   const rot = o.rot || 0, long = ex > ez, r = Math.max(0.25, Math.min(ex, ez)), L = Math.max(ex, ez) - r, n = Math.max(1, Math.ceil(L / (r * 1.1)));
   const ax = long ? Math.cos(rot) : Math.sin(rot), az = long ? -Math.sin(rot) : Math.cos(rot);
@@ -415,7 +418,7 @@ export function gameData(M, dim) {
   }
   // collision + breakable groups
   const obs = [], brk = [], brkOf = new Map();
-  const put = (c, gi, ex) => { const o = { x: r1(c.x * PX), y: r1(c.z * PX), r: r1(c.r * PX), hgt: r2(c.hgt), k: 'col' }; if (c.bot != null) o.bot = r2(c.bot); if (gi != null) o.b = gi; if (ex) Object.assign(o, ex); obs.push(o); };
+  const put = (c, gi, ex) => { const o = { x: r1(c.x * PX), y: r1(c.z * PX), r: r1(c.r * PX), hgt: r2(c.hgt), k: 'col' }; if (c.bot != null) o.bot = r2(c.bot); if (c.w != null) Object.assign(o, { hx: r1(c.hx * PX), hy: r1(c.hz * PX), w: r1(c.w * PX) }); if (gi != null) o.b = gi; if (ex) Object.assign(o, ex); obs.push(o); };
   let fenceN = 0;   // fence segment index (same order as data.sys.fence below) → obs k:'fcf' + fid (js/12-efs lowers burnt sections)
   for (const w of M.walls) {
     if (w.sg) continue;   // siege target wall/gate: the game builds its collision + look from data.siege.bw (js/02-fcs sgFromFile)
@@ -582,7 +585,7 @@ export function check(M, G) {
   const obsLim = Math.max(2000, Math.round(M.W * M.H * 0.035)), obsWarn = Math.round(obsLim * 0.6);   // budget scales with map area (spatial grid keeps cost local)
   if (c.obs > obsLim) add('err', 'Colliders ' + c.obs + ' colliders — too heavy (limit ' + obsLim + '): cut down long thin walls or make them thicker');
   else if (c.obs > obsWarn) add('warn', 'Colliders ' + c.obs + ' (getting heavy)');
-  else add('ok', 'Colliders ' + c.obs + ' (straight walls = 1 box each)');
+  else add('ok', 'Colliders ' + c.obs + ' (straight walls = 1 capsule each, boxes = 1 box each)');
   if (c.props > 0 && M.objs.filter(o => o.t === 'pchest').length > 2) add('warn', 'More than 2 treasure chests');
   let lo = 1e9, hi = -1e9; for (const h of M.hg) { if (h < lo) lo = h; if (h > hi) hi = h; }
   if (lo < -5 || hi > 20) add('warn', 'Ground level ' + lo.toFixed(1) + ' to ' + hi.toFixed(1) + ' (camera/minimap set for about −5 to +20)');

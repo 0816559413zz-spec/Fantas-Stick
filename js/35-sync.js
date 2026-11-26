@@ -1194,7 +1194,7 @@ function hudSight(x,y,h,me){
   const obs=sgNear(sgObs(),(ax+bx)/2,(ay+by)/2,L*(t1-t0)/2+10,_hsO),n=Math.max(1,Math.ceil(L*(t1-t0)/10));
   for(let i=0;i<=n;i++){const t=i/n,px=ax+(bx-ax)*t,py=ay+(by-ay)*t,wy=aw+(bw-aw)*t;
     if(TERR&&terrSolid(px,py,wy-terrT(px,py)))return false;
-    for(const q of obs){if(q.bi!==undefined||q.k==='tfence'||q.bot>=q.hgt)continue;const g0=GY(q.x,q.y),lo=q.top!==undefined?-50:g0+(q.bot||0),hi=q.top!==undefined?q.top:g0+(q.hgt||9);
+    for(const q of obs){if(q.bi!==undefined||q.k==='tfence'||q.bot>=q.hgt)continue;const g0=GY(q.x,q.y),lo=obsLo(q,g0),hi=q.top!==undefined?q.top:g0+(q.hgt||9);
       if(wy>=lo&&wy<hi&&obsD2(q,px,py)<q.r*q.r)return false;}}
   return true;
 }

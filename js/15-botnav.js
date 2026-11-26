@@ -37,7 +37,7 @@ function navBuild(){
   if(!NAV.g||NAV.g.length!==N)Object.assign(NAV,{g:new Float32Array(N),f:new Float32Array(N),par:new Int32Array(N),gen:new Uint32Array(N),cl:new Uint32Array(N),heap:new Int32Array(N*2),gn:0});
   const cells=(x0,y0,x1,y1,fn)=>{const a=clamp(Math.floor(x0/c),0,nx-1),b=clamp(Math.floor(x1/c),0,nx-1),e=clamp(Math.floor(y0/c),0,ny-1),f=clamp(Math.floor(y1/c),0,ny-1);
     for(let j=e;j<=f;j++)for(let i=a;i<=b;i++)fn(j*nx+i,(i+0.5)*c,(j+0.5)*c);};
-  const circ=(o,r,hgt,b)=>{if(hgt<=0.6)return;const eye=hgt>=NAV_EYE,ex=Math.abs(o.hx||0),ey=Math.abs(o.hy||0);cells(o.x-ex-r-pad,o.y-ey-r-pad,o.x+ex+r+pad,o.y+ey+r+pad,(k,x,y)=>{const d=Math.sqrt(obsD2(o,x,y));if(d<r+pad){if(b)bk[k]=b;else w[k]=1;}if(eye&&d<r+c*0.35)s[k]=1;});};
+  const circ=(o,r,hgt,b)=>{if(hgt<=0.6)return;const eye=hgt>=NAV_EYE,ex=Math.abs(o.hx||0),ey=Math.abs(o.hy||0);const R=obsRR(o);cells(o.x-ex-R-pad,o.y-ey-R-pad,o.x+ex+R+pad,o.y+ey+R+pad,(k,x,y)=>{const d=Math.sqrt(obsD2(o,x,y));if(d<r+pad){if(b)bk[k]=b;else w[k]=1;}if(eye&&d<r+c*0.35)s[k]=1;});};
   for(const o of OBS){if(o.bi!==undefined||o.bot>2||o.k==='flr')continue;circ(o,o.r,o.top!==undefined?o.top:o.hgt,o.sgw!==undefined&&!o.nb&&G&&G.sg&&G.sg.bw[o.sgw]>0?1+o.sgw:0);}   // bot>2 = floating (door lintels, gallery rails): no block on the ground
   const BX=MAPS[MAPID]&&MAPS[MAPID].boxes;
   if(BX)for(const B of BX){if(B.cl)continue;cells(B.x-pad,B.y-pad,B.x+B.w+pad,B.y+B.d+pad,(k,x,y)=>{w[k]=1;if(B.h>=NAV_EYE&&x>B.x-c*0.35&&x<B.x+B.w+c*0.35&&y>B.y-c*0.35&&y<B.y+B.d+c*0.35)s[k]=1;});}

@@ -171,6 +171,7 @@ function syncFloors() {
 const KIT = { list: [], byId: new Map(), files: new Map(), tpl: new Map(), thumbs: new Map() };
 const CATS = [['sys', 'Game Points'], ['mode', 'Siege Mode'], ['water', 'Water'], ['prefab', 'Room Prefabs'], ['room', 'Room / Breakables'], ['deco', 'Decor (game-drawn)'], ['game', 'Game Objects'], ['prim', 'Primitives'], ['collide', 'Collision Shapes'], ['tree', 'Trees'], ['rock', 'Rocks'], ['plant', 'Small Plants'], ['build', 'Buildings'], ['road', 'Roads / Paving'], ['prop', 'Props'], ['light', 'Lamps/Lights'], ['fence', 'Fences'], ['ruin', 'Ruin (modular)'], ['user', 'Custom']];
 const CS_DEF = { tree: 0.22, light: 0.4, plant: 0.6 };
+const KIT_ROUND = new Set(['tree', 'light', 'plant', 'rock']);   // kit categories that keep a round collider (others = box)
 let gltfL = null;
 function loader() { if (!gltfL) { gltfL = new GLTFLoader(); const d = new DRACOLoader(); d.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/gltf/'); gltfL.setDRACOLoader(d); gltfL.setMeshoptDecoder(MeshoptDecoder); } return gltfL; }
 async function loadKit() {
@@ -224,10 +225,10 @@ function dim(o) {   // footprint for collision (model.js objCircles)
     if (o.t === 'dc_cone') return { ex: o.r || 0.5, ez: o.r || 0.5, h: o.sy || 1, yo: -(o.sy || 1) / 2, col: o.col ? 1 : 0, brk: 0, m: 'stone', cs: 0.92 };
     if (o.t === 'dc_dome' || o.t === 'dc_rock') return { ex: (o.sx || 1) / 2, ez: (o.sz || 1) / 2, h: o.sy || 1, yo: -(o.sy || 1) / 2, col: o.col ? 1 : 0, brk: 0, m: 'stone', cs: 0.92 };
     const sy = o.sy || 1, cy = o.t === 'dc_cyl', r = cy ? Math.max(o.rt != null ? o.rt : (o.sx || 1) / 2, o.rb != null ? o.rb : (o.sx || 1) / 2) : 0;
-    return { ex: cy ? r : (o.sx || 1) / 2, ez: cy ? r : (o.sz || 1) / 2, h: sy, yo: -sy / 2, col: o.col ? 1 : 0, brk: 0, m: 'stone', cs: cy ? 0.92 : 1 }; }
-  if (isPrim(o)) { const sx = o.sx || 1, sz = o.sz || 1, round = o.t === 'cyl' || o.t === 'ball' || o.t === 'cone'; return { ex: sx / 2, ez: sz / 2, h: (o.sy || 1) * (o.t === 'ball' ? 0.84 : 1), col: o.col == null ? 1 : o.col, brk: 0, m: o.m || 'stone', cs: round ? 0.92 : 1 }; }
+    return { ex: cy ? r : (o.sx || 1) / 2, ez: cy ? r : (o.sz || 1) / 2, h: sy, yo: -sy / 2, col: o.col ? 1 : 0, brk: 0, m: 'stone', cs: cy ? 0.92 : 1, bx: cy ? 0 : 1 }; }
+  if (isPrim(o)) { const sx = o.sx || 1, sz = o.sz || 1, round = o.t === 'cyl' || o.t === 'ball' || o.t === 'cone'; return { ex: sx / 2, ez: sz / 2, h: (o.sy || 1) * (o.t === 'ball' ? 0.84 : 1), col: o.col == null ? 1 : o.col, brk: 0, m: o.m || 'stone', cs: round ? 0.92 : 1, bx: round ? 0 : 1 }; }
   if (isKit(o)) { const a = KIT.byId.get(kitId(o)), t = tplNow(kitId(o)); if (!a || !t) return null; const s = o.s || 1;
-    return { ex: t.ex * s, ez: t.ez * s, h: t.h * s, col: o.col == null ? a.col : o.col, brk: a.brk ? 1 : 0, m: a.brk || 'stone', cs: a.cs != null ? a.cs : CS_DEF[a.cat] || 0.85, s, cb: a.cb, fl: a.fl }; }   // cb/fl = kit collision boxes + walkable slabs (model.js objCircles/kitFloors)
+    return { ex: t.ex * s, ez: t.ez * s, h: t.h * s, col: o.col == null ? a.col : o.col, brk: a.brk ? 1 : 0, m: a.brk || 'stone', cs: a.cs != null ? a.cs : CS_DEF[a.cat] || 0.85, s, cb: a.cb, fl: a.fl, bx: KIT_ROUND.has(a.cat) ? 0 : 1 }; }   // cb/fl = kit collision boxes + walkable slabs (model.js objCircles/kitFloors)
   return null;
 }
 function labelSprite(text, c) {   // small always-readable tag (core number, phase number)
@@ -404,12 +405,16 @@ function gameData() { if (!GD) { GD = MD.gameData(ALLM(), dim); GD.data.fog = M.
 function buildCol() {
   for (const c of [...gCol.children]) { gCol.remove(c); c.geometry.dispose(); }
   if (!show.col || !M) return;
-  const obs = gameData().data.obs; if (!obs.length) return;
-  const im = new THREE.InstancedMesh(new THREE.CylinderGeometry(1, 1, 1, 14, 1, true), new THREE.MeshBasicMaterial({ color: 0xff5a4a, transparent: true, opacity: 0.38, depthWrite: false, side: THREE.DoubleSide }), obs.length), m4 = new THREE.Matrix4();
+  const all = gameData().data.obs; if (!all.length) return;
+  const mat = new THREE.MeshBasicMaterial({ color: 0xff5a4a, transparent: true, opacity: 0.38, depthWrite: false, side: THREE.DoubleSide }), m4 = new THREE.Matrix4();
   const q = new THREE.Quaternion(), Y = new THREE.Vector3(0, 1, 0), P = new THREE.Vector3(), S = new THREE.Vector3();
-  obs.forEach((o, i) => { const x = o.x / MD.PX, z = o.y / MD.PX, r = o.r / MD.PX, g = MD.gh(M, x, z), b = o.bot || 0, h = o.hgt - b, L = o.hx == null ? 0 : Math.hypot(o.hx, o.hy) / MD.PX;   // capsule (straight wall) = stretched along its axis
-    q.setFromAxisAngle(Y, o.hx == null ? 0 : -Math.atan2(o.hy, o.hx)); im.setMatrixAt(i, m4.compose(P.set(x, g + b + h / 2, z), q, S.set(r + L, h, r))); });
-  gCol.add(im); need();
+  for (const box of [0, 1]) {   // round (circle / capsule) and box colliders (w = half width across the axis)
+    const obs = all.filter(o => (o.w != null) === !!box); if (!obs.length) continue;
+    const geo = box ? new THREE.BoxGeometry(2, 1, 2) : new THREE.CylinderGeometry(1, 1, 1, 14, 1, true), im = new THREE.InstancedMesh(geo, mat, obs.length);
+    obs.forEach((o, i) => { const x = o.x / MD.PX, z = o.y / MD.PX, r = o.r / MD.PX, g = MD.gh(M, x, z), b = o.bot || 0, h = o.hgt - b, L = o.hx == null ? 0 : Math.hypot(o.hx, o.hy) / MD.PX;   // capsule (straight wall) = stretched along its axis
+      q.setFromAxisAngle(Y, o.hx == null ? 0 : -Math.atan2(o.hy, o.hx)); im.setMatrixAt(i, m4.compose(P.set(x, g + b + h / 2, z), q, S.set(r + L, h, r + (o.w || 0) / MD.PX))); });
+    gCol.add(im); }
+  need();
 }
 
 // ================= camera / picking =================

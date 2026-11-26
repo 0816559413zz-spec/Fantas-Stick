@@ -250,9 +250,9 @@ function drawMinimap(v,me,P){
   // one path + one fill per colour (was one fill per obstacle: ~100+ canvas fills a frame on tree maps, 2026-11-22; colours are opaque → same picture)
   {const B=MMB;for(const L of B.values())L.length=0;
   for(const o of OBS){
-    const ex=Math.abs(o.hx||0),ey=Math.abs(o.hy||0);if(Math.abs(o.x-me.x)>MM.view+o.r+ex||Math.abs(o.y-me.y)>MM.view+o.r+ey)continue;
+    const ex=Math.abs(o.hx||0),ey=Math.abs(o.hy||0);if(Math.abs(o.x-me.x)>MM.view+obsRR(o)+ex||Math.abs(o.y-me.y)>MM.view+obsRR(o)+ey)continue;
     const c=MM.col[o.k]||'#7d8499';let L=B.get(c);if(!L)B.set(c,L=[]);
-    obsEach(o,(x,y)=>{const q=pt(x,y,false);if(q)L.push(q[0],q[1],Math.max(1.6,o.r*sc));});
+    obsEach(o,(x,y,r)=>{const q=pt(x,y,false);if(q)L.push(q[0],q[1],Math.max(1.6,r*sc));});
   }
   for(const [c,L] of B){if(!L.length)continue;cx.beginPath();for(let i=0;i<L.length;i+=3){cx.moveTo(L[i]+L[i+2],L[i+1]);cx.arc(L[i],L[i+1],L[i+2],0,Math.PI*2);}cx.fillStyle=c;cx.fill();}}
   if(PROPON)for(const o of PROPS){

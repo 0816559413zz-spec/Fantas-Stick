@@ -85,7 +85,7 @@ function aimFromCrosshair(me,P,E){
     if(t<=tMin||t>=T)return;
     const y=o.y+dy*t;if(y>=y0&&y<=y1)T=t;
   };
-  for(const q of OBS){if(q.k==='tfence'||q.bot>=q.hgt)continue;{const g0=GY(q.x,q.y),y0=q.top!==undefined?-50:g0+(q.bot||0),y1=q.top!==undefined?q.top:g0+(q.hgt||9);obsEach(q,(x,y)=>cyl(tx(x),tz(y),q.r*S3,y0,y1));}}
+  for(const q of OBS){if(q.k==='tfence'||q.bot>=q.hgt)continue;{const g0=GY(q.x,q.y),y0=obsLo(q,g0),y1=q.top!==undefined?q.top:g0+(q.hgt||9);obsEach(q,(x,y,r)=>cyl(tx(x),tz(y),r*S3,y0,y1));}}
   if(PROPON)for(const q of PROPS)if(q.st!==1){const g0=GY(q.x,q.y);cyl(tx(q.x),tz(q.y),q.r*S3,g0,g0+q.hgt);}
   for(const q of P||[])if(q.id!==me.id&&q.al&&!q.dn&&!q.gh){const g0=GY(q.x,q.y)+(q.z||0);cyl(tx(q.x),tz(q.y),0.55,g0,g0+2);}
   for(const e of E||[]){const D=EDEF[e.t];if(D){const g0=GY(e.x,e.y)+(e.h||0);cyl(tx(e.x),tz(e.y),Math.max(0.4,D.r*S3),g0,g0+D.ch+0.8);}}
@@ -175,8 +175,8 @@ function camObsK(me,F,x,y,z){
   if(MAPID!=='fcs'&&!(MAPS[MAPID]&&MAPS[MAPID].fcs))return 1;const N=14,M=7;let k=1;const grid=sgObs(),mz=me.z||0;   // + Map Builder siege maps
   for(let i=1;i<=N;i++){const f=i/N,X=F.x+(x-F.x)*f,Y=F.y+(y-F.y)*f,Z=F.z+(z-F.z)*f,px=X/S3+MW/2,py=Z/S3+MH/2;let hit=false;
     const c=fcsCeilAt(px,py,mz);if(c<Infinity&&Y>GY(px,py)+c-0.3&&F.y<GY(px,py)+c)hit=true;
-    if(!hit)for(const q of sgNear(grid,px,py,M,_camOB)){if(q.r<14||q.k==='tfence'||q.k==='fcf'||q.k==='fct'||q.k==='fce')continue;
-      const g0=GY(q.x,q.y),y0=q.top!==undefined?-50:g0+(q.bot||0),y1=q.top!==undefined?q.top:g0+(q.hgt||0);if(Y<y0||Y>y1+0.3)continue;
+    if(!hit)for(const q of sgNear(grid,px,py,M,_camOB)){if(obsRR(q)<14||q.k==='tfence'||q.k==='fcf'||q.k==='fct'||q.k==='fce')continue;
+      const g0=GY(q.x,q.y),y0=obsLo(q,g0),y1=q.top!==undefined?q.top:g0+(q.hgt||0);if(Y<y0||Y>y1+0.3)continue;
       if(obsD2(q,px,py)<(q.r+M)*(q.r+M)){hit=true;break;}}
     if(!hit&&PNL.length&&pnlSolidAt(px,py,Y-GY(px,py)))hit=true;   // thick breakable panels (camera went inside = the wall vanished)
     if(hit){k=Math.max(0.12,(i-1)/N-0.02);break;}}
