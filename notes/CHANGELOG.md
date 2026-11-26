@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-26 — **Map Builder: Unity-style Project window.** Assets now live in a Project panel at the bottom: a folder tree (Gameplay, Rooms, Nature, Architecture, Props, Primitives, Custom, plus Packs grouped by map theme and Favorites / Recently Used), a thumbnail grid with a size slider (list view at the far left), search, right-click menu (favorites, show in folder, import .glb into the open folder), and drag-and-drop straight into the Scene. A Console tab next to it lists status messages, warnings and errors.
 - 2026-11-26 — **Test maps hidden.** Demo and test maps (names ending in -demo, starting with tmp- or test-, and tonelab) no longer show in the game's map picker or random pool; Map Builder's Play button still opens them.
 - 2026-11-26 — **Burnt ground by phase.** A Phase Ground area in Map Builder scorches the ground and grass inside it (or clears the grass, or frosts it) once the siege reaches a chosen phase, for scenes like a forest burning after a point falls.
 - 2026-11-25 — **Storm: new dash and skill moves.** Dash dives hand-first (left palm forward, legs wide, gold lightning on the right arm), holds a moment, then rises. Thunder Line: a one-hand palm push with a body twist, palm lined up with the strike, no smoke at your feet. Storm Orbs: crouch and burst open.

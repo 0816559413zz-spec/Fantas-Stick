@@ -11,6 +11,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import * as MD from './model.js';
 import * as BD from './backdrop.js';
+import { initProject } from './project.js';
 const { C, SURF, OBJ } = MD;
 
 const $ = id => document.getElementById(id);
@@ -20,6 +21,7 @@ const el = (tag, props, ...kids) => { const e = document.createElement(tag); if 
 
 // ================= state =================
 let M = null, online = false, dirty = false, saveT = 0, list = [];
+let PJ = null;   // Project/Console dock (mapbuild/project.js)
 let tool = 'select', sel = null, msel = [];   // sel = {k:'wall'|'floor'|'obj', id, pt?} = primary (Inspector, gizmo) • msel = more items picked with Shift/Ctrl
 const opt = { wk: 'lake', wdig: 1, wdep: 1.5, rk: 'cobble', rw: 4, rc: 0, smode: 'up', rad: 4, str: 4, soft: 1, hval: 2, surf: 0, wall: 0, wth: 1, wh: 3.5, wc: '#8a8478', wm: 'stone', wcurve: 0, wbrk: 0, floor: 0, fw: 4, fh: 3, fauto: 1, obj: 'spawn', cat: 'sys',
   rrot: 1, rscale: 0, dens: 3, snap: 0, part: 'wall', pp: {}, csnap: 1, psnap: 1, prim: { c: '#8a8478', sx: 2, sy: 2, sz: 2 }, pn: { pre: 0, mat: 'brick', m: 'p', thru: 1, sy: 3.6, T: 0.3, cs: 0.6, hp: 0, y: 0, draw: 'line', sides: 12 },
@@ -174,6 +176,7 @@ function loader() { if (!gltfL) { gltfL = new GLTFLoader(); const d = new DRACOL
 async function loadKit() {
   try { const k = await (await fetch('assets/mapkit/kit.json?t=' + Date.now())).json(); KIT.list = [...(k.assets || []), ...(k.user || [])]; } catch (e) { KIT.list = []; }
   KIT.byId = new Map(KIT.list.map(a => [a.id, a]));
+  if (PJ) PJ.render();
 }
 const sanit = s => s.replace(/\s/g, '_').replace(/[\[\]\.:\/]/g, '');
 function kitTpl(id) {   // → Promise<{obj (template, base centre at origin), ex, ez, h}>
@@ -196,7 +199,7 @@ let thumbR = null, thumbS = null, thumbC = null;
 async function thumb(id) {
   if (KIT.thumbs.has(id)) return KIT.thumbs.get(id);
   const t = await kitTpl(id); if (!t) return '';
-  if (!thumbR) { thumbR = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true }); thumbR.setSize(96, 96); thumbS = new THREE.Scene(); thumbS.add(new THREE.HemisphereLight(0xffffff, 0x555555, 2.2)); const d = new THREE.DirectionalLight(0xffffff, 2); d.position.set(2, 4, 3); thumbS.add(d); thumbC = new THREE.PerspectiveCamera(30, 1, 0.05, 500); }
+  if (!thumbR) { thumbR = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true }); thumbR.setSize(128, 128); thumbS = new THREE.Scene(); thumbS.add(new THREE.HemisphereLight(0xffffff, 0x555555, 2.2)); const d = new THREE.DirectionalLight(0xffffff, 2); d.position.set(2, 4, 3); thumbS.add(d); thumbC = new THREE.PerspectiveCamera(30, 1, 0.05, 500); }
   const o = t.obj.clone(true); thumbS.add(o);
   const R = Math.max(t.ex, t.ez, t.h / 2, 0.2) * 1.25, d = R / Math.tan(15 * Math.PI / 180) * 1.05;
   thumbC.position.set(d * 0.62, t.h / 2 + d * 0.42, d * 0.66); thumbC.lookAt(0, t.h / 2, 0);
@@ -890,6 +893,12 @@ cv.addEventListener('pointerup', e => {
   drag = null; need();
 });
 cv.addEventListener('pointerleave', () => { hover = null; need(); });
+// Project window → Scene: pick an asset / drag it in and drop it at the mouse (Unity style)
+function pickAsset(t, cat) { opt.obj = t; opt.cat = cat; if (tool === 'scatter' && isVisualType(t)) renderOpts(); else if (tool !== 'place') setTool('place'); else renderOpts(); need(); }
+cv.addEventListener('dragover', e => { if (!PJ || !PJ.dragging()) return; e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; updHover(e); need(); });
+cv.addEventListener('dragleave', () => { if (PJ && PJ.dragging()) { hover = null; need(); } });
+cv.addEventListener('drop', e => { if (!PJ || !PJ.dragging() || !M) return; e.preventDefault(); updHover(e); if (!hover) return;
+  pushUndo('o'); const o = placeObj(hover); if (o && !o.ref) { sel = { k: 'obj', id: o.id }; msel = []; } renderSide(); updSel(); changed(); colDirty(); cv.focus(); });
 cv.addEventListener('dblclick', () => { if (tool === 'road' && draft) finishRoad(); else if ((tool === 'wall' || tool === 'pnl') && draft) { draft.pts.pop(); finishWall(false); } else if (tool === 'castle' && fdraft) { fdraft.pts.pop(); finishFree(); } });
 cv.addEventListener('wheel', e => { e.preventDefault();
   if (e.shiftKey && tool === 'bd') { opt.brad = clamp(Math.round(opt.brad * (e.deltaY > 0 ? 0.9 : 1.11)), 3, 400); renderOpts(); need(); return; }
@@ -1330,38 +1339,29 @@ function renderOpts() {
   else if (tool === 'place' || tool === 'scatter') {
     if (tool === 'scatter') b.append(h3('Scatter'), slider('Size (radius)', 'rad', 0.5, 40, 0.5), slider('Density', 'dens', 0.5, 12, 0.5), slider('Random Scale ±', 'rscale', 0, 0.6, 0.05));
     b.append(check('Random Rotation', 'rrot'));
-    const cats = tool === 'scatter' ? CATS.filter(c => !['sys', 'game', 'mode', 'water', 'prefab', 'room', 'deco'].includes(c[0])) : CATS;
-    if (!cats.some(c => c[0] === opt.cat)) opt.cat = cats[0][0];
-    b.append(h3('Library'), el('select', { class: 'tl-sel', style: 'width:100%;margin-bottom:6px', onchange: e => { opt.cat = e.target.value; renderOpts(); }, html: cats.map(([k, n]) => `<option value="${k}"${k === opt.cat ? ' selected' : ''}>${n}${OBJ_CATN(k)}</option>`).join('') }));
+    b.append(h3('Asset'), PJ ? PJ.card(opt.obj) : null);
     const items = OBJ_IN(opt.cat);
-    if (opt.cat === 'sys' || opt.cat === 'game' || opt.cat === 'prim' || opt.cat === 'collide' || opt.cat === 'mode' || opt.cat === 'water' || opt.cat === 'room' || opt.cat === 'prefab' || opt.cat === 'deco') { b.append(pal(items.map(([t, D]) => ({ n: D.n, c: D.c })), items.findIndex(([t]) => t === opt.obj), i => { opt.obj = items[i][0]; renderOpts(); need(); }, 'one'));
-      const D = OBJ[opt.obj]; if (D && D.note) b.append(el('p', { class: 'note' }, D.note));
-      if (opt.cat === 'collide') b.append(h3('Size'), slider('Width', 'sx', 0.2, 30, 0.1, opt.prim), slider('Height', 'sy', 0.2, 30, 0.1, opt.prim), slider('Depth', 'sz', 0.2, 30, 0.1, opt.prim), el('p', { class: 'note' }, 'Shown red see-through here, invisible in the game • it is a Box/Cylinder with Visible off + Collider on'));
-      if (opt.cat === 'prim') b.append(h3('Size/Color'), slider('Width', 'sx', 0.2, 30, 0.1, opt.prim), slider('Height', 'sy', 0.2, 30, 0.1, opt.prim), slider('Depth', 'sz', 0.2, 30, 0.1, opt.prim), el('div', { class: 'row' }, el('label', null, 'Color'), el('input', { type: 'color', value: opt.prim.c, oninput: e => { opt.prim.c = e.target.value; need(); } }), pickBtn('color', v => { opt.prim.c = v; renderOpts(); }, 'a colour')));
-      if (opt.cat === 'game') b.append(el('p', { class: 'note' }, 'The game adds the models and break system for these (shown as stand-in shapes here)'));
-      if (opt.cat === 'deco') b.append(el('p', { class: 'note' }, 'Decor the game draws itself (hall style): no collision, not in the .glb • boxes/cylinders use materials "castle stone" etc., set in the Inspector'));
-      if (opt.cat === 'prefab') b.append(el('p', { class: 'note' }, items.length ? 'Click to place a room (room centre) • Shift+wheel = rotate 90° • a room = a map named room-…, made/edited like any map' : 'No rooms yet — create a new map whose id starts with room- (flat ground) and place the room’s items in it'));
-      if (opt.cat === 'water') b.append(el('p', { class: 'note' }, 'Placed with its level just under the lowest edge • the Water tool (H) can drag a size + dig a basin'));
-      if (opt.cat === 'mode') b.append(el('p', { class: 'note' }, 'Tick "Siege" in Playable Modes, then check the Validation list • the game builds the cores/spawn zones (shown as markers here) • target wall/gate = select a wall and set "Siege Target"'));
-      if (opt.cat === 'room') b.append(el('p', { class: 'note' }, 'Breakable room props (the game draws the real look, boxes here) • tables/benches/rails have adjustable length • Height Above Ground = place on a mezzanine'));
-    } else {
-      const g = el('div', { class: 'kit' });
-      for (const a of items) { const img = el('span', { class: 'ph' }); const bt = el('button', { class: opt.obj === 'kit:' + a.id ? 'on' : '', title: a.name, onclick: () => { opt.obj = 'kit:' + a.id; renderOpts(); need(); } }, img, el('span', null, a.name.split(' · ')[0])); g.append(bt);
-        thumb(a.id).then(u => { if (u) { const im = el('img', { src: u }); img.replaceWith(im); } }); }
-      b.append(g);
-      if (!items.length) b.append(el('p', { class: 'note' }, 'No assets in this category yet'));
-      if (opt.cat === 'user') b.append(el('button', { class: 'tl-btn', style: 'width:100%;margin-top:8px', onclick: addAsset }, '＋ Add Asset (.glb)'), el('p', { class: 'note' }, '.glb file from Blender (1 unit = 1 m, base at the ground) stored in assets/mapkit/'));
-    }
+    { const D = OBJ[opt.obj]; if (D && D.note) b.append(el('p', { class: 'note' }, D.note)); }
+    if (opt.cat === 'collide') b.append(h3('Size'), slider('Width', 'sx', 0.2, 30, 0.1, opt.prim), slider('Height', 'sy', 0.2, 30, 0.1, opt.prim), slider('Depth', 'sz', 0.2, 30, 0.1, opt.prim), el('p', { class: 'note' }, 'Shown red see-through here, invisible in the game • it is a Box/Cylinder with Visible off + Collider on'));
+    if (opt.cat === 'prim') b.append(h3('Size/Color'), slider('Width', 'sx', 0.2, 30, 0.1, opt.prim), slider('Height', 'sy', 0.2, 30, 0.1, opt.prim), slider('Depth', 'sz', 0.2, 30, 0.1, opt.prim), el('div', { class: 'row' }, el('label', null, 'Color'), el('input', { type: 'color', value: opt.prim.c, oninput: e => { opt.prim.c = e.target.value; need(); } }), pickBtn('color', v => { opt.prim.c = v; renderOpts(); }, 'a colour')));
+    if (opt.cat === 'game') b.append(el('p', { class: 'note' }, 'The game adds the models and break system for these (shown as stand-in shapes here)'));
+    if (opt.cat === 'deco') b.append(el('p', { class: 'note' }, 'Decor the game draws itself (hall style): no collision, not in the .glb • boxes/cylinders use materials "castle stone" etc., set in the Inspector'));
+    if (opt.cat === 'prefab') b.append(el('p', { class: 'note' }, items.length ? 'Click to place a room (room centre) • Shift+wheel = rotate 90° • a room = a map named room-…, made/edited like any map' : 'No rooms yet — create a new map whose id starts with room- (flat ground) and place the room’s items in it'));
+    if (opt.cat === 'water') b.append(el('p', { class: 'note' }, 'Placed with its level just under the lowest edge • the Water tool (H) can drag a size + dig a basin'));
+    if (opt.cat === 'mode') b.append(el('p', { class: 'note' }, 'Tick "Siege" in Playable Modes, then check the Validation list • the game builds the cores/spawn zones (shown as markers here) • target wall/gate = select a wall and set "Siege Target"'));
+    if (opt.cat === 'room') b.append(el('p', { class: 'note' }, 'Breakable room props (the game draws the real look, boxes here) • tables/benches/rails have adjustable length • Height Above Ground = place on a mezzanine'));
+    b.append(el('p', { class: 'note', html: tool === 'scatter' ? 'Pick a model in the <b>Project</b> window (bottom) — game points / markers can’t be scattered (dimmed)' : 'Pick an asset in the <b>Project</b> window (bottom), then click the Scene • or drag the asset from the Project window straight into the Scene' }));
   }
+  if (PJ) PJ.sync();
 }
 const OBJ_IN = cat => cat === 'prefab' ? list.filter(m => MD.isRoomId(m.id) && (!M || m.id !== M.id)).map(m => ['room:' + m.id, { n: m.name, c: '#c9a86a' }]) : cat === 'deco' || cat === 'sys' || cat === 'game' || cat === 'prim' || cat === 'collide' || cat === 'mode' || cat === 'room' ? Object.entries(OBJ).filter(([, D]) => D.cat === cat) : KIT.list.filter(a => a.cat === cat);
 const OBJ_CATN = k => { const n = OBJ_IN(k).length; return n ? ' (' + n + ')' : ''; };
-function addAsset() {
+function addAsset(cat = 'user') {
   const inp = el('input', { type: 'file', accept: '.glb' });
   inp.onchange = async () => { const f = inp.files[0]; if (!f) return; const label = prompt('Name shown in the library', f.name.replace(/\.glb$/i, '')); if (label == null) return;
     const name = f.name.replace(/\.glb$/i, '').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
-    try { const r = await (await fetch('/api/mb-asset?name=' + encodeURIComponent(name) + '&label=' + encodeURIComponent(label), { method: 'POST', body: await f.arrayBuffer() })).json(); if (!r.ok) throw new Error(r.err);
-      KIT.tpl.delete(r.asset.id); KIT.thumbs.delete(r.asset.id); KIT.files.delete(r.asset.src); await loadKit(); opt.obj = 'kit:' + r.asset.id; opt.cat = 'user'; renderOpts(); stat('Asset added', 'ok'); } catch (e) { stat('Couldn’t add asset: ' + e.message, 'err'); } };
+    try { const r = await (await fetch('/api/mb-asset?name=' + encodeURIComponent(name) + '&label=' + encodeURIComponent(label) + '&cat=' + encodeURIComponent(cat), { method: 'POST', body: await f.arrayBuffer() })).json(); if (!r.ok) throw new Error(r.err);
+      KIT.tpl.delete(r.asset.id); KIT.thumbs.delete(r.asset.id); KIT.files.delete(r.asset.src); await loadKit(); opt.obj = 'kit:' + r.asset.id; opt.cat = r.asset.cat || 'user'; renderOpts(); if (PJ) PJ.reveal(opt.obj); stat('Asset added: ' + r.asset.name, 'ok'); } catch (e) { stat('Couldn’t add asset: ' + e.message, 'err'); } };
   inp.click();
 }
 
@@ -1547,7 +1547,7 @@ function applySky() {
 }
 
 // ================= save / load =================
-function stat(t, cls) { const s = $('stat'); s.textContent = t; s.className = cls || ''; }
+function stat(t, cls) { const s = $('stat'); s.textContent = t; s.className = cls || ''; if (PJ && t !== 'Unsaved' && t !== 'Exporting…') PJ.log(t, cls); }
 function changed() { hierSoon(); dirty = true; GD = null; stat('Unsaved', 'warn'); clearTimeout(saveT); if (online && M.id) saveT = setTimeout(save, 4000); need(); }
 async function save() {
   clearTimeout(saveT); if (!M) return false;
@@ -1565,7 +1565,7 @@ async function refreshVer() {   // top bar: map version here vs on GitHub (Pages
   s.title = ['Map = version exported on this machine (assets/manifest.json)', 'Last commit = ' + v(r.head), 'Remote = version on GitHub (origin/main = what the online game loads)',
     r.err ? 'Couldn’t reach GitHub: ' + r.err : r.fetched ? 'Checked ' + new Date(r.fetched * 1000).toLocaleTimeString('th-TH') : '', 'Click to check again'].filter(Boolean).join('\n');
 }
-async function refreshList() { try { const r = await (await fetch('/api/mb-list')).json(); list = r.maps || []; online = true; } catch (e) { online = false; list = []; } renderList(); refreshVer(); }
+async function refreshList() { try { const r = await (await fetch('/api/mb-list')).json(); list = r.maps || []; online = true; } catch (e) { online = false; list = []; } renderList(); refreshVer(); if (PJ) PJ.render(); }
 function renderList() { const s = $('mapSel'); s.innerHTML = ''; const ids = new Set(list.map(m => m.id));
   if (M && M.id && !ids.has(M.id)) s.append(el('option', { value: M.id }, M.name));
   for (const m of list) s.append(el('option', { value: m.id }, (M && m.id === M.id ? M.name : m.name) + (m.game ? '  ✓ in game' : '')));
@@ -1755,6 +1755,8 @@ $('phView').onchange = e => { PV = +e.target.value; phViewNeed(); };
 $('oSky').onchange = e => { show.sky = e.target.checked; applySky(); };
 addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
 window.__mb = { get M() { return M; }, get tool() { return tool; }, makeWater, pnHoleHit, gameView, gameViewClose, get RX() { return RX; }, loadRooms, MD, opt, placePart, syncParts, partNode, gParts, castleProto, cam, camApply, setTool, gameData, buildExport, exportGame, save, setMap, syncAll, need, kitTpl, KIT, get sel() { return sel; }, set sel(v) { sel = v; renderSide(); updSel(); }, pushUndo, changed, colDirty, updTerrain, afterTerrain, applyRamp, makeFloor, placeObj, doUndo };
+PJ = initProject({ items: cat => OBJ_IN(cat), cur: () => opt.obj, pick: pickAsset, dragStart: (t, cat) => { opt.obj = t; opt.cat = cat; if (tool !== 'place') setTool('place'); else renderOpts(); },
+  dragEnd: () => { hover = null; need(); }, thumb, tool: () => tool, visual: isVisualType, importAsset: addAsset, reloadKit: async () => { await loadKit(); renderOpts(); stat('Asset library reloaded', 'ok'); }, need });
 (async () => {
   renderTools(); $('hint').textContent = HINT[tool];
   await Promise.all([loadKit(), refreshList()]);

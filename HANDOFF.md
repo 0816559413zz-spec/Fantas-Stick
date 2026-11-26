@@ -8,6 +8,8 @@
 
 ## Latest notes (newest first)
 
+**Map Builder Project window (2026-11-26):** Unity-style bottom dock (`mapbuild/project.js`, wired in `mapbuild/app.js` via `initProject` / `PJ`): Project tab = folder tree (Favorites, Assets grouped by `SPEC`, Packs by map theme) + thumbnail grid/list + search + favorites + drag asset into the Scene (`cv` dragover/drop → `placeObj`), Console tab = `stat()` log + window errors + console.warn/error. Place/Scatter Tool Settings lost the Library dropdown (asset card + settings only). `/api/mb-asset` takes `cat`. Not tested by the user yet. Details: guides/MAP-BUILDER.md.
+
 **Test maps hidden from the game (2026-11-26):** `MAP_TEST` regex (js/02-data: `*-demo`, `demo-*`, `tmp-*`, `test-*`, `tonelab`) puts file maps into `MAP_OFF` in `regFileMap` → not in the map picker (`mpkOpen` js/64 now filters `MAP_OFF`), lobby chips or random pool. `mapOkFor` lets `PLAYMAP` through so Map Builder ▶ Play still works. Hidden now: demo-builder, castle-demo, siege-demo, room-demo, pnl-demo, tonelab, town-demo, ruin-demo, water-demo. `gorge` stays (not named as a test).
 
 **Phase Ground (2026-11-26):** new area obj `phg` (Map Builder, Siege Mode category: `ph` from phase, `k` burn/flat/frost, `a` strength) → `data.phg [{x0,y0,x1,y1,ph,k,a}]` → `MAPS[id].phg` (js/02-data). `phTick` js/28-maps-build paints each rect once its phase is reached via `scarRect` (js/50, ragged noise edge, max-blend) into SCAR; `scarReset` bumps `SCAR.gen` so it repaints after a reset. Note the SCAR box can have negative w/h (Z flipped) — `scarRect` takes min/max. Visual only, one-way per match. Review #208.

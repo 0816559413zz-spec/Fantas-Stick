@@ -26,7 +26,7 @@
 #   POST /api/mb-publish?id=<id>    → commit + push เฉพาะไฟล์ของแผนที่นี้ (ต้นฉบับ + ห้อง prefab + assets/maps/<id>.* + รายการใน manifest) บน origin/main ด้วย index ชั่วคราว (&dry=1 = ไม่ push)
 #   POST /api/mb-unexport?id=<id>   → ถอดแผนที่ออกจากเกม (ลบไฟล์ใน assets/maps + รายการใน manifest) เฉพาะแผนที่ที่มีต้นฉบับใน maps/build/
 #   POST /api/mb-del?id=<id>        → ถอดออกจากเกม + ย้ายต้นฉบับไป maps/build/_deleted/
-#   POST /api/mb-asset?name=<ชื่อ>&label=&cat= → เพิ่ม Asset เอง: เก็บ .glb ลง assets/mapkit/ + ลงทะเบียนใน assets/mapkit/kit.json (user)
+#   POST /api/mb-asset?name=<ชื่อ>&label=&cat=<หมวด, ไม่ใส่ = user> → เพิ่ม Asset เอง: เก็บ .glb ลง assets/mapkit/ + ลงทะเบียนใน assets/mapkit/kit.json (user)
 #   GET  /api/sb-skills             → รายการสกิลจากโค้ดเกม (js/*.js: PATHS, PBASIC, defSpell) ให้ปุ่ม Import ของสตอรี่บอร์ด — อ่านสดทุกครั้ง ไม่มีไฟล์ค้าง
 #   GET  /api/hud-designs / GET|POST /api/hud-design?id= {doc,png,md} / POST /api/hud-design-del?id= / POST /api/hud-design-img?name= → HUD Editor โหมดออกแบบ: huddesign/<id>.json|.jpg(.png)|.md + huddesign/HUDDESIGN.md
 #   GET  /api/sketches              → รายชื่อสเก็ตช์ (sketch.html) ใน sketch/
@@ -625,7 +625,9 @@ def mb_post(self, u, q):
         with open(os.path.join(KITD, name + '.glb'), 'wb') as f: f.write(data)
         kp = os.path.join(KITD, 'kit.json')
         kit = json.load(open(kp, encoding='utf-8')) if os.path.exists(kp) else {'v': 1, 'assets': [], 'user': []}
-        e = {'id': 'user/' + name, 'name': q.get('label', [name])[0][:60] or name, 'cat': 'user', 'src': 'mapkit/' + name + '.glb', 'node': '', 'col': 1, 'brk': 0, 'ns': 0, 'v': int(time.time())}
+        cat = q.get('cat', ['user'])[0]
+        if cat not in ('user', 'tree', 'rock', 'plant', 'build', 'ruin', 'fence', 'road', 'prop', 'light'): cat = 'user'
+        e = {'id': 'user/' + name, 'name': q.get('label', [name])[0][:60] or name, 'cat': cat, 'src': 'mapkit/' + name + '.glb', 'node': '', 'col': 1, 'brk': 0, 'ns': 0, 'v': int(time.time())}
         kit['user'] = [a for a in kit.get('user', []) if a.get('id') != e['id']] + [e]
         open(kp, 'w', encoding='utf-8').write(kit_dump(kit))
         return self._json(200, {'ok': True, 'asset': e})
