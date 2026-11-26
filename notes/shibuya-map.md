@@ -26,7 +26,7 @@ every map can use (look + sound only).
    asphalt roads (0 m) / raised sidewalks (0.12 m), one invisible collision box per building wall (959, the exporter merges
    each into a capsule), 8 spawns + 4 red / 4 blue, 8 map lights, sky night, weather `rain:100`.
 4. Export: Map Builder ⬆ (or `node tools/headless.js --url "mapbuild.html?export=shibuya-demo" --js tools/mb-export.js`).
-   Result ~9.5 MB, ~204k triangles.
+   Result ~38.5 MB, ~532k triangles (after the detail pass).
 5. Play: Map Builder ▶ Play, or `index.html?playmap=shibuya-demo` (hidden from the picker by `MAP_TEST`, name ends `-demo`).
 
 Look: `PAINT.maps['shibuya-demo']` (js/77, `sunC` = moon colour, new field) + Look preset `citynight` (js/74).
@@ -51,3 +51,10 @@ plain colour; `tools/surf-thumbs.mjs` makes them).
   resolution with an oblique near plane, used near that height; SSR elsewhere). Presets: Low 0, Medium 1, High/Ultra 2,
   Cinematic 3. Needs soft particles on (Low has no wet pass).
 - Not measured: frame cost of SSR / Planar (the browser pane was hidden during the test).
+
+## Detail pass (2026-11-26)
+
+`shibuya_build.py` helpers: `wbox` (box stuck on a wall: t along edge, y up, d out; no back face), `beam` (bar between two points),
+`grid` (positions on the facade texture grid). `facade_relief` per style, `shop_relief`, `roof_rail`, `roof_stuff`, `screen_frame`,
+`billboard_truss`; rail block = girders, track, bracing, pier caps, catenary, train (doors, roof AC, pantographs, bogies).
+Kit 179k faces / 32 MB. Size is the cost: drop `roof_rail` or the tile sills/lintels first if the file must shrink.

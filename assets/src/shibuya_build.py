@@ -61,6 +61,9 @@ M['trainG'] = tmat('sb_train_stripe', '#5cbf3a', None, rough=0.5)
 M['glassL'] = tmat('sb_glass_lit', '#1e2a34', '#7fa6c4', 0.22, rough=0.2)
 M['bronze'] = tmat('sb_bronze', '#5e4a32', None, rough=0.45, metal=0.8)
 M['green'] = tmat('sb_hedge', '#3c5a34', None, rough=0.95)
+M['alum'] = tmat('sb_alum', '#9aa2ad', None, rough=0.4, metal=0.5)       # glass-facade mullions
+M['awn'] = tmat('sb_awning', '#ffffff', None, rough=0.8)                 # awnings, tinted by vertex colour
+M['dark'] = tmat('sb_darkmetal', '#24262a', None, rough=0.6, metal=0.4)  # fans, bogies, insulators
 MAT_ORDER = list(M.keys())
 
 
@@ -154,6 +157,189 @@ def uvq(r):  # (u0, vt, u1, vb) → quad uv order a(bottom-left) b(bottom-right)
     return ((r[0], r[3]), (r[2], r[3]), (r[2], r[1]), (r[0], r[1]))
 
 
+# ---------------- relief helpers ----------------
+WHITE = (1, 1, 1, 1)
+FLH, BAYW = 3.5, 3.0     # facade texture grid: floor height from G, bay width along the wall run (shibuya_tex.py)
+
+
+def wbox(mb, L3, a, e, n, t0, t1, y0, y1, d1, mat, col=WHITE, d0=-0.03, bot=True, ends=True):
+    """box stuck on a wall: t along edge (from a, dir e), y up, d out along normal n (map); no back face"""
+    if t1 - t0 < 1e-3 or y1 - y0 < 1e-3: return
+    P = lambda t, y, d: L3(a[0] + e[0] * t + n[0] * d, a[1] + e[1] * t + n[1] * d, y)
+    q = mb.quad
+    q(P(t0, y0, d1), P(t1, y0, d1), P(t1, y1, d1), P(t0, y1, d1), mat, col=col)
+    q(P(t0, y1, d0), P(t0, y1, d1), P(t1, y1, d1), P(t1, y1, d0), mat, col=col)
+    if bot: q(P(t1, y0, d0), P(t1, y0, d1), P(t0, y0, d1), P(t0, y0, d0), mat, col=col)
+    if ends:
+        q(P(t1, y0, d1), P(t1, y0, d0), P(t1, y1, d0), P(t1, y1, d1), mat, col=col)
+        q(P(t0, y0, d0), P(t0, y0, d1), P(t0, y1, d1), P(t0, y1, d0), mat, col=col)
+
+
+def beam(mb, p, q, w, mat, col=WHITE):
+    """square bar between two blender points (4 sides, no caps)"""
+    d = q - p; L = d.length
+    if L < 1e-4: return
+    d = d / L; up = V((0, 0, 1)) if abs(d.z) < 0.9 else V((1, 0, 0))
+    s = d.cross(up).normalized() * (w / 2); u = s.cross(d).normalized() * (w / 2)
+    c = [s + u, -s + u, -s - u, s - u]
+    for i in range(4):
+        j = (i + 1) % 4; mb.quad(p + c[i], q + c[i], q + c[j], p + c[j], mat, col=col)
+
+
+def grid(run0, L, step, off=0.0, m=0.25):
+    """positions t in [m, L-m] where (run0 + t - off) is a multiple of step"""
+    t = math.ceil((run0 - off) / step - 1e-6) * step + off - run0
+    while t <= L - m:
+        if t >= m: yield t
+        t += step
+
+
+def is_bay(run0, t): return abs((run0 + t) / BAYW - round((run0 + t) / BAYW)) < 0.02
+
+
+def facade_relief(mb, L3, a, e, n, L, run0, style, G, top, col, shop, back, R):
+    """3D relief lined up with the painted facade grid (floors every 3.5 m from G, bays every 3 m of wall run)"""
+    base = G if shop else 0.0
+    if top - base < 2: return
+    cells = [G + k * FLH for k in range(-1, int((top - G) / FLH) + 1) if G + k * FLH >= base - 1e-6 and G + k * FLH + FLH <= top + 0.05]   # full floor cells (bottom y)
+    lines = [G + k * FLH for k in range(-1, int((top - G) / FLH) + 1) if base + 0.4 < G + k * FLH < top - 0.3]
+    cc = col
+    if style == 'glass':
+        for y in lines: wbox(mb, L3, a, e, n, 0, L, y - 0.14, y + 0.2, 0.22, 'conc', cc)               # slab edge
+        for t in grid(run0, L, BAYW / 2):
+            big = is_bay(run0, t); w = 0.16 if big else 0.07
+            wbox(mb, L3, a, e, n, t - w / 2, t + w / 2, base, top, 0.34 if big else 0.16, 'alum', bot=False)   # mullions
+    elif style == 'ribbon':
+        for y in cells:
+            wbox(mb, L3, a, e, n, 0, L, y + 0.22, y + 0.4, 0.5, 'conc', cc)                         # window-sill lip
+            wbox(mb, L3, a, e, n, 0, L, y + 2.42, y + 2.54, 0.34, 'metal')                          # sun shade
+        for t0 in (0, L - 0.45): wbox(mb, L3, a, e, n, t0, t0 + 0.45, base, top, 0.24, 'conc', cc, bot=False)
+    elif style == 'tile':
+        for t in grid(run0, L, BAYW): wbox(mb, L3, a, e, n, t - 0.22, t + 0.22, base, top, 0.14, 'conc', cc, bot=False)   # pilasters
+        tb = -(run0 % BAYW)
+        while tb < L:
+            if tb + 0.56 >= 0 and tb + 2.44 <= L:
+                for y in cells:
+                    wbox(mb, L3, a, e, n, tb + 0.56, tb + 2.44, y + 0.6, y + 0.74, 0.2, 'conc', cc)    # sill
+                    wbox(mb, L3, a, e, n, tb + 0.6, tb + 2.4, y + 2.68, y + 2.8, 0.1, 'conc', cc)      # lintel
+                    if back and R.random() < 0.16: wbox(mb, L3, a, e, n, tb + 0.9, tb + 1.75, y + 0.05, y + 0.58, 0.42, 'metal')   # AC unit
+            tb += BAYW
+    elif style == 'dark':
+        for y in lines: wbox(mb, L3, a, e, n, 0, L, y - 0.08, y + 0.1, 0.55, 'metal')                 # egg-crate rows
+        for t in grid(run0, L, BAYW / 2, 1.43): wbox(mb, L3, a, e, n, t - 0.06, t + 0.06, base, top, 0.55, 'metal', bot=False)
+    if back:
+        if L > 5 and R.random() < 0.7:                                                              # drain pipe + brackets
+            t = R.uniform(0.6, L - 0.6); px, pz = a[0] + e[0] * t + n[0] * 0.16, a[1] + e[1] * t + n[1] * 0.16
+            mb.cyl(L3(px, pz, 0), 0.07, top + 0.4, 'metal', 6, cap=False)
+            for y in lines[::2]: wbox(mb, L3, a, e, n, t - 0.1, t + 0.1, y, y + 0.08, 0.2, 'metal')
+        if style != 'tile':
+            for y in cells:
+                for tb in grid(run0, L, BAYW, 1.5, 0.9):
+                    if R.random() < 0.07: wbox(mb, L3, a, e, n, tb - 0.42, tb + 0.42, y + 0.1, y + 0.62, 0.42, 'metal')
+
+
+def shop_relief(mb, L3, a, e, n, L, run0, G, col, R):
+    wbox(mb, L3, a, e, n, 0, L, 0, 0.32, 0.06, 'conc', col, bot=False)                                # plinth
+    wbox(mb, L3, a, e, n, 0, L, G - 0.12, G + 0.28, 0.42, 'conc', col)                                # fascia cornice
+    for t in grid(run0, L, BAYW, 0, 0.2): wbox(mb, L3, a, e, n, t - 0.14, t + 0.14, 0.32, G - 0.12, 0.2, 'metal', bot=False)   # shop pillars
+    for t0 in (0, L - 0.5): wbox(mb, L3, a, e, n, t0, t0 + 0.5, 0, G - 0.12, 0.3, 'conc', col, bot=False)
+    if L > 3 and R.random() < 0.45:                                                                 # awning
+        aw = min(L - 1.2, R.uniform(2.5, 6)); t0 = R.uniform(0.6, L - 0.6 - aw); t1 = t0 + aw
+        ac = R.choice([(0.75, 0.16, 0.12, 1), (0.14, 0.36, 0.2, 1), (0.85, 0.72, 0.4, 1), (0.2, 0.26, 0.5, 1), (0.82, 0.82, 0.8, 1)])
+        yw, yf, d = 3.3, 2.85, 1.3
+        P = lambda t, y, dd: L3(a[0] + e[0] * t + n[0] * dd, a[1] + e[1] * t + n[1] * dd, y)
+        mb.quad(P(t0, yw, 0), P(t0, yf, d), P(t1, yf, d), P(t1, yw, 0), 'awn', col=ac)
+        mb.quad(P(t1, yw, 0), P(t1, yf, d), P(t0, yf, d), P(t0, yw, 0), 'awn', col=(ac[0] * 0.6, ac[1] * 0.6, ac[2] * 0.6, 1))
+        wbox(mb, L3, a, e, n, t0, t1, yf - 0.28, yf, d + 0.02, 'awn', ac, d0=d - 0.02)              # valance
+        mb.face([P(t0, yw, 0.0), P(t0, yf - 0.28, d), P(t0, yf, d)][::-1], 'awn', col=ac)
+        mb.face([P(t1, yw, 0.0), P(t1, yf - 0.28, d), P(t1, yf, d)], 'awn', col=ac)
+
+
+def roof_rail(mb, L3, a, e, n, L, h):
+    for t in grid(0, L, 1.6, 0, 0.1): wbox(mb, L3, a, e, n, t - 0.03, t + 0.03, h + 0.12, h + 1.05, -0.32, 'metal', d0=-0.38, bot=False)
+    wbox(mb, L3, a, e, n, 0.05, L - 0.05, h + 1.0, h + 1.07, -0.3, 'metal', d0=-0.4)
+    wbox(mb, L3, a, e, n, 0.05, L - 0.05, h + 0.55, h + 0.59, -0.33, 'metal', d0=-0.37, bot=False, ends=False)
+
+
+def roof_stuff(mb, L3, P, cx, cz, h, ang, R):
+    """water tanks on legs, condenser rows, stair penthouse, antenna mast"""
+    n = len(P); ca, sa = math.cos(ang), math.sin(ang)
+    def ok(q, r):
+        return all(in_poly((q[0] + dx, q[1] + dz), P) for dx, dz in ((r, r), (-r, r), (r, -r), (-r, -r), (0, 0)))
+    def spot(r):
+        for _ in range(12):
+            p = P[R.randrange(n)]; k = R.uniform(0.1, 0.7); q = (cx + (p[0] - cx) * k, cz + (p[1] - cz) * k)
+            if ok(q, r): return q
+        return None
+    kinds = ['cond', 'cond', 'tank', 'pent', 'duct', 'mast', 'cond']
+    for _ in range(R.randint(2, 6)):
+        kd = R.choice(kinds)
+        if kd == 'tank':
+            q = spot(1.8)
+            if not q: continue
+            r = R.uniform(0.9, 1.4); c0 = L3(q[0], q[1], h)
+            for dx, dy in ((1, 1), (-1, 1), (1, -1), (-1, -1)): mb.box(c0 + V((dx * r * 0.7, dy * r * 0.7, 0.6)), 0.14, 0.14, 1.2, 'metal')
+            mb.box(c0 + V((0, 0, 1.25)), r * 2.1, r * 2.1, 0.1, 'metal'); mb.cyl(c0 + V((0, 0, 1.3)), r, 2.0, 'conc', 12)
+            beam(mb, c0 + V((r, 0, 0.1)), c0 + V((r, 0, 3.3)), 0.05, 'metal')
+        elif kd == 'cond':
+            q = spot(2.2)
+            if not q: continue
+            c0 = L3(q[0], q[1], h); k = R.randint(2, 4)
+            for j in range(k):
+                o = c0 + V((ca * (j - (k - 1) / 2) * 1.15, sa * (j - (k - 1) / 2) * 1.15, 0))
+                mb.box(o + V((0, 0, 0.5)), 1.0, 0.8, 0.9, 'metal', rotz=ang); mb.cyl(o + V((0, 0, 0.95)), 0.3, 0.03, 'dark', 10)
+            mb.box(c0 + V((0, 0, 0.05)), k * 1.15 + 0.3, 1.0, 0.1, 'conc', rotz=ang)
+        elif kd == 'pent':
+            q = spot(1.8)
+            if not q: continue
+            c0 = L3(q[0], q[1], h); mb.box(c0 + V((0, 0, 1.4)), 3.0, 2.4, 2.8, 'conc', rotz=ang)
+            mb.box(c0 + V((0, 0, 2.9)), 3.4, 2.8, 0.2, 'conc', rotz=ang)
+            mb.box(c0 + V((-sa * 1.21, ca * 1.21, 1.05)), 0.9, 0.04, 2.0, 'metal', rotz=ang)
+            mb.box(c0 + V((-sa * 1.3, ca * 1.3, 2.35)), 0.25, 0.1, 0.12, 'glow', rotz=ang)
+        elif kd == 'duct':
+            q = spot(2.6)
+            if not q: continue
+            c0 = L3(q[0], q[1], h); mb.box(c0 + V((0, 0, 0.55)), 5.0, 0.6, 0.6, 'metal', rotz=ang)
+            for j in (-2, 0, 2): mb.box(c0 + V((ca * j, sa * j, 0.12)), 0.2, 0.8, 0.24, 'metal', rotz=ang)
+            mb.box(c0 + V((ca * 2.6, sa * 2.6, 1.0)), 0.7, 0.7, 1.5, 'metal', rotz=ang)
+        else:
+            q = spot(0.5)
+            if not q: continue
+            c0 = L3(q[0], q[1], h); hm = R.uniform(5, 10)
+            mb.box(c0 + V((0, 0, 0.15)), 0.8, 0.8, 0.3, 'conc'); mb.cyl(c0, 0.07, hm, 'metal', 6)
+            for y in (hm * 0.55, hm * 0.8): beam(mb, c0 + V((-0.8 * ca, -0.8 * sa, y)), c0 + V((0.8 * ca, 0.8 * sa, y)), 0.05, 'metal')
+            mb.box(c0 + V((0, 0, hm + 0.1)), 0.18, 0.18, 0.2, 'glowR')
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)): beam(mb, c0 + V((0, 0, hm * 0.6)), c0 + V((dx * 2.2, dy * 2.2, 0.05)), 0.02, 'metal')
+
+
+def screen_frame(mb, L3, a, e, n, t0, t1, y0, y1, d, R, lights=True):
+    fr = 0.35
+    wbox(mb, L3, a, e, n, t0 - fr, t1 + fr, y1, y1 + fr, d + 0.4, 'metal')
+    wbox(mb, L3, a, e, n, t0 - fr, t1 + fr, y0 - fr, y0, d + 0.4, 'metal')
+    wbox(mb, L3, a, e, n, t0 - fr, t0, y0, y1, d + 0.4, 'metal'); wbox(mb, L3, a, e, n, t1, t1 + fr, y0, y1, d + 0.4, 'metal')
+    if lights:
+        for t in grid(0, t1 - t0, 2.0, 0, 0.4):
+            wbox(mb, L3, a, e, n, t0 + t - 0.04, t0 + t + 0.04, y1 + 0.1, y1 + 0.18, d + 1.1, 'metal')
+            wbox(mb, L3, a, e, n, t0 + t - 0.16, t0 + t + 0.16, y1 + 0.0, y1 + 0.2, d + 1.35, 'glow', d0=d + 1.05)
+
+
+def billboard_truss(mb, L3, pa, pb, e, n, sw, h, y0, sh):
+    """steel frame behind a rooftop billboard: posts, rails, X-braces, catwalk, lamp arms in front"""
+    ex, ez = e; nx, nz = n
+    P = lambda t, y, d: L3(pa[0] + ex * t + nx * d, pa[1] + ez * t + nz * d, y)
+    k = max(2, int(sw / 2.5)); ts = [sw * i / k for i in range(k + 1)]
+    for t in ts:
+        beam(mb, P(t, h, -0.25), P(t, y0 + sh, -0.25), 0.16, 'metal')
+        beam(mb, P(t, h, -1.6), P(t, y0 + sh * 0.6, -0.25), 0.1, 'metal')                         # back strut
+    for y in (y0, y0 + sh * 0.5, y0 + sh): beam(mb, P(0, y, -0.25), P(sw, y, -0.25), 0.12, 'metal')
+    for i in range(k):
+        beam(mb, P(ts[i], y0, -0.3), P(ts[i + 1], y0 + sh * 0.5, -0.3), 0.07, 'metal'); beam(mb, P(ts[i + 1], y0, -0.3), P(ts[i], y0 + sh * 0.5, -0.3), 0.07, 'metal')
+    wbox(mb, L3, pa, e, n, 0, sw, y0 - 0.12, y0 - 0.02, 1.0, 'metal', d0=-0.3)                          # catwalk
+    wbox(mb, L3, pa, e, n, 0, sw, y0 + 0.9, y0 + 0.95, 1.0, 'metal', d0=0.95, ends=False)
+    for t in ts[1:-1:1] if k > 2 else ts:
+        beam(mb, P(t, y0 - 0.1, 0.1), P(t, y0 - 0.1, 1.4), 0.06, 'metal'); wbox(mb, L3, pa, e, n, t - 0.18, t + 0.18, y0 - 0.25, y0 + 0.05, 1.6, 'glow', d0=1.3)
+
+
 # ---------------- buildings ----------------
 nB = 0
 for b in D['B']:
@@ -168,7 +354,9 @@ for b in D['B']:
     tint = R.uniform(0.4, 0.6); hue = R.choice([(1, 1, 1), (1.04, 0.98, 0.92), (0.94, 0.98, 1.05), (1.05, 1.0, 0.95)])
     col = (min(1, tint * hue[0]), min(1, tint * hue[1]), min(1, tint * hue[2]), 1)
     G = 4.4 if not small else h; par = 0.8 if h > 8 else 0.3
-    mb = MB(); run = R.uniform(0, 12)
+    mb = MB(); run = R.uniform(0, 12); railB = h > 10 and not station and R.random() < 0.55
+    lo = max(range(n), key=lambda i: math.hypot(P[(i + 1) % n][0] - P[i][0], P[(i + 1) % n][1] - P[i][1]))
+    bang = math.atan2(-(P[(lo + 1) % n][1] - P[lo][1]), P[(lo + 1) % n][0] - P[lo][0])   # blender angle of the longest wall
     L3 = lambda x, z, y: B3(x, z, y, cx, cz)
     if b['k'] == 'roof':                                      # canopy: slab on posts
         mb.face([L3(p[0], p[1], h) for p in P], 'roof'); mb.face([L3(p[0], p[1], h - 0.3) for p in P[::-1]], 'conc')
@@ -190,6 +378,16 @@ for b in D['B']:
             top = h - par
             if top > G: mb.quad(L3(a[0], a[1], G), L3(c[0], c[1], G), L3(c[0], c[1], top), L3(a[0], a[1], top), 'fac_' + style, ((u0, 0), (u1, 0), (u1, (top - G) / 14), (u0, (top - G) / 14)), col)
             mb.quad(L3(a[0], a[1], top), L3(c[0], c[1], top), L3(c[0], c[1], h), L3(a[0], a[1], h), 'conc', col=col)
+            ex, ez = (c[0] - a[0]) / L, (c[1] - a[1]) / L; E, N = (ex, ez), (-ez, ex)
+            facade_relief(mb, L3, a, E, N, L, u0 * 12, style, G, top, col, gm == 'shop', not (street or station), R)
+            if gm == 'shop': shop_relief(mb, L3, a, E, N, L, u0 * 12, G, col, R)
+            else: wbox(mb, L3, a, E, N, 0, L, 0, 0.4, 0.08, 'conc', col, bot=False)
+            wbox(mb, L3, a, E, N, 0, L, h - 0.02, h + 0.14, 0.12, 'conc', col, d0=-0.45)                    # coping
+            if railB: roof_rail(mb, L3, a, E, N, L, h)
+            if station and street and L > 4:                                                            # station canopy on posts
+                wbox(mb, L3, a, E, N, 0.2, L - 0.2, 3.7, 3.95, 3.2, 'roof', col)
+                wbox(mb, L3, a, E, N, 0.2, L - 0.2, 3.5, 3.7, 3.25, 'glow', d0=3.05, ends=False)
+                for t in grid(0, L, 6, 0, 0.5): mb.box(L3(a[0] + ex * t - ez * 2.9, a[1] + ez * t + ex * 2.9, 1.75), 0.2, 0.2, 3.5, 'metal')
             # signs on street sides
             if street and L > 3.5 and h > 9:
                 ex, ez = (c[0] - a[0]) / L, (c[1] - a[1]) / L; nx, nz = -ez, ex          # outward normal (map)
@@ -213,10 +411,7 @@ for b in D['B']:
                     y0 = G + 0.25; r = SIGN_H[R.randrange(8)]
                     mb.quad(L3(pa[0], pa[1], y0), L3(pb[0], pb[1], y0), L3(pb[0], pb[1], y0 + 1.1), L3(pa[0], pa[1], y0 + 1.1), 'sign', uvq(r))
         mb.face([L3(p[0], p[1], h) for p in P], 'roof', col=col)
-        if h > 12 and not station:                              # rooftop clutter
-            for k in range(R.randint(1, 4)):
-                p = P[R.randrange(n)]; q = (cx + (p[0] - cx) * R.uniform(0.2, 0.6), cz + (p[1] - cz) * R.uniform(0.2, 0.6))
-                if in_poly(q, P): mb.box(L3(q[0], q[1], h + 0.8), R.uniform(1.5, 3.5), R.uniform(1.2, 2.5), 1.6, 'metal')
+        if h > 8 and not station and hero != '109': roof_stuff(mb, L3, P, cx, cz, h, bang, R)   # rooftop clutter
         # hero screens / billboards facing the crossing
         dc = dist_cross((cx, cz))
         if (hero or (dc < 75 and h > 14 and R.random() < 0.6)) and hero != '109':
@@ -234,7 +429,11 @@ for b in D['B']:
                     if sh > 3:
                         t = L / 2; pa = (a[0] + ex * (t - sw / 2) + nx * 0.25, a[1] + ez * (t - sw / 2) + nz * 0.25); pb = (a[0] + ex * (t + sw / 2) + nx * 0.25, a[1] + ez * (t + sw / 2) + nz * 0.25)
                         mb.quad(L3(pa[0], pa[1], y0), L3(pb[0], pb[1], y0), L3(pb[0], pb[1], y0 + sh), L3(pa[0], pa[1], y0 + sh), 'screen', uvq(SCREEN[R.randrange(4)]))
-                        fr = 0.4; mb.quad(L3(pa[0], pa[1], y0 - fr), L3(pb[0], pb[1], y0 - fr), L3(pb[0], pb[1], y0), L3(pa[0], pa[1], y0), 'metal')
+                        screen_frame(mb, L3, a, (ex, ez), (nx, nz), t - sw / 2, t + sw / 2, y0, y0 + sh, 0.0, R)
+                        if hero == 'qfront':                                                                # deep vertical fins either side
+                            for k in range(1, 5):
+                                for tt in (t - sw / 2 - 0.35 - k * 0.9, t + sw / 2 + 0.35 + k * 0.9):
+                                    if 0.2 < tt < L - 0.2: wbox(mb, L3, a, (ex, ez), (nx, nz), tt - 0.08, tt + 0.08, G, h - 0.8, 0.9, 'alum', bot=False)
                 if hero in ('magnet', 'ekimae') or (not hero and R.random() < 0.6):   # rooftop billboard(s)
                     nbb = 3 if hero == 'ekimae' else 1
                     for s in range(nbb):
@@ -243,11 +442,18 @@ for b in D['B']:
                         y0 = h + 1.2 + (s % 2) * 0.5
                         mb.quad(L3(pa[0], pa[1], y0), L3(pb[0], pb[1], y0), L3(pb[0], pb[1], y0 + sh), L3(pa[0], pa[1], y0 + sh), 'screen', uvq(SCREEN[R.randrange(4)]))
                         mb.quad(L3(pb[0], pb[1], y0), L3(pa[0], pa[1], y0), L3(pa[0], pa[1], y0 + sh), L3(pb[0], pb[1], y0 + sh), 'metal')
-                        for pp in (pa, pb): mb.box(L3(pp[0] - nx * 0.4, pp[1] - nz * 0.4, h + 0.6), 0.3, 0.3, 1.2, 'metal')
+                        billboard_truss(mb, L3, pa, pb, (ex, ez), (nx, nz), sw, h, y0, sh)
         if hero == '109':                                          # cylinder landmark: glowing ring + tall sign pillar on top
             r0 = max(math.hypot(p[0] - cx, p[1] - cz) for p in P) * 0.55
             mb.cyl(V((0, 0, h)), r0, 1.2, 'glowW', 24, cap=False); mb.cyl(V((0, 0, h + 1.2)), r0 * 0.5, 9, 'conc', 16)
             mb.cyl(V((0, 0, h + 7)), r0 * 0.52, 2.4, 'screen', 16, cap=False)
+            for y in (h + 1.2, h + 3.6, h + 6.8, h + 9.4): mb.cyl(V((0, 0, y)), r0 * 0.56, 0.22, 'metal', 16)
+            mb.cyl(V((0, 0, h + 10.2)), r0 * 0.4, 0.5, 'metal', 16)
+            for k in range(16):
+                a_ = k * math.tau / 16; rr = r0 * 0.5
+                beam(mb, V((math.cos(a_) * rr * 1.08, math.sin(a_) * rr * 1.08, h + 1.2)), V((math.cos(a_) * rr * 1.08, math.sin(a_) * rr * 1.08, h + 6.8)), 0.12, 'alum')
+            for k in range(24):                                                                     # crown fins over the lit ring
+                a_ = k * math.tau / 24; beam(mb, V((math.cos(a_) * r0 * 1.02, math.sin(a_) * r0 * 1.04, h)), V((math.cos(a_) * r0 * 1.02, math.sin(a_) * r0 * 1.02, h + 1.4)), 0.18, 'alum')
     ob = mb.obj('sbb_%d' % b['id'], coll); nB += 1
     place['buildings'].append({'node': ob.name, 'id': b['id'], 'name': b['name'], 'x': round(cx, 2), 'z': round(cz, 2), 'h': h, 'p': [[round(p[0], 2), round(p[1], 2)] for p in P]})
 
@@ -370,32 +576,93 @@ for r in ROADS:                                                  # dashed centre
             t += 9
 omk = mk.obj('sb_marks', coll)
 
-# ---------------- elevated rail (viaduct deck + piers + a parked train) ----------------
+# ---------------- elevated rail (viaduct deck, girders, track, catenary, piers + a parked train) ----------------
 rl = MB(); trainDone = False
+
+
+def RP(px, pz, ex, ez, k, side, y):   # point along a rail segment: k along, side across (map +normal), y up
+    return S3(px + ex * k - ez * side, pz + ez * k + ex * side, y)
+
+
 for r in D['R']:
     if r['k'] not in ('rail_rail', 'rail_subway'): continue
-    top = 7.0 if r['k'] == 'rail_rail' else 11.0
+    top = 7.0 if r['k'] == 'rail_rail' else 11.0; acc = 8.0
     for i in range(len(r['p']) - 1):
         a, b = r['p'][i], r['p'][i + 1]; L = math.hypot(b[0] - a[0], b[1] - a[1])
         if L < 0.2: continue
-        ex, ez = (b[0] - a[0]) / L, (b[1] - a[1]) / L; ang = math.atan2(-ez, ex); m = S3((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, top - 0.5)
-        rl.box(m, L + 0.3, 5.0, 1.0, 'conc', rotz=ang)
+        ex, ez = (b[0] - a[0]) / L, (b[1] - a[1]) / L; ang = math.atan2(-ez, ex); mx, mz = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2
+        M3 = lambda side, y: RP(mx, mz, ex, ez, 0, side, y)
+        A3 = lambda k, side, y: RP(a[0], a[1], ex, ez, k, side, y)
+        rl.box(M3(0, top - 0.5), L + 0.3, 5.0, 1.0, 'conc', rotz=ang)                                     # deck
         for sgn in (1, -1):
-            nx, nz = -ez * 2.4 * sgn, ex * 2.4 * sgn; rl.box(S3((a[0] + b[0]) / 2 + nx, (a[1] + b[1]) / 2 + nz, top + 0.5), L + 0.3, 0.2, 1.0, 'conc', rotz=ang)
-        t = 0
+            rl.box(M3(2.4 * sgn, top + 0.5), L + 0.3, 0.2, 1.0, 'conc', rotz=ang)                          # side wall
+            rl.box(M3(2.42 * sgn, top + 1.05), L + 0.3, 0.36, 0.1, 'conc', rotz=ang)                        # coping
+            rl.box(M3(2.56 * sgn, top - 0.2), L + 0.3, 0.12, 0.25, 'conc', rotz=ang)                        # drip edge
+            g = 1.5 * sgn                                                                                   # steel I-girders under the deck
+            rl.box(M3(g, top - 1.05), L + 0.3, 0.5, 0.1, 'metal', rotz=ang); rl.box(M3(g, top - 1.45), L + 0.3, 0.14, 0.7, 'metal', rotz=ang)
+            rl.box(M3(g, top - 1.85), L + 0.3, 0.5, 0.1, 'metal', rotz=ang)
+            rl.box(M3(0.53 * sgn, top + 0.375), L + 0.3, 0.07, 0.15, 'metal', rotz=ang)                     # rails
+        rl.box(M3(0, top + 0.1), L + 0.3, 2.6, 0.2, 'roof', rotz=ang)                                       # ballast
+        t = 0.3
         while t < L:
+            rl.box(A3(t, 0, top + 0.25), 0.22, 2.0, 0.1, 'conc', rotz=ang); t += 0.62                      # sleepers
+        t = 2.0
+        while t < L - 1:                                                                                    # cross-bracing between girders
+            beam(rl, A3(t, -1.5, top - 1.8), A3(t + 2, 1.5, top - 1.1), 0.08, 'metal')
+            beam(rl, A3(t, 1.5, top - 1.8), A3(t + 2, -1.5, top - 1.1), 0.08, 'metal'); t += 4
+        t = 0
+        while t < L:                                                                                        # piers + caps
             px, pz = a[0] + ex * t, a[1] + ez * t
-            if not road_near((px, pz), -1.5) and not in_any_bld((px, pz)): rl.box(S3(px, pz, (top - 1) / 2), 1.2, 3.6, top - 1, 'conc', rotz=ang)
+            if not road_near((px, pz), -1.5) and not in_any_bld((px, pz)):
+                rl.box(S3(px, pz, (top - 2.6) / 2), 1.2, 3.6, top - 2.6, 'conc', rotz=ang); rl.box(S3(px, pz, top - 2.25), 1.8, 5.4, 0.7, 'conc', rotz=ang)
             t += 14
+        cw = top + 5.0                                                                                      # catenary: contact + messenger wire
+        beam(rl, A3(0, 0.15, cw), A3(L, 0.15, cw), 0.05, 'metal')
+        beam(rl, A3(0, 0.15, cw + 0.9), A3(L, 0.15, cw + 0.9), 0.05, 'metal')
+        t = 3.0
+        while t < L: beam(rl, A3(t, 0.15, cw), A3(t, 0.15, cw + 0.9), 0.025, 'metal'); t += 6
+        t = acc
+        while t < L:                                                                                        # masts every 30 m
+            rl.box(A3(t, 2.4, top + 1.1), 0.5, 0.5, 0.2, 'conc', rotz=ang)
+            rl.box(A3(t, 2.4, top + 4.2), 0.26, 0.26, 6.2, 'metal', rotz=ang)
+            beam(rl, A3(t, 2.4, cw + 1.2), A3(t, -0.4, cw + 1.2), 0.12, 'metal')
+            beam(rl, A3(t, 2.4, cw + 0.3), A3(t, 0.15, cw + 0.05), 0.07, 'metal')
+            beam(rl, A3(t, 2.4, cw - 0.3), A3(t, 1.2, cw + 1.15), 0.06, 'metal')
+            rl.box(A3(t, 0.15, cw + 1.05), 0.14, 0.14, 0.3, 'dark', rotz=ang)                              # insulator
+            t += 30
+        acc = t - L
         if r['k'] == 'rail_rail' and not trainDone and L > 60 and dist_cross(a) < 160:
-            trainDone = True; nCar = min(4, int(L // 20))
+            trainDone = True; nCar = min(4, int(L // 20)); yb = top + 0.9; yr = yb + 3.0                   # body bottom / roof
             for c in range(nCar):
-                t = 6 + c * 20.5; px, pz = a[0] + ex * (t + 10), a[1] + ez * (t + 10)
-                cc = S3(px, pz, top + 2.0); rl.box(cc, 20, 2.9, 3.0, 'train', rotz=ang)
-                rl.box(cc + V((0, 0, 0.3)), 20.05, 2.95, 0.35, 'trainG', rotz=ang)
-                for w in range(6):
-                    k = -8 + w * 3.2; wx, wz = ex * k, ez * k
-                    for sgn in (1, -1): rl.box(S3(px + wx - ez * 1.46 * sgn, pz + wz + ex * 1.46 * sgn, top + 2.6), 1.6, 0.04, 0.9, 'glowW', rotz=ang)
+                t = 6 + c * 20.5 + 10; px, pz = a[0] + ex * t, a[1] + ez * t
+                T3 = lambda k, side, y: RP(px, pz, ex, ez, k, side, y)
+                rl.box(T3(0, 0, yb + 1.5), 20, 2.9, 3.0, 'train', rotz=ang)
+                rl.box(T3(0, 0, yb + 1.8), 20.05, 2.95, 0.35, 'trainG', rotz=ang)
+                rl.box(T3(0, 0, yr + 0.05), 19.6, 2.4, 0.12, 'train', rotz=ang)                                  # roof crown
+                for sgn in (1, -1):
+                    rl.box(T3(0, 1.455 * sgn, yb + 2.15), 19.4, 0.02, 1.05, 'dark', rotz=ang)                   # window band
+                    for w in range(6): rl.box(T3(-8 + w * 3.2, 1.46 * sgn, yb + 2.1), 1.6, 0.04, 0.9, 'glowW', rotz=ang)
+                    for k in (-6.4, 0, 6.4):
+                        rl.box(T3(k, 1.47 * sgn, yb + 1.35), 1.3, 0.05, 2.2, 'metal', rotz=ang)                 # doors
+                        rl.box(T3(k, 1.5 * sgn, yb + 2.05), 0.9, 0.04, 0.75, 'glowW', rotz=ang)
+                    rl.box(T3(0, 1.2 * sgn, yb - 0.25), 12, 0.25, 0.5, 'dark', rotz=ang)                       # underfloor boxes
+                for k in (-5, 5): rl.box(T3(k, 0, yr + 0.3), 3.0, 1.8, 0.45, 'metal', rotz=ang)               # roof AC
+                for k in (-7, 7):                                                                                # bogies + wheels
+                    rl.box(T3(k, 0, top + 0.7), 2.6, 2.0, 0.35, 'dark', rotz=ang)
+                    for w in (-0.9, 0.9):
+                        for sgn in (1, -1): rl.box(T3(k + w, 0.6 * sgn, top + 0.85), 0.86, 0.12, 0.86, 'metal', rotz=ang)
+                for k in (-10.2, 10.2):
+                    if (k < 0 and c > 0) or (k > 0 and c < nCar - 1): rl.box(T3(k, 0, yb + 1.4), 0.6, 2.0, 2.5, 'dark', rotz=ang)   # gangway
+                if c == 0 or c == nCar - 1:                                                                     # cab end
+                    k = -10.0 if c == 0 else 10.0; s_ = -1 if c == 0 else 1
+                    rl.box(T3(k + s_ * 0.02, 0, yb + 2.1), 0.05, 2.5, 1.1, 'glassL', rotz=ang)
+                    for sd in (-0.95, 0.95): rl.box(T3(k + s_ * 0.03, sd, yb + 0.7), 0.05, 0.35, 0.2, 'glow', rotz=ang)
+                if c in (1, 2):                                                                                 # pantograph up to the wire
+                    rl.box(T3(-3, 0, yr + 0.15), 1.4, 1.4, 0.16, 'dark', rotz=ang)
+                    for sd in (-0.35, 0.35):
+                        knee = T3(-2.2, sd, yr + 0.75)
+                        beam(rl, T3(-3.6, sd, yr + 0.25), knee, 0.06, 'metal'); beam(rl, knee, T3(-3.0, sd, cw - 0.05), 0.05, 'metal')
+                    beam(rl, T3(-3.0, -0.8, cw - 0.06), T3(-3.0, 0.8, cw - 0.06), 0.07, 'metal')
 orl = rl.obj('sb_rail', coll)
 
 for o in (ost, omk, orl): place[o.name] = {'x': OXc, 'z': OZc}

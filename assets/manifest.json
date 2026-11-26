@@ -518,7 +518,7 @@
   "shibuya-demo": {
    "file": "maps/shibuya-demo.glb",
    "data": "maps/shibuya-demo.json",
-   "v": 4
+   "v": 5
   }
  },
  "ptex": {}

@@ -1,5 +1,5 @@
 {
- "next": 210,
+ "next": 211,
  "items": [
   {
    "id": 194,
@@ -4260,6 +4260,27 @@
     "review/img/r209-shibuya-ssr.jpg",
     "review/img/r209-shibuya-planar.jpg",
     "review/img/r209-shibuya-player.jpg"
+   ],
+   "links": [
+    "mapbuild.html",
+    "index.html?playmap=shibuya-demo"
+   ],
+   "feedback": "",
+   "reply": ""
+  },
+  {
+   "id": 210,
+   "title": "ชิบุย่า: เพิ่มรายละเอียดโมเดล (ผนังตึก, ตึกเด่น, รางรถไฟ)",
+   "text": "ผนังตึกมีมิติจริงตามลายหน้าต่าง: กระจก=เสา mullion+ขอบพื้น, ribbon=ชายคากันแดด+ขอบหน้าต่างลึก, กระเบื้อง=เสาเอ็น+ขอบหน้าต่าง+แอร์, ตึกมืด=ช่องตาราง egg-crate. หน้าร้าน: เสา, คิ้ว, กันสาดสี. ผนังหลัง: ท่อน้ำ, แอร์. หลังคา: ราวกันตก, แท็งก์น้ำมีขา, แอร์เรียง, ห้องบันได, เสาเสาอากาศไฟแดง. จอใหญ่มีกรอบ+ไฟส่อง, บิลบอร์ดมีโครงเหล็ก+ทางเดิน, ตึกทรงกลมมีครีบ+วงแหวน, สถานีมีหลังคายื่น. รางรถไฟ: คานเหล็ก I, ราง+หมอน, ค้ำกากบาท, หัวเสา, เสาสายไฟฟ้า+สาย, รถไฟมีประตู แอร์หลังคา แพนโทกราฟ โบกี้. รวมแมพ ~532k สามเหลี่ยม, ไฟล์ 38.5 MB. วิธีดู: index.html?playmap=shibuya-demo (รูป 1-2 จาก Blender เปิดไฟสว่างให้เห็นทรง, รูป 3 ในเกม)",
+   "kind": "Map",
+   "who": "Map + Graphics",
+   "status": "wait",
+   "created": "2026-11-26",
+   "updated": "2026-11-26",
+   "imgs": [
+    "review/img/r210-shibuya-facade.jpg",
+    "review/img/r210-shibuya-rail.jpg",
+    "review/img/r210-shibuya-game.jpg"
    ],
    "links": [
     "mapbuild.html",
