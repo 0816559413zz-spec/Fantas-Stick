@@ -8,6 +8,8 @@
 
 ## Latest notes (newest first)
 
+**Map Builder: object yaw rotation restored in the editor view (2026-11-26):** the Water tool commit (c7c05990, 2026-11-25) put `g.rotation.y = …` inside a comment in `objMesh` (`mapbuild/app.js`), so every object in the Map Builder scene ignored `rot` (only tilted rx/rz kept rotation). Map data and the game were never affected; maps saved meanwhile are fine. Seen as the fcs-file aqueduct walkway lying across its piers.
+
 **Storm rework previews (2026-11-26):** Approved in Studio: Thunder Line two-hand cast C (visual arcs on hit), Storm Dome radius 120 with a larger center orb and no persistent floor outline, and ally Mark with 15 fixed branches whose lit segment narrows from 70% to 20%. Thunderbomb radius 200 and God Lightning's Dash echo are still previews. Gameplay wiring and balance values are pending. Specs, approved GIFs, alternate studies and floor/wall/upward views: `designs/storm.md` → Rework.
 
 **Shibuya model detail pass (2026-11-26):** `assets/src/shibuya_build.py` now adds 3D relief lined up with the painted facade grid (floors 3.5 m from G, bays 3 m of wall run): glass = mullions + slab edges, ribbon = sill lips + sun shades, tile = pilasters + sills/lintels + AC units, dark = egg-crate; shopfront pillars/cornice/awnings, back-wall drain pipes + AC, coping, roof rails, rooftop tanks/condensers/stair houses/masts; screen frames + lamps, billboard trusses, round-tower fins, station canopy; rail girders, track, bracing, pier caps, catenary, detailed train. Helpers `wbox` / `beam` / `grid`. Kit 179k faces (32 MB), map export ~532k tris / 38.5 MB. Review #210.

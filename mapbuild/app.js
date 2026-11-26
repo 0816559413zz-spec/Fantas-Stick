@@ -359,7 +359,8 @@ function objMesh(o) {
   else if (OBJ[o.t]) { g = markerMesh(o); if (o.t === 'house') g.scale.set(o.sx || 1, 1, o.sz || 1); }
   else { g = new THREE.Group(); g.add(new THREE.Mesh(pg('box'), helpMat('#f06a6a', 0.6))); }
   const lift = o.t === 'ring' ? Math.max(1, o.y || 6) : o.t === 'light' ? (o.y == null ? 2.2 : o.y) : o.t === 'ceil' ? (o.y == null ? 21 : o.y) : o.t === 'lz' ? (o.y == null ? 22 : o.y) : (o.y || 0);
-  g.position.set(o.x, o.t === 'water' ? o.y || 0 : MD.gh(M, o.x, o.z) + lift, o.z);   // water: y = absolute level g.rotation.y = MD.AREA.has(o.t) ? 0 : o.rot || 0;   // areas are axis-aligned in the game
+  g.position.set(o.x, o.t === 'water' ? o.y || 0 : MD.gh(M, o.x, o.z) + lift, o.z);   // water: y = absolute level
+  g.rotation.y = MD.AREA.has(o.t) ? 0 : o.rot || 0;   // areas are axis-aligned in the game
   if (tiltOk(o) && (o.rx || o.rz)) g.rotation.set(o.rx || 0, o.rot || 0, o.rz || 0, 'YXZ');   // yaw first, then tilt
   if (o.vis === 0) ghostify(g);
   if (!show.area) g.traverse(m => { if (m.userData.area) m.visible = false; });
