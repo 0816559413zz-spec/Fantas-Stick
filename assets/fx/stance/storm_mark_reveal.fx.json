@@ -1,0 +1,38 @@
+{
+  "v": 1,
+  "desc": "Storm mark - fixed branches revealed in a travelling twenty-percent window",
+  "tags": [
+    "stance",
+    "preview"
+  ],
+  "dur": 2.2,
+  "layers": [
+    {
+      "id": "anchor",
+      "t": "mesh",
+      "shape": "disc",
+      "mat": "black",
+      "op": 0,
+      "at": 0,
+      "life": 2.2
+    },
+    {
+      "id": "stance",
+      "t": "code",
+      "fn": "studio_class_stance",
+      "at": 0,
+      "life": 2.2,
+      "args": {
+        "layer": "anchor",
+        "cls": "storm",
+        "style": "g3",
+        "stormStudy": "mark",
+        "run": [
+          99,
+          99
+        ],
+        "impact": "reveal"
+      }
+    }
+  ]
+}

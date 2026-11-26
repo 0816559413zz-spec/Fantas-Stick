@@ -1,0 +1,37 @@
+{
+  "v": 1,
+  "desc": "Storm rework - fast self-centered discharge with a short-lived shell",
+  "tags": [
+    "stance",
+    "preview"
+  ],
+  "dur": 1.5,
+  "layers": [
+    {
+      "id": "anchor",
+      "t": "mesh",
+      "shape": "disc",
+      "mat": "black",
+      "op": 0,
+      "at": 0,
+      "life": 1.5
+    },
+    {
+      "id": "stance",
+      "t": "code",
+      "fn": "studio_class_stance",
+      "at": 0,
+      "life": 1.5,
+      "args": {
+        "layer": "anchor",
+        "cls": "storm",
+        "style": "g3",
+        "stormStudy": "pulse",
+        "run": [
+          99,
+          99
+        ]
+      }
+    }
+  ]
+}

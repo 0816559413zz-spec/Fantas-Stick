@@ -1,0 +1,38 @@
+{
+  "v": 1,
+  "desc": "Storm mark polish - charge cue, ground flash and branching detonation",
+  "tags": [
+    "stance",
+    "preview"
+  ],
+  "dur": 4.62,
+  "layers": [
+    {
+      "id": "anchor",
+      "t": "mesh",
+      "shape": "disc",
+      "mat": "black",
+      "op": 0,
+      "at": 0,
+      "life": 4.62
+    },
+    {
+      "id": "stance",
+      "t": "code",
+      "fn": "studio_class_stance",
+      "at": 0,
+      "life": 4.62,
+      "args": {
+        "layer": "anchor",
+        "cls": "storm",
+        "style": "g3",
+        "stormStudy": "mark",
+        "run": [
+          99,
+          99
+        ],
+        "impact": "polish"
+      }
+    }
+  ]
+}
