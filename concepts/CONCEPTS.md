@@ -6,7 +6,7 @@
 ## #8 Skyloom ชิงของรอบ 2 — สวนลอยกลางเมฆ
 - สถานะ: 📝 พรอมต์พร้อม • ชนิด: แผนที่ • แท็ก: สีน้ำ, Castle Strike, ชิงของ, ไม้กวาด, เกาะลอย
 
-ช่วงชิงของหลังเฟส 2 ก่อนเฟส 3 (ข้อเสนอ ยังไม่ล็อก): เกาะสวนเล็ก ๆ ลอยรอบตัวหอ ช่วงกลางระหว่างหลังคาโดมกับยอดหอ ล้อมด้วยเมฆ • ต้องบินไม้กวาดข้ามเกาะ หลุดขอบ = ออกนอกเขต • ทีมรับถอยขึ้นมงกุฎหอ ทีมบุกถอยขึ้นหลังคาโดม เกาะอยู่ระหว่างกลาง • ของบนเกาะไกลหอให้ระดับสูงกว่า แต่บินไปกลับนานและเสี่ยงกว่า.
+ช่วงชิงของหลังเฟส 2 ก่อนเฟส 3 (ข้อเสนอ ยังไม่ล็อก): เกาะสวนเล็ก ๆ ลอยรอบตัวหอ ช่วงกลางระหว่างหลังคาโดมกับวงแหวน Halo Ring ล้อมด้วยเมฆ • ต้องบินไม้กวาดข้ามเกาะ หลุดขอบ = ออกนอกเขต • ทีมรับถอยขึ้นวงแหวน ทีมบุกถอยขึ้นหลังคาโดม เกาะอยู่ระหว่างกลาง • ของบนเกาะไกลหอให้ระดับสูงกว่า แต่บินไปกลับนานและเสี่ยงกว่า.
 
 - Ref: `concepts/img/skyloom_style_ref.webp`
 
@@ -18,7 +18,7 @@ Create a single landscape concept-art illustration (16:9), mid-air view, for the
 
 FOCAL POINT: a cluster of small floating garden islands at different heights orbiting the pale spiralling stone-and-brass spire, each island a chunk of rock with grass, small trees, ivy and hanging roots, some with tiny stone shrines or broken arches; small glowing lantern cabins resting on several islands, each holding a glowing crate. Wide gaps of open sky between islands that can only be crossed by broomstick.
 
-SURROUNDINGS: above, the spire continues up to a crown terrace with a floating rune crystal and a thin luminous teal-white thread of light rising into the sky; below, the top of a cracked glass dome and a sea of golden clouds with the canal city barely visible through gaps.
+SURROUNDINGS: above, the underside of a vast floating ring-shaped platform circling the spire (the Halo Ring), with the spire continuing past it and a thin luminous teal-white thread of light rising into the sky; below, the top of a cracked glass dome and a sea of golden clouds with the canal city barely visible through gaps.
 
 LIFE: several witches on broomsticks racing between the islands, cloaks streaming, wind streaks in the mist, birds, an airship drifting in the distance. Strong sense of height.
 
@@ -51,12 +51,16 @@ STYLE (from the attached style image): traditional watercolor and ink concept pa
 Avoid: text, logos, watermark, UI, guns, modern cars, realistic faces, white steel lattice truss towers, radial pier docks, copying any existing game's design.
 ```
 
-## #6 Skyloom เฟส 3 — มงกุฎหอเหนือเมฆ / ผลึกสมอดาว
-- สถานะ: 📝 พรอมต์พร้อม • ชนิด: แผนที่ • แท็ก: สีน้ำ, Castle Strike, เฟส 3, แลนด์มาร์ก
+## #6 Skyloom เฟส 3 — วงแหวนลอยรอบหอ (Halo Ring) / ผลึกสมอดาว
+- สถานะ: 📝 พรอมต์พร้อม • ชนิด: แผนที่ • แท็ก: สีน้ำ, Castle Strike, เฟส 3, แลนด์มาร์ก, วงแหวน
 
-เฟส 3 (ยอดหอ): ลานวงแหวนเหนือเมฆรอบผลึกสมอดาว = แกนสุดท้าย ทีมรับยันบนลานชั้นใน ทีมบุกเข้ามาจากสะพานโค้งและกระเช้าโคม. การขึ้นมาเฟสนี้อาจใช้ไม้กวาดหรือกระเช้าโคมในช่วงถอย-ชิงของ (เป็นไอเดีย ยังไม่ล็อก). แลนด์มาร์ก: ผลึกยักษ์ลอยอยู่ในวงรูน 3 วง ปล่อยสายแสงขึ้นฟ้า. ตำแหน่งแกนและทางเดินเป็นแค่ตัวอย่าง.
+เฟส 3 (ผู้ใช้เลือก 2026-11-27 แทนยอดหอที่เล็กเกินไป): วงแหวนยักษ์ลอยล้อมหอที่ระดับเมฆ บนวงมีอาคาร ระเบียง สวน เสาทองเหลือง ต่อเข้าแกนหอด้วยสะพาน 3–4 เส้นเหมือนซี่ล้อ. แลนด์มาร์ก/แกนสุดท้าย: ผลึกสมอดาวในกรงทองเหลืองกลางแกนหอ ตรงจุดที่สะพานมาบรรจบ หมุนด้วยวงรูนฟ้า 3 วง. สายแสงยังพุ่งต่อจากยอดหอขึ้นฟ้า. ตำแหน่งแกนและทางเดินเป็นแค่ตัวอย่าง.
 
-วิธีเข้าทำ (ข้อเสนอ ยังไม่ล็อก): ทางหลัก = สะพานโค้งลอยฟ้า แคบและยาว ทีมรับยันง่าย • ทางอ้อม = ขึ้นทางลานจอดกระเช้าโคมอีกฝั่ง โผล่หลังแนวทีมรับ • จุดได้เปรียบ = เสาทองเหลือง 4 ต้นรอบผลึก ใช้กำบังหรือยืนบนยอด • อันตรายจากฉาก (ไอเดีย) = ขอบลานไม่มีราว ลมแรงพัดคนตกได้
+ก่อนเริ่มเฟส: แกน 2 แตก → ถอย 20 วิ → ชิงของที่เกาะลอย (#8) → ทีมรับขึ้นวงแหวนตั้งแนวรอบผลึก ทีมบุกถอยขึ้นหลังคาโดม.
+
+จุดเกิด (ข้อเสนอ ยังไม่ล็อก): ทีมบุก = ลานจอดกระเช้าโคมที่ขอบวงฝั่งใต้ • ทีมรับ = ห้องโคมในแกนหอ สูงกว่าวงแหวน 1 ชั้น ทีมบุกขึ้นไม่ได้ ทางออกจุดเดียวเป็นบันไดวน/กระเช้าสั้นลงลานรอบผลึก แล้วแยกไปเฝ้าสะพาน • ไม่เลือกเกิดฝั่งตรงข้ามบนวง (ทับทางลอบหลัง) และไม่เลือกแท่นลอยเหนือวง (ช่วยทุกสะพานได้เร็วเกิน) • ระวังทีมรับได้เปรียบเพราะเกิดใกล้ผลึก ทางถ่วง: ทางลงจากห้องเกิดยาวขึ้น/ประตูเปิดช้า, ทีมบุกยึดหัวสะพานแล้วได้จุดเกิดเพิ่ม, หรือปรับเวลาเกิดใหม่ฝ่ายรับ — รอทดสอบ/ทีมเกมเพลย์.
+
+วิธีเข้าทำ (ข้อเสนอ ยังไม่ล็อก): ① ทางตรง = สะพานใต้จากลานกระเช้าเข้าผลึก เร็วสุดแต่ยาว แคบ โล่ง ใช้ตอนได้เปรียบหรือล่อทีมรับ ② อ้อมวง (ทางหลัก) = เดินตามวงซ้าย/ขวาผ่านอาคารที่มีที่กำบัง แล้วเข้าสะพานซ้าย/ขวา บังคับทีมรับแบ่งคน ③ ลอบหลัง (ทางอ้อม) = อ้อมไปเข้าสะพานเหนือ นานสุดแต่โผล่หลังแนวรับ • ทีมรับ: ยันหัวสะพาน 4 ช่องรอบผลึก เฝ้าครบไม่ได้ต้องอ่านทาง หรือออกไปสกัดบนวง • ขอบวงไม่มีราว ลมแรง สกิลผลักส่งตกได้ (ไอเดีย) • ไม้กวาดช่วงปกติ: แนะนำปิด หรือให้ทีมบุกขี่ได้เฉพาะเส้นที่กำหนด เพราะบินลอดใต้วงไปโผล่สะพานไหนก็ได้จะแรงเกิน.
 
 - Ref: `concepts/img/skyloom_style_ref.webp`
 
@@ -64,13 +68,13 @@ Avoid: text, logos, watermark, UI, guns, modern cars, realistic faces, white ste
 ```
 Use the attached image ONLY as the art-style reference (do not copy its buildings).
 
-Create a single landscape concept-art illustration (16:9), slightly low angle, for phase 3 (final) of an original wizard siege map: the Tether Crown, the summit terrace of the Skyloom Spire high above a sea of clouds.
+Create a single landscape concept-art illustration (16:9), high three-quarter aerial view, for phase 3 (final) of an original wizard siege map: the Halo Ring of the Skyloom Spire, floating at cloud height.
 
-LANDMARK (focal point, centre): the Star Anchor, an enormous pale-cyan rune crystal floating above a circular stone dais, held in place by three huge slowly turning rings of glowing teal runes at different tilts; from its tip a single luminous teal-white thread of woven light rises straight up into the deep blue sky and disappears; small glowing lantern-lift cabins hang on the thread far above.
+LANDMARK (focal point): the Halo Ring, a vast flat ring-shaped stone-and-brass platform floating around a pale spiralling stone spire, seen as a wide ellipse filling most of the image; along the whole ring stand small stone buildings, arcades, terraces with gardens and ivy, broken balustrades, banners and slender brass pylons, so it reads like a circular sky-street big enough for a battle. Four long straight sky-bridges connect the ring to the spire like the spokes of a wheel. At the hub, where the bridges meet the tower, a huge pale-cyan rune crystal (the Star Anchor) glows inside an open brass cage wrapped by three slowly turning rings of teal runes. Above, the spire continues upward and a thin luminous teal-white thread of light rises from its tip straight up out of frame; small lantern-lift cabins climb the thread and one lift landing platform juts from the ring.
 
-SURROUNDINGS: a ring-shaped stone and brass terrace with broken balustrades, banners whipping in strong wind, four slender brass pylons anchoring the rings, an arched sky-bridge leading in from one side, a lantern-lift landing platform on the other. Below and around: an endless sea of golden-lit clouds, with the glass dome and canal city barely visible through gaps far below.
+SURROUNDINGS: below the ring, a sea of soft golden-lit clouds with gaps showing a cracked glass dome and a canal city far below; a few small floating garden islets drifting under the ring.
 
-LIFE: witches on broomsticks circling the crystal, an old airship below in the clouds, strong wind streaks in the mist. Epic sense of height and scale.
+LIFE: witches on broomsticks circling the ring and crossing the bridges, an old airship below in the clouds, wind streaks in the mist, birds. Epic sense of height and scale; the ring must clearly look large and walkable.
 
 STYLE (from the attached style image): traditional watercolor and ink concept painting, soft translucent washes, visible cold-press paper texture, loose wet-on-wet bleeding edges, thin grey-sepia ink linework, palette of pale sky blue, cream, weathered grey-white stone, moss green, soft teal accents for magic light, warm golden sunlight from the upper left; drifting mist and cloud banks that dissolve into white paper at the edges. Semi-fantasy, semi-sci-fi: old stone and brass mixed with glowing rune crystal technology. Hand-painted, NOT 3D render, NOT photoreal, NOT cartoon.
 
@@ -132,12 +136,16 @@ Avoid: text, logos, watermark, UI, guns, modern cars, realistic faces, white ste
 ## #3 Skyloom Spire — แมพ Space Elevator สายเวท (ภาพรวม)
 - สถานะ: 📝 พรอมต์พร้อม • ชนิด: แผนที่ • แท็ก: สีน้ำ, Castle Strike, 3 เฟส, หอสายแสง, ไม้กวาด, เรือเหาะ
 
-คอนเซปแมพใหม่สำหรับบุกปราสาท: หอหินพันทองเหลืองโผล่จากโดมแก้วกลางเมืองคลอง ยอดหอมีผลึกสมอดาวปล่อยสายแสงเวทขึ้นฟ้า (ได้แรงบันดาลใจเรื่องสเกลจาก Space Elevator แต่ออกแบบเอง ไม่ลอกหอหรือเกาะต้นฉบับ). บุกจากล่างขึ้นบน 3 เฟส: ① ท่าคลองโคมลอย (แลนด์มาร์ก: ประตูน้ำกังหันจันทร์) ② สวนโดมแก้ว (ออร์เรอรีลอยฟ้า) ③ มงกุฎหอเหนือเมฆ (ผลึกสมอดาว). Ref 1 = สไตล์สีน้ำจากผู้ใช้ (แนบตอนเจน), Ref 2 = ภาพอธิบาย 3 เฟส ไม่ใช่ layout ที่อนุมัติ (ใช้ดูลำดับเท่านั้น ไม่ต้องแนบ).
+คอนเซปแมพใหม่สำหรับบุกปราสาท: หอหินพันทองเหลืองโผล่จากโดมแก้วกลางเมืองคลอง ยอดหอมีผลึกสมอดาวปล่อยสายแสงเวทขึ้นฟ้า (ได้แรงบันดาลใจเรื่องสเกลจาก Space Elevator แต่ออกแบบเอง ไม่ลอกหอหรือเกาะต้นฉบับ). บุกจากล่างขึ้นบน 3 เฟส: ① ท่าคลองโคมลอย (แลนด์มาร์ก: ประตูน้ำกังหันจันทร์) ② สวนโดมแก้ว (ออร์เรอรีลอยฟ้า) ③ วงแหวนลอยรอบหอ Halo Ring ที่ระดับเมฆ (ผลึกสมอดาวในแกนหอ). Ref 1 = สไตล์สีน้ำจากผู้ใช้ (แนบตอนเจน), Ref 2 = ภาพอธิบาย 3 เฟส ไม่ใช่ layout ที่อนุมัติ (ใช้ดูลำดับเท่านั้น ไม่ต้องแนบ).
 
-ช่วงชิงของ (ข้อเสนอ ยังไม่ล็อก): รอบ 1 = ตลาดน้ำกระเช้าโคม (#7) ระหว่างย่านคลองกับฐานโดม • รอบ 2 = สวนลอยกลางเมฆ (#8) ระหว่างหลังคาโดมกับยอดหอ ต้องบินไม้กวาดข้ามเกาะ • ของถูกส่งลงมาด้วยโคมลอยตามสายแสง ธีมเดียวกันทั้งแมพ. วิธีเข้าทำแต่ละเฟสอยู่ใน #4–#6.
+ช่วงชิงของ (ข้อเสนอ ยังไม่ล็อก): รอบ 1 = ตลาดน้ำกระเช้าโคม (#7) ระหว่างย่านคลองกับฐานโดม • รอบ 2 = สวนลอยกลางเมฆ (#8) ระหว่างหลังคาโดมกับวงแหวน ต้องบินไม้กวาดข้ามเกาะ • ของถูกส่งลงมาด้วยโคมลอยตามสายแสง ธีมเดียวกันทั้งแมพ. วิธีเข้าทำแต่ละเฟสอยู่ใน #4–#6.
+
+2026-11-27 ผู้ใช้เลือก: เฟส 3 ย้ายจากยอดหอ (เล็กเกินไป) มาเป็นวงแหวนลอยรอบหอ (Halo Ring). ผลเจนรอบ 2 ของผู้ใช้: ออร์เรอรีในโดม/วงรูนฟ้า/โดมร้าวถูกแล้ว แต่กังหันประตูน้ำเฟส 1 หายไป ต้องสั่งใส่กลับ.
 
 - Ref: `concepts/img/skyloom_style_ref.webp`
 - Ref: `concepts/img/skyloom_phases_sketch.jpg`
+- ผลลัพธ์: `concepts/img/skyloom_overview_gen1.webp`
+- ผลลัพธ์: `concepts/img/skyloom_overview_gen2.webp`
 
 **พรอมต์:**
 ```
@@ -145,13 +153,13 @@ Use the attached image ONLY as the art-style reference (do not copy its building
 
 Create a single landscape concept-art illustration (16:9), a wide aerial establishing view of an original game map for a wizard siege game: the Skyloom Spire, a magical 'space elevator'.
 
-THE SPIRE (original design): the Skyloom Spire, a slender spiralling tower of pale weathered stone wrapped in brass bands, growing out of a cracked glass dome conservatory; at its top a crown terrace where a huge floating rune crystal (the Star Anchor) is held by three slowly turning rings of glowing runes, and from it a thin luminous teal-white thread of woven magic light (the Tether) rises straight up through the clouds into the sky, so tall its top is lost above the clouds. Small glowing lantern-lift cabins climb the thread. The spire stands on a crescent-shaped island inside a misty lagoon city of canals, low arched stone bridges, overgrown ruins and old towers.
+THE SPIRE (original design): the Skyloom Spire, a slender spiralling tower of pale weathered stone wrapped in brass bands, growing out of a cracked glass dome conservatory; at cloud height the spire is encircled by the Halo Ring, a vast flat ring-shaped platform floating around the tower (diameter several times the dome's width), carrying stone buildings, terraces, gardens and brass pylons along its whole circumference, joined to the tower core by four long straight sky-bridges like the spokes of a wheel; where the bridges meet the tower, a huge rune crystal (the Star Anchor) glows inside an open brass cage wrapped by three turning rings of teal runes. From the spire's tip a thin luminous teal-white thread of woven magic light (the Tether) rises straight up through the clouds into the sky, so tall its top is lost above the clouds. Small glowing lantern-lift cabins climb the thread. The spire stands on a crescent-shaped island inside a misty lagoon city of canals, low arched stone bridges, overgrown ruins and old towers.
 
 COMPOSITION:
 - Foreground left: a mossy ruined stone balcony with a hanging blue banner, framing the view (viewer stands high on an old tower).
 - Lower third: the canal district: harbour canals with moored sailboats and floating paper lanterns, and a giant brass tide-wheel set in a stone canal lock gate (the Moonlock Wheel) with a glowing blue crystal hub.
 - Centre: the cracked glass dome garden at the base of the spire, floating garden islets and a brass orrery visible faintly through the glass.
-- Centre-right, very tall: the spire rising through a layer of cloud; at the top the floating rune crystal with three glowing rings and the luminous thread of light shooting up out of frame.
+- Centre-right, very tall: the spire rising through a layer of cloud; at cloud level the huge Halo Ring platform circling it (seen in perspective as a wide ellipse, clearly much bigger than the dome) with its four spoke bridges and the glowing crystal at the hub; above it the spire continues and the luminous thread of light shoots up out of frame, unbroken to the top edge.
 - Sky: an old airship drifting past the spire, three witches on broomsticks flying at different distances for scale, a few birds.
 - Strong atmospheric depth: detailed warm foreground, hazy blue-grey distance, mist pooling on the water.
 

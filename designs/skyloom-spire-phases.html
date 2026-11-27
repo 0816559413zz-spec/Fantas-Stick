@@ -21,9 +21,9 @@ text{font-family:"Segoe UI",Tahoma,sans-serif}
 <text x="30" y="66" font-size="15" fill="#a2402e" font-weight="600">⚠ ภาพอธิบายคร่าว ๆ (มุมตัดด้านข้าง) — ไม่ใช่ layout ที่อนุมัติแล้ว ขนาด/ระยะ/จำนวนทางยังไม่กำหนด</text>
 
 <!-- light tether -->
-<rect x="747" y="0" width="16" height="250" fill="url(#beam)"/>
-<rect x="753" y="0" width="4" height="250" fill="#ffffff" opacity=".9"/>
-<text x="830" y="80" font-size="13" fill="#2d6f7a">สายแสงเวท (Tether) ขึ้นฟ้า</text>
+<rect x="747" y="0" width="16" height="45" fill="url(#beam)"/>
+<rect x="753" y="0" width="4" height="45" fill="#ffffff" opacity=".9"/>
+<text x="775" y="30" font-size="13" fill="#2d6f7a">สายแสงเวท (Tether) ขึ้นฟ้า</text>
 
 <!-- sea / lagoon -->
 <path d="M0,600 Q150,590 300,600 T600,600 T900,598 T1200,600 V760 H0z" fill="#8fb3c4" opacity=".75"/>
@@ -62,29 +62,44 @@ text{font-family:"Segoe UI",Tahoma,sans-serif}
 <!-- garden islets inside -->
 <ellipse cx="660" cy="455" rx="28" ry="6" fill="#7f9a5c"/><ellipse cx="845" cy="448" rx="24" ry="5" fill="#7f9a5c"/>
 
-<!-- PHASE 3: spire + crown -->
-<path d="M730,370 L780,370 L772,180 L738,180z" fill="#d6cbb2" stroke="#5a4a35"/>
-<path d="M700,180 L810,180 L820,165 L690,165z" fill="#c8b994" stroke="#5a4a35"/>
-<rect x="680" y="150" width="150" height="16" fill="#b9a780" stroke="#5a4a35"/>
-<!-- anchor crystal + rune rings landmark -->
-<path d="M755,95 L775,128 L755,148 L735,128z" fill="#a9eef4" stroke="#2d6f7a" stroke-width="2"/>
-<ellipse cx="755" cy="122" rx="46" ry="10" fill="none" stroke="#5fd0dc" stroke-width="2.5"/>
-<ellipse cx="755" cy="122" rx="62" ry="14" fill="none" stroke="#5fd0dc" stroke-width="1.5" stroke-dasharray="6 5"/>
-<!-- lantern lift cabin -->
-<rect x="790" y="280" width="18" height="22" rx="4" fill="#f2c96b" stroke="#7a5420"/>
-<line x1="799" y1="180" x2="799" y2="280" stroke="#7a5420" stroke-dasharray="3 3"/>
+<!-- PHASE 3: Halo Ring around the spire at cloud height -->
+<path d="M738,370 L772,370 L764,70 L746,70z" fill="#d6cbb2" stroke="#5a4a35"/>
+<path d="M755,40 L764,70 L746,70z" fill="#c8b994" stroke="#5a4a35"/>
+<!-- cloud layer -->
+<g fill="#ffffff" opacity=".75"><ellipse cx="560" cy="285" rx="120" ry="16"/><ellipse cx="980" cy="290" rx="140" ry="18"/><ellipse cx="760" cy="300" rx="200" ry="14"/></g>
+<!-- ring platform (outer band, hole, front lip) -->
+<ellipse cx="755" cy="232" rx="300" ry="52" fill="#c9b994" stroke="#5a4a35" stroke-width="2"/>
+<ellipse cx="755" cy="226" rx="230" ry="32" fill="#dfe3e0" stroke="#5a4a35"/>
+<path d="M455,232 A300,52 0 0 0 1055,232 L1055,244 A300,52 0 0 1 455,244z" fill="#a8977a" stroke="#5a4a35"/>
+<!-- spoke bridges -->
+<g stroke="#8a7a5c" stroke-width="5"><line x1="538" y1="226" x2="742" y2="228"/><line x1="972" y1="226" x2="768" y2="228"/><line x1="755" y1="196" x2="755" y2="215"/><line x1="755" y1="258" x2="755" y2="240"/></g>
+<!-- buildings along ring -->
+<g fill="#e6d9bc" stroke="#5a4a35">
+  <rect x="478" y="214" width="22" height="18"/><path d="M475,214 L489,200 L503,214z"/>
+  <rect x="600" y="262" width="26" height="16"/><rect x="700" y="270" width="30" height="14"/><path d="M697,270 L715,256 L733,270z"/>
+  <rect x="820" y="268" width="26" height="14"/><rect x="930" y="258" width="22" height="18"/><path d="M927,258 L941,244 L955,258z"/>
+  <rect x="1010" y="214" width="22" height="18"/>
+</g>
+<g stroke="#a5782f" stroke-width="2"><line x1="560" y1="200" x2="560" y2="180"/><line x1="950" y1="200" x2="950" y2="180"/><line x1="640" y1="188" x2="640" y2="172"/><line x1="870" y1="188" x2="870" y2="172"/></g>
+<!-- anchor crystal in brass cage at hub -->
+<path d="M755,206 L770,228 L755,248 L740,228z" fill="#a9eef4" stroke="#2d6f7a" stroke-width="2"/>
+<ellipse cx="755" cy="228" rx="34" ry="8" fill="none" stroke="#5fd0dc" stroke-width="2.5"/>
+<ellipse cx="755" cy="228" rx="46" ry="12" fill="none" stroke="#5fd0dc" stroke-width="1.5" stroke-dasharray="6 5"/>
+<text x="470" y="180" font-size="13" fill="#5a4a35" font-weight="700">วงแหวนลอย Halo Ring (ระดับเมฆ)</text>
+<!-- lantern lift cabin on the tether above -->
+<rect x="764" y="120" width="16" height="20" rx="4" fill="#f2c96b" stroke="#7a5420"/>
 
 <!-- airship + brooms -->
-<ellipse cx="1030" cy="200" rx="70" ry="20" fill="#cfc2a4" stroke="#5a4a35"/><rect x="1010" y="220" width="40" height="10" fill="#8b6a45"/>
+<ellipse cx="1060" cy="110" rx="70" ry="20" fill="#cfc2a4" stroke="#5a4a35"/><rect x="1040" y="130" width="40" height="10" fill="#8b6a45"/>
 <g stroke="#3a3226" stroke-width="2" fill="#3a3226"><line x1="300" y1="330" x2="340" y2="318"/><circle cx="322" cy="318" r="5"/></g>
 <g stroke="#3a3226" stroke-width="2" fill="#3a3226"><line x1="980" y1="420" x2="1015" y2="430"/><circle cx="1000" cy="420" r="4"/></g>
 
 <!-- attack flow -->
 <path d="M90,575 C200,560 330,560 410,555" stroke="#2f6fb5" stroke-width="4" fill="none" marker-end="url(#ar)"/>
 <path d="M540,560 C580,520 610,500 640,488" stroke="#2f6fb5" stroke-width="4" fill="none" marker-end="url(#ar)"/>
-<path d="M880,430 C960,330 900,230 835,175" stroke="#2f6fb5" stroke-width="4" fill="none" stroke-dasharray="10 7" marker-end="url(#ar)"/>
-<text x="905" y="300" font-size="12" fill="#2f6fb5">ไม้กวาด / กระเช้าโคม</text>
-<text x="905" y="315" font-size="12" fill="#2f6fb5">(ช่วงถอย-ชิงของ — ไอเดีย)</text>
+<path d="M890,440 C990,380 1040,320 1010,262" stroke="#2f6fb5" stroke-width="4" fill="none" stroke-dasharray="10 7" marker-end="url(#ar)"/>
+<text x="1035" y="350" font-size="12" fill="#2f6fb5">ไม้กวาด / กระเช้าโคม</text>
+<text x="1035" y="365" font-size="12" fill="#2f6fb5">(ช่วงถอย-ชิงของ — ไอเดีย)</text>
 
 <!-- phase tags -->
 <g font-size="14" font-weight="700">
@@ -101,15 +116,15 @@ text{font-family:"Segoe UI",Tahoma,sans-serif}
   <text x="595" y="724" font-weight="400" font-size="13">ระบบดาวทองเหลืองหมุนใต้ยอดโดม</text>
 
   <rect x="900" y="640" width="280" height="100" rx="10" fill="#fffaf0" stroke="#5a4a35"/>
-  <text x="915" y="662">เฟส 3 · มงกุฎหอ (Tether Crown)</text>
-  <text x="915" y="684" font-weight="400" font-size="13">ลานยอดหอเหนือเมฆ ⇢ แกนสุดท้าย</text>
+  <text x="915" y="662">เฟส 3 · วงแหวนลอย (Halo Ring)</text>
+  <text x="915" y="684" font-weight="400" font-size="13">วงแหวนรอบหอ อ้อมได้ 2 ทาง ⇢ แกนสุดท้าย</text>
   <text x="915" y="704" font-weight="400" font-size="13">แลนด์มาร์ก: <tspan font-weight="700">ผลึกสมอดาว</tspan></text>
-  <text x="915" y="724" font-weight="400" font-size="13">ผลึกลอยในวงอักษรรูน ปล่อยสายแสง</text>
+  <text x="915" y="724" font-weight="400" font-size="13">ผลึกในกรงกลางหอ สะพานซี่ล้อเข้าหา</text>
 </g>
 <g font-size="20" font-weight="800" fill="#5a4a35">
   <circle cx="330" cy="500" r="16" fill="#fffaf0" stroke="#5a4a35"/><text x="324" y="507">1</text>
   <circle cx="620" cy="420" r="16" fill="#fffaf0" stroke="#5a4a35"/><text x="614" y="427">2</text>
-  <circle cx="660" cy="125" r="16" fill="#fffaf0" stroke="#5a4a35"/><text x="654" y="132">3</text>
+  <circle cx="430" cy="232" r="16" fill="#fffaf0" stroke="#5a4a35"/><text x="424" y="239">3</text>
 </g>
 <text x="20" y="575" font-size="13" fill="#2f6fb5" font-weight="700">ทีมบุก (ฟ้า) ขึ้นฝั่ง →</text>
 </svg>
