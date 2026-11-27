@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "desc": "Storm hand look g1 (user 2026-11-25, pick one of 3): idle, zap dash (left palm dive, hold, rise), Thunder Line cast",
+  "tags": ["stance", "preview"],
+  "dur": 6.0,
+  "layers": [
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 6.0},
+    {"id": "stance", "t": "code", "fn": "studio_class_stance", "at": 0, "life": 6.0, "args": {"layer":"anchor","cls":"storm","style":"g1","run":[99,99],"acts":[{"t":1.6,"a":"dash"},{"t":3.8,"a":"skill","id":"thunderline"}]}}
+  ]
+}

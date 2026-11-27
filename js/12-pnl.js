@@ -22,12 +22,13 @@ const sgPnl=()=>sgGrid('pn',PNL,p=>p.bb);
 const _sgPN=[],_sgPN2=[],_sgPN3=[];
 function pnlGen(id){
   const M=MAPS[id],L=((M&&M.pnl)||[]).concat((M&&M.pnH)||[]);
-  PNL=L.map((d,i)=>{const cs=d.cs||1,one=d.nb&&!(d.ho&&d.ho.length),nc=one?1:Math.max(1,Math.round(d.L/20/cs)),nr=one?1:Math.max(1,Math.round(d.H/cs)),n=nc*nr,Md=PNDEF.mat[d.mat]||PNDEF.mat.brick,mx=d.hp||Md.hp,a=d.a||0,tl=d.tl||0;
+  PNL=L.map((d,i)=>{const cs=d.cs||1,one=d.nb&&!(d.ho&&d.ho.length)&&!(d.hc&&d.hc.length),nc=one?1:Math.max(1,Math.round(d.L/20/cs)),nr=one?1:Math.max(1,Math.round(d.H/cs)),n=nc*nr,Md=PNDEF.mat[d.mat]||PNDEF.mat.brick,mx=d.hp||Md.hp,a=d.a||0,tl=d.tl||0;
     const c=Math.cos(a),s=Math.sin(a),ct=Math.cos(tl),stl=Math.sin(tl),zb=pnGT(d.x,d.y)+(d.z0||0),hl=d.L/2,Hp=d.H*20;
     const p={i,d,x:d.x,y:d.y,a,c,s,tl,W:[-s*stl,c*stl,ct],V:[-s*ct,c*ct,-stl],hl,ht:Math.max(1.5,(d.T||6)/2),zb,H:d.H,Hp,nc,nr,cw:d.L/nc,chp:Hp/nr,chh:d.H/nr,tri:!!pnTP(d),tp:pnTP(d),
       mode:d.m||'p',thru:d.thru!==0,nb:!!d.nb,mat:d.mat||'brick',g:d.g,max:mx,hp:new Float32Array(n).fill(mx),st:new Uint8Array(n),ex:new Uint8Array(n).fill(1),burnT:0,t:0,ver:1,ph:null,phv:0};
     if(p.tri)for(let k=0;k<n;k++){const u=pnCU(p,k%nc),w=(((k/nc)|0)+0.5)*p.chp;if(w>Hp*pnTopF(p.tp,(u+hl)/(2*hl))+p.chp*0.25)p.ex[k]=0;}
     if(d.ho)for(let k=0;k<n;k++){const u=(pnCU(p,k%nc)+hl)/20,z=(((k/nc)|0)+0.5)*p.chh;if(d.ho.some(q=>u>q[0]&&u<q[1]&&z>q[2]&&z<q[3]))p.ex[k]=0;}   // openings (door / windows)
+    if(d.hc)for(const [cc,rr] of d.hc)if(cc>=0&&cc<nc&&rr>=0&&rr<nr)p.ex[rr*nc+cc]=0;   // Map Builder Punch Holes: cells [col,row] that start missing
     const ex=hl+p.ht+Math.abs(p.W[0])*Hp+Math.abs(p.W[1])*Hp;p.bb=[d.x-ex,d.y-ex,d.x+ex,d.y+ex];
     return p;});
   PNL._id=id;pnlLinks();return PNL;

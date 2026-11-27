@@ -11,6 +11,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import * as MD from './model.js';
 import * as BD from './backdrop.js';
+import { initProject } from './project.js';
 const { C, SURF, OBJ } = MD;
 
 const $ = id => document.getElementById(id);
@@ -20,8 +21,9 @@ const el = (tag, props, ...kids) => { const e = document.createElement(tag); if 
 
 // ================= state =================
 let M = null, online = false, dirty = false, saveT = 0, list = [];
+let PJ = null;   // Project/Console dock (mapbuild/project.js)
 let tool = 'select', sel = null, msel = [];   // sel = {k:'wall'|'floor'|'obj', id, pt?} = primary (Inspector, gizmo) • msel = more items picked with Shift/Ctrl
-const opt = { rk: 'cobble', rw: 4, rc: 0, smode: 'up', rad: 4, str: 4, soft: 1, hval: 2, surf: 0, wall: 0, wth: 1, wh: 3.5, wc: '#8a8478', wm: 'stone', wcurve: 0, wbrk: 0, floor: 0, fw: 4, fh: 3, fauto: 1, obj: 'spawn', cat: 'sys',
+const opt = { wk: 'lake', wdig: 1, wdep: 1.5, rk: 'cobble', rw: 4, rc: 0, smode: 'up', rad: 4, str: 4, soft: 1, hval: 2, surf: 0, wall: 0, wth: 1, wh: 3.5, wc: '#8a8478', wm: 'stone', wcurve: 0, wbrk: 0, floor: 0, fw: 4, fh: 3, fauto: 1, obj: 'spawn', cat: 'sys',
   rrot: 1, rscale: 0, dens: 3, snap: 0, part: 'wall', pp: {}, csnap: 1, psnap: 1, prim: { c: '#8a8478', sx: 2, sy: 2, sz: 2 }, pn: { pre: 0, mat: 'brick', m: 'p', thru: 1, sy: 3.6, T: 0.3, cs: 0.6, hp: 0, y: 0, draw: 'line', sides: 12 },
   bm: 'up', brad: 40, bstr: 4, bh: 0, bs: 1, btd: 200, sr: 6, sh: 20, bpre: 'coast', bseed: 1 };   // b* = backdrop tool
 const show = { steep: true, col: false, grid: false, sky: true, area: true, bd: true };
@@ -167,13 +169,15 @@ function syncFloors() {
 
 // ================= asset kit =================
 const KIT = { list: [], byId: new Map(), files: new Map(), tpl: new Map(), thumbs: new Map() };
-const CATS = [['sys', 'Game Points'], ['mode', 'Siege Mode'], ['prefab', 'Room Prefabs'], ['room', 'Room / Breakables'], ['deco', 'Decor (game-drawn)'], ['game', 'Game Objects'], ['prim', 'Primitives'], ['collide', 'Collision Shapes'], ['tree', 'Trees'], ['rock', 'Rocks'], ['plant', 'Small Plants'], ['build', 'Buildings'], ['road', 'Roads / Paving'], ['prop', 'Props'], ['light', 'Lamps/Lights'], ['fence', 'Fences'], ['ruin', 'Ruin (modular)'], ['user', 'Custom']];
+const CATS = [['sys', 'Game Points'], ['mode', 'Siege Mode'], ['water', 'Water'], ['prefab', 'Room Prefabs'], ['room', 'Room / Breakables'], ['deco', 'Decor (game-drawn)'], ['game', 'Game Objects'], ['prim', 'Primitives'], ['collide', 'Collision Shapes'], ['tree', 'Trees'], ['rock', 'Rocks'], ['plant', 'Small Plants'], ['build', 'Buildings'], ['road', 'Roads / Paving'], ['prop', 'Props'], ['light', 'Lamps/Lights'], ['fence', 'Fences'], ['ruin', 'Ruin (modular)'], ['user', 'Custom']];
 const CS_DEF = { tree: 0.22, light: 0.4, plant: 0.6 };
+const KIT_ROUND = new Set(['tree', 'light', 'plant', 'rock']);   // kit categories that keep a round collider (others = box)
 let gltfL = null;
 function loader() { if (!gltfL) { gltfL = new GLTFLoader(); const d = new DRACOLoader(); d.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/gltf/'); gltfL.setDRACOLoader(d); gltfL.setMeshoptDecoder(MeshoptDecoder); } return gltfL; }
 async function loadKit() {
   try { const k = await (await fetch('assets/mapkit/kit.json?t=' + Date.now())).json(); KIT.list = [...(k.assets || []), ...(k.user || [])]; } catch (e) { KIT.list = []; }
   KIT.byId = new Map(KIT.list.map(a => [a.id, a]));
+  if (PJ) PJ.render();
 }
 const sanit = s => s.replace(/\s/g, '_').replace(/[\[\]\.:\/]/g, '');
 function kitTpl(id) {   // → Promise<{obj (template, base centre at origin), ex, ez, h}>
@@ -196,7 +200,7 @@ let thumbR = null, thumbS = null, thumbC = null;
 async function thumb(id) {
   if (KIT.thumbs.has(id)) return KIT.thumbs.get(id);
   const t = await kitTpl(id); if (!t) return '';
-  if (!thumbR) { thumbR = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true }); thumbR.setSize(96, 96); thumbS = new THREE.Scene(); thumbS.add(new THREE.HemisphereLight(0xffffff, 0x555555, 2.2)); const d = new THREE.DirectionalLight(0xffffff, 2); d.position.set(2, 4, 3); thumbS.add(d); thumbC = new THREE.PerspectiveCamera(30, 1, 0.05, 500); }
+  if (!thumbR) { thumbR = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true }); thumbR.setSize(128, 128); thumbS = new THREE.Scene(); thumbS.add(new THREE.HemisphereLight(0xffffff, 0x555555, 2.2)); const d = new THREE.DirectionalLight(0xffffff, 2); d.position.set(2, 4, 3); thumbS.add(d); thumbC = new THREE.PerspectiveCamera(30, 1, 0.05, 500); }
   const o = t.obj.clone(true); thumbS.add(o);
   const R = Math.max(t.ex, t.ez, t.h / 2, 0.2) * 1.25, d = R / Math.tan(15 * Math.PI / 180) * 1.05;
   thumbC.position.set(d * 0.62, t.h / 2 + d * 0.42, d * 0.66); thumbC.lookAt(0, t.h / 2, 0);
@@ -221,10 +225,10 @@ function dim(o) {   // footprint for collision (model.js objCircles)
     if (o.t === 'dc_cone') return { ex: o.r || 0.5, ez: o.r || 0.5, h: o.sy || 1, yo: -(o.sy || 1) / 2, col: o.col ? 1 : 0, brk: 0, m: 'stone', cs: 0.92 };
     if (o.t === 'dc_dome' || o.t === 'dc_rock') return { ex: (o.sx || 1) / 2, ez: (o.sz || 1) / 2, h: o.sy || 1, yo: -(o.sy || 1) / 2, col: o.col ? 1 : 0, brk: 0, m: 'stone', cs: 0.92 };
     const sy = o.sy || 1, cy = o.t === 'dc_cyl', r = cy ? Math.max(o.rt != null ? o.rt : (o.sx || 1) / 2, o.rb != null ? o.rb : (o.sx || 1) / 2) : 0;
-    return { ex: cy ? r : (o.sx || 1) / 2, ez: cy ? r : (o.sz || 1) / 2, h: sy, yo: -sy / 2, col: o.col ? 1 : 0, brk: 0, m: 'stone', cs: cy ? 0.92 : 1 }; }
-  if (isPrim(o)) { const sx = o.sx || 1, sz = o.sz || 1, round = o.t === 'cyl' || o.t === 'ball' || o.t === 'cone'; return { ex: sx / 2, ez: sz / 2, h: (o.sy || 1) * (o.t === 'ball' ? 0.84 : 1), col: o.col == null ? 1 : o.col, brk: 0, m: o.m || 'stone', cs: round ? 0.92 : 1 }; }
+    return { ex: cy ? r : (o.sx || 1) / 2, ez: cy ? r : (o.sz || 1) / 2, h: sy, yo: -sy / 2, col: o.col ? 1 : 0, brk: 0, m: 'stone', cs: cy ? 0.92 : 1, bx: cy ? 0 : 1 }; }
+  if (isPrim(o)) { const sx = o.sx || 1, sz = o.sz || 1, round = o.t === 'cyl' || o.t === 'ball' || o.t === 'cone'; return { ex: sx / 2, ez: sz / 2, h: (o.sy || 1) * (o.t === 'ball' ? 0.84 : 1), col: o.col == null ? 1 : o.col, brk: 0, m: o.m || 'stone', cs: round ? 0.92 : 1, bx: round ? 0 : 1 }; }
   if (isKit(o)) { const a = KIT.byId.get(kitId(o)), t = tplNow(kitId(o)); if (!a || !t) return null; const s = o.s || 1;
-    return { ex: t.ex * s, ez: t.ez * s, h: t.h * s, col: o.col == null ? a.col : o.col, brk: a.brk ? 1 : 0, m: a.brk || 'stone', cs: a.cs != null ? a.cs : CS_DEF[a.cat] || 0.85, s, cb: a.cb, fl: a.fl }; }   // cb/fl = kit collision boxes + walkable slabs (model.js objCircles/kitFloors)
+    return { ex: t.ex * s, ez: t.ez * s, h: t.h * s, col: o.col == null ? a.col : o.col, brk: a.brk ? 1 : 0, m: a.brk || 'stone', cs: a.cs != null ? a.cs : CS_DEF[a.cat] || 0.85, s, cb: a.cb, fl: a.fl, bx: KIT_ROUND.has(a.cat) ? 0 : 1 }; }   // cb/fl = kit collision boxes + walkable slabs (model.js objCircles/kitFloors)
   return null;
 }
 function labelSprite(text, c) {   // small always-readable tag (core number, phase number)
@@ -304,6 +308,10 @@ function markerMesh(o) {
   if (o.t === 'wind') { areaMesh(o, g, c, 0.3); const a = (o.dir || 0) * Math.PI / 180, L = Math.max(3, Math.min(o.sx || 1, o.sz || 1) * 0.4), ar = new THREE.Group();   // arrow = push direction
     const sh = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.2, L), helpMat(c)); sh.position.z = L / 2; ar.add(sh); const hd = new THREE.Mesh(new THREE.ConeGeometry(1.2, 2.4, 12), helpMat(c)); hd.rotation.x = Math.PI / 2; hd.position.z = L + 1.2; ar.add(hd);
     ar.traverse(m => m.isMesh && noPick(m)); ar.position.y = 1.5; ar.rotation.y = a; g.add(ar); const l = labelSprite('Wind ' + (o.str == null ? 8 : o.str), c); l.position.y = 3.4; g.add(l); return g; }
+  if (o.t === 'water') { const D0 = MD.WATER_DEF[o.k] || MD.WATER_DEF.lake, wc = new THREE.Color(o.cs || D0.sh).lerp(new THREE.Color(o.cd || D0.dp), 0.5), sx = o.sx || 1, sz = o.sz || 1;
+    const f = noPick(new THREE.Mesh(new THREE.PlaneGeometry(sx, sz).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: wc, roughness: 0.15, metalness: 0.1, transparent: true, opacity: 0.45 + 0.4 * (1 - (o.cl != null ? o.cl : D0.cl)), depthWrite: false })));
+    f.renderOrder = 2; g.add(f); const e = noPick(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(sx, 0.05, sz)), new THREE.LineBasicMaterial({ color: '#bfe8ff', transparent: true, opacity: 0.7 }))); e.userData.area = 1; g.add(e);
+    const hd = new THREE.Mesh(new THREE.OctahedronGeometry(0.6), helpMat('#bfe8ff')); hd.position.y = 0.6; g.add(hd); const l = labelSprite('Water ' + (o.y || 0).toFixed(1) + ' m', '#bfe8ff'); l.position.y = 2; l.userData.area = 1; g.add(l); return g; }
   if (o.t === 'lz') { areaMesh(o, g, c, 0); const l = labelSprite('Indoor light', c); l.position.y = 1.4; g.add(l); return g; }   // drawn at its Top height
   if (D.rp) { const R = MD.RPK[D.rp], L = R.L ? Math.max(0.3, o.L || 4) : R.w, w = R.L ? R.w : R.w; const lk = rpLook(o, D.rp); if (lk) { g.add(lk); return g; }
     const b = add(new THREE.BoxGeometry(L, R.h, w), mat(R.col ? c : '#b89a76'), 0, R.h / 2, 0); b.castShadow = true; return g; }
@@ -316,10 +324,13 @@ function markerMesh(o) {
     { const P = [[-L / 2, 0], [L / 2, 0], [L / 2, tp[2] * H], [X(tp[1]), H], [-L / 2, tp[0] * H]].filter((q, i, a) => i === 0 || Math.hypot(q[0] - a[i - 1][0], q[1] - a[i - 1][1]) > 1e-4);
       if (Math.hypot(P[0][0] - P.at(-1)[0], P[0][1] - P.at(-1)[1]) < 1e-4) P.pop(); sh.moveTo(...P[0]); for (const q of P.slice(1)) sh.lineTo(...q); sh.lineTo(...P[0]); }
     for (const q of o.ho || []) { const h = new THREE.Path(), a = q[0] - L / 2, b = q[1] - L / 2; h.moveTo(a, q[2]); h.lineTo(a, q[3]); h.lineTo(b, q[3]); h.lineTo(b, q[2]); h.lineTo(a, q[2]); sh.holes.push(h); }
+    if (o.hc && o.hc.length) { const d = MD.pnDims(o), cw = L / d.nc, ch = H / d.nr, e = 0.004, on = new Set(o.hc.filter(q => q[0] < d.nc && q[1] < d.nr).map(q => q[1] * d.nc + q[0]));   // punched cells: one hole per row run
+      for (let r = 0; r < d.nr; r++) for (let c = 0; c < d.nc; c++) { if (!on.has(r * d.nc + c) || on.has(r * d.nc + c - 1) && c > 0) continue; let c2 = c; while (c2 + 1 < d.nc && on.has(r * d.nc + c2 + 1)) c2++;
+        const a = -L / 2 + c * cw + e, b = -L / 2 + (c2 + 1) * cw - e, y0 = r * ch + e, y1 = (r + 1) * ch - e, h = new THREE.Path(); h.moveTo(a, y0); h.lineTo(a, y1); h.lineTo(b, y1); h.lineTo(b, y0); h.lineTo(a, y0); sh.holes.push(h); } }
     const geo = new THREE.ExtrudeGeometry(sh, { depth: T, bevelEnabled: false }); geo.translate(0, 0, -T / 2); if (o.tl) geo.rotateX(o.tl);
     const b = add(geo, mat(MD.PN_COL[o.mat || 'brick'] || c), 0, 0, 0); b.castShadow = true;
     if (o.mat === 'litwin' || o.mat === 'glass') { b.material = b.material.clone(); b.material.transparent = true; b.material.opacity = 0.6; }
-    const cs = o.cs || 1, one = o.nb && !(o.ho && o.ho.length), nc = one ? 1 : Math.max(1, Math.round(L / cs)), nr = one ? 1 : Math.max(1, Math.round(H / cs)), pts = [];   // unbreakable = no cell lines
+    const cs = o.cs || 1, one = o.nb && !(o.ho && o.ho.length) && !(o.hc && o.hc.length), nc = one ? 1 : Math.max(1, Math.round(L / cs)), nr = one ? 1 : Math.max(1, Math.round(H / cs)), pts = [];   // unbreakable = no cell lines
     for (const zf of [T / 2 + 0.01, -T / 2 - 0.01]) {   // cell lines on both faces
       for (let i = 1; i < nc; i++) { const x = -L / 2 + i * L / nc; pts.push(x, 0, zf, x, H * MD.pnTopF(tp, i / nc), zf); }
       for (let j = 1; j < nr; j++) { const y = j * H / nr, f = y / H, [a, k, b] = tp, xl = f <= a ? -L / 2 : X(k * (f - a) / (1 - a)), xr = f <= b ? L / 2 : X(k + (1 - k) * (1 - f) / (1 - b)); if (xr > xl) pts.push(xl, y, zf, xr, y, zf); } }
@@ -349,7 +360,8 @@ function objMesh(o) {
   else if (OBJ[o.t]) { g = markerMesh(o); if (o.t === 'house') g.scale.set(o.sx || 1, 1, o.sz || 1); }
   else { g = new THREE.Group(); g.add(new THREE.Mesh(pg('box'), helpMat('#f06a6a', 0.6))); }
   const lift = o.t === 'ring' ? Math.max(1, o.y || 6) : o.t === 'light' ? (o.y == null ? 2.2 : o.y) : o.t === 'ceil' ? (o.y == null ? 21 : o.y) : o.t === 'lz' ? (o.y == null ? 22 : o.y) : (o.y || 0);
-  g.position.set(o.x, MD.gh(M, o.x, o.z) + lift, o.z); g.rotation.y = MD.AREA.has(o.t) ? 0 : o.rot || 0;   // areas are axis-aligned in the game
+  g.position.set(o.x, o.t === 'water' ? o.y || 0 : MD.gh(M, o.x, o.z) + lift, o.z);   // water: y = absolute level
+  g.rotation.y = MD.AREA.has(o.t) ? 0 : o.rot || 0;   // areas are axis-aligned in the game
   if (tiltOk(o) && (o.rx || o.rz)) g.rotation.set(o.rx || 0, o.rot || 0, o.rz || 0, 'YXZ');   // yaw first, then tilt
   if (o.vis === 0) ghostify(g);
   if (!show.area) g.traverse(m => { if (m.userData.area) m.visible = false; });
@@ -393,12 +405,16 @@ function gameData() { if (!GD) { GD = MD.gameData(ALLM(), dim); GD.data.fog = M.
 function buildCol() {
   for (const c of [...gCol.children]) { gCol.remove(c); c.geometry.dispose(); }
   if (!show.col || !M) return;
-  const obs = gameData().data.obs; if (!obs.length) return;
-  const im = new THREE.InstancedMesh(new THREE.CylinderGeometry(1, 1, 1, 14, 1, true), new THREE.MeshBasicMaterial({ color: 0xff5a4a, transparent: true, opacity: 0.38, depthWrite: false, side: THREE.DoubleSide }), obs.length), m4 = new THREE.Matrix4();
+  const all = gameData().data.obs; if (!all.length) return;
+  const mat = new THREE.MeshBasicMaterial({ color: 0xff5a4a, transparent: true, opacity: 0.38, depthWrite: false, side: THREE.DoubleSide }), m4 = new THREE.Matrix4();
   const q = new THREE.Quaternion(), Y = new THREE.Vector3(0, 1, 0), P = new THREE.Vector3(), S = new THREE.Vector3();
-  obs.forEach((o, i) => { const x = o.x / MD.PX, z = o.y / MD.PX, r = o.r / MD.PX, g = MD.gh(M, x, z), b = o.bot || 0, h = o.hgt - b, L = o.hx == null ? 0 : Math.hypot(o.hx, o.hy) / MD.PX;   // capsule (straight wall) = stretched along its axis
-    q.setFromAxisAngle(Y, o.hx == null ? 0 : -Math.atan2(o.hy, o.hx)); im.setMatrixAt(i, m4.compose(P.set(x, g + b + h / 2, z), q, S.set(r + L, h, r))); });
-  gCol.add(im); need();
+  for (const box of [0, 1]) {   // round (circle / capsule) and box colliders (w = half width across the axis)
+    const obs = all.filter(o => (o.w != null) === !!box); if (!obs.length) continue;
+    const geo = box ? new THREE.BoxGeometry(2, 1, 2) : new THREE.CylinderGeometry(1, 1, 1, 14, 1, true), im = new THREE.InstancedMesh(geo, mat, obs.length);
+    obs.forEach((o, i) => { const x = o.x / MD.PX, z = o.y / MD.PX, r = o.r / MD.PX, g = MD.gh(M, x, z), b = o.bot || 0, h = o.hgt - b, L = o.hx == null ? 0 : Math.hypot(o.hx, o.hy) / MD.PX;   // capsule (straight wall) = stretched along its axis
+      q.setFromAxisAngle(Y, o.hx == null ? 0 : -Math.atan2(o.hy, o.hx)); im.setMatrixAt(i, m4.compose(P.set(x, g + b + h / 2, z), q, S.set(r + L, h, r + (o.w || 0) / MD.PX))); });
+    gCol.add(im); }
+  need();
 }
 
 // ================= camera / picking =================
@@ -704,6 +720,7 @@ function protoObj(x, z) {
   else if (t === 'wind') Object.assign(o, { sx: 20, sz: 20, dir: 0, str: 8, rot: 0 });
   else if (t === 'ceil') Object.assign(o, { sx: 20, sz: 20, y: 21, rot: 0 });
   else if (t === 'lz') Object.assign(o, { sx: 30, sz: 20, y: 22, k: 1, rot: 0 });
+  else if (t === 'water') Object.assign(o, { sx: 12, sz: 12, k: opt.wk });
   else if (MD.isRP(t) && MD.RPK[t.slice(3)].L) o.L = 4;
   else if (MD.isDeco(t)) Object.assign(o, { box: { k: 'stone', sx: 2, sy: 2, sz: 2, y: 1, rot: 0 }, cyl: { k: 'stone', rt: 1, rb: 1, sy: 4, seg: 12, y: 2 }, cone: { k: 'roof', r: 2, sy: 3, seg: 8, y: 1.5 },
     pyr: { k: 'slate', sx: 4, sy: 3, sz: 4, y: 1.5 }, dome: { k: 'copper', sx: 4, sy: 2, sz: 4, y: 1 }, wedge: { k: 'stone', sx: 4, sy: 2, sz: 3, y: 1 },
@@ -717,7 +734,7 @@ function updHover(e) { setRay(e); if (tool === 'bd') { hover = bdHit(); return; 
 function placeObj(h, extra) {
   if (opt.obj.startsWith('room:')) { const r = { id: nid(), ref: opt.obj.slice(5), x: snapV(h.x), z: snapV(h.z), rot: Math.round(ghostRot / (Math.PI / 2)) * (Math.PI / 2) };
     M.rooms.push(r); sel = { k: 'room', id: r.id }; loadRooms().then(() => { syncRooms(); renderSide(); }); return r; }
-  const o = protoObj(snapV(h.x), snapV(h.z)); o.id = nid(); if (o.t !== 'light' && o.t !== 'ring' && o.t !== 'ceil' && o.t !== 'lz' && !MD.isDeco(o.t)) o.y = +(Math.max(0, h.y - MD.gh(M, o.x, o.z))).toFixed(2); Object.assign(o, extra || {});
+  const o = protoObj(snapV(h.x), snapV(h.z)); o.id = nid(); if (o.t === 'water') o.y = MD.waterAutoLevel(M, o); else if (o.t !== 'light' && o.t !== 'ring' && o.t !== 'ceil' && o.t !== 'lz' && !MD.isDeco(o.t)) o.y = +(Math.max(0, h.y - MD.gh(M, o.x, o.z))).toFixed(2); Object.assign(o, extra || {});
   M.objs.push(o); syncObj(o); return o;
 }
 // castle parts: proto at the hover point (grid snap + port snap to other parts), then place
@@ -785,6 +802,7 @@ cv.addEventListener('pointerdown', e => {
     if (f && draft.pts.length > 2 && Math.hypot(f[0] - p[0], f[1] - p[1]) < 0.8) return finishWall(true);
     draft.pts.push(p); drawHandles(); need();
   } else if (tool === 'floor') { if (hover) drag = { k: 'floor', a: { x: hover.x, z: hover.z, y: hover.y } }; }
+  else if (tool === 'water') { if (hover) drag = { k: 'water', a: { x: hover.x, z: hover.z } }; }
   else if (tool === 'castle') {
     if (!hover) return;
     if (opt.part !== 'free') placePart(hover);
@@ -798,6 +816,7 @@ cv.addEventListener('pointerdown', e => {
   else if (tool === 'place') { if (!hover) return; pushUndo('o'); const o = placeObj(hover); if (opt.rrot && isVisual(o)) { ghostRot = Math.random() * 6.2832; } changed(); colDirty(); }
   else if (tool === 'select') {
     if (PNT.on) { const h = pickItem(), it2 = h && h.ref && h.ref.k === 'obj' && find(h.ref); if (it2 && it2.t === 'pn_wall') { pnTestHit(it2, h.p, e.shiftKey); return; } }
+    if (PNH.on) { const h = pickItem(), it2 = h && h.ref && h.ref.k === 'obj' && find(h.ref); if (it2 && it2.t === 'pn_wall') { pnHoleHit(it2, h.p, e.shiftKey); return; } }
     const fh = freeHandles();
     if (fh && !fdraft) { const r = cv.getBoundingClientRect(); let best = -1, bd = 12;
       fh.forEach((q, i) => { v3.set(q.x - M.W / 2, q.y, q.z - M.H / 2).project(camera); const d = Math.hypot((v3.x + 1) / 2 * r.width + r.left - e.clientX, (1 - v3.y) / 2 * r.height + r.top - e.clientY); if (d < bd) { bd = d; best = i; } });
@@ -862,6 +881,7 @@ cv.addEventListener('pointermove', e => {
   else if (drag && drag.k === 'box') boxDraw(drag, e);
   else if (drag && drag.k === 'ramp' && hover) drawLine([[drag.a.x, drag.a.z], [hover.x, hover.z]]);
   else if (drag && drag.k === 'floor' && hover) { const p = [[drag.a.x, drag.a.z], [hover.x, hover.z]]; drawLine(p); }
+  else if (drag && drag.k === 'water' && hover) { const a = drag.a, b = hover; drawLine([[a.x, a.z], [b.x, a.z], [b.x, b.z], [a.x, b.z], [a.x, a.z]]); }
   else if (tool === 'pnl' && draft && draft.round && hover) { const c = draft.pts[0], r = Math.hypot(hover.x - c[0], hover.z - c[1]); if (r > 0.3) { const P = pnRing(c, r); P.push(P[0]); drawLine(P); } }
   else if ((tool === 'wall' || tool === 'pnl' || tool === 'road') && draft && hover) drawLine([...draft.pts, [hover.x, hover.z]]);
   else if (tool === 'castle' && fdraft && hover) { const l = [...fdraft.pts, [snapC(hover.x), snapC(hover.z)]]; if (l.length > 2) l.push(l[0]); if (fdraft.base != null) l.y = fdraft.base; drawLine(l); }
@@ -870,6 +890,7 @@ cv.addEventListener('pointermove', e => {
 cv.addEventListener('pointerup', e => {
   if (drag && drag.k === 'ramp') { if (hover && Math.hypot(hover.x - drag.a.x, hover.z - drag.a.z) > 1) { pushUndo('t'); applyRamp(drag.a, hover, opt.rad * 2); afterTerrain(); } drawLine(null); }
   else if (drag && drag.k === 'floor') { makeFloor(drag.a, hover || drag.a); drawLine(null); }
+  else if (drag && drag.k === 'water') { makeWater(drag.a, hover || drag.a); drawLine(null); }
   else if (drag && drag.k === 'box') boxEnd(drag, e);
   else if (drag && (drag.k === 'move' || drag.k === 'pt' || drag.k === 'fpt') && drag.moved) { changed(); colDirty(); renderSide(); }
   if (stroke && stroke.k === 'bd') { bdTreesBuild(); changed(); stroke = null; }
@@ -878,6 +899,12 @@ cv.addEventListener('pointerup', e => {
   drag = null; need();
 });
 cv.addEventListener('pointerleave', () => { hover = null; need(); });
+// Project window → Scene: pick an asset / drag it in and drop it at the mouse (Unity style)
+function pickAsset(t, cat) { opt.obj = t; opt.cat = cat; if (tool === 'scatter' && isVisualType(t)) renderOpts(); else if (tool !== 'place') setTool('place'); else renderOpts(); need(); }
+cv.addEventListener('dragover', e => { if (!PJ || !PJ.dragging()) return; e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; updHover(e); need(); });
+cv.addEventListener('dragleave', () => { if (PJ && PJ.dragging()) { hover = null; need(); } });
+cv.addEventListener('drop', e => { if (!PJ || !PJ.dragging() || !M) return; e.preventDefault(); updHover(e); if (!hover) return;
+  pushUndo('o'); const o = placeObj(hover); if (o && !o.ref) { sel = { k: 'obj', id: o.id }; msel = []; } renderSide(); updSel(); changed(); colDirty(); cv.focus(); });
 cv.addEventListener('dblclick', () => { if (tool === 'road' && draft) finishRoad(); else if ((tool === 'wall' || tool === 'pnl') && draft) { draft.pts.pop(); finishWall(false); } else if (tool === 'castle' && fdraft) { fdraft.pts.pop(); finishFree(); } });
 cv.addEventListener('wheel', e => { e.preventDefault();
   if (e.shiftKey && tool === 'bd') { opt.brad = clamp(Math.round(opt.brad * (e.deltaY > 0 ? 0.9 : 1.11)), 3, 400); renderOpts(); need(); return; }
@@ -912,6 +939,15 @@ function insertWallPt(w, x, z) {
   for (let i = 0; i < m; i++) { const a = w.pts[i], b = w.pts[(i + 1) % n], dx = b[0] - a[0], dz = b[1] - a[1], t = clamp(((x - a[0]) * dx + (z - a[1]) * dz) / (dx * dx + dz * dz || 1), 0, 1), d = Math.hypot(a[0] + dx * t - x, a[1] + dz * t - z); if (d < bd) { bd = d; bi = i; } }
   pushUndo('o'); w.pts.splice(bi + 1, 0, [+x.toFixed(2), +z.toFixed(2)]); sel.pt = bi + 1; syncWalls(); changed(); colDirty();
 }
+// Water tool: rect A→B (or 12 m square at A) • level = just under the lowest edge • optional smooth bed
+function makeWater(A, B) {
+  const big = Math.abs(B.x - A.x) > 1.5 && Math.abs(B.z - A.z) > 1.5, o = { id: nid(), t: 'water', rot: 0, k: opt.wk };
+  if (big) Object.assign(o, { x: r2((A.x + B.x) / 2), z: r2((A.z + B.z) / 2), sx: r2(Math.abs(B.x - A.x)), sz: r2(Math.abs(B.z - A.z)) }); else Object.assign(o, { x: snapV(A.x), z: snapV(A.z), sx: 12, sz: 12 });
+  pushUndo(opt.wdig ? 'a' : 'o'); o.y = MD.waterAutoLevel(M, o);
+  if (opt.wdig) waterDigNow(o);
+  M.objs.push(o); syncObj(o); sel = { k: 'obj', id: o.id }; changed(); renderSide(); updSel();
+}
+function waterDigNow(o) { const [i0, j0, i1, j1] = MD.waterDig(M, o, opt.wdep); updTerrain(i0, j0, i1, j1); afterTerrain(); colDirty(); }
 function makeFloor(A, B) {
   const P = MD.FLOOR_PRESET[opt.floor], L = Math.hypot(B.x - A.x, B.z - A.z), f = { id: nid(), th: P.th, c: P.c, steps: P.steps ? 1 : 0, n: P.n, w: opt.fw };
   pushUndo('o');
@@ -946,7 +982,7 @@ const isDeco = it => OBJ[it.t] && OBJ[it.t].cat === 'deco';
 function gScaleKind(k, it) {   // how [3] size maps onto this item: 'u' uniform s, 'p' panel L/sy/T, 'L' length, 'xyz' / 'xz' sizes, 'f' floor, 'w' wall, 'fp' free shape, 'cp' castle part, null = none
   if (k === 'room') return null; if (k === 'wall') return 'w'; if (k === 'floor') return 'f'; if (k === 'part') return it.pts ? 'fp' : 'cp';
   if (isKit(it) || it.t === 'core') return 'u'; if (it.t === 'pn_wall') return 'p'; if (MD.isRP(it.t) && it.L) return 'L';
-  if (isPrim(it) || isDeco(it)) return 'xyz'; if (it.t === 'house' || MD.AREA.has(it.t)) return 'xz'; return null;
+  if (isPrim(it) || isDeco(it)) return 'xyz'; if (it.t === 'house' || it.t === 'water' || MD.AREA.has(it.t)) return 'xz'; return null;
 }
 function placeGizmo() {
   if (gz) return; const it = tool === 'select' && gmode !== 'hand' && sel && sel.pt == null ? find(sel) : null;
@@ -1147,7 +1183,7 @@ function rotSel(a) { if (!find(sel)) return; if (sel.k === 'room') { editSel(it 
 function scaleSel(k) { if (!find(sel)) return; editSel(it => { if (sel.k === 'obj') { if (isKit(it)) it.s = +((it.s || 1) * k).toFixed(2); else if (isPrim(it) || it.t === 'house' || MD.AREA.has(it.t)) { it.sx = +((it.sx || 1) * k).toFixed(2); it.sz = +((it.sz || 1) * k).toFixed(2); if (isPrim(it)) it.sy = +((it.sy || 1) * k).toFixed(2); } else if (it.t === 'core') it.s = +((it.s || 4) * k).toFixed(2); else if ((MD.isRP(it.t) || it.t === 'pn_wall') && it.L) it.L = +(it.L * k).toFixed(2); } else if (sel.k === 'part' && it.pts) { it.pts = it.pts.map(q => [+(q[0] * k).toFixed(3), +(q[1] * k).toFixed(3)]); it.h = +clamp(it.h * k, 0.5, 40).toFixed(2); } else if (sel.k === 'part') { const D = MD.PART[it.k], q = D.main, mn = D.p[q][1], mx = D.p[q][2]; it[q] = +clamp(it[q] * k, mn, mx).toFixed(2); } else if (sel.k === 'floor') { it.w = +(it.w * k).toFixed(2); it.d = +(it.d * k).toFixed(2); } else it.h = +(it.h * k).toFixed(2); }); }
 function snapGround() {   // End: move the selection so its lowest point meets the LOWEST ground under its footprint (sinks into slopes, no gap below)
   const it = find(sel), b = selBox && selBox.box; if (!it || !b || b.isEmpty() || sel.k === 'floor' || sel.k === 'room') return;
-  if (sel.k === 'obj' && (it.t === 'ring' || it.t === 'light' || MD.AREA.has(it.t))) return;
+  if (sel.k === 'obj' && (it.t === 'ring' || it.t === 'light' || it.t === 'water' || MD.AREA.has(it.t))) return;
   const d = sel.k === 'obj' ? (it.t === 'pn_wall' ? { ex: (it.L || 4) / 2, ez: (it.T || 0.3) / 2 } : dim(it)) : null, pts = [];
   if (d && !it.rx && !it.rz && !it.tl) { const c = Math.cos(it.rot || 0), sn = Math.sin(it.rot || 0);   // true (rotated) footprint
     for (let i = 0; i <= 6; i++) for (let j = 0; j <= 6; j++) { const lx = (i / 3 - 1) * d.ex, lz = (j / 3 - 1) * d.ez; pts.push([it.x + lx * c + lz * sn, it.z - lx * sn + lz * c]); } }
@@ -1193,6 +1229,7 @@ function pnFields(it) {
     fld('Tilt (deg, roof)', it, 'tl', { deg: 1, nullable: 1, ph: '0 = upright' }), fld('Shape', it, 'sh', { type: 'select', items: [['', 'Rectangle'], ['tri', 'Triangle'], ['trap', 'Slanted Top']], get: () => it.sh || '', set: v => { if (v) it.sh = v; else delete it.sh; }, after: () => { resync(); renderSide(); } }),
     it.sh === 'tri' ? fld('Apex Position (0 left • 0.5 middle • 1 right)', it, 'ap', { nullable: 1, ph: '0.5', min: 0, max: 1, step: 0.05 }) : null,
     it.sh === 'trap' ? fld('Right End Height (0..1 of Height)', it, 'hr', { nullable: 1, ph: '0.5', min: 0, max: 1, step: 0.05 }) : null,
+    it.hc && it.hc.length ? el('div', { class: 'row' }, el('label', null, 'Punched cells: ' + it.hc.length), el('button', { class: 'tl-btn', onclick: () => { pushUndo('o'); delete it.hc; resync(); renderSide(); colDirty(); } }, 'Clear Punched')) : null,
     it.ho && it.ho.length ? el('div', { class: 'row' }, el('label', null, 'Openings: ' + it.ho.length), el('button', { class: 'tl-btn', onclick: () => { pushUndo('o'); delete it.ho; resync(); renderSide(); } }, 'Clear Openings')) : null,
     fld('Unbreakable (one solid piece, no cells)', it, 'nb', { type: 'checkbox', get: () => !!it.nb, set: v => { if (v) it.nb = 1; else delete it.nb; }, after: () => { resync(); renderSide(); } }),
     fld('HP per cell', it, 'hp', { nullable: 1, ph: 'material default (' + MD.PN_HP[mat] + ')', min: 1, step: 5 }),
@@ -1200,11 +1237,23 @@ function pnFields(it) {
     el('p', { class: 'note' }, d.nc + ' × ' + d.nr + ' = ' + d.nc * d.nr + ' cells (each ' + (d.L / d.nc).toFixed(2) + ' × ' + (d.H / d.nr).toFixed(2) + ' m) • ' + ((it.m || 'p') === 'g' ? 'HP (whole panel) ' + hp : 'HP ' + hp + ' per cell') + ' • Touching panels in the same group hold each other up — nothing reaching the ground = falls'),
     el('div', { class: 'seg' }, el('button', { class: 'tl-btn', title: 'Cut a 1.4 × 2.4 m door in the middle of the panel (max 4 openings per panel)', onclick: () => pnCut(it, 'door') }, 'Cut Door'),
       el('button', { class: 'tl-btn', title: 'Cut a 1.2 × 1.2 m window, 1 m above the base, with a lit glass pane', onclick: () => pnCut(it, 'window') }, 'Cut Window'),
-      el('button', { class: 'tl-btn' + (PNT.on ? ' on' : ''), title: 'Click a panel to break one cell at a time and see what falls with it', onclick: () => { PNT.on = !PNT.on; if (!PNT.on) PNT.br.clear(); pnTestDraw(); renderSide(); } }, PNT.on ? 'Stop Test Break' : 'Test Break')),
-    PNT.on ? el('p', { class: 'note' }, 'Click a breakable panel = break 1 cell (Shift = 3×3) • red = broken • orange = will fall • not saved to the file') : null];
+      el('button', { class: 'tl-btn' + (PNT.on ? ' on' : ''), title: 'Click a panel to break one cell at a time and see what falls with it', onclick: () => { PNT.on = !PNT.on; PNH.on = false; if (!PNT.on) PNT.br.clear(); pnTestDraw(); renderSide(); } }, PNT.on ? 'Stop Test Break' : 'Test Break'),
+      el('button', { class: 'tl-btn' + (PNH.on ? ' on' : ''), title: 'Click cells to punch holes that are saved in the map (the game starts with them missing)', onclick: () => { PNH.on = !PNH.on; if (PNH.on && PNT.on) { PNT.on = false; PNT.br.clear(); pnTestDraw(); } renderSide(); } }, PNH.on ? 'Stop Punching' : 'Punch Holes')),
+    PNT.on ? el('p', { class: 'note' }, 'Click a breakable panel = break 1 cell (Shift = 3×3) • red = broken • orange = will fall • not saved to the file') : null,
+    PNH.on ? el('p', { class: 'note' }, 'Click a cell on any breakable panel = punch a hole (click again = fill it) • Shift = 3×3 • saved in the map: the game starts with these cells missing (no rubble) • cells left hanging with no support fall at the start like any loose piece') : null];
 }
 // editor test-break: broken cells per panel id (not saved) → red = broken, orange = would fall (same support rules as the game)
 const PNT = { on: false, br: new Map() }, gPnT = new THREE.Group();
+const PNH = { on: false };   // Punch Holes mode: click toggles saved holes (o.hc [col,row])
+function pnHoleHit(o, pt, big) {
+  const d = MD.pnDims(o), F = MD.pnFrame(M, o), D = [pt.x + M.W / 2 - F.B[0], pt.y - F.B[1], pt.z + M.H / 2 - F.B[2]], dot = A => A[0] * D[0] + A[1] * D[1] + A[2] * D[2], u = dot(F.U), w = dot(F.W);
+  const c0 = Math.floor((u + d.L / 2) / (d.L / d.nc)), r0 = Math.floor(w / (d.H / d.nr)); if (c0 < 0 || c0 >= d.nc || r0 < 0 || r0 >= d.nr) return;
+  const cur = new Set((o.hc || []).filter(q => q[0] < d.nc && q[1] < d.nr).map(q => q[1] * d.nc + q[0])), fill = cur.has(r0 * d.nc + c0), R = big ? 1 : 0, bare = Object.assign({}, o, { hc: null });
+  pushUndo('o');
+  for (let a = -R; a <= R; a++) for (let b = -R; b <= R; b++) { const cc = c0 + a, rr = r0 + b, k = rr * d.nc + cc; if (cc < 0 || cc >= d.nc || rr < 0 || rr >= d.nr || !MD.pnExists(bare, d, k)) continue; if (fill) cur.delete(k); else cur.add(k); }
+  if (cur.size) o.hc = [...cur].sort((x, y) => x - y).map(k => [k % d.nc, (k / d.nc) | 0]); else delete o.hc;
+  syncObj(o); changed(); colDirty(); renderSide(); pnTestDraw();
+}
 function pnTestDraw() {
   if (!gPnT.parent && gObjs.parent) gObjs.parent.add(gPnT);
   for (const c of [...gPnT.children]) { gPnT.remove(c); c.geometry.dispose(); }
@@ -1236,6 +1285,7 @@ const TOOLS = [['select', '⬚', 'Select', 'v', 'Click to select, drag to move �
   ['place', '◈', 'Place', 'o', 'Click to place • , . or Shift+wheel = rotate • can be placed on upper floors'],
   ['bd', '🌊', 'Backdrop', 'j', 'Backdrop = land/sea outside the play area (drawn in the game, no collision) • pick a mode in Settings, drag to sculpt/paint/plant • Shift = invert • Shift+wheel or [ ] = brush size • Sea Stack: click = add, Shift+click = remove'],
   ['road', '🛣', 'Road', 'u', 'Click point by point along the road (smooth curve, follows the ground) • double-click/Enter = finish • Backspace = undo point • Esc = cancel • edit later with Select: drag the points, Alt+click = add a point'],
+  ['water', '💧', 'Water', 'h', 'Drag a rectangle = water area (plain click = 12 × 12 m) • the level sits just under the lowest edge • Dig Basin (on) carves a smooth bed • edit later with Select: move/rotate/R scale, PgUp/PgDn or the green arrow = level'],
   ['scatter', '⁘', 'Scatter', 'g', 'Drag to scatter the chosen item (trees, rocks, grass) • Shift = remove items in the circle'],
 ];
 const HINT = Object.fromEntries(TOOLS.map(t => [t[0], t[4]]));
@@ -1287,41 +1337,37 @@ function renderOpts() {
     b.append(h3('Preset'), pal(MD.FLOOR_PRESET, opt.floor, i => { opt.floor = i; opt.fw = MD.FLOOR_PRESET[i].w; renderOpts(); }, 'one'), h3('Settings'), slider('Width', 'fw', 1, 30, 0.5), slider('Height Above Ground', 'fh', 0.5, 15, 0.25),
       MD.FLOOR_PRESET[opt.floor].ramp ? null : check('Drag across: height of the higher end', 'fauto'),
       el('p', { class: 'note', html: MD.FLOOR_PRESET[opt.floor].ramp ? 'Drag from the low end to the high end: a ramp joining the two heights (the top end can sit on a platform)<br>walkable if not steeper than 1.6 per 1' : 'Drag from A to B = bridge spanning both sides • upper floor edges can be stepped onto if no higher than 1.1' }));
+  } else if (tool === 'water') {
+    b.append(h3('Look'), el('select', { class: 'tl-sel', style: 'width:100%', onchange: e => { opt.wk = e.target.value; }, html: MD.WATER_LOOK.map(([k, n]) => `<option value="${k}"${k === opt.wk ? ' selected' : ''}>${n}</option>`).join('') }),
+      h3('Bed'), check('Dig Basin when placing', 'wdig'), slider('Basin Depth (m)', 'wdep', 0.3, 6, 0.1),
+      el('p', { class: 'note' }, 'The water is a flat surface at its Level: ground higher than the level hides it, so the shore follows the ground • off = keep the ground as it is (dig with Sculpt → Lower first) • overlapping areas with the same level + look join into one water • look only: no swimming/slow yet'));
   } else if (tool === 'bd') bdOpts(b);
   else if (tool === 'place' || tool === 'scatter') {
     if (tool === 'scatter') b.append(h3('Scatter'), slider('Size (radius)', 'rad', 0.5, 40, 0.5), slider('Density', 'dens', 0.5, 12, 0.5), slider('Random Scale ±', 'rscale', 0, 0.6, 0.05));
     b.append(check('Random Rotation', 'rrot'));
-    const cats = tool === 'scatter' ? CATS.filter(c => !['sys', 'game', 'mode', 'prefab', 'room', 'deco'].includes(c[0])) : CATS;
-    if (!cats.some(c => c[0] === opt.cat)) opt.cat = cats[0][0];
-    b.append(h3('Library'), el('select', { class: 'tl-sel', style: 'width:100%;margin-bottom:6px', onchange: e => { opt.cat = e.target.value; renderOpts(); }, html: cats.map(([k, n]) => `<option value="${k}"${k === opt.cat ? ' selected' : ''}>${n}${OBJ_CATN(k)}</option>`).join('') }));
+    b.append(h3('Asset'), PJ ? PJ.card(opt.obj) : null);
     const items = OBJ_IN(opt.cat);
-    if (opt.cat === 'sys' || opt.cat === 'game' || opt.cat === 'prim' || opt.cat === 'collide' || opt.cat === 'mode' || opt.cat === 'room' || opt.cat === 'prefab' || opt.cat === 'deco') { b.append(pal(items.map(([t, D]) => ({ n: D.n, c: D.c })), items.findIndex(([t]) => t === opt.obj), i => { opt.obj = items[i][0]; renderOpts(); need(); }, 'one'));
-      const D = OBJ[opt.obj]; if (D && D.note) b.append(el('p', { class: 'note' }, D.note));
-      if (opt.cat === 'collide') b.append(h3('Size'), slider('Width', 'sx', 0.2, 30, 0.1, opt.prim), slider('Height', 'sy', 0.2, 30, 0.1, opt.prim), slider('Depth', 'sz', 0.2, 30, 0.1, opt.prim), el('p', { class: 'note' }, 'Shown red see-through here, invisible in the game • it is a Box/Cylinder with Visible off + Collider on'));
-      if (opt.cat === 'prim') b.append(h3('Size/Color'), slider('Width', 'sx', 0.2, 30, 0.1, opt.prim), slider('Height', 'sy', 0.2, 30, 0.1, opt.prim), slider('Depth', 'sz', 0.2, 30, 0.1, opt.prim), el('div', { class: 'row' }, el('label', null, 'Color'), el('input', { type: 'color', value: opt.prim.c, oninput: e => { opt.prim.c = e.target.value; need(); } }), pickBtn('color', v => { opt.prim.c = v; renderOpts(); }, 'a colour')));
-      if (opt.cat === 'game') b.append(el('p', { class: 'note' }, 'The game adds the models and break system for these (shown as stand-in shapes here)'));
-      if (opt.cat === 'deco') b.append(el('p', { class: 'note' }, 'Decor the game draws itself (hall style): no collision, not in the .glb • boxes/cylinders use materials "castle stone" etc., set in the Inspector'));
-      if (opt.cat === 'prefab') b.append(el('p', { class: 'note' }, items.length ? 'Click to place a room (room centre) • Shift+wheel = rotate 90° • a room = a map named room-…, made/edited like any map' : 'No rooms yet — create a new map whose id starts with room- (flat ground) and place the room’s items in it'));
-      if (opt.cat === 'mode') b.append(el('p', { class: 'note' }, 'Tick "Siege" in Playable Modes, then check the Validation list • the game builds the cores/spawn zones (shown as markers here) • target wall/gate = select a wall and set "Siege Target"'));
-      if (opt.cat === 'room') b.append(el('p', { class: 'note' }, 'Breakable room props (the game draws the real look, boxes here) • tables/benches/rails have adjustable length • Height Above Ground = place on a mezzanine'));
-    } else {
-      const g = el('div', { class: 'kit' });
-      for (const a of items) { const img = el('span', { class: 'ph' }); const bt = el('button', { class: opt.obj === 'kit:' + a.id ? 'on' : '', title: a.name, onclick: () => { opt.obj = 'kit:' + a.id; renderOpts(); need(); } }, img, el('span', null, a.name.split(' · ')[0])); g.append(bt);
-        thumb(a.id).then(u => { if (u) { const im = el('img', { src: u }); img.replaceWith(im); } }); }
-      b.append(g);
-      if (!items.length) b.append(el('p', { class: 'note' }, 'No assets in this category yet'));
-      if (opt.cat === 'user') b.append(el('button', { class: 'tl-btn', style: 'width:100%;margin-top:8px', onclick: addAsset }, '＋ Add Asset (.glb)'), el('p', { class: 'note' }, '.glb file from Blender (1 unit = 1 m, base at the ground) stored in assets/mapkit/'));
-    }
+    { const D = OBJ[opt.obj]; if (D && D.note) b.append(el('p', { class: 'note' }, D.note)); }
+    if (opt.cat === 'collide') b.append(h3('Size'), slider('Width', 'sx', 0.2, 30, 0.1, opt.prim), slider('Height', 'sy', 0.2, 30, 0.1, opt.prim), slider('Depth', 'sz', 0.2, 30, 0.1, opt.prim), el('p', { class: 'note' }, 'Shown red see-through here, invisible in the game • it is a Box/Cylinder with Visible off + Collider on'));
+    if (opt.cat === 'prim') b.append(h3('Size/Color'), slider('Width', 'sx', 0.2, 30, 0.1, opt.prim), slider('Height', 'sy', 0.2, 30, 0.1, opt.prim), slider('Depth', 'sz', 0.2, 30, 0.1, opt.prim), el('div', { class: 'row' }, el('label', null, 'Color'), el('input', { type: 'color', value: opt.prim.c, oninput: e => { opt.prim.c = e.target.value; need(); } }), pickBtn('color', v => { opt.prim.c = v; renderOpts(); }, 'a colour')));
+    if (opt.cat === 'game') b.append(el('p', { class: 'note' }, 'The game adds the models and break system for these (shown as stand-in shapes here)'));
+    if (opt.cat === 'deco') b.append(el('p', { class: 'note' }, 'Decor the game draws itself (hall style): no collision, not in the .glb • boxes/cylinders use materials "castle stone" etc., set in the Inspector'));
+    if (opt.cat === 'prefab') b.append(el('p', { class: 'note' }, items.length ? 'Click to place a room (room centre) • Shift+wheel = rotate 90° • a room = a map named room-…, made/edited like any map' : 'No rooms yet — create a new map whose id starts with room- (flat ground) and place the room’s items in it'));
+    if (opt.cat === 'water') b.append(el('p', { class: 'note' }, 'Placed with its level just under the lowest edge • the Water tool (H) can drag a size + dig a basin'));
+    if (opt.cat === 'mode') b.append(el('p', { class: 'note' }, 'Tick "Siege" in Playable Modes, then check the Validation list • the game builds the cores/spawn zones (shown as markers here) • target wall/gate = select a wall and set "Siege Target"'));
+    if (opt.cat === 'room') b.append(el('p', { class: 'note' }, 'Breakable room props (the game draws the real look, boxes here) • tables/benches/rails have adjustable length • Height Above Ground = place on a mezzanine'));
+    b.append(el('p', { class: 'note', html: tool === 'scatter' ? 'Pick a model in the <b>Project</b> window (bottom) — game points / markers can’t be scattered (dimmed)' : 'Pick an asset in the <b>Project</b> window (bottom), then click the Scene • or drag the asset from the Project window straight into the Scene' }));
   }
+  if (PJ) PJ.sync();
 }
 const OBJ_IN = cat => cat === 'prefab' ? list.filter(m => MD.isRoomId(m.id) && (!M || m.id !== M.id)).map(m => ['room:' + m.id, { n: m.name, c: '#c9a86a' }]) : cat === 'deco' || cat === 'sys' || cat === 'game' || cat === 'prim' || cat === 'collide' || cat === 'mode' || cat === 'room' ? Object.entries(OBJ).filter(([, D]) => D.cat === cat) : KIT.list.filter(a => a.cat === cat);
 const OBJ_CATN = k => { const n = OBJ_IN(k).length; return n ? ' (' + n + ')' : ''; };
-function addAsset() {
+function addAsset(cat = 'user') {
   const inp = el('input', { type: 'file', accept: '.glb' });
   inp.onchange = async () => { const f = inp.files[0]; if (!f) return; const label = prompt('Name shown in the library', f.name.replace(/\.glb$/i, '')); if (label == null) return;
     const name = f.name.replace(/\.glb$/i, '').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
-    try { const r = await (await fetch('/api/mb-asset?name=' + encodeURIComponent(name) + '&label=' + encodeURIComponent(label), { method: 'POST', body: await f.arrayBuffer() })).json(); if (!r.ok) throw new Error(r.err);
-      KIT.tpl.delete(r.asset.id); KIT.thumbs.delete(r.asset.id); KIT.files.delete(r.asset.src); await loadKit(); opt.obj = 'kit:' + r.asset.id; opt.cat = 'user'; renderOpts(); stat('Asset added', 'ok'); } catch (e) { stat('Couldn’t add asset: ' + e.message, 'err'); } };
+    try { const r = await (await fetch('/api/mb-asset?name=' + encodeURIComponent(name) + '&label=' + encodeURIComponent(label) + '&cat=' + encodeURIComponent(cat), { method: 'POST', body: await f.arrayBuffer() })).json(); if (!r.ok) throw new Error(r.err);
+      KIT.tpl.delete(r.asset.id); KIT.thumbs.delete(r.asset.id); KIT.files.delete(r.asset.src); await loadKit(); opt.obj = 'kit:' + r.asset.id; opt.cat = r.asset.cat || 'user'; renderOpts(); if (PJ) PJ.reveal(opt.obj); stat('Asset added: ' + r.asset.name, 'ok'); } catch (e) { stat('Couldn’t add asset: ' + e.message, 'err'); } };
   inp.click();
 }
 
@@ -1355,6 +1401,26 @@ function decoFields(it) {   // inspector rows for dc_* decor
   if (t === 'cloth') F.push(fld('Color', it, 'c', { type: 'color' }));
   return F;
 }
+// ---------- Phase layers (user 2026-11-25): items shown only in some siege phases (e.g. forest → burnt forest after a point falls) ----------
+// pa = from phase (blank = 1), pb = until phase (blank = to the end). Objects (kits/prims) + walls: look + collision. Scene bar "Phase" previews one phase.
+const phOk = (r, o) => o && (r.k === 'wall' || (r.k === 'obj' && isVisual(o)));
+function phSection(box, S) {
+  const L = S.filter(r => phOk(r, find(r))).map(find); if (!L.length) return; const it = L[0];
+  const num = (key, label, ph) => { const i = el('input', { class: 'tl-in', type: 'number', min: 1, step: 1, placeholder: ph, value: it[key] > 0 ? it[key] : '',
+    onchange: () => { const v = i.value === '' ? 0 : Math.max(1, Math.round(+i.value)); pushUndo('o'); for (const o of L) { if (v && !(key === 'pa' && v === 1)) o[key] = v; else delete o[key]; } resync(); renderSide(); changed(); phViewNeed(); } });
+    return el('div', { class: 'row' }, el('label', null, label), i); };
+  const vp = MD.vpOf(it);
+  box.append(section('Phase Layer' + (L.length > 1 ? ' — ' + L.length + ' items' : ''), !!vp, num('pa', 'Show from phase', '1'), num('pb', 'Show until phase', 'to the end'),
+    el('p', { class: 'note' }, (vp ? 'Shown in phases ' + vp[0] + (vp[1] >= 99 ? '+' : '–' + vp[1]) + '. ' : 'Always shown. ') + 'Siege: when core N falls the game goes to phase N+1 and swaps these at once (look + collision). Other modes always use phase 1 • e.g. forest trees "until 1" + burnt trees "from 2" • preview with Phase on the Scene bar')));
+}
+let PV = 0, pvDirty = true; const phViewNeed = () => { pvDirty = true; need(); };
+function phViewApply() {   // hide items outside the previewed phase (flag phHid so other show/hide toggles are left alone)
+  if (!pvDirty && !PV) return; pvDirty = false; const hid = (n, o) => { const v = o && MD.vpOf(o), out = PV > 0 && v && (PV < v[0] || PV > v[1]);
+    if (out && n.visible) { n.visible = false; n.userData.phHid = 1; } else if (!out && n.userData.phHid) { n.visible = true; delete n.userData.phHid; } };
+  const AM = ALLM(), W = new Map(AM.walls.map(w => [w.id, w]));
+  for (const [id, n] of objNode) { const o = find({ k: 'obj', id }); hid(n, o && o.t === 'phg' ? { pa: o.ph || 2 } : o); }   // phase ground marker: shown from its phase
+  for (const n of gWalls.children) hid(n, W.get(n.userData.wid));
+}
 function section(title, open, ...kids) { const d = el('details', { class: 'sec', open }); d.append(el('summary', null, title), ...kids.filter(Boolean)); return d; }
 function renderSide() {
   const box = $('side'); box.textContent = ''; if (!M) return;
@@ -1372,7 +1438,7 @@ function renderSide() {
         el('p', { class: 'note' }, R ? 'Size ' + R.W + ' × ' + R.H + ' m • edit the room’s contents in its own file (every map using it updates) • , . rotate 90° • drag to move' : 'Room not loaded yet (' + it.ref + ')'), btns)); }
     else if (sel.k === 'obj') { const D = OBJ[it.t], a = isKit(it) && KIT.byId.get(kitId(it)), d = dim(it);
       box.append(section((D ? D.n : a ? a.name : it.t), true,
-        fld('Position X', it, 'x'), fld('Position Z', it, 'z'), it.t === 'light' || it.t === 'ring' || MD.isDeco(it.t) ? fld('Height Above Ground', it, 'y') : fld('Height Above Ground', it, 'y', { ph: '0 (negative = sunk)' }), fld('Rotation (deg)', it, 'rot', { deg: 1 }),
+        fld('Position X', it, 'x'), fld('Position Z', it, 'z'), it.t === 'water' ? null : it.t === 'light' || it.t === 'ring' || MD.isDeco(it.t) ? fld('Height Above Ground', it, 'y') : fld('Height Above Ground', it, 'y', { ph: '0 (negative = sunk)' }), fld('Rotation (deg)', it, 'rot', { deg: 1 }),
         tiltOk(it) ? fld('Tilt X (deg)', it, 'rx', { deg: 1, ph: '0' }) : null, tiltOk(it) ? fld('Tilt Z (deg)', it, 'rz', { deg: 1, ph: '0' }) : null,
         isKit(it) ? fld('Scale (×)', it, 's', { min: 0.05 }) : null,
         isPrim(it) || it.t === 'house' ? fld(it.t === 'house' ? 'Width (×)' : 'Width', it, 'sx', { min: 0.1 }) : null, isPrim(it) ? fld('Height', it, 'sy', { min: 0.1 }) : null, isPrim(it) || it.t === 'house' ? fld(it.t === 'house' ? 'Depth (×)' : 'Depth', it, 'sz', { min: 0.1 }) : null,
@@ -1386,7 +1452,22 @@ function renderSide() {
         it.t === 'sgItem' ? fld('Tier (1-3)', it, 'tier', { min: 1, max: 3, step: 1 }) : null,
         it.t === 'brz' ? fld('Who may fly', it, 'tm', { type: 'select', items: [['', 'Both teams'], ['A', 'Attackers only'], ['B', 'Defenders only']], get: () => it.tm || '' }) : null,
         it.t === 'brz' ? fld('Top (m above ground)', it, 'top', { get: () => it.top == null ? 60 : it.top, min: 2 }) : null,
+        it.t === 'phg' ? fld('From phase', it, 'ph', { get: () => it.ph || 2, min: 1, step: 1 }) : null,
+        it.t === 'phg' ? fld('Look', it, 'k', { type: 'select', items: MD.PHG_K, get: () => it.k || 'burn' }) : null,
+        it.t === 'phg' ? fld('Strength (0–1)', it, 'a', { get: () => it.a == null ? 1 : it.a, min: 0, max: 1, step: 0.05 }) : null,
         it.t === 'wind' ? fld('Direction (deg, 0 = +Z)', it, 'dir', { get: () => it.dir || 0, step: 15 }) : null, it.t === 'wind' ? fld('Strength', it, 'str', { get: () => it.str == null ? 8 : it.str, min: 0 }) : null,
+        ...(it.t === 'water' ? [fld('Width (X)', it, 'sx', { min: 1 }), fld('Length (Z)', it, 'sz', { min: 1 }), fld('Level (m, absolute)', it, 'y', { step: 0.05 }),
+          fld('Look (preset)', it, 'k', { type: 'select', items: MD.WATER_LOOK, get: () => it.k || 'lake', set: v => { it.k = v; for (const q of MD.WATER_OPT) delete it[q]; }, after: () => { resync(); renderSide(); } }),
+          h3('Water Colour + Waves'),
+          fld('Shallow Colour (edge)', it, 'cs', { type: 'color', get: () => it.cs || (MD.WATER_DEF[it.k] || MD.WATER_DEF.lake).sh }),
+          fld('Deep Colour (middle)', it, 'cd', { type: 'color', get: () => it.cd || (MD.WATER_DEF[it.k] || MD.WATER_DEF.lake).dp }),
+          fld('Clarity (0 murky – 1 clear)', it, 'cl', { get: () => it.cl != null ? it.cl : (MD.WATER_DEF[it.k] || MD.WATER_DEF.lake).cl, min: 0, max: 1, step: 0.05 }),
+          fld('Wave Height (×, 0 = still)', it, 'wh', { get: () => it.wh != null ? it.wh : 1, min: 0, max: 4, step: 0.1 }),
+          fld('Wave Speed (×)', it, 'ws', { get: () => it.ws != null ? it.ws : 1, min: 0, max: 4, step: 0.1 }),
+          fld('Foam (×)', it, 'fo', { get: () => it.fo != null ? it.fo : 1, min: 0, max: 3, step: 0.1 }),
+          el('button', { class: 'tl-btn', title: 'Clear the colour/wave changes: back to the Look preset', onclick: () => editSel(o => { for (const q of MD.WATER_OPT) delete o[q]; }) }, 'Reset to Look'),
+          el('div', { class: 'seg' }, el('button', { class: 'tl-btn', title: 'Level = just under the lowest ground along the edge', onclick: () => editSel(o => { o.y = MD.waterAutoLevel(M, o); }) }, 'Auto Level'),
+            el('button', { class: 'tl-btn', title: 'Carve a smooth oval bed (Basin Depth in the Water tool settings) — only lowers the ground', onclick: () => { pushUndo('a'); waterDigNow(it); syncObj(it); } }, 'Dig Basin ' + opt.wdep + ' m'))] : []),
         MD.AREA.has(it.t) ? fld('Width (X)', it, 'sx', { min: 1 }) : null, MD.AREA.has(it.t) ? fld('Length (Z)', it, 'sz', { min: 1 }) : null,
         it.t === 'lz' ? fld('Indoor strength (0-1)', it, 'k', { get: () => it.k == null ? 1 : it.k, min: 0, max: 1, step: 0.05 }) : null,
         it.t === 'ceil' ? fld('Only for players lower than (m)', it, 'zmax', { nullable: 1, ph: 'everyone', min: 0 }) : null,
@@ -1425,6 +1506,7 @@ function renderSide() {
     box.append(section('Group' + (S.length > 1 ? ' — ' + S.length + ' selected' : ''), true, el('div', { class: 'row' }, el('label', null, 'Hierarchy group'), inp, dl),
       el('div', { class: 'seg' }, el('button', { class: 'tl-btn', title: 'Ctrl+G', onclick: grpNew }, 'New Group'), cur ? el('button', { class: 'tl-btn', title: 'Ctrl+Shift+G', onclick: () => grpSet('', S) }, 'Ungroup') : null, cur ? el('button', { class: 'tl-btn', onclick: () => grpSelect(cur) }, 'Select Group') : null),
       el('p', { class: 'note' }, 'Folders in the Hierarchy only (the game ignores them) • type a name to move the selection into that group')));
+    phSection(box, S);
     const PW = S.map(find).filter(o => o && o.t === 'pn_wall');   // whole house / group at once (same as a panel's Unbreakable)
     if (PW.length > 1) { const all = PW.every(o => o.nb), cb = el('input', { type: 'checkbox', checked: all, onchange: () => { pushUndo('o'); for (const o of PW) { if (cb.checked) o.nb = 1; else delete o.nb; syncObj(o); } renderSide(); changed(); } });
       box.lastChild.append(el('label', { class: 'chk', title: 'Breakable panels in the selection become one solid piece each (same as Unbreakable on a single panel)' }, cb, 'Unbreakable — ' + PW.length + ' breakable panels in the selection' + (all || !PW.some(o => o.nb) ? '' : ' (some)'))); } }
@@ -1471,7 +1553,7 @@ function applySky() {
 }
 
 // ================= save / load =================
-function stat(t, cls) { const s = $('stat'); s.textContent = t; s.className = cls || ''; }
+function stat(t, cls) { const s = $('stat'); s.textContent = t; s.className = cls || ''; if (PJ && t !== 'Unsaved' && t !== 'Exporting…') PJ.log(t, cls); }
 function changed() { hierSoon(); dirty = true; GD = null; stat('Unsaved', 'warn'); clearTimeout(saveT); if (online && M.id) saveT = setTimeout(save, 4000); need(); }
 async function save() {
   clearTimeout(saveT); if (!M) return false;
@@ -1489,7 +1571,7 @@ async function refreshVer() {   // top bar: map version here vs on GitHub (Pages
   s.title = ['Map = version exported on this machine (assets/manifest.json)', 'Last commit = ' + v(r.head), 'Remote = version on GitHub (origin/main = what the online game loads)',
     r.err ? 'Couldn’t reach GitHub: ' + r.err : r.fetched ? 'Checked ' + new Date(r.fetched * 1000).toLocaleTimeString('th-TH') : '', 'Click to check again'].filter(Boolean).join('\n');
 }
-async function refreshList() { try { const r = await (await fetch('/api/mb-list')).json(); list = r.maps || []; online = true; } catch (e) { online = false; list = []; } renderList(); refreshVer(); }
+async function refreshList() { try { const r = await (await fetch('/api/mb-list')).json(); list = r.maps || []; online = true; } catch (e) { online = false; list = []; } renderList(); refreshVer(); if (PJ) PJ.render(); }
 function renderList() { const s = $('mapSel'); s.innerHTML = ''; const ids = new Set(list.map(m => m.id));
   if (M && M.id && !ids.has(M.id)) s.append(el('option', { value: M.id }, M.name));
   for (const m of list) s.append(el('option', { value: m.id }, (M && m.id === M.id ? M.name : m.name) + (m.game ? '  ✓ in game' : '')));
@@ -1499,7 +1581,7 @@ async function openMap(id) {
   try { const r = await (await fetch('/api/mb?id=' + id)).json(); if (!r.ok) throw new Error(r.err); setMap(MD.unpack(r.map)); localStorage.setItem('mb_last', id); stat('Opened', 'ok'); refreshVer(); } catch (e) { stat('Couldn’t open: ' + e.message, 'err'); }
 }
 function setMap(m) {
-  M = m; sel = null; msel = []; undo = []; redo = []; draft = null; PNT.br.clear(); dirty = false; GD = null;
+  M = m; sel = null; msel = []; undo = []; redo = []; draft = null; PNT.br.clear(); PNH.on = false; dirty = false; GD = null;
   buildTerrain(); buildBd(); applySky(); syncAll(); fit(); renderList(); renderSide(); renderOpts();
   if (M.rooms && M.rooms.length) loadRooms().then(() => { if (M === m) { syncAll(); renderSide(); } });   // room prefabs (room-*.json)
   for (const o of M.objs) if (isKit(o)) kitTpl(kitId(o)).then(() => { clearTimeout(setMap.t); setMap.t = setTimeout(() => { if (M === m) { syncObjs(); updSel(); colDirty(); } }, 60); });
@@ -1510,18 +1592,46 @@ function dlg(title, body, okText, onOk) {
   d.append(el('h2', null, title), body, err, el('div', { class: 'btns' }, el('button', { class: 'tl-btn', onclick: () => d.close() }, 'Cancel'), el('button', { class: 'tl-btn pri', onclick: async () => { try { const r = await onOk(); if (r !== false) d.close(); } catch (e) { err.textContent = e.message; } } }, okText)));
   d.showModal();
 }
+// New Map: everything the Map panel / Playable Modes / Backdrop set, chosen before the map exists (user 2026-11-25)
+const NEW_SIZES = [['s', 'Small (80 × 50)', 80, 50], ['m', 'Medium (120 × 75)', 120, 75], ['l', 'Large (150 × 90)', 150, 90], ['xl', 'Huge (200 × 130)', 200, 130], ['c', 'Custom', 0, 0]];
+const NEW_TERR = [['flat', 'Flat'], ['hills', 'Gentle Hills'], ['bowl', 'Valley (raised edges)'], ['plateau', 'Plateau (high middle)']];
+function newTerrain(m, k, seed) {   // starting ground shape (walkable slopes, sculpt from there)
+  if (k === 'flat') return; const { nx, ny, W, H } = m, fb = (x, z) => { let v = 0, a = 1, t = 0, f = 1; for (let i = 0; i < 3; i++) { v += a * MD.vnoise(x * f + seed * 13, z * f - seed * 7); t += a; a *= 0.5; f *= 2.1; } return v / t; };
+  const ss = t => t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t);
+  for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) { const x = i * MD.C, z = j * MD.C, ex = Math.abs(x / W - 0.5) * 2, ez = Math.abs(z / H - 0.5) * 2, e = Math.max(ex, ez); let h = 0;
+    if (k === 'hills') h = (fb(x * 0.025, z * 0.025) - 0.5) * 11;
+    else if (k === 'bowl') h = 6 * ss((e - 0.55) / 0.45) + (fb(x * 0.03, z * 0.03) - 0.5) * 1.5;
+    else if (k === 'plateau') h = 4 * (1 - ss((e - 0.35) / 0.4)) + (fb(x * 0.03, z * 0.03) - 0.5) * 1.2;
+    m.hg[j * nx + i] = +h.toFixed(2); }
+}
 function newDlg() {
-  const v = { name: 'New Map', id: '', W: 100, H: 70, surf: 0 }, body = el('div');
-  const f = (label, key, type, extra) => { const i = el('input', Object.assign({ class: 'tl-in', type: type || 'text', value: v[key], oninput: () => { v[key] = type === 'number' ? +i.value : i.value; } }, extra || {})); body.append(el('div', { class: 'row' }, el('label', null, label), i)); return i; };
-  f('Name', 'name'); f('id (English)', 'id', 'text', { placeholder: 'e.g. cliffs' }); f('Width (m)', 'W', 'number', { min: 30, max: 260, step: 10 }); f('Length (m)', 'H', 'number', { min: 30, max: 260, step: 10 });
-  body.append(el('div', { class: 'row' }, el('label', null, 'Starting Ground'), el('select', { class: 'tl-sel', onchange: e => { v.surf = +e.target.value; }, html: SURF.map((s, i) => `<option value="${i}">${s.n}</option>`).join('') })),
-    el('p', { class: 'note', html: 'Size guide: castle courtyard 80×50 (small) • hall 120×75 • meadow 150×90 (large)<br>2–6 players, longer side 100–150 recommended' }));
+  const v = { name: 'New Map', id: '', desc: '', size: 'm', W: 120, H: 75, surf: 0, terr: 'flat', sky: 'day', style: '', music: '', modes: ['coop', 'ffa', 'duel', 'tdm'], random: 0, autoProps: 1, skirt: 40, bd: '' }, body = el('div', { class: 'newmap', style: 'max-height:70vh;overflow-y:auto;min-width:380px;padding-right:6px' });
+  const row = (label, ...c) => el('div', { class: 'row' }, el('label', null, label), ...c);
+  const inp = (key, type, extra) => { const i = el('input', Object.assign({ class: 'tl-in', type: type || 'text', value: v[key], oninput: () => { v[key] = type === 'number' ? +i.value : i.value; } }, extra || {})); return i; };
+  const sel = (key, items, after) => el('select', { class: 'tl-sel', onchange: e => { v[key] = e.target.value; if (after) after(); }, html: items.map(([k, n]) => `<option value="${k}"${String(k) === String(v[key]) ? ' selected' : ''}>${n}</option>`).join('') });
+  const wI = inp('W', 'number', { min: 30, max: 260, step: 10 }), hI = inp('H', 'number', { min: 30, max: 260, step: 10 }), sizeRow = row('Width × Length (m)', wI, hI);
+  const sizeSync = () => { const S = NEW_SIZES.find(q => q[0] === v.size); if (S && S[2]) { v.W = S[2]; v.H = S[3]; wI.value = v.W; hI.value = v.H; } sizeRow.style.display = v.size === 'c' ? '' : 'none'; };
+  const modes = el('div', { class: 'pal' }); for (const [k, n] of MD.MODES) { const c = el('input', { type: 'checkbox', checked: v.modes.includes(k), onchange: () => { v.modes = MD.MODES.map(m => m[0]).filter(m => m === k ? c.checked : v.modes.includes(m)); } }); modes.append(el('label', { class: 'chk' }, c, n)); }
+  const chk = (key, label) => { const c = el('input', { type: 'checkbox', checked: !!v[key], onchange: () => { v[key] = c.checked ? 1 : 0; } }); return el('label', { class: 'chk' }, c, label); };
+  body.append(h3('Map'), row('Name', inp('name')), row('id (English)', inp('id', 'text', { placeholder: 'e.g. cliffs' })), row('Description', inp('desc', 'text', { placeholder: 'shown in the lobby' })),
+    h3('Size + Ground'), row('Size', sel('size', NEW_SIZES.map(q => [q[0], q[1]]), sizeSync)), sizeRow,
+    row('Starting Ground', sel('surf', SURF.map((q, i) => [i, q.n]))), row('Starting Shape', sel('terr', NEW_TERR)),
+    row('Backdrop', sel('bd', [['', '(none)'], ...BD.BD_PRESETS])),
+    h3('Look'), row('Sky', sel('sky', MD.SKY)), row('Main Style', sel('style', MD.STYLE)), row('Music', sel('music', MD.MUSIC.map(m => [m, m || '(default)']))), row('Outer Border (m)', inp('skirt', 'number', { min: 0, step: 5 })),
+    h3('Playable Modes'), modes, chk('random', 'In the random map pool'), chk('autoProps', 'Let the game place crates/barrels randomly (if none placed)'),
+    el('p', { class: 'note', html: 'Everything here can be changed later in the Inspector (Map, Playable Modes) and the Backdrop tool<br>2–6 players: longer side 100–150 recommended' }));
+  sizeSync();
   dlg('New Map', body, 'Create', async () => {
     const id = v.id.trim().toLowerCase(); if (!/^[a-z0-9][a-z0-9_-]{0,40}$/.test(id)) throw new Error('id Only a-z 0-9 _ - allowed');
     if (list.some(m => m.id === id)) throw new Error('That id already exists');
+    if (!v.modes.length) throw new Error('Tick at least one Playable Mode');
     const W = clamp(Math.round(v.W), 30, 260), H = clamp(Math.round(v.H), 30, 260);
     if (dirty) await save();
-    const m = MD.newMap({ id, name: v.name || id, W, H, surf: v.surf }); setMap(m); if (!await save()) throw new Error($('stat').textContent); await refreshList();
+    const m = MD.newMap({ id, name: v.name || id, W, H, surf: +v.surf });
+    Object.assign(m, { desc: v.desc || '', sky: v.sky, music: v.music, modes: v.modes.slice(), random: v.random, autoProps: v.autoProps, skirt: Math.max(0, +v.skirt || 0) }); if (v.style) m.style = v.style;
+    newTerrain(m, v.terr, Math.random() * 50);
+    setMap(m); if (v.bd) bdCreate(v.bd, 1 + Math.floor(Math.random() * 999));
+    if (!await save()) throw new Error($('stat').textContent); await refreshList();
   });
 }
 function resizeDlg() {
@@ -1550,12 +1660,12 @@ async function buildExport() {
   const G = gameData(), sc = new THREE.Scene(), R = new THREE.Group(); R.name = 'mb_root'; R.position.set(-M.W / 2, 0, -M.H / 2); sc.add(R);
   R.add(groundExport());
   // static meshes merge per material AND style (userData.style on the merged node → game style presets, MAP-STANDARD §1.5)
-  const bucket = new Map(), put = (mesh, geo, st) => { st = st || M.style || ''; const k = mesh.material.uuid + '|' + st; if (!bucket.has(k)) bucket.set(k, { m: mesh.material, g: [], st }); bucket.get(k).g.push(geo); };
+  const bucket = new Map(), put = (mesh, geo, st, vp) => { st = st || M.style || ''; const k = mesh.material.uuid + '|' + st + '|' + (vp || ''); if (!bucket.has(k)) bucket.set(k, { m: mesh.material, g: [], st, vp }); bucket.get(k).g.push(geo); };   // vp = phase layer (own node per range)
   const AM = ALLM(), styleOf = (k, id) => { const it = (k === 'wall' ? AM.walls : k === 'floor' ? AM.floors : AM.parts).find(q => q.id === id); return it && it.style; };
   let tris = 0;
   for (const w of gWalls.children) { const wd = AM.walls.find(q => q.id === w.userData.wid); if (wd && (wd.sg || wd.sys === 'fence' || wd.vis === 0)) continue;   // siege targets + burnable fences: the game draws them
-    const gi = G.brkOf.get('w' + w.userData.wid + ':' + w.userData.ci), st = styleOf('wall', w.userData.wid) || M.style;
-    if (gi != null) { const c = new THREE.Mesh(w.geometry, w.material); c.name = w.name; c.userData = { brk: gi }; if (st) c.userData.style = st; R.add(c); } else put(w, w.geometry, st); }
+    const gi = G.brkOf.get('w' + w.userData.wid + ':' + w.userData.ci), st = styleOf('wall', w.userData.wid) || M.style, vp = wd && MD.vpOf(wd);
+    if (gi != null) { const c = new THREE.Mesh(w.geometry, w.material); c.name = w.name; c.userData = { brk: gi }; if (st) c.userData.style = st; if (vp) c.userData.vp = vp; R.add(c); } else put(w, w.geometry, st, vp); }
   for (const f of gFloors.children) { const fd = AM.floors.find(q => q.id === f.userData.wid); if (fd && fd.vis === 0) continue; f.updateMatrix(); put(f, f.geometry.clone().applyMatrix4(f.matrix), styleOf('floor', f.userData.wid)); }
   const flat = g => { g = g.index ? g.toNonIndexed() : g; g.deleteAttribute('uv'); return g; };   // same attribute set as the hand-made wall/floor geometry so they merge
   for (const g of gParts.children) for (const nd of g.children) {
@@ -1565,9 +1675,9 @@ async function buildExport() {
     if (gi != null) { const c = nd.clone(true); c.userData = { brk: gi }; if (pst || M.style) c.userData.style = pst || M.style; c.name = 'part_' + o.id; c.traverse(m => { if (m !== c) m.userData = {}; }); R.add(c); }
     else { nd.updateMatrix(); nd.traverse(m => { if (m.isMesh) put(m, flat(m.geometry.clone().applyMatrix4(nd.matrix)), pst); }); }
   }
-  let n = 0; for (const b of bucket.values()) { const g = b.g.length > 1 ? mergeGeometries(b.g, false) : b.g[0]; const m = new THREE.Mesh(g, b.m); m.name = 'mb_static_' + (n++); if (b.st) m.userData.style = b.st; R.add(m); }
+  let n = 0; for (const b of bucket.values()) { const g = b.g.length > 1 ? mergeGeometries(b.g, false) : b.g[0]; const m = new THREE.Mesh(g, b.m); m.name = 'mb_static_' + (n++); if (b.st) m.userData.style = b.st; if (b.vp) m.userData.vp = b.vp; R.add(m); }
   for (const o of AM.objs) { if (!isVisual(o) || o.vis === 0 || (isKit(o) && !tplNow(kitId(o)))) continue; const src = objNode.get(o.id); if (!src) continue; const c = src.clone(true); const a = isKit(o) && KIT.byId.get(kitId(o));
-    c.userData = {}; const gi = G.brkOf.get('o' + o.id); if (gi != null) c.userData.brk = gi; c.traverse(m => { if (m !== c) m.userData = {}; if (m.isMesh && ((a && a.ns) || o.glow)) m.userData.ns = 1; }); R.add(c); }
+    c.userData = {}; const gi = G.brkOf.get('o' + o.id), vp = MD.vpOf(o); if (gi != null) c.userData.brk = gi; if (vp) c.userData.vp = vp; c.traverse(m => { if (m !== c) m.userData = {}; if (m.isMesh && ((a && a.ns) || o.glow)) m.userData.ns = 1; }); R.add(c); }
   sc.updateMatrixWorld(true); sc.traverse(o => { if (o.isMesh) tris += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count) / 3; });
   const glb = await new GLTFExporter().parseAsync(sc, { binary: true });
   return { G, glb, tris: Math.round(tris) };
@@ -1613,7 +1723,7 @@ function frame(t) {
   if (fly.size && drag && drag.k === 'orbit') { camera.getWorldDirection(v3); v3.y = 0; v3.normalize(); const sp = Math.max(8, cam.dist * 0.9) * dt * (fly.fast ? 3 : 1), fw = (fly.has('KeyW') ? 1 : 0) - (fly.has('KeyS') ? 1 : 0), rt = (fly.has('KeyD') ? 1 : 0) - (fly.has('KeyA') ? 1 : 0);
     { const L = bdLim(); cam.x = clamp(cam.x + (v3.x * fw - v3.z * rt) * sp, L.x0, L.x1); cam.z = clamp(cam.z + (v3.z * fw + v3.x * rt) * sp, L.z0, L.z1); } if (fly.has('KeyE')) cam.dist *= 1 + dt; if (fly.has('KeyQ')) cam.dist = Math.max(3, cam.dist * (1 - dt * 0.9)); camApply(); }
   if (!dirtyView) return; dirtyView = false;
-  drawRing(); updGhost(); updPartGhost(); gCol.visible = show.col; renderer.render(scene, camera);
+  drawRing(); updGhost(); updPartGhost(); phViewApply(); gCol.visible = show.col; renderer.render(scene, camera);
 }
 
 // Capture the current view as PNG: helpers hidden, up to 2x resolution (max 4096 px); download + copy to shots/ when online
@@ -1647,9 +1757,12 @@ $('oSteep').onchange = e => { show.steep = e.target.checked; updTerrain(0, 0, M.
 $('oCol').onchange = e => { show.col = e.target.checked; buildCol(); need(); };
 $('oArea').onchange = e => { show.area = e.target.checked; gObjs.traverse(m => { if (m.userData.area) m.visible = show.area; }); need(); };
 $('oGrid').onchange = e => { show.grid = e.target.checked; buildGrid(); need(); };
+$('phView').onchange = e => { PV = +e.target.value; phViewNeed(); };
 $('oSky').onchange = e => { show.sky = e.target.checked; applySky(); };
 addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
-window.__mb = { get M() { return M; }, gameView, gameViewClose, get RX() { return RX; }, loadRooms, MD, opt, placePart, syncParts, partNode, gParts, castleProto, cam, camApply, setTool, gameData, buildExport, exportGame, save, setMap, syncAll, need, kitTpl, KIT, get sel() { return sel; }, set sel(v) { sel = v; renderSide(); updSel(); }, pushUndo, changed, colDirty, updTerrain, afterTerrain, applyRamp, makeFloor, placeObj, doUndo };
+window.__mb = { get M() { return M; }, get tool() { return tool; }, makeWater, pnHoleHit, gameView, gameViewClose, get RX() { return RX; }, loadRooms, MD, opt, placePart, syncParts, partNode, gParts, castleProto, cam, camApply, setTool, gameData, buildExport, exportGame, save, setMap, syncAll, need, kitTpl, KIT, get sel() { return sel; }, set sel(v) { sel = v; renderSide(); updSel(); }, pushUndo, changed, colDirty, updTerrain, afterTerrain, applyRamp, makeFloor, placeObj, doUndo };
+PJ = initProject({ items: cat => OBJ_IN(cat), cur: () => opt.obj, pick: pickAsset, dragStart: (t, cat) => { opt.obj = t; opt.cat = cat; if (tool !== 'place') setTool('place'); else renderOpts(); },
+  dragEnd: () => { hover = null; need(); }, thumb, tool: () => tool, visual: isVisualType, importAsset: addAsset, reloadKit: async () => { await loadKit(); renderOpts(); stat('Asset library reloaded', 'ok'); }, need });
 (async () => {
   renderTools(); $('hint').textContent = HINT[tool];
   await Promise.all([loadKit(), refreshList()]);

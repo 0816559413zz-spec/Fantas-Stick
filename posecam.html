@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ท่า + กล้อง — Fantas Stick</title>
+<!-- Pose + Camera tool: pose the player model (clips, preset poses, bone gizmo) and fly a free camera; save camera shots.
+     Saves posecam/<id>.json + <id>_<shot>.jpg + <id>.md + posecam/POSECAM.md via tools/serve.py. Code: hub/posecam.js -->
+<link rel="stylesheet" href="hub/tool-ui.css">
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.min.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
+<style>
+html,body{margin:0;height:100%}
+body{display:flex;flex-direction:column;overflow:hidden}
+.tl-bar input.nm{width:200px}
+#stat{color:var(--tx2);font-size:12px;white-space:nowrap}
+#stat.err{color:var(--serr)}#stat.ok{color:var(--sok)}
+main{flex:1;display:flex;min-height:0}
+.pan{width:270px;background:var(--bg1);border-right:1px solid var(--ln);overflow:auto;padding:4px 0}
+#right{border-right:0;border-left:1px solid var(--ln);width:300px}
+.sec{padding:8px 12px;border-bottom:1px solid var(--ln)}
+.sec h3{margin:0 0 6px;font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em}
+.row{display:flex;align-items:center;gap:6px;margin:5px 0}
+.row>label{width:78px;color:var(--tx2);font-size:12px;flex:none}
+.row .tl-sel,.row .tl-in{flex:1;min-width:0;padding:3px 6px}
+.row input[type=range]{flex:1;min-width:0;accent-color:var(--acc)}
+.row .v{width:44px;text-align:right;font:12px var(--fu);color:var(--tx2)}
+.seg{display:flex;flex:1}.seg .tl-btn{flex:1;border-radius:0;margin-left:-1px;padding:3px 6px}.seg .tl-btn:first-child{border-radius:var(--r) 0 0 var(--r);margin-left:0}.seg .tl-btn:last-child{border-radius:0 var(--r) var(--r) 0}
+.btns{display:flex;flex-wrap:wrap;gap:4px}.btns .tl-btn{padding:3px 8px}
+.ck{display:flex;align-items:center;gap:6px;color:var(--tx2);font-size:12px;cursor:pointer}
+#bones{display:grid;grid-template-columns:1fr 1fr;gap:3px}
+#bones .tl-btn{padding:2px 6px;font-size:12px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#bones .tl-btn.ed{border-color:var(--swarn)}
+.hint{color:var(--tx3);font-size:11px;line-height:1.5}
+#view{flex:1;position:relative;display:flex;align-items:center;justify-content:center;background:var(--bg0);min-width:0}
+#frame{position:relative;box-shadow:0 0 0 1px var(--ln2)}
+#frame canvas{display:block;outline:none}
+#thirds{position:absolute;inset:0;pointer-events:none;display:none}
+#thirds.on{display:block}
+#thirds i{position:absolute;background:rgba(255,255,255,.18)}
+#ov{position:absolute;left:8px;top:8px;font:12px var(--fu);color:var(--tx2);background:rgba(0,0,0,.45);padding:3px 7px;border-radius:var(--r);pointer-events:none;white-space:pre}
+#ovShot{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);font-size:13px;color:#fff;background:rgba(0,0,0,.55);padding:4px 12px;border-radius:var(--r);pointer-events:none;display:none}
+#shots{display:flex;flex-direction:column;gap:6px}
+.shot{border:1px solid var(--ln2);border-radius:var(--r);background:var(--bg2);padding:6px}
+.shot.cur{border-color:var(--acc)}
+.shot img,.shot .noimg{width:100%;aspect-ratio:16/9;display:block;border-radius:2px;background:var(--bg0);cursor:pointer;object-fit:cover}
+.shot .noimg{display:flex;align-items:center;justify-content:center;color:var(--tx3);font-size:11px}
+.shot .tl-in{width:100%;padding:3px 6px;margin-top:5px}
+.shot .r{display:flex;gap:4px;align-items:center;margin-top:5px;font-size:11px;color:var(--tx3)}
+.shot .r .tl-in{width:48px;margin:0;padding:2px 4px}
+.shot .r .tl-sel{padding:2px 4px;flex:1;min-width:0}
+.shot .r .tl-btn{padding:2px 7px;font-size:12px}
+.shot textarea{width:100%;margin-top:5px;font:12px var(--ui);color:var(--tx);background:var(--bg1);border:1px solid var(--ln2);border-radius:var(--r);padding:4px 6px;resize:vertical;min-height:28px}
+#load{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--tx2);pointer-events:none}
+</style>
+</head><body>
+<div class="tl-bar">
+  <a class="tl-home" href="hub.html">◂ Tool</a>
+  <h1>ท่า + กล้อง</h1>
+  <input class="tl-in nm" id="name" placeholder="ชื่อชุด เช่น หน้าเลือกธาตุ">
+  <select class="tl-sel" id="open"><option value="">เปิดชุดเดิม…</option></select>
+  <button class="tl-btn" id="bNew">ใหม่</button>
+  <button class="tl-btn pri" id="bSave">บันทึก (Ctrl+S)</button>
+  <span id="stat"></span>
+  <span class="sp"></span>
+  <span class="hint">ซ้ายลาก = หมุนรอบ • ขวาลาก = เลื่อน • ล้อ = ซูม • คลิกจุดฟ้า = เลือกข้อต่อ</span>
+</div>
+<main>
+<div class="pan" id="left">
+  <div class="sec"><h3>ท่าเคลื่อนไหว</h3>
+    <div class="row"><label>คลิป</label><select class="tl-sel" id="clip"></select><button class="tl-btn" id="bPlay" style="padding:3px 9px">⏸</button></div>
+    <div class="row"><label>เวลา</label><input type="range" id="time" min="0" max="1" step="0.001" value="0"><span class="v" id="timeV">0.00</span></div>
+    <div class="row"><label>ท่าสำเร็จ</label><select class="tl-sel" id="preset"></select></div>
+    <div class="row"><label>หมุนตัว</label><input type="range" id="ry" min="-180" max="180" step="1" value="0"><span class="v" id="ryV">0°</span></div>
+    <div class="row"><label class="ck"><input type="checkbox" id="orb"> ลูกแก้วมือซ้าย</label><label class="ck"><input type="checkbox" id="wand" checked> ไม้</label></div>
+    <div class="row"><label>ทรงผม</label><select class="tl-sel" id="hair"></select></div>
+  </div>
+  <div class="sec"><h3>ข้อต่อ (จัดท่าเอง)</h3>
+    <div id="bones"></div>
+    <div class="row" style="margin-top:8px"><label>ตัวจับ</label><div class="seg"><button class="tl-btn on" id="gRot">หมุน (R)</button><button class="tl-btn" id="gMove">เลื่อน (G)</button></div></div>
+    <div class="row"><label>แกน</label><div class="seg"><button class="tl-btn on" id="sLoc">ของข้อต่อ</button><button class="tl-btn" id="sWor">โลก</button></div></div>
+    <div class="btns" style="margin-top:6px"><button class="tl-btn" id="bResB">รีเซ็ตข้อนี้</button><button class="tl-btn" id="bResAll">รีเซ็ตที่แก้ทั้งหมด</button><button class="tl-btn" id="bUndo">ย้อน (Ctrl+Z)</button></div>
+    <div class="row"><label class="ck"><input type="checkbox" id="marks" checked> โชว์จุดข้อต่อ</label></div>
+    <div class="hint">แก้ข้อต่อ = ซ้อนทับบนคลิป/ท่าสำเร็จ (เปลี่ยนคลิปแล้วที่แก้ยังอยู่) • เลื่อนได้เฉพาะ ทั้งตัว/สะโพก • Esc = เลิกเลือก</div>
+  </div>
+  <div class="sec"><h3>ฉาก</h3>
+    <div class="row"><label>พื้นหลัง</label><input type="color" id="bg" value="#14131a" style="flex:1;height:24px;background:none;border:1px solid var(--ln2);border-radius:var(--r)"></div>
+    <div class="row"><label class="ck"><input type="checkbox" id="floor" checked> พื้น</label><label class="ck"><input type="checkbox" id="grid" checked> กริด</label><label class="ck"><input type="checkbox" id="th3"> เส้น 3 ส่วน</label></div>
+  </div>
+</div>
+<div id="view"><div id="frame"><div id="thirds"><i style="left:33.33%;top:0;bottom:0;width:1px"></i><i style="left:66.66%;top:0;bottom:0;width:1px"></i><i style="top:33.33%;left:0;right:0;height:1px"></i><i style="top:66.66%;left:0;right:0;height:1px"></i></div><div id="ov"></div><div id="ovShot"></div></div><div id="load">กำลังโหลดตัวละคร…</div></div>
+<div class="pan" id="right">
+  <div class="sec"><h3>กล้อง</h3>
+    <div class="row"><label>โหมด (C)</label><div class="seg"><button class="tl-btn on" id="mOrb">หมุนรอบจุด</button><button class="tl-btn" id="mFly">บินอิสระ</button></div></div>
+    <div class="row"><label>FOV</label><input type="range" id="fov" min="10" max="100" step="1" value="40"><span class="v" id="fovV">40°</span></div>
+    <div class="row"><label>เอียงกล้อง</label><input type="range" id="roll" min="-30" max="30" step="1" value="0"><span class="v" id="rollV">0°</span></div>
+    <div class="row"><label>ความเร็วบิน</label><input type="range" id="spd" min="0.2" max="8" step="0.1" value="1.5"><span class="v" id="spdV">1.5</span></div>
+    <div class="btns"><button class="tl-btn" data-q="front">หน้า</button><button class="tl-btn" data-q="q34">เฉียง</button><button class="tl-btn" data-q="side">ข้าง</button><button class="tl-btn" data-q="back">หลัง</button><button class="tl-btn" data-q="face">ใกล้หน้า</button><button class="tl-btn" data-q="handL">มือซ้าย</button><button class="tl-btn" data-q="handR">มือขวา</button><button class="tl-btn" data-q="low">มุมต่ำ</button></div>
+    <div class="hint" style="margin-top:6px">บินอิสระ: กดขวาค้างแล้วลากเพื่อหันกล้อง • W A S D เดิน • Q/E ลง/ขึ้น • Shift = เร็ว • F = เล็งข้อต่อที่เลือก</div>
+  </div>
+  <div class="sec"><h3>มุมกล้องที่บันทึก</h3>
+    <div class="btns"><button class="tl-btn pri" id="bShot">+ บันทึกมุมนี้ (P)</button><button class="tl-btn" id="bPlayAll">▶ เล่นต่อกัน</button><label class="ck"><input type="checkbox" id="loop"> วน</label></div>
+    <div class="hint" style="margin:6px 0">คลิกรูป = ไปมุมนั้นแบบเคลื่อนกล้อง (เวลา/จังหวะตามช่องของมุมนั้น) • ⟳ = เก็บกล้อง+ท่าตอนนี้ทับ</div>
+    <div id="shots"></div>
+  </div>
+</div>
+</main>
+<script type="module" src="hub/posecam.js"></script>
+</body></html>

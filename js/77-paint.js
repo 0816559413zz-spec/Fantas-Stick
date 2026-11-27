@@ -13,6 +13,7 @@ var PAINT={on:!/[?&]nopaint\b/.test(location.search),cur:null,kit:null,
   kuw:1,kuwR:1.0,shaft:0.2,grass:[1.3,1.28,0.9],ground:[1.5,1.3,0.55],stroke:0.5,strokeHue:0.6,sat:1.32,sun:3.4,
   maps:{'fcs-file':{sky:'clear',fog:['#c4e2f6',320,1300],look:'clear',weather:'clear:100',sun:1.5,hemi:0.55,hemiC:'#cfe2f2',hemiG:'#7e8a62',ground:null},   // siege castle (Map Builder file map), user 2026-11-24: clear day (clear look, neutral sky fill) • coast look steps aside (js/67 backdropLook)
     fcs:{sky:'day',fog:['#b4e0d0',220,1300],look:'paint',weather:'clear:100'},   // old code castle: sky/fog/light only
+    'shibuya-demo':{sky:'night',fog:['#1a2030',35,380],look:'citynight',weather:'rain:100',sun:0.35,sunC:'#9fb2ff',hemi:0.32,hemiC:'#5a6a98',hemiG:'#1e1e28',ground:null},   // rainy city night test map (js/76 weather + reflections)
     forest:{sky:'day',fog:['#9fdccc',30,260],look:'paint',weather:'clear:100',
     back:{near:{col:'#4a8a3c',col2:'#35703a'},trees:{col:['#2f6e3c','#3d8440','#28603a']},mid:{col:'#5f9c88',lit:'#b4dcb0',tint:'#8cc4a6'},
       mist:[{d:235,h:45,col:'#d4f0dc',a:0.6}],far:{col:'#8cbcc0',lit:'#e0f4e0',tint:'#b0dcd0',snow:'#f6fff4'}}}},
@@ -37,7 +38,7 @@ function paintLights(id){
   paintGrass();paintVfx();
   if(!PAINT.cur){PTG.x=0;return;}   // saturation: Look preset (js/74 GFX.sat)
   const mo=PAINT.maps[PAINT.cur]||{};hemi.color.set(mo.hemiC||'#86dcea');hemi.groundColor.set(mo.hemiG||'#4f9a58');hemi.intensity=mo.hemi!==undefined?mo.hemi:LOOK.P.paint.hemi;   // per-map overrides: sun / hemi / exp / ground
-  moonL.color.set('#fff0bc');moonL.intensity=mo.sun!==undefined?mo.sun:PAINT.sun;if(mo.exp!==undefined)gl.toneMappingExposure=mo.exp;GFX.sat=GRADEU.uSat.value=PAINT.sat;
+  moonL.color.set(mo.sunC||'#fff0bc');moonL.intensity=mo.sun!==undefined?mo.sun:PAINT.sun;if(mo.exp!==undefined)gl.toneMappingExposure=mo.exp;GFX.sat=GRADEU.uSat.value=PAINT.sat;
   PAINT.KU.uK.value=PAINT.kuw;PTG.x=PAINT.cel;
 }
 // ---------- VFX สีสด (ทดลอง): บนแมพสว่าง เอฟเฟกต์เรืองแสงเดิมซีดเป็นขาว-เหลืองอ่อน → ดันความสด + กดสีซีดให้เข้ม, ไฟไล่ เหลือง→ส้ม→แดง→ม่วงแดง, แสงฟุ้งเบาลง ----------
@@ -256,9 +257,9 @@ function paintApply(m){return paintPatch(m,true);}
 // tree shape with the shared wind material (any map, paint look or not). Called from buildFileMap before brkSetup/batchStatic.
 function ptreeScene(sc){
   const K=paintKit(),G=new Map(),m4=new THREE.Matrix4();sc.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(sc.matrixWorld).invert();
-  sc.traverse(o=>{if(o.isMesh&&!o.isInstancedMesh&&o.material&&o.material.name==='paint_tree'){let L=G.get(o.geometry);if(!L)G.set(o.geometry,L=[]);L.push(o);}});
+  sc.traverse(o=>{if(o.isMesh&&!o.isInstancedMesh&&o.material&&o.material.name==='paint_tree'){const vp=phOf(o),k=o.geometry.uuid+'|'+(vp||'');let L=G.get(k);if(!L)G.set(k,L=Object.assign([],{geo:o.geometry,vp}));L.push(o);}});   // vp = phase layer (js/28-maps-build): one instanced mesh per range
   let n=0;
-  for(const [geo,L] of G){const im=new THREE.InstancedMesh(geo,K.mat,L.length);im.name='ptree_inst';im.customDepthMaterial=K.dmat;
+  for(const L of G.values()){const geo=L.geo,im=new THREE.InstancedMesh(geo,K.mat,L.length);im.name='ptree_inst';im.customDepthMaterial=K.dmat;if(L.vp)im.userData.vp=L.vp;
     L.forEach((o,i)=>im.setMatrixAt(i,m4.multiplyMatrices(inv,o.matrixWorld)));im.instanceMatrix.needsUpdate=true;im.computeBoundingSphere();
     im.castShadow=L.some(o=>o.castShadow);im.receiveShadow=true;sc.add(im);for(const o of L)o.parent.remove(o);n+=L.length;}
   return n;}
@@ -275,20 +276,41 @@ function paintScene(id,sc){
     else{const ms=Array.isArray(o.material)?o.material:[o.material];
       const gt=PAINT.maps[id].ground!==undefined?PAINT.maps[id].ground:PAINT.ground;if(gt&&/^ground/i.test(nm))for(const m of ms)if(m.color&&!m.userData.ptG){m.userData.ptG=1;m.color.multiply(new THREE.Color(gt[0],gt[1],gt[2]));}   // พื้นหญ้า: เขียวเหลืองสดแบบโดนแดด (สีใบหญ้าตามพื้น)
       ms.forEach(paintApply);}});
-  PAINT.n=n;sc.add(paintShafts());
+  PAINT.n=n;sc.add(paintShafts(sc));
 }
-// ลำแสงลอดใบไม้: แผ่นแสงยาวเอียงตามทิศแดด (additive) กระจายทั่วป่า รวมเป็น mesh เดียว
-function paintShafts(){
-  const R=mulberry(5150),P=[],UV=[],I=[],a=LDIR.clone().normalize(),w1=new THREE.Vector3().crossVectors(a,new THREE.Vector3(0,1,0)).normalize(),w2=new THREE.Vector3().crossVectors(a,w1).normalize();
-  const N=Math.round(MW*MH/90000);
-  for(let i=0;i<N;i++){const x=R()*MW,y=R()*MH,gx=tx(x),gz=tz(y),gy=GY(x,y),L=16+R()*10,wd=1.6+R()*3.4;
-    for(const w of [w1,w2]){const k=P.length/3;
-      for(const [u,t] of [[0,0],[1,0],[1,1],[0,1]]){const s=(u-0.5)*wd,d=-1.5+t*L;P.push(gx+w.x*s+a.x*d,gy+w.y*s+a.y*d,gz+w.z*s+a.z*d);UV.push(u,t);}
-      I.push(k,k+1,k+2,k,k+2,k+3);}}
-  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(UV,2));g.setIndex(I);
-  const tex=texCanvas(64,128,(c)=>{const im=c.createImageData(64,128);for(let y=0;y<128;y++)for(let x=0;x<64;x++){const u=x/63,t=1-y/127,e=Math.pow(Math.sin(u*Math.PI),1.6)*Math.min(1,t*5)*Math.pow(1-t,0.7),p=(y*64+x)*4,v=Math.round(e*255);im.data[p]=im.data[p+1]=im.data[p+2]=v;im.data[p+3]=255;}c.putImageData(im,0,0);});
-  const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({map:tex,color:new THREE.Color('#fff3b8').multiplyScalar(PAINT.shaft),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,fog:false,side:THREE.DoubleSide,name:'paint_glow_shaft'}));m.material.userData.noBake=true;
-  m.renderOrder=5;m.frustumCulled=false;m.name='paint_shafts';return m;}
+// ลำแสงลอดใบไม้ (round 2, user 2026-11-25 "แก้ให้เนียนขึ้น"): only in gaps between trees inside a forest (>= 3 trees within 9 m,
+// no trunk closer than 1.6 m, never under a ceiling / near castle floors), one sheet per beam that turns round the sun axis to face
+// the camera (no edge-on lines / X shapes), soft sides, fades near the ground, near the camera (3-12 m) and far away (55-105 m),
+// slow shimmer. One mesh, one draw.
+function paintTreePts(sc){const P=[],m4=new THREE.Matrix4(),v=new THREE.Vector3();sc.updateMatrixWorld(true);
+  sc.traverse(o=>{if(o.isInstancedMesh&&o.name==='ptree_inst'){for(let i=0;i<o.count;i++){o.getMatrixAt(i,m4);m4.premultiply(o.matrixWorld);v.setFromMatrixPosition(m4);P.push(v.x,v.z);}}
+    else if(o.isMesh&&/^forest_tree/i.test(o.name||'')){o.getWorldPosition(v);P.push(v.x,v.z);}});
+  return P;}
+function paintShafts(sc){
+  const T=paintTreePts(sc),nT=T.length/2,R=mulberry(5150),a=LDIR.clone().normalize();
+  const near=(x,z,r)=>{let n=0,dmin=1e9;for(let i=0;i<T.length;i+=2){const d=Math.hypot(T[i]-x,T[i+1]-z);if(d<r)n++;if(d<dmin)dmin=d;}return [n,dmin];};
+  const built=(gx,gy)=>{if(typeof fcsCeilAt==='function'&&fcsCeilAt(gx,gy,0)<Infinity)return true;
+    for(const o of OBS)if(o.k!=='col'){const rr=(o.r||0)+Math.max(Math.abs(o.hx||0),Math.abs(o.hy||0))+60;if(Math.abs(o.x-gx)<rr&&Math.abs(o.y-gy)<rr)return true;}return false;};
+  const P=[],C=[],I=[],N=Math.min(220,Math.round(nT/3));
+  for(let k=0,tries=0;k<N&&tries<N*30;tries++){const ti=Math.floor(R()*nT)*2,an=R()*Math.PI*2,rd=2.5+R()*3.5,x=T[ti]+Math.cos(an)*rd,z=T[ti+1]+Math.sin(an)*rd;
+    const [n,dmin]=near(x,z,9);if(n<3||dmin<1.6)continue;
+    const gx=x/S3+MW/2,gy=z/S3+MH/2;if(gx<0||gy<0||gx>MW||gy>MH||built(gx,gy))continue;
+    const y=GY(gx,gy),L=11+R()*7,w=1.4+R()*2.4,sd=R()*6.283,q=P.length/3;
+    for(const [u,t] of [[-1,0],[1,0],[1,1],[-1,1]]){P.push(x,y,z);C.push(u,t,w,L,sd);}
+    I.push(q,q+1,q+2,q,q+2,q+3);k++;}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));const ib=new THREE.InterleavedBuffer(new Float32Array(C),5);g.setAttribute('aC',new THREE.InterleavedBufferAttribute(ib,4,0));g.setAttribute('aS',new THREE.InterleavedBufferAttribute(ib,1,4));
+  g.setIndex(I);
+  const U={uT:{value:0},uA:{value:a},uC:{value:new THREE.Color('#fff3b8').multiplyScalar(PAINT.shaft)}};
+  const m=new THREE.Mesh(g,new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,fog:false,
+    vertexShader:'attribute vec4 aC;attribute float aS;uniform vec3 uA;varying vec2 vU;varying float vF,vS;'+
+      'void main(){float d=-1.5+aC.y*aC.w;vec3 mid=position+uA*(aC.w*0.45);vec3 V=cameraPosition-mid;float dv=length(V);vec3 sd=cross(uA,V/dv);float sl=length(sd);sd=sl>1e-3?sd/sl:vec3(1.,0.,0.);'+
+      'vec3 w=position+uA*d+sd*(aC.x*0.5*aC.z);vU=aC.xy;vS=aS;vF=smoothstep(.12,.45,sl)*smoothstep(3.,12.,dv)*(1.-smoothstep(55.,105.,dv));gl_Position=projectionMatrix*viewMatrix*vec4(w,1.);}',
+    fragmentShader:'uniform float uT;uniform vec3 uC;varying vec2 vU;varying float vF,vS;'+
+      'void main(){float e=1.-vU.x*vU.x;e=e*e*e;float t=vU.y;float a=e*smoothstep(0.,.12,t)*pow(1.-t,1.2)*vF*(.72+.28*sin(uT*.45+vS)*sin(uT*.31+vS*1.7));'+
+      'gl_FragColor=vec4(uC*a*1.7,1.);}'}));
+  m.material.name='paint_glow_shaft';m.material.userData.noBake=true;m.userData.noBatch=1;
+  m.onBeforeRender=()=>{U.uT.value=performance.now()/1000;};
+  m.renderOrder=5;m.frustumCulled=false;m.name='paint_shafts';m.visible=P.length>0;return m;}
 // ---------- ฟิลเตอร์ภาพวาด (Kuwahara 4 ทิศ, 64 จุด) — เลือกค่าเฉลี่ยของมุมที่สีเรียบที่สุด = ปื้นสีเรียบ ขอบคม ----------
 // PAINT.kuwQ: 'full' = 4×13 taps (QUAL high) • 'fast' = 4×4 bilinear taps, each tap averages a 2×2 texel block (auto)
 // • off on low and on auto once it steps down (QUAL.lvl>=1). One program per session (mode is fixed at entry).

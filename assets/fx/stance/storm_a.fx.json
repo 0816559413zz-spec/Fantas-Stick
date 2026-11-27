@@ -1,0 +1,43 @@
+{
+  "v": 1,
+  "desc": "Storm class stance (user 2026-11-25): idle with body lightning, beam (twist, right hand far forward), run (arms back-down)",
+  "tags": [
+    "stance",
+    "preview"
+  ],
+  "dur": 7.0,
+  "layers": [
+    {
+      "id": "anchor",
+      "t": "mesh",
+      "shape": "disc",
+      "mat": "black",
+      "op": 0,
+      "at": 0,
+      "life": 7.0
+    },
+    {
+      "id": "stance",
+      "t": "code",
+      "fn": "studio_class_stance",
+      "at": 0,
+      "life": 7.0,
+      "args": {
+        "layer": "anchor",
+        "cls": "storm",
+        "style": "a",
+        "run": [
+          4.4,
+          6.2
+        ],
+        "acts": [
+          {
+            "t": 1.6,
+            "a": "hold",
+            "d": 1.8
+          }
+        ]
+      }
+    }
+  ]
+}

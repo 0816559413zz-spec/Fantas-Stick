@@ -1,0 +1,11 @@
+{
+  "v": 1,
+  "desc": "Thunder Line rework: three two-handed cast and recoil studies",
+  "tags": ["stance", "preview"],
+  "dur": 4.5,
+  "layers": [
+    {"id": "anchor", "t": "mesh", "shape": "disc", "mat": "black", "op": 0, "at": 0, "life": 4.5},
+    {"id": "stance", "t": "code", "fn": "studio_class_stance", "at": 0, "life": 4.5,
+      "args": {"layer": "anchor", "cls": "storm", "style": "g3", "thunderLine": true, "run": [99, 99]}}
+  ]
+}

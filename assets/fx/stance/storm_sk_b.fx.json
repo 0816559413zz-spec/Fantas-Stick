@@ -1,0 +1,77 @@
+{
+  "v": 1,
+  "desc": "Storm skill animations set B (user 2026-11-25, pick per skill): Thunder Line, Triple Strike, Storm Orbs",
+  "tags": [
+    "stance",
+    "preview"
+  ],
+  "dur": 6.6,
+  "layers": [
+    {
+      "id": "anchor",
+      "t": "mesh",
+      "shape": "disc",
+      "mat": "black",
+      "op": 0,
+      "at": 0,
+      "life": 6.6
+    },
+    {
+      "id": "stance",
+      "t": "code",
+      "fn": "studio_class_stance",
+      "at": 0,
+      "life": 6.6,
+      "args": {
+        "layer": "anchor",
+        "cls": "storm",
+        "style": "g1",
+        "anim": "b",
+        "run": [
+          99,
+          99
+        ],
+        "acts": [
+          {
+            "t": 0.2,
+            "a": "set",
+            "k": "lst",
+            "v": 4
+          },
+          {
+            "t": 0.6,
+            "a": "skill",
+            "id": "thunderline"
+          },
+          {
+            "t": 2.2,
+            "a": "set",
+            "k": "lst",
+            "v": 4
+          },
+          {
+            "t": 2.3,
+            "a": "skill",
+            "id": "triplestrike"
+          },
+          {
+            "t": 2.45,
+            "a": "skill",
+            "id": "triplestrike"
+          },
+          {
+            "t": 4.2,
+            "a": "set",
+            "k": "lst",
+            "v": 4
+          },
+          {
+            "t": 4.4,
+            "a": "skill",
+            "id": "stormorbs"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -52,6 +52,7 @@ function sgInit(){
 function sgWallsApply(){
   const S=G.sg,F=sgF();
   for(const o of OBS){if(o.sgw===undefined)continue;const b=F.bw[o.sgw],open=b.k==='gate'?S.ph>=2:S.bw[o.sgw]<=0;o.hgt=open?0:b.h;}
+  phTick();   // phase layers (js/28-maps-build)
 }
 function sgWallDmg(i,dmg,x,y){
   const S=G.sg;if(!S||S.bw[i]===undefined||S.bw[i]<=0)return;   // ประตู (-1) ไม่โดนดาเมจ

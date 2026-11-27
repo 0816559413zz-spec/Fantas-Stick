@@ -114,15 +114,15 @@ function brkSetup(sc,skip){
   sc.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(sc.matrixWorld).invert(),ims=new Map();
   objs.forEach((L,i)=>{if(!L)return;const q={i,parts:[],key:-1,dmg:null,cut:null};BRKV.grp[i]=q;
     for(const o of L){o.traverse(m=>{if(!m.isMesh||Array.isArray(m.material))return;
-      const M=new THREE.Matrix4().multiplyMatrices(inv,m.matrixWorld),k=m.geometry.uuid+'|'+m.material.uuid;
-      let e=ims.get(k);if(!e)ims.set(k,e={geo:m.geometry,mat:m.material,list:[],cs:m.castShadow});
+      const M=new THREE.Matrix4().multiplyMatrices(inv,m.matrixWorld),vp=phOf(m),k=m.geometry.uuid+'|'+m.material.uuid+'|'+(vp||'');   // vp = phase layer (js/28-maps-build)
+      let e=ims.get(k);if(!e)ims.set(k,e={geo:m.geometry,mat:m.material,list:[],cs:m.castShadow,vp});
       const p={geo:m.geometry,mat:m.material,M,e,idx:e.list.length};e.list.push(p);q.parts.push(p);});
       if(o.parent)o.parent.remove(o);}
   });
   for(const e of ims.values()){
     const im=new THREE.InstancedMesh(e.geo,matTwin(e.mat,'inst'),e.list.length);   // วัสดุแฝด: ชิ้นแผนที่อื่นใช้วัสดุเดียวกันแบบไม่ instanced (js/22 matTwin)
     e.list.forEach((p,j)=>im.setMatrixAt(j,p.M));
-    im.castShadow=e.cs;im.receiveShadow=true;im.computeBoundingSphere();sc.add(im);e.im=im;}
+    im.castShadow=e.cs;im.receiveShadow=true;im.computeBoundingSphere();if(e.vp)im.userData.vp=e.vp;sc.add(im);e.im=im;}
   BRKV.sc=sc;
 }
 // วัสดุรอยร้าว: เส้นร้าวจากลาย voronoi ในพิกัดโลก (ไม่ต้องมี uv) • lv 1 = ร้าวบาง, 2 = ร้าวหนา + มืดลง

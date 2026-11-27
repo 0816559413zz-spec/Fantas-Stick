@@ -20,10 +20,13 @@ const DPOSE={
   slash:[0.38,-0.08, 0.7,-1.05, 0.55, 0.45, 0.5,-0.9,   0.45,1.0, -0.05],    // Mirror Legion: ง้างดาบต่ำไปหลังขวา
   slashF:[0.2,-0.14,-1.35, 0.7,  0.3, 0.6,  0.35,-0.7,  0.6,0.7, 0.08],      // ฟันตามแรงข้ามตัว
   stand:[0.05,-0.04,-0.35,-0.12, 0, 0.15,  0,0,         0.15,0.15, 0],       // ยืนปกติ (ปลายทางคืนท่าหลังถอยหลบ)
+  // Storm (user 2026-11-25): dive hand-first - left palm open pointing forward, body low, legs spread wide, right arm back (gold-coated) • [11],[12] = leg spread R/L
+  zap:  [0.62,-0.2, 0.95,-0.5, -2.15,0.05, 0.3, 0.2,   0.35,0.3, 0, -0.55,0.55],
 };
-const DPT={rec:0.32,land:0.62,fallMax:0.9};   // เวลา: คืนท่าหลังพุ่ง • ลงท่าฮีโร่ • รอลงพื้นนานสุด
+const DPT={rec:0.32,land:0.62,fallMax:0.9,zapHold:0.3,zapUp:0.38};   // Storm dash: hold the dive pose, then rise back   // เวลา: คืนท่าหลังพุ่ง • ลงท่าฮีโร่ • รอลงพื้นนานสุด
 const _dpQ=new THREE.Quaternion(),_dpX=new THREE.Vector3(1,0,0),_dpP=new Array(11).fill(0);
-function dpMix(A,B,f){for(let i=0;i<11;i++)_dpP[i]=A[i]+(B[i]-A[i])*f;return _dpP;}
+let STANCE_STORM_ZAP=true;   // Storm uses the zap dive dash
+function dpMix(A,B,f){const n=Math.max(A.length,B.length);_dpP.length=n;for(let i=0;i<n;i++)_dpP[i]=(A[i]??0)+((B[i]??0)-(A[i]??0))*f;return _dpP;}
 // งอเข่าที่กระดูกโมเดล (บวกเพิ่มจากแอนิเมชัน) • ถ้าแอนิเมชันไม่ได้เขียนทับ (ค่าเท่าที่เราตั้งเฟรมก่อน) คืนค่าเดิมก่อน กันหมุนสะสม
 function dpKnees(o,kr,kl){
   const m=o.fileModel;if(!m)return;
@@ -35,7 +38,8 @@ function dpKnees(o,kr,kl){
 }
 function dpStyle(p){
   if(p.wn&&p.wn[6]===2)return 'wind';
-  if(p.fr&&(p.fr[3]&16))return 'slash';   // สายน้ำแข็งไม่มี Dash แบบพุ่ง (Shift = ไถล) → ds ระหว่าง Mirror Legion = ดาบเปิดอัลติ
+  if(p.fr&&(p.fr[3]&16))return 'slash';
+  if(getKit(p.id).path===2&&STANCE_STORM_ZAP)return 'zap';   // สายน้ำแข็งไม่มี Dash แบบพุ่ง (Shift = ไถล) → ds ระหว่าง Mirror Legion = ดาบเปิดอัลติ
   return 'run';
 }
 const DPDBG={pose:null};   // ดีบัก: WD.DPDBG.pose='hero' = ค้างท่านั้นทุกตัว (ตรวจท่านิ่ง ๆ)
@@ -60,6 +64,7 @@ function dashPose(o,p,dt,now){
   // ท่าตามช่วง
   const base=S.back>0?DPOSE.back:DPOSE[S.st]||DPOSE.run;let P,w,legW=1;
   if(S.ph==='go'){S.w=Math.min(1,S.w+dt/0.05);w=S.w;P=S.st==='run'&&S.air>0.01&&!S.back?dpMix(base,DPOSE.tuck,S.air):base;}
+  else if(S.ph==='rec'&&S.st==='zap'){const H=DPT.zapHold,U=DPT.zapUp;P=base;w=S.w*(S.t<H?1:1-_cs(Math.min(1,(S.t-H)/U)));if(S.t>=H+U){o.dp=null;dpKnees(o,0,0);return;}}
   else if(S.ph==='rec'){const f=Math.min(1,S.t/DPT.rec),end=S.back>0?DPOSE.stand:S.st==='slash'?DPOSE.slashF:DPOSE.brake;
     P=dpMix(base,end,_cs(Math.min(1,f/(S.st==='slash'?0.3:0.4))));w=S.w*(f<0.4?1:1-_cs((f-0.4)/0.6));if(f>=1){o.dp=null;dpKnees(o,0,0);return;}}
   else if(S.ph==='fall'){P=dpMix(DPOSE.wind,DPOSE.fall,_cs(Math.min(1,S.t/0.22)));w=1;}
@@ -79,7 +84,7 @@ function dpApply(o,P,w,armW,legW,yaw){
   b.rotation.z=lerp(b.rotation.z,P[10],w);o.bz=1;
   R.x=lerp(R.x,P[2],aw);R.z=lerp(R.z,P[3],aw);L.x=lerp(L.x,P[4],aw);L.z=lerp(L.z,P[5],aw);
   o.legs[0].rotation.x=lerp(o.legs[0].rotation.x,P[6],lw);o.legs[1].rotation.x=lerp(o.legs[1].rotation.x,P[7],lw);
-  o.legs[0].rotation.z*=1-lw;o.legs[1].rotation.z*=1-lw;
+  if(P.length>11){o.legs[0].rotation.z=lerp(o.legs[0].rotation.z,P[11],lw);o.legs[1].rotation.z=lerp(o.legs[1].rotation.z,P[12],lw);}else{o.legs[0].rotation.z*=1-lw;o.legs[1].rotation.z*=1-lw;}
   dpKnees(o,P[8]*lw,P[9]*lw);
 }
 if(window.WD)Object.assign(window.WD,{DPOSE,DPT,DPDBG});

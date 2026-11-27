@@ -6,7 +6,7 @@
 <title>Map Builder — Fantas Stick</title>
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.min.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
 <!-- Map Builder: builds real maps the game loads (terrain sculpt/paint, walls, breakable panels, upper floors/bridges, props, spawns, light/sky), then "Export".
-     Unity-style layout: toolbar (Q/W/E/R) • Hierarchy + Tool Settings (left) • Scene (centre) • Inspector (right) • status bar.
+     Unity-style layout: toolbar (Q/W/E/R) • Hierarchy + Tool Settings (left) • Scene (centre) • Inspector (right) • Project/Console dock (bottom, mapbuild/project.js) • status bar.
      source: maps/build/<id>.json • export: assets/maps/<id>.json + .glb + assets/manifest.json (same format as Blender maps)
      code: mapbuild/*.js • format/how-to: guides/MAP-BUILDER.md • UI rules: guides/TOOL-UI-RULES.md -->
 <link rel="stylesheet" href="hub/tool-ui.css">
@@ -43,6 +43,101 @@ main{flex:1;display:flex;min-height:0;gap:2px;background:var(--bg0)}
 #opts{padding:6px 10px}
 #right{width:310px;flex:none}
 #center{flex:1;min-width:0}
+/* ---------- bottom dock: Project / Console (Unity) — mapbuild/project.js ---------- */
+#work{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+#top{flex:1;display:flex;gap:2px;min-height:0}
+#bottom{flex:none;height:250px}
+.split{flex:none;background:var(--bg0)}
+.split.h{height:4px;cursor:ns-resize}
+.split.v{width:4px;cursor:ew-resize}
+.split:hover,.split.on{background:var(--acc)}
+.tabs .tab[data-tab]{cursor:pointer}
+.tab b{font:600 10.5px var(--fu);padding:0 5px;border-radius:7px;margin-left:3px}.tab b:empty{display:none}
+.tab b.e{background:var(--serr);color:#fff}.tab b.w{background:var(--swarn);color:#000}
+.ppane{flex:1;display:flex;flex-direction:column;min-height:0}
+.ppane[hidden]{display:none}
+.pbar{display:flex;align-items:center;gap:3px;height:24px;padding:0 4px;background:var(--bg2);border-bottom:1px solid var(--bg0);flex:none}
+.pbar .sp{flex:1}
+.pbtn{font:inherit;font-size:12px;height:19px;padding:0 7px;background:var(--bg3);color:var(--tx);border:1px solid var(--ln2);border-radius:3px;cursor:pointer;white-space:nowrap}
+.pbtn:hover{background:var(--bg4)}
+.pbtn.tg{color:var(--tx3)}.pbtn.tg.on{background:var(--bg4);color:var(--tx);border-color:var(--tx3)}
+.pbtn.tg.w.on{color:var(--swarn)}.pbtn.tg.e.on{color:var(--serr)}
+.psearch{display:flex;align-items:center;gap:4px;width:220px;max-width:40%;height:19px;padding:0 6px;background:var(--bg0);border:1px solid var(--ln2);border-radius:10px;color:var(--tx3)}
+.psearch:focus-within{border-color:var(--acc)}
+.psearch input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--tx);font:inherit;font-size:12px;padding:0}
+.pmain{flex:1;display:flex;min-height:0}
+#ptree{width:210px;flex:none;padding:2px 0 8px;font-size:12px}
+#ptree .hrow{height:19px}
+#ptree .pfi{width:15px;height:13px;flex:none;color:var(--tx2);display:flex}
+#ptree .pfi svg{width:15px;height:13px}
+#ptree .pnm{overflow:hidden;text-overflow:ellipsis}
+.psep{height:6px}
+.pright{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--bg1)}
+#pcrumb{display:flex;align-items:center;gap:1px;height:22px;padding:0 6px;border-bottom:1px solid var(--ln);flex:none;font-size:12px;white-space:nowrap;overflow:hidden}
+#pcrumb .sp{flex:1}
+.pcb{font:inherit;font-size:12px;background:none;border:0;color:var(--tx2);padding:1px 4px;border-radius:3px;cursor:pointer}
+.pcb:hover{background:var(--hov);color:var(--tx)}.pcb.last{color:var(--tx);font-weight:600}
+.pcs{color:var(--tx3);padding:0 1px}
+.pcl{color:var(--tx2);margin-right:6px}
+.pseg{display:flex;border:1px solid var(--ln2);border-radius:3px;overflow:hidden}
+.pseg button{font:inherit;font-size:11.5px;background:var(--bg3);color:var(--tx2);border:0;border-right:1px solid var(--ln2);padding:1px 8px;cursor:pointer}
+.pseg button:last-child{border-right:0}.pseg button.on{background:var(--acc);color:#fff}
+.pchk{display:flex;align-items:center;gap:4px;color:var(--tx3);font-size:11.5px;cursor:pointer}
+#pgrid{flex:1;overflow-y:auto;min-height:0;outline:none;align-content:start}
+#pgrid.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(calc(var(--ts) + 14px),1fr));gap:6px 4px;padding:8px}
+#pgrid .pi{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;cursor:pointer;border-radius:4px;padding:3px 2px;user-select:none;position:relative}
+#pgrid .pi .ic{width:var(--ts);height:var(--ts);display:flex;align-items:center;justify-content:center;border-radius:3px;flex:none}
+#pgrid.grid .pi:not(.fold) .ic{background:var(--bg0)}
+#pgrid .pi .th{width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .15s}
+#pgrid .pi .th.ok{opacity:1}
+#pgrid .pi .gl{font-size:calc(var(--ts) * .5);line-height:1}
+#pgrid .pi.fold .ic{color:var(--tx2)}
+#pgrid .pi.fold .ic svg{width:86%;height:86%}
+#pgrid .pi .nm{max-width:100%;font-size:11.5px;line-height:15px;padding:0 4px;border-radius:3px;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#pgrid .pi .sub{max-width:100%;margin-top:-3px;font-size:10px;line-height:12px;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#pgrid.grid .pi:hover .ic{box-shadow:0 0 0 1px var(--ln2)}
+#pgrid.grid .pi.on .ic{box-shadow:0 0 0 2px var(--acc)}
+#pgrid.grid .pi.on .nm{background:var(--acc);color:#fff}
+#pgrid .pi.dim{opacity:.35}
+#pgrid .pi.ping .ic{animation:ping .9s}
+@keyframes ping{0%,60%{box-shadow:0 0 0 4px var(--acc2)}100%{box-shadow:0 0 0 2px var(--acc)}}
+#pgrid .pi .fv{width:12px;height:12px;color:var(--tx);display:block}
+#pgrid .pi .fv svg{width:100%;height:100%;display:block}
+#pgrid.grid .pi .fv{position:absolute;top:6px;left:calc(50% + var(--ts) / 2 - 15px);filter:drop-shadow(0 0 1px #000)}
+#pgrid .pi .pk{display:none}
+#pgrid.list{padding:2px 0}
+#pgrid.list .pi{flex-direction:row;gap:6px;height:20px;padding:0 8px;border-radius:0}
+#pgrid.list .pi .ic{width:16px;height:16px}
+#pgrid.list .pi .gl{font-size:12px}
+#pgrid.list .pi .nm{flex:1;text-align:left;padding:0}
+#pgrid.list .pi.on{background:var(--acc)}#pgrid.list .pi.on .nm{color:#fff}
+#pgrid.list .pi:hover:not(.on){background:var(--hov)}
+#pgrid.list .pi .pk{display:block;color:var(--tx3);font-size:11px;white-space:nowrap}#pgrid.list .pi.on .pk{color:#fff}
+#pgrid.list .pi .fv{width:11px;height:11px;color:var(--tx2);flex:none}
+.pempty{grid-column:1/-1;color:var(--tx3);padding:20px;text-align:center}
+.pfoot{display:flex;align-items:center;gap:8px;height:20px;padding:0 8px;border-top:1px solid var(--ln);background:var(--bg2);flex:none;font:11.5px var(--fu);color:var(--tx2)}
+.pfoot .sp{flex:1}
+#ppath{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#psize{width:90px}
+.pmenu{position:fixed;z-index:50;min-width:190px;background:var(--bg2);border:1px solid var(--ln2);border-radius:4px;padding:3px 0;box-shadow:0 4px 14px rgba(0,0,0,.5)}
+.pmenu button{display:block;width:100%;text-align:left;font:inherit;font-size:12px;color:var(--tx);background:none;border:0;padding:4px 14px;cursor:pointer}
+.pmenu button:hover:not(:disabled){background:var(--acc);color:#fff}.pmenu button:disabled{color:var(--tx3);cursor:default}
+.pmenu .msep{height:1px;background:var(--ln2);margin:3px 0}
+.pcard{display:flex;gap:8px;align-items:center;padding:5px;background:var(--bg2);border:1px solid var(--ln2);border-radius:var(--r);cursor:pointer}
+.pcard:hover{border-color:var(--acc)}
+.pcard .ic{width:52px;height:52px;flex:none;background:var(--bg0);border-radius:3px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pcard .ic img{width:100%;height:100%;object-fit:contain}.pcard .ic .gl{font-size:26px}
+.pcard .tx{display:flex;flex-direction:column;min-width:0;gap:2px}
+.pcard .tx b{font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pcard .tx span{font-size:11px;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#clist{flex:1;font:11.5px var(--fu)}
+.crow{display:flex;gap:6px;align-items:flex-start;padding:3px 8px;border-bottom:1px solid var(--ln);cursor:default;color:var(--tx)}
+.crow:nth-child(even){background:var(--hov)}
+.crow.on{background:var(--accBg)}
+.crow .cic{flex:none;width:14px;text-align:center}.crow.w .cic{color:var(--swarn)}.crow.e .cic{color:var(--serr)}.crow.i .cic{color:var(--tx3)}
+.crow .ctm{flex:none;color:var(--tx3)}
+.crow .ctx{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crow .cn{flex:none;background:var(--bg4);color:var(--tx);border-radius:8px;padding:0 6px;font-size:10.5px}
+#cdet{flex:none;max-height:70px;min-height:34px;overflow:auto;padding:4px 8px;border-top:1px solid var(--ln2);background:var(--bg0);font:11.5px var(--fu);color:var(--tx2);white-space:pre-wrap}
 /* ---------- hierarchy ---------- */
 .hsearch{padding:4px 6px;border-bottom:1px solid var(--ln)}
 .hsearch .tl-in{width:100%;padding:2px 6px;font-size:12px;background:var(--bg0)}
@@ -148,6 +243,8 @@ dialog .btns{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
   <button id="bExport" class="tl-btn pri" title="Export — write the map files to assets/maps for the game, then commit + push only this map to GitHub (the online game). Play only exports.">⬆ Export</button>
 </div>
 <main>
+ <div id="work">
+ <div id="top">
   <div id="left" class="dock">
     <div class="pane" id="hierPane">
       <div class="tabs"><span class="tab on">☰ Hierarchy</span></div>
@@ -175,6 +272,8 @@ dialog .btns{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
       <label class="chk" style="margin:0" title="Slopes too steep to walk up are shown red"><input type="checkbox" id="oSteep" checked>Too Steep</label>
       <label class="chk" style="margin:0" title="Show the game's collision shapes"><input type="checkbox" id="oCol">Colliders</label>
       <label class="chk" style="margin:0" title="Phase areas / ceilings (siege markers)"><input type="checkbox" id="oArea" checked>Areas</label>
+      <label class="lbl" for="phView" title="Preview one siege phase: items on a Phase Layer outside it are hidden">Phase</label>
+      <select id="phView" class="tl-sel"><option value="0">All</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select>
       <label class="chk" style="margin:0" title="Sky, fog and light from the map settings"><input type="checkbox" id="oSky" checked>Map Lighting</label>
     </div>
     <div id="view">
@@ -184,6 +283,38 @@ dialog .btns{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
       <div id="gv"><div id="gvBar"><b style="color:var(--tx)">Game View</b><span>Click the view to look around • WASD fly • Space/Ctrl up/down • Shift fast • wheel = speed</span><span class="sp"></span><span id="gvStat"></span><button class="tl-btn" id="gvRe" title="Export again from the editor camera">↻ Refresh</button><button class="tl-btn" id="gvX" title="Back to editing (Esc)">✕ Close</button></div></div>
     </div>
   </div>
+  </div>
+  <div id="hsplit" class="split h" title="Drag to resize"></div>
+  <div id="bottom" class="dock">
+    <div class="tabs"><span class="tab" data-tab="project">▤ Project</span><span class="tab" data-tab="console">≡ Console <b id="conN"></b></span></div>
+    <div id="projPane" class="ppane">
+      <div class="pbar">
+        <button id="pAdd" class="pbtn" title="Create / Import">＋ ▾</button>
+        <span class="sp"></span>
+        <div class="psearch"><span>⌕</span><input id="pq" placeholder="Search" autocomplete="off" spellcheck="false"></div>
+        <button id="pFav" class="pbtn" title="Favorites">★</button>
+      </div>
+      <div class="pmain">
+        <div id="ptree" class="pbody"></div>
+        <div id="vsplit" class="split v" title="Drag to resize"></div>
+        <div class="pright">
+          <div id="pcrumb"></div>
+          <div id="pgrid" tabindex="0"></div>
+          <div class="pfoot"><span id="ppath"></span><span class="sp"></span><input type="range" id="psize" min="0" max="100" title="Icon size (far left = list)"></div>
+        </div>
+      </div>
+    </div>
+    <div id="conPane" class="ppane" hidden>
+      <div class="pbar">
+        <button id="cClear" class="pbtn">Clear</button><button id="cfcol" class="pbtn tg">Collapse</button>
+        <span class="sp"></span>
+        <button id="cfi" class="pbtn tg" title="Messages">ⓘ<span> 0</span></button><button id="cfw" class="pbtn tg w" title="Warnings">⚠<span> 0</span></button><button id="cfe" class="pbtn tg e" title="Errors">⛔<span> 0</span></button>
+      </div>
+      <div id="clist" class="pbody"></div>
+      <div id="cdet"></div>
+    </div>
+  </div>
+ </div>
   <div id="right" class="dock">
     <div class="tabs"><span class="tab on">ⓘ Inspector</span></div>
     <div id="side" class="pbody"></div>

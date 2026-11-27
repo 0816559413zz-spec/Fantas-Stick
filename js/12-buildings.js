@@ -106,10 +106,17 @@ function brkParse(s){s=s||'';for(const g of BRK){const st=+(s[g.i]||0);if(st!==g
 // sgNear(ตาราง,x,y,รัศมี,out) = ของทุกชิ้นที่กรอบแตะวงนั้น (ไม่ซ้ำ) ใส่ลง out • แต่ละจุดเรียกใช้ out ของตัวเอง (กันทับกันตอนเรียกซ้อน)
 const SG={c:400,s:0,m:new Map()};
 // capsule colliders (Map Builder straight walls): hx,hy = half axis px → distance is measured to the axis • plain circles have none
-let OCX=0,OCY=0;function obsCP(o,x,y){const hx=o.hx;if(hx===undefined){OCX=o.x;OCY=o.y;return;}const hy=o.hy,t=clamp(((x-o.x)*hx+(y-o.y)*hy)/(hx*hx+hy*hy||1),-1,1);OCX=o.x+hx*t;OCY=o.y+hy*t;}
+// box colliders (Map Builder boxes / kit collision boxes, 2026-11-26): + w = half width across the axis (px) → rounded box, corner radius r
+let OCX=0,OCY=0;function obsCP(o,x,y){const hx=o.hx;if(hx===undefined){OCX=o.x;OCY=o.y;return;}const hy=o.hy,l2=hx*hx+hy*hy||1,dx=x-o.x,dy=y-o.y,t=clamp((dx*hx+dy*hy)/l2,-1,1);
+  if(o.w===undefined){OCX=o.x+hx*t;OCY=o.y+hy*t;return;}const l=Math.sqrt(l2),s=clamp((dy*hx-dx*hy)/l,-o.w,o.w);OCX=o.x+hx*t-hy/l*s;OCY=o.y+hy*t+hx/l*s;}
 function obsD2(o,x,y){obsCP(o,x,y);return (x-OCX)**2+(y-OCY)**2;}
-function obsEach(o,fn){if(o.hx===undefined){fn(o.x,o.y);return;}const L=Math.hypot(o.hx,o.hy)*2,n=Math.max(1,Math.ceil(L/(o.r*1.15)));for(let i=0;i<=n;i++){const t=i/n*2-1;fn(o.x+o.hx*t,o.y+o.hy*t);}}   // circles along a capsule (cheap consumers)
-const obsBox=c=>c.hx===undefined?[c.x-c.r,c.y-c.r,c.x+c.r,c.y+c.r]:[c.x-Math.abs(c.hx)-c.r,c.y-Math.abs(c.hy)-c.r,c.x+Math.abs(c.hx)+c.r,c.y+Math.abs(c.hy)+c.r];
+const obsLo=(q,g0)=>q.top!==undefined?(q.bot!==undefined?q.top-q.hgt+q.bot:-50):g0+(q.bot||0);   // bottom height (world) • top = absolute top on terrain maps, bot = floating start (arch lintels)
+const obsRR=o=>o.w===undefined?o.r:o.r+o.w;   // radius that covers the width (bounds / cheap consumers)
+// box: point inside the inner rect (d = 0) → push out through the nearest face to m past it • false = not inside a box
+function obsOut(o,p,m){if(o.w===undefined)return false;const hx=o.hx,hy=o.hy,l=Math.hypot(hx,hy)||1,ux=hx/l,uy=hy/l,dx=p.x-o.x,dy=p.y-o.y,a=dx*ux+dy*uy,b=dy*ux-dx*uy,ea=l-Math.abs(a),eb=o.w-Math.abs(b);
+  if(ea<0||eb<0)return false;if(ea<eb){const sa=a<0?-1:1;p.x+=ux*sa*(ea+m);p.y+=uy*sa*(ea+m);}else{const sb=b<0?-1:1;p.x-=uy*sb*(eb+m);p.y+=ux*sb*(eb+m);}return true;}
+function obsEach(o,fn){if(o.hx===undefined){fn(o.x,o.y,o.r);return;}const R=obsRR(o),L=Math.hypot(o.hx,o.hy)*2,n=Math.max(1,Math.ceil(L/(R*1.15)));for(let i=0;i<=n;i++){const t=i/n*2-1;fn(o.x+o.hx*t,o.y+o.hy*t,R);}}   // circles along a capsule / box (cheap consumers; box = its width as radius)
+const obsBox=c=>{const R=obsRR(c);return c.hx===undefined?[c.x-R,c.y-R,c.x+R,c.y+R]:[c.x-Math.abs(c.hx)-R,c.y-Math.abs(c.hy)-R,c.x+Math.abs(c.hx)+R,c.y+Math.abs(c.hy)+R];};
 const sgObs=()=>sgGrid('o',OBS,obsBox),sgProps=()=>sgGrid('p',PROPS,c=>[c.x-c.r,c.y-c.r,c.x+c.r,c.y+c.r]);
 function sgGrid(key,list,box){
   let g=SG.m.get(key);if(g&&g.list===list&&g.n===list.length&&g.mw===MW&&g.mh===MH)return g;
@@ -144,7 +151,7 @@ function collideWorld(o,r,z){
     obsCP(c,o.x,o.y);const cx=OCX,cy=OCY;
     if(Math.abs(o.x-cx)>c.r+r||Math.abs(o.y-cy)>c.r+r)continue;
     const dx=o.x-cx,dy=o.y-cy,d=Math.hypot(dx,dy),m=c.r+r;
-    if(d<m&&d>0.001){o.x=cx+dx/d*m;o.y=cy+dy/d*m;sol++;}
+    if(d<m&&d>0.001){o.x=cx+dx/d*m;o.y=cy+dy/d*m;sol++;}else if(d<=0.001&&obsOut(c,o,m))sol++;
   }
   if(G&&G.walls)for(const c of G.walls){
     if(c.wood){sol+=natureWallPush(c,o,r,z,_cwLast.get(o));continue;}

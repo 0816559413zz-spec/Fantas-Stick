@@ -488,7 +488,7 @@
   "fcs-file": {
    "file": "maps/fcs-file.glb",
    "data": "maps/fcs-file.json",
-   "v": 65
+   "v": 68
   },
   "pnl-demo": {
    "file": "maps/pnl-demo.glb",
@@ -509,6 +509,16 @@
    "file": "maps/ruin-demo.glb",
    "data": "maps/ruin-demo.json",
    "v": 4
+  },
+  "water-demo": {
+   "file": "maps/water-demo.glb",
+   "data": "maps/water-demo.json",
+   "v": 2
+  },
+  "shibuya-demo": {
+   "file": "maps/shibuya-demo.glb",
+   "data": "maps/shibuya-demo.json",
+   "v": 5
   }
  },
  "ptex": {}

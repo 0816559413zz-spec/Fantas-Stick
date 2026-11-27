@@ -2189,6 +2189,204 @@
    "dur": 4,
    "n": 2
   },
+  "stance/storm_a": {
+   "v": "60d70ebb",
+   "desc": "Storm class stance (user 2026-11-25): idle with body lightning, beam (twist, right hand far forward), run (arms back-down)",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 7,
+   "n": 2
+  },
+  "stance/storm_g1": {
+   "v": "05d9c5cf",
+   "desc": "Storm hand look g1 (user 2026-11-25, pick one of 3): idle, zap dash (left palm dive, hold, rise), Thunder Line cast",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 6,
+   "n": 2
+  },
+  "stance/storm_g3": {
+   "v": "825b8445",
+   "desc": "Storm hand look g3 (user 2026-11-25, pick one of 3): idle, zap dash (left palm dive, hold, rise), Thunder Line cast",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 6,
+   "n": 2
+  },
+  "stance/storm_g4": {
+   "v": "178c3448",
+   "desc": "Storm hand look g4 (user 2026-11-25, pick one of 3): idle, zap dash (left palm dive, hold, rise), Thunder Line cast",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 6,
+   "n": 2
+  },
+  "stance/storm_now": {
+   "v": "c4d18bd1",
+   "desc": "Storm: current idle + run (before the class stance)",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 5,
+   "n": 2
+  },
+  "stance/storm_sk_a": {
+   "v": "23c7b344",
+   "desc": "Storm skill animations set A (user 2026-11-25, pick per skill): Thunder Line, Triple Strike, Storm Orbs",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 6.6,
+   "n": 2
+  },
+  "stance/storm_sk_b": {
+   "v": "b02c2390",
+   "desc": "Storm skill animations set B (user 2026-11-25, pick per skill): Thunder Line, Triple Strike, Storm Orbs",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 6.6,
+   "n": 2
+  },
+  "stance/storm_sk_c": {
+   "v": "e7d43023",
+   "desc": "Storm skill animations set C (user 2026-11-25, pick per skill): Thunder Line, Triple Strike, Storm Orbs",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 6.6,
+   "n": 2
+  },
+  "stance/storm_pulse_rework": {
+   "v": "e83a85c7",
+   "desc": "Storm rework - fast self-centered discharge with a short-lived shell",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 1.5,
+   "n": 2
+  },
+  "stance/storm_dome_wall": {
+   "v": "89e82d99",
+   "desc": "Storm Dome study - lightning orb stops on a wall",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 3.65,
+   "n": 2
+  },
+  "stance/storm_dome_sky": {
+   "v": "e27012b4",
+   "desc": "Storm Dome study - upward shot at maximum range",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 3.65,
+   "n": 2
+  },
+  "stance/storm_dome_rework": {
+   "v": "036dee2e",
+   "desc": "Storm rework - ground-fired projectile and sustained lightning dome",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 3.65,
+   "n": 2
+  },
+  "stance/storm_mark_branches": {
+   "v": "ca9430dc",
+   "desc": "Storm mark - three independent moving lightning branch styles",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 5.7,
+   "n": 2
+  },
+  "stance/storm_mark_polish": {
+   "v": "0f8d1814",
+   "desc": "Storm mark polish - charge cue, ground flash and branching detonation",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 4.62,
+   "n": 2
+  },
+  "stance/storm_mark_reveal": {
+   "v": "2e924eb3",
+   "desc": "Storm mark - fixed branches revealed in a travelling twenty-percent window",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 2.2,
+   "n": 2
+  },
+  "stance/storm_mark_rework": {
+   "v": "ec631cc5",
+   "desc": "Storm rework - ally mark and self mark comparison",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 9.35,
+   "n": 2
+  },
+  "stance/storm_dash_echo": {
+   "v": "ac26d63b",
+   "desc": "God Lightning option - Dash trail and delayed lightning echo",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 1.65,
+   "n": 2
+  },
+  "stance/storm_thunderline_rework": {
+   "v": "a76e15ae",
+   "desc": "Thunder Line rework: three two-handed cast and recoil studies",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 4.5,
+   "n": 2
+  },
   "stance/water_a": {
    "v": "ec2bb9d7",
    "desc": "Stance preview — water style a (idle breathing, short run, idle)",

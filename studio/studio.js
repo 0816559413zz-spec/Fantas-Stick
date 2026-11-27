@@ -77,12 +77,13 @@ function stCam(c){if(ST.cam==='game'||!ST.fx)return;const A=stAnchor();if(!A)ret
   else if(ST.cam==='front')c.position.set(T.x+f[0]*ST.dist,T.y+2*ST.dist/9,T.z+f[1]*ST.dist);
   else if(ST.cam==='top')c.position.set(T.x+0.01,T.y+22,T.z+0.01);
   else{const o=ST.orb;c.position.set(T.x+Math.cos(o.yaw)*Math.cos(o.pitch)*o.dist,T.y+Math.sin(o.pitch)*o.dist,T.z+Math.sin(o.yaw)*Math.cos(o.pitch)*o.dist);}
+  ST.I?.classStanceCamera?.(c,T,ST.t);
   c.lookAt(T);}
 // ---------- เล่น / กรอเวลา (จำลองแน่นอน: dt คงที่ + เลขสุ่มมี seed) ----------
 function stDur(){const F=ST.fx;if(!F)return 2;if(F.dur)return F.dur;let e=0.5;for(const L of F.layers||[]){const g=k=>L[k]!==undefined?L[k]:(FXR.def[L.t]||{})[k];const n=v=>typeof v==='number'?v:Array.isArray(v)?+v[1]||0:0;e=Math.max(e,n(g('at'))+n(g('life')));}return e;}
 function stIsLoop(){return (ST.fx&&ST.fx.layers||[]).some(L=>L.loop);}
 function stRender(dt,draw){stVnow+=dt*1000;FXSTUDIO.noDraw=!draw;try{if(draw){ST.I?.updateNatureWeave?.();ST.I?.updateDarknessDash?.();ST.I?.updateNightWaltz?.();ST.I?.updateDarknessShift?.();ST.I?.updateDarknessShield?.();ST.I?.updateWardDrain?.();ST.I?.updateMarkWave?.();ST.I?.updateDarknessChase?.();ST.I?.updateDarknessUlt?.();ST.I?.updateDarknessFlow?.();ST.I?.updateDarknessVeil?.();}render(dt,stVnow);}catch(e){console.error(e);}finally{FXSTUDIO.noDraw=false;}}
-function stFlush(){if(ST.I){fxKill(ST.I);ST.I=null;}fxClearAll();for(let i=0;i<34;i++)stRender(0.15,false);PARTS.length=0;SCR.fl.length=0;SCR.rad=null;SCR.chr=0;shakeA=0;}
+function stFlush(){if(ST.I){ST.I.classStanceDispose?.();fxKill(ST.I);ST.I=null;}fxClearAll();for(let i=0;i<34;i++)stRender(0.15,false);PARTS.length=0;SCR.fl.length=0;SCR.rad=null;SCR.chr=0;shakeA=0;}
 function stLayers(){const F=ST.fx;return Object.assign({},F,{layers:(F.layers||[]).filter(L=>!ST.mute[L.id]&&(!ST.solo||ST.solo===L.id))});}
 function stSimKey(){return JSON.stringify(stLayers())+'|'+ST.at+'|'+ST.seed+'|'+ST.map;}
 function stRestart(){ST.simKey=null;if(!ST.fx||!VIEW.cur||MK.ws!=='fx')return;if(ST.skill&&!FXSTUDIO.seek&&!ST.busy)stCastSkill(ST.skill);stFlush();Math.random=stRng(ST.seed*7919+13);ST.t=0;ST.acc=0;ST.run={white:0,parts:0,block:0};ST.simKey=stSimKey();

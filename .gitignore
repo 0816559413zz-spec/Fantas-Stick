@@ -11,3 +11,6 @@ photos/
 
 # VRoid test models (sample licence: no redistribution) — local only, never commit
 assets/vrm/
+
+# HUD Editor: deleted designs (restore by hand)
+huddesign/_deleted/

@@ -117,5 +117,10 @@ cut), smoke ×1 (`SMOKE_K` 1, was cut to 0.4 on 2026-11-18), ground marks / debr
   glitter (js/67-ocean.js). Presets: low/medium 0, high/ultra 1, cinematic 2. Shader change (define `OCN` on the coast sea material).
   Cost +0.3 / +1.2 ms GPU (headless NVIDIA, 1080p sea view). Shots `shots/ocean.jpg`.
 
+- **เงาสะท้อนพื้นเปียก** `refl` (user 2026-11-26, rain test map `shibuya-demo`): ปิด / หลอก (เร็ว) / SSR / Planar. Only while it
+  rains (js/76-weather). Presets: low 0, medium 1, high/ultra 2, cinematic 3. Fake + SSR live in the FXPass copy shader
+  (`WETU`, no extra render); Planar adds one half-resolution mirror render of the scene per frame (`wxPre`). Cost not measured yet.
+  Details `notes/shibuya-map.md`.
+
 Not done yet: gate configs per preset (Low / Cinematic), 6v6 bench per preset, entry preload compiles only the High variant
 (another preset compiles its shaders when chosen = the accepted short hitch).

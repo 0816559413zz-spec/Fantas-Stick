@@ -26,11 +26,13 @@
 #   POST /api/mb-publish?id=<id>    → commit + push เฉพาะไฟล์ของแผนที่นี้ (ต้นฉบับ + ห้อง prefab + assets/maps/<id>.* + รายการใน manifest) บน origin/main ด้วย index ชั่วคราว (&dry=1 = ไม่ push)
 #   POST /api/mb-unexport?id=<id>   → ถอดแผนที่ออกจากเกม (ลบไฟล์ใน assets/maps + รายการใน manifest) เฉพาะแผนที่ที่มีต้นฉบับใน maps/build/
 #   POST /api/mb-del?id=<id>        → ถอดออกจากเกม + ย้ายต้นฉบับไป maps/build/_deleted/
-#   POST /api/mb-asset?name=<ชื่อ>&label=&cat= → เพิ่ม Asset เอง: เก็บ .glb ลง assets/mapkit/ + ลงทะเบียนใน assets/mapkit/kit.json (user)
+#   POST /api/mb-asset?name=<ชื่อ>&label=&cat=<หมวด, ไม่ใส่ = user> → เพิ่ม Asset เอง: เก็บ .glb ลง assets/mapkit/ + ลงทะเบียนใน assets/mapkit/kit.json (user)
 #   GET  /api/sb-skills             → รายการสกิลจากโค้ดเกม (js/*.js: PATHS, PBASIC, defSpell) ให้ปุ่ม Import ของสตอรี่บอร์ด — อ่านสดทุกครั้ง ไม่มีไฟล์ค้าง
+#   GET  /api/hud-designs / GET|POST /api/hud-design?id= {doc,png,md} / POST /api/hud-design-del?id= / POST /api/hud-design-img?name= → HUD Editor โหมดออกแบบ: huddesign/<id>.json|.jpg(.png)|.md + huddesign/HUDDESIGN.md
 #   GET  /api/sketches              → รายชื่อสเก็ตช์ (sketch.html) ใน sketch/
 #   GET/POST /api/sketch?id=<id>    → อ่าน/บันทึก {doc, png} → sketch/<id>.json + .png + .md แล้วเขียน sketch/SKETCH.md (ให้ Claude อ่าน)
 #   POST /api/sketch-del?id=<id>    → ย้ายไป sketch/_deleted/ (กู้คืนได้) • POST /api/sketch-img?name=<ชื่อ> → เก็บรูปพื้นหลังลง sketch/img/
+#   GET  /api/posecams / GET|POST /api/posecam?id= {doc, imgs{shot:dataURL}, md} / POST /api/posecam-del?id= → ท่า + กล้อง (posecam.html): posecam/<id>.json|.md + <id>_<shot>.jpg + posecam/POSECAM.md
 # ฟังเฉพาะ 127.0.0.1 (เครื่องตัวเองเท่านั้น)
 import base64, json, os, re, subprocess, sys, time
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -624,7 +626,9 @@ def mb_post(self, u, q):
         with open(os.path.join(KITD, name + '.glb'), 'wb') as f: f.write(data)
         kp = os.path.join(KITD, 'kit.json')
         kit = json.load(open(kp, encoding='utf-8')) if os.path.exists(kp) else {'v': 1, 'assets': [], 'user': []}
-        e = {'id': 'user/' + name, 'name': q.get('label', [name])[0][:60] or name, 'cat': 'user', 'src': 'mapkit/' + name + '.glb', 'node': '', 'col': 1, 'brk': 0, 'ns': 0, 'v': int(time.time())}
+        cat = q.get('cat', ['user'])[0]
+        if cat not in ('user', 'tree', 'rock', 'plant', 'build', 'ruin', 'fence', 'road', 'prop', 'light'): cat = 'user'
+        e = {'id': 'user/' + name, 'name': q.get('label', [name])[0][:60] or name, 'cat': cat, 'src': 'mapkit/' + name + '.glb', 'node': '', 'col': 1, 'brk': 0, 'ns': 0, 'v': int(time.time())}
         kit['user'] = [a for a in kit.get('user', []) if a.get('id') != e['id']] + [e]
         open(kp, 'w', encoding='utf-8').write(kit_dump(kit))
         return self._json(200, {'ok': True, 'asset': e})
@@ -776,6 +780,137 @@ def sk_post(self, u, q):
     sk_index()
     return self._json(200, {'ok': True, 'id': sid})
 
+# ---------- Pose + Camera (posecam.html): posed character + saved camera shots for Claude ----------
+PCD = os.path.join(ROOT, 'posecam')
+PC_SHOT = re.compile(r'^[a-z0-9]{1,12}$')
+
+def pc_list():
+    out = []
+    if os.path.isdir(PCD):
+        for f in sorted(os.listdir(PCD)):
+            if not f.endswith('.json'):
+                continue
+            try:
+                j = json.load(open(os.path.join(PCD, f), encoding='utf-8'))
+                out.append({'id': f[:-5], 'name': j.get('name') or f[:-5], 'n': len(j.get('shots') or []), 't': os.path.getmtime(os.path.join(PCD, f))})
+            except Exception:
+                pass
+    return out
+
+def pc_index():
+    L = ['# ท่า + กล้อง (posecam.html)', '',
+         '> เขียนอัตโนมัติจาก `posecam.html` (ศูนย์รวม Tool → ท่า + กล้อง). แต่ละชุด: `posecam/<id>.md` (มุมกล้อง + ท่า + โน้ต เป็นภาษาไทย), รูป `posecam/<id>_<shot>.jpg` (**เปิดด้วย Read**), ข้อมูลดิบ `posecam/<id>.json`.',
+         '> ผู้ใช้จัดท่าตัวละคร + หามุมกล้อง เพื่อบอก Claude ว่าอยากได้ภาพ/การเคลื่อนกล้องแบบไหน (เช่น หน้าเลือกธาตุ). เป็นภาพอ้างอิง เกมไม่ได้อ่านไฟล์พวกนี้.', '']
+    for m in sorted(pc_list(), key=lambda m: -m['t']):
+        L.append('- **%s** (`%s`) %d มุม — `posecam/%s.md` • แก้ล่าสุด %s' % (m['name'], m['id'], m['n'], m['id'], time.strftime('%Y-%m-%d %H:%M', time.localtime(m['t']))))
+    os.makedirs(PCD, exist_ok=True)
+    open(os.path.join(PCD, 'POSECAM.md'), 'w', encoding='utf-8').write('\n'.join(L) + '\n')
+
+def pc_post(self, u, q):
+    pid = q_id(u)
+    if not pid:
+        return self._json(400, {'ok': False, 'err': 'id ใช้ได้เฉพาะ a-z 0-9 _ -'})
+    os.makedirs(PCD, exist_ok=True)
+    if u.path == '/api/posecam-del':
+        d = os.path.join(PCD, '_deleted'); os.makedirs(d, exist_ok=True); st = time.strftime('%Y%m%d-%H%M%S')
+        for f in os.listdir(PCD):
+            if f in (pid + '.json', pid + '.md') or (f.startswith(pid + '_') and f.endswith('.jpg')):
+                os.replace(os.path.join(PCD, f), os.path.join(d, st + '_' + f))
+        pc_index()
+        return self._json(200, {'ok': True})
+    try:
+        b = json.loads(self._body().decode('utf-8')); doc = b['doc']
+        assert isinstance(doc.get('shots'), list)
+        ids = [s['id'] for s in doc['shots']]
+        assert all(PC_SHOT.match(i) for i in ids)
+    except Exception as e:
+        return self._json(400, {'ok': False, 'err': 'ข้อมูลผิดรูปแบบ: ' + str(e)})
+    doc['id'] = pid
+    for sid, img in (b.get('imgs') or {}).items():
+        if sid in ids:
+            data, ext = img_body(img.encode('ascii'))
+            open(os.path.join(PCD, '%s_%s.jpg' % (pid, sid)), 'wb').write(data)
+    for f in os.listdir(PCD):   # drop images of deleted shots
+        if f.startswith(pid + '_') and f.endswith('.jpg') and f[len(pid) + 1:-4] not in ids:
+            os.remove(os.path.join(PCD, f))
+    open(os.path.join(PCD, pid + '.json'), 'w', encoding='utf-8').write(json.dumps(doc, ensure_ascii=False, indent=1))
+    if b.get('md'):
+        open(os.path.join(PCD, pid + '.md'), 'w', encoding='utf-8').write(b['md'])
+    pc_index()
+    return self._json(200, {'ok': True, 'id': pid})
+
+# ---------- HUD designs (hudedit.html, design mode): hand-drawn HUD references for Claude ----------
+HDD = os.path.join(ROOT, 'huddesign')
+
+def hd_list():
+    out = []
+    if os.path.isdir(HDD):
+        for f in sorted(os.listdir(HDD)):
+            if not f.endswith('.json'):
+                continue
+            p = os.path.join(HDD, f)
+            try:
+                j = json.load(open(p, encoding='utf-8'))
+                out.append({'id': f[:-5], 'img': j.get('img') or 'huddesign/%s.png' % f[:-5], 'name': j.get('name') or f[:-5], 'n': len(j.get('objs', [])), 'w': j.get('w'), 'h': j.get('h'), 't': os.path.getmtime(p)})
+            except Exception:
+                pass
+    return out
+
+def hd_index():
+    os.makedirs(HDD, exist_ok=True)
+    L = ['# HUD designs (hudedit.html → ✎ ออกแบบ)', '',
+         '> เขียนอัตโนมัติจาก HUD Editor โหมดออกแบบ. ผู้ใช้วาด HUD ที่อยากได้ทับภาพเกม (ภาพอ้างอิง ยังไม่ใช่ HUD จริงในเกม).',
+         '> แต่ละอัน: ภาพ `huddesign/<id>.jpg` หรือ `.png` (**เปิดด้วย Read ก่อน**), `huddesign/<id>.md` (โน้ต + รายการชิ้น HUD/สกิล/ข้อความ + ตำแหน่ง), `huddesign/<id>.json` (ข้อมูลดิบ).', '']
+    for m in sorted(hd_list(), key=lambda m: -m['t']):
+        L.append('- **%s** (`%s`) %s×%s, %d ชิ้น — `%s` • `huddesign/%s.md` • แก้ล่าสุด %s' % (m['name'], m['id'], m['w'], m['h'], m['n'], m['img'], m['id'], time.strftime('%Y-%m-%d %H:%M', time.localtime(m['t']))))
+    if len(L) == 4:
+        L.append('- (ยังไม่มีแบบ)')
+    open(os.path.join(HDD, 'HUDDESIGN.md'), 'w', encoding='utf-8').write('\n'.join(L) + '\n')
+
+def hd_post(self, u, q):
+    if u.path == '/api/hud-design-img':
+        name = re.sub(r'[^a-zA-Z0-9_\-]', '_', q.get('name', ['img'])[0])[:60] or 'img'
+        data, ext = img_body(self._body())
+        d = os.path.join(HDD, 'img'); os.makedirs(d, exist_ok=True)
+        for e2 in ('png', 'jpg'):
+            if e2 != ext and os.path.exists(os.path.join(d, name + '.' + e2)):
+                os.remove(os.path.join(d, name + '.' + e2))
+        with open(os.path.join(d, name + '.' + ext), 'wb') as f: f.write(data)
+        return self._json(200, {'ok': True, 'path': 'huddesign/img/' + name + '.' + ext})
+    sid = q_id(u)
+    if not sid:
+        return self._json(400, {'ok': False, 'err': 'id ใช้ได้เฉพาะ a-z 0-9 _ -'})
+    os.makedirs(HDD, exist_ok=True)
+    if u.path == '/api/hud-design-del':
+        d = os.path.join(HDD, '_deleted'); os.makedirs(d, exist_ok=True); st = time.strftime('%Y%m%d-%H%M%S')
+        for ext in ('.json', '.md', '.png', '.jpg'):
+            p = os.path.join(HDD, sid + ext)
+            if os.path.exists(p):
+                os.replace(p, os.path.join(d, sid + '_' + st + ext))
+        di = os.path.join(HDD, 'img')   # its background / pasted pictures too
+        for f in (os.listdir(di) if os.path.isdir(di) else []):
+            if f.startswith(sid + '-'):
+                os.replace(os.path.join(di, f), os.path.join(d, st + '_' + f))
+        hd_index()
+        return self._json(200, {'ok': True})
+    try:
+        b = json.loads(self._body().decode('utf-8')); doc = b['doc']
+        assert isinstance(doc.get('objs'), list)
+    except Exception as e:
+        return self._json(400, {'ok': False, 'err': 'ข้อมูลผิดรูปแบบ: ' + str(e)})
+    doc['id'] = sid
+    open(os.path.join(HDD, sid + '.json'), 'w', encoding='utf-8').write(json.dumps(doc, ensure_ascii=False, separators=(',', ':')))
+    if b.get('png'):
+        data, ext = img_body(b['png'].encode('ascii'))
+        for e2 in ('png', 'jpg'):
+            if e2 != ext and os.path.exists(os.path.join(HDD, sid + '.' + e2)):
+                os.remove(os.path.join(HDD, sid + '.' + e2))
+        open(os.path.join(HDD, sid + '.' + ext), 'wb').write(data)
+    if b.get('md'):
+        open(os.path.join(HDD, sid + '.md'), 'w', encoding='utf-8').write(b['md'])
+    hd_index()
+    return self._json(200, {'ok': True, 'id': sid})
+
 def fx_list():
     out = {}
     for d, _, fs in os.walk(FXD):
@@ -826,6 +961,20 @@ class H(SimpleHTTPRequestHandler):
                 return self._json(200, {'ok': True, 'map': json.load(open(os.path.join(MBD, q_id(u) + '.json'), encoding='utf-8'))})
             except Exception as e:
                 return self._json(404, {'ok': False, 'err': str(e)})
+        if u.path == '/api/hud-designs':
+            return self._json(200, hd_list())
+        if u.path == '/api/hud-design':
+            p = os.path.join(HDD, q_id(u) + '.json')
+            if not q_id(u) or not os.path.exists(p):
+                return self._json(404, {'ok': False, 'err': 'ไม่มีแบบนี้'})
+            return self._json(200, json.load(open(p, encoding='utf-8')))
+        if u.path == '/api/posecams':
+            return self._json(200, pc_list())
+        if u.path == '/api/posecam':
+            p = os.path.join(PCD, (q_id(u) or '_') + '.json')
+            if not q_id(u) or not os.path.exists(p):
+                return self._json(404, {'ok': False, 'err': 'ไม่มีชุดนี้'})
+            return self._json(200, json.load(open(p, encoding='utf-8')))
         if u.path == '/api/sketches':
             return self._json(200, sk_list())
         if u.path == '/api/sketch':
@@ -966,6 +1115,10 @@ class H(SimpleHTTPRequestHandler):
                 open(os.path.join(MAPD, mid + '.png'), 'wb').write(data)
             maps_index()
             return self._json(200, {'ok': True, 'id': mid})
+        if u.path in ('/api/hud-design', '/api/hud-design-del', '/api/hud-design-img'):
+            return hd_post(self, u, q)
+        if u.path in ('/api/posecam', '/api/posecam-del'):
+            return pc_post(self, u, q)
         if u.path in ('/api/sketch', '/api/sketch-del', '/api/sketch-img'):
             return sk_post(self, u, q)
         if u.path in ('/api/mb', '/api/mb-export', '/api/mb-publish','/api/mb-unexport', '/api/mb-del', '/api/mb-asset'):

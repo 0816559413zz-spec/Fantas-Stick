@@ -31,4 +31,5 @@ function hlBox(id,ax,ay,x,y,w,h){if(!HUDL.demo)return;const L=hlGet(id),k=hudHs(
 const HL_DEMO_FEED=['Bot1 ⚡ → Bot2','คุณ 🔥 → Bot3','Bot2 ❄ → Bot1'];   // fake kill feed while the HUD Editor is open
 fetch('assets/hud/layout.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(j=>{if(j){hlSet(j);HUDL.file=hlJson();}}).catch(()=>{});
 // editor bridge (hudedit.html): live preview + highlight a block
-if(window.WD)Object.assign(window.WD,{HUDL,HUDL_DEF,hlSet,hlJson,hlGet,hudHs,hlMapBox:()=>h4MapBox()});
+if(window.WD)Object.assign(window.WD,{HUDL,HUDL_DEF,hlSet,hlJson,hlGet,hudHs,hlMapBox:()=>h4MapBox(),
+  hudLib:()=>({H4E,icoURL,hasIco,PBASIC:PBASIC.map(b=>b&&b.n)})});   // design mode asset library (element colours, icon URLs, basic attack names)

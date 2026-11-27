@@ -282,7 +282,7 @@ function devOverlay(){
   const g=new THREE.Group();g.renderOrder=999;
   if(solid.length){
     const im=new THREE.InstancedMesh(_dvCyl,_dvMat,solid.length),m=new THREE.Matrix4(),q=new THREE.Quaternion(),pos=new THREE.Vector3(),sc=new THREE.Vector3();
-    solid.forEach((o,i)=>{const h=Math.min(o.hgt,9),r=Math.max(0.2,o.r*S3),L=o.hx===undefined?0:Math.hypot(o.hx,o.hy)*S3;q.setFromAxisAngle(_dvY,o.hx===undefined?0:-Math.atan2(o.hy,o.hx));pos.set(tx(o.x),GY(o.x,o.y)+h/2,tz(o.y));sc.set(r+L,h,r);m.compose(pos,q,sc);im.setMatrixAt(i,m);});   // capsule = stretched along its axis
+    solid.forEach((o,i)=>{const h=Math.min(o.hgt,9),r=Math.max(0.2,o.r*S3),L=o.hx===undefined?0:Math.hypot(o.hx,o.hy)*S3;q.setFromAxisAngle(_dvY,o.hx===undefined?0:-Math.atan2(o.hy,o.hx));pos.set(tx(o.x),GY(o.x,o.y)+h/2,tz(o.y));sc.set(r+L,h,r+(o.w||0)*S3);m.compose(pos,q,sc);im.setMatrixAt(i,m);});   // capsule = stretched along its axis
     im.frustumCulled=false;g.add(im);
   }
   if(C.zon&&F){
@@ -303,7 +303,7 @@ function devMapDraw(){
   const W=Math.min(360,innerWidth*0.4),H=Math.round(W*MH/MW);
   if(_dvMap.width!==W||_dvMap.height!==H){_dvMap.width=W;_dvMap.height=H;}
   const c=_dvMap.getContext('2d'),k=W/MW;c.clearRect(0,0,W,H);
-  c.fillStyle='#3a4258';c.strokeStyle='#3a4258';c.lineCap='round';for(const o of OBS){if(!(o.hgt>0))continue;if(o.hx!==undefined){c.lineWidth=Math.max(2,o.r*k*2);c.beginPath();c.moveTo((o.x-o.hx)*k,(o.y-o.hy)*k);c.lineTo((o.x+o.hx)*k,(o.y+o.hy)*k);c.stroke();continue;}c.fillRect(o.x*k-1,o.y*k-1,Math.max(2,o.r*k*2),Math.max(2,o.r*k*2));}
+  c.fillStyle='#3a4258';c.strokeStyle='#3a4258';c.lineCap='round';for(const o of OBS){if(!(o.hgt>0))continue;if(o.hx!==undefined){c.lineWidth=Math.max(2,obsRR(o)*k*2);c.beginPath();c.moveTo((o.x-o.hx)*k,(o.y-o.hy)*k);c.lineTo((o.x+o.hx)*k,(o.y+o.hy)*k);c.stroke();continue;}c.fillRect(o.x*k-1,o.y*k-1,Math.max(2,o.r*k*2),Math.max(2,o.r*k*2));}
   const ring=(x,y,r,col,txt)=>{c.strokeStyle=col;c.fillStyle=col+'33';c.lineWidth=2;c.beginPath();c.arc(x*k,y*k,Math.max(3,r*k),0,7);c.fill();c.stroke();
     if(txt){c.fillStyle='#fff';c.font='10px sans-serif';c.textAlign='center';c.fillText(txt,x*k,y*k+3);}};
   if(MAPID==='fcs'){const F=sgF();

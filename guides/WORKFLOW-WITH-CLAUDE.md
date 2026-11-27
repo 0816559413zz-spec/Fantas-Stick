@@ -21,7 +21,8 @@ User-defined rules for all Claude sessions in this repo (language, style, scope)
 | Environment interaction / destruction | `guides/Destruction.md`, `designs/element-surfaces.md`, `designs/battlefield.md`; skills that hit terrain; map docs |
 | Bug fix | `bugs/BUGS.md` entry + the code area only |
 | Tool UI | `guides/TOOL-UI-RULES.md`, `hub/tools.json` |
-| HUD (in-match) | `HANDOFF.md` HUD Editor entry; `js/66-hud4.js`, `js/66-hudlay.js`, `css/hud4.css`, `js/38-hud.js`; layout `assets/hud/layout.json` (edited in `hudedit.html`) |
+| HUD (in-match) | `HANDOFF.md` HUD Editor entry; `js/66-hud4.js`, `js/66-hudlay.js`, `css/hud4.css`, `js/38-hud.js`; layout `assets/hud/layout.json` (edited in `hudedit.html`); hand-drawn HUD designs `huddesign/HUDDESIGN.md` → open `huddesign/<id>.jpg|png` with Read (drawing tool `hub/huddraw.js`, reference only) |
+| Music / soundtrack | `guides/MUSIC.md` (free tools, track slots, file spec), `audio/CREDITS.md`, `js/18-audio.js` (`wantTrack`) |
 | Graphics / perf / loading, or anything adding lights, materials, shaders, code-built meshes | `guides/PRELOAD-STANDARD.md` (rules + plan), `guides/OPTIMIZE.md` |
 
 Keep this table updated when a new system or doc appears.
@@ -29,6 +30,7 @@ Keep this table updated when a new system or doc appears.
 ## 2. Replies
 
 - Default language: **Thai** (user chose 2026-11-20). Short, simple words. Answer only what was asked.
+- Give candid feedback on design ideas. If you disagree, say so and explain the gameplay tradeoff. Agree when the idea merits it.
 - Style: `Fix: moved X to Y.` / `Done: ...` / `Need: <one decision>`.
 - Fixing a bug without being asked for the cause: do not explain the cause.
 - **While working: write NO progress text between tool calls** (no "now I'm testing…", "still recording…", "found the cause…"). Run tools silently. Speak only in the final reply, or earlier only to ask a blocking question.

@@ -18,6 +18,8 @@ export const SURF = [
   { k: 'ice', n: 'Ice (slippery)', c: '#a9d4e8', env: 'ice' }, { k: 'lava', n: 'Lava', c: '#d8521e', env: 'lava' },
   // เพิ่มท้ายตาราง (ห้ามแทรกกลาง — ดัชนีถูกเก็บในไฟล์แผนที่) • โทนจางสำหรับป่าหมอก (แมพ gorge)
   { k: 'moss', n: 'Moss', c: '#575837' }, { k: 'litter', n: 'Leaf Litter/Forest Soil', c: '#5d4a34' }, { k: 'gravel', n: 'Pebbles', c: '#7a7569' }, { k: 'duff', n: 'Pine Needles', c: '#4b4332' }, { k: 'trail', n: 'Forest Path (dark dirt)', c: '#6f5b44' },
+  // city (shibuya-demo, 2026-11-26)
+  { k: 'asphalt', n: 'Asphalt Road', c: '#2c2d31' }, { k: 'sidewalk', n: 'Sidewalk Tiles', c: '#6e6b66' },
 ];
 export const WALL_PRESET = [
   { n: 'Stone Wall', th: 1, h: 3.5, c: '#8a8478', m: 'stone' }, { n: 'Castle Wall', th: 2, h: 6, c: '#77736c', m: 'stone' },
@@ -57,7 +59,10 @@ export const OBJ = {
   sgItem: { n: 'Item Spawn (after core N)', cat: 'mode', c: '#ffe08a', note: 'point inside the Loot Area • Tier 1–3 (item kinds: team gameplay decides)' },
   // flying rules (any mode): Broom Zone = brooms allowed inside (box up to Top) • Wind Push = pushes players along Direction
   brz: { n: 'Broom Zone', cat: 'mode', c: '#8ad0ff', note: 'rectangle + Top height • Team = who may fly here • outside = rider falls off (siege rule)' },
+  phg: { n: 'Phase Ground (burnt / bare)', cat: 'mode', c: '#7a4a2a', note: 'rectangle • from phase N the game scorches the ground + grass here (burnt / bare / frozen look) • e.g. burnt forest floor' },
   wind: { n: 'Wind Push Zone', cat: 'mode', c: '#b8f0e0', note: 'rectangle • Direction (deg, map compass like Rotation) + Strength • e.g. edges of floating islands' },
+  // water surface (2026-11-25): flat see-through water at Level y (m, absolute — not above ground) • the ground cuts the shoreline
+  water: { n: 'Water Surface', cat: 'water', c: '#3fa0d8', note: 'flat water at Level (m) • ground higher than the level hides it = the shore • dig the bed lower (Dig Basin / Sculpt) • look only, no gameplay yet' },
   // room helpers
   ceil: { n: 'Ceiling', cat: 'room', c: '#c77dff', note: 'keeps players/fliers/camera below the ceiling • roofed rooms ≥ 20 high' },
   lz: { n: 'Indoor Light Zone', cat: 'room', c: '#7fb0ff', note: 'camera inside = dim cool indoor light • glass / lit windows inside get sun beams • Height Above Ground = roof (camera above it = outdoor)' },
@@ -74,8 +79,29 @@ export const RPK = {
 };
 for (const k in RPK) OBJ['rp_' + k] = { n: RPK[k].n, cat: 'room', c: '#a07a56', rp: k };
 export const isRP = t => t.startsWith('rp_');
+// water looks: defaults the Inspector shows (game js/67-pond.js WATER_LOOK keeps the same values) • sh shallow, dp deep colour, cl clarity 0..1
+export const WATER_DEF = { lake: { sh: '#4fa6b4', dp: '#143f5c', cl: 0.25 }, clear: { sh: '#6fdcd2', dp: '#1b7392', cl: 0.5 }, swamp: { sh: '#6e7a42', dp: '#1e2a16', cl: 0.1 }, dark: { sh: '#3a7088', dp: '#071a2a', cl: 0.07 } };
+export const WATER_OPT = ['cs', 'cd', 'cl', 'wh', 'ws', 'fo'];   // optional per-water overrides (shallow/deep colour, clarity, wave height/speed, foam)
+export const WATER_LOOK = [['lake', 'Lake (blue)'], ['clear', 'Clear (turquoise)'], ['swamp', 'Swamp (green)'], ['dark', 'Deep (dark)']];
+export const WATER_COL = { lake: '#3a8fb0', clear: '#4cc6c4', swamp: '#5e6e3c', dark: '#24506a' };
+// water rect: is map point (x,z) inside (local u/v in m, >0 = inside distance to the nearest edge)
+export function waterIn(o, x, z) { const cs = Math.cos(o.rot || 0), sn = Math.sin(o.rot || 0), dx = x - o.x, dz = z - o.z, u = dx * cs - dz * sn, v = dx * sn + dz * cs;
+  return Math.min((o.sx || 1) / 2 - Math.abs(u), (o.sz || 1) / 2 - Math.abs(v)); }
+// grid index box covering a (rotated) water rect
+export function waterBox(M, o) { const r = Math.hypot(o.sx || 1, o.sz || 1) / 2;
+  return [clamp(Math.floor((o.x - r) / C), 0, M.nx - 1), clamp(Math.floor((o.z - r) / C), 0, M.ny - 1), clamp(Math.ceil((o.x + r) / C), 0, M.nx - 1), clamp(Math.ceil((o.z + r) / C), 0, M.ny - 1)]; }
+// level just under the lowest ground along the rect edge (water stays inside a dug bed)
+export function waterAutoLevel(M, o) { const [i0, j0, i1, j1] = waterBox(M, o); let mn = Infinity, mx = -Infinity;
+  for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) { const d = waterIn(o, i * C, j * C); if (d < 0 || d > 0.75) continue; const h = M.hg[j * M.nx + i]; if (h < mn) mn = h; if (h > mx) mx = h; }
+  return mn < Infinity ? +(mn - 0.15).toFixed(2) : +(gh(M, o.x, o.z) - 0.15).toFixed(2); }
+// dig a smooth oval bed inside the rect: depth m below the level at the middle, bank 0.3 m above the level at the edge (only lowers the ground)
+export function waterDig(M, o, depth) { const [i0, j0, i1, j1] = waterBox(M, o), lv = o.y || 0, cs = Math.cos(o.rot || 0), sn = Math.sin(o.rot || 0), a = (o.sx || 1) / 2, b = (o.sz || 1) / 2;
+  for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) { const dx = i * C - o.x, dz = j * C - o.z, u = (dx * cs - dz * sn) / a, v = (dx * sn + dz * cs) / b, r = Math.hypot(u, v); if (r >= 1) continue;
+    const w = r < 0.55 ? 1 : 1 - (r - 0.55) / 0.45, s = w * w * (3 - 2 * w), t = lv + 0.3 - (depth + 0.3) * s, k = j * M.nx + i; if (t < M.hg[k]) M.hg[k] = clamp(+t.toFixed(2), HMIN, HMAX); }
+  return [i0, j0, i1, j1]; }
 // axis-aligned rectangle areas (size sx×sz, no rotation in the game)
-export const AREA = new Set(['phase', 'ceil', 'lz', 'sgHold', 'sgLoot', 'brz', 'wind']);
+export const AREA = new Set(['phase', 'ceil', 'lz', 'sgHold', 'sgLoot', 'brz', 'wind', 'phg']);
+export const PHG_K = [['burn', 'Burnt (black ground + grass)'], ['flat', 'Bare (no grass)'], ['frost', 'Frozen']];
 // decor drawn by the game (MAP-STANDARD round 4): the same builder the code rooms use (js/28-fcs-castle.js fcsDecoKit) — no collision,
 // not in the .glb. k = material key: stone/dark (castle ashlar), roof, lit (glowing window), wood, iron, carpet, slit (dark opening)
 // y = lift of the shape centre above the ground (roof/cloth: base/top) • rot = yaw (roof ridge, cloth/shield facing)
@@ -100,6 +126,9 @@ Object.assign(OBJ, {
   dc_flag: { n: 'Tower Flag', cat: 'deco', c: '#9a1c20' }, dc_post: { n: 'Flame on Pole', cat: 'deco', c: '#ffb060' },
 });
 export const isDeco = t => t.startsWith('dc_');
+// Phase layers (user 2026-11-25): pa = shown from siege phase N (default 1), pb = shown up to phase N (default: to the end) → [a,b] or null.
+// Objects (kits / prims) + walls only: look (.glb node extras vp) + collision (obs vp, game hgt 0 outside). Other modes stay at phase 1.
+export const vpOf = o => (o.pa > 1 || o.pb > 0) ? [Math.max(1, o.pa | 0 || 1), o.pb > 0 ? o.pb | 0 : 99] : null;
 // game systems bound by tag, not by map name (MAP-STANDARD §1.7)
 export const SYS_WALL = [['', '(none)'], ['fence', 'Burnable Fence'], ['stonewall', 'Stone Wall (cracks/burns)']];
 export const SYS_FLOOR = [['', '(none)'], ['eggshell', 'Eggshell Break (bridge)']];
@@ -206,6 +235,7 @@ export function pnExists(o, d, k) {
   const col = k % d.nc, r = (k / d.nc) | 0, cw = d.L / d.nc, ch = d.H / d.nr, u = -d.L / 2 + (col + 0.5) * cw, z = (r + 0.5) * ch;
   const tp = pnTP(o); if (tp && z > d.H * pnTopF(tp, u / d.L + 0.5) + ch * 0.25) return false;
   if (o.ho && o.ho.some(q => u + d.L / 2 > q[0] && u + d.L / 2 < q[1] && z > q[2] && z < q[3])) return false;
+  if (o.hc && o.hc.some(q => q[0] === col && q[1] === r)) return false;   // punched cells [col,row] (row 0 = bottom, col 0 = left end)
   return true;
 }
 // support graph, same rules as the game (pnlLinks): 4-way inside a panel + same-group cells whose centres are close (3D); grounded = bottom row on the ground
@@ -346,11 +376,14 @@ export function objCircles(M, o, d) {
   if (d.cb) {   // kit shapes (tools/ruin-assets.mjs): collision boxes [cx,cz,w,d,h,y0] in model metres replace the bbox footprint ([] = none, e.g. platforms: floors give it)
     const s = d.s || 1, k = o.cs == null ? 1 : o.cs, rot = o.rot || 0, cs = Math.cos(rot), sn = Math.sin(rot), out = [];
     for (const [cx, cz, w, dd, h, y0] of d.cb) { const lx = cx * s, lz = cz * s;
-      out.push(...objCircles(M, { x: o.x + lx * cs + lz * sn, z: o.z - lx * sn + lz * cs, rot, y: o.y, cs: 1 }, { ex: w * s * k / 2, ez: dd * s * k / 2, h: h * s, yo: (y0 || 0) * s, col: 1, cs: 1 })); }
+      out.push(...objCircles(M, { x: o.x + lx * cs + lz * sn, z: o.z - lx * sn + lz * cs, rot, y: o.y, cs: 1 }, { ex: Math.abs(w) * s * k / 2, ez: Math.abs(dd) * s * k / 2, h: h * s, yo: (y0 || 0) * s, col: 1, cs: 1, bx: 1 })); }
     return out;
   }
   const k = (o.cs == null ? d.cs || 1 : o.cs), ex = d.ex * k, ez = d.ez * k, g = gh(M, o.x, o.z), lift = (o.y || 0) + (d.yo || 0), top = g + lift + d.h, out = [];
   const add = (x, z, r) => { const gg = gh(M, x, z), c = { x, z, r, top, hgt: top - gg }; if (lift > 0.3) c.bot = g + lift - gg; if (c.hgt > 0.05 && r > 0.05) out.push(c); };
+  if (d.bx && Math.min(ex, ez) > 0.02) {   // box: one collider, half axis along the long side + half width w, small round corner (2026-11-26, was a chain of circles)
+    const rot = o.rot || 0, long = ex >= ez, rc = Math.min(0.1, Math.min(ex, ez)), a = (long ? ex : ez) - rc, ax = long ? Math.cos(rot) : Math.sin(rot), az = long ? -Math.sin(rot) : Math.cos(rot);
+    add(o.x, o.z, rc); if (out.length) Object.assign(out[0], { hx: ax * Math.max(a, 0.01), hz: az * Math.max(a, 0.01), w: (long ? ez : ex) - rc }); return out; }
   if (Math.abs(ex - ez) < 0.2 * Math.max(ex, ez) || Math.max(ex, ez) < 0.5) { add(o.x, o.z, Math.max(ex, ez)); return out; }
   const rot = o.rot || 0, long = ex > ez, r = Math.max(0.25, Math.min(ex, ez)), L = Math.max(ex, ez) - r, n = Math.max(1, Math.ceil(L / (r * 1.1)));
   const ax = long ? Math.cos(rot) : Math.sin(rot), az = long ? -Math.sin(rot) : Math.cos(rot);
@@ -385,7 +418,7 @@ export function gameData(M, dim) {
   }
   // collision + breakable groups
   const obs = [], brk = [], brkOf = new Map();
-  const put = (c, gi, ex) => { const o = { x: r1(c.x * PX), y: r1(c.z * PX), r: r1(c.r * PX), hgt: r2(c.hgt), k: 'col' }; if (c.bot != null) o.bot = r2(c.bot); if (gi != null) o.b = gi; if (ex) Object.assign(o, ex); obs.push(o); };
+  const put = (c, gi, ex) => { const o = { x: r1(c.x * PX), y: r1(c.z * PX), r: r1(c.r * PX), hgt: r2(c.hgt), k: 'col' }; if (c.bot != null) o.bot = r2(c.bot); if (c.w != null) Object.assign(o, { hx: r1(c.hx * PX), hy: r1(c.hz * PX), w: r1(c.w * PX) }); if (gi != null) o.b = gi; if (ex) Object.assign(o, ex); obs.push(o); };
   let fenceN = 0;   // fence segment index (same order as data.sys.fence below) → obs k:'fcf' + fid (js/12-efs lowers burnt sections)
   for (const w of M.walls) {
     if (w.sg) continue;   // siege target wall/gate: the game builds its collision + look from data.siege.bw (js/02-fcs sgFromFile)
@@ -395,7 +428,7 @@ export function gameData(M, dim) {
       let gi = null;
       if (w.brk && !P) { gi = brk.length; brkOf.set('w' + w.id + ':' + ci, gi); const L = R[R.length - 1][2] - R[0][2];
         brk.push({ h: r2(w.h), vh: r2(w.h), v: r1(L * w.th * w.h), m: w.m || 'stone', n: 'wall_' + w.id + '_' + ci }); }
-      for (const c of chunkCircles(M, w, R)) put(c, gi, P ? { k: 'fcf', fid: fid(c) } : null);
+      const vp = vpOf(w); for (const c of chunkCircles(M, w, R)) put(c, gi, Object.assign(P ? { k: 'fcf', fid: fid(c) } : {}, vp ? { vp } : {}));
     });
   }
   // floors that are solid underneath (sol 1, or auto = a ramp/stair starting at the ground): collision circles below the slab, tops just under the
@@ -411,7 +444,7 @@ export function gameData(M, dim) {
       const g = gh(M, x, z), h = top - 0.15 - g; if (h === h && h < 1e9 && h > (ramp ? 0.3 : TSTEP)) put({ x, z, r, hgt: h }, null, { k: 'flr' }); }
   }
   const spawns = [], espawn = [], rings = [], tasks = [], props = [], houses = [], lights = [];
-  const sg = { cores: [], sp: { A: {}, B: {} }, phases: [], bw: [], hold: { A: {}, B: {} }, loot: {}, items: [] }, ceil = [], lz = [], rprops = [], deco = [], pnl = [], broom = [], wind = [];
+  const sg = { cores: [], sp: { A: {}, B: {} }, phases: [], bw: [], hold: { A: {}, B: {} }, loot: {}, items: [] }, ceil = [], lz = [], rprops = [], deco = [], pnl = [], broom = [], wind = [], water = [], phg = [];
   const rect = o => { const w = (o.sx || 1) * PX, d = (o.sz || 1) * PX; return { x0: r1(o.x * PX - w / 2), y0: r1(o.z * PX - d / 2), x1: r1(o.x * PX + w / 2), y1: r1(o.z * PX + d / 2) }; };
   for (const o of allObjs) {
     const X = r1(o.x * PX), Y = r1(o.z * PX), rot = o.rot || 0;
@@ -422,7 +455,9 @@ export function gameData(M, dim) {
     else if (o.t === 'sgLoot') { const q = rect(o), k = o.ph || 1; (sg.loot[k] = sg.loot[k] || []).push({ x1: q.x0, y1: q.y0, x2: q.x1, y2: q.y1 }); }
     else if (o.t === 'sgItem') sg.items.push({ ph: o.ph || 1, x: X, y: Y, t: Math.max(1, Math.min(3, Math.round(o.tier || 1))) });
     else if (o.t === 'brz') broom.push(Object.assign(rect(o), { top: r2(o.top == null ? 60 : o.top), tm: o.tm === 'A' || o.tm === 'B' ? o.tm : '' }));   // tm '' = both teams
+    else if (o.t === 'phg') phg.push(Object.assign(rect(o), { ph: Math.max(1, o.ph | 0 || 2), k: o.k || 'burn', a: r2(o.a == null ? 1 : o.a) }));   // phase ground scorch (js/28-maps-build phTick → scarRect js/50)
     else if (o.t === 'wind') { const a = (o.dir || 0) * Math.PI / 180; wind.push(Object.assign(rect(o), { dx: r2(Math.sin(a)), dy: r2(Math.cos(a)), s: r2(o.str == null ? 8 : o.str) })); }   // push direction in map px axes (x right, y down)
+    else if (o.t === 'water') water.push(Object.assign({ x: X, y: Y, w: r1((o.sx || 1) * PX), h: r1((o.sz || 1) * PX), lv: r2(o.y || 0), k: o.k || 'lake' }, rot ? { a: +rot.toFixed(4) } : {}, ...WATER_OPT.filter(q => o[q] != null).map(q => ({ [q]: o[q] }))));   // js/67-pond.js (a = three rotation.y)
     else if (o.t === 'lz') lz.push(Object.assign(rect(o), { top: r2(o.y == null ? 22 : o.y), k: r2(o.k == null ? 1 : o.k) }));   // indoor light zone (js/28-fcs-hall.js)
     else if (o.t === 'ceil') ceil.push(Object.assign(rect(o), { h: r2(o.y == null ? 21 : o.y) }, o.zmax != null ? { zmax: r2(o.zmax) } : {}));
     else if (o.t === 'dc_road') { if ((o.pts || []).length > 1) { const cs = Math.cos(rot), sn = Math.sin(rot);   // drawn road: points -> absolute map px
@@ -437,13 +472,13 @@ export function gameData(M, dim) {
     else if (o.t === 'light') lights.push({ x: X, y: Y, h: r2(o.y == null ? 2.2 : o.y), col: o.c || '#ffb060', int: o.int == null ? 2.4 : o.int, dist: o.dist || 14 });
     else if (o.t === 'pn_wall') pnl.push(Object.assign({ x: X, y: Y, a: +(-rot).toFixed(4), L: r1((o.L || 4) * PX), T: r1((o.T || 0.3) * PX), H: r2(o.sy || 3), cs: o.cs || 1, mat: o.mat || 'brick', m: o.m === 'pn' ? 'p' : o.m || 'p' }, o.m === 'pn' ? { np: 1 } : {},
       o.y ? { z0: r2(o.y) } : {}, o.hp ? { hp: o.hp } : {}, o.thru === 0 ? { thru: 0 } : {}, o.g != null && o.g !== '' ? { g: o.g } : {},
-      o.tl ? { tl: +(+o.tl).toFixed(4) } : {}, o.sh === 'tri' ? Object.assign({ sh: 'tri' }, o.ap != null && +o.ap !== 0.5 ? { ap: +(+o.ap).toFixed(3) } : {}) : o.sh === 'trap' ? { sh: 'trap', hr: +(o.hr == null ? 0.5 : +o.hr).toFixed(3) } : {}, o.ho && o.ho.length ? { ho: o.ho.slice(0, 4) } : {}, o.nb ? { nb: 1 } : {}));   // breakable panel (js/12-pnl)
+      o.tl ? { tl: +(+o.tl).toFixed(4) } : {}, o.sh === 'tri' ? Object.assign({ sh: 'tri' }, o.ap != null && +o.ap !== 0.5 ? { ap: +(+o.ap).toFixed(3) } : {}) : o.sh === 'trap' ? { sh: 'trap', hr: +(o.hr == null ? 0.5 : +o.hr).toFixed(3) } : {}, o.ho && o.ho.length ? { ho: o.ho.slice(0, 4) } : {}, o.hc && o.hc.length ? { hc: o.hc.map(q => [q[0], q[1]]) } : {}, o.nb ? { nb: 1 } : {}));   // breakable panel (js/12-pnl) • hc = punched cells [col,row]
     else if (o.t === 'house') houses.push(Object.assign({ x: X, y: Y, w: r1(160 * (o.sx || 1)), d: r1(130 * (o.sz || 1)), ry: +rot.toFixed(3) }, o.brk === 0 ? { nb: 1 } : {}));   // nb = unbreakable (inspector 'Breakable' off)
     else if (OBJ[o.t] && OBJ[o.t].cat === 'game') props.push(Object.assign({ k: o.t, x: X, y: Y, a: +rot.toFixed(3) }, o.brk === 0 ? { nb: 1 } : {}));
     else { const d = dim(o); if (!d) continue; const cs = objCircles(M, o, d); if (!cs.length) continue;
       let gi = null; const isBrk = o.brk == null ? d.brk : o.brk;
       if (isBrk) { gi = brk.length; brkOf.set('o' + o.id, gi); brk.push({ h: r2(d.h), vh: r2(d.h), v: r1(d.ex * 2 * d.ez * 2 * d.h), m: d.m || 'stone', n: 'obj_' + o.id }); }
-      for (const c of cs) put(c, gi); }
+      const vp = vpOf(o); for (const c of cs) put(c, gi, vp ? { vp } : null); }
   }
   spawns.sort((a, b) => (a.t == null ? -1 : a.t) - (b.t == null ? -1 : b.t));
   // siege target walls/gate (axis-aligned bounding rect of the wall) + tagged systems
@@ -483,6 +518,8 @@ export function gameData(M, dim) {
   if (sg.cores.length || sg.bw.length || sg.phases.length || Object.keys(sg.sp.A).length || Object.keys(sg.sp.B).length) data.siege = sg;
   if (broom.length) data.broom = broom;
   if (wind.length) data.wind = wind;
+  if (water.length) data.water = water;
+  if (phg.length) data.phg = phg;
   if (ceil.length) data.ceil = ceil;
   if (lz.length) data.lz = lz;
   if (rprops.length) data.rprops = rprops;
@@ -502,6 +539,9 @@ export function check(M, G) {
   else if (c.spawns < 6) add('warn', 'General spawns: ' + c.spawns + ' points (6 spread apart recommended)');
   else add('ok', 'General spawns: ' + c.spawns + ' points');
   if (has('tdm') && !siegeOnly) { if (c.red >= 3 && c.blue >= 3) add('ok', 'Team spawns: red ' + c.red + ' / blue ' + c.blue); else add('warn', 'Team mode: team spawns red ' + c.red + ' / blue ' + c.blue + ' (3 per side recommended — none = the game splits the general spawns left/right)'); }
+  { const L = M.objs.concat(M.walls).filter(o => vpOf(o) || o.t === 'phg'), bad = L.find(o => o.pb > 0 && (o.pa || 1) > o.pb);
+    if (bad) add('err', 'Phase layer: “Show from phase” is after “Show until phase”', bad.x != null ? [bad.x, bad.z] : null);
+    else if (L.length) add(has('siege') ? 'ok' : 'warn', 'Phase layers: ' + L.length + ' items change by siege phase' + (has('siege') ? '' : ' — this map has no Siege mode, so phase 1 always shows')); }
   if (M.modes && M.modes.includes('race') && c.rings < 10) add('warn', 'Broom race: rings ' + c.rings + ' (need 10)');
   if (M.modes && M.modes.includes('imp') && c.tasks < 6) add('warn', 'Find Voldemort: task points ' + c.tasks + ' (6–8 recommended)');
   if (has('coop') && c.espawn && c.espawn < 4) add('warn', 'Co-op: Monster spawns: ' + c.espawn + ' (4+ recommended, or none to let the game spawn along the edges)');
@@ -545,7 +585,7 @@ export function check(M, G) {
   const obsLim = Math.max(2000, Math.round(M.W * M.H * 0.035)), obsWarn = Math.round(obsLim * 0.6);   // budget scales with map area (spatial grid keeps cost local)
   if (c.obs > obsLim) add('err', 'Colliders ' + c.obs + ' colliders — too heavy (limit ' + obsLim + '): cut down long thin walls or make them thicker');
   else if (c.obs > obsWarn) add('warn', 'Colliders ' + c.obs + ' (getting heavy)');
-  else add('ok', 'Colliders ' + c.obs + ' (straight walls = 1 box each)');
+  else add('ok', 'Colliders ' + c.obs + ' (straight walls = 1 capsule each, boxes = 1 box each)');
   if (c.props > 0 && M.objs.filter(o => o.t === 'pchest').length > 2) add('warn', 'More than 2 treasure chests');
   let lo = 1e9, hi = -1e9; for (const h of M.hg) { if (h < lo) lo = h; if (h > hi) hi = h; }
   if (lo < -5 || hi > 20) add('warn', 'Ground level ' + lo.toFixed(1) + ' to ' + hi.toFixed(1) + ' (camera/minimap set for about −5 to +20)');

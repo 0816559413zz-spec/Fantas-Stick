@@ -116,13 +116,46 @@ const AO_CALC=AO_HEAD+'void main(){float ao=1.0;'+
       'ao=clamp(1.0-uAO*occ/12.0,0.0,1.0);ao=mix(ao,1.0,smoothstep(uFade.x,uFade.y,z));}}'+
   'gl_FragColor=vec4(ao,ao,ao,1.0);}';
 // ขั้น 2: ก๊อปภาพฉาก × AO ที่เบลอแล้ว (ถ่วงน้ำหนักตามความลึกใกล้เคียง กันเงาเลอะข้ามขอบ)
-const AO_COPY=AO_HEAD+'uniform sampler2D t;uniform sampler2D tAO;uniform vec2 uAORes;uniform float uRim;uniform vec3 uRimCol;uniform float uHaze;uniform vec3 uHazeCol;uniform vec3 uHazeD;uniform vec4 uCamY;uniform float uRay;uniform vec2 uSunUV;uniform float uSunVis;uniform vec3 uRayCol;'+
+// ===== Wet ground + reflections (rain, js/76-weather.js) — pixels whose depth normal points up get darker + reflect the scene
+// uRefl (Settings > Graphics > Reflections): 0 off • 1 fake = vertical smear toward the lights above (cheap) • 2 SSR = ray march in this frame
+// • 3 Planar = mirror render tMir (js/76 wxPre) for pixels near the plane uMirY, SSR elsewhere • puddles + rain ripples from world-space noise
+const WETU={uWet:{value:0},uRefl:{value:0},uWT:{value:0},uWetD:{value:90},uCamX:{value:new THREE.Vector4()},uCamZ:{value:new THREE.Vector4()},uProj:{value:new THREE.Matrix4()},
+  uSkyC:{value:new THREE.Color()},tMir:{value:null},uMirVP:{value:new THREE.Matrix4()},uMirY:{value:0},uMirOn:{value:0}};
+const WET_GLSL='uniform float uWet;uniform float uRefl;uniform float uWT;uniform float uWetD;uniform vec4 uCamX;uniform vec4 uCamZ;uniform mat4 uProj;uniform vec3 uSkyC;uniform sampler2D tMir;uniform mat4 uMirVP;uniform float uMirY;uniform float uMirOn;'+
+  'float wh(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}'+
+  'float wn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(wh(i),wh(i+vec2(1.0,0.0)),f.x),mix(wh(i+vec2(0.0,1.0)),wh(i+vec2(1.0,1.0)),f.x),f.y);}'+
+  // rain ripples: one ring per cell (2 sizes), random phase/offset → xz slope of the ring wave
+  'vec2 wrip(vec2 p,float tm){vec2 g=vec2(0.0);for(int l=0;l<2;l++){vec2 q=p*(l==0?1.4:2.3)+float(l)*7.3;vec2 i=floor(q),f=fract(q)-0.5;float h=wh(i);'+
+    'vec2 d=f-(vec2(wh(i+3.1),wh(i+5.7))-0.5)*0.5;float r=length(d);float a=fract(tm*(0.9+h*0.6)+h);float rr=a*0.45;'+
+    'g+=d/max(r,1e-3)*(1.0-a)*exp(-pow((r-rr)*18.0,2.0))*cos((r-rr)*40.0);}return g*0.5;}'+
+  'vec2 wpr(vec3 q){vec4 c=uProj*vec4(q,1.0);return c.xy/c.w*0.5+0.5;}';
+const WET_MAIN='if(uWet>0.001&&z<uWetD){vec2 px=1.0/uRes;vec3 P=vec3((vUv*2.0-1.0)*uTan*z,-z);'+
+  'vec3 pr=vp(vUv+vec2(px.x,0.0))-P,pl=P-vp(vUv-vec2(px.x,0.0)),pu=vp(vUv+vec2(0.0,px.y))-P,pd=P-vp(vUv-vec2(0.0,px.y));'+
+  'vec3 N=normalize(cross(abs(pr.z)<abs(pl.z)?pr:pl,abs(pu.z)<abs(pd.z)?pu:pd));'+
+  'float hz=smoothstep(0.8,0.94,dot(N,uCamY.xyz))*uWet*(1.0-smoothstep(uWetD*0.55,uWetD,z));'+
+  'if(hz>0.001){vec2 wp=vec2(dot(uCamX.xyz,P)+uCamX.w,dot(uCamZ.xyz,P)+uCamZ.w);'+
+    'float pud=smoothstep(0.48,0.66,wn(wp*0.17)*0.65+wn(wp*0.6+3.0)*0.35);'+   // puddles (mirror-like) vs damp ground
+    'vec2 rg=wrip(wp,uWT)*(0.35+0.65*pud)+(vec2(wn(wp*3.0),wn(wp*3.0+9.0))-0.5)*0.16*(1.0-pud);'+
+    'vec3 Nv=normalize(uCamY.xyz+uCamX.xyz*rg.x+uCamZ.xyz*rg.y);'+
+    'c.rgb*=1.0-hz*(0.3+0.25*pud);'+   // wet = darker
+    'if(uRefl>0.5){vec3 V=normalize(P);float fr=pow(1.0-max(dot(-V,Nv),0.0),5.0);float amt=hz*mix(0.28,1.0,pud)*(0.1+0.75*fr);vec3 rc=vec3(0.0);float ok=0.0;'+
+      'if(uRefl<1.5){vec3 mx=vec3(0.0),av=vec3(0.0);for(int i=1;i<=7;i++){float f=float(i)/7.0;vec3 s=texture2D(t,clamp(vUv+vec2(rg.x*0.03,f*f*0.32),0.0,1.0)).rgb*(1.0-f*0.55);mx=max(mx,s);av+=s;}rc=mix(av/7.0,mx,0.55);ok=1.0;}'+
+      'else{'+
+        'if(uRefl>2.5&&uMirOn>0.5){float wy=dot(uCamY.xyz,P)+uCamY.w;if(abs(wy-uMirY)<0.4){vec4 mc=uMirVP*vec4(wp.x,uMirY,wp.y,1.0);rc=texture2D(tMir,mc.xy/mc.w*0.5+0.5+rg*0.03).rgb;ok=1.0;}}'+
+        'if(ok<0.5){vec3 R=reflect(V,Nv);float st=0.06+z*0.012;vec3 q=P+R*st*wh(gl_FragCoord.xy+fract(uWT));'+
+          'for(int i=0;i<36;i++){q+=R*st;st*=1.1;vec2 su=wpr(q);if(su.x<0.0||su.x>1.0||su.y<0.0||su.y>1.0||q.z>-0.3)break;'+
+            'float dz=-q.z-lz(su);if(dz>0.0&&dz<max(0.6,st*3.0)){vec3 a=q-R*st,b=q;for(int k=0;k<5;k++){vec3 m=(a+b)*0.5;if(-m.z-lz(wpr(m))>0.0)b=m;else a=m;}'+
+              'vec2 hu=wpr(b);vec2 e=smoothstep(vec2(0.0),vec2(0.07),hu)*smoothstep(vec2(1.0),vec2(0.93),hu);rc=texture2D(t,hu).rgb;ok=e.x*e.y;break;}}'+
+          'rc=mix(uSkyC,rc,ok);ok=1.0;}}'+
+      'c.rgb+=rc*amt*ok;}}}';
+const AO_COPY=AO_HEAD+WET_GLSL+'uniform sampler2D t;uniform sampler2D tAO;uniform vec2 uAORes;uniform float uRim;uniform vec3 uRimCol;uniform float uHaze;uniform vec3 uHazeCol;uniform vec3 uHazeD;uniform vec4 uCamY;uniform float uRay;uniform vec2 uSunUV;uniform float uSunVis;uniform vec3 uRayCol;'+
   'void main(){vec4 c=texture2D(t,vUv);'+
   'if(texture2D(tD,vUv).x<0.99999){float z=lz(vUv);'+   // ท้องฟ้าไม่ต้องทำ
   'if(uAO>0.001){float s=0.0,w=0.0;vec2 px=1.0/uAORes;'+
     'for(int x=0;x<4;x++)for(int y=0;y<4;y++){vec2 uv=vUv+(vec2(float(x),float(y))-1.5)*px;'+
       'float k=1.0/(1.0+abs(lz(uv)-z)*8.0/z);s+=texture2D(tAO,uv).r*k;w+=k;}'+
     'c.rgb*=s/max(w,1e-4);}'+
+  WET_MAIN+
   // ไฟขอบ: มองหาพิกเซลข้างบน/ข้าง ๆ (5 ทิศ × 2 ระยะ) ที่ลึกกว่าเรามาก → เราอยู่ที่ขอบ (ทิศบนแรงสุด = แสงจากด้านหลังบน)
   'if(uRim>0.001&&z<uHazeD.z){vec2 px=1.0/uRes;float r=0.0;'+
     'for(int i=0;i<5;i++){float a=float(i)*0.7854;vec2 o=vec2(cos(a),sin(a));float wt=0.45+0.55*o.y;'+
@@ -188,7 +221,7 @@ class FXPass extends Pass{
   constructor(){super();this.needsSwap=true;
     const vs='varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}';
     this.ao=new FullScreenQuad(new THREE.ShaderMaterial({uniforms:Object.assign({tD:{value:null}},SOFTU,AOU),vertexShader:vs,fragmentShader:AO_CALC,depthTest:false,depthWrite:false}));
-    this.cp=new FullScreenQuad(new THREE.ShaderMaterial({uniforms:Object.assign({t:{value:null},tD:{value:null}},SOFTU,AOU),vertexShader:vs,fragmentShader:AO_COPY,depthTest:false,depthWrite:false}));}
+    this.cp=new FullScreenQuad(new THREE.ShaderMaterial({uniforms:Object.assign({t:{value:null},tD:{value:null}},SOFTU,AOU,WETU),vertexShader:vs,fragmentShader:AO_COPY,depthTest:false,depthWrite:false}));}
   setSize(w,h){AO_RT.setSize(Math.max(1,w>>1),Math.max(1,h>>1));AOU.uAORes.value.set(AO_RT.width,AO_RT.height);}
   render(r,write,read){const ac=r.autoClear;r.autoClear=false;
     if(typeof ffMistFrame==='function')ffMistFrame();   // หมอกป่า fcs (js/28): โชว์เฉพาะตอนอยู่แมพนั้น
@@ -199,7 +232,7 @@ class FXPass extends Pass{
     const th=Math.tan(cam.fov*Math.PI/360);AOU.uTan.value.set(th*cam.aspect,th);
     this.ao.material.uniforms.tD.value=this.cp.material.uniforms.tD.value=read.depthTexture;
     if(AOU.uAO.value>0.001){r.setRenderTarget(AO_RT);this.ao.render(r);AOU.tAO.value=AO_RT.texture;}
-    const F=rpass.scene.fog,e=cam.matrixWorld.elements;AOU.uCamY.value.set(e[1],e[5],e[9],e[13]);
+    const F=rpass.scene.fog,e=cam.matrixWorld.elements;AOU.uCamY.value.set(e[1],e[5],e[9],e[13]);WETU.uCamX.value.set(e[0],e[4],e[8],e[12]);WETU.uCamZ.value.set(e[2],e[6],e[10],e[14]);WETU.uProj.value.copy(cam.projectionMatrix);
     AOU.uHaze.value=F&&F.isFog?GFX.haze:0;if(F){AOU.uHazeCol.value.copy(F.color);AOU.uHazeD.value.x=GFX.hazeK/Math.max(F.far||1,1);}
     AOU.uHazeD.value.y=GFX.hazeH;if(typeof lookRaysFrame==='function')lookRaysFrame();if(typeof ambFrame==='function')ambFrame();   // ฝุ่น/หมอกลอย (js/75)
     AOU.uRim.value=GFX.rim;AOU.uRimCol.value.copy(moonL.color).multiplyScalar(GFX.rim);AOU.uHazeD.value.z=GFX.rimZ;
@@ -276,6 +309,7 @@ const GQ_OPT=[   // [key, group, label, level names]
   ['grdist','โลก','ระยะหญ้า',['ใกล้','ปกติ','ไกล','ไกลมาก']],
   ['surf','โลก','ผิววัสดุละเอียด',['ปิด','เปิด']],
   ['amb','โลก','ฝุ่น/หมอกบรรยากาศ',['ปิด','Low','Medium','High']],
+  ['refl','โลก','เงาสะท้อนพื้นเปียก (ฝน)',['ปิด','หลอก (เร็ว)','SSR','Planar']],
   ['water','โลก','น้ำทะเล',['Low','High','Cinematic']],
   ['detail','โลก','ฉากไกล (โหลดแมพถัดไป)',['Low','High']],
   ['dist','โลก','ระยะของชิ้นเล็ก',['ใกล้','กลาง','ไกล']],
@@ -284,11 +318,11 @@ const GQ_OPT=[   // [key, group, label, level names]
   ['flash','เอฟเฟกต์','แสงวาบเต็มจอ',['ปิด','เปิด']],
 ];
 const GQ_PRE={
-  low:      {water:0,shdist:1,grdist:1,res:0,dyn:0,shadow:0,pcss:0,ao:0,bloom:0,grade:0,aa:0,paint:0,softp:0,grass:0,surf:0,amb:0,detail:0,dist:0,particles:0,debris:0,flash:0},
-  medium:   {water:0,shdist:1,grdist:1,res:1,dyn:0,shadow:2,pcss:0,ao:1,bloom:1,grade:1,aa:1,paint:1,softp:1,grass:2,surf:1,amb:2,detail:1,dist:2,particles:1,debris:1,flash:1},
-  high:     {water:1,shdist:1,grdist:1,res:2,dyn:0,shadow:3,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:3,surf:1,amb:3,detail:1,dist:2,particles:2,debris:2,flash:1},
-  ultra:    {water:1,shdist:2,grdist:2,res:3,dyn:0,shadow:4,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:3,surf:1,amb:3,detail:1,dist:2,particles:2,debris:2,flash:1},
-  cinematic:{water:2,shdist:2,grdist:2,res:3,dyn:0,shadow:4,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:4,surf:1,amb:3,detail:1,dist:2,particles:3,debris:3,flash:1},
+  low:      {refl:0,water:0,shdist:1,grdist:1,res:0,dyn:0,shadow:0,pcss:0,ao:0,bloom:0,grade:0,aa:0,paint:0,softp:0,grass:0,surf:0,amb:0,detail:0,dist:0,particles:0,debris:0,flash:0},
+  medium:   {refl:1,water:0,shdist:1,grdist:1,res:1,dyn:0,shadow:2,pcss:0,ao:1,bloom:1,grade:1,aa:1,paint:1,softp:1,grass:2,surf:1,amb:2,detail:1,dist:2,particles:1,debris:1,flash:1},
+  high:     {refl:2,water:1,shdist:1,grdist:1,res:2,dyn:0,shadow:3,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:3,surf:1,amb:3,detail:1,dist:2,particles:2,debris:2,flash:1},
+  ultra:    {refl:2,water:1,shdist:2,grdist:2,res:3,dyn:0,shadow:4,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:3,surf:1,amb:3,detail:1,dist:2,particles:2,debris:2,flash:1},
+  cinematic:{refl:3,water:2,shdist:2,grdist:2,res:3,dyn:0,shadow:4,pcss:1,ao:1,bloom:1,grade:1,aa:2,paint:2,softp:1,grass:4,surf:1,amb:3,detail:1,dist:2,particles:3,debris:3,flash:1},
 };
 const GQ_NAME={low:'Low',medium:'Medium',high:'High',ultra:'Ultra',cinematic:'Cinematic',custom:'Custom'};
 const GQ=(()=>{let o=null;try{o=JSON.parse(store('wd_gfx2')||'null');}catch(e){}

@@ -62,7 +62,7 @@ class Mesh {
     return this; }
   tris() { return this.p.length / 9; }
   // game shapes (local, before lift; lift moves them too)
-  colBox(x0, z0, x1, z1, h, y0 = 0) { this.cb.push([(x0 + x1) / 2, (z0 + z1) / 2, x1 - x0, z1 - z0, h, y0]); return this; }
+  colBox(x0, z0, x1, z1, h, y0 = 0) { this.cb.push([(x0 + x1) / 2, (z0 + z1) / 2, Math.abs(x1 - x0), Math.abs(z1 - z0), h, y0]); return this; }
   // walkable block top: floor (not solid-below) + 2 m grid of collision boxes 0.6 m under the top → feet coming off a stair/ramp edge pass over them, ground walkers are stopped
   solidTop(x0, z0, x1, z1, H) { this.floor(x0, z0, x1, z1, H, H, 0); const nx = Math.max(1, Math.round((x1 - x0) / 2)), nz = Math.max(1, Math.round((z1 - z0) / 2)), sx = (x1 - x0) / nx, sz = (z1 - z0) / nz;
     for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) this.colBox(x0 + i * sx, z0 + j * sz, x0 + (i + 1) * sx, z0 + (j + 1) * sz, H - 0.6); return this; }

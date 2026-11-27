@@ -51,6 +51,7 @@ function render(dt,now){
   const v=VIEW.cur;
   if(screen!=='game'||!v){
     if(PM3.size||EM3.size||JM3.size||WM3.size||MM3.size)clearDyn();
+    if(WX_READY&&WX.k>0)wxTick(dt);   // rain fades out off the game screen (js/76)
     PARTS.length=0;TEXTS.length=0;CAMRS.has=false;
     if(screen==='lobby'&&typeof gameWarmTick==='function'){lobbyMapTick(dt);gameWarmTick(dt);warmLobbyTick();}   // lobby: build + warm the next map (js/51; was in hubRender, which skips when the hub is off)
     if(screen==='menu'||screen==='lobby'){renderStage(dt,now);return;}
@@ -102,7 +103,7 @@ function renderGame(v,P,E,me,dt,now){
     detailCull.volume.setFromProjectionMatrix(detailCull.matrix.multiplyMatrices(cam.projectionMatrix,cam.matrixWorldInverse));
   }
   let t0=performance.now();
-  if(!FXSTUDIO.seek){syncPlayers(P,v.mode,now,dt);pf('p.sync',t0);let t1=performance.now();grassTick(dt);pf('p.grass',t1);t1=performance.now();QUAL.clA+=dt;{const cs=qualCS();if(!cs||QUAL.frame%(cs+1)===0){clothTick(QUAL.clA);QUAL.clA=0;}}pf('p.cloth',t1);gameWarmFree(dt);}pf('players',t0);   // grassTick = ลม + หญ้า (js/50) • clothTick = ผ้าคลุมจริงของเรา (js/49)
+  if(!FXSTUDIO.seek){syncPlayers(P,v.mode,now,dt);pf('p.sync',t0);let t1=performance.now();phTick();if(WX_READY)wxTick(dt);grassTick(dt);pf('p.grass',t1);t1=performance.now();QUAL.clA+=dt;{const cs=qualCS();if(!cs||QUAL.frame%(cs+1)===0){clothTick(QUAL.clA);QUAL.clA=0;}}pf('p.cloth',t1);gameWarmFree(dt);}pf('players',t0);   // grassTick = ลม + หญ้า (js/50) • clothTick = ผ้าคลุมจริงของเรา (js/49)
   if(me&&me.al&&!me.fl&&!me.dn){const o=PM3.get(me.id);if(o){const k=Math.floor(o.walk/Math.PI);if(o.stepK!==undefined&&k!==o.stepK)snd('step',{vol:0.35,rev:0.1});o.stepK=k;}}t0=performance.now();
   syncEnemies(E,P,now,dt);pf('enemies',t0);t0=performance.now();
   let t1=t0;   // projMode แยกย่อยให้ WD.PROF (pm.proj / pm.earth / ...) — รวมยังเป็น 'projMode' เหมือนเดิม
@@ -120,7 +121,7 @@ function renderGame(v,P,E,me,dt,now){
   gl.shadowMap.needsUpdate=gl.shadowMap.needsUpdate||QUAL.frame%shadowInterval===0;
   if(gl.shadowMap.needsUpdate)shadowFollow();if(QUAL.frame%30===1)shadowDepthSplit();cullTick(dt);
   if(FXSTUDIO.noDraw)return;
-  instzTick();skyFollow();t0=performance.now();shReadyPre();pf('shready',t0);t0=performance.now();if(typeof photoPre==='function')photoPre();hallPre(dt);taaBegin();composer.render();taaFinish();if(typeof photoPost==='function')photoPost();hallPost();pf('gpuSubmit',t0);pinPrograms();
+  instzTick();skyFollow();t0=performance.now();shReadyPre();pf('shready',t0);t0=performance.now();if(typeof photoPre==='function')photoPre();hallPre(dt);if(WX_READY)wxPre();taaBegin();composer.render();taaFinish();if(typeof photoPost==='function')photoPost();hallPost();pf('gpuSubmit',t0);pinPrograms();
   t0=performance.now();const spk=speakingIds();
   drawLabels(P,E,v,me,spk);pf('h.labels',t0);
   {let t1=performance.now();const T=k=>{pf('h.'+k,t1);t1=performance.now();};drawMinBars(v,me);T('bars');

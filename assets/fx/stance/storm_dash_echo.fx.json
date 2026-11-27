@@ -1,0 +1,37 @@
+{
+  "v": 1,
+  "desc": "God Lightning option - Dash trail and delayed lightning echo",
+  "tags": [
+    "stance",
+    "preview"
+  ],
+  "dur": 1.65,
+  "layers": [
+    {
+      "id": "anchor",
+      "t": "mesh",
+      "shape": "disc",
+      "mat": "black",
+      "op": 0,
+      "at": 0,
+      "life": 1.65
+    },
+    {
+      "id": "stance",
+      "t": "code",
+      "fn": "studio_class_stance",
+      "at": 0,
+      "life": 1.65,
+      "args": {
+        "layer": "anchor",
+        "cls": "storm",
+        "style": "g3",
+        "stormStudy": "dash",
+        "run": [
+          99,
+          99
+        ]
+      }
+    }
+  ]
+}

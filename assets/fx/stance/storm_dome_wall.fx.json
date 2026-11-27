@@ -1,0 +1,38 @@
+{
+  "v": 1,
+  "desc": "Storm Dome study - lightning orb stops on a wall",
+  "tags": [
+    "stance",
+    "preview"
+  ],
+  "dur": 3.65,
+  "layers": [
+    {
+      "id": "anchor",
+      "t": "mesh",
+      "shape": "disc",
+      "mat": "black",
+      "op": 0,
+      "at": 0,
+      "life": 3.65
+    },
+    {
+      "id": "stance",
+      "t": "code",
+      "fn": "studio_class_stance",
+      "at": 0,
+      "life": 3.65,
+      "args": {
+        "layer": "anchor",
+        "cls": "storm",
+        "style": "g3",
+        "stormStudy": "dome",
+        "run": [
+          99,
+          99
+        ],
+        "impact": "wall"
+      }
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+/* Minimal HUD (js/66-hudmin, Settings > หน้าจอ > รูปแบบ HUD) — thin lines, white text, no looping animation / filters */
+#hm{position:fixed;inset:0;z-index:1;pointer-events:none;font-family:'Kanit',sans-serif;color:#f2f3f5;--hs:1;--ac:#e2c27a;--ic:#fff;--line:rgba(255,255,255,.22);--bk:rgba(6,8,14,.42)}
+#hm[hidden]{display:none}
+#hm .hmL{position:absolute;left:26px;bottom:24px;display:flex;align-items:flex-end;gap:14px;transform:scale(var(--hs));transform-origin:left bottom}
+#hm .hmR{position:absolute;right:26px;bottom:24px;display:flex;align-items:flex-end;gap:10px;transform:scale(var(--hs));transform-origin:right bottom}
+/* minimap frame: the map itself is drawn on the game canvas underneath (js/38 drawMinimap → hmMapBox) */
+#hm .hmMap{position:relative;width:150px;height:150px;box-sizing:border-box;border:1px solid var(--line);flex:none}
+#hm .hmMap::before{content:'';position:absolute;left:-1px;top:-3px;width:150px;height:2px;background:var(--ac);opacity:.7;transform:scaleX(.18);transform-origin:left}
+#hm .hmMap.off{visibility:hidden;width:0;border:0}
+#hm .hmInfo{width:230px;display:flex;flex-direction:column;gap:4px;text-shadow:0 1px 2px rgba(0,0,0,.8)}
+#hm .hmSq{display:flex;flex-direction:column;gap:3px;margin-bottom:6px}
+#hm .hmSq .r{display:grid;grid-template-columns:1fr 70px;align-items:center;gap:8px;font-size:11px;line-height:1;opacity:.85}
+#hm .hmSq .r b{font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hm .hmSq .r i{height:2px;background:rgba(255,255,255,.15)}
+#hm .hmSq .r u{display:block;height:100%;background:#f2f3f5}
+#hm .hmSq .r.dead{opacity:.35}#hm .hmSq .r.dead b{text-decoration:line-through}
+#hm .hmChips{display:flex;gap:4px;font-size:13px;min-height:0}
+#hm .hmNm{font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;display:flex;gap:8px;align-items:baseline}
+#hm .hmNm small{font-size:10px;font-weight:400;letter-spacing:.16em;color:var(--ac)}
+#hm .hmHp{display:flex;align-items:baseline;gap:6px;line-height:1}
+#hm .hmHp .hp{font-size:34px;font-weight:300;letter-spacing:.02em}
+#hm .hmHp .mh{font-size:12px;opacity:.6}
+#hm .hmHp .xh{font-size:13px;font-style:normal;color:#8fe0ff}
+#hm .hmBar{position:relative;height:5px;background:rgba(255,255,255,.12);--tk:10%}
+#hm .hmBar i{position:absolute;left:0;top:0;bottom:0;width:0}
+#hm .hmBar .tr{background:rgba(255,255,255,.35)}
+#hm .hmBar .f{background:#f2f3f5;transition:width .12s}
+#hm .hmBar .x{background:#8fe0ff;opacity:.85;height:2px;top:auto}
+#hm .hmBar::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 calc(var(--tk) - 1px),rgba(6,8,14,.75) calc(var(--tk) - 1px) var(--tk))}
+#hm.low .hmBar .f{background:#ff4a4a}#hm.low .hmHp .hp{color:#ff6a6a}
+#hm .hmSub{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.06em;opacity:.8}
+#hm .hmSub small{min-width:0;white-space:nowrap}
+#hm .hmSub i{flex:1;height:2px;background:rgba(255,255,255,.12)}
+#hm .hmSub b{display:block;height:100%;background:#9fd0ff}
+#hm .hmSub.brk b{background:#ff8a5a}
+/* skill slots */
+#hm .hmGm,#hm .hmSk{display:flex;gap:6px;align-items:flex-end}
+#hm .hmSk{gap:8px}
+#hm .hmS{position:relative;width:52px;height:52px;box-sizing:border-box;background:var(--bk);border:1px solid var(--line);display:grid;place-items:center;--r:0}
+#hm .hmS.sm{width:34px;height:34px}
+#hm .hmS .ic{display:grid;place-items:center;opacity:.95}
+#hm .hmS .ic span{line-height:1}
+#hm .hmS .cd{position:absolute;left:0;right:0;top:0;height:calc(var(--r) * 100%);background:rgba(4,6,10,.62)}
+#hm .hmS.wait .ic{opacity:.45}
+#hm .hmS .n{position:absolute;inset:0;display:grid;place-items:center;font-size:15px;font-weight:500;text-shadow:0 1px 3px #000}
+#hm .hmS.sm .n{font-size:11px}
+#hm .hmS .k{position:absolute;left:50%;bottom:-15px;transform:translateX(-50%);font-size:10px;letter-spacing:.06em;opacity:.65;white-space:nowrap}
+#hm .hmS.on{border-color:var(--ac)}
+#hm .hmS.dim{opacity:.4}
+#hm .hmS.pop{animation:hmPop .45s ease-out}
+@keyframes hmPop{0%{border-color:#fff;background:rgba(255,255,255,.28)}100%{border-color:var(--line);background:var(--bk)}}
+/* ultimate */
+#hm .hmU{position:relative;width:64px;height:64px;margin-left:6px;box-sizing:border-box;background:var(--bk);border:1px solid var(--line);display:grid;place-items:center;--r:1}
+#hm .hmU .ic{opacity:.5}
+#hm .hmU .cd{position:absolute;left:0;right:0;top:0;height:calc(var(--r) * 100%);background:rgba(4,6,10,.55)}
+#hm .hmU .pct{position:absolute;inset:0;display:grid;place-items:center;font-size:13px;font-weight:500;letter-spacing:.06em;text-shadow:0 1px 3px #000}
+#hm .hmU .k{position:absolute;left:50%;bottom:-15px;transform:translateX(-50%);font-size:10px;opacity:.65}
+#hm .hmU .bar{position:absolute;left:-1px;right:-1px;top:-5px;height:2px;background:rgba(255,255,255,.12)}
+#hm .hmU .bar u{display:block;height:100%;width:0;background:var(--ac)}
+#hm .hmU.full{border-color:var(--ac);box-shadow:0 0 0 1px var(--ac) inset}
+#hm .hmU.full .ic{opacity:1}#hm .hmU.full .pct{top:auto;bottom:3px;inset:auto 0 3px 0;font-size:9px;color:var(--ac)}
+#hm .hmU.dim{opacity:.4}
