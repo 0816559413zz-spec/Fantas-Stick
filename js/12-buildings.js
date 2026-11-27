@@ -311,7 +311,7 @@ function playerDown(t,srcId){
   lightReleaseAlly(t);
   t.shieldOn=false;t.burn=0;t.fly=false;
   t.frostCut=null;
-  t.stS=null;t.sdome=null;t.rail=null;t.stStaff=0;t.slnT=0;t.beam=0;t.sdHit=null;earthReset(t);windReset(t);waterReset(t);natureReset(t);lightReset(t,true);darkReset(t);if(t.god>0){t.god=0;t.xhp=0;}
+  t.stS=null;t.sdome=null;t.stMarkAim=null;t.stPulse=0;t.stAllyMark=null;t.stStaff=0;t.slnT=0;t.beam=0;t.sdHit=null;earthReset(t);windReset(t);waterReset(t);natureReset(t);lightReset(t,true);darkReset(t);if(t.god>0){t.god=0;t.xhp=0;}
   // ท่าที่ง้าง/ค้างอยู่ตอนล้ม: ไม่งั้นคนล้ม (co-op) ยังปล่อยท่าได้ หรือท่าค้างไว้แล้วออกเองทันทีที่ถูกชุบ
   t.dfall=null;t.snapT=0;t.grT=0;t.slam=false;t.slam3=null;t.dchgOn=false;t.dchg=0;t.chg=0;t.dash=0;t.dashSp=0;t.trail=null;
   if(G.mode==='coop'){

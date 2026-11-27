@@ -238,11 +238,13 @@ function stormDomeFieldFX(d,age){
     stormDomePath(path,0.115,i===0?0.096:0.071,0.13,i===2?0.78:1.03,i===0);
   }
 }
+// Legacy charged-dome animation for historical Studio captures.
+const SDOME_POSE={charge:.26,lift:.38,swing:.19,hold:.38,recover:.22};
 function stormDomePose(o,p,pz,now){
   const D=p.df;
   if(D?.[4]!==1||D[5]!==0){o.domeReady=false;return;}
   const [ph,x,y,t]=D,T=SDOME_POSE,R=o.armR.rotation,L=o.armL.rotation;
-  const power=ph===1?0:ph===2?stormDomeCharge(t):D[7]||0,full=power>=1;
+  const power=ph===1?0:ph===2?clamp((3-t)/2,0,1):D[7]||0,full=power>=1;
   if(ph===1)o.domeReady=false;
   const smooth=u=>{u=clamp(u,0,1);return u*u*(3-2*u);};
   const rise=ph===1?smooth(1-t/T.lift):1;
@@ -517,6 +519,51 @@ function stBashLean(o,p,now){const B=STBASH[p.id];if(B&&B!==o.bashSeen){o.bashSe
   if(o.stFx){const B2=B||[0,0];o.stFx.o.off=e>0?[Math.cos(B2[1])*9*e,Math.sin(B2[1])*9*e,-0.1*e]:null;}}
    // STHIT[id]=[เวลา ms, มุมที่โดน] — ระลอกบนโล่ตอนดูดดาเมจ
 function shellPt(x,y,h,R,a,e){return [x+Math.cos(a)*R*Math.cos(e),y+Math.sin(a)*R*Math.cos(e),h+R*S3*Math.sin(e)];}
+function stormReworkField(ev,pulse){
+  const {x,y,h,r,g}=ev,life=pulse?.7:ev.t,height=pulse?.49:1;
+  const col=g?'#32dfff':'#ffe515',bolt=g?tboltB:tbolt,R=r*S3;
+  const shell=new THREE.Mesh(new THREE.SphereGeometry(R,32,16,0,Math.PI*2,0,pulse||ev.floor?Math.PI/2:Math.PI),
+    new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:pulse?.15:.21,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+  shell.position.set(tx(x),h+GY(x,y),tz(y));shell.scale.y=height;
+  stFade(shell,pulse?.46:life);
+  if(!pulse){
+    const core=new THREE.Mesh(new THREE.SphereGeometry(.37,12,8),new THREE.MeshBasicMaterial({color:hdr(col,2),transparent:true}));
+    core.position.copy(shell.position);core.position.y+=.23;stFade(core,life);
+  }
+  for(let j=0;j<Math.ceil(life/.08);j++)later(j*.08,()=>{
+    const scale=pulse?Math.min(1,.3+j*.52):1;
+    if(pulse&&j<2){shell.scale.x=shell.scale.z=scale;shell.scale.y=height*scale;}
+    for(let i=0;i<11;i++){
+      const a=i*2.39996+j*.44,outer=i<6,e=(pulse||ev.floor?1:i%2?1:-1)*rnd(.12,1.25);
+      const px=x+Math.cos(a)*r*scale*Math.cos(e),py=y+Math.sin(a)*r*scale*Math.cos(e);
+      const ph=h+Math.sin(e)*R*height*scale;
+      if(outer){
+        const q=a+.56,ex=x+Math.cos(q)*r*scale*Math.cos(e+.15),ey=y+Math.sin(q)*r*scale*Math.cos(e+.15);
+        bolt(px,py,ph,ex,ey,h+Math.sin(e+.15)*R*height*scale,.105,i%3===1?'#9fd8ff':0,.105,1);
+      }else{
+        bolt(x,y,h+(pulse?1.2:.23),px,py,ph,.12,i%3===1?'#9fd8ff':0,.086,1);
+      }
+    }
+  });
+}
+function stormAllyBranchFx(ev){
+  const {x,y,h,r,g}=ev,col=g?'#31e0ff':'#ffe327';
+  ring(x,y,col,r,.45,h+.06);
+  FX.flashSprite(x,y,h+.15,col,.75,4,.21,1.55);
+  burst(x,y,col,22,170,.36,2.4,{h:h+.18,vh:[.5,4],g:2});
+  for(let i=0;i<15;i++){
+    const a=i*2.39996,reach=r*(.78+.22*Math.cos(i*7.3)**2);
+    const path=Array.from({length:17},(_,j)=>{
+      const f=j/16, angle=a+Math.sin(j*2.2+i)*.15*f, px=x+Math.cos(angle)*reach*f,py=y+Math.sin(angle)*reach*f;
+      return new THREE.Vector3(tx(px),h+GY(px,py)+.08+Math.sin(Math.PI*f)*(.25+(i%4)*.33),tz(py));
+    });
+    for(let j=1;j<=9;j++)later(j*.034+i%3*.011,()=>{
+      const f=j/9,to=Math.max(1,Math.round(16*f)),width=lerp(.7,.2,clamp((f-.4)/.6,0,1));
+      const from=Math.max(0,to-Math.round(16*width));
+      tboltP(path.slice(from,to+1),.061,i%4===1?.09:.125,.035,i%4===1?'#9fd8ff':undefined).gk=.62;
+    });
+  }
+}
 function updateStormV(dt){
   for(let i=LATER.length-1;i>=0;i--){const L=LATER[i];L.t-=dt;if(L.t<=0){LATER.splice(i,1);try{vfxOnce(L.fn);}catch(e){}}}
   stormWaveBurstTick(dt);updateBolts(dt);updateClaws(dt);updateClawFX(dt);stormMarkTick(dt);
@@ -671,7 +718,43 @@ function stormClawSwipe(o,dt){const S=o.clSw,n=S.n,emp=n>=3;S.t+=dt;const k=Math
   if(S.t>=S.dur+0.04)stormClawStop(o);
 }
 
+function stormAllyMarkTexture(){
+  const cv=document.createElement('canvas');cv.width=cv.height=128;
+  const ctx=cv.getContext('2d');
+  ctx.beginPath();
+  for(const [x,y] of [[70,11],[35,72],[58,70],[48,119],[96,51],[72,54],[83,16]])ctx.lineTo(x,y);
+  ctx.closePath();
+  ctx.lineJoin='round';ctx.strokeStyle='#443318';ctx.lineWidth=8;ctx.stroke();
+  ctx.fillStyle='#ffffff';ctx.shadowColor='#ffffff';ctx.shadowBlur=13;ctx.fill();
+  const tex=new THREE.CanvasTexture(cv);tex.colorSpace=THREE.SRGBColorSpace;return tex;
+}
+
+let stormAllyMarkMats;
+function stormAllyMarkGlyph(o,p,now){
+  const M=p.stam;
+  if(!M){if(o.stAllyGlyph)o.stAllyGlyph.visible=false;return;}
+  if(!stormAllyMarkMats){
+    const map=stormAllyMarkTexture();
+    stormAllyMarkMats=['#ffe632','#5cf5ff'].map(color=>new THREE.SpriteMaterial({map,color,transparent:true,depthWrite:false,toneMapped:false}));
+  }
+  if(!o.stAllyGlyph){o.stAllyGlyph=new THREE.Sprite(stormAllyMarkMats[0]);o.g.add(o.stAllyGlyph);}
+  const glyph=o.stAllyGlyph,left=M[0];
+  glyph.material=stormAllyMarkMats[M[1]?1:0];
+  glyph.position.set(0,1.35,.39);
+  glyph.visible=left>.45||Math.sin(now/42)>.05;
+  glyph.scale.setScalar(.8+Math.sin(now/(left<.7?42:105))*.07);
+}
 function stormFX(o,p,pz,now,dt){
+  stormAllyMarkGlyph(o,p,now);
+  if(p.stam?.[0]>0&&now>=(o.stAllySpark||0)){
+    const [left,cyan]=p.stam,a=rnd(0,Math.PI*2),h=pz+.95;
+    o.stAllySpark=now+(left<.45?42:87);
+    const k=left<.45?1.45:1,col=cyan?'#41e9ff':'#ffe700',fn=cyan?tboltB:tbolt;
+    fn(p.x+Math.cos(a)*8,p.y+Math.sin(a)*8,h+.40,p.x-Math.cos(a)*12,p.y-Math.sin(a)*12,h-.25,.12,0,.08*k,1);
+    const H=left<.45?pz+.12:h;
+    FX.flashSprite(p.x,p.y,H,col,.26,k*.61,.12,1.1);
+  }
+
   stBashLean(o,p,now);
   if((p.fm|0)&16){o.b.rotation.z+=Math.sin(now/22)*0.2;o.b.rotation.x+=Math.sin(now/31)*0.08;}
   const M=p.sm;

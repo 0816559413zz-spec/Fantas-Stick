@@ -9,7 +9,7 @@ function plist(){return G.order.map(id=>G.players[id]).filter(Boolean);}
 function cleanName(n){n=String(n||'').trim().slice(0,16);return n||'พ่อมด';}
 
 function freshStats(){
-  return {lst:0,emp:0,orbs:0,orbBlk:0,dch:3,stS:null,stCd:0,god:0,sdome:null,rail:null,slnT:0,sorb:null,beam:0,hp:PLAY.hp,maxHp:PLAY.hp,alive:true,downed:false,revive:0,respawn:0,vx:0,vy:0,ang:0,z:0,vz:0,jumpAir:false,airPose:0,fly:false,flyCd:0,root:0,
+  return {lst:0,emp:0,orbs:0,orbBlk:0,dch:3,stS:null,stCd:0,god:0,sdome:null,stMarkAim:null,stPulse:0,stAllyMark:null,slnT:0,sorb:null,beam:0,hp:PLAY.hp,maxHp:PLAY.hp,alive:true,downed:false,revive:0,respawn:0,vx:0,vy:0,ang:0,z:0,vz:0,jumpAir:false,airPose:0,fly:false,flyCd:0,root:0,
     cd:{basic:0,q:0,e:0,r:0,f:0,dodge:0},cdMax:{basic:1,q:1,e:1,r:1,f:1,dodge:1},
     shieldOn:false,shieldE:100,shieldT:0,shieldBroken:0,dash:0,dashX:0,dashY:0,inv:0,stun:0,burn:0,bt:0,burnSrc:null,
     ult:0,kills:0,deaths:0,dmgDealt:0,dmgTaken:0,lastHit:null,bo:null,picked:true,taken:[],dfall:null,
@@ -188,7 +188,7 @@ function emoHost(id,e){const p=G.players[id];e=e|0;if(!p||!p.alive||p.downed||G.
 
 function resetBody(p,x,y){
   Object.assign(p,{x,y,z:0,vz:0,jumpAir:false,airPose:0,fly:false,flyCd:0,root:0,vx:0,vy:0,hp:p.maxHp,alive:true,downed:false,revive:0,stun:0,rgT:0,burn:0,dash:0,inv:0,
-    shieldOn:false,shieldE:100,shieldBroken:0,respawn:0,slam:false,slam3:null,dashSp:0,flyOn:false});   // slam: ตายกลางท่ากระโดดฟาด (น้ำแข็ง) แล้วค้าง = ฟันไม่ได้หลังเกิดใหม่
+    shieldOn:false,shieldE:100,shieldBroken:0,stPulse:0,stAllyMark:null,stMarkAim:null,respawn:0,slam:false,slam3:null,dashSp:0,flyOn:false});   // slam: ตายกลางท่ากระโดดฟาด (น้ำแข็ง) แล้วค้าง = ฟันไม่ได้หลังเกิดใหม่
   for(const k of CDK)p.cd[k]=0;clearStatus(p);p.trail=null;natureReset(p);earthReset(p);windReset(p);waterReset(p);lightReset(p);darkReset(p);
   p.ang=Math.atan2(MH/2-y,MW/2-x);
 }
@@ -397,7 +397,7 @@ function updatePlayer(p,dt,acting){
   if(!canAct||p.root>0||p.dchgOn||p.cryo>0||mawBrace||p.dark?.waltzUntil>G.time){mx=my=0;}
   else if(p.fear>0){const fa=Math.atan2(p.y-p.fearY,p.x-p.fearX);mx=Math.cos(fa);my=Math.sin(fa);}
   const shieldSlows=p.shieldOn&&p.pathIdx!==WATERP&&p.pathIdx!==DARKP;
-  const spd=(p.fly?(p.wfo?W_FW.fastSpd:PLAY.fly)*p.buffs.spd:PLAY.walk*p.buffs.spd*(shieldSlows?PLAY.shSlow:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.wdr||p.wfw||p.wgs?windSpd(p):1)*(p.wsk||p.wab||p.wmsT>0?waterSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):p.rail?RAIL.v.slow:(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0))*(p.lgBeam?LTV.baMove:1)*(darkFlow(p)?1.25:1);
+  const spd=(p.fly?(p.wfo?W_FW.fastSpd:PLAY.fly)*p.buffs.spd:PLAY.walk*p.buffs.spd*(shieldSlows?PLAY.shSlow:1))*(p.boost>0?1.45:1)*moveMul(p)*(p.wr||p.aug||p.ecb?earthSpd(p):1)*(p.wdr||p.wfw||p.wgs?windSpd(p):1)*(p.wsk||p.wab||p.wmsT>0?waterSpd(p):1)*(p.dfall?(p.dfall.ph===2?0.45:0):p.sdome?(p.sdome.ph===2?0.45:0):(p.kindle>0&&p.hover>0)?0.35:p.breath>0?0.7:(p.snapT>0||p.colos>0||p.grT>0)?0.5:1)*(p.slideT>0?1.8:1+(p.iceB||0))*(p.lgBeam?LTV.baMove:1)*(darkFlow(p)?1.25:1);
   p.wSpd=(p.dash>0||p.slideT>0||p.slip>0||!canAct||p.root>0||p.dchgOn||p.cryo>0||p.fear>0||p.gh||p.fly)?0:Math.round(spd);   // ความเร็วเดินตอนนี้ → ลูกข่ายใช้ทำนายตัวเอง (0 = อย่าทำนาย)
   if(p.natureHook&&!canAct)p.natureHook=null;
   if(p.natureHook&&natureHookMove(p,dt)){p.wSpd=0;p.vx=p.vy=0;}
@@ -461,7 +461,7 @@ function updatePlayer(p,dt,acting){
   }
   if(p.fswT>0)return;   // Frost mode-swap animation (user 2026-11-25): walk/jump only, no attacks/skills/dodge until it ends
   if(p.cryo>0){if(pr.q)castSlot(p,0);if(pr.e)castSlot(p,1);if(pr.r)castSlot(p,2);if(pr.f)castSlot(p,3);return;}
-  if(p.dfall||(p.sdome&&!stormDomeDash(p))||p.shk>0||(p.mudT>0&&!p.ramp)){}else if(B.dash){if(B.dash(p,inp,pr,dt,setCd))return;}
+  if(p.dfall||p.sdome||p.shk>0||(p.mudT>0&&!p.ramp)){}else if(B.dash){if(B.dash(p,inp,pr,dt,setCd))return;}
   else if(pr.sp&&p.cd.dodge<=0&&p.z-groundH(p.x,p.y,p.z)<0.5){   // height above the floor under you (bridges/wall tops count as ground)
     let dx=mx,dy=my;if(!dx&&!dy){dx=Math.cos(p.ang);dy=Math.sin(p.ang);}
     p.dash=0.18;p.dashX=dx;p.dashY=dy;p.inv=0.24;p.shieldOn=false;setCd('dodge',2.5*cdr);

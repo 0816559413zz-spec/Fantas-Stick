@@ -146,15 +146,14 @@ defSpell(5,{id:'legion',role:'ult',n:'กองทัพวิญญาณ',ic:'
     emit({k:'efx',z:'legion',x:p.x,y:p.y,h:p.z+0.5,r:200});
   }});
 // สายฟ้า: ลูกสายฟ้าโดม (ต่อท้ายสุดเพื่อไม่ให้ลำดับ index ของคาถาสายอื่นเลื่อน — kit ที่บันทึกไว้ยังใช้ได้)
-const SDOME=defSpell(2,{id:'stormdome',v:{cost:4,godCost:3,range:600,rise:6,fly:3,charge:2,r:150,time:2,pull:120,tick:5,partial:20,boom:50,env:50},vn:{cost:'ใช้ stack',godCost:'ใช้ stack ในร่างเทพ',range:'ระยะเล็ง',rise:'บินสูง',fly:'บินเล็งนาน (วิ)',charge:'ชาร์จเต็ม (วิ)',r:'รัศมีโดม',time:'โดมดูดนาน (วิ)',pull:'แรงดูด',tick:'ดาเมจทุก 0.5 วิ',partial:'ดาเมจขั้นต่ำของลูกระเบิด',boom:'ระเบิดตอนจบ • ดาเมจ',env:'ระเบิด • ดาเมจใส่บ้าน/ของ'},role:'control',n:'ลูกสายฟ้าโดม',ic:'🔵',cd:16,d:'ใช้ 4 stacks: ชาร์จสั้น ๆ แล้วทะยานขึ้น ชาร์จหอกสายฟ้าเต็มใน 2 วิ เล็งได้สูงสุด 3 วิ (WASD • Space ขึ้น / C ลง • Dash ได้) — คลิกฟาดไม้ยิงลงจุดเล็ง (ระยะ 600)',fx:'ยิงก่อนชาร์จเต็ม: หอกระเบิด 20–49 ดาเมจตามเกจ • ชาร์จเต็ม: โดมรัศมี 150 ดูดศัตรูเข้ากลาง 2 วิ (5 ดาเมจ ทุก 0.5 วิ) แล้วระเบิด 50 + Shock (รวม 70) • ระหว่างอัลติใช้ 3 stacks: ถือลูกพุ่งทุบลงแบบ Dragonfall ดูด+ระเบิดทันที 80 • ไม่อมตะ โดนสตันระหว่างบิน = ยกเลิก',
+const SDOME=defSpell(2,{id:'stormdome',v:{cost:4,godCost:3,range:600,speed:2000,r:120,time:2,tick:10,shockT:.3},vn:{cost:'ใช้ stack',godCost:'ใช้ stack ในร่างเทพ',range:'ระยะยิง',speed:'ความเร็วลูกสายฟ้า',r:'รัศมีโดม',time:'เวลาโดม (วิ)',tick:'ดาเมจทุก 0.5 วิ',shockT:'Shock ต่อจังหวะ (วิ)'},role:'control',n:'ลูกสายฟ้าโดม',ic:'🔵',cd:16,d:'ใช้ 4 stacks: ยิงลูกสายฟ้าตามที่เล็ง • โดนฉากหรือถึงสุดระยะจะกางโดมรัศมี 120 นาน 2 วิ',fx:'ทุก 0.5 วิ ทำ 10 ดาเมจ + Shock • ร่างเทพใช้ 3 stacks และยังใช้ท่าทุบเดิม',
   cast(p,S){
-    if(p.sdome||p.dfall)return false;
-    if(!stSpend(p,stormDomeCost(p)))return false;
-    const g0=groundH(p.x,p.y,p.z),q=aimPoint(p,S.v.range),god=p.god>0;
-    p.sdome={ph:1,t:god?0.35:SDOME_POSE.charge+SDOME_POSE.lift,z0:p.z,g0,H:g0+S.v.rise,tx:q.x,ty:q.y,god};
+    if(p.sdome||p.dfall||!stSpend(p,stormDomeCost(p)))return false;
+    if(!(p.god>0)){stormDomeLaunch(p);return;}
+    const g0=groundH(p.x,p.y,p.z),q=aimPoint(p,S.v.range);
+    p.sdome={ph:1,t:.35,g0,H:g0+6,tx:q.x,ty:q.y,god:true};
     p.stS=null;p.hover=0;p.vz=0;p.beam=0;
-    if(god)emit({k:'efx',z:'sdrise',x:p.x,y:p.y,h:p.z,id:p.id,g:1});
-    else if(p.fly){p.fly=false;emit({k:'efx',z:'dismount',x:p.x,y:p.y,h:p.z,id:p.id});}
+    emit({k:'efx',z:'sdrise',x:p.x,y:p.y,h:p.z,id:p.id,g:1});
   }});
 
 // ---------- ร่ายคาถา ----------
@@ -165,14 +164,14 @@ function castSlot(p,i){
   if(S.toggle&&S.toggle(p)){emit({k:'sk',id:p.id,s:S.id+'_2'});return true;}   // กดครั้งที่ 2 (เช่น Tectonic Crush บีบ) → ท่าร่าย
   if(S.melee&&p.fmode===1)return false;
   if(p.cryo>0&&S.id!=='frostaura')return false;
-  if(p.grT>0||p.dfall||p.sdome||p.rail||p.slnT>0)return false;
+  if(p.grT>0||p.dfall||p.sdome||p.stMarkAim||p.slnT>0||p.stPulse>0)return false;
   if(p.cd[k]>0||p.sil>0)return false;
   if(p.shieldOn&&p.pathIdx===LIGHTP)return false;   // Crystal Aegis: ระหว่างกางโล่ใช้สกิลไม่ได้
   if(G.mode==='br'&&!(p.unl&&p.unl[BRMAP[k]]))return false;
   if(S.cast(p,S,i)===false){if(S.id!=='crystalbond'){p.cd[k]=0.5;p.cdMax[k]=0.5;}return false;}
   const cd=S.cd*p.buffs.cdr;p.cd[k]=cd;p.cdMax[k]=cd;
   if(S.role!=='support')darkReveal(p);
-  emit({k:'sk',id:p.id,s:S.id,...(S.id==='stormdome'&&p.sdome.god?{g:1}:null)});   // ภาพ: ท่าร่ายสกิล (js/35 skAnim)
+  emit({k:'sk',id:p.id,s:S.id,...(S.id==='stormdome'&&p.sdome?.god?{g:1}:null)});   // ภาพ: ท่าร่ายสกิล (js/35 skAnim)
   return true;
 }
 function castUlt(p){if(p.wr||waterCageBusy(p))return false;const S=SPELLS[p.ultId];if(!S||p.ult<100||p.sil>0||p.cryo>0)return false;if(S.cast(p,S)===false)return false;p.ult=0;darkReveal(p);emit({k:'sk',id:p.id,s:S.id});return true;}

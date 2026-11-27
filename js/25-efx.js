@@ -107,10 +107,54 @@ const an=a+rnd(-1.05,1.05),rr=R*rnd(0.55,1.05);PARTS.push({x:px+Math.cos(an)*rr,
         if(near){snd('boom',ev);snd('zap',ev);shake(5);}});
       if(ev.n)floatText(x,y,'⚡'+ev.n,'#fff27a',18,H+2.6);break;}
     case 'slup':if(near)snd('cast_ebolt',ev);break;
-    case 'sline':{const a=ev.a,c=Math.cos(a),sn=Math.sin(a),L=ev.len,N=Math.max(3,Math.round(L/110));   // ผู้ใช้ 2026-11-11: ลดเอฟเฟกมาก เส้นบาง ไม่ระเบิดที่พื้น (โดมเล็กจาก storm/line_mix)
-      for(let i=0;i<=N;i++){const d=L*i/N,px=x+c*d,py=y+sn*d;if(d<70)continue;   // nothing at the caster's feet (user 2026-11-25: no smoke under us)
-        later(0.3*i/N,()=>{(ev.g?tboltB:tbolt)(px+rnd(-10,10),py+rnd(-10,10),H+9,px+rnd(-6,6),py+rnd(-6,6),H+0.1,0.16,0,0.09,0);if(i%2===0){SHAPES_Q.push({k:'decal',x:px,y:py,col:'#1a1408',s1:1.1,life:3,op:0.45});for(let k=0;k<5;k++)PARTS.push({x:px,y:py,h:H+0.1,vx:rnd(-90,90),vy:rnd(-90,90),vh:rnd(2,5),life:.35,max:.35,col:ev.g?'#7feaff':'#ffe27a',size:1.6,g:9,drag:1});}});}
-      if(near){snd('zap',ev);shake(2.6);}break;}   // ผู้ใช้ 2026-11-15: ฟ้าผ่าต้องสั่น + มี impact (รอยไหม้ + สะเก็ด)
+    case 'sline':{
+      const a=ev.a,c=Math.cos(a),sn=Math.sin(a),L=ev.len,g=ev.g,bolt=g?tboltB:tbolt;
+      const col=g?'#39dcff':'#ffe91a';
+      FX.flashSprite(x+c*19,y+sn*19,H,col,.2,1.8,.15,1.9);
+      const pts=[];
+      const n=Math.max(2,Math.ceil(L/32));
+      for(let i=0;i<=n;i++){
+        const d=L*i/n,w=i&&i<n?rnd(-16,16):0;
+        const px=x+c*d-sn*w,py=y+sn*d+c*w;
+        pts.push(new THREE.Vector3(tx(px),H+GY(px,py)+(i&&i<n?rnd(-.32,.32):0),tz(py)));
+      }
+      if(L>0)for(let i=1;i<pts.length;i++){
+        const j=i,from=Math.max(0,j-3);
+        later(ev.T*j/n,()=>{
+          const path=pts.slice(from,j+1);
+          if(g)stormDomePath(path,.14,.19,.045,.77,true);
+          else tboltP(path,.14,.19,.045).gk=.77;
+        });
+      }
+      for(let i=2;i<n;i+=3)later(ev.T*i/n,()=>{
+        const d=L*i/n,px=x+c*d,py=y+sn*d,side=i%2?1:-1;
+        bolt(px,py,H,px+c*38-sn*20*side,py+sn*38+c*20*side,H+rnd(-.5,.55),.16,i%2?'#9fd8ff':0,.085,1);
+      });
+      if(near){snd('zap',ev);if(ev.id===NET.myId)shake(2.3);}break;}
+    case 'stlinehit':{
+      const bolt=ev.g?tboltB:tbolt;
+      FX.flashSprite(x,y,H,ev.g?'#70f5ff':'#fff027',.22,1.05,.18,1.2);
+      for(let i=0;i<8;i++){
+        const a=i*2.39996,r=rnd(14,37);
+        bolt(x,y,H+rnd(-.45,.45),x+Math.cos(a)*r,y+Math.sin(a)*r,H+rnd(-.85,.62),rnd(.33,.59),i%3===1?'#9fd8ff':0,.085,2);
+      }break;}
+    case 'stpulse':
+      stormReworkField(ev,true);
+      if(near){snd('zap',ev);shake(2.5);}break;
+    case 'stallymark':{
+      const o=PM3.get(ev.id);
+      if(o){o.caN=ev.ally?'storm_study_send':'storm_study_self';o.caT=0;o.cpT=0;}
+      if(ev.ally)(ev.g?tboltB:tbolt)(x,y,H,ev.x2,ev.y2,ev.h2,.16,0,.10,1);
+      if(near)snd('zap',ev);
+      break;}
+    case 'stallyburst':stormAllyBranchFx(ev);if(near){snd('zap',ev);shake(2.2);}break;
+    case 'stdomeshot':{
+      const g=new THREE.Group(),core=new THREE.Sprite(glowMat('#ffffff',2.4)),halo=new THREE.Sprite(glowMat('#ffe600',2.3));
+      core.scale.setScalar(.45);halo.scale.setScalar(1.45);g.add(halo,core);g.position.set(tx(x),H+GY(x,y),tz(y));scene.add(g);
+      SBV.push({g,x,y,h:H,x2:ev.x2,y2:ev.y2,h2:ev.h2,t:0,max:ev.t,R:13});
+      if(near)snd('whoosh',ev);
+      break;}
+    case 'stdomefield':stormReworkField(ev,false);if(near)snd('zap',ev);break;
     case 'ssiph':{const T=ev.tg||[];
       // ผู้ใช้ 2026-10-23: ใช้ตัวเลือกรอบ 3 แบบ 1 (เทสลา) แต่สีเหลือง — ส่วนต่อศัตรู (siphon_y ยืดตามระยะ) + ส่วนรอบตัวเรา (siphon_yself)
       for(const t of T){const d=Math.hypot(x-t[0],y-t[1]);if(d>20)fxPlay('storm/siphon_y',{x:t[0],y:t[1],h:t[2],a:Math.atan2(y-t[1],x-t[0]),p:{len:d/20}});}

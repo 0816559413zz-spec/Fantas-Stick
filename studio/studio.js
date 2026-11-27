@@ -565,7 +565,7 @@ function stSkillFind(v){if(!v)return null;const [k,id]=v.split(':');for(const g 
 function stSkillUI(){const s=$st('stSkill');if(!s)return;const cur=ST.skill?ST.skill.k+':'+ST.skill.id:'';s.innerHTML='';
   s.append(h('option',{value:''},'— ไม่มี —'),...stSkillGroups().map(g=>h('optgroup',{label:g.P.ic+' '+g.P.n},...g.L.map(x=>h('option',{value:x.k+':'+x.id},x.n)))));s.value=cur;}
 {const _fx=fx;fx=function(ev,raw){if(ST.muteGame&&ST.skill&&ev&&ev.k==='efx')return;return _fx(ev,raw);};}   // ซ่อนภาพเดิมของเกมตอนเล่นท่า
-function stSkillBusy(){const me=ST.skill&&G&&G.players&&G.players.me;return !!(me&&(me.dfall||me.colos>0||me.sdome||me.wr||me.rail||me.aug||me.ramp||me.snapT>0||me.hover>0||me.dash>0||me.dchgOn||Math.abs(me.z-groundH(me.x,me.y))>0.05));}   // วนเล่น: รอท่าจบก่อนค่อยเริ่มรอบใหม่
+function stSkillBusy(){const me=ST.skill&&G&&G.players&&G.players.me;return !!(me&&(me.dfall||me.colos>0||me.sdome||me.wr||me.stMarkAim||me.aug||me.ramp||me.snapT>0||me.hover>0||me.dash>0||me.dchgOn||Math.abs(me.z-groundH(me.x,me.y))>0.05));}   // วนเล่น: รอท่าจบก่อนค่อยเริ่มรอบใหม่
 function stCastSkill(o){const me=G&&G.players&&G.players.me;if(!me||!o)return;
   if(!ST.home)ST.home={x:me.x,y:me.y};
   clearInterval(ST.skAim);clearTimeout(ST.skRel);

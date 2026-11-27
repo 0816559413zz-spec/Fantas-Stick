@@ -4,6 +4,13 @@
 
 ## Rework ที่กำลังคุย (2026-11-26)
 
+**ลงเกม 2026-11-27 (v119)** ตัวเลขตั้งต้นสำหรับลองเล่น
+- Thunder Line: ระยะ 780, ง้าง 0.21 วิ, เส้นวิ่งสุดระยะใน 0.10 วิ, คูลดาวน์ 4 วิ, ดาเมจ 20. ได้ 1 stack ต่อการร่ายที่โดนโดยไม่เพิ่ม BA เสริม
+- Thunderbomb (ช่องเดิม Triple Strike): 2 stacks, คูลดาวน์ 12 วิ, ง้าง 0.27 วิ, รัศมี 200, ดาเมจ 30, Shock 0.3 วิ, ผลักตามพื้น 125.
+- Lightning Mark (ช่องเดิมธนู): 3 stacks เมื่อส่งสำเร็จ, คูลดาวน์ 8 วิ, เล็งเพื่อนระยะ 700. เลือกเป้าภายใน 3 วิ แล้วระเบิดหลังจากส่งสำเร็จอีก 3 วิ รัศมี 300. ตัวเอง 35 ดาเมจ / Shock 0.3 วิ; เพื่อน 50 ดาเมจ / Shock 0.7 วิ / ความเร็วเคลื่อนที่ +25% ระหว่างติดมาร์ก
+- Storm Dome: 4 stacks, คูลดาวน์ 16 วิ, ระยะ 600, ความเร็วลูก 2000, รัศมี 120, ค้าง 2 วิ. ดาเมจ 10 และ Shock 0.3 วิ ทุก 0.5 วิ. ท่าทุบเดิมยังใช้เฉพาะระหว่าง God Lightning. Dash echo ยังเป็นพรีวิว
+
+
 - **ผู้ใช้ผ่านพรีวิว:** Thunder Line ท่า C, Storm Dome รัศมี 120 พร้อมลูกสายฟ้ากลางวงขนาดใหญ่ขึ้น และ VFX มาร์ก 15 กิ่ง (ช่วงสว่าง 70% → 20%, `stance/storm_mark_polish`)
 - **ไฟล์สำหรับดูข้ามเครื่อง:** [Thunder Line C](storm_vfx/rework_thunder_line_c.gif) · [มาร์กเพื่อน](storm_vfx/rework_ally_mark.gif) · [ทรงกิ่ง 15 กิ่ง](storm_vfx/rework_mark_branch_layout.png) · Storm Dome [พื้น](storm_vfx/rework_dome_ground.gif) / [กำแพง](storm_vfx/rework_dome_wall.gif) / [ยิงขึ้นฟ้า](storm_vfx/rework_dome_sky.gif) · แบบรอรีวิว [Thunderbomb](storm_vfx/rework_thunderbomb.gif) และ [Dash echo](storm_vfx/rework_god_dash_echo.gif)
 - **มาร์ก — พรีวิวกิ่งวิ่ง A/B/C:** กิ่งสายฟ้าเกิดจากผู้รับแล้วเคลื่อนออก เหลื่อมกัน หักมุมและแตกกิ่งย่อยขณะวิ่ง หางดับตาม ไม่มีขอบคลื่น กิ่งต่ำและสูงสลับกันตามแบบ อยู่ใน `stance/storm_mark_branches`

@@ -119,25 +119,11 @@ function botPlay(p,dt,tg,c0){
   if(pi===2){
     const st=p.lst|0;
     inp.ah=cH(tg)+terrT(tg.x,tg.y)-terrT(p.x,p.y);
-    if(p.sdome){if(p.sdome.ph===2&&(p.sdome.god||stormDomeCharge(p.sdome.t)>=1))pulse();return;}
-    if(p.rail){
-      inp.ap=Math.atan2((inp.ah-p.z-1.5)*20,d);
-      A.aimOv={x:tg.x,y:tg.y};
-      inp.sh=0;
-      return;
-    }
+    if(p.sdome){if(p.sdome.ph===2)pulse();return;}
+    if(p.stMarkAim)return;
     if(p.slnT>0)return;
     if(p.sdHit&&p.dash>0){inp.fire=0;return;}
     const closeHeight=Math.abs(inp.ah-p.z-1.1)<2.8;
-    const bow=SPELLS.railgun.v;
-    const bowRange=Math.hypot(d,(inp.ah-p.z-1.5)*20)<bow.len;
-    const flyingMatchup=tg.pathIdx===WINDP&&tg.kitIds.includes('featherwing');
-    if(rdy('railgun')&&bowRange&&(!closeHeight||flyingMatchup&&st<bow.cost)){
-      if(st>=bow.cost){go('railgun');return;}
-      if(rdy('thunderline')&&d<580)go('thunderline');
-      inp.fire=0;
-      return;
-    }
     if((p.emp&&!p.god||p.cEmp&&p.god)&&closeHeight&&d<(p.god?GODL.v.bigR:STORMV.triLen)){
       inp.fire=p.god||!p.bfPrev?1:0;
       A.aimOv={x:tg.x,y:tg.y};
@@ -151,12 +137,12 @@ function botPlay(p,dt,tg,c0){
     }
     if(p.emp&&!p.god)inp.fire=0;
     if(rdy('stormdome')&&st>=stormDomeCost(p)&&d<560)go('stormdome');
-    else if(rdy('railgun')&&st>=3&&d<850&&d>200)go('railgun');
+    else if(rdy('railgun')&&st>=STMARK.v.cost&&!p.stAllyMark&&d<STMARK.v.r)go('railgun');
     else if(rdy('speedsiphon')&&st>=1&&d<600&&marked&&!marked.primed&&marked.until>t)go('speedsiphon');
-    else if(rdy('triplestrike')&&st>=2&&d<560)go('triplestrike');
+    else if(rdy('triplestrike')&&st>=STPULSE.v.cost&&closeHeight&&d<STPULSE.v.r)go('triplestrike');
     else if(rdy('speedsiphon')&&st>=1&&d<600)go('speedsiphon');
     else if(rdy('stormorbs')&&st>=1&&!p.sorb&&d<500)go('stormorbs');
-    else if(rdy('thunderline')&&d<580&&st<3)go('thunderline');
+    else if(rdy('thunderline')&&closeHeight&&d<TLINE.v.len&&st<STORMV.stackMax)go('thunderline');
     ult(340);
     return;
   }

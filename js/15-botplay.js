@@ -20,7 +20,7 @@ function botWallBehind(p,tg,dist){
   return false;
 }
 const _bspd=t=>Math.hypot(t.vx||0,t.vy||0);
-// สายฟ้า: มีสกิลใช้ 2 stack พร้อม (Triple Strike / Railgun) = เก็บ stack ไว้ ไม่ใช้สกิล 1 stack จนกว่าจะมี 3
+// สายฟ้า: มีสกิลใช้ 2 stack พร้อม (Thunderbomb / Lightning Mark) = เก็บ stack ไว้ ไม่ใช้สกิล 1 stack จนกว่าจะมี 3
 const botSave=p=>p.kitIds.some((id,i)=>(id==='triplestrike'||id==='railgun')&&!(p.cd[SLOTK[i]]>0));
 function botFireCanNova(p){
   if(p.ult<100||p.sil>0||p.novaT>0||p.snapT>0)return false;
@@ -54,11 +54,11 @@ function botWant(p,id,tg,d){
     case 'frostaura':return d<180;
     case 'cryoshell':return hp<0.3&&d<450;
     // ---- สายฟ้า: Dash ทะลุเก็บ stack แล้วจ่าย stack ----
-    case 'thunderline':return d<560;
+    case 'thunderline':return d<TLINE.v.len;
     case 'speedsiphon':return st>=(botSave(p)?4:2)&&d<600;
     case 'stormorbs':return st>=(botSave(p)?3:1)&&!p.sorb&&d<450;
-    case 'triplestrike':return st>=2&&d<600&&(stuck||st>=4);
-    case 'railgun':return st>=3&&d>280&&d<850&&(stuck||hp>0.6);
+    case 'triplestrike':return st>=STPULSE.v.cost&&d<STPULSE.v.r;
+    case 'railgun':return st>=STMARK.v.cost&&!p.stAllyMark&&d<STMARK.v.r;
     case 'stormdome':return st>=stormDomeCost(p)&&d<560;
     // ---- ดิน: ผลักศัตรูชนของแข็ง • โคลน → กำแพงหนีบ ----
     case 'stonebreaker':return d<650&&(botWallBehind(p,tg,260)||d<360);
@@ -307,7 +307,7 @@ function botCombo(p,dt,tg){
   // สายฟ้า: ลูกสายฟ้าโดม = คลิกยิงลงเป้า
   if(p.sdome){inp.ax=tg.x;inp.ay=tg.y;if(p.sdome.ph===2){
     M.sd=(M.sd||0)+dt;
-    if(p.sdome.god?M.sd>0.8:stormDomeCharge(p.sdome.t)>=1)click();else inp.fire=0;
+    if(M.sd>0.8)click();else inp.fire=0;
   }}else M.sd=0;
   // ดิน: Wrath บนฟ้า = ปาเสาใส่เป้าเรื่อย ๆ
   if(p.wr&&p.wr.ph==='aim'){inp.ax=tg.x;inp.ay=tg.y;click();}

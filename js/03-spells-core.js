@@ -34,7 +34,7 @@ function icoHTML(id,col,sz){return `<span class="ico" style="--u:url('${icoURL(i
 const PATHS=[
   {id:'pyro',n:'สายไฟ',ic:'🔥',col:'#ff6a2a',d:'สะสม Burning (สูงสุด 5 ชั้น) แล้วดีดนิ้วระเบิด — ไม่ว่องไว เน้นระเบิดดาเมจ',combo:'ประกายไฟ/ลูกไฟ/Kindle/Dragon\'s Breath/Ring of Embers/โล่ ใส่ Burning (เผา 0.5/วิ/ชั้น) → Ignition Snap ระเบิดทุกคนที่ติดไฟ ชั้นละ 15 • Blazeform +30% ทุกดาเมจ'},
   {id:'frost',n:'สายน้ำแข็ง',ic:'❄️',col:'#8fe0ff',d:'นักดาบน้ำแข็ง สลับประชิด/ไกลด้วย V — ดาเมจหลักจากดาบ ไกลไว้ติดสลอว์ เน้นคลุกวงใน ทนทาน ดาเมจต่อเนื่อง',combo:'ยิงปกติสะสมสลอว์ (สูงสุด 30%) → Permafrost/Frostbite Aura ซ้อนสลอว์ได้ถึง 80% → ฟันคอมโบจังหวะ 3 ฮีลตัวเอง • Frostforge อัปเกรดอาวุธ • Glacier Rend สร้างทางน้ำแข็ง/ภูเขาน้ำแข็งแล้วกระโดดฟาดลงมา'},
-  {id:'storm',n:'สายสายฟ้า',ic:'⚡',col:'#ffe27a',d:'นักสู้ว่องไวแบบ Tracer — ลำสายฟ้าระยะประชิด Dash 3 ชาร์จทะลุศัตรู เก็บ Lightning stack (สูงสุด 5) ไปจ่ายสกิล',combo:'Dash ทะลุศัตรู / เส้นสายฟ้า / ระเบิดโล่ = +1 stack (และยิงครั้งถัดไปเป็นสายฟ้าสามเหลี่ยม) → ใช้ stack ร่ายสกิล: ดูดความเร็ว/ออร์บ 1 • ฟาดสามครั้ง/Railgun 2 • ลูกสายฟ้าโดม 3 • Shock = โคลงสั้นๆ ใช้ Dash ไม่ได้'},
+  {id:'storm',n:'สายสายฟ้า',ic:'⚡',col:'#ffe27a',d:'นักสู้ว่องไวแบบ Tracer — ลำสายฟ้าระยะประชิด Dash 3 ชาร์จทะลุศัตรู เก็บ Lightning stack (สูงสุด 5) ไปจ่ายสกิล',combo:'Dash ทะลุศัตรูเก็บสแต็กและเปิด BA เสริม • เส้นสายฟ้าเก็บสแต็ก • ใช้สแต็กยิงคลื่น วางโดม หรือเข้าใกล้เพื่อระเบิด Thunderbomb • ส่ง Lightning Mark ให้เพื่อนที่กำลังเข้าปะทะ'},
   // off:1 = ซ่อนไว้ก่อน (ผู้ใช้ 2026-10-21 "remove nature curse and summon for now") — โค้ดยังอยู่ เอากลับได้โดยลบ off:1
   {id:'nature',n:'สายธรรมชาติ',ic:'🌿',col:'#6fd57f',d:'ใช้แส้หนามและปลูกพืชเพื่อช่วยทีมคุมพื้นที่',combo:'ฟาดแส้เพื่อสั่งป้อมเลือกเป้าและส่งสปอร์ • เกี่ยวป้อมเพื่อเตรียมลูกถั่วใหญ่ • สลับดอกบัวระหว่างฮีลกับบัฟป้อม'},
   {id:'hex',off:1,n:'สายคำสาป',ic:'🌑',col:'#b57dff',d:'ตีตราแล้วคำสาปแรงขึ้น — ควบคุมฝูงชนตัวจริง',combo:'ตรามรณะก่อน → ปิดปาก/มืดบอด/หวาดกลัวนานขึ้นกับคนมีตรา → ดูดวิญญาณกินตราเป็นดาเมจ + ฟื้นเลือดเรา'},
@@ -64,8 +64,8 @@ function parseKit(str){
 function cleanKit(s){return parseKit(parseKit(s).str).str;}
 function setKit(p,str){const old=p.pathIdx;p.fmode=0;p.orbs=0;p.orbBlk=0;p.kit=cleanKit(str);const k=parseKit(p.kit);p.pathIdx=k.path;p.kitIds=k.ids.map(i=>SPELL_LIST[i].id);p.ultId=SPELL_LIST[k.ult].id;
   if(old!==undefined&&old!==p.pathIdx&&G&&G.ph!=='lobby')pathReset(p);}
-// เปลี่ยนสายกลางเกม (เมนูทดลอง): ล้างท่าค้างของสายเก่า — ไม่งั้นค้างลอยฟ้า (Wrath) / เดินไม่ได้ (Railgun/Auger) / ร่างเทพค้าง
-function pathReset(p){p.fheat=0;clearStatus(p);earthReset(p);windReset(p);waterReset(p);natureReset(p);lightReset(p,true);darkReset(p);Object.assign(p,{stS:null,stCd:0,god:0,clQ:null,cEmp:0,cEmpT:0,clT:0,xhp:0,sdome:null,rail:null,slnT:0,sorb:null,beam:0,sdHit:null,slam:false,slam3:null,frostCut:null,chg:0,dash:0,dashSp:0,trail:null,fpath:null,shieldOn:false});}
+// เปลี่ยนสายกลางเกม (เมนูทดลอง): ล้างท่าค้างของสายเก่า — ไม่งั้นค้างลอยฟ้า (Wrath) / เดินไม่ได้ (Auger) / ร่างเทพค้าง
+function pathReset(p){p.fheat=0;clearStatus(p);earthReset(p);windReset(p);waterReset(p);natureReset(p);lightReset(p,true);darkReset(p);Object.assign(p,{stS:null,stCd:0,god:0,clQ:null,cEmp:0,cEmpT:0,clT:0,xhp:0,sdome:null,stMarkAim:null,stPulse:0,stAllyMark:null,slnT:0,sorb:null,beam:0,sdHit:null,slam:false,slam3:null,frostCut:null,chg:0,dash:0,dashSp:0,trail:null,fpath:null,shieldOn:false});}
 
 // ---------- สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู) ----------
 const isBig=t=>t.isE&&(t.type==='troll'||t.type==='queen'||(EDEF[t.type]&&EDEF[t.type].boss));
@@ -110,7 +110,7 @@ function frostSlow(t){
   if(t.fslUltT>0)s=MIRROR.v.slow;
   return Math.min(Math.max(80,MIRROR.v.slow),s);
 }
-function moveMul(t){if(t.mlCast>0)return 0;let m=1;const fs=frostSlow(t);if(fs>0)m*=1-fs/100;if(t.chl>0)m*=1-0.1*t.chl;if(t.slowT>0)m*=t.slowF;if(t.haste>0)m*=t.hasteF;if(t.blaze>0)m*=BLAZEF.v.spdUp;if(t.fheat>0)m*=pyroHeatSpd(t);if(t.wtlT>0)m*=W_VO.tlUp;return Math.max(t.wbsT>0?0.08:0.25,m)*(t.natureSlow>G.time?2/3:1)*(t.devSpd||1);}
+function moveMul(t){if(t.mlCast>0)return 0;let m=1;const fs=frostSlow(t);if(fs>0)m*=1-fs/100;if(t.chl>0)m*=1-0.1*t.chl;if(t.slowT>0)m*=t.slowF;if(t.haste>0)m*=t.hasteF;if(t.stAllyMark?.ally&&t.stAllyMark.until>G.time)m*=STMARK.v.haste;if(t.blaze>0)m*=BLAZEF.v.spdUp;if(t.fheat>0)m*=pyroHeatSpd(t);if(t.wtlT>0)m*=W_VO.tlUp;return Math.max(t.wbsT>0?0.08:0.25,m)*(t.natureSlow>G.time?2/3:1)*(t.devSpd||1);}
 // Burning (สายไฟ): สูงสุด BRN_MAX ชั้น • เผา 0.3/วิ/ชั้น (แค่ดาเมจเสริม) • ไม่โดนเพิ่ม 6 วิ แล้วลดทีละ 1 ชั้นทุก 1 วิ (เนิร์ฟ 2026-10-27: เดิม 2/วิ, 10 วิ)
 const BRN_MAX=6;
 function addBurn(t,n,src){if(t.dead)return;const was=t.brn|0;t.brn=Math.min(BRN_MAX,was+n);t.brnT=6;t.brnSrc=src;if(!(t.brnTick>0))t.brnTick=0.5;if(t.brn>was)emit({k:'efx',z:'brn',x:t.x,y:t.y,h:cH(t)+0.8,n:t.brn});}

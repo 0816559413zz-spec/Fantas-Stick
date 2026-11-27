@@ -93,20 +93,20 @@ const SKFEET={sweep:[0.25,-0.5,0.1,-0.12],powerup:[-0.25,-0.15,0.16,-0.16],ultra
 // รอบ 2: ใส่ให้สกิลที่เดิมมีแต่ท่าค้าง (ไม่เหวี่ยง) ด้วย — ท่านี้เล่นหลังไฟล์สาย (lateSkillPose) จึงทับท่าค้างช่วงสั้น ๆ แล้วกลับท่าเดิม
 const SKANIM={ringofembers:'sweep',blazeform:'fireflare',colossus:'novaup',kindle:'upflick',ignitionsnap:'snap',
   frostforge:'forge',glacierrend:'rend',permafrost:'slam',cryoshell:'wrap',frostaura:'frostbreath',mirrorlegion:'mlraise',
-  thunderline:'line',speedsiphon:'staffup',stormorbs:'orbs',stormdome:'dome',triplestrike:'skycall',godlightning:'godcall',
+  thunderline:'line',speedsiphon:'staffup',stormorbs:'orbs',stormdome:'dome',triplestrike:'storm_study_pulse',godlightning:'godcall',
   stonebreaker:'punchcmd',mudswamp:'ground',tectoniccrush:'dome',tectoniccrush_2:'clap',dustburst:'burst',terraauger:'pullback',rampart:'rampcast',wrath:'ultraise',
   riptide:'wavecast',tidecaller:'tidecall',aquacage:'cagecast',abyssalbeam:'pullback',moonwater:'moonarts',dragondeep:'dragoncall',dragondeep_dive:'dragoncommand',voidspheres:'windvoid',aegisgale_push:'wallpush',aegisgale_place:'ground',featherwing_2:'wingflick',eyeofheaven:'heavenslam'};
 Object.assign(SKANIM,{poisondart:'natthrow',bloom:'natthrow',sporecloud:'natspell',vinelash:'natraise',thornburst:'natraise',worldtree:'natsummon',radiantsovereign:'novaup',lgrecall:'pullback'});
 SKANIM.railgun_release='railrelease';SKANIM.terraauger_release='ground';
 SKFEET.rendfar=[-0.75,0.5,0.1,-0.08];   /* ขาหน้าก้าวออกไปด้านหน้า ขาหลังยันหลัง ให้ท่าก้มดูมีน้ำหนักตามฟิสิกส์ (ผู้ใช้ 2026-11-16) */SKANIM.dragonfall_land='dragonland';SKFEET.dragonland=[-0.8,0.3,0.12,-0.1];SKFEET.wingflick=[-0.45,0.3,0.12,-0.12];
-function skAnim(ev){const o=PM3.get(ev.id);let n=SKANIM[ev.s];if(ev.s==='glacierrend'){const v=VIEW.cur&&VIEW.cur.P.find(q=>q.id===ev.id);if(v&&v.fr&&v.fr[0]!==0)n='rendfar';}{const v=STORM_ANIM_V||STORM_ANIM_PICK[ev.s],sv=v&&'st_'+ev.s+'_'+v;if(sv&&CANIM[sv])n=sv;}if(!o||!n)return;if(ev.s==='stormdome'&&!ev.g)return;o.caN=n;o.caT=0;o.cpT=0;}
+function skAnim(ev){const o=PM3.get(ev.id);let n=SKANIM[ev.s];if(ev.s==='glacierrend'){const v=VIEW.cur&&VIEW.cur.P.find(q=>q.id===ev.id);if(v&&v.fr&&v.fr[0]!==0)n='rendfar';}{const v=STORM_ANIM_V||STORM_ANIM_PICK[ev.s],sv=v&&'st_'+ev.s+'_'+v;if(sv&&CANIM[sv]&&ev.s!=='triplestrike')n=sv;}if(!o||!n)return;o.caN=n;o.caT=0;o.cpT=0;}
 // ---- Storm skill animations, 3 to pick per skill (user 2026-11-25): bigger twists, counter-turns, slow wind-up -> fast hit -> hit-stop -> slow settle
 //   no wand any more: the gold right hand leads. nc = authored both arms (no auto counter-arm)
 Object.assign(CANIM,{
   // Thunder Line
   st_thunderline_a:{d:.6,st:.9,nc:1,k:[[.32,-2.95,-.35,-.6,-.2,-1.25,.35,.05,.02,'s'],[.4,-3.0,-.3,-.66,-.22,-1.3,.38,.06,.03,'s'],[.5,-.85,.05,.75,.48,.55,.5,-.04,-.2,'i'],[.68,-.9,.05,.78,.46,.55,.5,-.04,-.2,'s'],[1,-1.2,-.1,.3,.15,.2,.4,0,-.06,'s']]},   // A slam: arm up high behind, body turned back, slow at the top -> hammer the palm down-forward, bent over, hold
   st_thunderline_b:{d:.65,st:.6,nc:1,tm:[.5,.72],k:[[.3,-.75,.3,-.35,0,-.55,.4,.02,-.05,'s'],[.38,-.72,.32,-.38,0,-.58,.42,.02,-.06,'s'],[.5,-1.62,-.47,.42,.18,-.2,.45,-.03,-.09,'i'],[.72,-1.62,-.47,.44,.18,-.2,.45,-.03,-.09,'s'],[1,-1.25,-.05,.18,.08,-.25,.4,0,-.03,'s']]},   // B push, one hand (user round 2): right hand pulls back only a little, drives forward with the twist, held tense (shake), then back; left arm stays calm • armR.z -.47 = palm on the skill line despite the twist (measured: hand within ~2° of the aim)
-  st_thunderline_c:{d:.6,st:.8,nc:1,k:[[.3,-1.6,.95,-.95,.05,.35,.55,.08,-.04,'s'],[.4,-1.62,1.0,-1.0,.06,.38,.58,.09,-.05,'s'],[.5,-1.35,-1.1,.7,.22,-.7,-.2,-.08,-.12,'o'],[.68,-1.35,-1.05,.68,.22,-.7,-.2,-.08,-.12,'s'],[1,-1.1,-.6,.25,.08,-.3,.3,0,-.03,'s']]},   // C chop: hand cocked at the left shoulder, body wound left -> backhand slash out to the right-front, hold
+  st_thunderline_c:{d:.67,st:0,nc:1,k:[[.19,-.93,.44,-.36,.10,-.35,-.72,.10,-.04,'s'],[.31,-1.58,.23,.15,.19,-1.52,-.24,-.04,-.055,'i'],[.61,-1.58,.23,.15,.19,-1.52,-.24,-.04,-.125,'s'],[1,-.93,.44,-.36,.10,-.35,-.72,.10,-.04,'s']]},
   // Triple Strike (call down at a point)
   st_triplestrike_a:{d:.7,st:.5,nc:1,k:[[.38,-3.15,-.25,-.25,-.25,-.9,.5,0,.04,'i'],[.48,-3.2,-.22,-.28,-.27,-.95,.52,0,.05,'s'],[.58,-1.0,.05,.55,.38,.45,.45,0,-.16,'o'],[.75,-1.0,.05,.55,.38,.45,.45,0,-.16,'s'],[1,-1.25,-.05,.2,.12,.15,.4,0,-.05,'s']]},   // A grab the sky: reach up (speeding up), hang at the top -> yank the fist down at the target, hold
   st_triplestrike_b:{d:.7,st:.6,nc:1,k:[[.35,-1.55,.1,.85,.02,-2.9,.55,-.06,0,'s'],[.5,-1.6,.12,.9,.02,-3.0,.58,-.07,0,'s'],[.56,-1.75,.15,1.0,.08,-2.6,.75,-.09,-.03,'o'],[.75,-1.72,.14,.98,.07,-2.65,.72,-.09,-.03,'s'],[1,-1.35,.05,.4,.03,-1.0,.5,0,0,'s']]},   // B aim + call: side-on like an archer, right palm points at the spot, left hand raised to the sky, a sharp snap, hold
@@ -119,7 +119,36 @@ Object.assign(CANIM,{
 Object.assign(SKFEET,{st_thunderline_a:[-.55,.35,.14,-.12],st_thunderline_b:[.3,-.45,.16,-.16],st_thunderline_c:[-.4,.3,.12,-.1],st_triplestrike_a:[-.35,.3,.12,-.12],st_triplestrike_b:[.4,-.45,.14,-.1],st_triplestrike_c:[-.45,.35,.16,-.16],
   st_stormorbs_a:[.15,-.2,.14,-.14],st_stormorbs_b:[.3,-.35,.12,-.12],st_stormorbs_c:[-.2,-.2,.2,-.2]});
 let STORM_ANIM_V=null;   // studio arg 'anim' forces a set
-const STORM_ANIM_PICK={thunderline:'b',stormorbs:'c'};   // user's picks per skill (2026-11-25); skills not listed keep their old animation
+{
+  const hold=[-1.37,.24,.06,.16,-.63,-.31,0,-.06];
+  CANIM.storm_study_send={d:.49,nc:1,st:0,k:[
+    [.27,-.56,-.33,-.22,.12,-.46,.17,0,-.055,'s'],
+    [.48,...hold,'i'],[.69,...hold,'s'],[1,-.7,-.12,0,0,-.28,.35,0,0,'s']
+  ]};
+  CANIM.storm_study_link={d:.52,nc:1,st:0,k:[
+    [.28,-.59,-.38,-.30,.08,-.28,.34,0,-.025,'s'],
+    [.49,-1.45,.22,.12,.15,-.55,.44,0,-.035,'i'],
+    [.69,-1.50,.17,.14,.15,-.50,.42,0,-.035,'s'],
+    [1,-.63,-.25,0,0,-.3,.38,0,0,'s']
+  ],j:[[.35,.19,.20,.82,-.12,.17,.18,-.18],[1,.15,.18,.55,-.1,.08,.15,-.15]]};
+  CANIM.storm_study_self={d:.57,nc:1,st:0,tm:[.49,.70],k:[
+    [.23,-.76,-.65,0,.02,-.76,.65,0,-.025,'s'],
+    [.37,-.79,-.67,0,.04,-.79,.67,0,-.04,'s'],
+    [.49,-1.27,.60,.02,.25,-1.27,-.60,.02,-.09,'i'],
+    [.58,-1.17,.52,-.025,.10,-1.17,-.52,-.025,-.045,'o'],
+    [.71,-1.22,.47,0,.12,-1.22,-.47,0,-.045,'s'],
+    [1,-.45,-.44,0,0,-.43,.44,0,0,'s']
+  ],j:[[.3,.25,.24,1.02,-.20,.08,.14,-.14],[.49,.46,.37,1.43,-.25,.08,.15,-.15],[.68,.21,.22,1.20,-.21,.11,.14,-.14],[1,.14,.14,.60,-.12,.12,.15,-.15]]};
+  const fold=[-1.63,1.02,0,.37,-1.63,-1.02,0,-.16],open=[-1.13,-1.27,0,-.34,-1.13,1.27,0,.055];
+  CANIM.storm_study_pulse={d:.67,nc:1,st:0,k:[
+    [.27,...fold,'s'],[.32,...fold,'s'],[.41,...open,'i'],[.62,...open,'s'],
+    [1,-.62,-.28,0,0,-.62,.28,0,0,'s']
+  ],j:[
+    [.28,1.25,1.25,1.56,-1.18,-1.18,.12,-.12],[.36,.9,.9,1.16,-.77,-.77,.27,-.27],
+    [.47,.10,.10,.14,.08,.05,.58,-.58],[.63,.12,.12,.20,.05,.05,.48,-.48],[1,.14,.14,.42,0,0,.10,-.10]
+  ]};
+}
+const STORM_ANIM_PICK={thunderline:'c',stormorbs:'c'};   // user's picks per skill (2026-11-25); skills not listed keep their old animation
 const _caT=[0,0,0,0,0,0,0,0],_caR=[0,0,0,0,0,0,0,0];
 function skillPose(o,p,dt,now){
   const A=CANIM[o.caN];if(!A){o.caN=null;o.caJ=null;return false;}
@@ -1281,7 +1310,12 @@ function drawCrosshair(){
     const rel=d.a-yaw-Math.PI/2;cx.strokeStyle=`rgba(255,60,60,${Math.min(0.85,d.t)})`;cx.lineWidth=6;cx.beginPath();cx.arc(x,y,96,rel-0.32,rel+0.32);cx.stroke();}
   const _v=VIEW.cur,_me=_v&&_v.P&&_v.P.find(q=>q.id===NET.myId),hot=_me&&(_me.cg>=1||_me.dc>=1);
   if(!(_me&&_me.ea&&_me.al&&_me.sh&&!(_me.ea[0]>0)))drawXh(x,y,hot);   // สายดินถือโล่: ซ่อนเป้าเล็ง (โชว์โค้ง HP โล่ + ตัวเลขแทน ใน drawEarthHud)
-  if(_me&&_me.sm&&_me.al)drawStormHud(x,y,_me.sm);
+  if(_me&&_me.sm&&_me.al){
+    drawStormHud(x,y,_me.sm);
+    if(_me.sta){
+      cx.save();cx.strokeStyle='#ffe261';cx.lineWidth=1.5;cx.beginPath();cx.arc(x,y,14,0,Math.PI*2);cx.stroke();cx.restore();
+    }
+  }
   if(_me&&_me.ea&&_me.al)drawEarthHud(x,y,_me.ea,_me);
   if(_me&&_me.wn&&_me.al)drawWindHud(x,y,_me.wn,_me);
   if(_me&&_me.nt&&_me.nt.length>6&&_me.al)drawNatureHud(x,y,_me.nt);

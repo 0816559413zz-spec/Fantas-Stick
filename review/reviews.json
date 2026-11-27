@@ -1,6 +1,23 @@
 {
- "next": 211,
+ "next": 213,
  "items": [
+  {
+   "id": 212,
+   "title": "Storm rework ในเกม",
+   "text": "เปิดห้องฝึก เลือก Storm แล้วใส่ Thunder Line, Thunderbomb, Lightning Mark และ Storm Dome. ลองยิงเส้นสองมือ ระเบิดรอบตัว ส่งมาร์กให้เพื่อนด้วยคลิกซ้ายหรือใส่ตัวเองด้วยคลิกขวา และยิงโดมลงพื้น/ใส่ผนัง/ขึ้นฟ้า. รอบนี้รอดูจังหวะท่าร่าย ความชัดของสายฟ้า และตัวเลขในไฟต์จริง.",
+   "kind": "VFX / แอนิเมชัน",
+   "who": "Storm",
+   "status": "wait",
+   "created": "2026-11-27",
+   "updated": "2026-11-27",
+   "imgs": [],
+   "links": [
+    "/index.html",
+    "/studio.html?fx=stance/storm_pulse_rework",
+    "/studio.html?fx=stance/storm_mark_polish",
+    "/studio.html?fx=stance/storm_dome_rework"
+   ]
+  },
   {
    "id": 194,
    "title": "ชุดซากปรักหักพัง (Ruin) แบบประกอบเองใน Map Builder",
