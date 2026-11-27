@@ -3,6 +3,163 @@
 > เขียนอัตโนมัติจาก `concepts.html` (ผ่าน `tools/serve.py`) — อย่าแก้ตรง ๆ, แก้ `concepts/concepts.json` แล้วรัน `python tools/serve.py --concepts-md`.
 > **Claude:** นี่คือคลังภาพอ้างอิง + พรอมต์ที่ผู้ใช้เอาไปเจนรูป (ChatGPT) — เปิดรูปด้วย Read. สถานะ ⭐ = แนวทางที่ผู้ใช้เลือก. สไตล์งานหลัก = สีน้ำ.
 
+## #8 Skyloom ชิงของรอบ 2 — สวนลอยกลางเมฆ
+- สถานะ: 📝 พรอมต์พร้อม • ชนิด: แผนที่ • แท็ก: สีน้ำ, Castle Strike, ชิงของ, ไม้กวาด, เกาะลอย
+
+ช่วงชิงของหลังเฟส 2 ก่อนเฟส 3 (ข้อเสนอ ยังไม่ล็อก): เกาะสวนเล็ก ๆ ลอยรอบตัวหอ ช่วงกลางระหว่างหลังคาโดมกับยอดหอ ล้อมด้วยเมฆ • ต้องบินไม้กวาดข้ามเกาะ หลุดขอบ = ออกนอกเขต • ทีมรับถอยขึ้นมงกุฎหอ ทีมบุกถอยขึ้นหลังคาโดม เกาะอยู่ระหว่างกลาง • ของบนเกาะไกลหอให้ระดับสูงกว่า แต่บินไปกลับนานและเสี่ยงกว่า.
+
+- Ref: `concepts/img/skyloom_style_ref.webp`
+
+**พรอมต์:**
+```
+Use the attached image ONLY as the art-style reference (do not copy its buildings).
+
+Create a single landscape concept-art illustration (16:9), mid-air view, for the item-scramble area between phase 2 and phase 3 of an original wizard siege map: the Cloud Gardens, floating around the middle of the Skyloom Spire.
+
+FOCAL POINT: a cluster of small floating garden islands at different heights orbiting the pale spiralling stone-and-brass spire, each island a chunk of rock with grass, small trees, ivy and hanging roots, some with tiny stone shrines or broken arches; small glowing lantern cabins resting on several islands, each holding a glowing crate. Wide gaps of open sky between islands that can only be crossed by broomstick.
+
+SURROUNDINGS: above, the spire continues up to a crown terrace with a floating rune crystal and a thin luminous teal-white thread of light rising into the sky; below, the top of a cracked glass dome and a sea of golden clouds with the canal city barely visible through gaps.
+
+LIFE: several witches on broomsticks racing between the islands, cloaks streaming, wind streaks in the mist, birds, an airship drifting in the distance. Strong sense of height.
+
+STYLE (from the attached style image): traditional watercolor and ink concept painting, soft translucent washes, visible cold-press paper texture, loose wet-on-wet bleeding edges, thin grey-sepia ink linework, palette of pale sky blue, cream, weathered grey-white stone, moss green, soft teal accents for magic light, warm golden sunlight from the upper left; drifting mist and cloud banks that dissolve into white paper at the edges. Semi-fantasy, semi-sci-fi: old stone and brass mixed with glowing rune crystal technology. Hand-painted, NOT 3D render, NOT photoreal, NOT cartoon.
+
+Avoid: text, logos, watermark, UI, guns, modern cars, realistic faces, white steel lattice truss towers, radial pier docks, copying any existing game's design.
+```
+
+## #7 Skyloom ชิงของรอบ 1 — ตลาดน้ำกระเช้าโคม
+- สถานะ: 📝 พรอมต์พร้อม • ชนิด: แผนที่ • แท็ก: สีน้ำ, Castle Strike, ชิงของ, ไม้กวาด
+
+ช่วงชิงของหลังเฟส 1 ก่อนเฟส 2 (ข้อเสนอ ยังไม่ล็อก): แพตลาดน้ำลอยกระจายในลากูนระหว่างย่านคลองกับฐานโดม มีสถานีกระเช้าชั้นล่าง • ของมากับโคมลอยที่ไต่ลงตามสายแสงแล้วตกบนแพต่าง ๆ มองขึ้นไปก็เห็นว่าจะตกตรงไหน • ทีมรับถอยเข้าโดม ทีมบุกถอยไปประตูน้ำ แพอยู่กลางพอดี • ผิวน้ำเป็นเขตไม้กวาด กระโดดข้ามแพหรือบินต่ำได้.
+
+- Ref: `concepts/img/skyloom_style_ref.webp`
+
+**พรอมต์:**
+```
+Use the attached image ONLY as the art-style reference (do not copy its buildings).
+
+Create a single landscape concept-art illustration (16:9), elevated three-quarter view, for the item-scramble area between phase 1 and phase 2 of an original wizard siege map: the Lantern-Lift Floating Market on the misty lagoon at the foot of the Skyloom Spire.
+
+FOCAL POINT: dozens of wooden market rafts and barges with patched canvas awnings scattered across calm teal water, linked loosely by rope bridges and gangplanks, with gaps of open water between them; a stone lower lift station on a small islet in the middle. From high above, glowing paper-and-brass lantern cabins are descending along a thin luminous teal-white thread of light and drifting down onto the rafts, each lantern carrying a small glowing crate.
+
+BACKGROUND: on one side the canal district with a giant brass tide-wheel in a stone lock gate; on the other side the huge cracked glass dome at the base of a pale spiralling stone spire whose thread of light rises into the clouds.
+
+LIFE: witches on broomsticks skimming low over the water between rafts, ripples and reflections, floating lanterns, mist, an airship far above.
+
+STYLE (from the attached style image): traditional watercolor and ink concept painting, soft translucent washes, visible cold-press paper texture, loose wet-on-wet bleeding edges, thin grey-sepia ink linework, palette of pale sky blue, cream, weathered grey-white stone, moss green, soft teal accents for magic light, warm golden sunlight from the upper left; drifting mist and cloud banks that dissolve into white paper at the edges. Semi-fantasy, semi-sci-fi: old stone and brass mixed with glowing rune crystal technology. Hand-painted, NOT 3D render, NOT photoreal, NOT cartoon.
+
+Avoid: text, logos, watermark, UI, guns, modern cars, realistic faces, white steel lattice truss towers, radial pier docks, copying any existing game's design.
+```
+
+## #6 Skyloom เฟส 3 — มงกุฎหอเหนือเมฆ / ผลึกสมอดาว
+- สถานะ: 📝 พรอมต์พร้อม • ชนิด: แผนที่ • แท็ก: สีน้ำ, Castle Strike, เฟส 3, แลนด์มาร์ก
+
+เฟส 3 (ยอดหอ): ลานวงแหวนเหนือเมฆรอบผลึกสมอดาว = แกนสุดท้าย ทีมรับยันบนลานชั้นใน ทีมบุกเข้ามาจากสะพานโค้งและกระเช้าโคม. การขึ้นมาเฟสนี้อาจใช้ไม้กวาดหรือกระเช้าโคมในช่วงถอย-ชิงของ (เป็นไอเดีย ยังไม่ล็อก). แลนด์มาร์ก: ผลึกยักษ์ลอยอยู่ในวงรูน 3 วง ปล่อยสายแสงขึ้นฟ้า. ตำแหน่งแกนและทางเดินเป็นแค่ตัวอย่าง.
+
+วิธีเข้าทำ (ข้อเสนอ ยังไม่ล็อก): ทางหลัก = สะพานโค้งลอยฟ้า แคบและยาว ทีมรับยันง่าย • ทางอ้อม = ขึ้นทางลานจอดกระเช้าโคมอีกฝั่ง โผล่หลังแนวทีมรับ • จุดได้เปรียบ = เสาทองเหลือง 4 ต้นรอบผลึก ใช้กำบังหรือยืนบนยอด • อันตรายจากฉาก (ไอเดีย) = ขอบลานไม่มีราว ลมแรงพัดคนตกได้
+
+- Ref: `concepts/img/skyloom_style_ref.webp`
+
+**พรอมต์:**
+```
+Use the attached image ONLY as the art-style reference (do not copy its buildings).
+
+Create a single landscape concept-art illustration (16:9), slightly low angle, for phase 3 (final) of an original wizard siege map: the Tether Crown, the summit terrace of the Skyloom Spire high above a sea of clouds.
+
+LANDMARK (focal point, centre): the Star Anchor, an enormous pale-cyan rune crystal floating above a circular stone dais, held in place by three huge slowly turning rings of glowing teal runes at different tilts; from its tip a single luminous teal-white thread of woven light rises straight up into the deep blue sky and disappears; small glowing lantern-lift cabins hang on the thread far above.
+
+SURROUNDINGS: a ring-shaped stone and brass terrace with broken balustrades, banners whipping in strong wind, four slender brass pylons anchoring the rings, an arched sky-bridge leading in from one side, a lantern-lift landing platform on the other. Below and around: an endless sea of golden-lit clouds, with the glass dome and canal city barely visible through gaps far below.
+
+LIFE: witches on broomsticks circling the crystal, an old airship below in the clouds, strong wind streaks in the mist. Epic sense of height and scale.
+
+STYLE (from the attached style image): traditional watercolor and ink concept painting, soft translucent washes, visible cold-press paper texture, loose wet-on-wet bleeding edges, thin grey-sepia ink linework, palette of pale sky blue, cream, weathered grey-white stone, moss green, soft teal accents for magic light, warm golden sunlight from the upper left; drifting mist and cloud banks that dissolve into white paper at the edges. Semi-fantasy, semi-sci-fi: old stone and brass mixed with glowing rune crystal technology. Hand-painted, NOT 3D render, NOT photoreal, NOT cartoon.
+
+Avoid: text, logos, watermark, UI, guns, modern cars, realistic faces, white steel lattice truss towers, radial pier docks, copying any existing game's design.
+```
+
+## #5 Skyloom เฟส 2 — สวนโดมแก้ว / ออร์เรอรีลอยฟ้า
+- สถานะ: 📝 พรอมต์พร้อม • ชนิด: แผนที่ • แท็ก: สีน้ำ, Castle Strike, เฟส 2, แลนด์มาร์ก
+
+เฟส 2 (ฐานหอ): สู้ในโดมแก้วร้าวที่ครอบสวนลอย มีทางเดินวงแหวนหลายระดับ ระเบียง และเกาะสวนลอยให้ตัวที่บินหรือลอยได้เล่น (หลังคาสูงพอ). แกน 2 อยู่ใต้ศูนย์กลางโดม. แลนด์มาร์ก: ออร์เรอรี (แบบจำลองระบบดาว) ทองเหลืองขนาดยักษ์ลอยหมุนใต้ยอดโดม. ตำแหน่งแกนและทางเดินเป็นแค่ตัวอย่าง.
+
+วิธีเข้าทำ (ข้อเสนอ ยังไม่ล็อก): ทางหลัก = ประตูใหญ่ฝั่งลากูนเข้าวงแหวนชั้นล่าง • ทางอ้อม = ปีนเข้าทางกระจกแตกบนหลังคาโดมแล้วลงตามเกาะสวนลอย (เหมาะกับสายบิน/ลอย) • จุดได้เปรียบ = วงแหวนชั้นบนใต้ออร์เรอรี เห็นแกนทั้งหมดแต่โดนยิงได้หลายทาง • จุดเด่น = สู้หลายระดับ ทีมรับต้องแบ่งคนทั้งล่างและบน
+
+- Ref: `concepts/img/skyloom_style_ref.webp`
+
+**พรอมต์:**
+```
+Use the attached image ONLY as the art-style reference (do not copy its buildings).
+
+Create a single landscape concept-art illustration (16:9), interior wide view, for phase 2 of an original wizard siege map: the Glass Garden, a vast cracked glass dome conservatory at the base of the Skyloom Spire.
+
+LANDMARK (focal point, upper centre): a colossal floating brass orrery hanging under the apex of the dome, concentric brass rings slowly turning, planets made of coloured glass and stone, a golden sun sphere glowing softly at its centre, thin threads of teal rune-light connecting the rings; the stone trunk of the spire passes up through the dome's centre behind it.
+
+SURROUNDINGS: the dome is made of iron-and-brass ribs with many glass panes, some cracked or missing so shafts of sunlight and wisps of cloud come in; inside, overgrown terraced gardens with ivy and small trees, several small floating garden islets with hanging roots, ring-shaped stone walkways at three heights connected by arched bridges and spiral stairs, a reflecting canal pool on the floor. Large open air volume under the dome (room for flying).
+
+LIFE: a witch on a broomstick flying between the floating islets, birds inside the dome, dust motes and mist in the light shafts.
+
+STYLE (from the attached style image): traditional watercolor and ink concept painting, soft translucent washes, visible cold-press paper texture, loose wet-on-wet bleeding edges, thin grey-sepia ink linework, palette of pale sky blue, cream, weathered grey-white stone, moss green, soft teal accents for magic light, warm golden sunlight from the upper left; drifting mist and cloud banks that dissolve into white paper at the edges. Semi-fantasy, semi-sci-fi: old stone and brass mixed with glowing rune crystal technology. Hand-painted, NOT 3D render, NOT photoreal, NOT cartoon.
+
+Avoid: text, logos, watermark, UI, guns, modern cars, realistic faces, white steel lattice truss towers, radial pier docks, copying any existing game's design.
+```
+
+## #4 Skyloom เฟส 1 — ท่าคลองโคมลอย / ประตูน้ำกังหันจันทร์
+- สถานะ: 📝 พรอมต์พร้อม • ชนิด: แผนที่ • แท็ก: สีน้ำ, Castle Strike, เฟส 1, แลนด์มาร์ก
+
+เฟส 1 (ชั้นล่าง): ทีมบุกขึ้นฝั่งจากคลอง สู้ผ่านสะพานเตี้ย ท่าเรือ โกดัง ไปหาแกน 1 ที่ประตูน้ำ ทีมรับยันที่ประตูน้ำและสะพานสูง. แลนด์มาร์ก: Moonlock Wheel กังหันทองเหลืองยักษ์ในประตูกั้นน้ำ หมุนช้า ๆ ตาผลึกฟ้ากลางวง มองเห็นได้จากทุกจุดในเฟส. ตำแหน่งแกนและทางเดินเป็นแค่ตัวอย่าง.
+
+วิธีเข้าทำ (ข้อเสนอ ยังไม่ล็อก): ทางหลัก = ถนนริมคลองตรงเข้าหน้าประตูน้ำ กว้าง ปะทะเป็นทีม • ทางอ้อม = ลอดใต้สะพานเตี้ยผ่านท่าเรือ/โกดัง โผล่ข้างกังหัน ลอบไปร่ายแกนได้ • จุดได้เปรียบ = ทางเดินโค้งบนหัวประตูน้ำ ยิงลงได้ทั้งสองทาง • กลไกฉาก (ไอเดีย) = กังหันหมุนตามน้ำขึ้นลง พอน้ำลดทางอ้อมใต้สะพานจะเปิด
+
+- Ref: `concepts/img/skyloom_style_ref.webp`
+
+**พรอมต์:**
+```
+Use the attached image ONLY as the art-style reference (do not copy its buildings).
+
+Create a single landscape concept-art illustration (16:9), eye-level three-quarter view from a canal-side street, for phase 1 of an original wizard siege map: the Lantern Canals at the foot of the Skyloom Spire.
+
+LANDMARK (focal point, centre): the Moonlock Wheel, a colossal brass tide-wheel, three storeys tall, mounted inside a weathered stone canal-lock gate with an arched walkway across its top; its spokes are engraved with moon-phase runes and its hub is a glowing pale-blue crystal; water pours in thin silver falls from its paddles into the lock basin.
+
+SURROUNDINGS: narrow canals with low arched stone bridges, moored sailboats and rowing boats, wooden docks, stacked crates and cargo nets, floating paper lanterns on the water, narrow cream stone houses with blue-grey roofs and ivy, an overgrown ruined watchtower on one side. In the far background, through mist, the base of a huge glass dome and the pale spiralling stone spire rising out of frame, a thin teal-white thread of light going up into the clouds.
+
+LIFE: two witches on broomsticks skimming low over the canal, a small airship in the sky, birds, mist on the water. Clear readable silhouettes; the wheel must be instantly recognisable from far away.
+
+STYLE (from the attached style image): traditional watercolor and ink concept painting, soft translucent washes, visible cold-press paper texture, loose wet-on-wet bleeding edges, thin grey-sepia ink linework, palette of pale sky blue, cream, weathered grey-white stone, moss green, soft teal accents for magic light, warm golden sunlight from the upper left; drifting mist and cloud banks that dissolve into white paper at the edges. Semi-fantasy, semi-sci-fi: old stone and brass mixed with glowing rune crystal technology. Hand-painted, NOT 3D render, NOT photoreal, NOT cartoon.
+
+Avoid: text, logos, watermark, UI, guns, modern cars, realistic faces, white steel lattice truss towers, radial pier docks, copying any existing game's design.
+```
+
+## #3 Skyloom Spire — แมพ Space Elevator สายเวท (ภาพรวม)
+- สถานะ: 📝 พรอมต์พร้อม • ชนิด: แผนที่ • แท็ก: สีน้ำ, Castle Strike, 3 เฟส, หอสายแสง, ไม้กวาด, เรือเหาะ
+
+คอนเซปแมพใหม่สำหรับบุกปราสาท: หอหินพันทองเหลืองโผล่จากโดมแก้วกลางเมืองคลอง ยอดหอมีผลึกสมอดาวปล่อยสายแสงเวทขึ้นฟ้า (ได้แรงบันดาลใจเรื่องสเกลจาก Space Elevator แต่ออกแบบเอง ไม่ลอกหอหรือเกาะต้นฉบับ). บุกจากล่างขึ้นบน 3 เฟส: ① ท่าคลองโคมลอย (แลนด์มาร์ก: ประตูน้ำกังหันจันทร์) ② สวนโดมแก้ว (ออร์เรอรีลอยฟ้า) ③ มงกุฎหอเหนือเมฆ (ผลึกสมอดาว). Ref 1 = สไตล์สีน้ำจากผู้ใช้ (แนบตอนเจน), Ref 2 = ภาพอธิบาย 3 เฟส ไม่ใช่ layout ที่อนุมัติ (ใช้ดูลำดับเท่านั้น ไม่ต้องแนบ).
+
+ช่วงชิงของ (ข้อเสนอ ยังไม่ล็อก): รอบ 1 = ตลาดน้ำกระเช้าโคม (#7) ระหว่างย่านคลองกับฐานโดม • รอบ 2 = สวนลอยกลางเมฆ (#8) ระหว่างหลังคาโดมกับยอดหอ ต้องบินไม้กวาดข้ามเกาะ • ของถูกส่งลงมาด้วยโคมลอยตามสายแสง ธีมเดียวกันทั้งแมพ. วิธีเข้าทำแต่ละเฟสอยู่ใน #4–#6.
+
+- Ref: `concepts/img/skyloom_style_ref.webp`
+- Ref: `concepts/img/skyloom_phases_sketch.jpg`
+
+**พรอมต์:**
+```
+Use the attached image ONLY as the art-style reference (do not copy its buildings).
+
+Create a single landscape concept-art illustration (16:9), a wide aerial establishing view of an original game map for a wizard siege game: the Skyloom Spire, a magical 'space elevator'.
+
+THE SPIRE (original design): the Skyloom Spire, a slender spiralling tower of pale weathered stone wrapped in brass bands, growing out of a cracked glass dome conservatory; at its top a crown terrace where a huge floating rune crystal (the Star Anchor) is held by three slowly turning rings of glowing runes, and from it a thin luminous teal-white thread of woven magic light (the Tether) rises straight up through the clouds into the sky, so tall its top is lost above the clouds. Small glowing lantern-lift cabins climb the thread. The spire stands on a crescent-shaped island inside a misty lagoon city of canals, low arched stone bridges, overgrown ruins and old towers.
+
+COMPOSITION:
+- Foreground left: a mossy ruined stone balcony with a hanging blue banner, framing the view (viewer stands high on an old tower).
+- Lower third: the canal district: harbour canals with moored sailboats and floating paper lanterns, and a giant brass tide-wheel set in a stone canal lock gate (the Moonlock Wheel) with a glowing blue crystal hub.
+- Centre: the cracked glass dome garden at the base of the spire, floating garden islets and a brass orrery visible faintly through the glass.
+- Centre-right, very tall: the spire rising through a layer of cloud; at the top the floating rune crystal with three glowing rings and the luminous thread of light shooting up out of frame.
+- Sky: an old airship drifting past the spire, three witches on broomsticks flying at different distances for scale, a few birds.
+- Strong atmospheric depth: detailed warm foreground, hazy blue-grey distance, mist pooling on the water.
+
+STYLE (from the attached style image): traditional watercolor and ink concept painting, soft translucent washes, visible cold-press paper texture, loose wet-on-wet bleeding edges, thin grey-sepia ink linework, palette of pale sky blue, cream, weathered grey-white stone, moss green, soft teal accents for magic light, warm golden sunlight from the upper left; drifting mist and cloud banks that dissolve into white paper at the edges. Semi-fantasy, semi-sci-fi: old stone and brass mixed with glowing rune crystal technology. Hand-painted, NOT 3D render, NOT photoreal, NOT cartoon.
+
+Avoid: text, logos, watermark, UI, guns, modern cars, realistic faces, white steel lattice truss towers, radial pier docks, copying any existing game's design.
+```
+
 ## #2 Cliffside Castle — วาดใหม่เป็นสีน้ำมุมสูง
 - สถานะ: 📝 พรอมต์พร้อม • ชนิด: แผนที่ • แท็ก: สีน้ำ, ปราสาท, แมพปัจจุบัน
 
