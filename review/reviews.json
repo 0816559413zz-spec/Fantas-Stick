@@ -4288,6 +4288,22 @@
    ],
    "feedback": "",
    "reply": ""
+  },
+  {
+   "id": 211,
+   "title": "Pyro: Dragonfall ใช้จากพื้นสูง + วงเตือนเอียงตามพื้น",
+   "text": "เลือก Pyro ยืนบนที่สูง (หลังคา / Terra Isle) กด Dragonfall เล็งจุดบนที่สูง = ลงบนนั้น ไม่ทะลุลงพื้นล่าง • เล็งบนเนิน/ทางลาด วงเตือนเอียงตามพื้น",
+   "kind": "Skill",
+   "who": "Pyro",
+   "status": "wait",
+   "created": "2026-11-27T12:00:00",
+   "updated": "2026-11-27T12:00:00",
+   "imgs": [],
+   "links": [
+    "/shots/dragonfall_tilt.jpg"
+   ],
+   "feedback": "",
+   "reply": ""
   }
  ]
 }

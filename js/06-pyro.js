@@ -128,9 +128,10 @@ function dragonfallTick(p,inp,dt){
   else if(D.ph===2){
     D.H=clamp(D.H+((inp.jh?1:0)-(inp.ch?1:0))*2.5*dt,D.g0+4.5,D.g0+7.5);p.z+=(D.H-p.z)*Math.min(1,6*dt);p.vz=0;
     const q=aimClip(p.x,p.y,p.z,aimPoint(p,DRAGONF.v.range),PR+6);D.tx=q.x;D.ty=q.y;D.th=q.hit?q.h:null;   // ไม่ทะลุบ้าน
+    D.lh=D.th!=null?D.th:groundH(q.x,q.y,p.z);   // fix (user 2026-11-27): land on high ground under the flight height, not the floor below it
     if(D.t<=0)dragonfallDive(p);
   }else{
-    const k=1-Math.max(0,D.t)/0.45,gh=D.th!=null?D.th:groundH(D.tx,D.ty);
+    const k=1-Math.max(0,D.t)/0.45,gh=D.th!=null?D.th:D.lh!=null?D.lh:groundH(D.tx,D.ty,D.sz);
     p.x=lerp(D.sx,D.tx,k);p.y=lerp(D.sy,D.ty,k);p.z=lerp(D.sz,gh,k*k);p.vz=0;
     if(D.t<=0){p.x=D.tx;p.y=D.ty;p.z=gh;p.dfall=null;dragonfallBoom(p,D.tx,D.ty,gh);}
   }

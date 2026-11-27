@@ -320,8 +320,14 @@ function dragonfallFX(o,p,pz,now,dt){
     if(godDome)stormCircleCyan(C);
     else U.mats.forEach((m,i)=>m.color.set(['#ffcc00','#ffd23a','#fff6c0','#ffe680'][i]));
   }
-  if(!C.visible){C.visible=true;C.position.set(tx(D[1]),0.07+GY(D[1],D[2]),tz(D[2]));}
-  C.position.x+=(tx(D[1])-C.position.x)*Math.min(1,dt*18);C.position.z+=(tz(D[2])-C.position.z)*Math.min(1,dt*18);
+  // landing height (D[6]) + tilt to the surface it lands on (user 2026-11-27): plane from 4 height samples around the spot
+  const lh=D[6]||0,surfH=(x,y)=>GY(x,y)+groundH(x,y,lh+0.6),cy=0.07+surfH(D[1],D[2]);
+  if(!C.visible){C.visible=true;C.position.set(tx(D[1]),cy,tz(D[2]));}
+  C.position.x+=(tx(D[1])-C.position.x)*Math.min(1,dt*18);C.position.z+=(tz(D[2])-C.position.z)*Math.min(1,dt*18);C.position.y+=(cy-C.position.y)*Math.min(1,dt*18);
+  {const d=R*10,hc=cy-0.07,sl=(a,b)=>{const ok1=Math.abs(a-hc)<1.5,ok2=Math.abs(b-hc)<1.5;return ok1&&ok2?(a-b)/(2*d/20):ok1?(a-hc)/(d/20):ok2?(hc-b)/(d/20):0;};
+    const sx=sl(surfH(D[1]+d,D[2]),surfH(D[1]-d,D[2])),sz=sl(surfH(D[1],D[2]+d),surfH(D[1],D[2]-d));
+    _ev.set(-sx,1,-sz).normalize();if(_ev.y<0.77){_ev.y=0;_ev.normalize().multiplyScalar(0.64);_ev.y=0.77;}   // max ~40 deg
+    const tq=U.tq||(U.tq=new THREE.Quaternion());tq.setFromUnitVectors(THREE.Object3D.DEFAULT_UP,_ev.normalize());C.quaternion.slerp(tq,Math.min(1,dt*12));}
   C.scale.set(R,1,R);
   const conv=clamp(1-left/0.65,0,1),pulse=0.5+0.5*Math.sin(now/110);
   U.mats[0].opacity=0.55+0.25*pulse+0.2*conv;U.mats[1].opacity=0.1+0.12*conv;
