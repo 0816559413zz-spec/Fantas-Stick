@@ -220,7 +220,7 @@ function fx(ev,raw){   // raw = ภาพเดิมในโค้ดเท่
     case 'zn':{
       const col={fire:'#ff7a2a',lava:'#ff5a1a',frost:'#8fe0ff',storm:'#ffe27a',bloom:'#ff9ad5',spore:'#b6e86a'}[ev.z]||'#ffffff';
       if(ev.z==='mud'){earthMudZone(ev);ZV.push({x:ev.x,y:ev.y,r:ev.r,t:ev.t,kind:'mud',col:'#6b4c2c',file:true});break;}
-      const own=zoneFx(ev.z,ev.x,ev.y,ev.r,ev.t,col);
+      const own=zoneFx(ev.z,ev.x,ev.y,ev.r,ev.t,col,ev.h);
       ZV.push({x:ev.x,y:ev.y,r:ev.r,t:ev.t,kind:ev.z,col,file:own});
       if(own)break;
       SHAPES_Q.push({k:'rune',x:ev.x,y:ev.y,col,s1:ev.r*S3,life:ev.t,op:ev.z==='lava'?0.85:0.6});

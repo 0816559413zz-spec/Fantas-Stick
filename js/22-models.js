@@ -347,7 +347,7 @@ function fileFx(name,o){
   return (a&&em.mode==='replace')||(b&&ef.mode==='replace');
 }
 // พื้น/โซนที่อยู่ค้าง (พื้นไฟ ลาวา วงเพลิง ฯลฯ): ไฟล์ vfx_zone_<ชนิด> อยู่ค้างเท่าเวลาของโซนจริง และขยายตามรัศมีโซน
-function zoneFx(kind,x,y,r,t,col){return fileFx('vfx_zone_'+kind,{x,y,r,hold:t,zr:1,col});}
+function zoneFx(kind,x,y,r,t,col,h){return fileFx('vfx_zone_'+kind,{x,y,h:h||0,r,hold:t,zr:1,col});}
 function clearVfx(){for(const v of VFXL){scene.remove(v.g);disposeTree(v.g);}for(const q of FLIPL){scene.remove(q.sp);q.sp.material.dispose();q.tex.dispose();}VFXL.length=FLIPL.length=0;}
 function updateVfx(dt){
   for(let i=VFXL.length-1;i>=0;i--){

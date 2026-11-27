@@ -73,10 +73,10 @@ function natureTrace(a,b,ha,hb,team,allWalls=false){
   return house;
 }
 function natureSight(a,b,ha,hb){return !natureTrace(a,b,ha,hb,a.team,true);}
-function natureGround(x,y){
+function natureGround(x,y,ref){   // ref = height to search down from (high ground: roofs/platforms count)
   const q={x:clamp(x,40,MW-40),y:clamp(y,40,MH-40)};
-  collideWorld(q,16,groundH(q.x,q.y));
-  q.h=groundH(q.x,q.y);
+  collideWorld(q,16,groundH(q.x,q.y,ref));
+  q.h=groundH(q.x,q.y,ref);
   return q;
 }
 function natureAimPoint(p,range){
@@ -87,12 +87,12 @@ function natureAimPoint(p,range){
   return {x:clamp(p.x+dx*k,40,MW-40),y:clamp(p.y+dy*k,40,MH-40)};
 }
 function naturePlace(p,point,onWall){
-  const q=natureGround(point.x,point.y);
+  const q=natureGround(point.x,point.y,surfH(p,point.x,point.y)+0.3);   // high ground: plant on the roof/platform aimed at
   const wall=natureTrace(p,point,p.z+1.35,point.h??q.h+.15,p.team,true);
   if(!wall)return q;
   const distance=natureDist(p,point)||1,dx=(point.x-p.x)/distance,dy=(point.y-p.y)/distance;
   if(onWall&&wall.h>.25)return {x:wall.x-dx*8,y:wall.y-dy*8,h:wall.h,wall:1,a:Math.atan2(-dy,-dx)};
-  return natureGround(wall.x-dx*30,wall.y-dy*30);
+  return natureGround(wall.x-dx*30,wall.y-dy*30,(p.z||0)+1.2);
 }
 function naturePlant(p,kind,spot,delay=0){
   const hp={turret:80,lotus:100,tree:350}[kind];
@@ -293,7 +293,7 @@ function natureHookMove(p,dt){
 }
 
 function natureBall(p){
-  const q=natureAimPoint(p,NAT.ballRange),h=groundH(q.x,q.y),wall=natureTrace(p,q,p.z+1.4,h+.12,p.team,true);
+  const q=natureAimPoint(p,NAT.ballRange),h=surfH(p,q.x,q.y),wall=natureTrace(p,q,p.z+1.4,h+.12,p.team,true);
   const end=wall?{...wall,x:wall.x-4*Math.cos(p.ang),y:wall.y-4*Math.sin(p.ang)}:{...q,h};
   const flight=.25+natureDist(p,end)/900;   // บอลลอยช้าลง (ผู้ใช้ 2026-11-15)
   const ball={natKind:'ball',id:++G.zid,owner:p.id,team:p.team,x:end.x,y:end.y,h:end.h,

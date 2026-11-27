@@ -100,7 +100,7 @@ function stormShieldBlast(p,broken=false){
   if(!S||S.abs<=0){emit({k:'efx',z:'stoff',x:p.x,y:p.y,h:p.z,id:p.id});return;}
   const dm=Math.min(STORMV.blastMax,S.abs*STORMV.blastMul);let any=false;
   emit({k:'efx',z:'stblast',x:p.x,y:p.y,h:p.z,r:STORMV.blastR,n:Math.round(dm),id:p.id});
-  for(const t of foesIn(p.team,p.x,p.y,STORMV.blastR,p.z+4))if(aoeHit(p,t,dm,t=>shock(t,p.id,STORMV.shock)))any=true;
+  for(const t of foesIn(p.team,p.x,p.y,STORMV.blastR,p.z+4,p.z-2))if(aoeHit(p,t,dm,t=>shock(t,p.id,STORMV.shock)))any=true;
   if(any)stGain(p);
 }
 // ทุกเฟรม (สายฟ้า): เวลาโล่ / อัลติ / ร่ายเส้นสายฟ้า / Railgun / ออร์บ / Dash
@@ -169,12 +169,12 @@ const TSTR=defSpell(2,{id:'triplestrike',v:{cost:2,range:600,r:100,dmg:30,env:30
     const god=p.god>0?1:0,q=aimPoint(p,V.range),a=Math.atan2(q.y-p.y,q.x-p.x),pts=[[q.x,q.y,V.r]];
     if(god)for(const sd of [-1,1])pts.push([clamp(q.x-Math.sin(a)*V.side*sd,40,MW-40),clamp(q.y+Math.cos(a)*V.side*sd,40,MH-40),V.sideR]);
     for(const [x,y,r] of pts){
-      const c={x,y,r,i:(G.tsid=(G.tsid|0)+1),team:p.team,t:V.delay+V.gap*2+0.05,mt:0};(G.tcells||(G.tcells=[])).push(c);
-      emit({k:'efx',z:'tswarn',x:Math.round(x),y:Math.round(y),h:groundH(x,y),r,i:c.i,g:god});
+      const c={x,y,r,h:surfH(p,x,y),i:(G.tsid=(G.tsid|0)+1),team:p.team,t:V.delay+V.gap*2+0.05,mt:0};(G.tcells||(G.tcells=[])).push(c);
+      emit({k:'efx',z:'tswarn',x:Math.round(x),y:Math.round(y),h:c.h,r,i:c.i,g:god});
       for(const tt of [V.delay,V.delay+V.gap,V.delay+V.gap*2])G.strikes.push({c,r,t:tt,fn:s=>{const C=s.c;
-        emit({k:'efx',z:'tstrike',x:Math.round(C.x),y:Math.round(C.y),h:groundH(C.x,C.y),r:s.r,i:C.i,id:p.id,g:god});
-        for(const t of foesIn(p.team,C.x,C.y,s.r,5))aoeHit(p,t,V.dmg);
-        damageEnv(C.x,C.y,s.r,V.env,p.id,'lightning',0.5);   // พังบ้าน/ลัง
+        emit({k:'efx',z:'tstrike',x:Math.round(C.x),y:Math.round(C.y),h:C.h,r:s.r,i:C.i,id:p.id,g:god});
+        for(const t of foesIn(p.team,C.x,C.y,s.r,C.h+5,C.h-1.5))aoeHit(p,t,V.dmg);
+        damageEnv(C.x,C.y,s.r,V.env,p.id,'lightning',C.h+0.5);   // พังบ้าน/ลัง
       }});
     }
   }});
@@ -184,7 +184,7 @@ function updateTCells(dt){
   const TV=TSTR.v;for(const c of G.tcells){c.t-=dt;let best=null,bd=TV.seek;
     for(const t of foesOf(c.team)){const d=Math.hypot(t.x-c.x,t.y-c.y);if(d<bd){bd=d;best=t;}}
     if(best&&bd>8){const st=Math.min(bd-8,TV.spd*dt);c.x+=(best.x-c.x)/bd*st;c.y+=(best.y-c.y)/bd*st;c.mv=1;}
-    c.mt-=dt;if(c.mv&&c.mt<=0){c.mt=0.1;c.mv=0;emit({k:'efx',z:'tsmv',i:c.i,x:Math.round(c.x),y:Math.round(c.y),h:groundH(c.x,c.y)});}}
+    c.mt-=dt;if(c.mv&&c.mt<=0){c.mt=0.1;c.mv=0;c.h=groundH(c.x,c.y,(c.h||0)+1.2);emit({k:'efx',z:'tsmv',i:c.i,x:Math.round(c.x),y:Math.round(c.y),h:c.h});}}
   G.tcells=G.tcells.filter(c=>c.t>0);
 }
 // ----- สกิล 4 (1 stack): ออร์บสายฟ้าคู่ — ลอยหลังเรา Dash โดนศัตรู = ออร์บพุ่งกระแทกจุดนั้น -----
@@ -254,16 +254,16 @@ function stormDomeTick(p,inp,dt){
   else if(D.ph===2){
     D.H=clamp(D.H+((inp.jh?1:0)-(inp.ch?1:0))*2.5*dt,D.g0+4.5,D.g0+7.5);p.z+=(D.H-p.z)*Math.min(1,6*dt);p.vz=0;
     const q=aimClip(p.x,p.y,p.z,aimPoint(p,SDOME.v.range),PR+6);D.tx=q.x;D.ty=q.y;D.th=q.hit?q.h:null;   // ไม่ทะลุบ้าน
-    if(!D.god)D.landH=groundH(D.tx,D.ty);
+    D.landH=D.th!=null?D.th:groundH(D.tx,D.ty,p.z);   // high ground: highest floor under the flight height
     if(D.t<=0)stormDomeFire(p);
   }else if(D.ph===3){
-    const k=1-Math.max(0,D.t)/0.45,gh=D.th!=null?D.th:groundH(D.tx,D.ty);
+    const k=1-Math.max(0,D.t)/0.45,gh=D.th!=null?D.th:D.landH!=null?D.landH:groundH(D.tx,D.ty,D.sz);
     p.x=lerp(D.sx,D.tx,k);p.y=lerp(D.sy,D.ty,k);p.z=lerp(D.sz,gh,k*k);p.vz=0;
     if(D.t<=0){p.x=D.tx;p.y=D.ty;p.z=gh;p.sdome=null;stormDomeSlam(p,D.tx,D.ty,gh);}
   }else if(!D.shot&&D.t<=SDOME_POSE.hold+SDOME_POSE.recover){
     D.shot=true;p.vz=-12;
     const fromX=Math.round(p.x),fromY=Math.round(p.y),fromH=p.z+1.4;
-    (G.sballs||(G.sballs=[])).push({x:D.tx,y:D.ty,t:0.3,owner:p.id,team:p.team,power:D.power,fromX,fromY,fromH});
+    (G.sballs||(G.sballs=[])).push({x:D.tx,y:D.ty,h:D.landH??0,t:0.3,owner:p.id,team:p.team,power:D.power,fromX,fromY,fromH});
     emit({k:'efx',z:'sdball',x:fromX,y:fromY,h:fromH,x2:Math.round(D.tx),y2:Math.round(D.ty),h2:D.landH??0,id:p.id,power:D.power});
   }else if(D.t<=0)p.sdome=null;
 }
@@ -276,7 +276,7 @@ function stormDomeFire(p){
 // อัลติ: ทุบลงพร้อมลูกสายฟ้า — ดูดเข้ากลาง + ระเบิดทันที 80
 function stormDomeSlam(p,x,y,gh){
   const GV=GODL.v;emit({k:'efx',z:'sdboom',x:Math.round(x),y:Math.round(y),h:gh+0.08,r:GV.slamR,g:1,id:p.id});
-  for(const t of foesIn(p.team,x,y,GV.slamR,gh+4)){if(!t.isE&&!t.isM){const a=Math.atan2(y-t.y,x-t.x),d=Math.hypot(x-t.x,y-t.y);t.vx=(t.vx||0)+Math.cos(a)*Math.min(600,d*5);t.vy=(t.vy||0)+Math.sin(a)*Math.min(600,d*5);}aoeHit(p,t,GV.slamDmg,t=>shock(t,p.id,STORMV.shock,false,true));}
+  for(const t of foesIn(p.team,x,y,GV.slamR,gh+4,gh-1.5)){if(!t.isE&&!t.isM){const a=Math.atan2(y-t.y,x-t.x),d=Math.hypot(x-t.x,y-t.y);t.vx=(t.vx||0)+Math.cos(a)*Math.min(600,d*5);t.vy=(t.vy||0)+Math.sin(a)*Math.min(600,d*5);}aoeHit(p,t,GV.slamDmg,t=>shock(t,p.id,STORMV.shock,false,true));}
   damageEnv(x,y,GV.slamR,GV.slamDmg,p.id,'lightning',gh);
 }
 function updateStorm(dt){
@@ -291,21 +291,21 @@ function updateStorm(dt){
     G.slines=G.slines.filter(L=>!L.done);
   }
   if(G.sorbs&&G.sorbs.length){
-    for(const b of G.sorbs){b.t-=dt;if(b.tg&&!b.tg.dead&&b.tg.alive!==false){b.x=b.tg.x+b.ox;b.y=b.tg.y+b.oy;}if(b.t<=0){b.done=1;const o=G.players[b.owner];emit({k:'efx',z:'sorbhit',x:Math.round(b.x),y:Math.round(b.y),h:groundH(b.x,b.y)+0.5,id:b.owner,g:b.god});if(o)for(const t of foesIn(b.team,b.x,b.y,SORBS.v.r,5))aoeHit(o,t,SORBS.v.dmg);}}
+    for(const b of G.sorbs){b.t-=dt;if(b.tg&&!b.tg.dead&&b.tg.alive!==false){b.x=b.tg.x+b.ox;b.y=b.tg.y+b.oy;}if(b.t<=0){b.done=1;const o=G.players[b.owner],bh=b.tg&&!b.tg.dead?(b.tg.isE?(b.tg.h||0):(b.tg.z||0)):groundH(b.x,b.y,o?o.z+1.2:1.2);emit({k:'efx',z:'sorbhit',x:Math.round(b.x),y:Math.round(b.y),h:bh+0.5,id:b.owner,g:b.god});if(o)for(const t of foesIn(b.team,b.x,b.y,SORBS.v.r,bh+5,bh-1.5))aoeHit(o,t,SORBS.v.dmg);}}
     G.sorbs=G.sorbs.filter(b=>!b.done);
   }
   if(G.sballs&&G.sballs.length){
     for(const b of G.sballs){
       b.t-=dt;if(b.t>0)continue;
       b.done=1;
-      const DV=SDOME.v,h=groundH(b.x,b.y),impact={k:'efx',x:Math.round(b.x),y:Math.round(b.y),h,r:DV.r};
+      const DV=SDOME.v,h=b.h!=null?b.h:groundH(b.x,b.y),impact={k:'efx',x:Math.round(b.x),y:Math.round(b.y),h,r:DV.r};
       if(b.power<1){
         const dmg=Math.min(DV.boom-1,Math.round(lerp(DV.partial,DV.boom,b.power))),o=G.players[b.owner];
         emit({...impact,z:'sdpop',power:b.power});
-        if(o)for(const t of foesIn(b.team,b.x,b.y,DV.r,5))aoeHit(o,t,dmg);
-        damageEnv(b.x,b.y,DV.r,Math.round(DV.env*dmg/DV.boom),b.owner,'lightning',0.5);
+        if(o)for(const t of foesIn(b.team,b.x,b.y,DV.r,h+5,h-1.5))aoeHit(o,t,dmg);
+        damageEnv(b.x,b.y,DV.r,Math.round(DV.env*dmg/DV.boom),b.owner,'lightning',h+0.5);
       }else{
-        (G.sdomes||(G.sdomes=[])).push({x:b.x,y:b.y,t:DV.time,tk:0.5,owner:b.owner,team:b.team});
+        (G.sdomes||(G.sdomes=[])).push({x:b.x,y:b.y,h,t:DV.time,tk:0.5,owner:b.owner,team:b.team});
         emit({...impact,z:'sdome',t:DV.time,id:b.owner,fromX:b.fromX,fromY:b.fromY,fromH:b.fromH});
       }
     }
@@ -314,12 +314,12 @@ function updateStorm(dt){
   if(G.sdomes&&G.sdomes.length){
     const DV=SDOME.v;for(const D of G.sdomes){
       D.t-=dt;D.tk-=dt;const o=G.players[D.owner],tick=D.tk<=0;if(tick)D.tk+=0.5;
-      for(const t of foesIn(D.team,D.x,D.y,DV.r,5)){
+      for(const t of foesIn(D.team,D.x,D.y,DV.r,(D.h||0)+5,(D.h||0)-1.5)){
         const dx=D.x-t.x,dy=D.y-t.y,d=Math.hypot(dx,dy);
         if(d>8&&!(t.isE&&isBig(t))){const st=Math.min(d-4,DV.pull*dt);t.x+=dx/d*st;t.y+=dy/d*st;}
         if(tick&&o)aoeHit(o,t,DV.tick);
       }
-      if(D.t<=0){D.done=1;emit({k:'efx',z:'sdboom',x:Math.round(D.x),y:Math.round(D.y),h:groundH(D.x,D.y)+0.08,r:DV.r,id:D.owner});if(o)for(const t of foesIn(D.team,D.x,D.y,DV.r,5))aoeHit(o,t,DV.boom,t=>shock(t,o.id,STORMV.shock));damageEnv(D.x,D.y,DV.r,DV.env,D.owner,'lightning',0.5);}
+      if(D.t<=0){D.done=1;emit({k:'efx',z:'sdboom',x:Math.round(D.x),y:Math.round(D.y),h:(D.h||0)+0.08,r:DV.r,id:D.owner});if(o)for(const t of foesIn(D.team,D.x,D.y,DV.r,(D.h||0)+5,(D.h||0)-1.5))aoeHit(o,t,DV.boom,t=>shock(t,o.id,STORMV.shock));damageEnv(D.x,D.y,DV.r,DV.env,D.owner,'lightning',0.5);}
     }
     G.sdomes=G.sdomes.filter(D=>!D.done);
   }

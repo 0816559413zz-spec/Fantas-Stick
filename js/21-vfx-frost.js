@@ -80,11 +80,11 @@ function updateSlashes(dt){
 
 // ภูเขาน้ำแข็งแบบท่าโทโดโรกิ: กลุ่มแท่งน้ำแข็งแหลมต่อกันเป็นแนว สูงขึ้นเรื่อยๆ (ความสูงตรงกับที่ host ใช้ให้เดินขึ้นไปได้)
 let _glGeo=null,_glMat=null,_glMat2=null;
-function makeGlacier(x,y,a,len,t){
+function makeGlacier(x,y,a,len,t,h){
   if(!_glGeo){_glGeo=new THREE.ConeGeometry(1,1,5);_glGeo.translate(0,0.5,0);_glGeo.userData.keep=true;
     _glMat=new THREE.MeshStandardMaterial({color:'#bfe4fa',emissive:'#2a6fa0',emissiveIntensity:0.45,roughness:0.5,metalness:0,transparent:true,opacity:0.9,flatShading:true});
     _glMat2=new THREE.MeshStandardMaterial({color:'#d4effc',emissive:'#4a9ad0',emissiveIntensity:0.5,roughness:0.5,transparent:true,opacity:0.75,flatShading:true});_glMat.userData.keep=_glMat2.userData.keep=true;}
-  const g=new THREE.Group();g.position.set(tx(x),GY(x,y),tz(y));g.rotation.y=-a;scene.add(g);
+  const g=new THREE.Group();g.position.set(tx(x),GY(x,y)+(h||0),tz(y));g.rotation.y=-a;scene.add(g);
   const spikes=[];
   mistLine(x,y,a,len,t,{rate:9,delay:len/1400});
   // กลุ่มหนามจากไฟล์ Blender (mesh_ice_spire) + shader น้ำแข็ง — ถ้ายังไม่โหลดใช้กรวยเดิมด้านล่าง

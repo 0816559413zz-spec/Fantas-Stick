@@ -206,12 +206,12 @@ function waterDragonTick(p,dt){const D=p.wdg;D.t-=dt;const inp=p.inp||{};
   if(D.ph==='aim'){const click=inp.fire&&!D.f0;D.f0=!!inp.fire;
     if(click||D.t<=0){let gx=typeof inp.gx==='number'?inp.gx:p.x+Math.cos(p.ang)*300,gy=typeof inp.gy==='number'?inp.gy:p.y+Math.sin(p.ang)*300;
       const d=Math.hypot(gx-p.x,gy-p.y);if(d>WT_UL.range){gx=p.x+(gx-p.x)/d*WT_UL.range;gy=p.y+(gy-p.y)/d*WT_UL.range;}
-      D.ph='dive';D.t=WT_UL.rise;D.x=gx;D.y=gy;D.n=0;p.cd.basic=Math.max(p.cd.basic,0.3);
-      emit({k:'efx',z:'wtdgdive',x:Math.round(gx),y:Math.round(gy),h:groundH(gx,gy,0),id:p.id});}
+      D.ph='dive';D.t=WT_UL.rise;D.x=gx;D.y=gy;D.h=surfH(p,gx,gy);D.n=0;p.cd.basic=Math.max(p.cd.basic,0.3);
+      emit({k:'efx',z:'wtdgdive',x:Math.round(gx),y:Math.round(gy),h:D.h,id:p.id});}
     return;}
   if(D.t>0)return;
   D.t+=WT_UL.gap;D.n++;
-  for(const t of foesOf(p.team))if(Math.hypot(t.x-D.x,t.y-D.y)<WT_UL.r+(t.r||PR))aoeHit(p,t,WT_UL.dmg,t=>addSlow(t,WT_UL.slow,WT_UL.slowT));
+  for(const t of foesOf(p.team))if(Math.hypot(t.x-D.x,t.y-D.y)<WT_UL.r+(t.r||PR)&&Math.abs((t.isE?(t.h||0):(t.z||0))-(D.h||0)-1)<4.5)aoeHit(p,t,WT_UL.dmg,t=>addSlow(t,WT_UL.slow,WT_UL.slowT));
   if(D.n>=WT_UL.n){p.wdg=null;emit({k:'efx',z:'wtdgend',x:Math.round(D.x),y:Math.round(D.y),id:p.id});}}
 
 // ---------- ทุกเฟรม (ทั้งเกม) ----------

@@ -44,21 +44,23 @@ SGPH:197 SGTR:197 SGLT:197 SG_SPR:198 sgFD:200 _sgAreaC:201 sgArea:202 _sgAreaT:
 ## js/02-room-greathall.js (105) — 
 
 
-## js/03-spells-core.js (263) — 
-SHIELD_OFF:2 REGEN:4 FROST_GUARD:7 FROST_SWAP_T:8 shieldAllowed:9 ICONS:17 ICOALIAS:18 hasIco:19 ICOBASE:21 icoURL:22 ICO:23 icoTint:24 icoHTML:33 PATHS:34 SPELL_LIST:43 SPELLS:43 defSpell:44 SLOTK:45 BRMAP:45 KITP:46 parseKit:47 cleanKit:64 setKit:65 pathReset:68
+## js/03-spells-core.js (270) — ระบบคาถาใหม่: สาย (path) × คาถา (spell) + สถานะ (status effects)
+SHIELD_OFF:2 REGEN:4 FROST_GUARD:7 FROST_SWAP_T:8 shieldAllowed:9
+§15 ไอคอนคาถา: จาก game-icons.net (CC BY 3.0, เครดิตใน "คู่มือ" และ icons…
+ICONS:17 ICOALIAS:18 hasIco:19 ICOBASE:21 icoURL:22 ICO:23 icoTint:24 icoHTML:33 PATHS:34 SPELL_LIST:43 SPELLS:43 defSpell:44 SLOTK:45 BRMAP:45 KITP:46 parseKit:47 cleanKit:64 setKit:65 pathReset:68
 §70 สถานะ (ใช้ได้ทั้งผู้เล่นและศัตรู)
 isBig:71 ccScale:73 ccTouch:74 addStun:75 addRoot:76 addFreeze:77 addSlow:82 addChill:83 ignite:88 FX_SHOCK_CYAN:96 FX_ONFIRE:96 shock:97 knock:102 addWard:103 addFrostSlow:105 frostSlow:106 moveMul:113 BRN_MAX:115 addBurn:116 addOnFire:118 addXBurn:119 addPoison:120 addSil:121 addFear:122 addBlind:123 addMark:124 healT:126 tickStatus:131 clearStatus:154 fxMask:155
 §157 วัตถุในสนามที่คาถาสร้าง: โซน / ฟ้าผ่าหน่วงเวลา / กำแพง / ช่องร่ายต่อเ…
-foesIn:158 SHIELD_BREAK_LOCK:166 shieldFaces:168 frostGuardFaces:169 shieldFacesRaw:170 aoeHit:180 addZone:187 updateZones:192 addStrike:203 updateStrikes:204 addWall:205 updateWalls:206 updateChan:217 updateSpells:221 aimPoint:223 aimWall:235
-§237 ตัวช่วยคอมโบ (ทุกสายใช้หลักเดียวกัน: ตั้งต้น → ต่อยอด → ปิดจบ)
-ROLE_N:239 takePoison:240
-§242 ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ …
-PBASIC:243
+foesIn:158 SHIELD_BREAK_LOCK:166 shieldFaces:168 frostGuardFaces:169 shieldFacesRaw:170 aoeHit:180 addZone:187 updateZones:192 addStrike:203 updateStrikes:204 addWall:205 updateWalls:206 updateChan:217 updateSpells:221 surfH:226 aimPoint:230 aimWall:242
+§244 ตัวช่วยคอมโบ (ทุกสายใช้หลักเดียวกัน: ตั้งต้น → ต่อยอด → ปิดจบ)
+ROLE_N:246 takePoison:247
+§249 ความสามารถพื้นฐาน (คลิกซ้าย) ของแต่ละสาย: สะสมสถานะตั้งต้นให้เองทุกๆ …
+PBASIC:250
 
-## js/04-frost-mech.js (142) — สายน้ำแข็ง: ประชิด/ไกล (V) • ฟันดาบ/ขวาน • ไถลน้ำแข็ง • พื้นน้ำแข็ง/ภ…
-FROSTV:3 FROST_SWING3_HIT:9 frostContactTime:10 frostShieldPitch:11 frostBoom:16 meleeHit:23 mirrorPos:34 frostBasic:35 frostCutTick:57 frostSlam3:66 frostSlam:74 frostDash:80 addIce:85 updateIces:86 frostWavePitch:103 frostWaveSolid:106 updateWaves:112 _stO:130 _stL:130 groundH:131
+## js/04-frost-mech.js (143) — สายน้ำแข็ง: ประชิด/ไกล (V) • ฟันดาบ/ขวาน • ไถลน้ำแข็ง • พื้นน้ำแข็ง/ภ…
+FROSTV:3 FROST_SWING3_HIT:9 frostContactTime:10 frostShieldPitch:11 frostBoom:16 meleeHit:23 mirrorPos:34 frostBasic:35 frostCutTick:57 frostSlam3:66 frostSlam:74 frostDash:80 addIce:85 updateIces:87 frostWavePitch:104 frostWaveSolid:107 updateWaves:113 _stO:131 _stL:131 groundH:132
 
-## js/05-terrain.js (44) — พื้นสูงต่ำ (แผนที่จากไฟล์ Blender — กติกาฝั่งคนปั้นใน guides/MAP-DESI…
+## js/05-terrain.js (45) — พื้นสูงต่ำ (แผนที่จากไฟล์ Blender — กติกาฝั่งคนปั้นใน guides/MAP-DESI…
 TERR:5 TSTEP:6 TSLOPE:6 terrT:7 floorAt:12 terrSolid:14 terrMove:21 updateGlaciers:30
 
 ## js/06-pyro.js (223) — สายไฟ — ความร้อน: สะสมด้วยลูกไฟ/กำแพง/พุ่งเพลิง แล้วจุดระเบิดด้วยระเบิดความร้อน/อุกกาบาต
@@ -67,10 +69,11 @@ PYV:3 pyroBigBoom:11 pyroBall:19 pyroBasic:20 PHEAT:41 pyroHeatLv:42 pyroHeatGai
 §103 Kindle volley (user 2026-11-14): one click = 3 fireballs. The big mid…
 pyroKindleVolley:106 pyroKindleCurve:109 KINDLE:111 DRAGONF:113 dragonfallDive:122 dragonfallTick:123 dragonfallBoom:139 RINGE:144 BLAZEF:151 pyroBlazeAct:154 SNAP:155 COLOS:162 pyroNova:165 pyroSnap:170 colossusTick:183 updateERings:202
 
-## js/07-frost-spells.js (34) — 
+## js/07-frost-spells.js (34) — สายน้ำแข็ง — ความเย็น: สะสม 3 ชั้น = แข็ง • ปิดจบด้วยหอกน้ำแข็ง (ยิ่งเย็นยิ่งแรง ถ้าแข็ง …
 FROSTF:4 GREND:6 frostGlacier:11 PERMA:16 CRYO:18 FAURA:25 MIRROR:27 mirrorStart:30
 
-## js/08-storm.js (326) — 
+## js/08-storm.js (326) — สายสายฟ้า (ผู้เล่นออกแบบทั้งหมด — designs/storm.md)
+§5 ตัวเลขพื้นฐานของสายสายฟ้าอยู่ใน STORMV + v:{...} ของแต่ละสกิล — ปรับไ…
 STORMV:6 stGain:10 stSpend:11 stormCone:13 stormLineFoes:18 stormBasic:22 stormTri:55 stormClawStrike:63 stormDash:68 stormDashTick:81 stormShieldBlast:98 stormTick:107
 §117 สกิล 1 (ฟรี): เส้นสายฟ้า — ชี้ขึ้นแล้วกดลง 0.5 วิ จากนั้นสายฟ้าผ่าเป็…
 TLINE:118 stormLine:120
@@ -90,7 +93,8 @@ SDOME_POSE:235 stormDomeCost:236 stormDomeDash:237 stormDomeCharge:238 stormDome
 ## js/09-darkness.js (463) — 
 DARKP:2 DARK_V:6 DARK_BA:7 DARK_LONG_DASH:8 DARK_CHASE_FLOW:9 DARK_MAW:10 DARK_VEIL_PULL_CLEAR:11 DARK_CHASE_T:12 DARK_WALTZ_ORB:13 darkFlow:14 darkOrbImmune:15 darkAlive:23 darkReset:24 darkState:25 darkEvent:26 darkAim:29 darkTarget:36 darkCone:40 darkBAFloor:47 darkBATargets:51 darkMoveHeading:68 darkClearCooldown:71 darkMark:75 darkReveal:82 darkQueue:83 darkGainFlow:84 darkKill:90 darkTick:93 darkShieldTick:127 darkShieldCrossAt:144 darkShieldCross:153 darkBeamStop:154 darkDash:163 darkBasic:186 DARK_MARK:216 darkWaveTick:233 DARK_CHASE:255 darkMoveWaltz:306 DARK_WALTZ:331 DARK_WARD:353 DARK_VEIL:368 DARK_ULT:376 darkUltBite:391 darkMoveChase:401 darkSnap:441 darkMarked:460
 
-## js/09-earth.js (424) — 
+## js/09-earth.js (424) — สายดิน ⛰️ (ผู้ใช้ออกแบบทั้งหมด — designs/earth.md §0 FINAL SPEC) • ฝั่งโฮสต์
+§8 Tectonic Crush: Stand ดันช้า (TECT.v.push) แล้วกำแพงปิดเร็ว (TECT.v.s…
 EARTH:9 ERV:12
 §24 ตัวช่วย
 eOn:25 eStand:26 eNoStand:27 eSegD:29 eAdd:30 eCollide:32 eProjHit:53 eKill:56
@@ -123,7 +127,7 @@ WRATH_READY_T:319 WRATH_THROW_SWING_T:320 WRATH_DRAW_T:321 WRATH_HEAD:322 WRATH:
 §385 ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง
 updateEarth:386 earthSnapP:400 earthSnapW:416
 
-## js/09-light.js (582) — 
+## js/09-light.js (582) — สายแสง ✨ Radiance (ผู้ใช้ออกแบบทั้งหมด — designs/light.md) • ฝั่งโฮสต์ • รอบแรก 2026-11-1…
 LIGHTP:8 LTV:12 lgOn:19 lightShieldPitch:20 lightShieldGauge:21 lightClearBond:22 lightReset:26 lightAlly:32 lightLinkPos:33 lightUnlink:34 lightReleaseAlly:52 lightBondTarget:59 lightBondTap:79 lightRecall:94
 §95 ทุกเฟรม
 lightTick:96 lightSlotOf:113
@@ -140,13 +144,16 @@ NATURE_BA_TEST:2 NATURE_WHIP:3 natureWhipEnabled:4 NAT_SLAM:8 NAT_LINE:8 natureE
 ## js/09-nature.js (480) — 
 NATUREP:2 NAT:3 natureDist:5 natureItems:6 natureLive:7 naturePlants:8 natureY:9 natureHead:10 natureTreeReady:11 natureEmit:12 natureWallLocal:15 natureWallContains:21 natureWallPush:28 natureBurnWall:36 natureWallDamage:43 natureWallTick:48 natureTrace:57 natureSight:75 natureGround:76 natureAimPoint:82 naturePlace:89 naturePlant:97 natureCastPlant:107 natureLotusToggle:123 natureMovePlants:131 natureAimSpot:142 natureAimStart:143 natureAimDone:144 natureAimTick:148 natureWallBuild:159 natureCastWall:160 NAT_WALLS:167 natureWallUse:168 natureWallCharges:169 naturePoison:176 natureStatus:181 natureSpore:193 natureSendSpore:200 NAT_SHIELD_HIT:210 natureShield:211 natureHookCandidates:225 NAT_DASH:230 natureDashCharge:231 natureDash:232 natureHookMove:260 natureBall:295 natureBallTick:303 natureTree:322 natureTreeReach:327 natureGuardian:332 natureGuard:338 natureDamage:347 natureEnd:353 natureTurret:359 naturePeaSplash:392 NAT_TREE:399 natureTreeTick:400 natureUpdate:409 natureReset:443 natureSnapP:448 natureLotusCooldown:460 natureSnapW:465
 
-## js/09-other-paths.js (178) — 
+## js/09-other-paths.js (178) — สายธรรมชาติ — ป้อมพืช แส้ และการคุ้มครองทีม
+§12 สายคำสาป — ตรามรณะ: ตีตรา (ดาเมจ +25%) → คำสาปทุกชนิดแรงขึ้นกับคนมีตร…
 §44 สัตว์เวท (minion): AI ฝั่งโฮสต์
-MIND:45 summonMin:51 minTarget:60 minShoot:67 updateMins:72 aimTarget:112 SDOME:149
+MIND:45 summonMin:51 minTarget:60 minShoot:67 updateMins:72 aimTarget:112
+§122 สายอัญเชิญ — สัตว์เวท: เรียกกองทัพ → วิญญาณเสริมพลัง → ระเบิดวิญญาณปิ…
+SDOME:149
 §160 ร่ายคาถา
 castSlot:161 castUlt:178
 
-## js/09-water.js (255) — 
+## js/09-water.js (255) — สายน้ำ 💧 (ผู้ใช้ออกแบบทั้งหมด — designs/water.md) • ฝั่งโฮสต์ • รอบแรก: ระบบเกมก่อน ภาพช…
 WATERP:7 WAV:11 wtOn:17 WT_BEAM_H:18 waterBeamPitch:19 waterBeamTarget:25 waterBeamWindLimit:32
 §38 ทุกเฟรมของผู้เล่นสายน้ำ (เรียกจาก updatePlayer หลังส่วนโล่)
 waterTick:39 waterSpd:58 waterCageBusy:59 waterReset:60 waterCageLaunch:62 waterCageSteer:70
@@ -165,7 +172,7 @@ waterDragonTick:203
 §217 ทุกเฟรม (ทั้งเกม)
 updateWater:218 waterSnapP:224 waterSnapW:228 WT_RP:231 WT_FM:234 WT_CG:236 WT_AB:241 WT_MW:244 WT_UL:246
 
-## js/09-wind.js (602) — 
+## js/09-wind.js (602) — สายลม 🌪️ (ผู้ใช้ออกแบบทั้งหมด — designs/wind.md "คอนเซ็ปต์ใหม่") • ฝั่งโฮสต์ • ขั้นที่ 1…
 WINDP:8 WNV:12
 §19 ตัวช่วย
 wOn:20 wGain:21 wSeg:23 wFoeNear:24
@@ -320,12 +327,12 @@ SMOKE_K:150 burst:151 smoke:164 ring:165 floatText:166 shake:167 weaponContactAg
 §225 เอฟเฟกต์คาถาใหม่
 ZV:226 COLB:226 WVV:226 GLV:226 ICEV:226 SLV:226 ULTV:226 OBV:226 _iceDisc:228 _iceEdge:229 _iceSpk:230 iceFloorMat:231 _icePlane:232 _icePathMat:233 _iceWvM:233 iceWvMat:235 _iceShardGeo:248 _isM:251 _isQ:251 _isP:251 _isS:251 _isY:251 iceShardTrail:252 _iceShardMat:257 makeIceFloor:258 ICE_WV:293 updateIceFloors:294 FLASHM:306 FLASHING:307 flashModel:308 endFlash:321 tickFlash:322 GHOSTM:324 SOLIDM:324 ghostOf:325 setGhost:331 hitSparks:339
 
-## js/20-vfx-pyro-storm.js (871) — Dragonfall (ภาพ)
-makeDfCircle:3 stormCircleCyan:20 DFV:25 dfCracks:26 updateDfCracks:36 _domeAim:37 domeChargeOrb:38 _spearUp:46 _spearDir:46 _spearA:46 _spearB:46 DOME_SPEAR_LEN:47 stormDomePath:48 stormDomeSpearFX:52 stormDomeHoverFX:83 stormDomeReadyFX:107 stormDomeGroundPoint:128 stormDomeFracture:131 stormDomeFloorPullFX:177 stormDomeFieldFX:204 stormDomePose:240 dragonfallFX:304
-§374 สายฟ้า (ภาพ)
-TBN:377 TBA:377 TBF:377 TBMAX:377 _tv:378 _tt:378 _ts:378 _tw:378 tbFalloff:381 tbLayer:384 TBL:390 TBO_MAX:392 tbOrbLayer:393 TBC:396 _tcc:397 domeCyan:398 domeGold:399 tbGet:400 TBLUE:403 TBFIRE:403 tboltB:404 tbolt:405 tboltP:417 _tbW:420 _tbA:420 _tbC:420 _tbS:420 _tbF:420 tbWrite4:421 tbSet:429 updateBolts:430 LATER:461 STV:461 SBV:461 SDV:461 TSV:461 CLV:461 stTgPos:463 STCLAW:467
-§471 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
-clawGeo:474 clawRakes:479 updateClaws:493 later:501 stFade:502 stBeam:503 STHIT:509 STBASH:509 stBashLean:511 shellPt:518 updateStormV:519 _ev:567 GODPTS:569 bWorld:571 stormClawStop:575 CLAWFX:581 stormClawRangeFX:582 updateClawFX:612 stormClawSwipe:625 stormFX:673 STHUD:825 drawStormHud:826
+## js/20-vfx-pyro-storm.js (872) — Dragonfall (ภาพ)
+makeDfCircle:3 stormCircleCyan:21 DFV:26 dfCracks:27 updateDfCracks:37 _domeAim:38 domeChargeOrb:39 _spearUp:47 _spearDir:47 _spearA:47 _spearB:47 DOME_SPEAR_LEN:48 stormDomePath:49 stormDomeSpearFX:53 stormDomeHoverFX:84 stormDomeReadyFX:108 stormDomeGroundPoint:129 stormDomeFracture:132 stormDomeFloorPullFX:178 stormDomeFieldFX:205 stormDomePose:241 dragonfallFX:305
+§375 สายฟ้า (ภาพ)
+TBN:378 TBA:378 TBF:378 TBMAX:378 _tv:379 _tt:379 _ts:379 _tw:379 tbFalloff:382 tbLayer:385 TBL:391 TBO_MAX:393 tbOrbLayer:394 TBC:397 _tcc:398 domeCyan:399 domeGold:400 tbGet:401 TBLUE:404 TBFIRE:404 tboltB:405 tbolt:406 tboltP:418 _tbW:421 _tbA:421 _tbC:421 _tbS:421 _tbF:421 tbWrite4:422 tbSet:430 updateBolts:431 LATER:462 STV:462 SBV:462 SDV:462 TSV:462 CLV:462 stTgPos:464 STCLAW:468
+§472 รอยกรงเล็บ (อัลติสายฟ้า): รอยข่วน 3 เส้นโค้งปลายแหลมขนานกัน ตั้งขวางห…
+clawGeo:475 clawRakes:480 updateClaws:494 later:502 stFade:503 stBeam:504 STHIT:510 STBASH:510 stBashLean:512 shellPt:519 updateStormV:520 _ev:568 GODPTS:570 bWorld:572 stormClawStop:576 CLAWFX:582 stormClawRangeFX:583 updateClawFX:613 stormClawSwipe:626 stormFX:674 STHUD:826 drawStormHud:827
 
 ## js/21-vfx-frost.js (228) — น้ำแข็ง (ภาพ): ชิ้นผลึก/หนาม/แผ่นน้ำแข็งชั่วคราว (โผล่ → ค้าง → หด) •…
 FRV:2 _cryG:3 _spkG:3 _plateG:3 _hexG:3 _iceFxM:4 _frostM:4 iceFxM:5 frostM:6 ICEP:8 _im4:8 _iq:8 _ie:8 _ip:8 _is:8 icePool:9 iceBit:10 iceChips:13 updateFRV:14 iceRing:24 chillFX:25 makeSlash:41 _wbGeo:49 crescentGeo:51 makeWaveBlade:54 WGH:68 updateSlashes:69 _glGeo:82 _glMat:82 _glMat2:82 makeGlacier:83 updateGlacierVis:114 updateOrbShots:123
@@ -628,7 +635,7 @@ WB:298 wbInit:299 wbBegin:309 wbEnd:310 fxWarpMake:311 fxWarpTick:324
 §332 ไฟ 3 มิติจากการจำลอง (ชั้น vol) — ไฟล์รูปแบบเดียวกับที่เพื่อน bake จา…
 FXVOL:335 fxVolLoad:336 fxVolTex:340 fxVolSet:343 fxVolReady:344 fxVolMake:345 fxVolTick:348 fxPreAssets:353 fxAssetsWait:355
 
-## js/47-earth-view.js (1218) — 
+## js/47-earth-view.js (1218) — สายดิน ⛰️ — ภาพฝั่งเครื่องเล่น (Stand / Stand ใหญ่ / กำแพง / เสา / เนิน / ฝุ่น / สว่าน / …
 ECOL:9 EGUARD_BIG:14 EGUARD:14 EV:15 eW:16 EARTH_FIST_SCALE:17 eYaw:18
 §19 ลายผิว (วาดเองบน canvas: หิน/ทราย + รอยร้าว + ขอบบล็อกแบบ Roblox)
 ETEX:20 eTex:21 eFadeTex:35 eMat:37 eTMat:38 rockGeo:39 ROCKU:45 rockMesh:46 coneMesh:48 _eChunkM:50 eChunks:51
@@ -1011,4 +1018,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(123 files, 38480 lines)
+(123 files, 38490 lines)

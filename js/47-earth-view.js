@@ -113,7 +113,7 @@ function eRampWind(s,S,p,on,t,dt,fx,fy,rx,ry){const B=S.bow;if(!B)return;const U
     PARTS.push({x:q.x,y:q.y,h:q.h-GY(q.x,q.y),vx:-fx*v+rx*c*70,vy:-fy*v+ry*c*70,vh:Math.sin(th)*1.5,life:rnd(0.14,0.24),max:0.24,col:i%2?'#e8d4a8':'#fff6e4',size:rnd(1.2,2),g:0,sh:2});}
   s.awT=(s.awT||0)-dt;if(s.awT<=0){s.awT=0.16;eAirWave(P(0,0,0.15),new THREE.Vector3(fx,0,fy),0.5,'#fff0d0',0.25);}}
 // วงหินแหลมพุ่งขึ้นรอบจุดทุบ (เอียงออกนอก) แล้วจมกลับ — Rampage ตอนทุบ
-function eSpikes(x,y,r,n){const g=new THREE.Group(),m=eTMat('wall','#c8b08a'),L=[];g.position.copy(eW(x,y,0));scene.add(g);
+function eSpikes(x,y,r,n,h){const g=new THREE.Group(),m=eTMat('wall','#c8b08a'),L=[];g.position.copy(eW(x,y,h||0));scene.add(g);
   for(let i=0;i<n;i++){const a=i/n*6.283+rnd(-0.2,0.2),d=r*S3*rnd(0.45,0.75),h=rnd(1.3,2.4),pv=new THREE.Group(),o=new THREE.Mesh(rockGeo(rnd(0.5,0.75),h,rnd(0.5,0.75),0.2),m);
     o.position.y=h/2;o.castShadow=true;pv.add(o);pv.position.set(Math.cos(a)*d,-h,Math.sin(a)*d);pv.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),new THREE.Vector3(Math.cos(a)*0.6,1,Math.sin(a)*0.6).normalize());pv.userData.h=h;pv.userData.d=rnd(0,0.06);g.add(pv);L.push(pv);}
   eAnim({g,life:1.5,fn(a){for(const pv of L){const h=pv.userData.h,k=a.t-pv.userData.d;pv.position.y=k<0?-h:k<0.1?-h+h*1.05*(1-Math.pow(1-k/0.1,3)):k<1.0?-0.05*h:lerp(-0.05*h,-h,Math.min(1,(k-1.0)/0.45));}}});}
@@ -692,7 +692,7 @@ function eMakeSO(w){const k=w[1],x1=w[2],y1=w[3],x2=w[4],y2=w[5],r=w[6],g=new TH
   else if(k===4){const m=eRampMesh(w[10]|0,false);g.add(m);g.userData.vein=m.userData.vein;h=RAMPART.v.hgt;mat=null;g.rotation.y=eYaw(x1,y1,x2,y2);}
   else{mat=new THREE.MeshBasicMaterial({color:hdr('#ffd86b',1.2),transparent:true,opacity:0.18,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending});const L=Math.hypot(x2-x1,y2-y1)*S3;h=12;const b=new THREE.Mesh(new THREE.PlaneGeometry(L,h),mat);b.position.y=h/2;b.rotation.y=Math.PI/2;g.add(b);g.rotation.y=eYaw(x1,y1,x2,y2);}
   if(k===0||k===2)eMergeKids(g);const vein=g.userData.vein;
-  g.position.copy(eW(k===1?x1:(x1+x2)/2,k===1?y1:(y1+y2)/2,0));scene.add(g);return {g,mat,mats:mats||(mat?[mat]:[]),k,h,born:performance.now(),x:k===1?x1:(x1+x2)/2,y:k===1?y1:(y1+y2)/2,hp:w[7],x1,y1,x2,y2,base:g.position.clone(),vein};}
+  g.position.copy(eW(k===1?x1:(x1+x2)/2,k===1?y1:(y1+y2)/2,k===4||k===1?(w[11]||0)/100:0));scene.add(g);return {g,mat,mats:mats||(mat?[mat]:[]),k,h,born:performance.now(),x:k===1?x1:(x1+x2)/2,y:k===1?y1:(y1+y2)/2,hp:w[7],x1,y1,x2,y2,base:g.position.clone(),vein};}
 // ===== Rampart wall (user 2026-11-23 v2): fused rounded boulders, uneven tops of similar height, gold energy seams =====
 const ERAMP={vein:new THREE.Color(hdr('#ffc94a',1.6)),mat:null,mat2:null,veinM:null,holoM:null,geo:new Map()};
 function eRng(seed){let a=(seed>>>0)||1;return ()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
@@ -750,7 +750,7 @@ function eRampPlace(g,x,y,a){g.position.copy(eW(x,y,0));g.rotation.y=-a;}   // s
 function eRampTick(v,dt,now){
   const me=(v.P||[]).find(q=>q.id===NET.myId),ra=me&&me.ra;   // own aim preview: hologram identical to the real wall
   if(ra){if(!EV.rholo||EV.rholo.seed!==ra[3]){if(EV.rholo)scene.remove(EV.rholo.g);EV.rholo={seed:ra[3],g:eRampHolo(ra[3])};}
-    const g=EV.rholo.g;g.visible=true;eRampPlace(g,ra[0],ra[1],ra[2]);ERAMP.holoM.uniforms.t.value=now/1000;}
+    const g=EV.rholo.g;g.visible=true;eRampPlace(g,ra[0],ra[1],ra[2]);g.position.y+=(ra[4]||0)/100;ERAMP.holoM.uniforms.t.value=now/1000;}
   else if(EV.rholo){scene.remove(EV.rholo.g);EV.rholo=null;}
   for(let i=EV.rcall.length-1;i>=0;i--){const R=EV.rcall[i];R.t+=dt;const c=Math.cos(R.a),sn=Math.sin(R.a),T=RAMPART.v.lift;
     if(R.holo){R.holo.visible=!R.up;eRampPlace(R.holo,R.x,R.y,R.a);ERAMP.holoM.uniforms.t.value=now/1000;}
@@ -1119,12 +1119,12 @@ function earthEfx(ev){
       if(mine)shake(1.8);return true;}
     case 'epilthrow':return true;
     case 'epilland':{
-      dfCracks(x,y,.05,300,'#d8a060',1.4);
-      ring(x,y,'#d6a476',380,.39,.18);
+      dfCracks(x,y,H+.05,300,'#d8a060',1.4);
+      ring(x,y,'#d6a476',380,.39,H+.18);
       shake(near?2:.3);if(near)snd('break',ev);return true;}
     // หินแหลมในบึง Wrath (ผู้ใช้ 2026-11-01): วงเตือนที่พื้น 0.5 วิ → หินแหลมพุ่งขึ้น 3 แท่ง + เศษหิน
-    case 'espkw':ring(x,y,'#e0b070',55,0.5,0.08);ring(x,y,'#7a5a38',38,0.5,0.06);return true;
-    case 'espk':eSpikes(x,y,22,4);eDebris(x,y,0.2,14,120);eWave(x,y,0.15,70);if(near)snd('boom',ev);return true;
+    case 'espkw':ring(x,y,'#e0b070',55,0.5,H+0.08);ring(x,y,'#7a5a38',38,0.5,H+0.06);return true;
+    case 'espk':eSpikes(x,y,22,4,H);eDebris(x,y,H+0.2,14,120);eWave(x,y,H+0.15,70);if(near)snd('boom',ev);return true;
     case 'ewend':{const s=EV.st.get(ev.id);if(s)s.gopL=0;return true;}
   }
   return false;}
@@ -1144,10 +1144,10 @@ function eDrillFly(from,x,y,tier,sc,h){const d=makeDrill(),to=eW(x,y,h||0),ac=eA
     burst(w.x,w.y,tier===3?'#ff6a2a':'#e8e4dc',1,30,0.25,tier===3?2.2:1.6,{h:w.h,g:0});
     for(let i=0;i<3;i++){const an=rnd(0,6.283);PARTS.push({x:w.x+Math.cos(an)*12,y:w.y+Math.sin(an)*12,h:w.h+rnd(-0.3,0.3),vx:Math.cos(an)*140,vy:Math.sin(an)*140,vh:rnd(-0.3,0.8),life:0.2,max:0.2,col:'#f4f6f8',size:1.5,g:0,drag:2,sh:2});}}});}   // อากาศแตกออกรอบตัวตามทาง
 // ---------- บึงโคลน (Mud Swamp + บึงจากเสาอัลติ): คลื่นกระเพื่อมจากกลางไปขอบ แล้วพื้นกลายเป็นโคลน (ไม่ใช่วงเวท) ----------
-function earthMudZone(ev){const x=ev.x,y=ev.y,r=ev.r,life=ev.t,R=r*S3;
-  for(let i=0;i<3;i++)later(i*0.12,()=>ring(x,y,i?'#6b4c2c':'#a07a50',r*(0.6+i*0.25),0.55,0.08));
+function earthMudZone(ev){const x=ev.x,y=ev.y,r=ev.r,life=ev.t,R=r*S3,zh=ev.h||0;
+  for(let i=0;i<3;i++)later(i*0.12,()=>ring(x,y,i?'#6b4c2c':'#a07a50',r*(0.6+i*0.25),0.55,zh+0.08));
   const mt=new THREE.MeshStandardMaterial({map:eTex('mud'),color:'#ffffff',roughness:0.25,metalness:0.1,transparent:true,opacity:0,depthWrite:false});
-  const m=new THREE.Mesh(new THREE.CircleGeometry(1,48),mt);m.rotation.x=-Math.PI/2;m.position.copy(eW(x,y,0.04));m.scale.setScalar(0.01);m.receiveShadow=true;scene.add(m);
+  const m=new THREE.Mesh(new THREE.CircleGeometry(1,48),mt);m.rotation.x=-Math.PI/2;m.position.copy(eW(x,y,zh+0.04));m.scale.setScalar(0.01);m.receiveShadow=true;scene.add(m);
   eAnim({g:m,life,fn(a){const k=Math.min(1,a.t/0.55);m.scale.setScalar(Math.max(0.01,R*(1-Math.pow(1-k,2))));mt.opacity=0.92*Math.min(1,a.t/0.3)*(a.t>life-0.6?Math.max(0,(life-a.t)/0.6):1);
     if(a.t>0.4&&Math.random()<r/500){const q=rnd(0,6.283),rr=r*Math.sqrt(Math.random())*0.9;ring(x+Math.cos(q)*rr,y+Math.sin(q)*rr,'#7a5a38',rnd(14,30),0.6,0.07);burst(x+Math.cos(q)*rr,y+Math.sin(q)*rr,'#6b4c2c',2,25,0.5,2,{h:0.1,vh:[1,2],g:6});}}});}
 // ขาจมโคลน (สถานะ bit 524288)

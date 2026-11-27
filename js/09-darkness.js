@@ -332,7 +332,7 @@ const DARK_WALTZ=defSpell(DARKP,{id:'darkwaltz',n:'Night Waltz',ic:'🌑',role:'
   v:{r:250,dmg:25,marked:50},d:'แปลงเป็นลูกเงา ชนเป้ามีตราก่อน แล้วชิ่งไปหาเป้าในวง',
   cast(p,S){
     const d=darkState(p),{x,y,z}=p,V=S.v;
-    const targets=foesIn(p.team,x,y,V.r,z+8).filter(t=>darkAlive(t)&&!(t.inv>0))
+    const targets=foesIn(p.team,x,y,V.r,z+8,z-4).filter(t=>darkAlive(t)&&!(t.inv>0))
       .map(target=>({target,point:[target.x,target.y],marked:d.marks.has(target)}));
     const chain=stDarkChainTargets([x,y],targets,V.r);
     let from=[x,y],start=ST_DARKNESS_WALTZ_LAUNCH;

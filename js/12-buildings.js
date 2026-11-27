@@ -19,7 +19,7 @@ function bldRay(x0,y0,h0,x1,y1,h1){
 }
 // ท่าที่พุ่ง/ยิงลงจุดเล็ง: จุดลงหยุดที่ผนัง/หลังคาบ้านที่ขวางอยู่ (ไม่ทะลุ) • ถอยออกจากผนัง back px • คืน {x,y,h} (h = ความสูงจุดชน หรือพื้น)
 function aimClip(x0,y0,h0,o,back){
-  const g=groundH(o.x,o.y),c=bldRay(x0,y0,h0,o.x,o.y,g);if(!c)return {x:o.x,y:o.y,h:g,hit:false};
+  const g=groundH(o.x,o.y,h0),c=bldRay(x0,y0,h0,o.x,o.y,g);if(!c)return {x:o.x,y:o.y,h:g,hit:false};
   const d=Math.hypot(o.x-x0,o.y-y0)||1,k=Math.min(back||0,c.t*d)/d;
   return {x:c.x-(o.x-x0)*k,y:c.y-(o.y-y0)*k,h:c.h,hit:true};
 }
@@ -36,7 +36,7 @@ function aimRay3(p,h0,range,worldHeight=false){
   for(let s=10;s<=range;s+=10){
     const nx=p.x+dx*s,ny=p.y+dy*s,nh=startH+dh*s/20-(worldHeight?terrT(nx,ny):0);
     if(nx<40||nx>MW-40||ny<40||ny>MH-40)return {x,y,h,hit:'edge'};
-    const g=groundH(nx,ny);
+    const g=groundH(nx,ny,Math.max(0,nh));
     if(nh<=g){
       if(!worldHeight)return {x:nx,y:ny,h:g,hit:'ground'};
       let lo=s-10,hi=s;

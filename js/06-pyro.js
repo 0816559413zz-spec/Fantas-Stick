@@ -13,7 +13,7 @@ function pyroBigBoom(pr){
   damageEnv(pr.x,pr.y,V.r,V.env,pr.owner,'fireblast',pr.h);
   const o=G.players[pr.owner];if(!o)return;
   let best=null,bd=1e9;
-  for(const t of foesIn(pr.team,pr.x,pr.y,V.r,pr.h+3.5)){aoeHit(o,t,V.dmg,t=>addBurn(t,1,pr.owner));const d=Math.hypot(t.x-pr.x,t.y-pr.y);if(d<bd){bd=d;best=t;}}
+  for(const t of foesIn(pr.team,pr.x,pr.y,V.r,pr.h+3.5,pr.h-3.5)){aoeHit(o,t,V.dmg,t=>addBurn(t,1,pr.owner));const d=Math.hypot(t.x-pr.x,t.y-pr.y);if(d<bd){bd=d;best=t;}}
   if(best)launchOrbs(o,best);
 }
 function pyroBall(p){shoot(p,'pfire',{sp:'pyroball',dmg:PYV.ballDmg,hand:1});}   // 2026-11-14: 12→20, charge 1.9→1.6 s
@@ -77,8 +77,8 @@ function pyroDash(p,inp,pr,dt,setCd){
 // ⚠ Claude เลือกเอง: กว้าง 1.5 ม. (ครึ่ง 15 px + ตัว) • เข้าซ้ำได้ stack ใหม่หลังออกไปแล้ว ≥1 วิ • ไม่โดนตัวเอง/ทีม • ลอยสูง >1.2 ม. ไม่โดน
 function pyroPathEnd(p){
   const f=p.fpath;p.fpath=null;const len=Math.hypot(p.x-f.x,p.y-f.y);if(len<20||len>1300||!p.alive||p.downed)return;
-  (G.fpaths||(G.fpaths=[])).push({x0:f.x,y0:f.y,x1:p.x,y1:p.y,t:PYV.pathT,tt:0.5,owner:p.id,team:p.team,on:new Map()});
-  emit({k:'efx',z:'pfpath',x:Math.round(f.x),y:Math.round(f.y),h:groundH(f.x,f.y),a:Math.round(Math.atan2(p.y-f.y,p.x-f.x)*1000)/1000,len:Math.round(len),id:p.id});
+  const ph=groundH(p.x,p.y,p.z);(G.fpaths||(G.fpaths=[])).push({h:ph,x0:f.x,y0:f.y,x1:p.x,y1:p.y,t:PYV.pathT,tt:0.5,owner:p.id,team:p.team,on:new Map()});
+  emit({k:'efx',z:'pfpath',x:Math.round(f.x),y:Math.round(f.y),h:ph,a:Math.round(Math.atan2(p.y-f.y,p.x-f.x)*1000)/1000,len:Math.round(len),id:p.id});
 }
 function updateFirePaths(dt){
   if(!G.fpaths||!G.fpaths.length)return;
@@ -87,7 +87,7 @@ function updateFirePaths(dt){
     const dx=f.x1-f.x0,dy=f.y1-f.y0,L2=dx*dx+dy*dy||1;
     for(const t of foesOf(f.team)){
       const u=clamp(((t.x-f.x0)*dx+(t.y-f.y0)*dy)/L2,0,1),d=Math.hypot(t.x-(f.x0+dx*u),t.y-(f.y0+dy*u));
-      const inside=d<PYV.pathW+(t.r||PR)*0.6&&(t.isE?(t.h||0):(t.z||0))<1.2&&!(t.inv>0);
+      const inside=d<PYV.pathW+(t.r||PR)*0.6&&(t.isE?(t.h||0):(t.z||0))-(f.h||0)<1.2&&(t.isE?(t.h||0):(t.z||0))-(f.h||0)>-1.5&&!(t.inv>0);
       const last=f.on.get(t);
       if(inside){if(last===undefined||(last<0&&G.time+last>=1))addBurn(t,1,f.owner);f.on.set(t,1);if(tick)damage(t,PYV.pathDps*0.5,f.owner,'zone');}
       else if(last>0)f.on.set(t,-(G.time+0.001));
@@ -138,15 +138,15 @@ function dragonfallTick(p,inp,dt){
 }
 function dragonfallBoom(p,x,y,gh){
   const V=DRAGONF.v;emit({k:'efx',z:'dfboom',x:Math.round(x),y:Math.round(y),h:gh+0.08,r:V.r,id:p.id});
-  for(const t of foesIn(p.team,x,y,V.r,gh+4))aoeHit(p,t,V.dmg,t=>{addBurn(t,V.burn,p.id);});   // ไม่มีช้าแล้ว (ผู้ใช้ 2026-11-18)
+  for(const t of foesIn(p.team,x,y,V.r,gh+4,gh-1.5))aoeHit(p,t,V.dmg,t=>{addBurn(t,V.burn,p.id);});   // ไม่มีช้าแล้ว (ผู้ใช้ 2026-11-18)
   damageEnv(x,y,V.r,V.env,p.id,'fireblast',gh);
 }
 const RINGE=defSpell(0,{id:'ringofembers',v:{range:400,r:170,time:4,inSlow:0.8,delay:0.3,dmg:10,hitCd:0.5,edgeSlow:0.6,edgeT:0.4,push:280,wallH:3.6},vn:{range:'ระยะวาง',r:'รัศมีวง',time:'อยู่นาน (วิ)',inSlow:'คนในวง • ความเร็ว (เท่า)',delay:'อุกกาบาตตก (วิ)',dmg:'ดาเมจตอนพยายามออก',hitCd:'โดนซ้ำได้ทุก (วิ)',edgeSlow:'แตะขอบ • ความเร็ว (เท่า)',edgeT:'แตะขอบ • ช้านาน (วิ)',push:'แรงผลักกลับ',wallH:'ความสูงกำแพง (ม.)'},role:'control',n:'Ring of Embers',ic:'⭕',cd:14,d:'อุกกาบาตไฟตกลงที่จุดเล็ง (ระยะ ~400) ไม่มีดาเมจ แล้วกลายเป็นวงเพลิง (รัศมี ~170) นาน 4 วิ — คนข้างในเดินออกไม่ได้',fx:'พยายามเดินออก = 10 ดาเมจ + ผลักกลับเข้าวง • ใครแตะขอบวงไฟ = ช้าลง 40% • คนข้างนอกเดินเข้าได้ • กำแพงมีความสูง: บินสูงกว่ากำแพงออกได้',
   cast(p,S){
     const V=S.v,q=aimPoint(p,V.range);
     // อุกกาบาตไฟตกลงจุดที่วาง ~0.3 วิ → ตกถึงพื้น = 10 ดาเมจครั้งเดียว (ผู้เล่นสั่ง 2026-10-19) แล้ววงไฟค่อยเริ่ม (กับดักเริ่มช้าลง 0.3 วิ)
-    (G.erings||(G.erings=[])).push({x:q.x,y:q.y,z:groundH(q.x,q.y),r:V.r,t:V.time,del:V.delay,owner:p.id,team:p.team,in:new Set(),cd:new Map(),ed:new Map()});
-    emit({k:'efx',z:'ermet',x:q.x,y:q.y,h:0.2,r:V.r,t:V.delay,id:p.id});
+    const rz=surfH(p,q.x,q.y);(G.erings||(G.erings=[])).push({x:q.x,y:q.y,z:rz,r:V.r,t:V.time,del:V.delay,owner:p.id,team:p.team,in:new Set(),cd:new Map(),ed:new Map()});
+    emit({k:'efx',z:'ermet',x:q.x,y:q.y,h:rz+0.2,r:V.r,t:V.delay,id:p.id});
   }});
 const BLAZEF=defSpell(0,{id:'blazeform',v:{time:8,heatSec:0.03,heatAct:0.05,dmgUp:1.15,spdUp:1.25,taken:1.25,r:200,aura:1.05,burn:1},vn:{time:'อยู่นาน (วิ)',heatSec:'Heat ขึ้นเองต่อวิ (สัดส่วนแถบเต็ม)',heatAct:'Heat ต่อการตี/โดนตีตอนกางโล่ (สัดส่วนแถบเต็ม)',dmgUp:'ดาเมจเรา (เท่า)',spdUp:'เดินเร็ว (เท่า)',taken:'รับดาเมจ (เท่า)',r:'รัศมีออร่า',aura:'ออร่า • ดาเมจทุก 0.5 วิ',burn:'ออร่า • Burning ครั้งแรก'},role:'utility',n:'Blazeform',ic:'🔥',cd:20,d:'กลายร่างเปลวไฟ 8 วิ: ดาเมจทุกสกิล (รวมเผา Burning) +15% • เดินเร็ว +25% • ออร่าไฟรอบตัว (รัศมี ~200) เผา ~2.4/วิ • ศัตรูที่โดนออร่าครั้งแรก +1 Burning (คนละ 1 ชั้นต่อการใช้ 1 ครั้ง) • ระหว่างร่าง Heat ขึ้นเอง 3%/วิ และตี/โดนตีตอนกางโล่ +5% ต่อครั้ง (บัฟซ้อนกับ Heat)',fx:'ผลเสีย: เรารับดาเมจ +25% ระหว่างนั้น',
   cast(p,S){p.blaze=S.v.time;p.blzTk=0;p.blzN=0;p.blzHit=new Set();emit({k:'efx',z:'blaze',x:p.x,y:p.y,h:p.z+1,id:p.id});}});
@@ -163,7 +163,7 @@ const COLOS=defSpell(0,{id:'colossus',v:{wind:1.2,r:520,time:9,every:1.5},vn:{wi
   // ชูไม้ขึ้นฟ้า ปลายไม้ชาร์จไฟสว่าง (wind วิ) แล้วระเบิดออกจากปลายไม้ (ผู้ใช้ 2026-11-14) — ไม่มีพื้นแตก
   cast(p,S){p.novaT=S.v.wind;emit({k:'efx',z:'novawind',x:p.x,y:p.y,h:p.z,t:S.v.wind,id:p.id});}});
 function pyroNova(p){const V=COLOS.v;emit({k:'efx',z:'infnova',x:p.x,y:p.y,h:p.z,r:V.r,id:p.id});
-  for(const t of foesIn(p.team,p.x,p.y,V.r,p.z+6)){if(!t.isE&&!t.isM&&t.inv>0)continue;addOnFire(t,V.time,V.every,p.id);}
+  for(const t of foesIn(p.team,p.x,p.y,V.r,p.z+6,p.z-6)){if(!t.isE&&!t.isM&&t.inv>0)continue;addOnFire(t,V.time,V.every,p.id);}
   p.fheat=PHEAT.per*PHEAT.max;p.fheatT=G.time;
   for(let i=0;i<4;i++)if(p.kitIds[i]==='ignitionsnap'){const k=SLOTK[i];p.cd[k]=0;}
 }
@@ -188,7 +188,7 @@ function colossusTick(p,inp,dt){
   if(!q){const r=aimRay3(p,p.z+4.2,V.range);if(r){q=r;q.free=1;}}   // ไม่ล็อกศัตรู = ยิงตามเป้ากลางจอ 3 มิติ (ชนพื้น/บ้าน/สุดระยะกลางอากาศ)
   if(!q){const ap=(inp.ap||0),H=p.z+4;let d=V.range;if(ap<-0.03)d=Math.min(V.range,H*20/Math.tan(-ap));d=Math.max(120,d);q={x:p.x+Math.cos(p.ang)*d,y:p.y+Math.sin(p.ang)*d};}
   q.x=clamp(q.x,40,MW-40);q.y=clamp(q.y,40,MH-40);
-  if(!q.free){const c=aimClip(p.x,p.y,p.z+4.2,q,0);q.x=c.x;q.y=c.y;q.h=c.hit?c.h:groundH(q.x,q.y);}   // ชนบ้านก่อน = ระเบิดที่ผนัง
+  if(!q.free){const c=aimClip(p.x,p.y,p.z+4.2,q,0);q.x=c.x;q.y=c.y;q.h=c.hit?c.h:surfH(p,q.x,q.y,p.z+1);}   // ชนบ้านก่อน = ระเบิดที่ผนัง
   p.colN--;p.colCd=V.gap;
   const fx=p.x+Math.cos(p.ang)*30,fy=p.y+Math.sin(p.ang)*30,tt=Math.hypot(q.x-fx,q.y-fy,(q.h-p.z-4.2)*20)/1800+0.08,qh=Math.round(q.h*10)/10;
   emit({k:'efx',z:'colbolt',x:fx,y:fy,h:p.z+4.2,x2:q.x,y2:q.y,h2:qh,t:tt,id:p.id});
@@ -204,12 +204,12 @@ function updateERings(dt){
   const V=RINGE.v;for(const R of G.erings){
     if(R.del>0){R.del-=dt;if(R.del>0)continue;
       // อุกกาบาตไม่มีดาเมจแล้ว (ผู้ใช้ 2026-10-27) — ดาเมจมีแค่ตอนพยายามเดินออก (10)
-      emit({k:'efx',z:'ering',x:R.x,y:R.y,h:0.2,r:R.r,t:R.t});continue;}
+      emit({k:'efx',z:'ering',x:R.x,y:R.y,h:R.z+0.2,r:R.r,t:R.t});continue;}
     R.t-=dt;
     for(const t of foesOf(R.team)){
       const dx=t.x-R.x,dy=t.y-R.y,d=Math.hypot(dx,dy)||1,tr=t.r||PR;
       // วงไฟมีผลแค่ระดับพื้น: สูงเกินกำแพง = ไม่โดนและหลุดจากการกักขัง (ผู้ใช้ 2026-11-09)
-      if((t.isE?(t.h||0):(t.z||0))-R.z>=V.wallH){R.in.delete(t);continue;}
+      {const dz=(t.isE?(t.h||0):(t.z||0))-R.z;if(dz>=V.wallH||dz<-1.5){R.in.delete(t);continue;}}   // above the wall or below the ring's floor
       // แตะขอบวงไฟ: ช้าลง (ไม่ใส่ Burning แล้ว — ผู้เล่นปรับ 2026-10-18)
          // ขอบวงไม่ทำให้ช้าแล้ว (ผู้ใช้ 2026-11-18)
       if(d<R.r-tr*0.5){R.in.add(t);continue;}   // ในวงไม่ช้าแล้ว (ผู้ใช้ 2026-11-18)

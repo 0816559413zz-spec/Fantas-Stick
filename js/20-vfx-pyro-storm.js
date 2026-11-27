@@ -1,12 +1,13 @@
 // ---------- Dragonfall (ภาพ) ----------
 // วงเตือนบนพื้น: วงส้มแดง + แผ่นจางๆ + ขีดอักขระไฟ 10 เส้นที่หุบเข้าหาศูนย์กลางใน 0.65 วิสุดท้ายก่อนกระแทก (ทุกคนเห็น)
 function makeDfCircle(st){
-  const g=new THREE.Group(),BL=st?THREE.NormalBlending:THREE.AdditiveBlending;   // สายฟ้า: สีปกติ เห็นชัดแม้บนหิมะ
-  const rm=new THREE.MeshBasicMaterial({color:st?'#ffcc00':hdr('#ff5a1a',1.3),transparent:true,opacity:0.75,depthWrite:false,blending:BL,side:THREE.DoubleSide});
-  const ring=new THREE.Mesh(new THREE.RingGeometry(st?0.88:0.93,1,56),rm);ring.rotation.x=-Math.PI/2;g.add(ring);
+  const g=new THREE.Group(),BL=THREE.NormalBlending;   // normal blend for both (additive fire orange vanished on bright floors, user 2026-11-27)
+  const rm=new THREE.MeshBasicMaterial({color:st?'#ffcc00':'#ff4a10',transparent:true,opacity:0.75,depthWrite:false,blending:BL,side:THREE.DoubleSide});
+  const ring=new THREE.Mesh(new THREE.RingGeometry(st?0.88:0.9,1,56),rm);ring.rotation.x=-Math.PI/2;g.add(ring);
+  if(!st){const eg=new THREE.Mesh(new THREE.RingGeometry(1,1.045,56),new THREE.MeshBasicMaterial({color:'#4a1204',transparent:true,opacity:0.6,depthWrite:false,side:THREE.DoubleSide}));eg.rotation.x=-Math.PI/2;g.add(eg);}   // dark rim = contrast on bright ground
   const disc=new THREE.Mesh(new THREE.CircleGeometry(0.93,48),new THREE.MeshBasicMaterial({color:st?'#ffd23a':'#ff3a10',transparent:true,opacity:0.13,depthWrite:false,side:THREE.DoubleSide,forceSinglePass:true}));disc.rotation.x=-Math.PI/2;g.add(disc);
-  const inner=new THREE.Mesh(new THREE.RingGeometry(0.9,1,40),new THREE.MeshBasicMaterial({color:st?'#fff6c0':hdr('#ffb347',1.2),transparent:true,opacity:0.55,depthWrite:false,blending:BL,side:THREE.DoubleSide}));inner.rotation.x=-Math.PI/2;g.add(inner);
-  let runes=[];const crs=[],bm=new THREE.MeshBasicMaterial({color:st?'#ffe680':hdr('#ffd27a',1.4),transparent:true,opacity:0.85,depthWrite:false,blending:BL,side:THREE.DoubleSide});
+  const inner=new THREE.Mesh(new THREE.RingGeometry(0.9,1,40),new THREE.MeshBasicMaterial({color:st?'#fff6c0':'#ff9a2a',transparent:true,opacity:0.55,depthWrite:false,blending:BL,side:THREE.DoubleSide}));inner.rotation.x=-Math.PI/2;g.add(inner);
+  let runes=[];const crs=[],bm=new THREE.MeshBasicMaterial({color:st?'#ffe680':'#ffb347',transparent:true,opacity:0.85,depthWrite:false,blending:BL,side:THREE.DoubleSide});
   for(let i=0;i<(st?12:10);i++){const r=new THREE.Mesh(new THREE.PlaneGeometry(0.05,0.22),bm);r.rotation.x=-Math.PI/2;r.userData.a=i/(st?12:10)*Math.PI*2;g.add(r);runes.push(r);
     if(st){const c=new THREE.Mesh(new THREE.PlaneGeometry(0.14,0.035),bm);c.position.y=0.04;r.add(c);crs.push(c);}}
   runes=instz(runes,g);instz(crs,g);   // อักษร 10-12 ชิ้น + ขีดขวาง → วาดรวม 2 ก้อน (ตัวแทนยังหมุน/หุบเข้ากลางได้เหมือนเดิม)
@@ -330,7 +331,7 @@ function dragonfallFX(o,p,pz,now,dt){
     const tq=U.tq||(U.tq=new THREE.Quaternion());tq.setFromUnitVectors(THREE.Object3D.DEFAULT_UP,_ev.normalize());C.quaternion.slerp(tq,Math.min(1,dt*12));}
   C.scale.set(R,1,R);
   const conv=clamp(1-left/0.65,0,1),pulse=0.5+0.5*Math.sin(now/110);
-  U.mats[0].opacity=0.55+0.25*pulse+0.2*conv;U.mats[1].opacity=0.1+0.12*conv;
+  U.mats[0].opacity=0.55+0.25*pulse+0.2*conv;U.mats[1].opacity=ST?0.1+0.12*conv:0.2+0.16*conv;
   U.inner.scale.setScalar(Math.max(0.04,1-conv*0.96));U.mats[2].opacity=0.25+0.5*conv;
   U.runes.forEach((r,i)=>{const an=r.userData.a+now/900,rr=lerp(0.82,0.1,conv);r.position.set(Math.cos(an)*rr,0.01,Math.sin(an)*rr);r.rotation.z=-an;r.scale.set(1/R*R,1+conv*1.5,1);});
   if(normalDome)return;

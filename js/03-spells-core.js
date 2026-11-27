@@ -155,9 +155,9 @@ function clearStatus(t){for(const k of ['wbsT','slowT','shk','frz','sil','chl','
 function fxMask(t){return (t.stun>0?1:0)|(t.burn>0?2:0)|((t.chl>0||t.slowT>0||frostSlow(t)>0)?4:0)|(t.frz>0?8:0)|(t.shk>0?(16|(t.shkGod?FX_SHOCK_CYAN:0)):0)|(t.root>0?32:0)|(t.sil>0?64:0)|(t.ward?128:0)|(t.haste>0?256:0)|(t.ovc>0?512:0)|(t.psn>0||t.naturePoison?1024:0)|(t.fear>0?2048:0)|(t.bld>0?4096:0)|(t.mrk>0?8192:0)|(t.dr?16384:0)|((t.heat>0||t.brn>0)?32768:0)|((t.flare>0||t.kindle>0)?65536:0)|(t.blaze>0?131072:0)|(t.xb>0?262144:0)|(t.mudT>0?524288:0)|(t.onF>0?FX_ONFIRE:0);}
 
 // ---------- วัตถุในสนามที่คาถาสร้าง: โซน / ฟ้าผ่าหน่วงเวลา / กำแพง / ช่องร่ายต่อเนื่อง ----------
-function foesIn(team,x,y,r,hMax){
+function foesIn(team,x,y,r,hMax,hMin){   // hMin (high ground fix 2026-11-27): skip foes below the effect (e.g. street under a roof AoE)
   const out=[];
-  for(const t of foesOf(team))if(Math.hypot(t.x-x,t.y-y)<r+(t.r||PR)&&((t.isE?(t.h||0):(t.z||0))<(hMax||4)))out.push(t);
+  for(const t of foesOf(team)){const z=t.isE?(t.h||0):(t.z||0);if(Math.hypot(t.x-x,t.y-y)<r+(t.r||PR)&&z<(hMax||4)&&(hMin==null||z>=hMin))out.push(t);}
   return out;
 }
 // ดาเมจวง: โล่/อมตะบล็อกทั้งดาเมจและสถานะ
@@ -186,7 +186,7 @@ function aoeHit(p,t,dmg,fn,noFlash=false,impact){
 }
 function addZone(o){
   const z=Object.assign({id:++G.zid,tt:0.05,tick:0.5},o);z.max=z.t;G.zones.push(z);
-  emit({k:'zn',id:z.id,x:z.x,y:z.y,r:z.r,t:z.t,z:z.kind});
+  emit({k:'zn',id:z.id,x:z.x,y:z.y,r:z.r,t:z.t,z:z.kind,h:z.h||0});
   return z;
 }
 function updateZones(dt){
@@ -194,7 +194,7 @@ function updateZones(dt){
     z.t-=dt;z.tt-=dt;
     if(z.tt<=0&&z.t>0){
       z.tt=z.tick;
-      if(z.hit)for(const t of foesIn(z.team,z.x,z.y,z.r,3.2)){if(!t.isE&&t.inv>0)continue;z.hit(t,z);}
+      if(z.hit)for(const t of foesIn(z.team,z.x,z.y,z.r,(z.h||0)+3.2,(z.h||0)-1.5)){if(!t.isE&&t.inv>0)continue;z.hit(t,z);}
       if(z.allyHit)for(const q of plist())if(q.team===z.team&&q.alive&&!q.downed&&Math.hypot(q.x-z.x,q.y-z.y)<z.r+PR)z.allyHit(q,z);
     }
   }
@@ -220,6 +220,13 @@ function updateChan(dt){
 }
 function updateSpells(dt){updateStorm(dt);updateEarth(dt);updateWind(dt);updateWater(dt);updateZones(dt);updateFirePaths(dt);efsTick(dt);updateStrikes(dt);updateWalls(dt);natureUpdate(dt);updateChan(dt);updateERings(dt);updateIces(dt);updateWaves(dt);updateGlaciers(dt);updateBldg(dt);}
 // จุดเล็งของคาถาวางพื้น: ถ้ามีศัตรูอยู่ในแนวเล็งให้วางที่ตัวมัน ไม่งั้นวางที่ระยะ 75% ของพิสัย
+// High ground (user 2026-11-27): height (like p.z) of the surface under a ground-aimed spot — roofs, platforms and
+// Terra Isles count. Uses the crosshair hit height (inp.gw) near the crosshair point, a foe standing there, else the
+// highest floor up to the caster's level (refZ).
+function surfH(p,x,y,refZ){const i=p&&p.inp;let ref=refZ!=null?refZ:((p&&p.z)||0)+1.2;
+  if(i&&!p.bot&&Number.isFinite(i.gw)&&i.gx>=0&&Math.hypot(i.gx-x,i.gy-y)<40)ref=Math.max(ref,i.gw-(TERR?terrT(x,y):0)+0.3);
+  if(p)for(const t of foesOf(p.team))if(Math.hypot(t.x-x,t.y-y)<60){const z=t.isE?(t.h||0):(t.z||0);if(z+0.5>ref)ref=z+0.5;}
+  return groundH(x,y,ref);}
 function aimPoint(p,range,clip=true){
   // ผู้เล่นจริง: วางตรงจุดที่เป้ากลางจอชี้พื้น (ไม่เกินพิสัย)
   if(p.inp&&!p.bot&&p.inp.gx>=0&&typeof p.inp.ah==='number'){const dx=p.inp.gx-p.x,dy=p.inp.gy-p.y,d=Math.hypot(dx,dy)||1,k=Math.min(1,range/d),o={x:clamp(p.x+dx*k,40,MW-40),y:clamp(p.y+dy*k,40,MH-40)};return clip?aimWall(p,o):o;}

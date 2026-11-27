@@ -234,7 +234,7 @@ function lightSkillsTick(p,dt){
       const [x,y,h,r]=V.pts[V.warned++];
       emit({k:'efx',z:'lgvolwarn',x,y,h,r,t:LT_VO.charge,id:p.id});
     }   // ผู้ใช้ 2026-11-17: ไปทีละชิ้น ใกล้ → ไกล • แต่ละชิ้นนับวงเตือนของตัวเอง แล้วระเบิดทีละลูก
-    while(V.b<V.pts.length&&V.t>=LT_VO.wind+V.b*LT_VO.step+LT_VO.charge){const [x,y,h,r]=V.pts[V.b];for(const t of foesIn(p.team,x,y,r,h+13))aoeHit(p,t,LT_VO.dmg,null);   // เสาแสงสูง: โดนถึง 13 ม. (Wind บินได้สูงสุด 12)
+    while(V.b<V.pts.length&&V.t>=LT_VO.wind+V.b*LT_VO.step+LT_VO.charge){const [x,y,h,r]=V.pts[V.b];for(const t of foesIn(p.team,x,y,r,h+13,h-2))aoeHit(p,t,LT_VO.dmg,null);   // เสาแสงสูง: โดนถึง 13 ม. (Wind บินได้สูงสุด 12)
       emit({k:'efx',z:'lgvolboom',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id,pts:[[Math.round(x),Math.round(y)]],r,i:V.b});V.b++;}
     if(V.b>=V.pts.length&&V.t>=LT_VO.wind+(V.pts.length-1)*LT_VO.step+LT_VO.charge+LT_VO.back){p.lc=Math.min(LTV.max,p.lc+V.n);p.lgVol=null;}}
   const Z=p.lgSan;   // Sanctum Crystal: ฮีลรอบวง 3/วิ ต่อคริสตัล (ผู้ใช้ 2026-11-18)
@@ -258,7 +258,7 @@ function lightSkillsTick(p,dt){
     const wind=Math.min(W.wind,dt);W.wind-=wind;
     if(W.wind>0)return;
     const active=Math.min(W.t,dt-wind);W.t-=active;W.k+=active;
-    const fs=foesIn(p.team,W.x,W.y,LT_VS.r,W.h+3);for(const t of fs)addSlow(t,1-LT_VS.slow,0.2);
+    const fs=foesIn(p.team,W.x,W.y,LT_VS.r,W.h+3,W.h-3);for(const t of fs)addSlow(t,1-LT_VS.slow,0.2);
     if(W.k+1e-6>=LT_VS.tick){W.k=Math.max(0,W.k-LT_VS.tick);const ids=[];for(const t of fs){aoeHit(p,t,LT_VS.dmg);ids.push(t.id);}if(ids.length)emit({k:'efx',z:'lgveilhit',x:Math.round(W.x),y:Math.round(W.y),h:W.h,id:p.id,ids});}
     if(W.t<=1e-6)p.lgVeil=null;
   }
@@ -476,7 +476,7 @@ function lightUltTick(p,inp,dt,canAct,finishPressed){
     const ground=Number.isFinite(inp.gx)&&inp.gx>=0&&Number.isFinite(inp.gy)&&inp.gy>=0;
     const ax=ground?inp.gx:Number.isFinite(inp.ax)?inp.ax:p.x+Math.cos(p.ang)*LT_UL.finishRange;
     const ay=ground?inp.gy:Number.isFinite(inp.ay)?inp.ay:p.y+Math.sin(p.ang)*LT_UL.finishRange;
-    u.target={ax,ay,ah:groundH(ax,ay)};
+    u.target={ax,ay,ah:surfH(p,ax,ay)};
     u.phase=3;u.finish=LT_UL.finishCast;
     u.lean=clamp(Math.atan2(p.z+.65-u.target.ah,Math.hypot(ax-p.x,ay-p.y)*.05),.12,.53);
     return;
@@ -567,7 +567,7 @@ function lightQueueTick(dt){
     impacts.splice(i,1);
     emit({k:'efx',z:'lgultboom',x,y,h,r:LT_UL.finishR,id:src});
     const caster=G.players[src]||{id:src};
-    for(const t of foesIn(team,x,y,LT_UL.finishR,h+3.5)){
+    for(const t of foesIn(team,x,y,LT_UL.finishR,h+3.5,h-3.5)){
       if(Math.abs(cH(t)-h)<3.5)aoeHit(caster,t,LT_UL.finishDmg,q=>addSlow(q,1-LT_UL.finishSlow,LT_UL.finishSlowT));
     }
   }

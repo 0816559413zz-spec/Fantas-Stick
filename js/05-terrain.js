@@ -31,11 +31,12 @@ function updateGlaciers(dt){
   if(!G.glac||!G.glac.length)return;
   for(const s of G.glac){
     s.age+=dt;s.t-=dt;
-    s.h=s.t<=0?0:s.H*clamp((s.age-s.delay)/0.22,0,1);
+    s.h=s.t<=0?0:(s.b||0)+s.H*clamp((s.age-s.delay)/0.22,0,1);   // b = base floor (high ground)
     if(s.h>0&&!s.hitDone){
       s.hitDone=true;const o=G.players[s.owner];
       if(o)for(const t of foesOf(s.team)){
         if(s.grp.has(t))continue;
+        {const dz=(t.isE?(t.h||0):(t.z||0))-(s.b||0);if(dz<-1.5||dz>s.H+2)continue;}
         if(Math.hypot(t.x-s.x,t.y-s.y)<s.r+(t.r||PR)){s.grp.add(t);const nx=-Math.sin(s.a),ny=Math.cos(s.a),sd=((t.x-s.x)*nx+(t.y-s.y)*ny)>=0?1:-1;aoeHit(o,t,GREND.v.dmg,t=>{addFreeze(t,GREND.v.freeze);knock(t,t.x-nx*sd*10,t.y-ny*sd*10,GREND.v.knock);});}
       }
     }

@@ -30,7 +30,7 @@ function eSegD(x,y,w){const dx=w.x2-w.x1,dy=w.y2-w.y1,L=dx*dx+dy*dy;let t=L?((x-
 function eAdd(o){const w=Object.assign({id:++G.zid,hgt:7,hp:1e9,maxHp:1e9},o);(G.eso||(G.eso=[])).push(w);return w;}
 // ชนสิ่งก่อสร้างสายดิน (เรียกจาก collideWorld) • คืนจำนวนครั้งที่ชนของแข็ง (รวมเนิน v2) ไว้ทำคอมโบ Stonebreaker
 function eCollide(o,r,z,prev){let n=0;if(!G||!G.eso)return 0;
-  for(const w of G.eso){if(w.hgt<=z||w.dead||w.k==='mound'||w.k==='isle'&&z<w.h-1.8)continue;   // isle: solid only around its rock body (can walk under once it floats high)
+  for(const w of G.eso){if(w.hgt<=z||w.dead||w.k==='mound'||w.k==='isle'&&z<w.h-1.8||w.bz&&w.k!=='isle'&&z<w.bz-1.9)continue;   // bz = built on high ground: walk under   // isle: solid only around its rock body (can walk under once it floats high)
   if(o.eRamp&&w.owner===o.eRamp&&w.k!=='dom')continue;   // เนินเดินข้ามได้ (เป็นพื้นสูงใน groundH)
     const m=w.r+r;
     if(o.sbk>0&&prev&&eSegD(prev.x,prev.y,w).d>=m-1e-5){
@@ -51,7 +51,7 @@ function eCollide(o,r,z,prev){let n=0;if(!G||!G.eso)return 0;
   return n;}
 // กระสุนชนสิ่งก่อสร้าง (กระสุนฝ่ายเดียวกันทะลุของตัวเอง • กำแพงโดเมนกระสุนผ่านได้)
 function eProjHit(pr){if(!G.eso)return false;
-  for(const w of G.eso){if(w.dead||w.k==='dom'||w.k==='mound'||pr.team===w.team||pr.h>=w.hgt||w.k==='isle'&&pr.h<w.h-1.8)continue;if(eSegD(pr.x,pr.y,w).d<w.r+pr.r){w.hp-=pr.dmg||5;emit({k:'efx',z:'ehitw',x:Math.round(pr.x),y:Math.round(pr.y),h:pr.h});return true;}}
+  for(const w of G.eso){if(w.dead||w.k==='dom'||w.k==='mound'||pr.team===w.team||pr.h>=w.hgt||w.k==='isle'&&pr.h<w.h-1.8||w.bz&&w.k!=='isle'&&pr.h<w.bz-0.3)continue;if(eSegD(pr.x,pr.y,w).d<w.r+pr.r){w.hp-=pr.dmg||5;emit({k:'efx',z:'ehitw',x:Math.round(pr.x),y:Math.round(pr.y),h:pr.h});return true;}}
   return false;}
 function eKill(w,quiet){if(w.dead)return;w.dead=1;if(!quiet)emit({k:'efx',z:'ebreakw',x:Math.round((w.x1+w.x2)/2),y:Math.round((w.y1+w.y2)/2),x2:Math.round(w.x2),y2:Math.round(w.y2),x1:Math.round(w.x1),y1:Math.round(w.y1),r:w.r,n:w.k==='pil'?1:w.k==='mound'?2:0});}
 
@@ -94,7 +94,7 @@ function earthReset(p){p.ehp=ERV.sh;p.stdB=0;p.eShT=0;p.epn=null;p.esb=null;p.au
 const EROCK={max:8,rate:0.7,refill:1.8,splash:34,dmg:10};
 function earthRockTick(p,dt){if(p.erk===undefined)p.erk=EROCK.max;if(p.erk<EROCK.max&&!p.erBar)p.erk=Math.min(EROCK.max,p.erk+dt/(p.erkFast>G.time?BARRAGE.v.refill/EROCK.max:EROCK.refill));}
 function earthRockSplash(pr){if(pr.splashed)return;pr.splashed=1;const o=G.players[pr.owner];if(!o)return;
-  for(const t of foesIn(o.team,pr.x,pr.y,EROCK.splash,pr.h+3)){const z=t.isE?(t.h||0):(t.z||0);if(Math.abs(z+1-pr.h)<2.6&&aoeHit(o,t,EROCK.dmg))earthStoneHit(t);}
+  for(const t of foesIn(o.team,pr.x,pr.y,EROCK.splash,pr.h+3,pr.h-3)){const z=t.isE?(t.h||0):(t.z||0);if(Math.abs(z+1-pr.h)<2.6&&aoeHit(o,t,EROCK.dmg))earthStoneHit(t);}
   damageEnv(pr.x,pr.y,EROCK.splash,6*ERV.env,pr.owner,'rock',Math.max(0.3,pr.h));
   emit({k:'efx',z:'erockboom',x:Math.round(pr.x),y:Math.round(pr.y),h:Math.round(pr.h*10)/10});}
 SPELLS.erockb={hit(pr){earthRockSplash(pr);}};
@@ -156,7 +156,7 @@ function earthDash(p,inp,pr,dt,setCd){
       emit({k:'efx',z:'ekick',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(a*100)/100,id:p.id});emit({k:'sk',id:p.id,s:'ekick'});}
     if(!air&&inp.dh&&!(p.eLaunchCd>G.time)&&!(p.mudT>0)&&!(p.stun>0)){p.eLH=(p.eLH||0)+dt;
       if(p.eLH>=K.hold){p.eLH=0;p.eLaunchCd=G.time+K.cdUp;p.vz=K.v0;p.eLB=K.boost;p.jumpAir=true;p.z+=0.05;
-        for(const t of foesIn(p.team,p.x,p.y,K.upR,p.z+3))knock(t,p.x,p.y,K.upKnock);
+        for(const t of foesIn(p.team,p.x,p.y,K.upR,p.z+3,p.z-1.5))knock(t,p.x,p.y,K.upKnock);
         emit({k:'efx',z:'elaunch',x:Math.round(p.x),y:Math.round(p.y),h:p.z,id:p.id});}}
     else p.eLH=0;
     if(p.eLB>0){p.eLB=Math.max(0,p.eLB-dt);const k=1-p.eLB/K.boost;p.vz=K.v0+(K.launch-K.v0)*k*k;p.jumpAir=true;}
@@ -166,7 +166,7 @@ function earthDash(p,inp,pr,dt,setCd){
   if(!pr.sp||p.cd.dodge>0||p.mudT>0||p.z>groundH(p.x,p.y,p.z)+0.3)return false;
   if(p.stdB>0){   // Rock Boost Escape: หินดันตัวพุ่งไปข้างหน้า ~400 + ศัตรูรอบจุดเริ่ม (120) กระเด็น ไม่มีดาเมจ
     let dx,dy;if(typeof inp.mx==='number'&&Math.hypot(inp.mx,inp.my)>0.1){dx=inp.mx;dy=inp.my;const l=Math.hypot(dx,dy);dx/=l;dy/=l;}else{dx=Math.cos(p.ang);dy=Math.sin(p.ang);}
-    for(const t of foesIn(p.team,p.x,p.y,ERV.boostR,p.z+3))knock(t,p.x,p.y,ERV.boostKnock);
+    for(const t of foesIn(p.team,p.x,p.y,ERV.boostR,p.z+3,p.z-1.5))knock(t,p.x,p.y,ERV.boostKnock);
     p.dash=0.35;p.dashSp=ERV.boostDist/0.35;p.dashX=dx;p.dashY=dy;p.vz=7;p.shieldOn=false;setCd('dodge',ERV.boostCd*p.buffs.cdr);
     emit({k:'efx',z:'eboost',x:Math.round(p.x),y:Math.round(p.y),h:p.z,a:Math.round(Math.atan2(dy,dx)*100)/100,id:p.id});return true;}
   p.ramp={t:ERV.rampT,hit:new Set()};p.shieldOn=false;emit({k:'efx',z:'erampon',x:p.x,y:p.y,h:p.z,id:p.id});return true;
@@ -174,7 +174,7 @@ function earthDash(p,inp,pr,dt,setCd){
 function earthRampEnd(p,quiet){p.ramp=null;p.dash=0;p.dashSp=0;p.eRamp=null;p.cd.dodge=ERV.rampCd*p.buffs.cdr;p.cdMax.dodge=p.cd.dodge;
   if(quiet){emit({k:'efx',z:'erampoff',x:p.x,y:p.y,h:p.z,id:p.id});return;}
   emit({k:'efx',z:'eslam',x:Math.round(p.x),y:Math.round(p.y),h:p.z,r:ERV.slamR,id:p.id});damageEnv(p.x,p.y,ERV.slamR,30*ERV.env,p.id,'rock',p.z+0.3);
-  for(const t of foesIn(p.team,p.x,p.y,ERV.slamR,p.z+3))aoeHit(p,t,ERV.slamDmg,t=>knock(t,p.x,p.y,ERV.slamKnock));}   // แดชจบ: ผลักนิดหน่อย ไม่สตัน (ผู้ใช้ 2026-11-18)
+  for(const t of foesIn(p.team,p.x,p.y,ERV.slamR,p.z+3,p.z-1.5))aoeHit(p,t,ERV.slamDmg,t=>knock(t,p.x,p.y,ERV.slamKnock));}   // แดชจบ: ผลักนิดหน่อย ไม่สตัน (ผู้ใช้ 2026-11-18)
 
 // ---------- สกิล 1: Stonebreaker ----------
 function earthStoneAim(p,range=60,origin=2){
@@ -214,8 +214,8 @@ function earthStoneSnap(t){const m=t.stMk>G.time,s=t.stoneT>G.time;if(!m&&!s)ret
 
 // ---------- สกิล 2: Mud Swamp ----------
 const MUDS=defSpell(EARTH,{id:'mudswamp',v:{range:600,r:120,warn:0.5,time:5,slow:0.5},vn:{range:'ระยะเล็ง',r:'รัศมี',warn:'วงเตือน (วิ)',time:'อยู่นาน (วิ)',slow:'ศัตรู • ความเร็ว (เท่า)'},role:'control',n:'Mud Swamp',ic:'🟤',cd:12,d:'เล็งพื้นระยะ 600 วงเตือน 0.5 วิ แล้วเป็นบ่อโคลนรัศมี 120 นาน 5 วิ (โดนเฉพาะศัตรู)',fx:'ศัตรูในโคลน: ช้าลง 50% ใช้ Dash/กระโดดไม่ได้ ขาจมโคลน • ไม่มีดาเมจ • ใช้ได้แม้ Stand แตก',
-  cast(p,S){if(p.aug||p.ramp)return false;const V=S.v,o=aimPoint(p,V.range);
-    addStrike({x:o.x,y:o.y,r:V.r,t:V.warn,col:'#8a6a3a',fn(){addZone({x:o.x,y:o.y,r:V.r,t:V.time,tick:0.15,owner:p.id,team:p.team,kind:'mud',hit(t){addSlow(t,V.slow,0.3);t.mudT=Math.max(t.mudT||0,0.3);}});}});}});
+  cast(p,S){if(p.aug||p.ramp)return false;const V=S.v,o=aimPoint(p,V.range),mh=surfH(p,o.x,o.y);
+    addStrike({x:o.x,y:o.y,r:V.r,t:V.warn,col:'#8a6a3a',fn(){addZone({x:o.x,y:o.y,h:mh,r:V.r,t:V.time,tick:0.15,owner:p.id,team:p.team,kind:'mud',hit(t){addSlow(t,V.slow,0.3);t.mudT=Math.max(t.mudT||0,0.3);}});}});}});
 
 // ---------- สกิล 3: Tectonic Crush ----------
 // กำแพงหินคู่ขนานหน้าตัวเรา (ยาว 300 ห่างกัน 240 HP 200) • กดซ้ำก่อนคูลดาวน์ครบ = Crush (ง้าง 0.5 วิ) • ไม่กดทัน = กำแพงอยู่ต่อเป็นที่กำบังจนพัง/ร่ายคู่ใหม่
@@ -252,21 +252,21 @@ const DUSTB={v:{range:500,r:350,time:5,rWeak:200,timeWeak:3,delay:0.6,cloud:3}};
 const ISLE=defSpell(EARTH,{id:'terraisle',v:{range:600,r:72,h0:1.25,hMax:6.5,acc:34,vMax:15,hp:350,life:12,punch:0.15,lift:0.5,env:20},
   vn:{range:'ระยะเล็ง',r:'เกาะ • รัศมี',h0:'เกาะ • ลอยตอนเกิด (ม.)',hMax:'เกาะ • สูงสุด (ม.)',acc:'มีคนยืน • เร่ง/เบรก (ม./วิ²)',vMax:'มีคนยืน • ความเร็วสูงสุด (ม./วิ)',hp:'เกาะ • HP',life:'อยู่นาน (วิ)'},
   role:'utility',n:'Terra Isle',ic:'🏝',cd:14,d:'ชี้จุด: พื้นแตกสั่นแป๊บนึงแล้วเกาะหินลอยขึ้นมาเอง (ลอยต่ำ กระโดดขึ้นได้) • มีคนยืนบนเกาะ = ค่อย ๆ ลอยสูงขึ้น (สูงสุด ~6.5 ม.) • ทุกคนยืนได้ บังกระสุนด้านล่าง • HP 350 อยู่ 12 วิ',
-  cast(p,S){if(p.aug||p.ramp||p.ecb||p.wr)return false;const V=S.v,o=aimPoint(p,V.range),x=o.x,y=o.y,seed=(Math.random()*1e6)|0,team=p.team,id=p.id;
+  cast(p,S){if(p.aug||p.ramp||p.ecb||p.wr)return false;const V=S.v,o=aimPoint(p,V.range),x=o.x,y=o.y,seed=(Math.random()*1e6)|0,team=p.team,id=p.id,bz=surfH(p,x,y);
     if(p.isle){const old=(G.eso||[]).find(q=>q.id===p.isle);if(old)eKill(old);}
-    emit({k:'efx',z:'eislecall',x:Math.round(x),y:Math.round(y),h:groundH(x,y,0),a:Math.round(Math.atan2(y-p.y,x-p.x)*100)/100,n:seed,id});
-    G.strikes.push({x,y,t:V.lift,fn(){const w=eAdd({k:'isle',x1:x-0.01,y1:y,x2:x+0.01,y2:y,r:V.r,hgt:0.2,h:0.2,hp:V.hp,maxHp:V.hp,team,owner:id,life:V.life,seed,born:G.time});
+    emit({k:'efx',z:'eislecall',x:Math.round(x),y:Math.round(y),h:bz,a:Math.round(Math.atan2(y-p.y,x-p.x)*100)/100,n:seed,id});
+    G.strikes.push({x,y,t:V.lift,fn(){const w=eAdd({k:'isle',x1:x-0.01,y1:y,x2:x+0.01,y2:y,r:V.r,hgt:bz+0.2,h:bz+0.2,bz,hp:V.hp,maxHp:V.hp,team,owner:id,life:V.life,seed,born:G.time});
       const o2=G.players[id];if(o2)o2.isle=w.id;damageEnv(x,y,V.r+20,V.env*ERV.env,id,'rock',0.5);
-      emit({k:'efx',z:'eisleup',x:Math.round(x),y:Math.round(y),h:groundH(x,y,0),id});}});}});
+      emit({k:'efx',z:'eisleup',x:Math.round(x),y:Math.round(y),h:bz,id});}});}});
 // isle tick: grow out of the ground to h0, then rise while anyone stands on top; top = walkable (groundH), body = solid
 function earthIsleTick(dt){if(!G.eso)return;const V=ISLE.v;
   for(const w of G.eso){if(w.k!=='isle'||w.dead)continue;const age=G.time-w.born;
-    if(age<0.35){w.h=V.h0*Math.min(1,age/0.3);}
+    const bz=w.bz||0;if(age<0.35){w.h=bz+V.h0*Math.min(1,age/0.3);}
     else{let on=false;for(const t of plist().concat(G.en)){if(t.dead||t.alive===false)continue;const z=t.isE?(t.h||0):(t.z||0);
         if((t.x-w.x1)**2+(t.y-w.y1)**2<w.r*w.r&&Math.abs(z-w.h)<0.2){on=true;break;}}
       // smooth: accelerates from rest, cruises, then brakes into the top (user 2026-11-24) • nobody on = drifts to a stop
-      const room=V.hMax-w.h,vBrake=Math.sqrt(2*V.acc*Math.max(0,room));w.v=w.v||0;
-      w.v=on&&room>0.01?Math.min(w.v+V.acc*dt,V.vMax,vBrake):Math.max(0,w.v-V.acc*1.5*dt);w.h=Math.min(V.hMax,w.h+w.v*dt);}
+      const room=bz+V.hMax-w.h,vBrake=Math.sqrt(2*V.acc*Math.max(0,room));w.v=w.v||0;
+      w.v=on&&room>0.01?Math.min(w.v+V.acc*dt,V.vMax,vBrake):Math.max(0,w.v-V.acc*1.5*dt);w.h=Math.min(bz+V.hMax,w.h+w.v*dt);}
     w.hgt=w.h;}}
 
 // ---------- สกิล 5: Terra Auger ----------
@@ -281,7 +281,7 @@ const RAMPART=defSpell(EARTH,{id:'rampart',v:{range:520,len:360,r:30,hgt:5.6,hp:
   cast(p,S,i){if(p.aug||p.ramp||p.ecb||p.wr)return false;if(p.rmpAim){p.rmpAim=null;return false;}
     p.rmpAim={k:SLOTK[i],t:G.time,armed:!p.inp?.fire,s0:!!p.inp?.sh,seed:(Math.random()*1e6)|0};earthRampAimUpd(p);return false;}});
 function earthRampAimUpd(p){const A=p.rmpAim,o=aimPoint(p,RAMPART.v.range);let x=o.x,y=o.y;const d=Math.hypot(x-p.x,y-p.y);
-  if(d<80){x=p.x+Math.cos(p.ang)*80;y=p.y+Math.sin(p.ang)*80;}A.x=x;A.y=y;A.a=p.ang;}
+  if(d<80){x=p.x+Math.cos(p.ang)*80;y=p.y+Math.sin(p.ang)*80;}A.x=x;A.y=y;A.a=p.ang;A.bz=surfH(p,x,y);}
 function earthRampAimTick(p,dt){const A=p.rmpAim;if(!A)return false;const inp=p.inp||{};
   if(!p.alive||p.downed||p.stun>0||G.time-A.t>10||(inp.sh&&!A.s0)){p.rmpAim=null;return true;}
   A.s0=!!inp.sh;earthRampAimUpd(p);
@@ -290,13 +290,13 @@ function earthRampAimTick(p,dt){const A=p.rmpAim;if(!A)return false;const inp=p.
   return true;}
 function earthRampPlace(p,A){const V=RAMPART.v,c=Math.cos(A.a),s=Math.sin(A.a),hx=-s*V.len/2,hy=c*V.len/2,x=A.x,y=A.y,seed=A.seed,team=p.team,id=p.id;
   p.cd[A.k]=RAMPART.cd*p.buffs.cdr;p.cdMax[A.k]=p.cd[A.k];
-  emit({k:'sk',id,s:'rampart'});emit({k:'efx',z:'erampcall',x:Math.round(x),y:Math.round(y),h:groundH(x,y,0),a:Math.round(A.a*100)/100,n:seed,id});
+  const bz=A.bz!=null?A.bz:surfH(p,x,y);emit({k:'sk',id,s:'rampart'});emit({k:'efx',z:'erampcall',x:Math.round(x),y:Math.round(y),h:bz,a:Math.round(A.a*100)/100,n:seed,id});
   G.strikes.push({x,y,t:V.lift,fn(){
-    const w=eAdd({k:'ramp',x1:x-hx,y1:y-hy,x2:x+hx,y2:y+hy,r:V.r,hgt:V.hgt,hp:V.hp,maxHp:V.hp,team,owner:id,life:V.life,seed});
-    for(const t of plist().concat(G.en)){if(t.dead||t.alive===false)continue;const q=eSegD(t.x,t.y,w);if(q.d>=w.r+(t.r||PR)+4)continue;   // standing on the line = pushed off to the nearer side
+    const w=eAdd({k:'ramp',x1:x-hx,y1:y-hy,x2:x+hx,y2:y+hy,r:V.r,hgt:bz+V.hgt,bz,hp:V.hp,maxHp:V.hp,team,owner:id,life:V.life,seed});
+    for(const t of plist().concat(G.en)){if(t.dead||t.alive===false)continue;const q=eSegD(t.x,t.y,w);if(q.d>=w.r+(t.r||PR)+4||Math.abs((t.isE?(t.h||0):(t.z||0))-bz)>2)continue;   // standing on the line = pushed off to the nearer side
       const sd=Math.sign((t.x-x)*c+(t.y-y)*s)||1,f=isBig(t)?150:650;t.vx=(t.vx||0)+c*sd*f;t.vy=(t.vy||0)+s*sd*f;}
-    damageEnv(x,y,160,V.env*ERV.env,id,'rock',0.5);
-    emit({k:'efx',z:'erampup',x:Math.round(x),y:Math.round(y),h:groundH(x,y,0),a:Math.round(A.a*100)/100,id});}});}
+    damageEnv(x,y,160,V.env*ERV.env,id,'rock',bz+0.5);
+    emit({k:'efx',z:'erampup',x:Math.round(x),y:Math.round(y),h:bz,a:Math.round(A.a*100)/100,id});}});}
 // (dormant Terra Auger helpers)
 // จุดลงของสว่าน: ตามเป้าเมาส์เสมอ • เล็งเหนือขอบฟ้า (ไม่โดนพื้น) = ไกลสุด 600 ตามทิศที่หัน (ไม่ดูดเข้าศัตรูใกล้ ๆ)
 // เล็งอิสระ 3 มิติ (ผู้ใช้ 2026-10-27): ตามเส้นเป้ากลางจอจากสว่านเหนือหัว ชนพื้น/บ้าน/สุดระยะ (กลางอากาศ) • บอท = จุดเล็งบนพื้นแบบเดิม
@@ -305,7 +305,7 @@ function earthAugFire(p){const A=p.aug,V=AUGER.v;p.aug=null;const tier=A.t>=V.t3
   p.cd[A.k]=AUGER.cd*p.buffs.cdr;p.cdMax[A.k]=p.cd[A.k];
   emit({k:'efx',z:'eaugfire',x:Math.round(o.x),y:Math.round(o.y),h:oh,x2:Math.round(p.x),y2:Math.round(p.y),n:tier,r,id:p.id});
   G.strikes.push({x:o.x,y:o.y,t:0.35,fn(){
-    for(const t of foesIn(p.team,o.x,o.y,r,o.h+5))if((t.isE?(t.h||0):(t.z||0))>o.h-5)aoeHit(p,t,dm);
+    for(const t of foesIn(p.team,o.x,o.y,r,o.h+5,o.h-2))if((t.isE?(t.h||0):(t.z||0))>o.h-5)aoeHit(p,t,dm);
     damageEnv(o.x,o.y,r,dm*ERV.env,p.id,'rock',o.hit?o.h:0.5);
     if(tier===3&&!o.hit)earthMound(p,o.x,o.y,false);
     emit({k:'efx',z:'eaugboom',x:Math.round(o.x),y:Math.round(o.y),h:oh,n:tier,r});}});}
@@ -340,13 +340,13 @@ function earthPillarThrow(p){const W=p.wr;if(!W||W.ph!=='aim')return;
   emit({k:'efx',z:'epilthrow',x:p.x,y:p.y,h:p.z,x2:W.target.x,y2:W.target.y,id:p.id});
 }
 function earthPillarImpact(p,W){
-    const {x,y}=W.target,a=W.a;
-    for(const t of foesIn(p.team,x,y,E_WRS.r,30))aoeHit(p,t,E_WRS.hit,t=>knock(t,x,y,E_WRS.knock));damageEnv(x,y,90,E_WRS.env*ERV.env,p.id,'rock',0.6);   // แรงกระแทกทั้งบึง (aoeHit = โล่กันได้)
+    const {x,y}=W.target,a=W.a,wh=groundH(x,y,W.oh);W.wh=wh;
+    for(const t of foesIn(p.team,x,y,E_WRS.r,wh+30,wh-1.5))aoeHit(p,t,E_WRS.hit,t=>knock(t,x,y,E_WRS.knock));damageEnv(x,y,90,E_WRS.env*ERV.env,p.id,'rock',0.6);   // แรงกระแทกทั้งบึง (aoeHit = โล่กันได้)
     const flight=earthWrathFlightAngles(x,y,W.ox,W.oy,W.oh,a);
-    eAdd({k:'pil',x1:x,y1:y,x2:x+Math.cos(a)*0.5,y2:y+Math.sin(a)*0.5,r:35,hgt:9,hp:E_WRS.pilHp,maxHp:E_WRS.pilHp,team:p.team,owner:p.id,flight,life:12});
-    addZone({x,y,r:E_WRS.r,t:E_WRS.mud,tick:0.15,owner:p.id,team:p.team,kind:'mud',hit(t){addSlow(t,E_WRS.mudSlow,0.3);t.mudT=Math.max(t.mudT||0,0.3);}});
-    (G.espk||(G.espk=[])).push({x,y,t:E_WRS.mud,nx:E_WRS.every,owner:p.id,team:p.team});
-    emit({k:'efx',z:'epilland',x:Math.round(x),y:Math.round(y),h:0,a:Math.round(a*100)/100});}
+    eAdd({k:'pil',x1:x,y1:y,x2:x+Math.cos(a)*0.5,y2:y+Math.sin(a)*0.5,r:35,hgt:wh+9,bz:wh,hp:E_WRS.pilHp,maxHp:E_WRS.pilHp,team:p.team,owner:p.id,flight,life:12});
+    addZone({x,y,h:wh,r:E_WRS.r,t:E_WRS.mud,tick:0.15,owner:p.id,team:p.team,kind:'mud',hit(t){addSlow(t,E_WRS.mudSlow,0.3);t.mudT=Math.max(t.mudT||0,0.3);}});
+    (G.espk||(G.espk=[])).push({x,y,h:wh,t:E_WRS.mud,nx:E_WRS.every,owner:p.id,team:p.team});
+    emit({k:'efx',z:'epilland',x:Math.round(x),y:Math.round(y),h:wh,a:Math.round(a*100)/100});}
 function earthWrathTick(p,dt){const W=p.wr;W.t+=dt;
   if(W.ph==='charge'){
     if(W.t>=E_WRS.charge){
@@ -377,10 +377,10 @@ function earthWrathEnd(p){const W=p.wr;p.wr=null;if(!W)return;
 // หินแหลมในบึง Wrath: ทุก 2 วิ พุ่งขึ้นใต้ศัตรูทุกคนในบึง (เตือนวงที่พื้น 0.5 วิ หลบได้) + จุดสุ่มอีก 3 จุด • โดน = 30 (โล่กันได้) + เด้งขึ้นนิดหน่อย
 const E_WRS=WRATH.v;
 function earthSpikeTick(S,dt){S.t-=dt;S.nx-=dt;if(S.nx>0)return;S.nx=E_WRS.every;const o=G.players[S.owner];if(!o)return;
-  const pts=foesIn(S.team,S.x,S.y,E_WRS.r,30).map(t=>({x:t.x+(Math.random()-0.5)*20,y:t.y+(Math.random()-0.5)*20}));
+  const pts=foesIn(S.team,S.x,S.y,E_WRS.r,(S.h||0)+30,(S.h||0)-1.5).map(t=>({x:t.x+(Math.random()-0.5)*20,y:t.y+(Math.random()-0.5)*20}));
   for(let i=0;i<3;i++){const a=Math.random()*6.283,d=Math.sqrt(Math.random())*E_WRS.r*0.9;pts.push({x:S.x+Math.cos(a)*d,y:S.y+Math.sin(a)*d});}
-  for(const q of pts){const x=clamp(q.x,40,MW-40),y=clamp(q.y,40,MH-40);emit({k:'efx',z:'espkw',x:Math.round(x),y:Math.round(y),h:0});
-    G.strikes.push({x,y,t:E_WRS.warn,fn(){for(const t of foesIn(S.team,x,y,E_WRS.sr,30))aoeHit(o,t,E_WRS.spk,t=>{t.vz=Math.max(t.vz||0,6);});emit({k:'efx',z:'espk',x:Math.round(x),y:Math.round(y),h:0});}});}}
+  for(const q of pts){const x=clamp(q.x,40,MW-40),y=clamp(q.y,40,MH-40);emit({k:'efx',z:'espkw',x:Math.round(x),y:Math.round(y),h:S.h||0});
+    G.strikes.push({x,y,t:E_WRS.warn,fn(){for(const t of foesIn(S.team,x,y,E_WRS.sr,(S.h||0)+30,(S.h||0)-1.5))aoeHit(o,t,E_WRS.spk,t=>{t.vz=Math.max(t.vz||0,6);});emit({k:'efx',z:'espk',x:Math.round(x),y:Math.round(y),h:S.h||0});}});}}
 
 // ---------- ทั้งสนาม: สิ่งก่อสร้างพัง / ฝุ่นหมดเวลา / Stonebreaker ชนกำแพง ----------
 function updateEarth(dt){
@@ -413,7 +413,7 @@ function earthSnapP(p){if(!eOn(p))return undefined;const W=p.wr;
   }
   if(W)ea[13]=[W.t,W.target.x,W.target.y,W.ox??p.x,W.oy??p.y,W.oh??p.z,W.a??p.ang,W.baseZ];
   return ea;}
-function earthSnapW(){return {ES:(G.eso||[]).map(w=>[w.id,{tec:0,pil:1,mound:2,dom:3,ramp:4,isle:5}[w.k],w.k==='pil'?w.x1:Math.round(w.x1),w.k==='pil'?w.y1:Math.round(w.y1),Math.round(w.x2),Math.round(w.y2),w.r,w.maxHp>1e8?100:Math.max(1,Math.round(w.hp/w.maxHp*100)),w.team,w.owner,...(w.flight?[w.flight]:w.k==='ramp'?[w.seed]:w.k==='isle'?[w.seed,Math.round(w.h*100)]:[])]),
+function earthSnapW(){return {ES:(G.eso||[]).map(w=>[w.id,{tec:0,pil:1,mound:2,dom:3,ramp:4,isle:5}[w.k],w.k==='pil'?w.x1:Math.round(w.x1),w.k==='pil'?w.y1:Math.round(w.y1),Math.round(w.x2),Math.round(w.y2),w.r,w.maxHp>1e8?100:Math.max(1,Math.round(w.hp/w.maxHp*100)),w.team,w.owner,...(w.flight?[w.flight,Math.round((w.bz||0)*100)]:w.k==='ramp'?[w.seed,Math.round((w.bz||0)*100)]:w.k==='isle'?[w.seed,Math.round(w.h*100)]:[])]),
   ED:(G.edust||[]).map(d=>[d.id,Math.round(d.x),Math.round(d.y),d.r,Math.round(d.t*10)/10,d.team,d.boom?1:0,d.boom?d.ids:0])};}
 
 // ท่าพื้นฐาน + โล่ + Dash ของสาย (PBASIC ต้องอยู่ช่องที่ 6 = ลำดับใน PATHS)

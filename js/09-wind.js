@@ -382,8 +382,8 @@ function windDownCast(p){if(windSpin(p)||(p.wwc|0)<=0)return false;
   if(inp.gx>=0){gx=inp.gx;gy=inp.gy;}else if(typeof inp.ax==='number'&&(inp.ax||inp.ay)){gx=inp.ax;gy=inp.ay;}else{gx=p.x+Math.cos(p.ang)*R*0.6;gy=p.y+Math.sin(p.ang)*R*0.6;}
   const d=Math.hypot(gx-p.x,gy-p.y);if(d>R){gx=p.x+(gx-p.x)/d*R;gy=p.y+(gy-p.y)/d*R;}
   gx=clamp(gx,40,MW-40);gy=clamp(gy,40,MH-40);p.wwc--;
-  (G.wdb||(G.wdb=[])).push({o:p.id,team:p.team,x:gx,y:gy,gh:groundH(gx,gy),t:0,tk:0});
-  emit({k:'efx',z:'wndb',x:Math.round(gx),y:Math.round(gy),h:groundH(gx,gy),id:p.id});}
+  const wgh=surfH(p,gx,gy);(G.wdb||(G.wdb=[])).push({o:p.id,team:p.team,x:gx,y:gy,gh:wgh,t:0,tk:0});
+  emit({k:'efx',z:'wndb',x:Math.round(gx),y:Math.round(gy),h:wgh,id:p.id});}
 function windPressDown(t,dt){const gh=groundH(t.x,t.y,t.z);if(t.z<=gh+0.02)return;const F=t.wfw;
   if(F&&F.ph==='focus'&&F.up===undefined){F.h=Math.max(W_FW.hmin,F.h-W_WL.dbPress*dt);return;}
   t.z=Math.max(gh,t.z-W_WL.dbPress*dt);t.vz=Math.min(t.vz||0,0);}
@@ -401,7 +401,7 @@ function windUpCast(p){if(windSpin(p)||(p.wwc|0)<=0)return false;
   if(inp.gx>=0){gx=inp.gx;gy=inp.gy;}else if(typeof inp.ax==='number'&&(inp.ax||inp.ay)){gx=inp.ax;gy=inp.ay;}else{gx=p.x+Math.cos(p.ang)*R*0.6;gy=p.y+Math.sin(p.ang)*R*0.6;}
   const d=Math.hypot(gx-p.x,gy-p.y);if(d>R){gx=p.x+(gx-p.x)/d*R;gy=p.y+(gy-p.y)/d*R;}
   gx=clamp(gx,40,MW-40);gy=clamp(gy,40,MH-40);p.wwc--;
-  const z={id:++G.zid,o:p.id,team:p.team,x:gx,y:gy,gh:groundH(gx,gy),air,t:0,act:air?W.actA:W.actG,r:air?W.rA:W.rG,hang:air?W.hangA:W.hangG,lift:air?W.liftA:W.liftG,dmg:air?W.dmgA:W.dmgG,cap:new Set()};
+  const z={id:++G.zid,o:p.id,team:p.team,x:gx,y:gy,gh:surfH(p,gx,gy),air,t:0,act:air?W.actA:W.actG,r:air?W.rA:W.rG,hang:air?W.hangA:W.hangG,lift:air?W.liftA:W.liftG,dmg:air?W.dmgA:W.dmgG,cap:new Set()};
   (G.wup||(G.wup=[])).push(z);emit({k:'efx',z:'wnup',x:Math.round(gx),y:Math.round(gy),h:z.gh,r:Math.round(z.r),t:W.tele,m:air?1:0,id:p.id,n:z.id});}
 function windUpTick(z,dt){const p=G.players[z.o];if(!p)return false;z.t+=dt;if(z.t<W_WL.tele)return true;
   if(!z.go){z.go=1;emit({k:'efx',z:'wnupgo',x:Math.round(z.x),y:Math.round(z.y),h:z.gh,r:Math.round(z.r),m:z.air?1:0,n:z.id});}

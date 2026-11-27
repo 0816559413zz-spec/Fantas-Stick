@@ -9,9 +9,9 @@ const GREND=defSpell(1,{id:'glacierrend',v:{charge:1,waveDmg:30,waveLen:780,wave
   }});
 // Glacier Rend โหมดไกล (หลังชาร์จ 1 วิ): ภูเขาน้ำแข็งแหลมพุ่งเป็นแนวตามทิศที่เล็งตอนปล่อย
 function frostGlacier(p){
-  const V=GREND.v,L=Math.max(45,V.len),a=p.ang,c=Math.cos(a),s=Math.sin(a),grp=new Set();
-  for(let d=70;d<=70+L;d+=45){const x=p.x+c*d,y=p.y+s*d;if(x<30||x>MW-30||y<30||y>MH-30)break;(G.glac||(G.glac=[])).push({x,y,r:52,a,H:1+(V.height-1)*(d-70)/L,h:0,age:0,delay:(d-70)/(L*2),t:V.time,team:p.team,owner:p.id,grp});}
-  emit({k:'efx',z:'glacier',x:p.x+c*70,y:p.y+s*70,h:0,a:Math.round(a*1000)/1000,len:L,t:V.time,id:p.id});
+  const V=GREND.v,L=Math.max(45,V.len),a=p.ang,c=Math.cos(a),s=Math.sin(a),grp=new Set(),ref=(p.z||0)+0.5;
+  for(let d=70;d<=70+L;d+=45){const x=p.x+c*d,y=p.y+s*d;if(x<30||x>MW-30||y<30||y>MH-30)break;(G.glac||(G.glac=[])).push({x,y,r:52,a,b:groundH(x,y,ref),H:1+(V.height-1)*(d-70)/L,h:0,age:0,delay:(d-70)/(L*2),t:V.time,team:p.team,owner:p.id,grp});}
+  emit({k:'efx',z:'glacier',x:p.x+c*70,y:p.y+s*70,h:groundH(p.x+c*70,p.y+s*70,ref),a:Math.round(a*1000)/1000,len:L,t:V.time,id:p.id});
 }
 const PERMA=defSpell(1,{id:'permafrost',v:{r:300,time:6,slow:20,selfSpd:0.3},vn:{r:'รัศมีวง',time:'อยู่นาน (วิ)',slow:'ศัตรูในวง • สลอว์ (%)',selfSpd:'เราในวง • เดินเร็วขึ้น (เท่า)'},role:'control',melee:1,n:'Permafrost',ic:'❄️',cd:16,d:'พื้นน้ำแข็งวงใหญ่รอบตัว (รัศมี ~300) 6 วิ: ศัตรูในวงช้าลง 20% ทันที (ซ้อนกับสลอว์ยิงปกติ สูงสุด 60%)',fx:'เราเดินในวงเร็ว +30% (ไม่ซ้อนกับไถลน้ำแข็ง) • ใช้ได้เฉพาะโหมดประชิด',
   cast(p,S){const V=S.v;addIce({x:p.x,y:p.y,r:V.r,t:V.time,team:p.team,owner:p.id,kind:'ring'});emit({k:'efx',z:'perma',x:p.x,y:p.y,h:0.1,r:V.r});}});

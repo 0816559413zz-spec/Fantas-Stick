@@ -16,7 +16,7 @@ function frostShieldPitch(p){
 function frostBoom(pr){
   const V=FROSTF.v;emit({k:'efx',z:'iceboom',x:pr.x,y:pr.y,h:pr.h,r:V.r});
   const o=G.players[pr.owner];if(!o)return;
-  for(const t of foesIn(pr.team,pr.x,pr.y,V.r,pr.h+3))aoeHit(o,t,V.dmg,t=>{t.fslBigT=V.slowT;});
+  for(const t of foesIn(pr.team,pr.x,pr.y,V.r,pr.h+3,pr.h-3))aoeHit(o,t,V.dmg,t=>{t.fslBigT=V.slowT;});
   damageEnv(pr.x,pr.y,V.r,V.env,pr.owner,'ice',pr.h);
 }
 // ฟันโดนทุกคนในกรวยหน้า (arc = ครึ่งมุม) จากจุด ox,oy
@@ -74,7 +74,7 @@ function frostSlam3(p){
 function frostSlam(p){
   p.slam=false;const dm=p.ffT>0?FROSTF.v.slamDmg:FROSTV.slamDmg,R=FROSTV.slamR;
   emit({k:'efx',z:'slam',x:p.x,y:p.y,h:p.z+0.2,r:R,id:p.id,ax:p.ffT>0?1:0});
-  for(const t of foesIn(p.team,p.x,p.y,R,p.z+3))aoeHit(p,t,dm);
+  for(const t of foesIn(p.team,p.x,p.y,R,p.z+3,p.z-2))aoeHit(p,t,dm);
   damageEnv(p.x,p.y,R,dm,p.id,'ice',p.z);
 }
 function frostDash(p,inp,pr,dt,setCd){
@@ -82,7 +82,8 @@ function frostDash(p,inp,pr,dt,setCd){
   return false;
 }
 // พื้นน้ำแข็ง (ทางไถล / ทางคลื่นดาบ / วงน้ำแข็ง)
-function addIce(o){const z=Object.assign({t:4},o);(G.ices||(G.ices=[])).push(z);const ev={k:'efx',z:'ice',x:z.x,y:z.y,r:z.r,t:z.t,c:z.kind==='ring'?1:0};if(o.wv)ev.w=1;if(o.lx!==undefined){ev.lx=Math.round(o.lx);ev.ly=Math.round(o.ly);}emit(ev);return z;}
+function addIce(o){const z=Object.assign({t:4},o);if(z.h==null){const ow=G.players[z.owner];z.h=groundH(z.x,z.y,ow?(ow.z||0)+0.5:0.5);}   // high ground: ice lies on the floor under its owner
+  (G.ices||(G.ices=[])).push(z);const ev={k:'efx',z:'ice',x:z.x,y:z.y,r:z.r,t:z.t,c:z.kind==='ring'?1:0,h:Math.round(z.h*100)/100};if(o.wv)ev.w=1;if(o.lx!==undefined){ev.lx=Math.round(o.lx);ev.ly=Math.round(o.ly);}emit(ev);return z;}
 function updateIces(dt){
   for(const q of plist())q.iceB=0;
   if(!G.ices||!G.ices.length)return;
@@ -90,7 +91,7 @@ function updateIces(dt){
   for(const z of G.ices){
     z.t-=dt;
     for(const t of all){
-      if((t.z||t.h||0)>2.5)continue;
+      {const dz=(t.z||t.h||0)-(z.h||0);if(dz>2.5||dz<-1.5)continue;}
       if((t.x-z.x)**2+(t.y-z.y)**2>(z.r+(t.r||PR)*0.5)**2)continue;
       if(t.team===z.team){if(!t.isE&&!t.isM)t.iceB=Math.max(t.iceB||0,z.kind==='ring'?PERMA.v.selfSpd:0.2);continue;}
       if(z.kind==='ring')t.fslR=0.3;else{t.fslP=0.3;t.slip=0.3;}

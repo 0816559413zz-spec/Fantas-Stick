@@ -19,13 +19,13 @@ defSpell(4,{id:'silencecurse',role:'control',n:'คำสาปปิดปา�
   hit(pr,t){damage(t,pr.dmg,pr.owner,'proj');addSil(t,t.mrk>0?2.2:1.6);emit({k:'efx',z:'silence',x:t.x,y:t.y,h:cH(t)+1});}});
 defSpell(4,{id:'blinddust',role:'control',n:'ผงมืดบอด',ic:'🕶️',cd:16,d:'โปรยผงมืดบอด ณ จุดเล็ง เป้าหมายเล็งไม่แม่น 2 วิ',fx:'คนมีตรา: มืดบอด 2.8 วิ และช้าลงด้วย',
   cast(p,S){
-    const q=aimPoint(p,520);emit({k:'efx',z:'blind',x:q.x,y:q.y,h:0.8,r:130});
-    for(const t of foesIn(p.team,q.x,q.y,130,4))aoeHit(p,t,4,t=>{const mk=t.mrk>0;addBlind(t,mk?2.8:2.0);if(mk)addSlow(t,0.8,1.5);});
+    const q=aimPoint(p,520),qh=surfH(p,q.x,q.y);emit({k:'efx',z:'blind',x:q.x,y:q.y,h:qh+0.8,r:130});
+    for(const t of foesIn(p.team,q.x,q.y,130,qh+4,qh-1.5))aoeHit(p,t,4,t=>{const mk=t.mrk>0;addBlind(t,mk?2.8:2.0);if(mk)addSlow(t,0.8,1.5);});
   }});
 defSpell(4,{id:'terror',role:'control',n:'ความหวาดกลัว',ic:'😱',cd:14,d:'คลื่นความกลัวรอบตัว ศัตรูวิ่งหนี 1.5 วิ (บังคับทิศเดินเท่านั้น)',fx:'คนมีตรา: กลัว 2.2 วิ • ศัตรูที่กลัวยังร่ายเวทได้',
   cast(p,S){
     emit({k:'efx',z:'terror',x:p.x,y:p.y,h:p.z+1,r:210});
-    for(const t of foesIn(p.team,p.x,p.y,210,5))aoeHit(p,t,6,t=>addFear(t,t.mrk>0?2.2:1.5,p.x,p.y));
+    for(const t of foesIn(p.team,p.x,p.y,210,p.z+5,p.z-2))aoeHit(p,t,6,t=>addFear(t,t.mrk>0?2.2:1.5,p.x,p.y));
   }});
 defSpell(4,{id:'soulsiphon',role:'finisher',n:'ดูดวิญญาณ',ic:'🩸',cd:8,d:'ดูดวิญญาณเป้าหมายตรงหน้า (พิสัย 650): คนมีตรา = ดาเมจ 18 + กินตรา + ปิดปาก 1.2 วิ + ฟื้นเลือดเรา',fx:'ไม่มีตรา = ดาเมจแค่ 10 และไม่ฟื้น — ต้องตีตราก่อน',
   cast(p,S){
@@ -38,7 +38,7 @@ defSpell(4,{id:'soulsiphon',role:'finisher',n:'ดูดวิญญาณ',ic:'
 defSpell(4,{id:'darkness',role:'ult',n:'ความมืดมิด',ic:'🌑',cd:0,ult:true,d:'เวทโบราณสายคำสาป: ตีตราทุกคนในวงกว้าง + ปิดปาก + มืดบอด + ชะลอ',fx:'บอสทนได้ แต่ศัตรูทั่วไปหมดทางสู้ — ตามด้วยดูดวิญญาณ',
   cast(p,S){
     emit({k:'efx',z:'curse',x:p.x,y:p.y,h:p.z+1,r:360});
-    for(const t of foesIn(p.team,p.x,p.y,360,6))aoeHit(p,t,20,t=>{addMark(t,6);addSil(t,3);addBlind(t,2.2);addSlow(t,0.55,3);});
+    for(const t of foesIn(p.team,p.x,p.y,360,p.z+6,p.z-3))aoeHit(p,t,20,t=>{addMark(t,6);addSil(t,3);addBlind(t,2.2);addSlow(t,0.55,3);});
   }});
 
 // ---------- สัตว์เวท (minion): AI ฝั่งโฮสต์ ----------
@@ -96,7 +96,7 @@ function updateMins(dt){
       case 'golem':{
         const tg=minTarget(m);
         if(tg){const d=Math.hypot(tg.x-m.x,tg.y-m.y);if(d>m.r+(tg.r||PR)+30)mv(tg.x,tg.y);
-          if(d<m.r+(tg.r||PR)+90&&m.cd<=0){m.cd=2.2*od;emit({k:'slam',x:m.x,y:m.y,r:100});for(const t of foesIn(m.team,m.x,m.y,100,3.5)){damage(t,12,m.owner,'aoe');knock(t,m.x,m.y,350);}}}
+          if(d<m.r+(tg.r||PR)+90&&m.cd<=0){m.cd=2.2*od;emit({k:'slam',x:m.x,y:m.y,r:100});for(const t of foesIn(m.team,m.x,m.y,100,(m.z||0)+3.5,(m.z||0)-1.5)){damage(t,12,m.owner,'aoe');knock(t,m.x,m.y,350);}}}
         else follow();break;}
       case 'wisp':{
         for(const o2 of G.mins)if(o2!==m&&!o2.dead&&o2.owner===m.owner&&Math.hypot(o2.x-m.x,o2.y-m.y)<230)o2.od=Math.max(o2.od,0.4);
@@ -135,7 +135,7 @@ defSpell(5,{id:'soulburst',role:'finisher',n:'ระเบิดวิญญา�
     for(const m of mine){
       m.dead=true;emit({k:'efx',z:'soulburst',x:m.x,y:m.y,h:(m.h||0)+0.8,r:110});
       if(m.type==='wisp'){for(const q of plist())if(q.team===p.team&&q.alive&&!q.downed&&Math.hypot(q.x-m.x,q.y-m.y)<170)healT(q,10);}
-      else{const dm=({wolf:14,sprite:12,golem:26})[m.type]||12;for(const t of foesIn(p.team,m.x,m.y,110,5))aoeHit(p,t,dm,t=>knock(t,m.x,m.y,220));}
+      else{const dm=({wolf:14,sprite:12,golem:26})[m.type]||12;for(const t of foesIn(p.team,m.x,m.y,110,(m.z||0)+5,(m.z||0)-1.5))aoeHit(p,t,dm,t=>knock(t,m.x,m.y,220));}
       healT(p,4);
     }
   }});

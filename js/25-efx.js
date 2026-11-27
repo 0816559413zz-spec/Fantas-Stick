@@ -8,7 +8,7 @@ function efxState(ev){
     case 'slam':if(o)o.slamT=0;break;
     case 'gwave':{if(o&&!ev.cl)o.grDown=0.3;if(!(ev.len>0))break;if(o)o.grPt=ev.pt||0;WVV.push({n:ev.n,x,y,a:ev.a,len:ev.len,d:0,pt:ev.pt||0,h:ev.h!==undefined?ev.h:1,gnd:0,m:frostSlashGet()});break;}   // คลื่นดาบบางแบบใหม่ (js/21 frostSlash) แทน fx frost/rend_slash
     case 'gwend':{const w=WVV.find(q=>q.n===ev.n);if(w){w.x=x;w.y=y;w.h=ev.h??w.h;w.hitWall=1;w.d=w.len;}break;}   // คลื่นดาบชนกำแพงกลางอากาศ
-    case 'glacier':if(o)o.grUp=0.5;if(ev.len>0)GLV.push(makeGlacier(x,y,ev.a,ev.len,ev.t));break;
+    case 'glacier':if(o)o.grUp=0.5;if(ev.len>0)GLV.push(makeGlacier(x,y,ev.a,ev.len,ev.t,H));break;
     case 'mirror':{if(o&&o.mlcCirc){const c=o.mlcCirc;o.mlcCirc=null;later(0.45,()=>fxStop(c));}break;}
     case 'mlcast':if(o){o.mlcT=o.mlcT0=ev.t||1.5;o.mlcU=0;o.mlcN=SKANIM.mirrorlegion;if(o.mlcCirc)fxStop(o.mlcCirc);o.mlcCirc=fxPlay('frost/forge_buff',{x,y,h:H,follow:ev.id});}   // วงเวทใต้เท้าระหว่างร่ายsnd('nova',{x,y,vol:.35});break;   // ไม่มีทางพุ่งฟันแล้ว (ULTV เดิม = เส้นน้ำแข็งตามทางพุ่ง)
     case 'colbolt':if(o)o.colShot=performance.now();break;   // Colossus: เวลาปาล่าสุด → ท่าเหวี่ยงแขนในไฟล์เอฟเฟกต์ (param tw) แม้ bind แบบ replace
@@ -57,7 +57,7 @@ const an=a+rnd(-1.05,1.05),rr=R*rnd(0.55,1.05);PARTS.push({x:px+Math.cos(an)*rr,
       burst(x,y,ev.m?'#bfeaff':'#ffffff',10,120,0.35,1.8,{h:H,g:0});if(ev.id===NET.myId)snd('ui_click');break;}
     case 'slide':burst(x,y,'#dff6ff',16,200,0.4,2,{h:0.3,vh:[0.5,2],g:3,sh:4,vr:5,c2:'#5ab8ff'});for(let i=0;i<4;i++){const an=i/4*6.283+rnd(-0.2,0.2),r=rnd(12,26);iceBit(_plateG,x+Math.cos(an)*r,y+Math.sin(an)*r,0.1,rnd(0.35,0.55),0.5,rnd(0.35,0.5),{rx:rnd(-0.6,-0.3),ry:-an,life:0.6,up:0.06,down:0.3});}iceChips(x,y,0.3,8,180,4);if(near)snd('whoosh',ev);break;
     case 'ice':
-      ICEV.push(makeIceFloor(x,y,ev.r,ev.t,ev.c,ev.lx,ev.ly,ev.w));
+      {const iv=makeIceFloor(x,y,ev.r,ev.t,ev.c,ev.lx,ev.ly,ev.w);if(iv&&iv.g&&ev.h)iv.g.position.y+=ev.h;ICEV.push(iv);}
       if(ev.c)ZV.push({x,y,r:ev.r,t:ev.t,kind:'icering',col:'#8fe0ff',file:null});   // Permafrost: ไม่ใช้ไฟล์โซนเงาวาว (ผู้ใช้ 2026-11-15: สะท้อนแสงเกิน)
       else if(Math.random()<0.5)burst(x,y,'#ffffff',3,60,0.4,1.4,{h:0.2,g:0});
       break;
@@ -277,15 +277,15 @@ const an=a+rnd(-1.05,1.05),rr=R*rnd(0.55,1.05);PARTS.push({x:px+Math.cos(an)*rr,
       ring(x,y,'#ffb347',45,0.35,H+0.1);for(let i=0;i<14;i++){const an=rnd(0,6.283),r=rnd(4,22);flame(x+Math.cos(an)*r,y+Math.sin(an)*r,H+0.05,{vh:rnd(7,11),life:rnd(0.35,0.5),size:rnd(8,12),g:-1.5});}
       FX.flashLight(x,y,H+1,'#ff8a3a',5,12,0.35);if(near)snd('cast_fire',ev);if(ev.id===NET.myId)snd('buff');break;
     // Ring of Embers ขั้น 1: อุกกาบาตไฟตกลงจุดที่วาง (~0.3 วิ) + เงา/วงเตือนบนพื้น — กระแทกจริงอยู่ที่ 'ering'
-    case 'ermet':{const o=PM3.get(ev.id),P=o&&o.g?simOf(o.g.position):null;fireMeteor(x,y,ev.t||0.3,P?P.x:x-1,P?P.y:y);ring(x,y,'#ff7a2a',ev.r*0.3,ev.t||0.3,0.12);if(near)snd('whoosh',ev);break;}
-    case 'ering':{const own=zoneFx('ering',x,y,ev.r,ev.t,'#ff6a2a'),zv={x,y,r:ev.r,t:ev.t,kind:'ering',col:'#ff6a2a',file:own};ZV.push(zv);if(own){if(near)snd('boom',{x,y,vol:0.5});break;}
+    case 'ermet':{const o=PM3.get(ev.id),P=o&&o.g?simOf(o.g.position):null;fireMeteor(x,y,ev.t||0.3,P?P.x:x-1,P?P.y:y);ring(x,y,'#ff7a2a',ev.r*0.3,ev.t||0.3,H-0.08);if(near)snd('whoosh',ev);break;}
+    case 'ering':{const own=zoneFx('ering',x,y,ev.r,ev.t,'#ff6a2a',H-0.2),zv={x,y,r:ev.r,t:ev.t,kind:'ering',col:'#ff6a2a',file:own};ZV.push(zv);if(own){if(near)snd('boom',{x,y,vol:0.5});break;}
       // กำแพงไฟ 3 มิติ (shader เปลวเลียขึ้น 3 ชั้น) ปะทุขึ้นจากพื้น
-      zv.wall=makeFireWall(ev.r*S3,3.6,{thick:1});zv.wall.position.set(tx(x),GY(x,y),tz(y));zv.wall.scale.y=0.01;scene.add(zv.wall);}ring(x,y,'#ffb347',ev.r,0.4,0.2);
+      zv.wall=makeFireWall(ev.r*S3,3.6,{thick:1});zv.wall.position.set(tx(x),GY(x,y)+H-0.2,tz(y));zv.wall.scale.y=0.01;scene.add(zv.wall);}ring(x,y,'#ffb347',ev.r,0.4,0.2);
       // ข้างในวง: วงเวทไฟ + พื้นไหม้ + พื้นแตกมีลาวาเรือง (ทึบ เห็นบนพื้นขาว) • อุกกาบาตกระแทก: ระเบิดเล็ก + เศษหิน + ควัน
-      fireRune(x,y,0,ev.r*0.9,ev.t+0.3);scorch(x,y,0,ev.r*1.02,ev.t+0.6);fireCrackWeb(x,y,0,ev.r*0.88,ev.t+0.5,{n:10,hot:ev.t});
-      fireBlast(x,y,0.5,2.4,0.45);FX.flashSprite(x,y,0.8,'#ffb347',0.3,4,0.12,1.5);rockChunks(x,y,0,10,7,{r:15,s:0.8});smoke(x,y,0.3,8,'#3a2a24',0.9,7,70);if(near)shake(3);
+      const hb=H-0.2;fireRune(x,y,hb,ev.r*0.9,ev.t+0.3);scorch(x,y,hb,ev.r*1.02,ev.t+0.6);fireCrackWeb(x,y,hb,ev.r*0.88,ev.t+0.5,{n:10,hot:ev.t});   // hb = ring floor (high ground)
+      fireBlast(x,y,hb+0.5,2.4,0.45);FX.flashSprite(x,y,hb+0.8,'#ffb347',0.3,4,0.12,1.5);rockChunks(x,y,hb,10,7,{r:15,s:0.8});smoke(x,y,hb+0.3,8,'#3a2a24',0.9,7,70);if(near)shake(3);
       // กำแพงไฟปะทุขึ้นจากพื้นตอนวาง
-      for(let i=0;i<48;i++){const a=i/48*6.283;flame(x+Math.cos(a)*ev.r,y+Math.sin(a)*ev.r,0.05,{vh:rnd(9,13),life:rnd(0.35,0.5),size:rnd(10,13),g:-1,fb:'-'});}
+      for(let i=0;i<48;i++){const a=i/48*6.283;flame(x+Math.cos(a)*ev.r,y+Math.sin(a)*ev.r,hb+0.05,{vh:rnd(9,13),life:rnd(0.35,0.5),size:rnd(10,13),g:-1,fb:'-'});}
       FX.flashLight(x,y,2,'#ff8a3a',6,20,0.35);if(near)snd('boom',{x,y,vol:0.5});break;
     case 'eringhit':burst(x,y,'#ffb347',22,220,0.4,2.2,{h:H,vh:[0,3],g:2});for(let i=0;i<8;i++)flame(x+rnd(-12,12),y+rnd(-12,12),Math.max(0.1,H-1.2),{vx:rnd(-90,90),vy:rnd(-90,90),vh:rnd(4,8),life:0.3,size:rnd(9,12),drag:4});FX.flashLight(x,y,H,'#ff8a3a',3,10,0.2);if(near)snd('block',{x,y,vol:0.5});break;
     case 'blaze':{const o=PM3.get(ev.id);if(o)o.blzIn=0.6;}burst(x,y,'#ff7a2a',30,200,0.6,2.4,{h:H,vh:[1,5],g:-1});ring(x,y,'#ffb347',80,0.4,0.2);FX.flashLight(x,y,H+1,'#ff8a3a',5,16,0.4);if(near)snd('cast_fire',ev);break;
@@ -342,7 +342,7 @@ ring(x,y,'#ff9a4a',ev.r,0.55,0.2);ring(x,y,'#ffd27a',ev.r*0.6,0.45,0.2);burst(x,
       burst(x,y,'#6fd57f',20,160,0.6,2,{h:0.4,vh:[1,4],g:3});ring(x,y,'#6fd57f',55,0.4,0.2);if(near)snd('splat',ev);break;
     case 'silence':burst(x,y,'#b57dff',18,120,0.6,2,{h:H,vh:[0,2],g:0});floatText(x,y,'🤐 ปิดปาก','#d0a8ff',16,H+0.6);break;
     case 'terror':ring(x,y,'#b57dff',ev.r,0.5,H);ring(x,y,'#6a2a9a',ev.r*0.6,0.4,H);SHAPES_Q.push({k:'dome',x,y,h:H,col:'#7a3aaa',s0:0.4,s1:ev.r*S3,life:0.45,op:0.25,full:1});burst(x,y,'#b57dff',60,ev.r*2.2,0.8,2.4,{h:H,vh:[0,4],g:0});smoke(x,y,H,16,'#1a0a2a',1.4,9,ev.r*1.6);FX.flashLight(x,y,H+1,'#9a4aff',5,18,0.4);if(near){snd('roar',{x,y,small:1});shake(4);}break;
-    case 'blind':burst(x,y,'#2a1a3a',50,200,1,4,{h:0.8,vh:[0,2],g:-0.3,smoke:true,grow:1.2});burst(x,y,'#b57dff',20,160,0.7,1.8,{h:0.8,g:0});ring(x,y,'#7a3aaa',ev.r,0.4,0.2);if(near)snd('push',{x,y,vol:0.4});break;
+    case 'blind':burst(x,y,'#2a1a3a',50,200,1,4,{h:H,vh:[0,2],g:-0.3,smoke:true,grow:1.2});burst(x,y,'#b57dff',20,160,0.7,1.8,{h:H,g:0});ring(x,y,'#7a3aaa',ev.r,0.4,H-0.6);if(near)snd('push',{x,y,vol:0.4});break;
     case 'mark':ring(x,y,'#ff4060',50,0.5,H);burst(x,y,'#ff4060',16,100,0.7,1.8,{h:H,vh:[0,2],g:0});floatText(x,y,'🎯 ตรามรณะ','#ff7a8a',16,H+0.6);break;
     case 'worldtree':
       ring(x,y,'#6fd57f',ev.r,0.7,0.2);ring(x,y,'#ff9ad5',ev.r*0.6,0.5,0.2);
