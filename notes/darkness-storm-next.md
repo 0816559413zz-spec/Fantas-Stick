@@ -19,8 +19,11 @@ Hand-off for the next chat. Reply in Thai, short. Discuss before building; still
 - **Map Builder**: Ctrl+C / X / V (`copySel` / `pasteClip`).
 
 ## Open (next chat)
-1. **User asked: re-check all Darkness and Storm animations after the last pull** (close `--cam front` + `side` sheets of every move) and fix anything weird/jittery. Not done yet.
-2. Darkness basic attack (scythe BA): user said "arm spins" — never looked at.
+1. **User asked: re-check all Darkness and Storm animations after the last pull** (close `--cam front` + `side` sheets of every move) and fix anything weird/jittery. Started: Darkness BA checked (item 2, broken). Darkness skills and all Storm moves not re-checked yet.
+2. **Darkness basic attack (scythe BA) — checked 2026-11-28, looks broken, not fixed yet:**
+   - Real match (headless, `HL.cam('q34')`, holding fire): both arms stick out sideways like a T while attacking, and the scythe is not visible in the frames (`shots/dk_ba_live.jpg`), although `o.darkWeapon.visible` is true and arm rotations change (armR ≈ [-1.21,.49,-.7], armL ≈ [-1.77,0,.49] after a swing).
+   - VFX Studio (`stance/darkness_ba_check`, acts `fire`): after the first swing the scythe disappears and the body plays a wand-shot pose with a light ball. The same happens on the old commit 13e1805d, so it is NOT from the Darkness rework.
+   - Next: look at the live BA pose code in `js/68-darkness-view.js` (`ST_DARK_LIVE_BA`, `darkBAPose`, `liveHandPose`) in a real browser (the browser pane) before trusting headless; then fix the arm pose (user: "arm spin") and confirm the scythe swing shows.
 3. Death Sentence charge: from the front the two hands are not clearly together at the hip.
 4. Storm dash: check direction changes mid-dash and the side-dash roll sign.
 5. Thunderbomb camera pull-back only exists in the real game camera — verify in a match.

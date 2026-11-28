@@ -1,0 +1,58 @@
+{
+  "v": 1,
+  "desc": "Darkness BA check (2026-11-28)",
+  "tags": [
+    "stance",
+    "preview"
+  ],
+  "dur": 4,
+  "layers": [
+    {
+      "id": "anchor",
+      "t": "mesh",
+      "shape": "disc",
+      "mat": "black",
+      "op": 0,
+      "at": 0,
+      "life": 4
+    },
+    {
+      "id": "stance",
+      "t": "code",
+      "fn": "studio_class_stance",
+      "at": 0,
+      "life": 4,
+      "args": {
+        "layer": "anchor",
+        "cls": "darkness",
+        "style": "b",
+        "run": [
+          99,
+          99
+        ],
+        "acts": [
+          {
+            "t": 0.3,
+            "a": "fire"
+          },
+          {
+            "t": 0.9,
+            "a": "fire"
+          },
+          {
+            "t": 1.5,
+            "a": "fire"
+          },
+          {
+            "t": 2.1,
+            "a": "fire"
+          },
+          {
+            "t": 2.7,
+            "a": "fire"
+          }
+        ]
+      }
+    }
+  ]
+}
