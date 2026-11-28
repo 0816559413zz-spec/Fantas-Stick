@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-28 Performance: deduplicate queued shader subtrees and skip retries for detached objects. Prepare cloth collision capsules once per frame and reject out-of-range points before projection and square root.
+
 - 2026-11-28 Rendering: refresh High shadows every other frame on regular maps, reduce its larger shadow target from 4096 to 3072, and reuse the same PCSS spiral with incremental rotation.
 
 - 2026-11-27 — **Storm rework is playable.** Thunder Line C is quicker and longer. Thunderbomb replaces the targeted sky strikes. Lightning Mark replaces the bow and lets Storm mark an ally or self. The standard Storm Dome launches immediately and applies recurring damage and Shock at impact or max range. Old kits resolve to the new skills through their existing IDs. PREFIX v119.

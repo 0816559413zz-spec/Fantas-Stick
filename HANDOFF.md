@@ -8,6 +8,8 @@
 
 ## Latest notes (newest first)
 
+**ลดงานคิว shader และผ้าคลุม (2026-11-28):** คิว shader ข้ามวัตถุที่ยังไม่เข้า scene และรวมลูกอยู่ใต้รากในคิวเดียวกัน ทดสอบทั้ง `add` และ `attach` ผ้าคลุมสร้างขอบเขต capsule ก่อนแก้ผ้าและข้ามจุดที่อยู่นอกระยะ ผลชนตรงกันในชุดทดสอบ เฟรมกระตุกจากเรนเดอร์และ shader ใหม่กลางทีมไฟต์ยังอยู่ ดู `guides/OPTIMIZE.md`
+
 **ลดต้นทุนเงา (2026-11-28):** High อัปเดต shadow map ทุกสองเฟรมในแมพทั่วไปและยังรับการสั่งอัปเดตจากฉากทันที ขนาด High จาก 4096 เป็น 3072 สำหรับแมพที่เดิมใช้ 4096 เงานุ่ม PCSS ใช้จุดเดิมโดยหมุนเวกเตอร์สะสมแทน sin/cos ทุกจุด ผล A/B ใน `guides/OPTIMIZE.md`
 
 **Storm rework in game (2026-11-27, v119):** Thunderbomb replaces Triple Strike and Lightning Mark replaces the bow; saved loadouts keep their spell IDs/indices. Thunder Line C is faster/longer and grants a stack without empowering BA. Lightning Mark: press its skill key, then LMB on an ally or RMB on self; 3 s fuse, ally +25% movement, radius 300. Storm Dome fires from the ground and forms a radius-120 damage/Shock field on a surface or at max range. Host/renderer, bots and tuning controls updated. New numerical defaults are listed in designs/storm.md. God Lightning's Dash echo remains a Studio prototype. Tested offline in the browser; live multiplayer and visual polish still need play review.

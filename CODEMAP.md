@@ -655,10 +655,10 @@ ESM:1157 eSmooth:1158 ESF:1161 eShieldFx:1162 eChips:1167 eShieldSegs:1170 eShie
 ## js/48-ragdoll.js (429) — 
 RAG:10 RAGJ:23 RAGB:29 RAGS:33 RAGMIN:37 RAGHINGE:39 _rv1:40 _rv2:40 _rv3:40 _rqa:40 _rqb:40 _rm:40 _ragFw:41 ragBones:42 ragBasis:49 ragTargets:57 ragStart:63 ragBack:96 ragFloor:97 ragStep:98 ragPose:170 ragWrite:185 ragRestore:197 ragEnd:201 ragTick:203 ragHideDead:250 clearDeathFades:259 deathClipMat:269 deathSlashSplit:276 DD_ALPHA:330 deathDissolve:331 deathVisualSync:405
 
-## js/49-cloth.js (283) — 
-CLOTH:10 CLOTH_LITE:28 CL_ROWS:29 CL_NC:29 CL_GAP:29 CL_IN:29 _clV:30 _clA:30 _clB:30 clPinK:32 clBind:34 cloakPanelGrid:36 cloakBodyIndices:50 stormCape:59 clothSetup:97 _clM:130 clTargets:131 clReset:143 clCapsule:147 _clO:151 clWorld:152 clWorldHit:160 clStep:165 clDraw:178 _clRank:200 clothTick:201 clRun:212
-§229 other players: low-res cloth on the batched body (student_all_batch)
-clLiteSetup:231 clLiteShow:258 clLiteTick:259 clLiteDraw:270 clOuterNormals:277
+## js/49-cloth.js (300) —
+CLOTH:10 CLOTH_LITE:28 CL_ROWS:29 CL_NC:29 CL_GAP:29 CL_IN:29 _clV:30 _clA:30 _clB:30 clPinK:32 clBind:34 cloakPanelGrid:36 cloakBodyIndices:50 stormCape:59 clothSetup:97 _clM:130 clTargets:131 clReset:143 clCapsuleState:147 clCapsuleUpdate:150 clCapsule:159 _clO:169 clWorld:170 clWorldHit:178 clStep:183 clDraw:195 _clRank:217 clothTick:218 clRun:229
+§246 other players: low-res cloth on the batched body (student_all_batch)
+clLiteSetup:248 clLiteShow:275 clLiteTick:276 clLiteDraw:287 clOuterNormals:294
 
 ## js/50-grass.js (443) — 
 AIR:10 AIR_MAP:17 AIR_NG:20 airGust:21 airGustOff:26 airEnv:27 airGs:28 airMark:30 airForMap:33 _airV:34 airAt:35 airGv:41 airTick:42
@@ -675,7 +675,7 @@ GR_NOISE:173 GR_LIVE:178 SNOWU:199 GR_SNOW:200 grLive:202 GR_GLSL_V:212 GR_BEGIN
 §420 สกิลลม → หญ้า (ภาพล้วน เรียกจาก windEfx js/68)
 WIND_GRASS:422 airWind:436
 
-## js/51-warmup.js (432) — 
+## js/51-warmup.js (442) —
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_SLICE:13 WARM_X:14 WARM_Y:14 warmKeep:16 warmStaticModels:22 glReady:31 warmCompile:32 warmDraw:35 WARM_SKIP:45 warmAssets:48 warmFx:58 warmNow:71 warmFxRun:79 warmFxEnd:82 warmGather:84 warmPaths:86 warmFrame:88 warmStep:90 preloadCharMat:158 warmTrCopy:161 warmCharVariants:164 warmQueue:184 WARM_LOBBY:190 warmLobbyTick:191 warmTick:198
 §209 Entry loader (PRELOAD-STANDARD step 3, 2026-11-23)
 PRE:215 preloadReg:216 warmDissolve:218 preProg:234 preFin:235 preStart:237
@@ -686,7 +686,7 @@ warmOutline:295
 §312 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
 GWARM:317 gameWarmTick:318 LMAP:351 lobbyMapTick:352 gameWarmFree:362
 §368 Shader never seen before mid-match: compile in the background, hide t…
-SHR:376 shrLights:380 IMZ:385 imzPre:392 imzPost:394 shrRoot:395 shrCollect:396 shrPending:402 shReadyPre:406 shReadyPost:427
+SHR:376 shrLights:380 IMZ:385 imzPre:398 imzPost:400 shrCollect:401 shrPending:407 shReadyPre:411 shReadyPost:437
 
 ## js/52-social.js (172) — 
 §6 แชท: Enter = พิมพ์ / Enter อีกที = ส่ง / Esc = ปิด • ข้อความขึ้นมุมซ้…

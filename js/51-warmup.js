@@ -373,7 +373,7 @@ function gameWarmFree(dt){
 // A new material that reuses an existing shader is ready at once and never hidden. `?noshready` = old path.
 // isReady() = getProgramParameter = a synchronous round trip to the GPU process: never asked for a shader that already existed, and at
 // most once per frame, only after SHR_MIN ms (most links finish by then).
-const SHR={sib:[],seen:new Set(),on:!/[?&]noshready/.test(location.search),q:[],retry:new Map(),pend:new Map(),wait:[],hid:[],list:[],rdy:new WeakSet(),polled:false,
+const SHR={sib:[],seen:new Set(),on:!/[?&]noshready/.test(location.search),q:[],pend:new Map(),wait:[],hid:[],list:[],rdy:new WeakSet(),polled:false,
   fake:{traverse(f){for(const o of SHR.list)f(o);},traverseVisible(){}},lit:new Map()},SHR_MIN=60,SHR_MAX=1500;
 // compile() takes the lights from the scene it is given (a full traverse, ~0.25 ms in a fight): a stand-in with the scene's fog/environment
 // and its light list (refreshed every 2 s; visibility checked live) gives the same program key
@@ -383,16 +383,21 @@ function shrLights(sc,now){let L=SHR.lit.get(sc);
       traverseVisible(f){for(const l of L.a){let v=l;while(v&&v.visible)v=v.parent;if(!v)f(l);}}}};SHR.lit.set(sc,L);}else{L.a=a;L.t=now;}}
   return L.px;}
 const IMZ={on:!/[?&]noimz/.test(location.search),set:new Set(),hid:[],scan:0};
-{const add0=THREE.Object3D.prototype.add;THREE.Object3D.prototype.add=function(o){
+{const add0=THREE.Object3D.prototype.add,attach0=THREE.Object3D.prototype.attach;THREE.Object3D.prototype.add=function(o){
   if(SHR.on){for(let i=0;i<arguments.length;i++){const a=arguments[i];if(a&&a!==this&&a.isObject3D)SHR.q.push(a);}}
   if(IMZ.on){for(let i=0;i<arguments.length;i++){const a=arguments[i];if(a&&a.isInstancedMesh)IMZ.set.add(a);}}
-  return add0.apply(this,arguments);};}
+  return add0.apply(this,arguments);};
+  THREE.Object3D.prototype.attach=function(o){
+    const result=attach0.call(this,o);
+    if(SHR.on)SHR.q.push(o);
+    if(IMZ.on&&o.isInstancedMesh)IMZ.set.add(o);
+    return result;
+  };}
 // Empty instanced pools (count 0: FX pools, debris, marks — ~90 in a TDM fight) still cost program + uniforms + buffers per pass
 // in three r160 (no early-out). Hidden for the frame while empty, restored after render. ?noimz = old.
 function imzPre(){if(!IMZ.on)return;if(--IMZ.scan<=0){IMZ.scan=120;for(const r of [scene,fxScene])r.traverse(o=>{if(o.isInstancedMesh)IMZ.set.add(o);});}   // also pools built before this file / added via children.push
   for(const im of IMZ.set){if(!im.parent){IMZ.set.delete(im);continue;}if(im.count===0&&im.visible){im.visible=false;IMZ.hid.push(im);}}}
 function imzPost(){const H=IMZ.hid;if(!H.length)return;for(let i=0;i<H.length;i++)H[i].visible=true;H.length=0;}
-function shrRoot(o){while(o.parent)o=o.parent;return o;}
 function shrCollect(o){const m=o.material;
   if(m){for(const x of Array.isArray(m)?m:[m]){if(!x||x.userData.shr===1)continue;if(SHR.pend.has(x)){SHR.sib.push(o);continue;}   // another object already compiling this material: it waits too
     if(gl.properties.get(x).currentProgram!==undefined){x.userData.shr=1;continue;}
@@ -406,11 +411,16 @@ function shrPending(m,now){const e=SHR.pend.get(m);if(!e)return false;
 function shReadyPre(){
   shReadyPost();imzPre();if(!SHR.on||!SHR.ext){SHR.q.length=0;return;}
   const now=performance.now();SHR.polled=false;
-  if(SHR.q.length){const Q=SHR.q;SHR.q=[];SHR.seen.clear();const per=new Map();
-    for(const o of Q){const r=shrRoot(o);
-      if(SHR.seen.has(o))continue;SHR.seen.add(o);
-      if(r===scene||r===fxScene){SHR.retry.delete(o);let L=per.get(r);if(!L)per.set(r,L=[]);L.push(o);}
-      else{const n=(SHR.retry.get(o)||0)+1;if(n<30){SHR.retry.set(o,n);SHR.q.push(o);}else SHR.retry.delete(o);}}   // built first, put in the scene later
+  if(SHR.q.length){const Q=SHR.q;SHR.q=[];const queued=SHR.seen,per=new Map();
+    for(const o of Q)queued.add(o);
+    // A queued ancestor collects its subtree. Detached objects are queued when added later.
+    for(const o of queued){
+      let root=o;
+      while(root.parent&&!queued.has(root.parent))root=root.parent;
+      if(root.parent||(root!==scene&&root!==fxScene))continue;
+      let list=per.get(root);if(!list)per.set(root,list=[]);list.push(o);
+    }
+    queued.clear();
     const prev=gl.getRenderTarget();
     for(const [sc,L] of per){SHR.list.length=0;for(const o of L)shrCollect(o);if(!SHR.list.length)continue;
       const before=new Set(gl.info.programs),vis=SHR.list.map(o=>o.visible);for(const o of SHR.list)o.visible=true;

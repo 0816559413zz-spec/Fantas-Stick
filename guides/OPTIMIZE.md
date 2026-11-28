@@ -10,6 +10,12 @@ Priority: **P1** = real bug or big win, **P2** = clear win, **P3** = nice to hav
 
 Shader compiles (not downloads) cause the fight/match-start freezes. Rules for every system and the graphics/perf plan (registry, entry loader, mid-match compile detector, fixed light rig, painterly in assets): `guides/PRELOAD-STANDARD.md`. Gate: `node tools/shader-gate.js` (mid-match shaders must be 0; baseline 45–76 per run).
 
+## 2026-11-28 shader queue and cloth
+
+- A focused Meadow browser probe added a detached subtree with 300 children. The old shader queue retained 302 entries each frame; the new queue retained zero. Both delayed `add` to the main scene and delayed `attach` to the effects scene still prepared their materials.
+- Cloth caches each body capsule's segment and bounds per simulation tick. A seeded comparison of 8,192 points across 24 capsules (including zero-length segments and extended wrists) had 1,656 corrected coordinate values and zero output differences. The isolated kernel was faster in three of four alternating pairs, with noisy timings.
+- A 10-player Meadow bot fight at 720p High still put render submission first. The live baseline and local retest had nearly identical median frame intervals (~85 ms in this setup), with slow spikes in both. The retest had different draw and shader counts as the real-time fight evolved, so this does not establish an overall FPS improvement. Mid-fight shader variants remain an open issue.
+
 ## 2026-11-28 shadow rendering
 
 High refreshes the directional shadow map every other frame in regular matches and honors explicit invalidations. Its previously 4096² maps now use 3072² (43.75% fewer target texels). Ultra and Cinematic keep their shadow target and refresh rate. All soft-shadow levels use iterative rotation for the same PCSS sampling spiral and tap counts.

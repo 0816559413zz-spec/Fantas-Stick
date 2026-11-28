@@ -120,7 +120,7 @@ function clothSetup(o){
   const C={o,outer,ref,rf,NR,N,pk,E:new Float64Array(E),mo,mi,P:new Float32Array(N*3),Q:new Float32Array(N*3),T:new Float32Array(N*3),Tm:new Float32Array(CL_ROWS.length*CL_NC*3),
     caps:[['hips','neck','TORSO'],['thigh_L','shin_L','LEG'],['shin_L','foot_L','LEG'],['thigh_R','shin_R','LEG'],['shin_R','foot_R','LEG'],['upper_arm_L','forearm_L','ARM'],['upper_arm_R','forearm_R','ARM'],['forearm_L','hand_L','FORE'],['forearm_R','hand_R','FORE']].map(([a,b,k])=>[B(a),B(b),k]).filter(c=>c[0]&&c[1]),
     NC:CL_NC,init:false,flip:false,t:0,acc:0,air:{x:0,z:0}};
-  C.capV=C.caps.map(()=>[new THREE.Vector3(),new THREE.Vector3(),0]);
+  C.capV=C.caps.map(clCapsuleState);
   o.g.userData.extra=(o.g.userData.extra||[]).concat([mo,mi]);   // disposeObj(o.g) ทิ้ง mesh ผ้าด้วย
   return C;}
 // ตำแหน่งเป้าของทุกจุด (ตามโมเดลที่ขยับตามกระดูกตอนนี้) → C.T
@@ -144,9 +144,27 @@ function clReset(C){
   C.P.set(C.T);C.Q.set(C.T);C.lp=null;C.air.x=C.air.z=0;C.acc=0;C.init=true;
 }
 // ดันจุดออกจากแคปซูล (a→b รัศมี rad)
-function clCapsule(P,Q,i,a,b,rad){const ax=a.x,ay=a.y,az=a.z,bx=b.x-ax,by=b.y-ay,bz=b.z-az,px=P[i]-ax,py=P[i+1]-ay,pz=P[i+2]-az,L=bx*bx+by*by+bz*bz||1;
-  const t=clamp((px*bx+py*by+pz*bz)/L,0,1),dx=px-bx*t,dy=py-by*t,dz=pz-bz*t,d=Math.sqrt(dx*dx+dy*dy+dz*dz);
-  if(d<rad&&d>1e-5){const k=(rad-d)/d;P[i]+=dx*k;P[i+1]+=dy*k;P[i+2]+=dz*k;Q[i]+=dx*k;Q[i+1]+=dy*k;Q[i+2]+=dz*k;}}   // เลื่อน Q ตามด้วย = ดันออกแต่ไม่เพิ่มความเร็ว (ขาแกว่งไม่ดีดผ้าปลิว)
+function clCapsuleState(){
+  return {a:new THREE.Vector3(),b:new THREE.Vector3(),rad:0,rad2:0,bx:0,by:0,bz:0,len2:1,minX:0,maxX:0,minY:0,maxY:0,minZ:0,maxZ:0};
+}
+function clCapsuleUpdate(c,[from,to,kind]){
+  from.getWorldPosition(c.a);to.getWorldPosition(c.b);
+  if(kind==='FORE')c.b.sub(c.a).multiplyScalar(1+CLOTH.HAND/Math.max(c.b.length(),1e-3)).add(c.a);
+  const rad=CLOTH[kind],bx=c.b.x-c.a.x,by=c.b.y-c.a.y,bz=c.b.z-c.a.z;
+  c.rad=rad;c.rad2=rad*rad;c.bx=bx;c.by=by;c.bz=bz;c.len2=bx*bx+by*by+bz*bz||1;
+  c.minX=Math.min(0,bx)-rad;c.maxX=Math.max(0,bx)+rad;
+  c.minY=Math.min(0,by)-rad;c.maxY=Math.max(0,by)+rad;
+  c.minZ=Math.min(0,bz)-rad;c.maxZ=Math.max(0,bz)+rad;
+}
+function clCapsule(P,Q,i,c){
+  const px=P[i]-c.a.x,py=P[i+1]-c.a.y,pz=P[i+2]-c.a.z;
+  if(px<c.minX||px>c.maxX||py<c.minY||py>c.maxY||pz<c.minZ||pz>c.maxZ)return;
+  const {bx,by,bz}=c,t=clamp((px*bx+py*by+pz*bz)/c.len2,0,1),dx=px-bx*t,dy=py-by*t,dz=pz-bz*t;
+  const d2=dx*dx+dy*dy+dz*dz;
+  if(d2>=c.rad2||d2<=1e-10)return;
+  const d=Math.sqrt(d2),k=(c.rad-d)/d;
+  P[i]+=dx*k;P[i+1]+=dy*k;P[i+2]+=dz*k;Q[i]+=dx*k;Q[i+1]+=dy*k;Q[i+2]+=dz*k;
+}
 // ของในโลกใกล้ตัว (รวบทีละเฟรม): วงกลม [x,y,r,สูง,abs] (px / ม.) • บ้านใกล้ ๆ • กำแพง/เสาสายดิน (เส้น) — ผ้าชนแล้วไม่ทะลุ (ผู้ใช้ 2026-10-21)
 const _clO={x:0,y:0};
 function clWorld(cx,cy){const R=140,c=[],b=[],s=[],near=q=>Math.abs(q.x-cx)<R+q.r&&Math.abs(q.y-cy)<R+q.r;
@@ -173,8 +191,7 @@ function clStep(C,h,gy,caps,bv,W){const P=C.P,Q=C.Q,T=C.T,pk=C.pk,E=C.E,N=C.N,g=
     for(let e=0;e<E.length;e+=4){const a=E[e]*3,b=E[e+1]*3,wa=pk[E[e]]>=1?0:1,wb=pk[E[e+1]]>=1?0:1;if(!(wa+wb))continue;
       const dx=P[b]-P[a],dy=P[b+1]-P[a+1],dz=P[b+2]-P[a+2],d=Math.sqrt(dx*dx+dy*dy+dz*dz)||1e-6,s=(d-E[e+2])/d*E[e+3]/(wa+wb);
       P[a]+=dx*s*wa;P[a+1]+=dy*s*wa;P[a+2]+=dz*s*wa;P[b]-=dx*s*wb;P[b+1]-=dy*s*wb;P[b+2]-=dz*s*wb;}
-    const hitB=true;   // body collision every pass (was every other pass → arms/legs poked through)
-    for(let n=0;n<N;n++){if(pk[n]>=1)continue;const i=n*3;if(hitB)for(const c of caps)clCapsule(P,Q,i,c[0],c[1],c[2]);if(P[i+1]<gy){P[i+1]=gy;Q[i]=lerp(Q[i],P[i],0.6);Q[i+2]=lerp(Q[i+2],P[i+2],0.6);}if(W&&it===IT-1)clWorldHit(P,Q,i,W);}}}
+    for(let n=0;n<N;n++){if(pk[n]>=1)continue;const i=n*3;for(const c of caps)clCapsule(P,Q,i,c);if(P[i+1]<gy){P[i+1]=gy;Q[i]=lerp(Q[i],P[i],0.6);Q[i+2]=lerp(Q[i+2],P[i+2],0.6);}if(W&&it===IT-1)clWorldHit(P,Q,i,W);}}}
 function clDraw(C){const po=C.mo.geometry.attributes.position,pi=C.mi.geometry.attributes.position;for(let n=0;n<C.N;n++)if(C.pk[n]>=1){const i=n*3;C.P[i]=C.T[i];C.P[i+1]=C.T[i+1];C.P[i+2]=C.T[i+2];}po.array.set(C.P);
   const jump=C.o.jumpLegs;
   if(jump?.weight>.01){
@@ -212,7 +229,7 @@ function clothTick(dt){if(!CLOTH.ON||typeof NET==='undefined')return;
 function clRun(C,dt,W){const o=C.o;
   const wj=o.wud!==undefined||(o.wld&&o.wld.t<0.15);if(!C.init||wj)clReset(C);   // Sonic Boom พุ่ง: ตัวย้ายแทบทันที ไม่ให้ผ้ารับรู้ความเร็ว ไม่งั้นปลิวค้างหลังจบ
   else{const i=0;if(Math.hypot(C.T[i]-C.P[i],C.T[i+1]-C.P[i+1],C.T[i+2]-C.P[i+2])>CLOTH.SNAP)clReset(C);}
-  for(let i=0;i<C.caps.length;i++){const q=C.caps[i],c=C.capV[i];q[0].getWorldPosition(c[0]);q[1].getWorldPosition(c[1]);c[2]=CLOTH[q[2]];if(q[2]==='FORE')c[1].sub(c[0]).multiplyScalar(1+CLOTH.HAND/Math.max(c[1].length(),1e-3)).add(c[0]);}   // FORE: reach past the wrist to cover the hand + cuff
+  for(let i=0;i<C.caps.length;i++)clCapsuleUpdate(C.capV[i],C.caps[i]);
   _clV.setFromMatrixPosition(C.o.g.matrixWorld);if(!C.lp){C.lp=_clV.clone();C.ly=C.o.g.rotation.y;}
   const dl=_clB.copy(_clV).sub(C.lp);C.lp.copy(_clV);
   // ผ้าจำลองในกรอบของตัวละคร: ย้ายทุกจุดตามตัวไปส่วนใหญ่ (ไม่เพิ่มความเร็ว) เหลือแค่เศษ INERT ให้ผ้ารับรู้ — จึงไม่แกว่งตามทุกก้าว/ทุกการหมุน
@@ -252,7 +269,7 @@ function clLiteSetup(o){
     full:BG.index,cut:new THREE.BufferAttribute(Uint32Array.from(cloakBodyIndices(BG.index,mark)),1),on:false,sgn:0,
     caps:[['hips','neck','TORSO'],['thigh_L','shin_L','LEG'],['thigh_R','shin_R','LEG'],['upper_arm_L','hand_L','FORE'],['upper_arm_R','hand_R','FORE']].map(([a,b,k])=>[B(a),B(b),k]).filter(c=>c[0]&&c[1]),
     init:false,t:0,acc:0,air:{x:0,z:0}};
-  C.capV=C.caps.map(()=>[new THREE.Vector3(),new THREE.Vector3(),0]);
+  C.capV=C.caps.map(clCapsuleState);
   return C;}
 // on = lite cloth drawn + panel cut from the batch • off = bone cloak (full index). Index checked by identity (stormCape may swap it)
 function clLiteShow(C,on){C.on=on;C.m.visible=on;if(!on)C.init=false;const want=on?C.cut:C.full;if(C.outer.geometry.index!==want)C.outer.geometry.setIndex(want);}
