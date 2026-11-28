@@ -147,7 +147,7 @@ function collideWorld(o,r,z){
   }
   const za=TERR?terrT(o.x,o.y)+z:z;
   for(const c of sgNear(sgObs(),o.x,o.y,r,_sgCO)){
-    if((c.top!==undefined?c.top<=za:c.hgt<=z)||c.bi!==undefined||(c.bot!==undefined&&z+1.9<=c.bot))continue;   // bot = วงที่ลอยเริ่มสูงจากพื้น (ส่วนทึบบนตึกกลวง)
+    if((c.top!==undefined?c.top<=za+OBS_STEP:c.hgt<=z+OBS_STEP)||c.bi!==undefined||(c.bot!==undefined&&z+1.9<=c.bot))continue;   // bot = วงที่ลอยเริ่มสูงจากพื้น (ส่วนทึบบนตึกกลวง) • top ≤ feet + OBS_STEP = step onto it (groundH), not a wall (fix 2026-11-28: small lips on wall tops shoved you sideways off)
     obsCP(c,o.x,o.y);const cx=OCX,cy=OCY;
     if(Math.abs(o.x-cx)>c.r+r||Math.abs(o.y-cy)>c.r+r)continue;
     const dx=o.x-cx,dy=o.y-cy,d=Math.hypot(dx,dy),m=c.r+r;

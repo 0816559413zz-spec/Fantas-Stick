@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-28 — **Fix: walking on wall tops.** Small height steps on top of walls and blocks pushed players sideways off the edge. You can now walk freely on tops and only fall when you walk past the edge.
 - 2026-11-28 — Storm dash: no hand-first dive; the body keeps facing the aim and the pose follows the travel direction (forward lean with arms back, backward sit-back, wide side step); God Lightning dash floats stretched like a bolt (leans back going backward).
 - 2026-11-28 — Map Builder: Ctrl+C / Ctrl+X / Ctrl+V copy, cut and paste the selection (pasted under the mouse; works between maps in the same browser).
 - 2026-11-28 — **Map Builder: shortcuts work with the Thai keyboard on.** Ctrl+D, Ctrl+S, Ctrl+Z, Ctrl+Y, Ctrl+G and the tool keys (Q W E R T…) used to do nothing while typing in Thai.

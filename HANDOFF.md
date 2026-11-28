@@ -8,6 +8,8 @@
 
 ## Latest notes (newest first)
 
+**Walk on wall tops without being shoved off (2026-11-28, user: Pyro on a castle wall top got pushed sideways and fell):** `collideWorld` js/12 only skipped an OBS collider when its top was at or below the feet, but `groundH` lets you step onto tops up to 0.35 higher. Wall tops are built from many boxes/capsules whose tops differ by a few cm, so every small lip pushed the player sideways instead of letting them step on (headless fcs-file sweep: ~1000 shoves, all from colliders 0–0.35 above the feet). Now both use the shared `OBS_STEP` (0.35, js/04): a collider whose top is ≤ feet + `OBS_STEP` is a step, not a wall. Remaining blocks on tops are real walls (parapet panels, 80-high boundary walls). Side effect: OBS colliders ≤ 0.35 high can now be walked onto from the ground too (matches the step rule).
+
 **Storm dash round 2 (2026-11-28, user approved):** js/72 `zapMix` blends `DPOSE.zapF|zapB|zapS` by the travel angle `S.rel` (body no longer turns to the travel direction for Storm); God Lightning uses `bolt`/`boltB` (`dpStyle` → 'bolt' when `p.sm[3]&4`). Hold `DPT.zapHold` .12. Preview `stance/storm_dash_check`. Map Builder Ctrl+C/X/V: `copySel`/`pasteClip` (mapbuild/app.js).
 
 **Map Builder shortcuts on a Thai keyboard (2026-11-28, user: guest Ctrl+D did nothing):** the keydown handler in `mapbuild/app.js` read `e.key`, which is a Thai letter (D = ก) when the Thai layout is on, so Ctrl+D/S/Z/Y/G and the tool letters did nothing. It now reads the physical key (`e.code` KeyA–KeyZ) and falls back to `e.key` for other keys. Not guest-specific: host + guest Ctrl+D tested OK in a live room (incl. a synthetic `key:'ก', code:'KeyD'` event).
