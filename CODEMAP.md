@@ -56,7 +56,7 @@ ROLE_N:246 takePoison:247
 PBASIC:250
 
 ## js/04-frost-mech.js (143) — สายน้ำแข็ง: ประชิด/ไกล (V) • ฟันดาบ/ขวาน • ไถลน้ำแข็ง • พื้นน้ำแข็ง/ภ…
-FROSTV:3 FROST_SWING3_HIT:9 frostContactTime:10 frostShieldPitch:11 frostBoom:16 meleeHit:23 mirrorPos:34 frostBasic:35 frostCutTick:57 frostSlam3:66 frostSlam:74 frostDash:80 addIce:85 updateIces:87 frostWavePitch:104 frostWaveSolid:107 updateWaves:113 _stO:131 _stL:131 groundH:132
+FROSTV:3 FROST_SWING3_HIT:9 frostContactTime:10 frostShieldPitch:11 frostBoom:16 meleeHit:23 mirrorPos:34 frostBasic:35 frostCutTick:57 frostSlam3:66 frostSlam:74 frostDash:80 addIce:85 updateIces:87 frostWavePitch:104 frostWaveSolid:107 updateWaves:113 _stN:131 groundH:132
 
 ## js/05-terrain.js (45) — พื้นสูงต่ำ (แผนที่จากไฟล์ Blender — กติกาฝั่งคนปั้นใน guides/MAP-DESI…
 TERR:5 TSTEP:6 TSLOPE:6 terrT:7 floorAt:12 terrSolid:14 terrMove:21 updateGlaciers:30
@@ -514,7 +514,8 @@ bpOpen:53 bpOn:53 bpKey:53 bpShow:55 bpSync:57 hovEl:127
 §128 หน้าตั้งค่า
 setRow:129 setTog:130 setTab:131 XHC:132 XHN:132 setOpts:133 SET_ICO:135 SET_EN:138 gfxPanel:141 renderSettings:148 drawXhPrev:171 openSettings:172 closeSettings:174 modeIcon:230 modeTitle:231 renderLobby:232
 
-## js/41-debug.js (223) — 
+## js/41-debug.js (223) — เครื่องมือทดสอบสมดุล (ใช้ผ่านคอนโซล WD.bal / WD.dmgTest เท่านั้น ผู้เล่นปกติไม่เห็น)
+§5 บอทต่อสู้แบบง่ายๆ: เล็งนำเป้า เดินรักษาระยะ+ส่ายไปมา ร่ายคาถาทุกครั้ง…
 botBrain:6 _obsKeep:50 balArena:51 _balStash:54 balIsolate:55 balReset:58 balDuel:64 balTour:80 balTeamReset:95 balTeam:104 balCoop:132 balSpellTest:148
 §171 Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้…
 SWK:172 swSetup:173

@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-28 — **Stand on top of anything solid.** Jump onto walls, crates, towers, arches and other blocking objects and stand there. To keep players off something, map makers add a taller wall collider.
 - 2026-11-28 — **New setting: HUD animation on/off.** Settings > หน้าจอ (Display) > แอนิเมชัน HUD. Off stops the embers, auras and other looping effects on the full HUD, which makes big fights smoother (about 3 ms a frame in a 6v6 test). Low HP, ult ready and selected cards still show. On by default.
 - 2026-11-28 — **Smoother big team fights.** Less work per frame when many players fight at once: object positions, HUD line-of-sight checks, minimap, Nature plant HUD and the paint pass.
 - 2026-11-28 Performance: batch Wind Sonic Boom wing glints, skip them once the wings start dissolving, and preload the charging wings.

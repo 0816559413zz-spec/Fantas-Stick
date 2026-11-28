@@ -128,7 +128,7 @@ function updateWaves(dt){
 // ภูเขาน้ำแข็ง (Glacier Rend โหมดไกล): แท่งน้ำแข็งแหลมต่อกันเป็นแนว สูงขึ้นเรื่อยๆ เดินขึ้นไปได้
 // พื้นที่ยืนได้ตรง (x,y) วัดเป็น "ความสูงจากพื้นหลัก" (0 = พื้นหลัก/เนิน) • z = ความสูงปัจจุบันของตัวที่ถาม (นับพื้นชั้นบน เช่น สะพาน เฉพาะที่ก้าวขึ้นถึง)
 // ที่ชนที่ยืนบนหลังได้ของแผนที่นี้ (แคชตาม OBS)
-let _stO=null,_stL=[];function standObs(){if(_stO!==OBS){_stO=OBS;_stL=(OBS||[]).filter(o=>o.st);}return _stL;}
+const _stN=[];   // every collider top is a floor (2026-11-28) • block a top with a taller wall collider in Map Builder
 function groundH(x,y,z){
   let g=0;
   if(TERR&&TERR.fl.length){const t=terrT(x,y),a=t+(z||0)+TSTEP;const zz=t+(z||0);for(const f of TERR.fl){const v=floorAt(f,x,y,'top');if((v<=a||(v-zz<1.0&&floorAt(f,x,y,'bot')<=zz))&&v-t>g)g=v-t;}}   // inside a thick slab (roof) near its top = stand on it (fast falls/fliers no longer sink through)
@@ -138,6 +138,6 @@ function groundH(x,y,z){
   {const m=bldMoundH(x,y);if(m>g)g=m;}
   {const c=cityFloorH(x,y,z);if(c>g)g=c;}
   {const pt=pnlTopH(x,y,z);if(pt>g)g=pt;}   // top of breakable panels (js/12-pnl)   // พื้นชั้นบน/ทางลาดในตึกเมือง (js/12-city-dmg)   // เนินซากบ้านที่พังครบทั้งหลัง (js/12)
-  {const S=standObs();if(S.length){const t=TERR?terrT(x,y):0,a=t+(z||0)+0.35;for(const o of S){if((x-o.x)**2+(y-o.y)**2>=o.r*o.r)continue;const v=o.top!==undefined?o.top:t+o.hgt;if(v<=a&&v-t>g)g=v-t;}}}   // โต๊ะ (st): ลงยืนได้เมื่อกระโดดสูงพอ — เดินชนยังกั้นอยู่ (ก้าวขึ้นได้แค่ 0.35 ไม่ใช่ TSTEP)
+  if(OBS&&OBS.length){const t=TERR?terrT(x,y):0,a=t+(z||0)+0.35;for(const o of sgNear(sgObs(),x,y,0,_stN)){if(o.bi!==undefined||o.hgt<=0||obsD2(o,x,y)>=o.r*o.r)continue;const v=o.top!==undefined?o.top:t+o.hgt;if(v<=a&&v-t>g)g=v-t;}}   // โต๊ะ (st): ลงยืนได้เมื่อกระโดดสูงพอ — เดินชนยังกั้นอยู่ (ก้าวขึ้นได้แค่ 0.35 ไม่ใช่ TSTEP)
   return g;
 }
