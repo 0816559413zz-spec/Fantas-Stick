@@ -255,3 +255,5 @@ Tool: ศูนย์รวม Tool → **Map Builder** • โค้ด: `mapbu
 - **หมุน Tilt ด้วย gizmo (2026-11-24):** เลือกแผ่นพัง → <kbd>E</kbd> Rotate → วงแดง = Tilt (เอียงรอบแนวยาวของแผ่น, ทีละ 5°), วงเขียว = หมุนรอบแกนตั้ง (Tilt คงเดิม) • หมุนในระนาบของแผ่น (ขอบล่างเฉียง) ยังไม่มี: ระบบพังในเกมถือว่าขอบล่างราบ (ติดพื้น, กองเศษ)
 - **พื้น/ทางลาดพังได้:** pn_wall Tilt 90 = พื้นนอน, เอียง = ทางลาด → ยืนได้ (`pnlTopH`) • ช่องพัง = ตกลงไป • พื้นต้องอยู่ Group เดียวกับกำแพงที่รองรับ ไม่งั้นโดนครั้งแรกถล่มทั้งแผ่น
 - **ลากคลุมเลือก:** เครื่องมือ Select ลากบนที่ว่าง = เลือกทุกชิ้นที่จุดกลางอยู่ในกรอบ (กำแพง = จุดใดจุดหนึ่ง) • Shift/Ctrl = เพิ่มเข้าที่เลือกไว้
+
+- **Copy / paste (2026-11-28):** Ctrl+C copies every selected item, Ctrl+X cuts, Ctrl+V pastes the copies under the mouse (or 2 m aside), as a new selection. The clipboard is kept in this browser (`localStorage mb_clip`), so you can paste into another map. Code: `copySel` / `pasteClip` in `mapbuild/app.js`.

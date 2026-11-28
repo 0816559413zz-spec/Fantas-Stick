@@ -921,8 +921,8 @@ WDG_YAW:472 wdgGet:473 wdgStart:474 wdgDive:481 wdgKeep:484 wdgEnd:485 wdgTick:4
 ## js/71-perfhud.js (164) — 
 PERF:9 perfNetSample:11 perfNetSend:14 perfNetReceive:20 perfNetFrame:25 FRZ:40 frzAdd:42 frzOk:45 frzFrame:46 SHW:53 shwDiff:54 shwPath:58 shwSig:60 shwWho:61 shwHead:68 shwSrc:69 shwSame:70 shwFrame:71 frzRecv:87 frzIn:89 frzNote:91 FRZ_NAME:95 frzRows:96 perfFrame:98 perfDom:113 perfStats:121 perfGraph:125 _gpuName:138 gpuIntegrated:139 perfRows:140 perfPanel:160 perfText:161
 
-## js/72-dash-pose.js (90) — 
-DPOSE:12 DPT:26 _dpQ:27 _dpX:27 _dpP:27 STANCE_STORM_ZAP:28 dpMix:29 dpKnees:31 dpStyle:39 DPDBG:45 dashPose:46 dpApply:80
+## js/72-dash-pose.js (106) — 
+DPOSE:12 DPT:32 _dpQ:33 _dpX:33 _dpP:33 STANCE_STORM_ZAP:34 dpMix:35 dpKnees:37 dpStyle:45 DPDBG:51 dashPose:52 _zpP:87 zapMix:88 dpApply:96
 
 ## js/73-tune.js (141) — 
 TUNE:8 tuneNum:9 tuneBuild:15
@@ -1004,4 +1004,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(123 files, 38993 lines)
+(123 files, 39009 lines)

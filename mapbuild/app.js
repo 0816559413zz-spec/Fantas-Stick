@@ -1151,6 +1151,8 @@ addEventListener('keydown', e => {
   if ((e.ctrlKey || e.metaKey) && k === 'z') { e.preventDefault(); e.shiftKey ? doRedo() : doUndo(); return; }
   if ((e.ctrlKey || e.metaKey) && k === 'y') { e.preventDefault(); doRedo(); return; }
   if ((e.ctrlKey || e.metaKey) && k === 'd') { e.preventDefault(); dupSel(); return; }
+  if ((e.ctrlKey || e.metaKey) && (k === 'c' || k === 'x')) { if (copySel()) { e.preventDefault(); if (k === 'x') delSel(); } return; }   // copy / cut (user 2026-11-28)
+  if ((e.ctrlKey || e.metaKey) && k === 'v') { e.preventDefault(); pasteClip(); return; }
   if ((e.ctrlKey || e.metaKey) && k === 'g') { e.preventDefault(); if (e.shiftKey) grpSet(''); else grpNew(); return; }   // group / ungroup the selection
   if (e.ctrlKey || e.metaKey) return;
   if (k === 'q' || k === 'w' || k === 'e' || k === 'r' || (k === 't' && !e.shiftKey)) { setGizmo({ q: 'hand', w: 'translate', e: 'rotate', r: 'scale', t: 'resize' }[k]); return; }   // Unity transform tools
@@ -1182,6 +1184,28 @@ function delSel() { if (!sel) return;
   if (fp && fp.pts && sel.pt != null && fp.pts.length > (fp.t === 'dc_road' ? 2 : 3)) { pushUndo('o'); fp.pts.splice(sel.pt, 1); sel.pt = null; resync(); drawHandles(); return; }
   if (w && sel.pt != null && w.pts.length > 2) { pushUndo('o'); w.pts.splice(sel.pt, 1); sel.pt = null; resync(); return; }
   pushUndo('o'); const key = KEYS[sel.k]; M[key] = M[key].filter(v => v.id !== sel.id); sel = null; syncAll(); renderSide(); changed(); }
+// Ctrl+C / Ctrl+V (user 2026-11-28): copies every selected item; paste puts the copies under the mouse (or 2 m aside), works across maps in this browser
+let CLIP = null, pasteN = 0;
+function copySel() {
+  const items = selAll().map(q => { const it = find(q); return it ? { k: q.k, it: JSON.parse(JSON.stringify(it)) } : null; }).filter(Boolean);
+  if (!items.length) return false;
+  CLIP = items; pasteN = 0; try { localStorage.setItem('mb_clip', JSON.stringify(items)); } catch (e) {}
+  return true;
+}
+function pasteClip() {
+  let items = CLIP; if (!items) try { items = JSON.parse(localStorage.getItem('mb_clip') || 'null'); } catch (e) {}
+  if (!items || !items.length) return;
+  const at = it => it.pts && it.x == null ? [it.pts.reduce((a, p) => a + p[0], 0) / it.pts.length, it.pts.reduce((a, p) => a + p[1], 0) / it.pts.length] : [it.x, it.z];
+  const cs = items.map(q => at(q.it)), cx = cs.reduce((a, c) => a + c[0], 0) / cs.length, cz = cs.reduce((a, c) => a + c[1], 0) / cs.length;
+  const g = hover; pasteN++;   // hover = ground point under the mouse (status bar x/z)
+  const dx = g ? g.x - cx : 2 * pasteN, dz = g ? g.z - cz : 2 * pasteN;
+  pushUndo('o'); const out = [];
+  for (const q of items) { if (!KEYS[q.k]) continue; const c = JSON.parse(JSON.stringify(q.it)); c.id = nid(); delete c.grp;
+    if (q.k === 'wall' || (c.pts && c.x == null)) c.pts = c.pts.map(p => [r2(clamp(p[0] + dx, 0, M.W)), r2(clamp(p[1] + dz, 0, M.H))]);
+    else { c.x = r2(clamp(c.x + dx, 0, M.W)); c.z = r2(clamp(c.z + dz, 0, M.H)); }
+    M[KEYS[q.k]].push(c); out.push({ k: q.k, id: c.id }); }
+  sel = out[0] || null; msel = out.slice(1); syncAll(); renderSide(); changed();
+}
 function dupSel() {   // copies stay exactly where the originals are (move them with the gizmo) • all selected items are copied, the copies become the selection
   if (!find(sel)) return; pushUndo('o'); const out = [];
   for (const q of selAll()) { const it = find(q); if (!it) continue; const c = JSON.parse(JSON.stringify(it)); c.id = nid(); M[KEYS[q.k]].push(c); out.push({ k: q.k, id: c.id }); }
