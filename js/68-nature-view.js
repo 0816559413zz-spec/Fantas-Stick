@@ -1062,8 +1062,9 @@ function natPortrait(k,src){
 function natPlantHud(me,v){
   if(!NPH.el){const d=document.createElement('div');d.id='h4pl';document.body.appendChild(d);NPH.el=d;}
   const el=NPH.el,list=me&&me.al!==false&&v?(v.NT||[]).filter(o=>o.owner===me.id&&o.hp>0&&NPH_IC[o.k]):[];
-  if(!list.length||(H4.el&&H4.el.hidden)){if(el.innerHTML){el.innerHTML='';NPH.key='';}el.hidden=true;return;}
-  el.hidden=false;
+  // write `hidden` only on change: re-setting it every frame dirtied the page style → the HUD's next canvas font set paid a forced style recalc
+  if(!list.length||(H4.el&&H4.el.hidden)){if(el.firstChild){el.innerHTML='';NPH.key='';}if(!el.hidden)el.hidden=true;return;}
+  if(el.hidden)el.hidden=false;
   for(const o of list)if(!NPH.img[o.k]&&o.age>(o.k==='tree'?NAT.treeGrow+.3:o.k==='wall'?1.2:1)){const V=NAT_VIEW.get(o.id),src=V&&natPortraitObj(V,o.k);if(src){const u=natPortrait(o.k,src);if(u)NPH.img[o.k]=u;}}
   const ord={tree:0,turret:1,lotus:2,wall:3};list.sort((a,b)=>(ord[a.k]-ord[b.k])||(a.id-b.id));
   const key=list.map(o=>o.k+':'+o.id+':'+Math.ceil(o.hp)+':'+Math.ceil(o.left||0)+':'+(NPH.img[o.k]?1:0)).join('|');

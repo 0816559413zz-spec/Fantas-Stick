@@ -234,7 +234,7 @@ function drawModeHUD(v,me,P,big){
 }
 // แผนที่ย่อมุมขวาบน (kill feed เลื่อนลงมาอยู่ใต้แผนที่): วงกลมหมุนตามมุมกล้อง (ด้านหน้า = ขึ้นบน) ตัวเราอยู่กลาง
 const MM={r:82,view:620,col:{pillar:'#7d8499',stone:'#7d8499',rock:'#6e7482',tree:'#2f6b3f',crate:'#8a6a3e',hay:'#a8883e',hoop:'#e8c25a',house:'#9a8a78',stall:'#c0603a',lamp:'#ffd070',barrel:'#8a6a3e',well:'#6a7a94',table:'#8a6a3e',tfence:'#c8a060',tgate:'#f0d070'}};
-const MMB=new Map();
+const MMB=new Map(),_mmO=[];
 function drawMinimap(v,me,P){
   if(!me)return;
   // แผนที่ย่อสี่เหลี่ยมมุมซ้ายล่าง (ผู้ใช้ 2026-10-28) — กรอบตาม h4MapBox (js/66) • R = ครึ่งความกว้าง
@@ -257,8 +257,10 @@ function drawMinimap(v,me,P){
   }
   // สิ่งกีดขวาง
   // one path + one fill per colour (was one fill per obstacle: ~100+ canvas fills a frame on tree maps, 2026-11-22; colours are opaque → same picture)
-  {const B=MMB;for(const L of B.values())L.length=0;
-  for(const o of OBS){
+  // nearby obstacles from the spatial grid (was a walk over every OBS entry a frame); colour order fixed per map = order in OBS
+  {const B=MMB;if(B.src!==OBS||B.n!==OBS.length){B.clear();for(const o of OBS){const c=MM.col[o.k]||'#7d8499';if(!B.has(c))B.set(c,[]);}B.src=OBS;B.n=OBS.length;}
+  for(const L of B.values())L.length=0;
+  for(const o of sgNear(sgObs(),me.x,me.y,MM.view,_mmO)){
     const ex=Math.abs(o.hx||0),ey=Math.abs(o.hy||0);if(Math.abs(o.x-me.x)>MM.view+obsRR(o)+ex||Math.abs(o.y-me.y)>MM.view+obsRR(o)+ey)continue;
     const c=MM.col[o.k]||'#7d8499';let L=B.get(c);if(!L)B.set(c,L=[]);
     obsEach(o,(x,y,r)=>{const q=pt(x,y,false);if(q)L.push(q[0],q[1],Math.max(1.6,r*sc));});

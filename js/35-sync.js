@@ -1275,17 +1275,18 @@ function nameTag(txt,col){const key=col+'|'+txt;let c=NAMETAG.get(key);if(c)retu
   g.fillStyle='rgba(0,0,0,0.65)';g.fillText(txt,w/2+1,16);g.fillStyle=col;g.fillText(txt,w/2,15);NAMETAG.set(key,c);return c;}
 // Enemy tags hide behind walls (user 2026-11-24): camera → target segment vs terrain, obstacles/Map Builder walls, panels, city.
 // Starts past our own player (camera may sit inside a wall). true = clear.
-const _hsO=[];
+const _hsO=[],_hsQ=[],_hsLo=[],_hsHi=[];
 function hudSight(x,y,h,me){
   const o=cam.position,x0=o.x/S3+MW/2,y0=o.z/S3+MH/2,dx=x-x0,dy=y-y0,L2=dx*dx+dy*dy;if(L2<1)return true;
   const L=Math.sqrt(L2),t0=me?clamp(((me.x-x0)*dx+(me.y-y0)*dy)/L2,0,0.95):0,t1=Math.max(t0,1-12/L);
   const wa=o.y,wb=GY(x,y)+h,ax=x0+dx*t0,ay=y0+dy*t0,aw=wa+(wb-wa)*t0,bx=x0+dx*t1,by=y0+dy*t1,bw=wa+(wb-wa)*t1;
   if(bldRay(ax,ay,aw-GY(ax,ay),bx,by,bw-GY(bx,by)))return false;
   const obs=sgNear(sgObs(),(ax+bx)/2,(ay+by)/2,L*(t1-t0)/2+10,_hsO),n=Math.max(1,Math.ceil(L*(t1-t0)/10));
+  // height band of each obstacle once per ray (was GY + obsLo per obstacle per step: 2.4 % of CPU in a 6v6 siege fight)
+  let m=0;for(const q of obs){if(q.bi!==undefined||q.k==='tfence'||q.bot>=q.hgt)continue;const g0=GY(q.x,q.y);_hsQ[m]=q;_hsLo[m]=obsLo(q,g0);_hsHi[m]=q.top!==undefined?q.top:g0+(q.hgt||9);m++;}
   for(let i=0;i<=n;i++){const t=i/n,px=ax+(bx-ax)*t,py=ay+(by-ay)*t,wy=aw+(bw-aw)*t;
     if(TERR&&terrSolid(px,py,wy-terrT(px,py)))return false;
-    for(const q of obs){if(q.bi!==undefined||q.k==='tfence'||q.bot>=q.hgt)continue;const g0=GY(q.x,q.y),lo=obsLo(q,g0),hi=q.top!==undefined?q.top:g0+(q.hgt||9);
-      if(wy>=lo&&wy<hi&&obsD2(q,px,py)<q.r*q.r)return false;}}
+    for(let j=0;j<m;j++)if(wy>=_hsLo[j]&&wy<_hsHi[j]){const q=_hsQ[j];if(obsD2(q,px,py)<q.r*q.r)return false;}}
   return true;
 }
 // per-target cached sight (re-check every ~0.1 s, staggered) + smooth fade • returns alpha 0..1

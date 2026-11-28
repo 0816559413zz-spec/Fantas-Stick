@@ -77,7 +77,8 @@ function blobFire(r,write){
   const vis=[];for(const o of fxScene.children)if(o!==pts&&o.visible){o.visible=false;vis.push(o);}
   const sc=m.uniforms.scale.value,rx=SOFTU.uRes.value.x,ry=SOFTU.uRes.value.y,bd=m.blendDst,bda=m.blendDstAlpha,ca=r.getClearAlpha();r.getClearColor(BLOB.cc);
   PBLOB.value=1;m.uniforms.scale.value=sc*0.5*PAINT.blobSize;SOFTU.uRes.value.set(w,h);m.blendDst=m.blendDstAlpha=THREE.OneFactor;
-  r.setRenderTarget(BLOB.rt);r.setClearColor(0x000000,0);r.clear(true,false,false);r.render(fxScene,cam);
+  // second fxScene render this frame: matrices were just updated by the FX pass → skip the scene-wide matrix walk
+  r.setRenderTarget(BLOB.rt);r.setClearColor(0x000000,0);r.clear(true,false,false);const mu=fxScene.matrixWorldAutoUpdate;fxScene.matrixWorldAutoUpdate=false;try{r.render(fxScene,cam);}finally{fxScene.matrixWorldAutoUpdate=mu;}
   PBLOB.value=0;m.uniforms.scale.value=sc;SOFTU.uRes.value.set(rx,ry);m.blendDst=bd;m.blendDstAlpha=bda;r.setClearColor(BLOB.cc,ca);for(const o of vis)o.visible=true;
   BLOB.U.t.value=BLOB.rt.texture;BLOB.U.uB.value.x=PAINT.blobThr;r.setRenderTarget(write);BLOB.q.render(r);}
 // ใบหญ้า (js/50): ย้อมเขียวเหลืองสว่าง + โคนไม่มืด เฉพาะแมพภาพวาด (mesh หญ้าสร้างทีหลังได้ → PaintPass เรียกซ้ำทุกเฟรม)

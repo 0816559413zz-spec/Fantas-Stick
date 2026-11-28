@@ -419,6 +419,45 @@ water +4.8 ms, storm +2.9, fire +2.6, frost +1.9, earth +1.7, wind +1.3. CPU pro
   is first-use GPU work that is not program linking (likely first draws / uploads of match-only objects, e.g. ANGLE per-layout
   variants). Not pursued further.
 
+## Y. Big team fights, 6v6 siege on Cliff Side Castle (2026-11-28, user: "FPS still drops a lot in big fights")
+
+Setup: headless Chrome (NVIDIA), 1280×720, 6v6 bots, siege on `fcs-file`, `tools/bench-tdm.js`. The bench now waits for the entry
+preload and the warm queue before timing (`preMs` / `settleMs` in its result); before that a 32 s CPU profile was 98.9 %
+`getProgramParameter`, i.e. it timed shader compiles, not the fight. `tools/headless.js --novsync` runs rAF uncapped so A/B
+differences above 60 fps show. A/B = interleaved 1 s windows in alternating order (fixed 3 s windows were biased: the fight grows).
+
+- Steady 6v6 at vsync: 53.6 fps. From ~30 s the fight peaks: 35–45 fps uncapped, 560–790 draws. A frame over 16.7 ms waits for
+  the next vblank (30 fps on a 60 Hz screen): that is the big drop players see.
+- 30 s fight profile: `updateMatrixWorld` 5.8 % + `multiplyMatrices` 2 % + `updateWorldMatrix` 1.5 %, `drawHUD` 4.7 %, cloth
+  `clStep` 1.8 %, `hudSight` 1.2 % (plus its `terrT` / `GY` calls); the rest is three's render.
+
+Fixed:
+- **Matrix update with a change check** (js/01-core `MXC`, `?nomxc` = three's own): three recomposes every object and rebuilds
+  every world matrix each render; ~65 % of the 2,500 scene objects never move. A/B 0.66 → 0.37 ms a frame, matrices identical on
+  all 2,361 live objects.
+- **hudSight** (js/35): obstacle height band once per ray, not per obstacle per step.
+- **Minimap** (js/38 `drawMinimap`): obstacles from the spatial grid round the player (`sgNear(sgObs())`), not every OBS entry a
+  frame; colour order per map unchanged.
+- **Nature plant HUD** (js/68-nature-view `natPlantHud`): wrote `hidden` every frame, which dirtied the page style, so the HUD's
+  next canvas `font` set paid a forced style recalc. Now writes on change only.
+- **Paint blob pass** (js/77 `blobFire`): its second fxScene render skips the scene-wide matrix walk (just done by the FX pass).
+- **Class look leak** (js/35 `stanceFX`): Storm / Water class looks were dropped and rebuilt each time the player went down,
+  became a ghost or was hidden: new ribbons + materials each time, never freed (~15 geometries a second in this fight). The same
+  fix (look hidden and reused, freed on a look change, shared pieces marked `userData.keep`) landed upstream the same day
+  ("2026-11-28 class looks and map prop draws" below); kept from this round: `disposeTree` (js/29) no longer disposes three's one
+  shared Sprite quad. Measured with an equivalent local fix, 90 s fight, same seed: GPU geometries 2,800 → 4,129 before,
+  2,159 → 2,496 after (flat for the first 20 s); fps in the fight about the same (40.6 vs 43.2 mean from 30 s, within run noise:
+  the fix is about memory over a long match). 40 s draw probe: +414 → +57 geometries, class looks gone from the "rendered, not in
+  scene, not disposed" list. Left on it (not checked: pools or leaks): unnamed skill FX meshes, cones (MeshStandard) 37,
+  tubes 36, ShaderMaterial meshes 26, tori 10.
+
+Measured, not changed (changes how the HUD looks: user's choice):
+- **HUD round 4 CSS animations** (embers `h4Rise` ×44, flipbooks `h4FbX/Y`, glows; 90 running). A/B in the fight, running vs
+  paused: 17.94 → 15.29 ms a frame (−2.65 ± 0.63 ms). Main-thread style work every frame; `will-change` does not help
+  (−0.27 ± 0.23 ms, 63 layers promoted). Options: draw particles / flipbooks on one canvas, cut them in heavy fights, or a switch.
+- Draws in the fight (before the upstream batching below): players ≈ 240 of ~730 (class-look sprites and ribbons, cloth),
+  30 `prop_crate`, 131 unnamed MeshStandard group pieces.
+
 ## Benchmarks
 - 2026-11-22, combat readability A/B in Team PvP at 1000×560. All 11 classes cast the same 31 skills in an 80-frame test. The default combat presentation reduced median active particles from 2,650 to 1,220 and peak particles from 3,740 to 1,776. Median frame draw calls were 472 versus 461. Shard Storm's landing warning and active edge and Night Waltz's boundary rendered in both runs. `?fullvfx` keeps the original effects for comparison. This fixture measures effect load, not live match FPS.
 

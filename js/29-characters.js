@@ -429,7 +429,7 @@ function disposeTree(root){
   root.traverse(o=>{
     if(o.isMapLight)MLS.pts.delete(o);   // map light slot marker (js/27)
     if(o.isInstancedMesh)o.dispose();
-    if(o.geometry&&o.geometry!==projGeo&&o.geometry!==tailGeo&&!(o.geometry.userData&&o.geometry.userData.keep))o.geometry.dispose();
+    if(o.geometry&&!o.isSprite&&o.geometry!==projGeo&&o.geometry!==tailGeo&&!(o.geometry.userData&&o.geometry.userData.keep))o.geometry.dispose();   // every Sprite shares three's one quad
     if(o.material)for(const m of [].concat(o.material))if(!seen.has(m)){seen.add(m);disposeMaterial(m,keep);}
     // โครงกระดูกของโมเดลไฟล์ (SkeletonUtils.clone = ของใครของมัน) มี bone texture บนการ์ดจอ — ไม่ทิ้ง = รั่วแมตช์ละ ~84 ชิ้น (OPTIMIZE §H)
     //   เส้นขอบใน js/47, js/68 ใช้โครงเดียวกับตัวจริง: ทิ้งซ้ำได้ ถ้าตัวจริงยังอยู่ three สร้าง bone texture ใหม่เองตอนวาดเฟรมถัดไป

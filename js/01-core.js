@@ -15,6 +15,23 @@ function flatMark(m,g){if(!FLAT_ON||!m||!g||m.side!==THREE.DoubleSide||!m.transp
 Object.defineProperty(THREE.Material.prototype,'forceSinglePass',{configurable:true,
   get(){return this._fsp||this.blending===THREE.AdditiveBlending||this._flat===1;},set(v){this._fsp=v;}});
 THREE.Material.prototype.onBeforeRender=function(r,s,c,g){flatMark(this,g);};
+// Matrix update with a change check (2026-11-28, 6v6 siege fcs-file: scene.updateMatrixWorld 0.66 → 0.37 ms a frame, matrices identical
+// on all 2361 live objects). three r160 recomposes every object and rebuilds every world matrix each render (the scene root forces all
+// children); ~65 % of the objects never move. Here an object recomposes only when position / quaternion / scale differ from its last
+// compose (exact compare, cached in _mx), and its world matrix is rebuilt only when it or a parent changed. add() flags the added object
+// (new parent = new world matrix). A matrix written by hand (matrixAutoUpdate off) drops the cache. `?nomxc` = three's own version.
+const MXC=!/[?&]nomxc\b/.test(location.search);
+if(MXC){const P=THREE.Object3D.prototype,add0=P.add;
+  P.updateMatrixWorld=function(force){
+    if(this.matrixAutoUpdate){const c=this._mx,p=this.position,q=this.quaternion,s=this.scale;
+      if(c===undefined||c[0]!==p.x||c[1]!==p.y||c[2]!==p.z||c[3]!==q._x||c[4]!==q._y||c[5]!==q._z||c[6]!==q._w||c[7]!==s.x||c[8]!==s.y||c[9]!==s.z){
+        this.matrix.compose(p,q,s);this.matrixWorldNeedsUpdate=true;const d=c||(this._mx=new Float64Array(10));
+        d[0]=p.x;d[1]=p.y;d[2]=p.z;d[3]=q._x;d[4]=q._y;d[5]=q._z;d[6]=q._w;d[7]=s.x;d[8]=s.y;d[9]=s.z;}}
+    else if(this._mx!==undefined)this._mx=undefined;
+    if(this.matrixWorldNeedsUpdate||force){if(this.parent===null)this.matrixWorld.copy(this.matrix);else this.matrixWorld.multiplyMatrices(this.parent.matrixWorld,this.matrix);
+      this.matrixWorldNeedsUpdate=false;force=true;}
+    const ch=this.children;for(let i=0,l=ch.length;i<l;i++){const o=ch[i];if(o.matrixWorldAutoUpdate===true||force===true)o.updateMatrixWorld(force);}};
+  P.add=function(){for(let i=0;i<arguments.length;i++){const a=arguments[i];if(a&&a.isObject3D)a.matrixWorldNeedsUpdate=true;}return add0.apply(this,arguments);};}
 // ชิ้นเล็กหลายชิ้นที่ใช้ geometry + วัสดุเดียวกัน (หนามน้ำแข็ง, อักษรวงสายฟ้า) → วาดรวมเป็น InstancedMesh ก้อนเดียว (ผู้ใช้ 2026-11-07 "ไฟต์นัวๆกระตุก": ฉากมี ~1,500 draw ตอนอัลติ)
 // instz(meshes,host) คืนตัวแทน (Object3D) ตำแหน่งเดิม ลูกเดิม → โค้ดเดิมขยับ/ซ่อนตัวแทนได้เหมือนเดิม • instzTick() ก่อน render ลอกตำแหน่งลงก้อนรวม • ?noinstz = ปิด
 // ใช้ได้กับวัสดุ three มาตรฐานเท่านั้น (ShaderMaterial ที่เขียน vertex เองไม่รู้จัก instanceMatrix)

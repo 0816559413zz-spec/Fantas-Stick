@@ -7,6 +7,7 @@
 //   node tools/headless.js --game --eval "await HL.solo({kit:'1'});return HL.info()"
 //   node tools/headless.js --fx darkness/scythe_ba --cam top --gif darkness-ba --from 0 --to 2 --still-at 0.7
 // --profile [ชื่อ]: วัด CPU ช่วง console.profile()..profileEnd() ในสคริปต์ → พิมพ์ฟังก์ชันกินเวลาสุด (+ shots/<ชื่อ>.cpuprofile)
+// --novsync: rAF runs as fast as the machine allows (no 60 Hz cap) → A/B frame cost above 60 fps
 // ตัวเลือก: --w 1280 --h 720 • --timeout 180 (วินาที) • --shot out.jpg (ถ่ายทั้งจอตอนจบ ลง shots/) • --quiet (ไม่พิมพ์ console log ของหน้า)
 // สคริปต์ (--js/--eval) = body ของ async function ในหน้า: return ค่าอะไรก็ได้ (พิมพ์เป็น JSON) •
 //   {files:{name:text}} -> shots/<name> (big text output, e.g. tools/fcs-bridge-export.js)
@@ -79,7 +80,7 @@ async function main(){
     url=captureUrl.href;
   }
   const prof=fs.mkdtempSync(path.join(os.tmpdir(),'wdhl-'));
-  const ch=spawn(CHROME,['--headless=new','--remote-debugging-port='+port,'--user-data-dir='+prof,'--window-size='+W+','+H,'--hide-scrollbars','--no-first-run','--mute-audio','--autoplay-policy=no-user-gesture-required','--enable-unsafe-swiftshader','--ignore-gpu-blocklist','--disable-background-timer-throttling','--disable-renderer-backgrounding',...(process.getuid&&process.getuid()===0?['--no-sandbox']:[]),'about:blank'],{stdio:'ignore'});
+  const ch=spawn(CHROME,['--headless=new','--remote-debugging-port='+port,'--user-data-dir='+prof,'--window-size='+W+','+H,'--hide-scrollbars','--no-first-run','--mute-audio','--autoplay-policy=no-user-gesture-required','--enable-unsafe-swiftshader','--ignore-gpu-blocklist','--disable-background-timer-throttling','--disable-renderer-backgrounding',...(A.novsync?['--disable-gpu-vsync','--disable-frame-rate-limit']:[]),...(process.getuid&&process.getuid()===0?['--no-sandbox']:[]),'about:blank'],{stdio:'ignore'});
   let ws,id=0;const pend={},errs=[],logs=[];
   const timer=setTimeout(()=>{console.error('✗ หมดเวลา '+TMO/1000+' วิ');finish(1);},TMO);
   let done=false;
