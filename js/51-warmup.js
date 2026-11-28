@@ -227,13 +227,27 @@ function warmDissolve(root){const out=new THREE.Group(),L=[];root.updateMatrixWo
 preloadReg('frost',()=>new THREE.Mesh(new THREE.PlaneGeometry(1,1),frGuardMat()));   // frost knight Sword Guard sheet (built on first block)
 preloadReg('storm',()=>{const o={g:new THREE.Group()};stormWaveMake(o,{g:0,id:0});return o.g;});   // storm bow wave (ShaderMaterial + bolt tubes)
 preloadReg('pyro',()=>{const g=makeDfCircle(false);g.visible=true;return g;});preloadReg('storm',()=>{const g=makeDfCircle(true);g.visible=true;return g;});
+preloadReg('storm',()=>[stArcBatch(false),stArcBatch(true)].map(mesh=>{
+  mesh.geometry.setDrawRange(0,ST_ARC.seg*6);
+  return mesh;
+}));
 // Countdown first-frame programs (2026-11-25, bench-entry): built on players / the map at match start, never warmed before.
 preloadReg('frost',()=>loadModel('mesh_ice_sword').then(()=>fileWeapon('mesh_ice_sword',-0.66,0.5)),   // file ice sword (DoubleSide ice shader)
   ()=>{const m=mistMesh(),c=new THREE.InstancedMesh(m.geometry,m.material,1);c.frustumCulled=false;fxScene.add(c);return c;});   // frost mist puffs (fxScene)
 preloadReg('wind',()=>makeWindWings());   // wind wings on the body
 preloadReg('all',()=>[ambMesh(0),ambMesh(1)],   // ambient dust / mist (fxScene, js/75)
-  ()=>{const N=Object.values(PROPDEF).map(D=>D.model);   // props (surf look) are made per match
-    return Promise.all(N.map(n=>loadModel(n).catch(()=>null))).then(()=>N.map(n=>MODELS.ready.get(n)?modelInst(n):null).filter(Boolean));});
+  ()=>{
+    const intact=Object.values(PROPDEF).map(D=>D.model);
+    const batched=[...PROP_BATCH_TYPES].flatMap(k=>[PROPDEF[k].model,PROPDEF[k].model+'_broken']);
+    return Promise.all([...new Set([...intact,...batched])].map(loadModel)).then(()=>{
+      const samples=intact.map(modelInst).filter(Boolean);
+      for(const name of batched){
+        const source=propBatchSource(name);
+        if(source)samples.push(propBatchMesh(source,1));
+      }
+      return samples;
+    });
+  });
 function preProg(){return PRE.st===2?1:PRE.st===1?PRE.best:0;}
 function preFin(){if(PRE.st===1){PRE.st=2;PRE.ms=performance.now()-PRE.t0;WARM.log.push('preload '+PRE.ms.toFixed(0)+'ms');}
   const cb=PRE.cb;PRE.cb=[];for(const f of cb)try{f();}catch(e){console.warn('preload cb',e);}}

@@ -10,6 +10,12 @@ Priority: **P1** = real bug or big win, **P2** = clear win, **P3** = nice to hav
 
 Shader compiles (not downloads) cause the fight/match-start freezes. Rules for every system and the graphics/perf plan (registry, entry loader, mid-match compile detector, fixed light rig, painterly in assets): `guides/PRELOAD-STANDARD.md`. Gate: `node tools/shader-gate.js` (mid-match shaders must be 0; baseline 45–76 per run).
 
+## 2026-11-28 class looks and map prop draws
+
+- In the scripted 12-player High workload at 960 × 540, median submissions fell from 695 to 596 on Meadow and from 684 to 639 on Castle Strike (`fcs-file`). Main-pass Storm class-look submissions averaged about 39 → 6 on Meadow. Castle Strike submitted about 25 intact crate draws before the change and 6 combined crate/barrel batch draws afterward. Whole-frame timing varied between runs, so these draw counts do not establish a live FPS gain.
+- Storm writes its core and glow ribbons into two meshes per player. Pyro samples its left-arm joints once per frame and uses fewer decorative flame meshes on remote players beyond 8 m. Class looks skip off-camera updates, reuse the same group through temporary visibility changes, and release owned geometry when the look changes. The test checked Storm's live ribbon range, camera turn-away and return, and group reuse through an invulnerability blink.
+- Crates and barrels use tiled instances of the existing model, with intact and broken states in separate batches. A snapshot transition moved one crate from the intact batch to the broken batch and restored it to the correct slot when the original state returned. The entry queue prewarms the new arc and prop variants. HUD feed text widths are recomputed only for new lines or when font loading completes.
+
 ## 2026-11-28 shader queue and cloth
 
 - A focused Meadow browser probe added a detached subtree with 300 children. The old shader queue retained 302 entries each frame; the new queue retained zero. Both delayed `add` to the main scene and delayed `attach` to the effects scene still prepared their materials.

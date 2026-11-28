@@ -329,12 +329,12 @@ ANIM_ALT:49 makeAnimator:50 animResolve:55 animPlay:56 _animN:66 animLod:67 anim
 §261 VFX จากไฟล์ (รายละเอียดฝั่งคนทำอยู่ใน guides/ASSETS.md)
 VFXL:267 FLIPL:267 FLIPS:267 prefetchFx:268 playVfx:269 vfxSeq:315 flipTex:320 playFlip:328 fileFx:343 zoneFx:350 clearVfx:351 updateVfx:352
 
-## js/23-props-bld-view.js (205) — prop ฝั่งแสดงผล
-PROPV:2 propFallback:4 farCull:33 syncProps:34
-§51 flying debris (city towers / props): chunks fall, bounce, then rest a…
-CHARM:53 DEBRIS:53 _bldIce:54 charMat:55 bldIceMat:59 updateDebris:61 debrisDrop:76 debrisCap:78 clearDebris:79 drawPropHint:80 syncWalls:88
-§106 ของบังในแผนที่ไฟล์ที่พังได้ ฝั่งแสดงผล (สถานะจาก BRK[].st — host js/1…
-BRKV:109 BRK_COL:109 brkSetup:110 BRK_CM:129 brkCrackMat:130 brkClip:146 brkYc:161 brkStump:163 brkSync:173 BRK_ZERO:194 brkFall:196
+## js/23-props-bld-view.js (276) — prop ฝั่งแสดงผล
+PROP_BATCH_TYPES:2 PROPV:3 propFallback:5 farCull:34 PROP_BATCH_SRC:35 _propMatrix:35 propBatchSource:36 propBatchMesh:51 propBatchWrite:58 propBatchAdd:62 propBatchRemove:74 syncProps:79
+§122 flying debris (city towers / props): chunks fall, bounce, then rest a…
+CHARM:124 DEBRIS:124 _bldIce:125 charMat:126 bldIceMat:130 updateDebris:132 debrisDrop:147 debrisCap:149 clearDebris:150 drawPropHint:151 syncWalls:159
+§177 ของบังในแผนที่ไฟล์ที่พังได้ ฝั่งแสดงผล (สถานะจาก BRK[].st — host js/1…
+BRKV:180 BRK_COL:180 brkSetup:181 BRK_CM:200 brkCrackMat:201 brkClip:217 brkYc:232 brkStump:234 brkSync:244 BRK_ZERO:265 brkFall:267
 
 ## js/24-minions-view.js (68) — สัตว์เวท: โมเดลโปร่งแสง + ซิงก์จาก snapshot (MN)
 MM3:2 makeMinion:3 syncMins:36 drawMinBars:58
@@ -463,21 +463,21 @@ iceMat:10 iceRim:11 makeIceSword:12 makeIceAxe:31 makeKiteShield:47
 §59 อาวุธน้ำแข็งลอย (ผู้ใช้ 2026-10-22: "ร่ายคาถาให้ดาบฟันเอง ระยะเท่าเดิ…
 makeIceCrown:63 frostCrown:68 FW_MID:74 FSW:76 _fsV:78 _fsW:78 _fsC:78 _fsD:78 _fsEase:79 frostSwapPose:81 fsShards:101 frostSwapLate:106 FWS:127 FWA:127 _fwM:128 _fwM2:128 _fwX:128 _fwY:128 _fwZ:128 _fwP:128 _fwS:128 _fwQ:128 _eo:129 _ei:129 _ss:129 fwAim:131 fwWeapons:132 FWP:134 FWT:134 fwChop:135 fwSweep:136 FF_RISE:137 fwIdle:138 fwSwing:141 FWL_N:153 fwLink:154 fwMat:157 SLIDE_POSE:160 _slQ:162 frostSlideHead:163 _slAx:169 frostWandLink:170 frostFX:178
 
-## js/35-sync.js (1333) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
+## js/35-sync.js (1394) — ซิงก์ผู้เล่น/ศัตรู/ลูกเวทจาก snapshot + ฉายตำแหน่งลงจอ (ป้ายชื่อ/ตัวเ…
 §2 ท่าร่ายคาถาแบบนักเวทในหนัง Harry Potter (ผู้ใช้ 2026-10-22: "ยิงปกติท…
 CPOSE_T:7 _ce:7 _cs:7 _cb:7 _caJ:9 _caJ0:9 CTWIST:12 counterArm:13 AMP_B:14 AMP_S:14 CP_BEND:15 CPOSE:17 _cpT:26 _cpR:26 CP_STEP:27 CPCOL:28 castStyle:29 castStart:30
 §31 ท่าร่ายสกิล / อัลติ / โล่ (ผู้ใช้ 2026-10-22: "เกือบทุกสกิลควรมีการเห…
 CANIM:36 SKFEET:92 SKANIM:94 skAnim:102
 §103 Storm skill animations, 3 to pick per skill (user 2026-11-25): bigger…
-STORM_ANIM_V:121 STORM_ANIM_PICK:151 _caT:152 _caR:152 skillPose:153 _g2:194 wandTwoHand:195 characterPoseMix:202 characterStance:203 JUMP_LEGS:210 jumpLegPose:219 jumpCloakTurn:255 jumpCloakEuler:255 jumpCloakPose:256 readyBaseR:275 readyBaseL:275 castBaseR:276 castBaseL:276 jumpElbowPivot:277 clearJumpArms:278 jumpArmPose:284 _caEQ:293 _caEX:293 caElbowL:294 _caRQ:299 caElbowR:300 HEAD_DOWN:310 readyHeadTurn:311 readyHeadParent:311 readyHeadEuler:311 readyHeadPose:312 readyAllowed:328
-§333 Class stances (designs/class-stances.md, user 2026-11-24)
-STANCE_STYLE:340 STANCES:341 STANCE_PICK:370 stanceOf:371 _stQ:372 _stX:372 _stZ:372 stanceSpine:374 stanceSpineOff:378 STANCE_WAND:380 stanceWand:381 _swA:393 _swB:393 _swD:393 _swQ:393 _swQ2:393 _swP:393 _swE:396 _swH:396 stanceWandTip:397 _stV:413 _stV2:413 _stV3:413
-§414 Class look (always-on small VFX that tell the class, STANCES[..].fx)
-stBone:416 stLoc:417 stArmPt:418 ST_TEX:421 stTex:422 ST_MAT:430 stMat:431 stMatNew:432 stRibbon:446 stRibbonSet:448 FIRE_TONGUES:449 ST_ARC:452 _stArG:455 stRibbonUV:457
-§458 Storm gold hands (user 2026-11-25)
-ST_GOLD:460 _stGT:461 stGoldMat:465 _sgGA:467 _sgGB:467 _sgGC:467 _sgY:467 stTube:468 stormGold:469 _stArA:495 _stArB:495 _stArC:495 _stArD:495 _stArE:495 ST_GEO:496 stBuild:497 _stF:531 _stH:531 stCyc:532 stanceFX:533 classStance:640 natureReadyEuler:662 natureReadyArm:662 readyStance:663 jumpShoulders:701 CBLOCK:717 CBLOCK_PATH:718 blockPose:719 poseMirror:727 castPose:732 lateSkillPose:738 castPose0:739 clearCharacterCast:768 hitRecoilPose:773 syncPlayers:782 syncEnemies:975 projGeo:1015 tailGeo:1016 _t1:1017 makeProj:1018 _a:1039 _b:1039 PJFX:1041 syncProj:1042 _awT:1143 animateWorld:1144
-§1185 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
-_v:1186 toScreen:1187 BURNC:1195 burnNum:1196 NAMETAG:1210 nameTag:1211 _hsO:1217 hudSight:1218 SIGHT:1231 sightA:1232 drawLabels:1236 TEXTAG:1271 textTag:1272 drawTexts:1276 HITM:1288 DIRI:1288 drawXh:1290 drawCrosshair:1300
+STORM_ANIM_V:121 STORM_ANIM_PICK:152 _caT:153 _caR:153 skillPose:154 _g2:195 wandTwoHand:196 characterPoseMix:203 characterStance:204 JUMP_LEGS:211 jumpLegPose:220 jumpCloakTurn:256 jumpCloakEuler:256 jumpCloakPose:257 readyBaseR:276 readyBaseL:276 castBaseR:277 castBaseL:277 jumpElbowPivot:278 clearJumpArms:279 jumpArmPose:285 _caEQ:294 _caEX:294 caElbowL:295 _caRQ:300 caElbowR:301 HEAD_DOWN:311 readyHeadTurn:312 readyHeadParent:312 readyHeadEuler:312 readyHeadPose:313 readyAllowed:329
+§334 Class stances (designs/class-stances.md, user 2026-11-24)
+STANCE_STYLE:341 STANCES:342 STANCE_PICK:371 stanceOf:372 _stQ:373 _stX:373 _stZ:373 stanceSpine:375 stanceSpineOff:379 STANCE_WAND:381 stanceWand:382 _swA:394 _swB:394 _swD:394 _swQ:394 _swQ2:394 _swP:394 _swE:397 _swH:397 stanceWandTip:398 _stV:414 _stV2:414 _stV3:414
+§415 Class look (always-on small VFX that tell the class, STANCES[..].fx)
+stBone:417 stLoc:418 stArmPt:419 ST_TEX:422 stTex:423 ST_MAT:431 stMat:432 stMatNew:436 stRibbon:450 stRibbonSet:452 FIRE_TONGUES:453 ST_ARC:456 _stArG:459 stArcBatch:461 stArcWrite:482 stArcFinish:492
+§500 Storm gold hands (user 2026-11-25)
+ST_GOLD:502 _stGT:503 stGoldMat:507 _sgGA:509 _sgGB:509 _sgGC:509 _sgY:509 stTube:510 stormGold:511 _stArA:537 _stArB:537 _stArC:537 _stArD:537 _stArE:537 ST_GEO:538 stBuild:540 _stF:576 _stH:576 stCyc:577 stanceFX:578 classStance:701 natureReadyEuler:723 natureReadyArm:723 readyStance:724 jumpShoulders:762 CBLOCK:778 CBLOCK_PATH:779 blockPose:780 poseMirror:788 castPose:793 lateSkillPose:799 castPose0:800 clearCharacterCast:829 hitRecoilPose:834 syncPlayers:843 syncEnemies:1036 projGeo:1076 tailGeo:1077 _t1:1078 makeProj:1079 _a:1100 _b:1100 PJFX:1102 syncProj:1103 _awT:1204 animateWorld:1205
+§1246 ฉายตำแหน่ง 3D ลงจอ (ป้ายชื่อ / ตัวเลขดาเมจ)
+_v:1247 toScreen:1248 BURNC:1256 burnNum:1257 NAMETAG:1271 nameTag:1272 _hsO:1278 hudSight:1279 SIGHT:1292 sightA:1293 drawLabels:1297 TEXTAG:1332 textTag:1333 drawTexts:1337 HITM:1349 DIRI:1349 drawXh:1351 drawCrosshair:1361
 
 ## js/36-modes-view.js (171) — 
 ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 healTex:22 makeItem:23 syncModeObjs:39
@@ -489,12 +489,12 @@ lastFrame:2 HSTOP:5 hitStop:6 FXSTUDIO:8
 §9 เก็บ shader ที่ compile แล้วไว้ตลอดเกม (ผู้ใช้ 2026-11-02 "เล่นกับบอท…
 PINMAX:13 PINNED:13 KEEPSRC:16 pinPrograms:22 frame:25 _fpsAcc:42 _fpsN:42 _fpsLast:42 render:43 detailCull:90 viewDetailAt:93 renderGame:100
 
-## js/38-hud.js (492) — 
+## js/38-hud.js (501) —
 hudPips:2 hudArc:6 drawReticleTimer:8
 §17 HUD
 rr:18 SLOTS:19 fmtTime:20
 §21 ชิ้นส่วน HUD ธีมทอง-น้ำเงิน
-HG:22 HG2:22 HUDF:24 hudTick:25 readyPulse:27 diaPath:29 plate:31 frameBox:37 bossTrail:45 drawBossBar:46 spellDia:66 thinBar:95 drawHUD:100 raceRankClient:185 drawModeHUD:189 MM:227 MMB:228 drawMinimap:229 slotKey:305 mySlots:306 STATUS_ICO:315 SLOTS_IMP:316 BR_LOCK:317 CLUSTER:319 E_NEEDSTAND:320 slotState:321 drawBottom:345 drawBoard:360 FHUD:385 FHTEX:386 fhFrame:387 FH_EDGE:390 FH_CORE:390 fhMix:391 FHC:393 fhLayer:394 drawFireHeat:397 SNAPB:481 snapBanner:482 drawSnapBanner:483
+HG:22 HG2:22 HUDF:24 hudTick:26 readyPulse:28 diaPath:30 plate:32 frameBox:38 bossTrail:46 drawBossBar:47 spellDia:67 thinBar:96 drawHUD:101 raceRankClient:194 drawModeHUD:198 MM:236 MMB:237 drawMinimap:238 slotKey:314 mySlots:315 STATUS_ICO:324 SLOTS_IMP:325 BR_LOCK:326 CLUSTER:328 E_NEEDSTAND:329 slotState:330 drawBottom:354 drawBoard:369 FHUD:394 FHTEX:395 fhFrame:396 FH_EDGE:399 FH_CORE:399 fhMix:400 FHC:402 fhLayer:403 drawFireHeat:406 SNAPB:490 snapBanner:491 drawSnapBanner:492
 
 ## js/39-menu.js (355) — 
 myLook:5 myColor:5 myKit:5 myName:6 renderMyHouse:9
@@ -672,18 +672,18 @@ GR_NOISE:173 GR_LIVE:178 SNOWU:199 GR_SNOW:200 grLive:202 GR_GLSL_V:212 GR_BEGIN
 §420 สกิลลม → หญ้า (ภาพล้วน เรียกจาก windEfx js/68)
 WIND_GRASS:422 airWind:436
 
-## js/51-warmup.js (445) — 
+## js/51-warmup.js (459) —
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_SLICE:13 WARM_X:14 WARM_Y:14 warmKeep:16 warmStaticModels:22 glReady:31 warmCompile:32 warmDraw:35 WARM_SKIP:45 warmAssets:48 warmFx:58 warmNow:71 warmFxRun:79 warmFxEnd:82 warmGather:84 warmPaths:86 warmFrame:88 warmStep:90 preloadCharMat:158 warmTrCopy:161 warmCharVariants:164 warmQueue:184 WARM_LOBBY:193 warmLobbyTick:194 warmTick:201
 §212 Entry loader (PRELOAD-STANDARD step 3, 2026-11-23)
-PRE:218 preloadReg:219 warmDissolve:221 preProg:237 preFin:238 preStart:240
-§253 Event rehearsal (PRELOAD-STANDARD step 4, 2026-11-23)
-WARM_REC_SKIP:259 warmRec:260 warmRecDump:262 WARM_EVFLAGS:263 WARM_EVX:264 WARM_EVY:264 warmEvShift:265 warmRehearse:270 preTick:277
-§287 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
-warmOutline:298
-§315 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
-GWARM:320 gameWarmTick:321 LMAP:354 lobbyMapTick:355 gameWarmFree:365
-§371 Shader never seen before mid-match: compile in the background, hide t…
-SHR:379 shrLights:383 IMZ:388 imzPre:401 imzPost:403 shrCollect:404 shrPending:410 shReadyPre:414 shReadyPost:440
+PRE:218 preloadReg:219 warmDissolve:221 preProg:251 preFin:252 preStart:254
+§267 Event rehearsal (PRELOAD-STANDARD step 4, 2026-11-23)
+WARM_REC_SKIP:273 warmRec:274 warmRecDump:276 WARM_EVFLAGS:277 WARM_EVX:278 WARM_EVY:278 warmEvShift:279 warmRehearse:284 preTick:291
+§301 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
+warmOutline:312
+§329 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
+GWARM:334 gameWarmTick:335 LMAP:368 lobbyMapTick:369 gameWarmFree:379
+§385 Shader never seen before mid-match: compile in the background, hide t…
+SHR:393 shrLights:397 IMZ:402 imzPre:415 imzPost:417 shrCollect:418 shrPending:424 shReadyPre:428 shReadyPost:454
 
 ## js/52-social.js (172) — 
 §6 แชท: Enter = พิมพ์ / Enter อีกที = ส่ง / Esc = ปิด • ข้อความขึ้นมุมซ้…

@@ -140,12 +140,13 @@ let STORM_ANIM_V=null;   // studio arg 'anim' forces a set
     [1,-.45,-.44,0,0,-.43,.44,0,0,'s']
   ],j:[[.3,.25,.24,1.02,-.20,.08,.14,-.14],[.49,.46,.37,1.43,-.25,.08,.15,-.15],[.68,.21,.22,1.20,-.21,.11,.14,-.14],[1,.14,.14,.60,-.12,.12,.15,-.15]]};
   const fold=[-1.63,1.02,0,.37,-1.63,-1.02,0,-.16],open=[-1.13,-1.27,0,-.34,-1.13,1.27,0,.055];
-  CANIM.storm_study_pulse={d:.67,nc:1,st:0,k:[
-    [.27,...fold,'s'],[.32,...fold,'s'],[.41,...open,'i'],[.62,...open,'s'],
+  // Thunderbomb round 2 (user 2026-11-28): longer charge (0.7 s) curled up and trembling, burst open at 0.7 s
+  CANIM.storm_study_pulse={d:1.1,nc:1,st:0,tm:[.18,.6],k:[
+    [.18,...fold,'s'],[.6,...fold,'s'],[.65,...open,'i'],[.82,...open,'s'],
     [1,-.62,-.28,0,0,-.62,.28,0,0,'s']
   ],j:[
-    [.28,1.25,1.25,1.56,-1.18,-1.18,.12,-.12],[.36,.9,.9,1.16,-.77,-.77,.27,-.27],
-    [.47,.10,.10,.14,.08,.05,.58,-.58],[.63,.12,.12,.20,.05,.05,.48,-.48],[1,.14,.14,.42,0,0,.10,-.10]
+    [.18,1.25,1.25,1.56,-1.18,-1.18,.12,-.12],[.6,1.3,1.3,1.6,-1.2,-1.2,.12,-.12],
+    [.69,.10,.10,.14,.08,.05,.58,-.58],[.84,.12,.12,.20,.05,.05,.48,-.48],[1,.14,.14,.42,0,0,.10,-.10]
   ]};
 }
 const STORM_ANIM_PICK={thunderline:'c',stormorbs:'c'};   // user's picks per skill (2026-11-25); skills not listed keep their old animation
@@ -415,9 +416,9 @@ const _stV=new THREE.Vector3(),_stV2=new THREE.Vector3(),_stV3=new THREE.Vector3
 // Meshes driven by time (not PARTS), so they also show in VFX Studio seeks/GIF export. One group per character under o.g.
 function stBone(o,n){const c=o.stBn||(o.stBn={});if(c.m!==o.fileModel){for(const k in c)delete c[k];c.m=o.fileModel;}return c[n]||(c[n]=o.fileModel?.getObjectByName(n)||null);}
 function stLoc(o,n,out){const b=stBone(o,n);if(!b)return null;b.getWorldPosition(out);return o.g.worldToLocal(out);}
-function stArmPt(o,t,out){   // left arm in o.g space, t 0 = shoulder .. 1 = palm
-  const a=stLoc(o,'upper_arm_L',_stV2),b=stLoc(o,'forearm_L',_stV3);if(!a||!b)return null;
-  if(t<.5)return out.lerpVectors(a,b,t*2);const c=stLoc(o,'hand_L',_stV2);return out.lerpVectors(_stV3,c,(t-.5)*2);}
+function stArmPt(shoulder,elbow,hand,t,out){
+  return t<.5?out.lerpVectors(shoulder,elbow,t*2):out.lerpVectors(elbow,hand,(t-.5)*2);
+}
 const ST_TEX={};
 function stTex(k){if(ST_TEX[k])return ST_TEX[k];const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');
   if(k==='soft'){const r=g.createRadialGradient(32,32,0,32,32,32);r.addColorStop(0,'rgba(255,255,255,1)');r.addColorStop(.45,'rgba(255,255,255,.55)');r.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=r;g.fillRect(0,0,64,64);}
@@ -426,9 +427,12 @@ function stTex(k){if(ST_TEX[k])return ST_TEX[k];const c=document.createElement('
       for(const f of [.45,.7]){const x=Math.cos(a)*L*f,y=Math.sin(a)*L*f;g.lineWidth=.8;g.beginPath();g.moveTo(x,y);g.lineTo(x+Math.cos(a+.7)*5,y+Math.sin(a+.7)*5);g.moveTo(x,y);g.lineTo(x+Math.cos(a-.7)*5,y+Math.sin(a-.7)*5);g.stroke();}}
     const r=g.createRadialGradient(0,0,0,0,0,32);r.addColorStop(0,'rgba(220,245,255,.5)');r.addColorStop(1,'rgba(220,245,255,0)');g.fillStyle=r;g.fillRect(-32,-32,64,64);}
   else if(k==='ring'){g.strokeStyle='rgba(255,255,255,1)';g.lineWidth=4;g.beginPath();g.arc(32,32,26,0,6.283);g.stroke();}
-  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return ST_TEX[k]=t;}
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.userData.keep=true;return ST_TEX[k]=t;}
 const ST_MAT={};
-function stMat(k){return ST_MAT[k]||(ST_MAT[k]=stMatNew(k));}
+function stMat(k){
+  if(!ST_MAT[k]){const mat=stMatNew(k);mat.userData.keep=true;ST_MAT[k]=mat;}
+  return ST_MAT[k];
+}
 function stMatNew(k){let m;   // own material per piece when each fades on its own (clone() lost the look)
   if(k==='ink')m=new THREE.MeshBasicMaterial({color:'#050308'});
   else if(k==='inkSmoke')m=new THREE.SpriteMaterial({map:stTex('soft'),color:'#0a0710',transparent:true,depthWrite:false,opacity:.5});
@@ -445,7 +449,7 @@ function stMatNew(k){let m;   // own material per piece when each fades on its o
   return m;}
 function stRibbon(n,mat){const g=new THREE.BufferGeometry(),idx=[];g.setAttribute('position',new THREE.BufferAttribute(new Float32Array((n+1)*2*3),3).setUsage(THREE.DynamicDrawUsage));
   for(let i=0;i<n;i++){const a=i*2;idx.push(a,a+1,a+2,a+1,a+3,a+2);}g.setIndex(idx);const m=new THREE.Mesh(g,mat);m.userData.n=n;return m;}
-function stRibbonSet(m,f){const A=m.geometry.attributes.position,a=A.array,n=m.userData.n;for(let i=0;i<=n;i++)f(i/n,a,i*6);A.needsUpdate=true;m.geometry.computeVertexNormals();m.geometry.computeBoundingSphere();}
+function stRibbonSet(m,f){const A=m.geometry.attributes.position,a=A.array,n=m.userData.n;for(let i=0;i<=n;i++)f(i/n,a,i*6);A.needsUpdate=true;if(!m.material.isMeshBasicMaterial)m.geometry.computeVertexNormals();m.geometry.computeBoundingSphere();}
 const FIRE_TONGUES=9;   // Fire class arm: flame tongues (cost: one small fire-shader mesh each)
 // Storm class look (user 2026-11-25): small lightning arcs flicker over the whole body all the time — not many, random, very fast
 // round 2 (user): bigger arcs, most of them crawl the wand (hand -> tip), a few on the left hand, fewer on the body
@@ -453,15 +457,53 @@ const ST_ARC={n:13,body:4,wand:6,dash:10,seg:7,life:[.06,.13],gap:[.03,.2],len:[
   bones:[['hips','spine',.32],['spine','chest',.3],['chest','neck',.24],['upper_arm_L','forearm_L',.15],['forearm_L','hand_L',.15],['upper_arm_R','forearm_R',.15],['forearm_R','hand_R',.15],['thigh_L','shin_L',.34],['thigh_R','shin_R',.34],['shin_L','foot_L',.42],['shin_R','foot_R',.42]]};   // radius = out past the robe/sleeves
 // glow round an arc fades out to both edges (user 2026-11-25: no flat band 'aura', soft + thin)
 let _stArG=null;function stArcGlowTex(){if(_stArG)return _stArG;const c=document.createElement('canvas');c.width=4;c.height=64;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,64);
-  g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.5,'rgba(255,255,255,1)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,4,64);_stArG=new THREE.CanvasTexture(c);return _stArG;}
-function stRibbonUV(m){const n=m.userData.n,uv=new Float32Array((n+1)*4);for(let i=0;i<=n;i++){uv[i*4]=i/n;uv[i*4+1]=0;uv[i*4+2]=i/n;uv[i*4+3]=1;}m.geometry.setAttribute('uv',new THREE.BufferAttribute(uv,2));}
+  g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.5,'rgba(255,255,255,1)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,4,64);_stArG=new THREE.CanvasTexture(c);_stArG.userData.keep=true;return _stArG;}
+function stArcBatch(glow){
+  const n=ST_ARC.seg,verts=2*(n+1),count=ST_ARC.n,geo=new THREE.BufferGeometry();
+  const p=new Float32Array(count*verts*3),c=new Float32Array(count*verts*4);
+  const indices=[],uv=glow?new Float32Array(count*verts*2):null;
+  for(let k=0;k<count;k++)for(let i=0;i<=n;i++){
+    const v=k*verts+i*2;
+    if(uv){uv[v*2]=uv[v*2+2]=i/n;uv[v*2+3]=1;}
+    if(i<n)indices.push(v,v+1,v+2,v+1,v+3,v+2);
+  }
+  geo.setAttribute('position',new THREE.BufferAttribute(p,3).setUsage(THREE.DynamicDrawUsage));
+  geo.setAttribute('color',new THREE.BufferAttribute(c,4).setUsage(THREE.DynamicDrawUsage));
+  if(uv)geo.setAttribute('uv',new THREE.BufferAttribute(uv,2));
+  geo.setIndex(indices);geo.setDrawRange(0,0);
+  geo.boundingSphere=new THREE.Sphere(new THREE.Vector3(0,1,0),3);
+  const mat=new THREE.MeshBasicMaterial({map:glow?stArcGlowTex():null,vertexColors:true,transparent:true,depthWrite:false,
+    side:THREE.DoubleSide,forceSinglePass:true,blending:glow?THREE.AdditiveBlending:THREE.NormalBlending});
+  const mesh=new THREE.Mesh(geo,mat);
+  mesh.name=glow?'Class look Storm glow':'Class look Storm core';
+  mesh.frustumCulled=false;mesh.renderOrder=3;
+  return mesh;
+}
+function stArcWrite(mesh,slot,pts,axis,width,col,alpha){
+  const attrs=mesh.geometry.attributes;
+  let v=slot*(ST_ARC.seg+1)*2;
+  for(const point of pts){
+    attrs.position.setXYZ(v,point.x-axis.x*width,point.y-axis.y*width,point.z-axis.z*width);
+    attrs.color.setXYZW(v++,col.r,col.g,col.b,alpha);
+    attrs.position.setXYZ(v,point.x+axis.x*width,point.y+axis.y*width,point.z+axis.z*width);
+    attrs.color.setXYZW(v++,col.r,col.g,col.b,alpha);
+  }
+}
+function stArcFinish(mesh,count){
+  const g=mesh.geometry,verts=count*(ST_ARC.seg+1)*2;
+  mesh.visible=count>0;g.setDrawRange(0,count*ST_ARC.seg*6);
+  if(!count)return;
+  for(const a of [g.attributes.position,g.attributes.color]){
+    a.clearUpdateRanges();a.addUpdateRange(0,verts*a.itemSize);a.needsUpdate=true;
+  }
+}
 // ---- Storm gold hands (user 2026-11-25) ----
 // hand: a gold shell over the hand • forearm/upper arm: tubes with a streaky texture that fades up the arm (no hard cut at the wrist)
 const ST_GOLD={tube:new THREE.CylinderGeometry(1,1,1,14,1,true),streaks:3,coatIn:.08,coatOut:.55,handR:.125,foreR:.15,upR:.16,fore:.62};
 let _stGT=null;function stGoldTex(){if(_stGT)return _stGT;const W=128,H=128,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
   for(let i=0;i<46;i++){const px=Math.random()*W,len=H*(.25+Math.random()*.75),w=2+Math.random()*7,g=x.createLinearGradient(0,H,0,H-len);   // v=0 at the hand end: streaks rise from the hand, ragged tops
     g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.7,'rgba(255,255,255,.8)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(px,H-len,w,len);x.fillRect(px-W,H-len,w,len);}
-  _stGT=new THREE.CanvasTexture(c);_stGT.wrapS=THREE.RepeatWrapping;return _stGT;}
+  _stGT=new THREE.CanvasTexture(c);_stGT.wrapS=THREE.RepeatWrapping;_stGT.userData.keep=true;return _stGT;}
 function stGoldMat(tube){return tube?new THREE.MeshStandardMaterial({color:'#ffcf3a',emissive:'#ffa800',emissiveIntensity:1.1,metalness:.35,roughness:.3,map:stGoldTex(),alphaMap:stGoldTex(),transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide})
   :new THREE.MeshStandardMaterial({color:'#ffd54a',emissive:'#ffb000',emissiveIntensity:1.2,metalness:.35,roughness:.28,transparent:true,opacity:0});}
 const _sgGA=new THREE.Vector3(),_sgGB=new THREE.Vector3(),_sgGC=new THREE.Vector3(),_sgY=new THREE.Vector3(0,1,0);
@@ -494,6 +536,7 @@ function stormGold(o,S,P,dt,t){
     const w=ST_ARC.w*.8,V=d.wv;m.material.opacity=.6+.4*dk;stRibbonSet(m,(u,a2,i6)=>{const j=Math.round(u*ST_ARC.seg),q=pts[j];a2[i6]=q.x-V.x*w;a2[i6+1]=q.y-V.y*w;a2[i6+2]=q.z-V.z*w;a2[i6+3]=q.x+V.x*w;a2[i6+4]=q.y+V.y*w;a2[i6+5]=q.z+V.z*w;});});}
 const _stArA=new THREE.Vector3(),_stArB=new THREE.Vector3(),_stArC=new THREE.Vector3(),_stArD=new THREE.Vector3(),_stArE=new THREE.Vector3();
 const ST_GEO={ball:new THREE.SphereGeometry(1,20,14),drop:new THREE.SphereGeometry(1,10,8),plane:new THREE.PlaneGeometry(1,1),shard:new THREE.OctahedronGeometry(1,0)};
+for(const geo of [...Object.values(ST_GEO),ST_GOLD.tube])geo.userData.keep=true;
 function stBuild(o,kind){
   const g=new THREE.Group();g.name='Class look '+kind;g.userData={kind,parts:{}};const P=g.userData.parts;
   const add=(m,list)=>{m.renderOrder=3;m.frustumCulled=false;g.add(m);(P[list]||(P[list]=[])).push(m);return m;};
@@ -506,8 +549,10 @@ function stBuild(o,kind){
     for(let i=0;i<FIRE_TONGUES;i++)add(new THREE.Mesh(ST_GEO.ball,fireMat({mode:'ball',disp:.55,flow:[0,1,0],scale:[2,2,2],speed:2.3,int:.95,op:.9,seed:11+i*3.7})),'tongue');}
   else if(kind==='inkDrip'){for(let i=0;i<7;i++)add(new THREE.Mesh(ST_GEO.drop,stMat('ink')),'drop');for(let i=0;i<4;i++)add(new THREE.Sprite(stMatNew('inkSmoke')),'wisp');}
   else if(kind==='footMist'){for(let i=0;i<14;i++)add(new THREE.Sprite(stMatNew('mist')),'mist');}
-  else if(kind==='stormArc'){for(let i=0;i<ST_ARC.n;i++){const m=add(stRibbon(ST_ARC.seg,new THREE.MeshBasicMaterial({color:i%4===3?'#7fe8ff':'#fff3a0',transparent:true,depthWrite:false,side:THREE.DoubleSide})),'arc');m.userData.t=-Math.random()*.3;
-    m.userData.src=i<ST_ARC.body?0:i<ST_ARC.body+ST_ARC.wand?1:2;const gl=add(stRibbon(ST_ARC.seg,new THREE.MeshBasicMaterial({map:stArcGlowTex(),color:i%4===3?'#38d8ff':'#ffc21c',transparent:true,opacity:.35,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide})),'arcGlow');stRibbonUV(gl);m.userData.gl=gl;}
+  else if(kind==='stormArc'){
+    P.arc=Array.from({length:ST_ARC.n},(_,i)=>({t:-Math.random()*.3,src:i<ST_ARC.body?0:i<ST_ARC.body+ST_ARC.wand?1:2,
+      color:new THREE.Color(i%4===3?'#7fe8ff':'#fff3a0'),glow:new THREE.Color(i%4===3?'#38d8ff':'#ffc21c')}));
+    add(stArcBatch(false),'arcBatch');add(stArcBatch(true),'arcBatch');
     for(let i=0;i<ST_ARC.dash;i++){const m=add(stRibbon(ST_ARC.seg,new THREE.MeshBasicMaterial({color:i%2?'#7fe8ff':'#fff3a0',transparent:true,depthWrite:false,side:THREE.DoubleSide})),'darc');m.visible=false;}
     for(const sd of [0,1]){add(new THREE.Mesh(ST_GEO.ball,stGoldMat(0)),'gHand').userData.sd=sd;add(new THREE.Mesh(ST_GOLD.tube,stGoldMat(1)),'gFore').userData.sd=sd;add(new THREE.Mesh(ST_GOLD.tube,stGoldMat(1)),'gUpper').userData.sd=sd;}
     for(let i=0;i<ST_GOLD.streaks*2;i++){const m=add(stRibbon(ST_ARC.seg,new THREE.MeshBasicMaterial({color:'#ffd23a',transparent:true,depthWrite:false,side:THREE.DoubleSide})),'gStreak');m.userData.sd=i%2;m.userData.t=0;}}
@@ -531,19 +576,32 @@ function stBuild(o,kind){
 const _stF=new THREE.Vector3(),_stH=new THREE.Vector3();
 const stCyc=(t,P,i,n)=>((t/P+i/n)%1+1)%1;   // looping age 0..1 for item i of n
 function stanceFX(o,p,now,dt,detail){
-  const S=o.fileModel&&stanceOf(o),kind=S&&!p.dn&&!p.gh&&o.g.visible?S.fx:null;
-  if(o.stLk&&o.stLk.userData.kind!==kind){o.g.remove(o.stLk);o.stLk=null;}
+  const S=o.fileModel&&stanceOf(o),kind=S?.fx;
+  if(o.stLk&&o.stLk.userData.kind!==kind){
+    o.g.remove(o.stLk);disposeTree(o.stLk);o.stLk=null;
+  }
+  const personal=p.id===NET.myId||FXSTUDIO.own||FULL_COMBAT_VFX;
+  const {x,y,z}=o.g.position;
+  if(p.dn||p.gh||!o.g.visible||!personal&&(!detail||!viewDetailAt(x,y+1,z,2.6))){
+    if(o.stLk)o.stLk.visible=false;
+    return;
+  }
   if(!kind)return;const g=o.stLk||(o.stLk=stBuild(o,kind)),P=g.userData.parts,t=now/1000;g.visible=true;
   const B=S.br||{T:3.5},ph=(o.readyBreath||0)*6.283;
   const fwd=_stF.set(0,0,1).applyQuaternion(o.b.quaternion);fwd.y=0;fwd.normalize();   // facing in o.g space
-  if(kind==='fireArm'||kind==='fireTorch'){const torch=kind==='fireTorch';
-    P.arm.forEach((m,i)=>{const u=.12+.86*i/(P.arm.length-1);if(!stArmPt(o,u,m.position))return;m.position.y+=.03;
+  if(kind==='fireArm'||kind==='fireTorch'){const torch=kind==='fireTorch',full=personal||g.getWorldPosition(_stV).distanceToSquared(cam.position)<64;
+    const shoulder=stLoc(o,'upper_arm_L',_stV2),elbow=stLoc(o,'forearm_L',_stV3),h=stLoc(o,'hand_L',_stH);
+    if(!shoulder||!elbow||!h){g.visible=false;return;}
+    P.arm.forEach((m,i)=>{m.visible=full||i%2===0||i===P.arm.length-1;if(!m.visible)return;
+      const u=.12+.86*i/(P.arm.length-1);stArmPt(shoulder,elbow,h,u,m.position);m.position.y+=.03;
       const r=(torch?.12:.135)+(torch?.05:.03)*u,w=1+.12*Math.sin(t*7.3+i*1.7);m.position.y+=.03;m.scale.set(r*w,r*(1.55+.3*Math.sin(t*5.1+i)),r*w);});
-    if(P.tongue)P.tongue.forEach((m,i)=>{const n=P.tongue.length,T=.55+.12*(i%3),c=t/T+i/n,a=c-Math.floor(c),k=Math.floor(c);   // each tongue: born on the sleeve, rises, thins out
-      const h=Math.sin(k*12.9898+i*78.233)*43758.5453,u=.12+.84*(h-Math.floor(h));if(!stArmPt(o,u,m.position))return;
+    if(P.tongue)P.tongue.forEach((m,i)=>{m.visible=full||i%3===0;if(!m.visible)return;
+      const n=P.tongue.length,T=.55+.12*(i%3),c=t/T+i/n,a=c-Math.floor(c),k=Math.floor(c);   // each tongue: born on the sleeve, rises, thins out
+      const phase=Math.sin(k*12.9898+i*78.233)*43758.5453,u=.12+.84*(phase-Math.floor(phase));
+      stArmPt(shoulder,elbow,h,u,m.position);
       m.position.y+=.1+a*.13;m.position.x+=Math.sin(k*3.1+i)*.03;m.position.z+=Math.cos(k*2.3+i)*.03;
       const r=.06*(1-a*.75)*(.8+.4*u);m.scale.set(r,r*(1.7+a*.6),r);});
-    const h=stLoc(o,'hand_L',_stH);if(h){P.hand[0].position.copy(h).y+=torch?.16:.06;const s=torch?.17:.075;P.hand[0].scale.set(s,s*(torch?2.3:1.8)*(1+.12*Math.sin(t*9)),s);
+    {P.hand[0].position.copy(h).y+=torch?.16:.06;const s=torch?.17:.075;P.hand[0].scale.set(s,s*(torch?2.3:1.8)*(1+.12*Math.sin(t*9)),s);
       if(P.hand[1]){P.hand[1].position.copy(h).y+=.48+.05*Math.sin(t*6);P.hand[1].scale.set(.11,.3*(1+.2*Math.sin(t*8.3)),.11);}
       P.ember.forEach((m,i)=>{const a=stCyc(t,1.1,i,6);m.position.copy(h);m.position.x+=Math.sin(i*2.1+t)*.12*a;m.position.z+=Math.cos(i*1.3+t)*.12*a;m.position.y+=.1+a*(torch?.9:.6);
         m.scale.setScalar(.035*(1-a*.6));m.material.opacity=Math.sin(a*Math.PI);});}
@@ -554,7 +612,8 @@ function stanceFX(o,p,now,dt,detail){
       P.wisp.forEach((m,i)=>{const a=stCyc(t,2.2,i,4),an=t*.9+i*1.57;m.position.set(h.x+Math.cos(an)*.09,h.y-.04+a*.18,h.z+Math.sin(an)*.09);m.scale.setScalar(.12+a*.2);m.material.opacity=.45*Math.sin(a*Math.PI);});}
   }else if(kind==='stormArc'){stormGold(o,S,P,dt,t);   // gold hands / dash arm coat (user 2026-11-25)
     // each arc: pick a body segment, a zigzag along its surface, lives 0.05-0.11 s, waits 0.05-0.35 s, again
-    P.arc.forEach(m=>{const d=m.userData;d.t+=dt;
+    const [core,glow]=P.arcBatch;let count=0;
+    P.arc.forEach(d=>{d.t+=dt;
       if(d.t>=(d.L||0)){d.t=-(ST_ARC.gap[0]+Math.random()*(ST_ARC.gap[1]-ST_ARC.gap[0]));d.L=ST_ARC.life[0]+Math.random()*(ST_ARC.life[1]-ST_ARC.life[0]);
         let sg,a,b;if(d.src===1&&S.noWand){sg=['forearm_R','hand_R',.07];a=stLoc(o,'forearm_R',_stArA);b=stLoc(o,'hand_R',_stArB);if(a&&b)b.addScaledVector(_stArC.copy(b).sub(a),.35);}   // no wand: these crawl round the right hand
         else if(d.src===1&&o.tip){sg=['hand_R','tip',.05];a=stLoc(o,'hand_R',_stArA);b=o.g.worldToLocal(o.tip.getWorldPosition(_stArB));}   // along the wand
@@ -565,10 +624,12 @@ function stanceFX(o,p,now,dt,detail){
           const off=_stArD.copy(side).multiplyScalar(r);const tw=_stArE.crossVectors(ax,side);(d.wv||(d.wv=new THREE.Vector3())).copy(tw).add(side).normalize();
           for(let i=0;i<=ST_ARC.seg;i++){const f=i/ST_ARC.seg,j=i&&i<ST_ARC.seg?ST_ARC.jit:0;const q=pts[i]||(pts[i]=new THREE.Vector3());
             q.copy(_stArA).addScaledVector(ax,u0*len+f*span).add(off).addScaledVector(side,(Math.random()-.5)*j).addScaledVector(tw,(Math.random()-.5)*j*1.6);}}}
-      const on=d.t>=0&&d.ok;m.visible=on;d.gl.visible=on;if(!on)return;const k=1-d.t/d.L,w=ST_ARC.w*(.6+.4*k)*(d.src===1?.8:1),pts=d.p;
-      m.material.opacity=k>.5?1:k*2;d.gl.material.opacity=.35*m.material.opacity;
-      const V=d.wv,rib=(M,W)=>stRibbonSet(M,(u,a2,i6)=>{const i=Math.round(u*ST_ARC.seg),q=pts[i];a2[i6]=q.x-V.x*W;a2[i6+1]=q.y-V.y*W;a2[i6+2]=q.z-V.z*W;a2[i6+3]=q.x+V.x*W;a2[i6+4]=q.y+V.y*W;a2[i6+5]=q.z+V.z*W;});
-      rib(m,w);rib(d.gl,w*ST_ARC.glow);});
+      if(d.t<0||!d.ok)return;
+      const k=1-d.t/d.L,w=ST_ARC.w*(.6+.4*k)*(d.src===1?.8:1),opacity=k>.5?1:k*2;
+      stArcWrite(core,count,d.p,d.wv,w,d.color,opacity);
+      stArcWrite(glow,count++,d.p,d.wv,w*ST_ARC.glow,d.glow,opacity*.35);
+    });
+    stArcFinish(core,count);stArcFinish(glow,count);
   }else if(kind==='footMist'){
     P.mist.forEach((m,i)=>{const a=stCyc(t,4.5,i,P.mist.length),an=i*2.4+t*.15,r=.3+a*.95;m.position.set(Math.cos(an)*r,.08+a*.22,Math.sin(an)*r);
       m.scale.set(.8+a*1.1,.35+a*.45,1);m.material.opacity=.9*Math.sin(a*Math.PI);});
@@ -1237,7 +1298,7 @@ function drawLabels(P,E,v,me,spk){
   if(!SET.names){const team=teamOn(v);P=P.filter(p=>team&&me&&p.tm===me.tm);}
   cx.textAlign='center';
   for(const e of E){if(!e.br)continue;const o=EM3.get(e.id);if(!o)continue;const s=toScreen(e.x,(o.hs||0)+(o.h||2)*0.5,e.y);if(s)burnNum(s[0],s[1],e.br);}
-  for(const p of P){if(!p.br||!p.al||p.id===NET.myId)continue;const s=toScreen(p.x,(p.z||0)+1.2,p.y);if(s)burnNum(s[0],s[1],p.br);}
+  for(const p of P){if(!p.br||!p.al||p.id===NET.myId)continue;const s=toScreen(p.x,(p.z||0)+1.2,p.y);if(s)burnNum(s[0]-(p.stam?26:0),s[1],p.br);}   // Lightning Mark on the body too: number moves left
   cx.textAlign='center';
   for(const e of E){
     const o=EM3.get(e.id);if(!o)continue;

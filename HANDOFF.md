@@ -8,6 +8,8 @@
 
 ## Latest notes (newest first)
 
+**ลด draw calls ในไฟต์ 12 คน (2026-11-28):** รวมสายฟ้าประจำคลาส Storm เป็น 2 mesh ต่อคน ลดรายละเอียดไฟแขน Pyro ของคนที่อยู่ไกล ซ่อนเอฟเฟกต์ประจำคลาสนอกกล้องและใช้ชุดเดิมผ่านช่วงกะพริบ รวมลัง/ถังตามพื้นที่กับสถานะแตก และแคชความกว้างข้อความ HUD เทสต์ High Meadow 695 → 596 draws และ Castle Strike 684 → 639 ดูข้อจำกัดของผลวัดใน `guides/OPTIMIZE.md`
+
 **Map Builder room panel close fix (2026-11-28):** `.mb-room{display:flex}` overrode the `hidden` attribute, so 👥 couldn't close the panel; added `.mb-room[hidden]{display:none}` + ✕ / Esc / click-outside (mapbuild/collab.js).
 
 **Map Builder live co-editing, phase 3 (2026-11-28):** backdrop undo merge (`S.bdCellT` / `bdMetaT` / `bdFullT` stamps, `COL.mergeBd` in `restore`; `snap('b')` now has `t`; a whole-backdrop replace by someone else makes the older undo step a skip), `mergeUndo` also keeps items another person holds (locked). Guest reconnect: tab token (`mb_tok`) → host reuses the slot; on close / 75 s silence the guest keeps editing offline (no flush while unlinked, so `diff()` vs shadow = unsent edits), retries every 2.5 s for 60 s, reloads the host map with `reloadMap`, replays its unsent objects + terrain region and flushes them. Heartbeat `hb` every 3 s (host drops a link after 90 s; long timeouts because hidden tabs run timers once a minute). Tested with two tabs: backdrop undo merge, locked item kept by undo, same slot after reload, drop → offline edit → reconnect → host got both edits. Not covered: backdrop edits made while disconnected, host crash (room ends).

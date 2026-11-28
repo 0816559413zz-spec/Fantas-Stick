@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-28 Performance: batch Storm class-look arcs, thin distant Pyro arm detail, reuse class looks across visibility changes, instance crates and barrels by tile and damage state, and reuse HUD text measurements across frames.
+
 - 2026-11-28 — **Map Builder: the 👥 room panel closes again.** Click 👥 again, the ✕, press Esc, or click anywhere outside it.
 - 2026-11-28 — Darkness round 2: Death Sentence wave is slender and sharp again, thinner scythe trail, two-hand pose at the hip; in Flow it fires 3 of the new horizontal waves; Nightfall lift step 1.5 m (was 4 m).
 - 2026-11-28 — **Map Builder rooms: safer undo and automatic reconnect.** Undo in a room never reverts what someone else changed later, including the backdrop, and never touches something another person is holding. If your connection drops you can keep editing; Map Builder reconnects by itself within a minute, keeps your colour, and sends the edits you made while offline.

@@ -21,7 +21,8 @@ function fmtTime(s){return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
 // ---------- ชิ้นส่วน HUD ธีมทอง-น้ำเงิน ----------
 let HG='#d9b45a',HG2='#f3dc94';const HN='rgba(7,11,24,0.84)';
 // สถานะความรู้สึกของ HUD ฝั่งจอเรา (ไม่เกี่ยวกับเน็ต): แฟลชโดนตี / แถบเลือดค้าง / ช่องคาถาเพิ่งพร้อม / นับถอยหลัง / kill feed เลื่อนเข้า
-const HUDF={t:0,dt:0,id:null,hp:0,hit:0,trail:1,trailHold:0,rdy:{},rdyT:{},ph:'',go:0,uFull:false,uT:-9,feed:new Map()};
+const HUDF={t:0,dt:0,id:null,hp:0,hit:0,trail:1,trailHold:0,rdy:{},rdyT:{},ph:'',go:0,uFull:false,uT:-9,feed:new Map(),topWidth:null,fontRev:0};
+document.fonts?.addEventListener('loadingdone',()=>HUDF.fontRev++);
 function hudTick(){const n=performance.now();HUDF.dt=HUDF.t?Math.min(0.1,(n-HUDF.t)/1000):0;HUDF.t=n;return n;}
 // วงเพชรขยายออกตอนช่องคาถาเพิ่งคูลดาวน์เสร็จ (k = 0→1)
 function readyPulse(x,y,r,k){cx.save();cx.globalAlpha=1-k;cx.strokeStyle=HG2;cx.lineWidth=3*(1-k)+1;cx.shadowColor=HG2;cx.shadowBlur=12;diaPath(x,y,r+3+k*16);cx.stroke();
@@ -121,7 +122,9 @@ function drawHUD(v,me,P){
   else top=`${TEAMN[0]} ${v.ts[0]}   —   ${v.ts[1]} ${TEAMN[1]}   •   ⏱ ${fmtTime(v.tm)}`;
   if(hlBegin('top',SW/2,12)){   // HUD Editor block (js/66-hudlay)
     cx.font='600 16px Kanit,sans-serif';
-    const tw=cx.measureText(top).width+56;
+    let label=HUDF.topWidth;
+    if(!label||label.text!==top||label.rev!==HUDF.fontRev)label=HUDF.topWidth={text:top,rev:HUDF.fontRev,width:cx.measureText(top).width+56};
+    const tw=label.width;
     if(hudMin()){cx.font='500 15px Kanit,sans-serif';cx.fillStyle='rgba(0,0,0,0.55)';cx.fillText(top,SW/2+1,33);cx.fillStyle='#f2f3f5';cx.fillText(top,SW/2,32);}   // Minimal: plain text, no plate
     else{plate(SW/2-tw/2,12,tw,34);
     cx.fillStyle='#efe6cf';cx.fillText(top,SW/2,35);}hlEnd();hlBox('top',SW/2,12,SW/2-tw/2,12,tw,34);}
@@ -132,9 +135,15 @@ function drawHUD(v,me,P){
   // kill feed
   // (ข้อความใหม่เลื่อนเข้าจากขวา • ข้อความที่มีชื่อเรา = ตัวทอง) • ห้องฝึก: เลื่อนลงให้พ้นปุ่ม "จบการฝึก" ใต้แผนที่ย่อ
   cx.textAlign='right';cx.font='14px Kanit,sans-serif';
-  if(hlBegin('feed',SW-12,58)){const F=HUDF.feed,y0=58+(v.mode==='train'?46:0),fo=hlGet('feed').o,feed=HUDL.demo&&!v.feed.length?HL_DEMO_FEED:v.feed;for(const k of [...F.keys()])if(!feed.includes(k))F.delete(k);
-  let fw=0;feed.forEach(f=>{fw=Math.max(fw,cx.measureText(f).width+30);});hlBox('feed',SW-12,58,SW-12-fw,y0,fw,feed.length*28-4);
-  feed.forEach((f,i)=>{if(!F.has(f))F.set(f,now);const k=Math.min(1,(now-F.get(f))/220),e=1-Math.pow(1-k,3),w=cx.measureText(f).width+30,y=y0+i*28,ox=(1-e)*60,mine=me&&f.includes(me.n);
+  if(hlBegin('feed',SW-12,58)){const F=HUDF.feed,y0=58+(v.mode==='train'?46:0),fo=hlGet('feed').o,feed=HUDL.demo&&!v.feed.length?HL_DEMO_FEED:v.feed;for(const k of F.keys())if(!feed.includes(k))F.delete(k);
+  let fw=0;
+  for(const f of feed){
+    let entry=F.get(f);
+    if(!entry||entry.rev!==HUDF.fontRev){entry={start:entry?.start??now,rev:HUDF.fontRev,width:cx.measureText(f).width+30};F.set(f,entry);}
+    fw=Math.max(fw,entry.width);
+  }
+  hlBox('feed',SW-12,58,SW-12-fw,y0,fw,feed.length*28-4);
+  feed.forEach((f,i)=>{const {start,width:w}=F.get(f),k=Math.min(1,(now-start)/220),e=1-Math.pow(1-k,3),y=y0+i*28,ox=(1-e)*60,mine=me&&f.includes(me.n);
     cx.globalAlpha=e*fo;
     if(hudMin()){cx.fillStyle='rgba(0,0,0,0.5)';cx.fillText(f,SW-23+ox,y+18);cx.fillStyle=mine?HG2:'#f2f3f5';cx.fillText(f,SW-24+ox,y+17);cx.globalAlpha=fo;return;}   // Minimal: text only
     const g=cx.createLinearGradient(SW-12-w,0,SW-12,0);g.addColorStop(0,'rgba(7,11,24,0)');g.addColorStop(0.18,HN);g.addColorStop(1,mine?'rgba(60,44,12,0.9)':HN);

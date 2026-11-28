@@ -1,5 +1,6 @@
 // ---------- prop ฝั่งแสดงผล ----------
-const PROPV={g:null,map:null,list:[]};
+const PROP_BATCH_TYPES=new Set(['pcrate','pbarrel']);
+const PROPV={g:null,map:null,list:[],batches:new Map(),sizes:new Map(),dirty:new Set()};
 // โมเดลสำรองจากโค้ด (ใช้เมื่อยังไม่มี/โหลดไฟล์ไม่ได้) — st: 0 ปกติ, 1 พัง, 2 ใช้แล้ว
 function propFallback(k,st){
   const D=PROPDEF[k],g=new THREE.Group(),s=D.r*S3;
@@ -31,22 +32,92 @@ function propFallback(k,st){
 }
 // แมพใหญ่: ของที่ไกลกว่าหมอก (มองไม่เห็นอยู่แล้ว) ไม่ต้องวาด — x,y,r = sim px • เช็กเป็นวงกลมรอบกล้องบนพื้น
 function farCull(x,y,r){const dx=tx(x)-cam.position.x,dz=tz(y)-cam.position.z,R=(scene.fog?scene.fog.far:170)+10+r*S3;return dx*dx+dz*dz>R*R;}
+const PROP_BATCH_SRC=new Map(),_propMatrix=new THREE.Matrix4();
+function propBatchSource(name){
+  if(PROP_BATCH_SRC.has(name))return PROP_BATCH_SRC.get(name);
+  const model=MODELS.ready.get(name);
+  if(!model)return null;
+  const meshes=[];
+  model.scene.traverseVisible(o=>{if(o.isMesh||o.isSprite||o.isLine||o.isPoints)meshes.push(o);});
+  const o=meshes[0];
+  if(model.animations.length||meshes.length!==1||!o.isMesh||o.isSkinnedMesh||o.isInstancedMesh||Array.isArray(o.material)||o.material.transparent){
+    PROP_BATCH_SRC.set(name,null);return null;
+  }
+  model.scene.updateMatrixWorld(true);
+  const source={name,geo:o.geometry,mat:matTwin(o.material,'inst'),transform:o.matrixWorld.clone(),shadow:o.castShadow,receive:o.receiveShadow};
+  PROP_BATCH_SRC.set(name,source);
+  return source;
+}
+function propBatchMesh(source,capacity){
+  const mesh=new THREE.InstancedMesh(source.geo,source.mat,capacity);
+  mesh.name=source.name+' batch';
+  mesh.castShadow=source.shadow;mesh.receiveShadow=source.receive;
+  mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  return mesh;
+}
+function propBatchWrite(batch,q,i){
+  batch.mesh.setMatrixAt(i,_propMatrix.multiplyMatrices(q.g.matrix,batch.source.transform));
+  q.batchIndex=i;
+}
+function propBatchAdd(q,source){
+  const key=source.name+'|'+q.tile;
+  let batch=PROPV.batches.get(key);
+  if(!batch){
+    const mesh=propBatchMesh(source,PROPV.sizes.get(q.tile));
+    mesh.count=0;mesh.visible=false;PROPV.g.add(mesh);
+    batch={mesh,source,members:[]};PROPV.batches.set(key,batch);
+  }
+  const i=batch.members.length;
+  batch.members.push(q);q.batch=batch;propBatchWrite(batch,q,i);
+  PROPV.dirty.add(batch);
+}
+function propBatchRemove(q){
+  const batch=q.batch,last=batch.members.pop();
+  if(last!==q){batch.members[q.batchIndex]=last;propBatchWrite(batch,last,q.batchIndex);}
+  q.batch=null;PROPV.dirty.add(batch);
+}
 function syncProps(v){
   if(!v||!v.PB){if(PROPV.g)PROPV.g.visible=false;return;}
   if(!PROPV.g||PROPV.g.parent!==world||PROPV.map!==builtMap){
     PROPV.g=new THREE.Group();world.add(PROPV.g);PROPV.map=builtMap;PROPV.list=[];
+    PROPV.batches.clear();PROPV.sizes.clear();PROPV.dirty.clear();
     prefetchModels(Object.values(PROPDEF).flatMap(D=>[D.model,D.model+'_broken',D.model+'_used']));
-    for(const o of PROPS){const g=new THREE.Group();g.position.set(tx(o.x),GY(o.x,o.y),tz(o.y));g.rotation.y=o.a;PROPV.g.add(g);PROPV.list.push({g,st:-1,o});}
+    for(const o of PROPS){
+      const g=new THREE.Group();g.position.set(tx(o.x),GY(o.x,o.y),tz(o.y));g.rotation.y=o.a;
+      g.updateMatrix();g.matrixAutoUpdate=false;PROPV.g.add(g);
+      const tile=PROP_BATCH_TYPES.has(o.k)?Math.floor(g.position.x/72)+','+Math.floor(g.position.z/72)+'|'+o.k:null;
+      if(tile!==null)PROPV.sizes.set(tile,(PROPV.sizes.get(tile)||0)+1);
+      PROPV.list.push({g,st:-1,o,tile,batch:null});
+    }
   }
   PROPV.g.visible=true;
   for(const q of PROPV.list){
-    if(farCull(q.o.x,q.o.y,60)){q.g.visible=false;continue;}q.g.visible=true;   // ไกลเกินหมอก: ซ่อน + ยังไม่ต้องสร้างโมเดล
-    const st=+(v.PB[q.o.i]||0);if(st===q.st)continue;q.st=st;
+    if(farCull(q.o.x,q.o.y,60)){
+      q.g.visible=false;
+      if(q.batch){propBatchRemove(q);q.st=-1;}
+      continue;
+    }
+    q.g.visible=!q.batch;
+    const st=+(v.PB[q.o.i]||0),D=PROPDEF[q.o.k],name=D.model+(st===1?'_broken':st===2?'_used':'');
+    if(st===q.st&&q.batch)continue;
+    const source=PROPV.sizes.get(q.tile)>1?propBatchSource(name):null;
+    if(st===q.st&&!source)continue;
+    if(q.batch)propBatchRemove(q);
+    q.st=st;
     for(const c of [...q.g.children]){q.g.remove(c);disposeTree(c);}
-    const D=PROPDEF[q.o.k];
-    q.g.add(modelOr(D.model+(st===1?'_broken':st===2?'_used':''),()=>propFallback(q.o.k,st)));
+    q.g.visible=!source;
+    if(source)propBatchAdd(q,source);
+    else q.g.add(modelOr(name,()=>propFallback(q.o.k,st)));
     gl.shadowMap.needsUpdate=true;
   }
+  for(const batch of PROPV.dirty){
+    const mesh=batch.mesh;
+    mesh.count=batch.members.length;mesh.visible=mesh.count>0;
+    if(mesh.count)mesh.computeBoundingSphere();
+    mesh.instanceMatrix.needsUpdate=true;
+    gl.shadowMap.needsUpdate=true;
+  }
+  PROPV.dirty.clear();
 }
 // ---------- flying debris (city towers / props): chunks fall, bounce, then rest as rubble for the match ----------
 // The old breakable-house view lived here (removed 2026-11-21: houses are breakable panels now, js/12-pnl.js + js/28-pnl-build.js)
