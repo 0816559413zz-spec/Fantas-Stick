@@ -467,7 +467,8 @@ function pushUndo(kind) { undo.push(snap(kind)); if (undo.length > 40) undo.shif
 function restore(e) {
   if (e.isBd) { const back = snap('b'); M.bd = e.bd; buildBd(); applySky(); renderOpts(); changed(); return back; }
   const kind = e.hg && e.js ? 'a' : e.hg ? 't' : 'o', back = snap(kind);
-  if (e.hg) { const rs = e.W !== M.W || e.H !== M.H; M.W = e.W; M.H = e.H; M.nx = Math.round(M.W / C) + 1; M.ny = Math.round(M.H / C) + 1; M.hg = e.hg; M.sf = e.sf; if (rs) buildTerrain(); else updTerrain(0, 0, M.nx - 1, M.ny - 1); }
+  if (e.hg) { const rs = e.W !== M.W || e.H !== M.H, bb = !rs && COL && COL.on ? COL.mergeTerr(e) : undefined;   // room: keep cells others changed, redraw only what differs
+    M.W = e.W; M.H = e.H; M.nx = Math.round(M.W / C) + 1; M.ny = Math.round(M.H / C) + 1; M.hg = e.hg; M.sf = e.sf; if (rs) buildTerrain(); else if (bb !== null) updTerrain(...(bb || [0, 0, M.nx - 1, M.ny - 1])); }
   if (e.js) Object.assign(M, COL ? COL.mergeUndo(JSON.parse(e.js), e.t || 0) : JSON.parse(e.js));   // room: others' later edits stay
   if (sel && !find(sel)) sel = null;
   syncAll(); buildGrid(); renderSide(); changed(); return back;
@@ -524,6 +525,7 @@ function buildBd() {
   updBd(0, 0, B.nx - 1, B.ny - 1); bdSea(); bdStacks(); bdTreesBuild(); gBd.visible = show.bd; need();
 }
 function updBd(i0, j0, i1, j1) {
+  if (COL) COL.onBd(i0, j0, i1, j1);   // live room: send this backdrop region
   const B = M.bd; if (!B || !bdMesh) return; const g = bdMesh.geometry, P = g.attributes.position.array, N = g.attributes.normal.array, Cc = g.attributes.color.array;
   i0 = clamp(i0 - 1, 0, B.nx - 1); j0 = clamp(j0 - 1, 0, B.ny - 1); i1 = clamp(i1 + 1, 0, B.nx - 1); j1 = clamp(j1 + 1, 0, B.ny - 1);
   for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) { const k = j * B.nx + i; bdY[k] = bdAt(B.x0 + i * B.c, B.z0 + j * B.c); P[k * 3 + 1] = bdY[k]; }
@@ -1292,7 +1294,7 @@ const TOOLS = [['select', '⬚', 'Select', 'v', 'Click to select, drag to move �
   ['scatter', '⁘', 'Scatter', 'g', 'Drag to scatter the chosen item (trees, rocks, grass) • Shift = remove items in the circle'],
 ];
 const HINT = Object.fromEntries(TOOLS.map(t => [t[0], t[4]]));
-function setTool(t) { if (t === 'bd' && COL && COL.on) { stat('👥 Backdrop editing is off in a live room (not synced yet)', 'warn'); return; } const wasBd = tool === 'bd'; setTimeout(() => { if (M && (wasBd || t === 'bd')) applySky(); }, 0); if (draft) { draft = null; undo.pop(); drawLine(null); } if (fdraft) { fdraft = null; undo.pop(); drawLine(null); } tool = t; if (t === 'scatter' && !isVisualType(opt.obj)) { const a = KIT.list.find(a => a.cat === 'tree'); if (a) { opt.obj = 'kit:' + a.id; opt.cat = 'tree'; } } renderTools(); renderOpts(); drawHandles(); $('hint').textContent = HINT[t] || ''; placeGizmo(); need(); }
+function setTool(t) { const wasBd = tool === 'bd'; setTimeout(() => { if (M && (wasBd || t === 'bd')) applySky(); }, 0); if (draft) { draft = null; undo.pop(); drawLine(null); } if (fdraft) { fdraft = null; undo.pop(); drawLine(null); } tool = t; if (t === 'scatter' && !isVisualType(opt.obj)) { const a = KIT.list.find(a => a.cat === 'tree'); if (a) { opt.obj = 'kit:' + a.id; opt.cat = 'tree'; } } renderTools(); renderOpts(); drawHandles(); $('hint').textContent = HINT[t] || ''; placeGizmo(); need(); }
 function renderTools() { const box = $('tools'); box.textContent = ''; for (const t of TOOLS) box.append(el('button', { class: tool === t[0] ? 'on' : '', title: t[2] + ' (' + t[3].toUpperCase() + ')', onclick: () => setTool(t[0]) }, el('b', null, t[1]))); const T = TOOLS.find(x => x[0] === tool); if ($('optTitle')) $('optTitle').textContent = '⚙ ' + (T ? T[2] : '') + ' Settings'; }
 const h3 = t => el('h3', null, t);
 function seg(items, cur, on) { const d = el('div', { class: 'seg' }); for (const [v, n, tip] of items) d.append(el('button', { class: 'tl-btn' + (v === cur ? ' on' : ''), title: tip || '', onclick: () => on(v) }, n)); return d; }
@@ -1768,7 +1770,9 @@ $('oSky').onchange = e => { show.sky = e.target.checked; applySky(); };
 addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
 window.__mb = { get M() { return M; }, get tool() { return tool; }, makeWater, pnHoleHit, gameView, gameViewClose, get RX() { return RX; }, loadRooms, MD, opt, placePart, syncParts, partNode, gParts, castleProto, cam, camApply, setTool, gameData, buildExport, exportGame, save, setMap, syncAll, need, kitTpl, KIT, get sel() { return sel; }, set sel(v) { sel = v; renderSide(); updSel(); }, pushUndo, changed, colDirty, updTerrain, afterTerrain, applyRamp, makeFloor, placeObj, doUndo };
 COL = initCollab({ THREE, MD, get M() { return M; }, root, scene, el, stat, applySky, updTerrain, syncAll, buildGrid, syncObjs, syncObj, syncWalls, syncFloors, syncParts, syncPart, colDirty, hierSoon,
-  markDirty: changed, camDist: () => cam.dist, get sel() { return sel; }, renderSide, updSel, need, selAll, loadMap: m => setMap(m), barSlot: $('stat'),
+  markDirty: changed, camDist: () => cam.dist, BD, buildBd, updBd, bdTreesBuild, gh: (x, z) => MD.gh(M, x, z),
+  brushR: () => tool === 'bd' ? opt.brad : tool === 'sculpt' || tool === 'paint' || tool === 'scatter' ? opt.rad : 0,
+  reloadMap: m => { M = m; sel = null; msel = []; undo = []; redo = []; draft = null; GD = null; buildTerrain(); buildBd(); applySky(); syncAll(); buildGrid(); renderSide(); }, get sel() { return sel; }, renderSide, updSel, need, selAll, loadMap: m => setMap(m), barSlot: $('stat'),
   setSel: L => { sel = L[0] || null; msel = L.slice(1); renderSide(); updSel(); },
   boxOf: r => { const it = find(r); if (!it) return null; const b = new THREE.Box3(), t = new THREE.Box3(); b.makeEmpty(); root.updateMatrixWorld(true); for (const n of selNodes(r, it)) if (n) { t.setFromObject(n); b.union(t); } return b.isEmpty() ? null : b; },
   dragging: () => !!gz || !!(drag && drag.k !== 'orbit' && drag.k !== 'pan'), guestLeft: () => { dirty = false; clearTimeout(saveT); stat('Left the room — this copy is not saved until you edit', 'warn'); } });
