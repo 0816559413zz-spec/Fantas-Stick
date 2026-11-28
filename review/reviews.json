@@ -4322,6 +4322,25 @@
    ],
    "feedback": "",
    "reply": "แก้แล้ว: วงเตือนสีส้มทึบมีขอบเข้ม เห็นชัดบนพื้นขาว • แก้สกิลที่พังบนที่สูงทั้งหมด (ลงบนพื้นที่เล็ง โดนเฉพาะคนระดับเดียวกัน)"
+  },
+  {
+   "id": 213,
+   "title": "Darkness: Death Sentence + Nightfall rework (ลงเกมแล้ว)",
+   "text": "เล่น Darkness ในห้องฝึก: Death Sentence ชาร์จแล้วฟันคลื่นแนวนอน (พลาด = คูลดาวน์ครึ่ง) • Nightfall ไม่มีตรา = ก้าวแล้วงัดรอบตัว 60 ลอย ~4 ม. • มีตรา = พุ่งทะลุ + โผล่ข้างบนฟาดลง • ใน Flow = พุ่งทะลุฟันทีเดียว. พรีวิว: studio.html?fx=darkness/rework_mark (rework_lift / rework_marked / rework_flow)",
+   "kind": "Skill",
+   "who": "Darkness",
+   "status": "wait",
+   "created": "2026-11-28T12:00:00",
+   "updated": "2026-11-28T12:00:00",
+   "imgs": [],
+   "links": [
+    "/shots/death_sentence_s.gif",
+    "/shots/nightfall_lift_s.gif",
+    "/shots/nightfall_marked_s.gif",
+    "/shots/nightfall_flow_s.gif"
+   ],
+   "feedback": "",
+   "reply": "ลงเกมแล้วตามพรีวิวที่ผ่าน: ตัวเลขตั้งต้นตามที่คุยกัน ยังไม่ได้ทำเดินช้าลงระหว่างชาร์จ"
   }
  ]
 }

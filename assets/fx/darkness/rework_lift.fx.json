@@ -1,0 +1,37 @@
+{
+  "v": 1,
+  "desc": "Nightfall rework (no mark): step, floor shock, 360 sweep, lift everyone in 7.5 m, shadow tower (user 2026-11-27, preview)",
+  "tags": [
+    "darkness",
+    "preview"
+  ],
+  "dur": 2.4,
+  "layers": [
+    {
+      "id": "anchor",
+      "t": "mesh",
+      "shape": "disc",
+      "mat": "black",
+      "op": 0,
+      "at": 0,
+      "life": 2.4
+    },
+    {
+      "id": "stance",
+      "t": "code",
+      "fn": "studio_class_stance",
+      "at": 0,
+      "life": 2.4,
+      "args": {
+        "layer": "anchor",
+        "cls": "darkness",
+        "style": "b",
+        "darkRework": "lift",
+        "run": [
+          99,
+          99
+        ]
+      }
+    }
+  ]
+}

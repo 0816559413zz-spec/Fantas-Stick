@@ -131,6 +131,18 @@ The user plans a skill's look in **`storyboard.html`** (double-click `Tools.bat`
   - `near: N` = only within N m of the camera
 
 ## 6. See your work: contact sheets (this is how you "look")
+
+**Fast loop (use this first, 2026-11-27 — the user waited 1 hour on a 3-skill preview round):**
+```
+python tools/fxsheet.py darkness/rework_lift --times 0.05,0.15,0.3,0.45,0.7,1.2 --cam side --dist 11
+```
+One command, ~1–2 min: records the fx with `headless.js --fx … --gif` (retries 3×), cuts the frames at `--times` into `shots/<fx>_sheet.jpg`, prints the path → Read it. No server needed. Send the user `shots/<name>_s.gif` (480 px, ~2 MB): the full 5–7 MB GIF does not play in the chat preview.
+- Avoid `--url "studio.html?…&sheet=…&save=…" --wait-shot`: it hung (180 s timeouts) 5 times in a row, and a save name with `/` is saved as `_` so `--wait-shot` never finds it.
+- One `headless.js` at a time (parallel runs failed). Run with `--quiet`; on a fail run once without it and grep `page errors`.
+- Pick the camera once: `side` + `--dist` 8–13 shows body + VFX; `top` only to check layout/direction. Do not shoot every angle.
+- Skill previews with the real player: `studio/class-stance.js` args (`darkRework`, `thunderLine`, `stormStudy`) → pose with `CANIM` keys (game knees/elbows for free), VFX + dummy targets in a root group. Template: `studio/darkness-rework.js`. Gotchas: hide the real avatar with `layers.mask=0` (syncPlayers resets `.visible`); dummy looks `h/cl/hs` only 0–3; `o.darkChaseFx` stub hides the Darkness scythe gear; caster tint = `stDarkBodyTint(o,true)` called with **(strength, opacity)** (one arg = body vanishes); after teleporting the player set `o.cloth.init=false` or the cloak flies up as a black cone; put dummy targets on the far side from the camera (`side` cam sits on the caster's right, −x). A move that travels/teleports: give the preview a `camera(c,T)` (fixed view over the whole route, see `darkness-rework.js`), not `--at self`. `stDarkTargetMark` faces the GAME camera (edge-on in studio views) and is black on black cloaks → use a sprite X (`dkrXMark`). Don't pass a temp vector that a helper also uses inside (`fromTip` bug put the scythe at the origin). Stop after 2 failed fixes of the same thing and probe with `headless.js --url studio.html?fx=… --js probe.js` (`WD.scene`, `STUDIO.seek(t)`, no `THREE` global).
+
+Studio sheet URL (slower, still works in a browser tab):
 ```
 http://localhost:8765/studio.html?fx=storm/railgun&sheet=0.03,0.1,0.2,0.35,0.6,1&cam=side&at=self&map=test&save=railgun_v1
 ```

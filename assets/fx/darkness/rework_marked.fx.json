@@ -1,0 +1,37 @@
+{
+  "v": 1,
+  "desc": "Nightfall rework (marked): orb pass-through slash, reappear above, overhead slam (user 2026-11-27, preview)",
+  "tags": [
+    "darkness",
+    "preview"
+  ],
+  "dur": 1.9,
+  "layers": [
+    {
+      "id": "anchor",
+      "t": "mesh",
+      "shape": "disc",
+      "mat": "black",
+      "op": 0,
+      "at": 0,
+      "life": 1.9
+    },
+    {
+      "id": "stance",
+      "t": "code",
+      "fn": "studio_class_stance",
+      "at": 0,
+      "life": 1.9,
+      "args": {
+        "layer": "anchor",
+        "cls": "darkness",
+        "style": "b",
+        "darkRework": "marked",
+        "run": [
+          99,
+          99
+        ]
+      }
+    }
+  ]
+}

@@ -14,7 +14,8 @@ FXCODE.studio_class_stance=(_x,_y,_h,args,instance)=>{
   const inp=emptyInput(),run=args.run||[2.4,4.0],acts=(args.acts||[]).map(a=>({...a,done:false}));me.inp=inp;
   const foe=foesOf(me.team).filter(e=>e.alive!==false)[0];
   const preview=args.thunderLine?studioThunderLine(me,home,foe)
-    :args.stormStudy?studioStormStudy(args.stormStudy,me,home,inp,foe,args.impact):null;
+    :args.stormStudy?studioStormStudy(args.stormStudy,me,home,inp,foe,args.impact)
+    :args.darkRework&&typeof studioDarkRework==='function'?studioDarkRework(args.darkRework,me,home,foe):null;
   instance.classStanceDispose=preview?.dispose;
   instance.classStanceCamera=preview?.camera;
   // driven from every studio sim step (stStep is wrapped below), on studio time ST.t, so seeks/GIF export replay it exactly

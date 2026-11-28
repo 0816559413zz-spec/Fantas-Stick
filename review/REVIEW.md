@@ -3,6 +3,19 @@
 > เขียนอัตโนมัติจาก `review.html` (ผ่าน `tools/serve.py`) — อย่าแก้ไฟล์นี้ตรง ๆ, แก้ `review/reviews.json` แล้วรัน `python tools/serve.py --review-md`.
 > **Claude:** ทำเฉพาะหัวข้อสถานะ **✏️ ขอแก้** — อ่านความเห็นผู้ใช้ (`ความเห็นผู้ใช้`) + เปิดรูปด้วย Read → แก้ → ตั้ง `status:"wait"` + เขียน `reply` (ไทยสั้น ๆ ว่าแก้อะไร) เพื่อส่งกลับให้ผู้ใช้รีวิวใหม่. อย่าตั้ง `ok` เอง (ผู้ใช้เป็นคนกดผ่าน). งานที่ **⏳ รอ** = รอผู้ใช้ ไม่ต้องทำอะไร
 
+## #213 Darkness: Death Sentence + Nightfall rework (ลงเกมแล้ว)
+- สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: Skill • สาย/ส่วน: Darkness
+
+**วิธีดู / อะไรรอรีวิว:**
+เล่น Darkness ในห้องฝึก: Death Sentence ชาร์จแล้วฟันคลื่นแนวนอน (พลาด = คูลดาวน์ครึ่ง) • Nightfall ไม่มีตรา = ก้าวแล้วงัดรอบตัว 60 ลอย ~4 ม. • มีตรา = พุ่งทะลุ + โผล่ข้างบนฟาดลง • ใน Flow = พุ่งทะลุฟันทีเดียว. พรีวิว: studio.html?fx=darkness/rework_mark (rework_lift / rework_marked / rework_flow)
+
+- ลิงก์/ไฟล์: `/shots/death_sentence_s.gif`
+- ลิงก์/ไฟล์: `/shots/nightfall_lift_s.gif`
+- ลิงก์/ไฟล์: `/shots/nightfall_marked_s.gif`
+- ลิงก์/ไฟล์: `/shots/nightfall_flow_s.gif`
+
+> **Claude ตอบ:** ลงเกมแล้วตามพรีวิวที่ผ่าน: ตัวเลขตั้งต้นตามที่คุยกัน ยังไม่ได้ทำเดินช้าลงระหว่างชาร์จ
+
 ## #212 Storm rework ในเกม
 - สถานะ: ⏳ รอผู้ใช้รีวิว • ชนิด: VFX / แอนิเมชัน • สาย/ส่วน: Storm
 

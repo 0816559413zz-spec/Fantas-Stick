@@ -327,6 +327,7 @@ function darkMarkContact(ev){
   if(target){target.darkMarkedAt=darkViewNow||performance.now();target.darkTint??=stDarkBodyTint(target);}
   const view=darkWaveViews.get(ev.wave);
   if(!view)return;
+  if(view.dkr){view.dkr.contact(ev.distance*S3);return;}
   const world=darkWorldAt(ev,new THREE.Vector3());
   const center=view.root.worldToLocal(world);
   const end=view.direction.clone().multiplyScalar(ev.distance*S3).add(new THREE.Vector3(0,1.1,0));
@@ -820,8 +821,8 @@ function darknessEfx(ev){
     });
     return true;
   }
-  if(z==='darkmarkwind'){if(o)o.darkSwingAt=undefined;darkMarkWind(ev,o);return true;}
-  if(z==='darkmarkcast'){darkMarkLaunch(ev,o);return true;}
+  if(z==='darkmarkwind'){if(o)o.darkSwingAt=undefined;if(!dkrLiveMarkWind(ev,o))darkMarkWind(ev,o);return true;}   // rework 2026-11-28 (studio/darkness-rework.js); Flow 3-wave cast keeps the old view
+  if(z==='darkmarkcast'){if(!(ev.main&&!ev.flow&&dkrLiveMarkLaunch(ev,o)))darkMarkLaunch(ev,o);return true;}
   if(z==='darkmarkhit'){darkMarkContact(ev);return true;}
   if(z==='darkdashcancel'){
     if(o?.darkDashFx){
@@ -936,6 +937,7 @@ function darknessEfx(ev){
   }
   if(z==='darkchaseflow'){
     if(!o)return true;
+    {const seq=dkrLiveChase('flow',ev,o,Math.hypot(ev.x2-ev.x,ev.y2-ev.y)*S3,1.0);o.darkFlowStrike={root:seq.root};return true;}   // rework 2026-11-28
     o.darkSwingAt=undefined;
     if(o.darkMarkCast){
       o.darkMarkCast.live.scythe=false;
@@ -957,6 +959,7 @@ function darknessEfx(ev){
     return true;
   }
   if(z==='darkchaseflowhit'){
+    return true;   // rework: the pass-through cut is drawn by the Flow chase view
     const root=darkViewRoot(ev,'Nightfall Flow impact');
     const points=[[-1.52,-.62,.02],[-.18,-.03,.06],[1.65,.67,.04]];
     const rim=stDarkCut(root,points,.29,0x09070e,12),core=stDarkCut(root,points,.155,0xeeeaf4,13);
@@ -973,6 +976,7 @@ function darknessEfx(ev){
   }
   if(z==='darkchaseplain'||z==='darkchasemarked'){
     if(!o)return true;
+    dkrLiveChase(z==='darkchasemarked'?'marked':'lift',ev,o,ev.distance||0,z==='darkchasemarked'?1.45:1.25);return true;   // rework 2026-11-28 (studio/darkness-rework.js)
     const marked=z==='darkchasemarked',root=darkViewRoot(ev,marked?'Nightfall marked':'Nightfall');
     const contacts=[];
     if(marked)o.darkTint??=stDarkBodyTint(o,true);

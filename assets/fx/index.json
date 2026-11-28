@@ -115,6 +115,50 @@
    "dur": 3.37,
    "n": 2
   },
+  "darkness/rework_flow": {
+   "v": "0d93f8c3",
+   "desc": "Nightfall rework (marked, in Flow): orb passes through the target with one slash, lands on the far side (user 2026-11-28, preview)",
+   "pal": "",
+   "tags": [
+    "darkness",
+    "preview"
+   ],
+   "dur": 1.4,
+   "n": 2
+  },
+  "darkness/rework_lift": {
+   "v": "5aa5b4b6",
+   "desc": "Nightfall rework (no mark): step, floor shock, 360 sweep, lift everyone in 7.5 m, shadow tower (user 2026-11-27, preview)",
+   "pal": "",
+   "tags": [
+    "darkness",
+    "preview"
+   ],
+   "dur": 2.4,
+   "n": 2
+  },
+  "darkness/rework_mark": {
+   "v": "9b107e34",
+   "desc": "Death Sentence rework: charge with both hands, horizontal slash wave, X mark (user 2026-11-27, preview)",
+   "pal": "",
+   "tags": [
+    "darkness",
+    "preview"
+   ],
+   "dur": 1.6,
+   "n": 2
+  },
+  "darkness/rework_marked": {
+   "v": "733dafff",
+   "desc": "Nightfall rework (marked): orb pass-through slash, reappear above, overhead slam (user 2026-11-27, preview)",
+   "pal": "",
+   "tags": [
+    "darkness",
+    "preview"
+   ],
+   "dur": 1.9,
+   "n": 2
+  },
   "darkness/scythe_ba": {
    "v": "ddae57db",
    "desc": "Darkness — ท่าฟัน BA เคียว (พรีวิว): เงื้อ 0.2 วิ กวาดแนวนอนขวา→ซ้าย 120° เปลวบนใบยืดเป็นหาง • วนทุก 1.6 วิ",
@@ -2200,8 +2244,52 @@
    "dur": 7,
    "n": 2
   },
+  "stance/storm_dash_echo": {
+   "v": "45db24e6",
+   "desc": "God Lightning option - Dash trail and delayed lightning echo",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 1.65,
+   "n": 2
+  },
+  "stance/storm_dome_rework": {
+   "v": "c597988d",
+   "desc": "Storm rework - ground-fired projectile and sustained lightning dome",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 3.65,
+   "n": 2
+  },
+  "stance/storm_dome_sky": {
+   "v": "47b4fec7",
+   "desc": "Storm Dome study - upward shot at maximum range",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 3.65,
+   "n": 2
+  },
+  "stance/storm_dome_wall": {
+   "v": "599c4b5d",
+   "desc": "Storm Dome study - lightning orb stops on a wall",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 3.65,
+   "n": 2
+  },
   "stance/storm_g1": {
-   "v": "05d9c5cf",
+   "v": "131b7500",
    "desc": "Storm hand look g1 (user 2026-11-25, pick one of 3): idle, zap dash (left palm dive, hold, rise), Thunder Line cast",
    "pal": "",
    "tags": [
@@ -2212,7 +2300,7 @@
    "n": 2
   },
   "stance/storm_g3": {
-   "v": "825b8445",
+   "v": "672390fa",
    "desc": "Storm hand look g3 (user 2026-11-25, pick one of 3): idle, zap dash (left palm dive, hold, rise), Thunder Line cast",
    "pal": "",
    "tags": [
@@ -2223,7 +2311,7 @@
    "n": 2
   },
   "stance/storm_g4": {
-   "v": "178c3448",
+   "v": "3261320d",
    "desc": "Storm hand look g4 (user 2026-11-25, pick one of 3): idle, zap dash (left palm dive, hold, rise), Thunder Line cast",
    "pal": "",
    "tags": [
@@ -2231,6 +2319,50 @@
     "preview"
    ],
    "dur": 6,
+   "n": 2
+  },
+  "stance/storm_mark_branches": {
+   "v": "f1a2f1a2",
+   "desc": "Storm mark - three independent moving lightning branch styles",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 5.7,
+   "n": 2
+  },
+  "stance/storm_mark_polish": {
+   "v": "22cd999d",
+   "desc": "Storm mark polish - charge cue, ground flash and branching detonation",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 4.62,
+   "n": 2
+  },
+  "stance/storm_mark_reveal": {
+   "v": "9411b4df",
+   "desc": "Storm mark - fixed branches revealed in a travelling twenty-percent window",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 2.2,
+   "n": 2
+  },
+  "stance/storm_mark_rework": {
+   "v": "2ccae9ab",
+   "desc": "Storm rework - ally mark and self mark comparison",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 9.35,
    "n": 2
   },
   "stance/storm_now": {
@@ -2242,6 +2374,17 @@
     "preview"
    ],
    "dur": 5,
+   "n": 2
+  },
+  "stance/storm_pulse_rework": {
+   "v": "b9d83652",
+   "desc": "Storm rework - fast self-centered discharge with a short-lived shell",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 1.5,
    "n": 2
   },
   "stance/storm_sk_a": {
@@ -2277,107 +2420,8 @@
    "dur": 6.6,
    "n": 2
   },
-  "stance/storm_pulse_rework": {
-   "v": "e83a85c7",
-   "desc": "Storm rework - fast self-centered discharge with a short-lived shell",
-   "pal": "",
-   "tags": [
-    "stance",
-    "preview"
-   ],
-   "dur": 1.5,
-   "n": 2
-  },
-  "stance/storm_dome_wall": {
-   "v": "89e82d99",
-   "desc": "Storm Dome study - lightning orb stops on a wall",
-   "pal": "",
-   "tags": [
-    "stance",
-    "preview"
-   ],
-   "dur": 3.65,
-   "n": 2
-  },
-  "stance/storm_dome_sky": {
-   "v": "e27012b4",
-   "desc": "Storm Dome study - upward shot at maximum range",
-   "pal": "",
-   "tags": [
-    "stance",
-    "preview"
-   ],
-   "dur": 3.65,
-   "n": 2
-  },
-  "stance/storm_dome_rework": {
-   "v": "036dee2e",
-   "desc": "Storm rework - ground-fired projectile and sustained lightning dome",
-   "pal": "",
-   "tags": [
-    "stance",
-    "preview"
-   ],
-   "dur": 3.65,
-   "n": 2
-  },
-  "stance/storm_mark_branches": {
-   "v": "ca9430dc",
-   "desc": "Storm mark - three independent moving lightning branch styles",
-   "pal": "",
-   "tags": [
-    "stance",
-    "preview"
-   ],
-   "dur": 5.7,
-   "n": 2
-  },
-  "stance/storm_mark_polish": {
-   "v": "0f8d1814",
-   "desc": "Storm mark polish - charge cue, ground flash and branching detonation",
-   "pal": "",
-   "tags": [
-    "stance",
-    "preview"
-   ],
-   "dur": 4.62,
-   "n": 2
-  },
-  "stance/storm_mark_reveal": {
-   "v": "2e924eb3",
-   "desc": "Storm mark - fixed branches revealed in a travelling twenty-percent window",
-   "pal": "",
-   "tags": [
-    "stance",
-    "preview"
-   ],
-   "dur": 2.2,
-   "n": 2
-  },
-  "stance/storm_mark_rework": {
-   "v": "ec631cc5",
-   "desc": "Storm rework - ally mark and self mark comparison",
-   "pal": "",
-   "tags": [
-    "stance",
-    "preview"
-   ],
-   "dur": 9.35,
-   "n": 2
-  },
-  "stance/storm_dash_echo": {
-   "v": "ac26d63b",
-   "desc": "God Lightning option - Dash trail and delayed lightning echo",
-   "pal": "",
-   "tags": [
-    "stance",
-    "preview"
-   ],
-   "dur": 1.65,
-   "n": 2
-  },
   "stance/storm_thunderline_rework": {
-   "v": "a76e15ae",
+   "v": "f2333b30",
    "desc": "Thunder Line rework: three two-handed cast and recoil studies",
    "pal": "",
    "tags": [

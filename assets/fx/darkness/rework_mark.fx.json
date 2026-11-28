@@ -1,0 +1,37 @@
+{
+  "v": 1,
+  "desc": "Death Sentence rework: charge with both hands, horizontal slash wave, X mark (user 2026-11-27, preview)",
+  "tags": [
+    "darkness",
+    "preview"
+  ],
+  "dur": 1.6,
+  "layers": [
+    {
+      "id": "anchor",
+      "t": "mesh",
+      "shape": "disc",
+      "mat": "black",
+      "op": 0,
+      "at": 0,
+      "life": 1.6
+    },
+    {
+      "id": "stance",
+      "t": "code",
+      "fn": "studio_class_stance",
+      "at": 0,
+      "life": 1.6,
+      "args": {
+        "layer": "anchor",
+        "cls": "darkness",
+        "style": "b",
+        "darkRework": "mark",
+        "run": [
+          99,
+          99
+        ]
+      }
+    }
+  ]
+}
