@@ -234,7 +234,10 @@ preloadReg('storm',()=>[stArcBatch(false),stArcBatch(true)].map(mesh=>{
 // Countdown first-frame programs (2026-11-25, bench-entry): built on players / the map at match start, never warmed before.
 preloadReg('frost',()=>loadModel('mesh_ice_sword').then(()=>fileWeapon('mesh_ice_sword',-0.66,0.5)),   // file ice sword (DoubleSide ice shader)
   ()=>{const m=mistMesh(),c=new THREE.InstancedMesh(m.geometry,m.material,1);c.frustumCulled=false;fxScene.add(c);return c;});   // frost mist puffs (fxScene)
-preloadReg('wind',()=>makeWindWings());   // wind wings on the body
+preloadReg('wind',()=>{const wings=makeWindWings(),d=wings.userData;
+  d.sup={t:0,dis:-1};windWingSup(d,W_UL.chg*0.75);
+  return wings;
+});   // base wings and Sonic Boom charging wings
 preloadReg('all',()=>[ambMesh(0),ambMesh(1)],   // ambient dust / mist (fxScene, js/75)
   ()=>{
     const intact=Object.values(PROPDEF).map(D=>D.model);

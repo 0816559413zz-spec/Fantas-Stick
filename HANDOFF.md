@@ -8,6 +8,8 @@
 
 ## Latest notes (newest first)
 
+**ลด draw calls ตอนชาร์จ Sonic Boom (2026-11-28):** รวมประกายปลายปีก Wind เหลือ 1 draw ต่อข้าง และซ่อนทั้งชุดเมื่อเริ่มสลาย เทสต์เฉพาะประกายเหลือ 2 draws จาก 20 ลงทะเบียนชุดชาร์จใน preload
+
 **ลด draw calls ในไฟต์ 12 คน (2026-11-28):** รวมสายฟ้าประจำคลาส Storm เป็น 2 mesh ต่อคน ลดรายละเอียดไฟแขน Pyro ของคนที่อยู่ไกล ซ่อนเอฟเฟกต์ประจำคลาสนอกกล้องและใช้ชุดเดิมผ่านช่วงกะพริบ รวมลัง/ถังตามพื้นที่กับสถานะแตก และแคชความกว้างข้อความ HUD เทสต์ High Meadow 695 → 596 draws และ Castle Strike 684 → 639 ดูข้อจำกัดของผลวัดใน `guides/OPTIMIZE.md`
 
 **Map Builder room panel close fix (2026-11-28):** `.mb-room{display:flex}` overrode the `hidden` attribute, so 👥 couldn't close the panel; added `.mb-room[hidden]{display:none}` + ✕ / Esc / click-outside (mapbuild/collab.js).

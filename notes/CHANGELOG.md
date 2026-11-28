@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-28 Performance: batch Wind Sonic Boom wing glints, skip them once the wings start dissolving, and preload the charging wings.
+
 - 2026-11-28 Performance: batch Storm class-look arcs, thin distant Pyro arm detail, reuse class looks across visibility changes, instance crates and barrels by tile and damage state, and reuse HUD text measurements across frames.
 
 - 2026-11-28 — **Map Builder: the 👥 room panel closes again.** Click 👥 again, the ✕, press Esc, or click anywhere outside it.

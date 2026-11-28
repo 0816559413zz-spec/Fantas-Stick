@@ -672,18 +672,18 @@ GR_NOISE:173 GR_LIVE:178 SNOWU:199 GR_SNOW:200 grLive:202 GR_GLSL_V:212 GR_BEGIN
 §420 สกิลลม → หญ้า (ภาพล้วน เรียกจาก windEfx js/68)
 WIND_GRASS:422 airWind:436
 
-## js/51-warmup.js (459) —
+## js/51-warmup.js (462) —
 WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_SLICE:13 WARM_X:14 WARM_Y:14 warmKeep:16 warmStaticModels:22 glReady:31 warmCompile:32 warmDraw:35 WARM_SKIP:45 warmAssets:48 warmFx:58 warmNow:71 warmFxRun:79 warmFxEnd:82 warmGather:84 warmPaths:86 warmFrame:88 warmStep:90 preloadCharMat:158 warmTrCopy:161 warmCharVariants:164 warmQueue:184 WARM_LOBBY:193 warmLobbyTick:194 warmTick:201
 §212 Entry loader (PRELOAD-STANDARD step 3, 2026-11-23)
-PRE:218 preloadReg:219 warmDissolve:221 preProg:251 preFin:252 preStart:254
-§267 Event rehearsal (PRELOAD-STANDARD step 4, 2026-11-23)
-WARM_REC_SKIP:273 warmRec:274 warmRecDump:276 WARM_EVFLAGS:277 WARM_EVX:278 WARM_EVY:278 warmEvShift:279 warmRehearse:284 preTick:291
-§301 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
-warmOutline:312
-§329 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
-GWARM:334 gameWarmTick:335 LMAP:368 lobbyMapTick:369 gameWarmFree:379
-§385 Shader never seen before mid-match: compile in the background, hide t…
-SHR:393 shrLights:397 IMZ:402 imzPre:415 imzPost:417 shrCollect:418 shrPending:424 shReadyPre:428 shReadyPost:454
+PRE:218 preloadReg:219 warmDissolve:221 preProg:254 preFin:255 preStart:257
+§270 Event rehearsal (PRELOAD-STANDARD step 4, 2026-11-23)
+WARM_REC_SKIP:276 warmRec:277 warmRecDump:279 WARM_EVFLAGS:280 WARM_EVX:281 WARM_EVY:281 warmEvShift:282 warmRehearse:287 preTick:294
+§304 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
+warmOutline:315
+§332 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
+GWARM:337 gameWarmTick:338 LMAP:371 lobbyMapTick:372 gameWarmFree:382
+§388 Shader never seen before mid-match: compile in the background, hide t…
+SHR:396 shrLights:400 IMZ:405 imzPre:418 imzPost:420 shrCollect:421 shrPending:427 shReadyPre:431 shReadyPost:457
 
 ## js/52-social.js (172) — 
 §6 แชท: Enter = พิมพ์ / Enter อีกที = ส่ง / Esc = ปิด • ข้อความขึ้นมุมซ้…
@@ -885,7 +885,7 @@ waterEfx:216
 §245 HUD: เกจฮีลโล่ (โค้งซ้ายรอบเป้าเล็ง)
 drawWaterHud:246
 
-## js/68-wind-view.js (501) — 
+## js/68-wind-view.js (505) —
 WV:6 WN_BODY:8 WN_AIR_FEET:8 WF_POSE:12 WF_FEET:12 WF_REF:12 WF_ROLL:12 _wfP:13 _wfF:13 windFlyPose:14 WTLF:24 windTailDraw:25 windTailFeel:31 windCharacterPose:33 wvState:50 wvAlive:51
 §52 ทุกเฟรมของผู้เล่นสายลม: ปีกติดหลัง / ปีกห่อตอนยกโล่ / ดูดลมชาร์จเกจ
 wfeSwing:53 wfeTwist:53 W_BLAST_SUCK:54 WFE_HOLD:55 WFE_TURN:55 windLatePose:57 _faX:98 _faQ:98 _faT:98 WF_ELBOW:98 windForearm:99
@@ -902,7 +902,7 @@ _wShellM:314 windShellMat:315 windSlipHud:322 drawWindHud:328
 §339 ตัวช่วยเล็งกำแพงลม (เห็นเฉพาะเรา): เส้นโค้งเรืองที่จุดวาง (คลิกขวา) +…
 wvAimGhost:340
 §351 ปีกเวทสายลมติดหลัง: ขนนก 8+4 เส้นต่อข้าง ทำจากสายลม (shader) + ริบบิ้…
-WWS:353 WWU:353 WW_NOISE:354 _wwMat:359 wwMats:360 wwFeatherGeo:406 WW_PRI:417 WW_COV:419 WW_RIB:420 _wwGeo:421 _wsupG:423 _wsupD:423 windSupDust:424 windSupDustTick:428 windWingSup:429 makeWindWings:451 wwCue:465 poseWindWings:469
+WWS:353 WWU:353 WW_NOISE:354 _wwMat:359 wwMats:360 wwFeatherGeo:406 WW_PRI:417 WW_COV:419 WW_RIB:420 _wwGeo:421 _wsupG:423 _wsupD:423 windSupDust:424 windSupDustTick:428 windWingSup:429 makeWindWings:455 wwCue:469 poseWindWings:473
 
 ## js/69-broom.js (236) — ไม้กวาด (ผู้ใช้ 2026-10-29): บินแบบเครื่องบิน + ยิงลำแสงตามสาย + อนิเ…
 BRM:9 BFW:12 BSK:13 BROOM_SK:19 broomVert:40 broomMove:53 broomStrike:72 broomStrikeTick:81 broomFlak:89 broomAct:100 broomOff:107 broomBeam:109
