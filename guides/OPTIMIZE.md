@@ -10,6 +10,12 @@ Priority: **P1** = real bug or big win, **P2** = clear win, **P3** = nice to hav
 
 Shader compiles (not downloads) cause the fight/match-start freezes. Rules for every system and the graphics/perf plan (registry, entry loader, mid-match compile detector, fixed light rig, painterly in assets): `guides/PRELOAD-STANDARD.md`. Gate: `node tools/shader-gate.js` (mid-match shaders must be 0; baseline 45–76 per run).
 
+## 2026-11-28 shadow rendering
+
+High refreshes the directional shadow map every other frame in regular matches and honors explicit invalidations. Its previously 4096² maps now use 3072² (43.75% fewer target texels). Ultra and Cinematic keep their shadow target and refresh rate. All soft-shadow levels use iterative rotation for the same PCSS sampling spiral and tap counts.
+
+In a warmed High test-room A/B with the old cadence and target restored inside the same session, the two comparisons averaged 286 → 265 and 289 → 266 draw calls. Timing varied. The live Meadow 10-player profile from an earlier build put render submission first, then player updates and VFX, with grass and particle simulation each below 0.5 ms on the CPU in that run. These measurements are from headless Chrome and do not establish the player's live FPS.
+
 ## 2026-11-22 map and combat rendering
 
 - High grass fell from 148,120 to 68,800 submitted blades (740,600 to 344,000 triangles per frame). Seeded positions, uneven patches and four blade profiles replace the more uniform pattern. Meadow also replaces its 420 baked tufts with fewer clumps in three shapes, each using four to six triangles.

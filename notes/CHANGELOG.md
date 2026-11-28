@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-28 Rendering: refresh High shadows every other frame on regular maps, reduce its larger shadow target from 4096 to 3072, and reuse the same PCSS spiral with incremental rotation.
+
 - 2026-11-27 — **Storm rework is playable.** Thunder Line C is quicker and longer. Thunderbomb replaces the targeted sky strikes. Lightning Mark replaces the bow and lets Storm mark an ally or self. The standard Storm Dome launches immediately and applies recurring damage and Shock at impact or max range. Old kits resolve to the new skills through their existing IDs. PREFIX v119.
 
 - 2026-11-27 — **Skills on high ground fixed.** Ground-aimed skills used the lowest ground, so on a roof, platform or Terra Isle they appeared under you, missed people standing up there and hit people on the street below. Now they land on the surface you aim at and only hit around that height: Mud Swamp, Wrath, Ring of Embers, Fire Dash path, Triple Strike, Storm Dome, Water Dragon, Wind Downburst/Windup, Permafrost and slide ice, Glacier Rend, Rampart, Terra Isle, Nature plants, Blind Dust and more. Crosshair aiming no longer passes through roofs. The Dragonfall warning circle is solid orange with a dark rim so it shows on bright floors. PREFIX v118.

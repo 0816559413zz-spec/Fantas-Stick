@@ -350,24 +350,24 @@ onfOutlineMat:4 onFireFX:6 statusFX:17 fx:44
 §251 overlay: เลือกบัฟ / สรุปผล
 choosePick:252 syncOverlays:257 showOver:278
 
-## js/27-world.js (645) — 
+## js/27-world.js (651) —
 S3:4 tx:4 tz:4 CITY_KERB:7 cityKerb:8 GY:9 TW:9 hdr:10 PTG:15 gl:23
 §37 เงานุ่มแบบ PCSS (contact-hardening): ใกล้จุดสัมผัสคม ไกลจากวัตถุที่บั…
-PCSS:40 scene:67 cam:69 composer:70
-§71 ท่อภาพ (post-processing): ฉาก → ชั้นเอฟเฟกต์นุ่ม (FXPass) → แสงฟุ้ง →…
-rpass:74 fxScene:76 SOFTU:78 SOFT_GLSL:79 FXMATS:81 fxMat:82 softify:84 HAZE_U:89 AOU:93 GFX:99 AO_ON:100 AO_HEAD:101 AO_CALC:105
-§119 Wet ground + reflections (rain, js/76-weather.js) — pixels whose dept…
-WETU:122 WET_GLSL:124 WET_MAIN:132 AO_COPY:151
-§173 TAA (ลบขอบหยักแบบสะสมหลายเฟรม) — กราฟิกสูงเท่านั้น • ปิดด้วย ?notaa
-TAA:176 TAA_FRAG:177 _taaH:192 taaWanted:193 taaBegin:194 taaEnd:202 taaFinish:203 taaQuad:205 taaWarm:208 taaResolve:210 AO_RT:219 fxPass:244 bloom:245 GRADEU:252 gradePass:273 aaPass:291
-§293 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
-GQ_OPT:296 GQ_PRE:320 GQ_NAME:327 GQ:328 gq:331 gqSave:332 gqPreset:333 gqSet:334 gqMode:337 gqSync:338 QUAL:339 QUAL_NAME:341 qDyn:342 qualPR:343 gqShadowSize:348 applyQuality:349 qualTick:375
-§391 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
-qualCS:395 CULL:396 cullTick:397 texCanvas:408 glowTex:409 stoneTex:410 runeTex:416 glowMats:424 glowMat:425 STONEM:427 stoneMat:428 shadowAll:429
-§432 clear midday sky (user refs 2026-11-24: anime key-art noon) — baked O…
-SKYC:437 skyBakeClear:439 skyBake:526 SKY:531 hemi:563 moonL:565 LDIR:569 setSky:570 SKYB:586 skyFollow:587
-§588 เงาตามผู้เล่น
-SHD:592 _shF:593 _shR:593 _shU:593 _shC:593 _shY:593 SHD_DM:597 shadowDepthSplit:598 shadowFollow:603 shadowSoft:623 LPOOL:625 MLS_N:631 MLS:631 mlsPoint:633 _mlsP:635 mlsInScene:636 mlsTick:637
+PCSS:40 scene:73 cam:75 composer:76
+§77 ท่อภาพ (post-processing): ฉาก → ชั้นเอฟเฟกต์นุ่ม (FXPass) → แสงฟุ้ง →…
+rpass:80 fxScene:82 SOFTU:84 SOFT_GLSL:85 FXMATS:87 fxMat:88 softify:90 HAZE_U:95 AOU:99 GFX:105 AO_ON:106 AO_HEAD:107 AO_CALC:111
+§125 Wet ground + reflections (rain, js/76-weather.js) — pixels whose dept…
+WETU:128 WET_GLSL:130 WET_MAIN:138 AO_COPY:157
+§179 TAA (ลบขอบหยักแบบสะสมหลายเฟรม) — กราฟิกสูงเท่านั้น • ปิดด้วย ?notaa
+TAA:182 TAA_FRAG:183 _taaH:198 taaWanted:199 taaBegin:200 taaEnd:208 taaFinish:209 taaQuad:211 taaWarm:214 taaResolve:216 AO_RT:225 fxPass:250 bloom:251 GRADEU:258 gradePass:279 aaPass:297
+§299 คุณภาพกราฟิก: auto = ปรับความละเอียดเองตาม FPS / high = สวยสุด / low …
+GQ_OPT:302 GQ_PRE:326 GQ_NAME:333 GQ:334 gq:337 gqSave:338 gqPreset:339 gqSet:340 gqMode:343 gqSync:344 QUAL:345 QUAL_NAME:347 qDyn:348 qualPR:349 gqShadowSize:354 applyQuality:355 qualTick:381
+§397 ประหยัด CPU สำหรับเครื่องอ่อน (ผู้ใช้ 2026-11-06 "เครื่องผู้เล่นแย่กว…
+qualCS:401 CULL:402 cullTick:403 texCanvas:414 glowTex:415 stoneTex:416 runeTex:422 glowMats:430 glowMat:431 STONEM:433 stoneMat:434 shadowAll:435
+§438 clear midday sky (user refs 2026-11-24: anime key-art noon) — baked O…
+SKYC:443 skyBakeClear:445 skyBake:532 SKY:537 hemi:569 moonL:571 LDIR:575 setSky:576 SKYB:592 skyFollow:593
+§594 เงาตามผู้เล่น
+SHD:598 _shF:599 _shR:599 _shU:599 _shC:599 _shY:599 SHD_DM:603 shadowDepthSplit:604 shadowFollow:609 shadowSoft:629 LPOOL:631 MLS_N:637 MLS:637 mlsPoint:639 _mlsP:641 mlsInScene:642 mlsTick:643
 
 ## js/28-city-build.js (386) — เมืองมักเกิ้ล (ลอนดอน) — ภาพ • ข้อมูลอยู่ js/02-city.js • โมเดลจาก as…
 CITY_WIN:4 cityWinTex:5 cityEmTex:10 cityBoxGeo:16 buildCity:21
@@ -487,7 +487,7 @@ ROLE:4 KC:4 roleShowT:4 onPriv:5 MO:10 BREATHS:11 clearModeObjs:12 ITEMC:21 heal
 §140 หน้าประชุมโหวต (หาลอร์ดโวลเดอมอร์)
 meetKey:141 myVoted:141 castVote:142 syncMeeting:148
 
-## js/37-render-loop.js (132) — ลูปเรนเดอร์
+## js/37-render-loop.js (133) — ลูปเรนเดอร์
 lastFrame:2 HSTOP:5 hitStop:6 FXSTUDIO:8
 §9 เก็บ shader ที่ compile แล้วไว้ตลอดเกม (ผู้ใช้ 2026-11-02 "เล่นกับบอท…
 PINMAX:13 PINNED:13 KEEPSRC:16 pinPrograms:22 frame:25 _fpsAcc:42 _fpsN:42 _fpsLast:42 render:43 detailCull:90 viewDetailAt:93 renderGame:100

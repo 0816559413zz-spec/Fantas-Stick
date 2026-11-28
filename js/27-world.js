@@ -47,17 +47,23 @@ THREE.ShaderChunk.shadowmap_pars_fragment=THREE.ShaderChunk.shadowmap_pars_fragm
 	vec2 ts = 1.0 / sz;
 	float sr = clamp( K * 0.02, 0.0015, 0.008 );
 	float bs = 0.0; float bn = 0.0;
+	// Advance the same golden-angle spiral without per-tap trigonometry.
+	const mat2 spiral = mat2( -0.737368878, 0.675490296, -0.675490296, -0.737368878 );
+	vec2 dir = vec2( cos( ang ), sin( ang ) );
 	for ( int i = 0; i < 12; i ++ ) {
-		float r = sqrt( ( float( i ) + 0.5 ) / 12.0 ); float a = ang + float( i ) * 2.39996323;
-		float d = unpackRGBAToDepth( texture2D( sm, sc.xy + vec2( cos( a ), sin( a ) ) * r * sr ) );
+		float r = sqrt( ( float( i ) + 0.5 ) / 12.0 );
+		float d = unpackRGBAToDepth( texture2D( sm, sc.xy + dir * r * sr ) );
+		dir = spiral * dir;
 		if ( d < zR ) { bs += d; bn += 1.0; }
 	}
 	if ( bn < 0.5 ) return 1.0;
 	float pen = clamp( ( zR - bs / bn ) * K, 1.2 * ts.x, 0.012 );
 	float lit = 0.0;
+	dir = vec2( cos( ang * 1.7 ), sin( ang * 1.7 ) );
 	for ( int i = 0; i < 16; i ++ ) {
-		float r = sqrt( ( float( i ) + 0.5 ) / 16.0 ); float a = ang * 1.7 + float( i ) * 2.39996323;
-		lit += step( zR, unpackRGBAToDepth( texture2D( sm, sc.xy + vec2( cos( a ), sin( a ) ) * r * pen ) ) );
+		float r = sqrt( ( float( i ) + 0.5 ) / 16.0 );
+		lit += step( zR, unpackRGBAToDepth( texture2D( sm, sc.xy + dir * r * pen ) ) );
+		dir = spiral * dir;
 	}
 	return lit / 16.0;
 }
@@ -345,7 +351,7 @@ function qualPR(){
   const b=r===0?Math.min(1,dpr)*0.7:r===1?Math.min(1,dpr):r===2?Math.min(1.5,dpr):Math.min(2,dpr*1.5);
   return gq('dyn')?b*QUAL.scale:b;
 }
-function gqShadowSize(id){const s=gq('shadow');return s>=4?4096:s===3&&id!=='castle'&&id!=='greathall'?4096:2048;}
+function gqShadowSize(id){const s=gq('shadow');return s>=4?4096:s===3&&id!=='castle'&&id!=='greathall'?3072:2048;}
 function applyQuality(){
   if(QUAL.mode!==QUAL._m){const m=QUAL.mode,lv=QUAL.lvl,sc=QUAL.scale;gqPreset(m==='low'?'low':m==='auto'?'medium':'high');if(m==='auto'){GQ.v.dyn=1;GQ.p='custom';gqSync();QUAL.lvl=lv;QUAL.scale=sc;}}   // set from outside (old scripts)
   try{SMOKE_K=gq('particles')>=3?1:0.4;}catch(e){}   // Cinematic: smoke as before the 2026-11-18 cut

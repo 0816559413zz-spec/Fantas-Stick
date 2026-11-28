@@ -117,7 +117,8 @@ function renderGame(v,P,E,me,dt,now){
   tickFlash(dt);
   t0=performance.now();{let t1=t0;updateZV(dt);pf('fx.zv',t1);let t2=performance.now();updateParticles(dt);pf('fx.particles',t2);pf('fx.parts',t1);t1=performance.now();updateShapes(dt);pf('fx.shapes',t1);t1=performance.now();updateLights(dt);pf('fx.lights',t1);t1=performance.now();updateVfx(dt);pf('fx.vfx',t1);t1=performance.now();updateDebris(dt);pf('fx.debris',t1);}pf('fx',t0);
   QUAL.frame++;
-  const shS=gq('shadow'),shCS=gq('dyn')?QUAL.cs:0,shadowInterval=shCS>=2?12:shCS?6:qDyn(2)?4:shS>=4?1:shS===3?(MAPID==='fcs'||MAPS[MAPID]&&MAPS[MAPID].fm?2:1):shS===2?2:4;   // Map Builder maps (fcs-file …) like fcs: big static castles, shadow pass ~120 draws (2026-11-24 6v6 CPU)
+  const shS=gq('shadow'),shCS=gq('dyn')?QUAL.cs:0;
+  const shadowInterval=shCS>=2?12:shCS?6:qDyn(2)?4:shS>=4?1:shS>=2?2:4;
   gl.shadowMap.needsUpdate=gl.shadowMap.needsUpdate||QUAL.frame%shadowInterval===0;
   if(gl.shadowMap.needsUpdate)shadowFollow();if(QUAL.frame%30===1)shadowDepthSplit();cullTick(dt);
   if(FXSTUDIO.noDraw)return;
