@@ -1146,7 +1146,7 @@ addEventListener('keydown', e => {
   if (e.code === 'Space' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { spaceDown = true; e.preventDefault(); }
   if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { if (e.key === 'Escape') document.activeElement.blur(); return; }
   if (drag && drag.k === 'orbit' && /^Key[WASDQE]$/.test(e.code)) { fly.add(e.code); fly.fast = e.shiftKey; e.preventDefault(); return; }   // right-drag + WASD = fly (Unity)
-  const k = e.key.toLowerCase();
+  const k = /^Key[A-Z]$/.test(e.code) ? e.code.slice(3).toLowerCase() : e.key.toLowerCase();   // physical key: shortcuts work on a Thai / non-Latin layout too
   if ((e.ctrlKey || e.metaKey) && k === 's') { e.preventDefault(); save(); return; }
   if ((e.ctrlKey || e.metaKey) && k === 'z') { e.preventDefault(); e.shiftKey ? doRedo() : doUndo(); return; }
   if ((e.ctrlKey || e.metaKey) && k === 'y') { e.preventDefault(); doRedo(); return; }

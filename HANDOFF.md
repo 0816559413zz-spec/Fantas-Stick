@@ -8,6 +8,8 @@
 
 ## Latest notes (newest first)
 
+**Map Builder shortcuts on a Thai keyboard (2026-11-28, user: guest Ctrl+D did nothing):** the keydown handler in `mapbuild/app.js` read `e.key`, which is a Thai letter (D = ก) when the Thai layout is on, so Ctrl+D/S/Z/Y/G and the tool letters did nothing. It now reads the physical key (`e.code` KeyA–KeyZ) and falls back to `e.key` for other keys. Not guest-specific: host + guest Ctrl+D tested OK in a live room (incl. a synthetic `key:'ก', code:'KeyD'` event).
+
 **Stand on every collider (2026-11-28, user):** `groundH` js/04 now treats the top of every OBS collider (circle, capsule, box; not hollow-building `bi`) as a floor, found through the spatial grid (`sgNear(sgObs())`, box/capsule shape via `obsD2`). Old table-only `st` list removed. Step-up onto a top is still 0.35 (jump to get up); walking into the side still blocks. To stop people standing on something, add a taller wall collider in Map Builder. Debug: `WD.OBS`, `WD.groundH`, `WD.terrT`. Tested headless on fcs-file siege: boxes, capsules and circles hold the player on top.
 
 **HUD animation switch (2026-11-28, user picked it):** Settings > หน้าจอ > แอนิเมชัน HUD (`SET.hudanim`, default 1, js/17). `applySettings` (js/31) toggles `html.hudStill`; rules at the end of css/hud4.css hide the particles and stop the looping decoration, keep static state cues (low HP, regen, ult READY edge, selected card) and one-shot card feedback. 6v6 siege fcs-file A/B: 16.48 → 12.95 ms a frame, running animations 94 → 0. Tested in the browser pane: toggle in the real settings UI, saved in `wd_set`, ult full + low HP readable with it off.
