@@ -1,0 +1,37 @@
+# Darkness + Storm rework: where it stands, what is next (2026-11-28)
+
+Hand-off for the next chat. Reply in Thai, short. Discuss before building; still → GIF → approval → commit.
+
+## Done and pushed (user approved)
+- **Darkness** (`studio/darkness-rework.js` = VFX Studio previews + the live views; host `js/09-darkness.js`):
+  - Death Sentence: 0.35 s two-hand charge, slender horizontal crescent (speed 1600, width ±70), miss = half cooldown; Flow fires 3 of the same waves.
+  - Nightfall without a mark: 1.5 m step, lift everyone within 60 px ~4 m, 1 s stun, shadow tower (`DARK_LIFT`).
+  - Nightfall marked: orb pass-through slash (10) → reappear 3.4 m above the far side → overhead slam (25), 1.1 s (`DARK_NF`, `darkNFRoute`). Flow: one pass slash (20), new look.
+  - Previews: `darkness/rework_mark|lift|marked|flow`.
+- **Storm** (`js/20-vfx-pyro-storm.js` bottom "Storm round 2", `js/08-storm.js`, `js/09-other-paths.js`, `js/72-dash-pose.js`):
+  - Beam: hand on the aim line (`STBEAM`, armR.z −.47 measured).
+  - Thunderbomb: 0.7 s charge, camera pull-back (`CAM_FRAMES.stormBomb`), branches out of the body, fresnel dome flash.
+  - Storm Dome: 0.6 s charge (`SDOME.v.aim`, `p.sdW`), muzzle blast, dome 4.5 s, opens where the ball stops (wall / air too — user: no falling).
+  - Lightning Mark: bigger chest glyph beside Burning numbers, lightning ring 100 px round the holder, clearer burst.
+  - Dash: pose by travel direction (`zapMix`: `zapF/zapB/zapS`), God Lightning `bolt/boltB`.
+  - Previews: `stance/storm_check`, `storm_dome_check`, `storm_dome_air`, `storm_dash_check`.
+- **Nature**: free left hand drifts / swings / lags turns (js/35 readyStance).
+- **Map Builder**: Ctrl+C / X / V (`copySel` / `pasteClip`).
+
+## Open (next chat)
+1. **User asked: re-check all Darkness and Storm animations after the last pull** (close `--cam front` + `side` sheets of every move) and fix anything weird/jittery. Not done yet.
+2. Darkness basic attack (scythe BA): user said "arm spins" — never looked at.
+3. Death Sentence charge: from the front the two hands are not clearly together at the hip.
+4. Storm dash: check direction changes mid-dash and the side-dash roll sign.
+5. Thunderbomb camera pull-back only exists in the real game camera — verify in a match.
+6. Storm Dome damage goes through walls (no line-of-sight check in `updateStorm` dome ticks); the ball ignores Earth Rampart walls (`aimRay3` checks ground, panels, city only).
+7. Lightning Mark: no "who am I aiming at" highlight while choosing an ally.
+8. Walking slower while charging Death Sentence: asked, not built.
+9. Nothing tested online with several players.
+10. **Stashed local edit**: `git stash` "local fcs-file edits before pull 2026-11-28" (maps/build/fcs-file.json objs differ from the remote v70). Ask the user: drop it or restore it. A copy is also in the old chat's scratchpad.
+
+## Fast workflow (read first)
+- Shots: `python tools/fxsheet.py <fx> --times a,b,c [--cam side|front|top] [--dist N] [--at self|front] [--map id] [--to T]` → `shots/<name>_sheet.jpg` (Read it) + `_s.gif` (send that one; big GIFs do not play in chat). Details: `VFX-STUDIO-CLAUDE.md` §6 "Fast loop".
+- Skill previews with the real player: `studio/class-stance.js` acts (`skill`, `ult`, `dash`, `move`, `hold`, `shield`, `set`, `aimh`) or a preview module like `studio/darkness-rework.js` (CANIM poses, `camera(c,T)` for a fixed view).
+- Match tests: `node tools/headless.js --game --js file.js --timeout 540` (HL.solo takes ~2.5 min; run in the background). `WD.spawnBot(path,0,x,y,null,me.id,1)` = still player dummy.
+- Mistake list to check before sending: memory `vfx-mistake-patterns` (white-out from wide glowing bolts / additive rings, camera-facing helpers, shared temp vectors, cloth on teleport, retyped timings, front pose check, measure aim with a probe).
