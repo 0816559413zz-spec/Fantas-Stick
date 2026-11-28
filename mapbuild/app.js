@@ -12,6 +12,7 @@ import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import * as MD from './model.js';
 import * as BD from './backdrop.js';
 import { initProject } from './project.js';
+import { initCollab } from './collab.js';
 const { C, SURF, OBJ } = MD;
 
 const $ = id => document.getElementById(id);
@@ -22,6 +23,7 @@ const el = (tag, props, ...kids) => { const e = document.createElement(tag); if 
 // ================= state =================
 let M = null, online = false, dirty = false, saveT = 0, list = [];
 let PJ = null;   // Project/Console dock (mapbuild/project.js)
+let COL = null;   // live co-editing room (mapbuild/collab.js)
 let tool = 'select', sel = null, msel = [];   // sel = {k:'wall'|'floor'|'obj', id, pt?} = primary (Inspector, gizmo) • msel = more items picked with Shift/Ctrl
 const opt = { wk: 'lake', wdig: 1, wdep: 1.5, rk: 'cobble', rw: 4, rc: 0, smode: 'up', rad: 4, str: 4, soft: 1, hval: 2, surf: 0, wall: 0, wth: 1, wh: 3.5, wc: '#8a8478', wm: 'stone', wcurve: 0, wbrk: 0, floor: 0, fw: 4, fh: 3, fauto: 1, obj: 'spawn', cat: 'sys',
   rrot: 1, rscale: 0, dens: 3, snap: 0, part: 'wall', pp: {}, csnap: 1, psnap: 1, prim: { c: '#8a8478', sx: 2, sy: 2, sz: 2 }, pn: { pre: 0, mat: 'brick', m: 'p', thru: 1, sy: 3.6, T: 0.3, cs: 0.6, hp: 0, y: 0, draw: 'line', sides: 12 },
@@ -95,6 +97,7 @@ function buildTerrain() {
   buildGrid();
 }
 function updTerrain(i0, j0, i1, j1) {
+  if (COL) COL.onTerr(i0, j0, i1, j1);   // live room: send this region
   const { nx, ny } = M, g = terr.geometry, P = g.attributes.position, N = g.attributes.normal, Cc = g.attributes.color;
   i0 = clamp(i0 - 1, 0, nx - 1); j0 = clamp(j0 - 1, 0, ny - 1); i1 = clamp(i1 + 1, 0, nx - 1); j1 = clamp(j1 + 1, 0, ny - 1);
   for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) { const k = j * nx + i; P.array[k * 3 + 1] = M.hg[k]; vnormal(i, j, N.array, k * 3); vcolor(i, j, Cc.array, k * 3, show.steep); }
@@ -454,18 +457,18 @@ function toggleSel(r) {   // Shift/Ctrl+click: add to / remove from the selectio
   if (sel) msel.push({ k: sel.k, id: sel.id }); sel = { k: r.k, id: r.id };
 }
 const syncKind = (k, it) => k === 'room' ? syncRooms() : k === 'obj' ? syncObj(it) : k === 'part' ? syncPart(it) : k === 'wall' ? syncWalls() : syncFloors();
-const nid = () => (M.seq = (M.seq || 1) + 1);
+const nid = () => COL ? COL.nid() : (M.seq = (M.seq || 1) + 1);   // in a room: ids with id % 32 = my slot
 const snapV = v => opt.snap ? Math.round(v / opt.snap) * opt.snap : +v.toFixed(2);
 
 // ================= undo =================
 const META = ['walls', 'floors', 'objs', 'parts', 'rooms', 'groups', 'name', 'desc', 'sky', 'style', 'fog', 'music', 'weather', 'fx', 'modes', 'random', 'autoProps', 'skirt', 'seq'];
-function snap(kind) { if (kind === 'b') return { isBd: 1, bd: BD.bdClone(M.bd) }; const e = {}; if (kind !== 'o') { e.hg = M.hg.slice(); e.sf = M.sf.slice(); e.W = M.W; e.H = M.H; } if (kind !== 't') { const o = {}; for (const k of META) o[k] = M[k]; e.js = JSON.stringify(o); } return e; }
+function snap(kind) { if (kind === 'b') return { isBd: 1, bd: BD.bdClone(M.bd) }; const e = { t: performance.now() }; if (kind !== 'o') { e.hg = M.hg.slice(); e.sf = M.sf.slice(); e.W = M.W; e.H = M.H; } if (kind !== 't') { const o = {}; for (const k of META) o[k] = M[k]; e.js = JSON.stringify(o); } return e; }
 function pushUndo(kind) { undo.push(snap(kind)); if (undo.length > 40) undo.shift(); redo = []; }
 function restore(e) {
   if (e.isBd) { const back = snap('b'); M.bd = e.bd; buildBd(); applySky(); renderOpts(); changed(); return back; }
   const kind = e.hg && e.js ? 'a' : e.hg ? 't' : 'o', back = snap(kind);
   if (e.hg) { const rs = e.W !== M.W || e.H !== M.H; M.W = e.W; M.H = e.H; M.nx = Math.round(M.W / C) + 1; M.ny = Math.round(M.H / C) + 1; M.hg = e.hg; M.sf = e.sf; if (rs) buildTerrain(); else updTerrain(0, 0, M.nx - 1, M.ny - 1); }
-  if (e.js) Object.assign(M, JSON.parse(e.js));
+  if (e.js) Object.assign(M, COL ? COL.mergeUndo(JSON.parse(e.js), e.t || 0) : JSON.parse(e.js));   // room: others' later edits stay
   if (sel && !find(sel)) sel = null;
   syncAll(); buildGrid(); renderSide(); changed(); return back;
 }
@@ -694,7 +697,7 @@ function updSel() {
   for (const h of mBoxes) { scene.remove(h); h.geometry.dispose(); } mBoxes = []; msel = msel.filter(q => find(q) && !(sel && q.k === sel.k && q.id === sel.id));
   for (const q of msel) { const b = new THREE.Box3(), t = new THREE.Box3(); b.makeEmpty(); root.updateMatrixWorld(true); for (const n of selNodes(q, find(q))) if (n) { t.setFromObject(n); b.union(t); }
     if (!b.isEmpty()) { const h = new THREE.Box3Helper(b, 0xffcc44); h.material.depthTest = false; h.renderOrder = 9; scene.add(h); mBoxes.push(h); } }
-  drawHandles(); placeGizmo(); need();
+  drawHandles(); placeGizmo(); need(); if (COL) COL.onSel();
 }
 function updGhost() {
   const key = (tool === 'place' && !opt.obj.startsWith('room:') ? opt.obj + '|' + JSON.stringify(opt.prim) : '');
@@ -1289,7 +1292,7 @@ const TOOLS = [['select', '⬚', 'Select', 'v', 'Click to select, drag to move �
   ['scatter', '⁘', 'Scatter', 'g', 'Drag to scatter the chosen item (trees, rocks, grass) • Shift = remove items in the circle'],
 ];
 const HINT = Object.fromEntries(TOOLS.map(t => [t[0], t[4]]));
-function setTool(t) { const wasBd = tool === 'bd'; setTimeout(() => { if (M && (wasBd || t === 'bd')) applySky(); }, 0); if (draft) { draft = null; undo.pop(); drawLine(null); } if (fdraft) { fdraft = null; undo.pop(); drawLine(null); } tool = t; if (t === 'scatter' && !isVisualType(opt.obj)) { const a = KIT.list.find(a => a.cat === 'tree'); if (a) { opt.obj = 'kit:' + a.id; opt.cat = 'tree'; } } renderTools(); renderOpts(); drawHandles(); $('hint').textContent = HINT[t] || ''; placeGizmo(); need(); }
+function setTool(t) { if (t === 'bd' && COL && COL.on) { stat('👥 Backdrop editing is off in a live room (not synced yet)', 'warn'); return; } const wasBd = tool === 'bd'; setTimeout(() => { if (M && (wasBd || t === 'bd')) applySky(); }, 0); if (draft) { draft = null; undo.pop(); drawLine(null); } if (fdraft) { fdraft = null; undo.pop(); drawLine(null); } tool = t; if (t === 'scatter' && !isVisualType(opt.obj)) { const a = KIT.list.find(a => a.cat === 'tree'); if (a) { opt.obj = 'kit:' + a.id; opt.cat = 'tree'; } } renderTools(); renderOpts(); drawHandles(); $('hint').textContent = HINT[t] || ''; placeGizmo(); need(); }
 function renderTools() { const box = $('tools'); box.textContent = ''; for (const t of TOOLS) box.append(el('button', { class: tool === t[0] ? 'on' : '', title: t[2] + ' (' + t[3].toUpperCase() + ')', onclick: () => setTool(t[0]) }, el('b', null, t[1]))); const T = TOOLS.find(x => x[0] === tool); if ($('optTitle')) $('optTitle').textContent = '⚙ ' + (T ? T[2] : '') + ' Settings'; }
 const h3 = t => el('h3', null, t);
 function seg(items, cur, on) { const d = el('div', { class: 'seg' }); for (const [v, n, tip] of items) d.append(el('button', { class: 'tl-btn' + (v === cur ? ' on' : ''), title: tip || '', onclick: () => on(v) }, n)); return d; }
@@ -1554,9 +1557,10 @@ function applySky() {
 
 // ================= save / load =================
 function stat(t, cls) { const s = $('stat'); s.textContent = t; s.className = cls || ''; if (PJ && t !== 'Unsaved' && t !== 'Exporting…') PJ.log(t, cls); }
-function changed() { hierSoon(); dirty = true; GD = null; stat('Unsaved', 'warn'); clearTimeout(saveT); if (online && M.id) saveT = setTimeout(save, 4000); need(); }
+function changed() { hierSoon(); dirty = true; GD = null; stat('Unsaved', 'warn'); clearTimeout(saveT); if (online && M.id && !(COL && COL.guest)) saveT = setTimeout(save, 4000); if (COL) COL.onChanged(); need(); }
 async function save() {
   clearTimeout(saveT); if (!M) return false;
+  if (COL && COL.guest) { stat('👥 The host saves this map', 'warn'); return false; }
   if (!M.id) { stat('No id yet', 'err'); return false; }
   try { const r = await (await fetch('/api/mb?id=' + M.id, { method: 'POST', body: JSON.stringify({ map: MD.pack(M) }) })).json(); if (!r.ok) throw new Error(r.err);
     dirty = false; stat('Saved ' + new Date().toLocaleTimeString('th-TH'), 'ok'); localStorage.setItem('mb_last', M.id); return true; }
@@ -1577,6 +1581,7 @@ function renderList() { const s = $('mapSel'); s.innerHTML = ''; const ids = new
   for (const m of list) s.append(el('option', { value: m.id }, (M && m.id === M.id ? M.name : m.name) + (m.game ? '  ✓ in game' : '')));
   if (M) s.value = M.id; }
 async function openMap(id) {
+  if (COL && COL.on) { stat('👥 Leave the room before opening another map', 'warn'); renderList(); return; }
   if (dirty) await save();
   try { const r = await (await fetch('/api/mb?id=' + id)).json(); if (!r.ok) throw new Error(r.err); setMap(MD.unpack(r.map)); localStorage.setItem('mb_last', id); stat('Opened', 'ok'); refreshVer(); } catch (e) { stat('Couldn’t open: ' + e.message, 'err'); }
 }
@@ -1692,6 +1697,7 @@ async function exportGame() {
 }
 
 async function exportPublish() {   // ⬆ Export = export + commit/push only this map's files to GitHub (Play / Game View only export)
+  if (COL && COL.guest) { stat('👥 Only the host exports (the file lives on the host’s machine)', 'warn'); return; }
   if (!await exportGame()) return; const st = $('stat').textContent; stat(st + ' • Pushing…');
   try { const r = await (await fetch('/api/mb-publish?id=' + M.id, { method: 'POST' })).json(); if (!r.ok) throw new Error(r.err);
     stat(r.same ? st + ' • GitHub already has v' + r.v : st + ' • Pushed v' + r.v + ' (' + r.sha + ')' + (r.local === 'behind' ? ' • this PC not pulled yet' : ''), 'ok'); }
@@ -1743,7 +1749,7 @@ async function shotPNG() {
 }
 
 // ================= boot =================
-$('bNew').onclick = newDlg; $('bSave').onclick = save; $('bUndo').onclick = doUndo; $('bRedo').onclick = doRedo; $('bExport').onclick = exportPublish; $('ver').onclick = refreshVer; setInterval(refreshVer, 120000);
+$('bNew').onclick = () => { if (COL && COL.on) { stat('👥 Leave the room before making a new map', 'warn'); return; } newDlg(); }; $('bSave').onclick = save; $('bUndo').onclick = doUndo; $('bRedo').onclick = doRedo; $('bExport').onclick = exportPublish; $('ver').onclick = refreshVer; setInterval(refreshVer, 120000);
 $('bPlay').onclick = async () => { const w = window.open('about:blank', 'mb_play'); if (await exportGame()) w.location = 'index.html?nosw&playmap=' + M.id + (M.modes.length === 1 && M.modes[0] === 'siege' ? '&pm=siege' : '') + '&t=' + Date.now(); else w.close(); };
 $('mapSel').onchange = e => openMap(e.target.value);
 for (const b of document.querySelectorAll('#gbar [data-g]')) b.onclick = () => setGizmo(b.dataset.g);
@@ -1761,6 +1767,13 @@ $('phView').onchange = e => { PV = +e.target.value; phViewNeed(); };
 $('oSky').onchange = e => { show.sky = e.target.checked; applySky(); };
 addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
 window.__mb = { get M() { return M; }, get tool() { return tool; }, makeWater, pnHoleHit, gameView, gameViewClose, get RX() { return RX; }, loadRooms, MD, opt, placePart, syncParts, partNode, gParts, castleProto, cam, camApply, setTool, gameData, buildExport, exportGame, save, setMap, syncAll, need, kitTpl, KIT, get sel() { return sel; }, set sel(v) { sel = v; renderSide(); updSel(); }, pushUndo, changed, colDirty, updTerrain, afterTerrain, applyRamp, makeFloor, placeObj, doUndo };
+COL = initCollab({ THREE, MD, get M() { return M; }, root, scene, el, stat, applySky, updTerrain, syncAll, buildGrid, syncObjs, syncObj, syncWalls, syncFloors, syncParts, syncPart, colDirty, hierSoon,
+  markDirty: changed, camDist: () => cam.dist, get sel() { return sel; }, renderSide, updSel, need, selAll, loadMap: m => setMap(m), barSlot: $('stat'),
+  setSel: L => { sel = L[0] || null; msel = L.slice(1); renderSide(); updSel(); },
+  boxOf: r => { const it = find(r); if (!it) return null; const b = new THREE.Box3(), t = new THREE.Box3(); b.makeEmpty(); root.updateMatrixWorld(true); for (const n of selNodes(r, it)) if (n) { t.setFromObject(n); b.union(t); } return b.isEmpty() ? null : b; },
+  dragging: () => !!gz || !!(drag && drag.k !== 'orbit' && drag.k !== 'pan'), guestLeft: () => { dirty = false; clearTimeout(saveT); stat('Left the room — this copy is not saved until you edit', 'warn'); } });
+{ const uh = updHover; updHover = e => { uh(e); COL.onHover(hover); }; }
+window.__mb.COL = COL;   // debug   // cursor for the others in the room
 PJ = initProject({ items: cat => OBJ_IN(cat), cur: () => opt.obj, pick: pickAsset, dragStart: (t, cat) => { opt.obj = t; opt.cat = cat; if (tool !== 'place') setTool('place'); else renderOpts(); },
   dragEnd: () => { hover = null; need(); }, thumb, tool: () => tool, visual: isVisualType, importAsset: addAsset, reloadKit: async () => { await loadKit(); renderOpts(); stat('Asset library reloaded', 'ok'); }, need });
 (async () => {

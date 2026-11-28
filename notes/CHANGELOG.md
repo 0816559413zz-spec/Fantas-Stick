@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-28 — **Map Builder: edit a map together, live.** Press 👥 in the top bar to open a room and share the 5-letter code; others join with it and everyone sees each other's edits, cursors and selections as they happen (objects, walls, floors, castle parts, rooms, map settings, ground sculpt and paint). Something another person has selected is locked for the rest. The host's machine keeps the file: only the host saves and exports. Undo only undoes your own changes. Backdrop editing is off inside a room for now.
 - 2026-11-28 Shader warm-up: carry unfinished event rehearsals into the match queue and keep expensive GLSL inspection opt-in. The shader gate now fails if its detector never armed or a page error occurred.
 
 - 2026-11-28 Performance: deduplicate queued shader subtrees and skip retries for detached objects. Prepare cloth collision capsules once per frame and reject out-of-range points before projection and square root.

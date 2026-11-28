@@ -8,6 +8,8 @@
 
 ## Latest notes (newest first)
 
+**Map Builder live co-editing, phase 1 (2026-11-28):** 👥 button in the top bar: host opens a room (PeerJS, prefix `fsmb-v1-`, same TURN as the game), guests join with the code. `mapbuild/collab.js` diffs walls/floors/objs/parts/rooms by id + META settings + terrain regions (hook in `updTerrain`) on `changed()` (120 ms debounce, live during gizmo drags), host relays and is the only one that saves/exports; guests' `save()`/⬆ are blocked. Locks = remote selections (`updSel` → `COL.onSel`), cursors + coloured selection boxes, ids per slot (`nid`: id % 32 = slot), undo keeps items others changed after the snapshot (`snap.t` + `mergeUndo`). Messages chunked at 12 KB (JSON). Not synced: backdrop (tool off in a room), map resize, terrain undo restores the whole grid. Tested with two tabs on a temp map (edit both ways, delete, terrain, lock, undo merge, cursor, close room). `__mb.COL` for debugging. Next phases: terrain/paint polish, per-user undo, rejoin after a drop.
+
 **ตรวจ shader กลางไฟต์ (2026-11-28):** รอ entry preload และคิวแมตช์ครบแล้ว Meadow TDM สองชุดไม่มี shader ใหม่ แต่ยังเจอเฟรมช้า เมื่อเข้าเกมเร็ว คิว warm-up เก็บงาน rehearsal ที่ยังเหลือไว้ ตัวนับ shader ยังแสดงใน F3 ส่วนการอ่าน GLSL เปิดเฉพาะตอนวิเคราะห์ ดู `guides/PRELOAD-STANDARD.md`
 
 **ลดงานคิว shader และผ้าคลุม (2026-11-28):** คิว shader ข้ามวัตถุที่ยังไม่เข้า scene และรวมลูกอยู่ใต้รากในคิวเดียวกัน ทดสอบทั้ง `add` และ `attach` ผ้าคลุมสร้างขอบเขต capsule ก่อนแก้ผ้าและข้ามจุดที่อยู่นอกระยะ ผลชนตรงกันในชุดทดสอบ เฟรมกระตุกจากเรนเดอร์และ shader ใหม่กลางทีมไฟต์ยังอยู่ ดู `guides/OPTIMIZE.md`
