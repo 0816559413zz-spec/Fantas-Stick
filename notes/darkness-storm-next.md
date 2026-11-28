@@ -23,17 +23,18 @@ Hand-off for the next chat. Reply in Thai, short. Discuss before building; still
 2. **Darkness basic attack (scythe BA) — checked 2026-11-28, looks broken, not fixed yet:**
    - Real match (headless, `HL.cam('q34')`, holding fire): both arms stick out sideways like a T while attacking, and the scythe is not visible in the frames (`shots/dk_ba_live.jpg`), although `o.darkWeapon.visible` is true and arm rotations change (armR ≈ [-1.21,.49,-.7], armL ≈ [-1.77,0,.49] after a swing).
    - VFX Studio (`stance/darkness_ba_check`, acts `fire`): after the first swing the scythe disappears and the body plays a wand-shot pose with a light ball. The same happens on the old commit 13e1805d, so it is NOT from the Darkness rework.
+   - More (2026-11-28): the BA scythe sweeps out to ~6 m from the caster (its range is 175 px) and loops round, so in a close camera it leaves the screen; with fire held it keeps circling far away. Probe: `o.darkWeapon` world position .2 s → 1.5 m, .45 s → 5.7 m, 1.0 s → 5.3 m. Ask the user what "arm spin" means (send `shots/dk_ba_wide_s.gif`).
    - Next: look at the live BA pose code in `js/68-darkness-view.js` (`ST_DARK_LIVE_BA`, `darkBAPose`, `liveHandPose`) in a real browser (the browser pane) before trusting headless; then fix the arm pose (user: "arm spin") and confirm the scythe swing shows.
 2b. **Full skill sweep 2026-11-28** (`stance/darkness_all`, `stance/storm_all`, sheets `shots/dk_all_sheet.jpg`, `shots/st_all_sheet.jpg`):
    - Fixed: God Lightning claw attacks were laid flat by the new `bolt` dash pose (js/72: skip bolt while `o.clSw`).
-   - Thunder Line release shows a tall white glow column at the hands (bloom) instead of reading as a line — tone down like the Thunderbomb fix (thin bolts, low `gk`, no big flash).
+   - Thunder Line: thinner low-glow bolts + smaller flash (done 2026-11-28). From the side camera the line runs away from the camera, so it still looks like a bright column near the caster.
    - Night Waltz border B: huge pale grey sheets fill the screen from a close camera — check in a real match.
    - God Lightning dash echo leaves black branching cracks on the floor (other session's prototype) — looks like dark "tree" decals; ask the user.
    - Studio limits: `class-stance` keeps the foe at me.x+400 every tick, so marked Nightfall / Storm Dome on the foe can't be judged there; use a real match (HL) for those.
-3. Death Sentence charge: from the front the two hands are not clearly together at the hip.
+3. Death Sentence charge: hands brought closer (gap ~0.38 m, left hand straighter/lower; keys in `CANIM.dk_sentence`). Measured with `gap.js` style probe (hand_R/hand_L world positions).
 4. Storm dash: check direction changes mid-dash and the side-dash roll sign.
 5. Thunderbomb camera pull-back only exists in the real game camera — verify in a match.
-6. Storm Dome damage goes through walls (no line-of-sight check in `updateStorm` dome ticks); the ball ignores Earth Rampart walls (`aimRay3` checks ground, panels, city only).
+6. Storm Dome: damage no longer goes through walls (`natureTrace` in the dome tick, done 2026-11-28). Still open: the ball ignores Earth Rampart walls (`aimRay3` checks ground, panels, city only).
 7. Lightning Mark: no "who am I aiming at" highlight while choosing an ally.
 8. Walking slower while charging Death Sentence: asked, not built.
 9. Nothing tested online with several players.

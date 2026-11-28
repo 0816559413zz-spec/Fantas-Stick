@@ -110,7 +110,7 @@ const an=a+rnd(-1.05,1.05),rr=R*rnd(0.55,1.05);PARTS.push({x:px+Math.cos(an)*rr,
     case 'sline':{
       const a=ev.a,c=Math.cos(a),sn=Math.sin(a),L=ev.len,g=ev.g,bolt=g?tboltB:tbolt;
       const col=g?'#39dcff':'#ffe91a';
-      FX.flashSprite(x+c*19,y+sn*19,H,col,.2,1.8,.15,1.9);
+      FX.flashSprite(x+c*19,y+sn*19,H,col,.14,.8,.1,1.2);   // round 2: smaller flash (bloomed into a white column)
       const pts=[];
       const n=Math.max(2,Math.ceil(L/32));
       for(let i=0;i<=n;i++){
@@ -122,13 +122,13 @@ const an=a+rnd(-1.05,1.05),rr=R*rnd(0.55,1.05);PARTS.push({x:px+Math.cos(an)*rr,
         const j=i,from=Math.max(0,j-3);
         later(ev.T*j/n,()=>{
           const path=pts.slice(from,j+1);
-          if(g)stormDomePath(path,.14,.19,.045,.77,true);
-          else tboltP(path,.14,.19,.045).gk=.77;
+          if(g)stormDomePath(path,.14,.11,.045,.3,true);
+          else tboltP(path,.14,.11,.045).gk=.28;   // thinner, low glow: reads as a line, no white smear
         });
       }
       for(let i=2;i<n;i+=3)later(ev.T*i/n,()=>{
         const d=L*i/n,px=x+c*d,py=y+sn*d,side=i%2?1:-1;
-        bolt(px,py,H,px+c*38-sn*20*side,py+sn*38+c*20*side,H+rnd(-.5,.55),.16,i%2?'#9fd8ff':0,.085,1);
+        bolt(px,py,H,px+c*38-sn*20*side,py+sn*38+c*20*side,H+rnd(-.5,.55),.16,i%2?'#9fd8ff':0,.06,1);
       });
       if(near){snd('zap',ev);if(ev.id===NET.myId)shake(2.3);}break;}
     case 'stlinehit':{

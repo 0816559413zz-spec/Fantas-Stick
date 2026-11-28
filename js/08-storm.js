@@ -331,6 +331,7 @@ function updateStorm(dt){
     if(!p||p.team!==D.team)continue;
     for(const t of foesIn(D.team,D.x,D.y,V.r,D.h+V.r/20,D.h-(D.floor?0.5:V.r/20))){
       if(Math.hypot(t.x-D.x,t.y-D.y,(cH(t)-D.h)*20)>V.r+(t.r||PR))continue;
+      if(natureTrace({x:D.x,y:D.y},t,D.h+.4,cH(t),D.team,true))continue;   // no damage through walls (user 2026-11-28)
       aoeHit({id:p.id,x:D.x,y:D.y,z:D.h-1.2},t,V.tick,hit=>shock(hit,p.id,V.shockT,false,D.g));
     }
   }

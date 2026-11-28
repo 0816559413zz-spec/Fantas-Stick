@@ -12,9 +12,10 @@ const DKR={
 // CANIM keys: [u, armR.x, armR.z, twist(+ = right shoulder leads), lean(+ fwd), armL.x, armL.z, roll, drop, ease]
 Object.assign(CANIM,{
   // Death Sentence: coil right with both hands gathered at the right hip (charge, trembling) -> unwind left, both hands flick out level -> hold -> settle
-  dk_sentence:{d:1.0,st:0,nc:1,tm:[.09,.32],k:[[.09,.1,-.1,-.6,.14,-.5,-.95,.05,-.08,'s'],[.31,.12,-.12,-.7,.16,-.55,-1.05,.06,-.1,'s'],
+  dk_sentence:{d:1.0,st:0,nc:1,tm:[.09,.32],k:[[.09,-.35,.25,-.6,.14,.35,-1.0,.05,-.08,'s'],[.31,-.38,.28,-.7,.16,.4,-1.05,.06,-.1,'s'],   // round 3: left hand lower + straighter so both hands meet at the right hip
+    
     [.39,-1.45,.3,.55,.18,-1.3,1.0,-.04,-.07,'i'],[.53,-1.5,.38,.62,.16,-1.25,1.15,-.05,-.06,'o'],[1,-.5,.15,.1,.04,-.3,.3,0,-.02,'s']],
-    j:[[0,.2,.2,.7,-.1,.1,.12,-.12],[.09,.75,.6,.95,-.45,.15,.2,-.2],[.31,.85,.7,1.0,-.5,.18,.22,-.22],[.39,.55,.45,.35,-.3,.1,.2,-.2],[.53,.5,.42,.3,-.28,.1,.2,-.2],[1,.2,.2,.6,-.1,.1,.12,-.12]]},
+    j:[[0,.2,.2,.7,-.1,.1,.12,-.12],[.09,.75,.6,.3,-.45,.15,.2,-.2],[.31,.85,.7,.3,-.5,.18,.22,-.22],[.39,.55,.45,.35,-.3,.1,.2,-.2],[.53,.5,.42,.3,-.28,.1,.2,-.2],[1,.2,.2,.6,-.1,.1,.12,-.12]]},
   // Flow Death Sentence: no charge, quick flick of both hands (same release shape)
   dk_sentence_q:{d:.55,st:0,nc:1,k:[[.08,.1,-.1,-.6,.14,-.5,-.95,.05,-.08,'s'],[.2,-1.45,.3,.55,.18,-1.3,1.0,-.04,-.07,'i'],[.4,-1.5,.38,.62,.16,-1.25,1.15,-.05,-.06,'o'],[1,-.5,.15,.1,.04,-.3,.3,0,-.02,'s']]},
   // Nightfall lift: crouch, arms back -> step + plant, deep knees, arms low and out -> torso follows the sweep -> scoop both arms up, lean back -> settle
