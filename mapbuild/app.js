@@ -301,6 +301,12 @@ function markerMesh(o) {
   const add = (geo, m, x = 0, y = 0, z = 0) => { const me = new THREE.Mesh(geo, m); me.position.set(x, y, z); g.add(me); return me; };
   if (o.t === 'core') { const s = o.s || 4; add(new THREE.CylinderGeometry(s / 2, s / 2, 0.2, 24), helpMat(c, 0.5), 0, 0.1, 0); add(new THREE.OctahedronGeometry(s * 0.3), mat(c, { emit: 1 }), 0, 3, 0); const l = labelSprite('Core ' + (o.n || '?'), c); l.position.y = 5.6; g.add(l); return g; }
   if (o.t === 'sgA' || o.t === 'sgB') { add(new THREE.CylinderGeometry(4, 4, 0.1, 28), helpMat(c, 0.35), 0, 0.06, 0); add(new THREE.CylinderGeometry(0.08, 0.08, 2.6, 6), helpMat(c), 0, 1.3, 0); const l = labelSprite((o.t === 'sgA' ? 'Atk ' : 'Def ') + (o.ph || 1), c); l.position.y = 3.2; g.add(l); return g; }
+  if (o.t === 'sgCap') {   // capture zone outline (local frame; the group carries the rotation) + see-through fill + label
+    const P = MD.capPoly(o), sh = new THREE.Shape(P.map(q => new THREE.Vector2(q[0], -q[1])));
+    const f = noPick(new THREE.Mesh(new THREE.ShapeGeometry(sh).rotateX(-Math.PI / 2), helpMat(c, 0.16))); f.position.y = 0.18; f.userData.area = 1; f.material.side = THREE.DoubleSide; g.add(f);
+    const L = noPick(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(P.map(q => new THREE.Vector3(q[0], 0.25, q[1]))), new THREE.LineBasicMaterial({ color: c }))); L.userData.area = 1; g.add(L);
+    const hd = new THREE.Mesh(new THREE.OctahedronGeometry(0.9), helpMat(c)); hd.position.y = 1.1; g.add(hd);
+    const l = labelSprite('Capture ' + (o.ph || 1), c); l.position.y = 2.8; g.add(l); return g; }
   if (o.t === 'phase') { areaMesh(o, g, c, 0.15); const l = labelSprite('Phase ' + (o.ph || 1), c); l.position.y = 2.6; g.add(l); return g; }
   if (o.t === 'ceil') { areaMesh(o, g, c, 0); return g; }
   if (o.t === 'sgHold' || o.t === 'sgLoot') { const tc = o.t === 'sgHold' ? (o.tm === 'B' ? '#5aa8ff' : '#ff6a5a') : c; areaMesh(o, g, tc, 0.2); const l = labelSprite(o.t === 'sgHold' ? (o.tm === 'B' ? 'Def' : 'Atk') + ' retreat ' + (o.ph || 1) : 'Loot ' + (o.ph || 1), tc); l.position.y = 2.8; g.add(l); return g; }
@@ -723,6 +729,7 @@ function protoObj(x, z) {
   else if (t === 'sgHold') Object.assign(o, { ph: 1, tm: 'A', sx: 20, sz: 14, rot: 0 });
   else if (t === 'sgLoot') Object.assign(o, { ph: 1, sx: 30, sz: 30, rot: 0 });
   else if (t === 'sgItem') Object.assign(o, { ph: 1, tier: 1 });
+  else if (t === 'sgCap') Object.assign(o, { ph: 1, sh: 'rect', sx: 16, sz: 16 });
   else if (t === 'brz') Object.assign(o, { sx: 60, sz: 60, top: 60, tm: '', rot: 0 });
   else if (t === 'wind') Object.assign(o, { sx: 20, sz: 20, dir: 0, str: 8, rot: 0 });
   else if (t === 'ceil') Object.assign(o, { sx: 20, sz: 20, y: 21, rot: 0 });
@@ -750,7 +757,8 @@ function partPP(k) { const D = MD.PART[k], pp = opt.pp[k] || (opt.pp[k] = {}); f
 function snapPartTo(p) { const sn = opt.psnap && MD.snapPart(M, p); if (sn) { p.x = +(p.x + sn.dx).toFixed(3); p.z = +(p.z + sn.dz).toFixed(3); if (sn.base !== undefined) p.base = Math.abs(sn.base - MD.gh(M, p.x, p.z)) < 0.06 ? null : sn.base; } return !!sn; }
 function castleProto(h) { const k = opt.part, p = MD.partNew(k, Object.assign({}, partPP(k), { id: 0, rot: ghostRot, x: snapC(h.x), z: snapC(h.z), base: h.on === 'floor' ? +(Math.round(h.y * 20) / 20).toFixed(2) : null })); snapPartTo(p); return p; }
 function placePart(h) { pushUndo('o'); const p = castleProto(h); p.id = nid(); M.parts.push(p); syncPart(p); sel = { k: 'part', id: p.id }; updSel(); renderSide(); changed(); colDirty(); return p; }
-const isRoad = r => !!(r && r.k === 'obj' && (find(r) || {}).t === 'dc_road');
+const isCapP = it => !!(it && it.t === 'sgCap' && it.sh === 'poly' && it.pts);   // polygon capture zone: point handles like a road
+const isRoad = r => !!(r && r.k === 'obj' && (((find(r) || {}).t === 'dc_road') || isCapP(find(r))));
 let fdraft = null;   // free-shape part being drawn: {pts:[[x,z]…] world, base}
 function finishFree() {
   const d = fdraft; fdraft = null; drawLine(null); drawHandles();
@@ -763,6 +771,7 @@ function freeHandles() {   // vertex handles of the selected free-shape part (wo
   if (fdraft) return fdraft.pts.map(q => ({ x: q[0], z: q[1], y: (fdraft.base != null ? fdraft.base : MD.gh(M, q[0], q[1])) + 0.3 }));
   const it = sel && (sel.k === 'part' || isRoad(sel)) && find(sel); if (!it || !it.pts) return null;
   const cs = Math.cos(it.rot || 0), sn = Math.sin(it.rot || 0), g0 = MD.gh(M, it.x, it.z), b = it.base != null ? it.base : g0;
+  if (it.t === 'sgCap') return it.pts.map(q => { const x = it.x + q[0] * cs + q[1] * sn, z = it.z - q[0] * sn + q[1] * cs; return { x, z, y: MD.gh(M, clamp(x, 0, M.W), clamp(z, 0, M.H)) + (it.y || 0) + 0.5 }; });
   if (it.t === 'dc_road') return it.pts.map(q => { const x = it.x + q[0] * cs + q[1] * sn, z = it.z - q[0] * sn + q[1] * cs; return { x, z, y: MD.gh(M, clamp(x, 0, M.W), clamp(z, 0, M.H)) + (it.y || 0) + 0.4 }; });
   return it.pts.map(q => ({ x: it.x + q[0] * cs + q[1] * sn, z: it.z - q[0] * sn + q[1] * cs, y: b + it.h + 0.3 }));
 }
@@ -834,6 +843,7 @@ cv.addEventListener('pointerdown', e => {
       w.pts.forEach((p, i) => { v3.set(p[0] - M.W / 2, (w.base != null ? w.base : MD.gh(M, p[0], p[1])) + w.h + 0.2, p[1] - M.H / 2).project(camera); const d = Math.hypot((v3.x + 1) / 2 * r.width + r.left - e.clientX, (1 - v3.y) / 2 * r.height + r.top - e.clientY); if (d < bd) { bd = d; best = i; } });
       if (best >= 0) { sel.pt = best; drag = { k: 'pt', w, i: best, moved: 0 }; drawHandles(); renderSide(); need(); return; } }
     const p = pickItem(), g = groundHit();
+    { const cz = sel && sel.k === 'obj' && find(sel); if (e.altKey && g && isCapP(cz)) { insertFreePt(cz, g.x, g.z); return; } }   // polygon capture zone: Alt+click anywhere near an edge = add point (the outline is not pickable)
     if (p && p.ref) { const same = sameRef(sel, p.ref), was = isSel(p.ref);
       if (e.shiftKey || e.ctrlKey || e.metaKey) { toggleSel(p.ref); renderSide(); updSel(); return; }   // multi-select
       if (!was) msel = []; else if (!same) { msel = msel.filter(q => !sameRef(q, p.ref)); if (sel) msel.push({ k: sel.k, id: sel.id }); }
@@ -883,7 +893,7 @@ cv.addEventListener('pointermove', e => {
       else { it.x = clamp(snapV(q.o[0] + dx), 0, M.W); it.z = clamp(snapV(q.o[1] + dz), 0, M.H); }
       syncKind(q.k, it); }
     updSel(); }
-  else if (drag && drag.k === 'fpt') { setRay(e); const g = groundHit(); if (!g) return; if (!drag.moved) { pushUndo('o'); drag.moved = 1; } const rd = drag.it.t === 'dc_road', sn = rd ? snapV : snapC; drag.it.pts[drag.i] = toLocal(drag.it, clamp(sn(g.x), 0, M.W), clamp(sn(g.z), 0, M.H)); if (rd) { syncObj(drag.it); drawHandles(); } else syncPart(drag.it); }
+  else if (drag && drag.k === 'fpt') { setRay(e); const g = groundHit(); if (!g) return; if (!drag.moved) { pushUndo('o'); drag.moved = 1; } const rd = drag.it.t === 'dc_road' || drag.it.t === 'sgCap', sn = rd ? snapV : snapC; drag.it.pts[drag.i] = toLocal(drag.it, clamp(sn(g.x), 0, M.W), clamp(sn(g.z), 0, M.H)); if (rd) { syncObj(drag.it); drawHandles(); } else syncPart(drag.it); }
   else if (drag && drag.k === 'pt') { setRay(e); const g = groundHit(); if (!g) return; if (!drag.moved) { pushUndo('o'); drag.moved = 1; } drag.w.pts[drag.i] = [clamp(snapV(g.x), 0, M.W), clamp(snapV(g.z), 0, M.H)]; syncWalls(); updSel(); }
   else if (drag && drag.k === 'box') boxDraw(drag, e);
   else if (drag && drag.k === 'ramp' && hover) drawLine([[drag.a.x, drag.a.z], [hover.x, hover.z]]);
@@ -939,7 +949,7 @@ function finishWall(closed) {
 function insertFreePt(it, x, z) {   // Alt+click on a free shape: add a vertex on the nearest edge
   const [lx, lz] = toLocal(it, x, z), P = it.pts, n = P.length; let bi = 0, bd = 1e9;
   for (let i = 0; i < (it.t === 'dc_road' ? n - 1 : n); i++) { const a = P[i], b = P[(i + 1) % n], dx = b[0] - a[0], dz = b[1] - a[1], t = clamp(((lx - a[0]) * dx + (lz - a[1]) * dz) / (dx * dx + dz * dz || 1), 0, 1), d = Math.hypot(a[0] + dx * t - lx, a[1] + dz * t - lz); if (d < bd) { bd = d; bi = i; } }
-  pushUndo('o'); P.splice(bi + 1, 0, [lx, lz]); sel.pt = bi + 1; if (it.t === 'dc_road') { syncObj(it); drawHandles(); } else syncPart(it); changed(); colDirty(); renderSide();
+  pushUndo('o'); P.splice(bi + 1, 0, [lx, lz]); sel.pt = bi + 1; if (it.t === 'dc_road' || it.t === 'sgCap') { syncObj(it); drawHandles(); } else syncPart(it); changed(); colDirty(); renderSide();
 }
 function insertWallPt(w, x, z) {
   let bi = 0, bd = 1e9; const n = w.pts.length, m = w.closed ? n : n - 1;
@@ -989,6 +999,7 @@ const isDeco = it => OBJ[it.t] && OBJ[it.t].cat === 'deco';
 function gScaleKind(k, it) {   // how [3] size maps onto this item: 'u' uniform s, 'p' panel L/sy/T, 'L' length, 'xyz' / 'xz' sizes, 'f' floor, 'w' wall, 'fp' free shape, 'cp' castle part, null = none
   if (k === 'room') return null; if (k === 'wall') return 'w'; if (k === 'floor') return 'f'; if (k === 'part') return it.pts ? 'fp' : 'cp';
   if (isKit(it) || it.t === 'core') return 'u'; if (it.t === 'pn_wall') return 'p'; if (MD.isRP(it.t) && it.L) return 'L';
+  if (it.t === 'sgCap') return it.sh === 'poly' ? 'cpts' : 'xz';
   if (isPrim(it) || isDeco(it)) return 'xyz'; if (it.t === 'house' || it.t === 'water' || MD.AREA.has(it.t)) return 'xz'; return null;
 }
 function placeGizmo() {
@@ -1057,6 +1068,7 @@ tc.addEventListener('objectChange', () => {
     else if (sk === 'L') it.L = r2(mn(s.L * f));
     else if (sk === 'xyz' || sk === 'xz') { it.sx = sns(mn((s.sx || 1) * S.x)); it.sz = sns(mn((s.sz || 1) * S.z)); if (sk === 'xyz') it.sy = sns(mn((s.sy || 1) * S.y)); }
     else if (sk === 'f') { it.w = sns(mn(s.w * S.x)); it.d = sns(mn(s.d * S.z)); if (s.th) it.th = r2(mn(s.th * S.y)); }
+    else if (sk === 'cpts') it.pts = s.pts.map(q => [r3(q[0] * S.x), r3(q[1] * S.z)]);
     else if (sk === 'fp') { it.pts = s.pts.map(q => [r3(q[0] * S.x), r3(q[1] * S.z)]); it.h = r2(clamp(s.h * S.y, 0.5, 40)); }
     else if (sk === 'cp') { const D = MD.PART[it.k], q = D.main; it[q] = r2(clamp(s[q] * f, D.p[q][1], D.p[q][2])); }
     else if (sk === 'w') { const cx = z.p.x, cz = z.p.z; it.pts = s.pts.map(p => [r2(cx + (p[0] - cx) * S.x), r2(cz + (p[1] - cz) * S.z)]); it.h = r2(mn(s.h * S.y)); }
@@ -1477,6 +1489,15 @@ function renderSide() {
         isPrim(it) || it.t === 'poly' ? fld('Visible (exported to the game)', it, 'vis', { type: 'checkbox', get: () => it.vis !== 0, set: v => { if (v) delete it.vis; else it.vis = 0; } }) : null,
         ...(MD.isDeco(it.t) ? decoFields(it) : []), ...(it.t === 'pn_wall' ? pnFields(it) : []),
         it.t === 'core' ? fld('Core Number (order)', it, 'n', { min: 1, step: 1 }) : null, it.t === 'core' ? fld('Core Size', it, 's', { min: 1 }) : null,
+        ...(it.t === 'core' ? [h3('Capture (stand in the zone)'), fld('Capture Time (s, 1 attacker)', it, 'ct', { nullable: 1, ph: '45', min: 1 }),
+          fld('Speed × by players in zone (1, 2, 3+…)', it, 'cm', { type: 'text', get: () => it.cm || '', set: v => { if (String(v).trim()) it.cm = String(v).trim(); else delete it.cm; }, ph: '1, 1.2, 1.4' }),
+          fld('Push-back × (defenders alone in zone)', it, 'cb', { nullable: 1, ph: '1', min: 0, step: 0.1 }),
+          el('p', { class: 'note' }, 'Only attackers in zone = capture • both teams = paused • only defenders = pushed back • empty = holds • captured = locked, next phase • zone shape = Capture Zone objects with this Core Number')] : []),
+        ...(it.t === 'sgCap' ? [fld('Core Number', it, 'ph', { min: 1, step: 1 }),
+          fld('Shape', it, 'sh', { type: 'select', items: [['rect', 'Rectangle'], ['circle', 'Circle / Oval'], ['poly', 'Polygon (any shape)']], get: () => it.sh || 'rect',
+            set: v => { if (v === 'poly' && !(it.pts && it.pts.length > 2)) it.pts = MD.capPoly(Object.assign({}, it, { sh: 'rect' })).map(q => q.slice()); it.sh = v; }, after: () => { resync(); updSel(); renderSide(); } }),
+          it.sh !== 'poly' ? fld('Width (X)', it, 'sx', { min: 1 }) : null, it.sh !== 'poly' ? fld('Length (Z)', it, 'sz', { min: 1 }) : null,
+          el('p', { class: 'note' }, it.sh === 'poly' ? (it.pts || []).length + ' points • drag the white points • Alt+click an edge = add point • select a point then Del = delete' : 'Polygon = any shape • several Capture Zones with the same Core Number = one joined zone')] : []),
         it.t === 'sgA' || it.t === 'sgB' || it.t === 'phase' ? fld('Phase', it, 'ph', { min: 1, step: 1 }) : null,
         it.t === 'sgHold' || it.t === 'sgLoot' || it.t === 'sgItem' ? fld('Break (after core N)', it, 'ph', { min: 1, step: 1 }) : null,
         it.t === 'sgHold' ? fld('Team', it, 'tm', { type: 'select', items: [['A', 'Attackers'], ['B', 'Defenders']], get: () => it.tm === 'B' ? 'B' : 'A' }) : null,

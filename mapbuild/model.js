@@ -48,7 +48,8 @@ export const OBJ = {
   col_box: { n: 'Collision Box', cat: 'collide', c: '#ff5a5a', note: 'Invisible in the game, blocks players/spells • size in the Inspector (or the R/T gizmo)' }, col_cyl: { n: 'Collision Cylinder', cat: 'collide', c: '#ff5a5a', note: 'Invisible in the game, blocks players/spells (round footprint)' },
   box: { n: 'Box', cat: 'prim' }, cyl: { n: 'Cylinder', cat: 'prim' }, cone: { n: 'Cone/Roof', cat: 'prim' }, ball: { n: 'Sphere', cat: 'prim' }, wedge: { n: 'Wedge', cat: 'prim' },
   // siege mode markers (guides/MAP-STANDARD.md) — exported as data.siege, the game builds collision/visuals itself
-  core: { n: 'Core (anchor)', cat: 'mode', c: '#7fd8ff', note: 'number 1–N = order to destroy' },
+  core: { n: 'Core (anchor)', cat: 'mode', c: '#7fd8ff', note: 'number 1–N = order to capture • capture time / speed per player / push-back in the Inspector' },
+  sgCap: { n: 'Capture Zone (core N)', cat: 'mode', c: '#39e6ff', note: 'Shape: rectangle / circle / polygon (drag the points, Alt+click an edge = add point) • several shapes with the same Core N = one zone • none = circle around the core' },
   sgA: { n: 'Attacker Spawn (per phase)', cat: 'mode', c: '#f0a04a', note: '1 per phase (the game puts 6 players around it)' },
   sgB: { n: 'Defender Spawn (per phase)', cat: 'mode', c: '#5aa0ff', note: '1 per phase' },
   phase: { n: 'Phase Play Area', cat: 'mode', c: '#f2d45e', note: 'rectangle (no rotation) • several per phase allowed' },
@@ -126,6 +127,13 @@ Object.assign(OBJ, {
   dc_flag: { n: 'Tower Flag', cat: 'deco', c: '#9a1c20' }, dc_post: { n: 'Flame on Pole', cat: 'deco', c: '#ffb060' },
 });
 export const isDeco = t => t.startsWith('dc_');
+// capture zone shape (sgCap) → local outline [[x,z]…] in the object's frame (rotation applied by the caller / the group)
+export function capPoly(o) {
+  const w = (o.sx || 16) / 2, d = (o.sz || 16) / 2;
+  if (o.sh === 'poly' && o.pts && o.pts.length > 2) return o.pts;
+  if (o.sh === 'circle') { const P = []; for (let i = 0; i < 32; i++) { const a = i / 32 * Math.PI * 2; P.push([+(Math.cos(a) * w).toFixed(3), +(Math.sin(a) * d).toFixed(3)]); } return P; }
+  return [[-w, -d], [w, -d], [w, d], [-w, d]];
+}
 // Phase layers (user 2026-11-25): pa = shown from siege phase N (default 1), pb = shown up to phase N (default: to the end) → [a,b] or null.
 // Objects (kits / prims) + walls only: look (.glb node extras vp) + collision (obs vp, game hgt 0 outside). Other modes stay at phase 1.
 export const vpOf = o => (o.pa > 1 || o.pb > 0) ? [Math.max(1, o.pa | 0 || 1), o.pb > 0 ? o.pb | 0 : 99] : null;
@@ -444,11 +452,13 @@ export function gameData(M, dim) {
       const g = gh(M, x, z), h = top - 0.15 - g; if (h === h && h < 1e9 && h > (ramp ? 0.3 : TSTEP)) put({ x, z, r, hgt: h }, null, { k: 'flr' }); }
   }
   const spawns = [], espawn = [], rings = [], tasks = [], props = [], houses = [], lights = [];
-  const sg = { cores: [], sp: { A: {}, B: {} }, phases: [], bw: [], hold: { A: {}, B: {} }, loot: {}, items: [] }, ceil = [], lz = [], rprops = [], deco = [], pnl = [], broom = [], wind = [], water = [], phg = [];
+  const sg = { cores: [], zones: [], sp: { A: {}, B: {} }, phases: [], bw: [], hold: { A: {}, B: {} }, loot: {}, items: [] }, ceil = [], lz = [], rprops = [], deco = [], pnl = [], broom = [], wind = [], water = [], phg = [];
   const rect = o => { const w = (o.sx || 1) * PX, d = (o.sz || 1) * PX; return { x0: r1(o.x * PX - w / 2), y0: r1(o.z * PX - d / 2), x1: r1(o.x * PX + w / 2), y1: r1(o.z * PX + d / 2) }; };
   for (const o of allObjs) {
     const X = r1(o.x * PX), Y = r1(o.z * PX), rot = o.rot || 0;
-    if (o.t === 'core') sg.cores.push({ n: o.n || sg.cores.length + 1, x: X, y: Y, s: r1((o.s || 4) * PX) });
+    if (o.t === 'core') sg.cores.push(Object.assign({ n: o.n || sg.cores.length + 1, x: X, y: Y, s: r1((o.s || 4) * PX) }, o.ct > 0 ? { ct: r1(o.ct) } : {},
+      o.cm ? { cm: String(o.cm).split(/[ ,]+/).map(Number).filter(v => v > 0).map(r2) } : {}, o.cb != null && o.cb !== '' ? { cb: r2(Math.max(0, +o.cb)) } : {}));   // capture: ct s for 1 player • cm speed × by players in zone • cb push-back × (js/15-siege)
+    else if (o.t === 'sgCap') { const cs = Math.cos(rot), sn = Math.sin(rot); sg.zones.push({ n: Math.max(1, o.ph | 0 || 1), p: capPoly(o).map(q => [r1((o.x + q[0] * cs + q[1] * sn) * PX), r1((o.z - q[0] * sn + q[1] * cs) * PX)]) }); }
     else if (o.t === 'sgA' || o.t === 'sgB') sg.sp[o.t === 'sgA' ? 'A' : 'B'][o.ph || 1] = { x: X, y: Y };
     else if (o.t === 'phase') { const q = rect(o), k = (o.ph || 1) - 1; (sg.phases[k] = sg.phases[k] || []).push({ x1: q.x0, y1: q.y0, x2: q.x1, y2: q.y1 }); }
     else if (o.t === 'sgHold') { const q = rect(o), T = o.tm === 'B' ? 'B' : 'A', k = o.ph || 1; (sg.hold[T][k] = sg.hold[T][k] || []).push({ x1: q.x0, y1: q.y0, x2: q.x1, y2: q.y1 }); }
@@ -515,6 +525,7 @@ export function gameData(M, dim) {
   if (!Object.keys(sg.hold.A).length && !Object.keys(sg.hold.B).length) delete sg.hold;
   if (!Object.keys(sg.loot).length) delete sg.loot;
   if (!sg.items.length) delete sg.items;
+  if (!sg.zones.length) delete sg.zones;
   if (sg.cores.length || sg.bw.length || sg.phases.length || Object.keys(sg.sp.A).length || Object.keys(sg.sp.B).length) data.siege = sg;
   if (broom.length) data.broom = broom;
   if (wind.length) data.wind = wind;
@@ -558,6 +569,12 @@ export function check(M, G) {
         const k = S.cores.find(c => c.n === p); if (k && !inA(k)) add('warn', 'Siege phase ' + p + ': Core ' + p + ' is outside the phase play area', [k.x / PX, k.y / PX]);
         for (const [t, n] of [['A', 'attacker'], ['B', 'defender']]) if (!inA(S.sp[t][p])) add('warn', 'Siege phase ' + p + ': ' + n + ' spawn is outside the play area', [S.sp[t][p].x / PX, S.sp[t][p].y / PX]);
       }
+      { const Z = S.zones || [], own = S.cores.filter(k => Z.some(z => z.n === k.n)).length, orphan = Z.find(z => !S.cores.some(k => k.n === z.n));
+        if (orphan) add('warn', 'Siege: a Capture Zone is set to core ' + orphan.n + ' but there is no Core ' + orphan.n, orphan.p[0] ? [orphan.p[0][0] / PX, orphan.p[0][1] / PX] : null);
+        add(own === N ? 'ok' : 'warn', 'Siege: capture zones drawn for ' + own + '/' + N + ' cores' + (own < N ? ' (the rest use a circle around the core)' : ''));
+        const inZ = (P, x, y) => { let c = false; for (let i = 0, j = P.length - 1; i < P.length; j = i++) { const a = P[i], b = P[j]; if ((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]) c = !c; } return c; };
+        for (let p = 1; p <= N; p++) { const L = Z.filter(z => z.n === p), R = S.phases[p - 1] || []; for (const z of L) if (!z.p.some(q => R.some(r => q[0] >= r.x1 && q[0] <= r.x2 && q[1] >= r.y1 && q[1] <= r.y2))) add('warn', 'Siege: capture zone of core ' + p + ' is outside the phase ' + p + ' play area', [z.p[0][0] / PX, z.p[0][1] / PX]);
+          const k = S.cores.find(c => c.n === p); if (k && L.length && !L.some(z => inZ(z.p, k.x, k.y))) add('warn', 'Siege: Core ' + p + ' is not inside its capture zone (fine, it is only a marker)', [k.x / PX, k.y / PX]); } }
       add(S.bw.length ? 'ok' : 'warn', 'Siege: target walls/gates ' + S.bw.length + ' pieces');
       // loot phase (data only for now): every break 1..N-1 wants both retreat zones + a loot area with items inside it
       const inR = (L, q) => (L || []).some(r => q.x >= r.x1 && q.x <= r.x2 && q.y >= r.y1 && q.y <= r.y2);

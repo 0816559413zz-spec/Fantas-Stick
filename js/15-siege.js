@@ -1,10 +1,11 @@
 // =====================================================================
 //  🏰 โหมดบุกปราสาท (siege) — แบบ Basic ตาม designs/castle-gameplay-concept.md + แผนที่ js/02-fcs.js
 //  ทีม 0 (ฟ้า) = ฝ่ายบุก • ทีม 1 (แดง) = ฝ่ายรับ • 3 เฟส แบบ Breakthrough: แต่ละเฟสมีพื้นที่เล่น + จุดเกิดคู่ + แกน 1 จุด
-//  เริ่ม: ฝ่ายรับมีเวลาเตรียมตัว (ฝ่ายบุกออกจากจุดเกิดไม่ได้) • ฝ่ายบุกเข้าเขตแกนแล้วกด G = ร่ายทำลายแกนต่อเนื่อง
-//    ร่ายหยุดเมื่อ: ยิง/ยกโล่/ใช้สกิล/พุ่ง, โดนสตัน, ออกนอกเขต, ตาย, กด G อีกครั้ง
-//    ดาเมจรวมต่อแกน × คนร่าย 1 / 1.2 / 1.4 (3 คนขึ้นไป) • มีฝ่ายรับในเขต = ลดลงคงที่ (ไม่ลดตามจำนวนคน)
-//  แกนแตก = เฟสถัดไป (เวลาเพิ่ม + จุดเกิดย้าย + พื้นที่เปลี่ยน, แกน 1 แตก = ประตูเปิด) • แกนสุดท้ายแตก = ฝ่ายบุกชนะ
+//  เริ่ม: ฝ่ายรับมีเวลาเตรียมตัว (ฝ่ายบุกออกจากจุดเกิดไม่ได้) • ยึดจุดแบบยืนในเขต (ผู้ใช้ 2026-11-28, ไม่มีกด G แล้ว):
+//    เขตยึด = Capture Zone ใน Map Builder (สี่เหลี่ยม/วงกลม/รูปหลายเหลี่ยม หลายชิ้นรวมกัน) ไม่มี = วงกลม SGV.zoneR รอบแกน
+//    ฝ่ายบุกอยู่ในเขตฝ่ายเดียว = ยึด (เวลา/ตัวคูณตามจำนวนคน ตั้งที่ Core ใน Map Builder) • สองฝ่ายอยู่ด้วยกัน = หยุด
+//    ฝ่ายรับอยู่ฝ่ายเดียว = แถบลด (ดันกลับ) • ว่าง = ค้างไว้ • ยึดครบ = ล็อก ไปเฟสถัดไป (ยึดคืนไม่ได้)
+//  ยึดได้ = เฟสถัดไป (เวลาเพิ่ม + จุดเกิดย้าย + พื้นที่เปลี่ยน, แกน 1 แตก = ประตูเปิด) • แกนสุดท้ายแตก = ฝ่ายบุกชนะ
 //  หมดเวลา: มีฝ่ายบุกในเขตแกน = ต่อเวลา (มีฝ่ายรับในเขต = แกนไม่รับดาเมจ, ฝ่ายบุกออกหมด = นับผ่อนผัน 5→1 วิ) • ไม่มี = ฝ่ายรับชนะ
 //  แกนแตก (ไม่ใช่แกนสุดท้าย) + แมพมี Loot Area = ถอย (trT) → ช่วงชิงของ (lootT, ของชั่วคราว SG_ITEMS) → เฟสถัดไป • เวลาหลักหยุดระหว่างนั้น
 //  ⚠ ตัวเลขทั้งหมดใน SGV = ค่าตั้งต้นชั่วคราว (เอกสารยังไม่กำหนด) ให้ทีมเกมเพลย์ปรับ
@@ -14,11 +15,10 @@ const SGV={
   time0:330,     // เวลาบุกตั้งต้น (วิ)
   add:180,       // เวลาที่ได้เพิ่มเมื่อทำลายแกน (วิ)
   prep:20,       // เวลาเตรียมตัวฝ่ายรับก่อนเปิดบุก (วิ)
-  coreHp:1000,   // เลือดแกน
-  rate:22,       // ดาเมจ/วิ ของคนร่าย 1 คน (~45 วิ ต่อแกนถ้าไม่มีใครขัด)
-  mul:[0,1,1.2,1.4],   // ตัวคูณดาเมจรวมตามจำนวนคนร่าย (ผู้ใช้กำหนด)
-  defMul:0.5,    // มีฝ่ายรับในเขต: เหลือส่วนนี้ (ช่วงปกติ)
-  zoneR:330,     // รัศมีเขตแกน (px)
+  capT:45,       // capture time (s) for 1 attacker alone in the zone — per core override: Map Builder Core "Capture Time" (k.ct)
+  capMul:[1,1.2,1.4],   // speed × by attackers in zone (1, 2, 3+) — per core override k.cm (last entry = that many or more)
+  back:1,        // push-back speed × capture speed while only defenders are in the zone — per core override k.cb
+  zoneR:330,     // fallback zone radius (px) when the map has no Capture Zone for this core
   wallHp:400,    // เลือดกำแพงพังได้
   grace0:5,graceMin:1,graceT:60,
   lootT:45,      // loot phase length (s) after the retreat, main timer paused ⚠ temporary
@@ -38,11 +38,25 @@ const SG_ITEM_T=['shard','shard','shard'];
 const SG_CARRY=3;   // items one player can hold (all kinds)
 function sgF(){return sgFD();}   // js/02-fcs.js: code fcs or a Map Builder siege map
 function sgCore(){const S=G.sg;return S?sgF().cores[S.ph-1]:null;}
-function sgInZone(p,k){k=k||sgCore();return !!k&&Math.hypot(p.x-k.x,p.y-k.y)<SGV.zoneR+PR;}
+// capture zone of core k = list of polygons [[x,y]…] (union) • Map Builder Capture Zones (sgFromFile k.zone) or a circle of SGV.zoneR
+function sgZone(k){if(!k)return [];if(k.zone&&k.zone.length)return k.zone;
+  if(!k._zc){const P=[];for(let i=0;i<40;i++){const a=i/40*6.2832;P.push([k.x+Math.cos(a)*SGV.zoneR,k.y+Math.sin(a)*SGV.zoneR]);}k._zc=[P];}return k._zc;}
+function sgPolyBB(P){if(!P.bb){let a=1e9,b=1e9,c=-1e9,d=-1e9;for(const q of P){a=Math.min(a,q[0]);b=Math.min(b,q[1]);c=Math.max(c,q[0]);d=Math.max(d,q[1]);}P.bb=[a,b,c,d];}return P.bb;}
+function sgPolyIn(P,x,y){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const a=P[i],b=P[j];if((a[1]>y)!==(b[1]>y)&&x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0])c=!c;}return c;}
+function sgPolyD(P,x,y){let m=1e18;for(let i=0,j=P.length-1;i<P.length;j=i++){const a=P[j],b=P[i],dx=b[0]-a[0],dy=b[1]-a[1],t=clamp(((x-a[0])*dx+(y-a[1])*dy)/(dx*dx+dy*dy||1),0,1);m=Math.min(m,Math.hypot(a[0]+dx*t-x,a[1]+dy*t-y));}return m;}
+// point inside the zone, or its body (pad px) touching the edge
+function sgZoneIn(k,x,y,pad){pad=pad||0;for(const P of sgZone(k)){const B=sgPolyBB(P);if(x<B[0]-pad||x>B[2]+pad||y<B[1]-pad||y>B[3]+pad)continue;if(sgPolyIn(P,x,y)||(pad&&sgPolyD(P,x,y)<pad))return true;}return false;}
+function sgInZone(p,k){k=k||sgCore();return !!k&&sgZoneIn(k,p.x,p.y,PR);}
+// random walkable spot inside the zone (bots)
+function sgZonePt(k){const Z=sgZone(k);for(let n=0;n<24;n++){const P=Z[Math.floor(Math.random()*Z.length)],B=sgPolyBB(P),x=rnd(B[0],B[2]),y=rnd(B[1],B[3]);
+  if(sgPolyIn(P,x,y)&&sgPolyD(P,x,y)>PR*1.5&&(!navOn()||!NAV.w||navWalk(x,y)))return {x,y};}return {x:k.x,y:k.y};}
+function sgCapT(k){return k&&k.ct>0?k.ct:SGV.capT;}
+function sgCapMul(k,n){const m=k&&k.cm&&k.cm.length?k.cm:SGV.capMul;return n>0?m[Math.min(n,m.length)-1]:0;}
+function sgCapBack(k){return k&&k.cb!=null?k.cb:SGV.back;}
 function sgSpawn(t,ph){const s=sgF().sp[t?'B':'A'][ph||G.sg.ph];return s||{x:MW/2,y:MH/2};}
 function sgInit(){
   const F=sgF();SGPH=1;SGTR=0;
-  SGLT=0;G.sg={it:[],lt:0,tr:0,ph:1,prep:SGV.prep,ot:false,otT:0,grace:SGV.grace0,win:-1,atk:0,hp:F.cores.map(()=>SGV.coreHp),bw:F.bw.map(b=>b.k==='gate'?-1:SGV.wallHp),t0:0};
+  SGLT=0;G.sg={it:[],lt:0,tr:0,ph:1,prep:SGV.prep,ot:false,otT:0,grace:SGV.grace0,win:-1,atk:0,cp:F.cores.map(()=>0),cs:0,bw:F.bw.map(b=>b.k==='gate'?-1:SGV.wallHp),t0:0};
   G.timer=SGV.time0;AREA=mapArea(G.map,G.mode);
   sgWallsApply();
   for(const p of plist())p.sgc=0;
@@ -65,16 +79,8 @@ function sgWallEnv(x,y,rad,dmg){
   if(G.mode!=='siege'||!G.sg||!(MAPS[MAPID]&&MAPS[MAPID].fcs))return;
   sgF().bw.forEach((b,i)=>{if(G.sg.bw[i]<=0)return;const dx=Math.max(b.x-x,0,x-(b.x+b.w)),dy=Math.max(b.y-y,0,y-(b.y+b.d));if(Math.hypot(dx,dy)<rad)sgWallDmg(i,dmg,x,y);});
 }
-// ปุ่ม (updatePlayer js/11): G = เริ่ม/หยุดร่ายที่แกน • ยิง/โล่/สกิล/พุ่ง = หยุดร่าย
-function sgInput(p,pr,inp){
-  const S=G.sg;if(!S||G.ph!=='play')return;
-  if(p.sgc&&(inp.fire||inp.sh||pr.q||pr.e||pr.r||pr.f||pr.x||pr.sp||p.dash>0))sgStop(p);
-  if(!pr.g||!p.alive||p.downed)return;
-  if(p.sgc){sgStop(p);return;}
-  if(p.team!==0||S.prep>0||S.tr>0||S.lt>0||!sgInZone(p)||p.stun>0)return;
-  p.sgc=1;emit({k:'sgch',id:p.id,on:1});
-}
-function sgStop(p){if(!p.sgc)return;p.sgc=0;emit({k:'sgch',id:p.id,on:0});}
+// p.sgc = this attacker is capturing right now (beam to the crystal on screen, snapshot 'sc') — set by sgTick, no key any more
+function sgStop(p){p.sgc=0;}
 function sgTick(dt){
   const S=G.sg,F=sgF(),ps=plist(),k=sgCore();if(!S||!k)return;
   // จุดเกิดปลอดภัย: คนในทีมอยู่ในเขตจุดเกิดของตัวเอง = ไม่โดนดาเมจ
@@ -96,29 +102,29 @@ function sgTick(dt){
     if(S.lt<=0)sgLootEnd();
     return;
   }
-  // ร่ายแกน
-  let n=0,def=0,atkIn=0;
-  for(const p of ps){
-    if(!p.alive||p.downed){if(p.sgc)sgStop(p);continue;}
-    const inz=sgInZone(p,k);
-    if(p.team===1&&inz)def++;
-    if(p.team===0&&inz)atkIn++;
-    if(p.sgc){if(!inz||p.stun>0)sgStop(p);else n++;}
-  }
-  S.atk=n>0?1:0;S.def=def>0?1:0;
-  if(n){const m=SGV.mul[Math.min(3,n)],red=def?(S.ot?0:SGV.defMul):1;S.hp[S.ph-1]-=SGV.rate*m*red*dt;}
-  if(S.hp[S.ph-1]<=0){sgCoreDown();return;}
+  // stand-to-capture: attackers alone = capture • both teams = paused • defenders alone = pushed back • empty = holds
+  let def=0,atkIn=0;
+  for(const p of ps){p.sgz=0;
+    if(!p.alive||p.downed||p.gh||(p.team!==0&&p.team!==1)||!sgInZone(p,k))continue;
+    p.sgz=1;if(p.team===0)atkIn++;else def++;}
+  const i=S.ph-1,T=sgCapT(k);
+  S.cs=atkIn&&def?2:atkIn?1:def&&S.cp[i]>0?3:0;   // 0 idle • 1 capturing • 2 contested • 3 pushed back
+  if(S.cs===1)S.cp[i]=Math.min(1,S.cp[i]+sgCapMul(k,atkIn)/T*dt);
+  else if(S.cs===3)S.cp[i]=Math.max(0,S.cp[i]-sgCapBack(k)/T*dt);
+  S.atk=S.cs===1?1:0;S.def=def>0?1:0;
+  for(const p of ps)p.sgc=S.cs===1&&p.team===0&&p.sgz?1:0;
+  if(S.cp[i]>=1){sgCoreDown();return;}
   // เวลา / ต่อเวลา
   if(!S.ot){
     G.timer-=dt;
-    if(G.timer<=0){G.timer=0;if(atkIn){S.ot=true;S.otT=0;S.grace=SGV.grace0;banner('⏱ ต่อเวลา! ฝ่ายรับอยู่ในเขต = แกนไม่รับดาเมจ',3);}else sgEnd(1);}
+    if(G.timer<=0){G.timer=0;if(atkIn){S.ot=true;S.otT=0;S.grace=SGV.grace0;banner('⏱ ต่อเวลา! ฝ่ายบุกต้องยึดให้ได้ — ออกจากเขตหมด = แพ้',3);}else sgEnd(1);}
   }else{
     S.otT+=dt;const gmax=Math.max(SGV.graceMin,SGV.grace0-(SGV.grace0-SGV.graceMin)*S.otT/SGV.graceT);
     if(atkIn)S.grace=gmax;else{S.grace-=dt;if(S.grace<=0)sgEnd(1);}
   }
 }
 function sgCoreDown(){
-  const S=G.sg,F=sgF();S.hp[S.ph-1]=0;
+  const S=G.sg,F=sgF();S.cp[S.ph-1]=1;S.cs=0;S.atk=0;
   for(const p of plist())sgStop(p);
   const k=sgCore();emit({k:'sgcore',n:S.ph,x:Math.round(k.x),y:Math.round(k.y)});
   if(S.ph>=F.n){sgEnd(0);return;}
@@ -127,7 +133,7 @@ function sgCoreDown(){
   // line (area = old + new, attackers clamped to the old rects — sgAreaT js/02-fcs), respawns already use the new spawns.
   S.tr=SGV.trT;SGTR=S.tr;
   AREA=mapArea(G.map,G.mode);sgWallsApply();
-  banner(`💥 แกน ${S.ph-1} แตก! ${S.ph===2?'ประตูเปิด • ':''}${SG_TEAM[1]}ถอยเข้าเขตใหม่ — `+(sgHasLoot(S.ph-1)?`ช่วงชิงของเริ่มใน ${SGV.trT} วิ`:`เฟส ${S.ph} เริ่มใน ${SGV.trT} วิ`),4);
+  banner(`🚩 ยึดจุด ${S.ph-1} ได้! ${S.ph===2?'ประตูเปิด • ':''}${SG_TEAM[1]}ถอยเข้าเขตใหม่ — `+(sgHasLoot(S.ph-1)?`ช่วงชิงของเริ่มใน ${SGV.trT} วิ`:`เฟส ${S.ph} เริ่มใน ${SGV.trT} วิ`),4);
 }
 // transition over: next phase live. Defenders still outside the new area die (out of bounds), attackers left behind move to their new spawn.
 // soft (after a loot phase, nobody had time to fall back): defenders outside go to their spawn too instead of dying
@@ -172,12 +178,12 @@ function sgEnd(w){const S=G.sg;if(S.win>=0)return;S.win=w;endMatch();}
 function sgResult(ps){
   const S=G.sg||{win:1,ph:1},w=S.win<0?1:S.win,win=ps.filter(p=>p.team===w).map(p=>p.id);
   const title=w===0?`🏆 ${SG_TEAM[0]} (${TEAMN[0]}) ยึดปราสาทสำเร็จ!`:`🛡️ ${SG_TEAM[1]} (${TEAMN[1]}) ป้องกันปราสาทได้!`;
-  const sub=w===0?'ทำลายแกนครบทั้ง 3 จุด':`ฝ่ายบุกทำลายได้ ${S.ph-1} แกน • แกน ${S.ph} เหลือ ${Math.ceil(Math.max(0,S.hp[S.ph-1]||0)/SGV.coreHp*100)}%`;
+  const sub=w===0?`ยึดครบทั้ง ${sgF().n} จุด`:`ฝ่ายบุกยึดได้ ${S.ph-1} จุด • จุด ${S.ph} ยึดไป ${Math.floor((S.cp&&S.cp[S.ph-1]||0)*100)}%`;
   return {title,sub,win};
 }
 function sgSnap(){
   const S=G.sg;if(!S)return null;
-  return {ph:S.ph,n:sgF().n,pr:Math.ceil(S.prep),tr:Math.ceil(S.tr||0),hp:S.hp.map(v=>Math.max(0,Math.round(v))),mx:SGV.coreHp,ot:S.ot?1:0,gr:S.ot?Math.round(S.grace*10)/10:0,atk:S.atk|0,def:S.def|0,
+  return {ph:S.ph,n:sgF().n,pr:Math.ceil(S.prep),tr:Math.ceil(S.tr||0),cp:S.cp.map(v=>Math.floor(v*100)),cs:S.cs|0,ot:S.ot?1:0,gr:S.ot?Math.round(S.grace*10)/10:0,atk:S.atk|0,def:S.def|0,
     bw:S.bw.map((v,i)=>sgF().bw[i].k==='gate'?(S.ph>=2?1:0):v<=0?1:0).join(''),zr:SGV.zoneR,
     lt:Math.ceil(S.lt||0),lc:sgHasLoot(S.ph-1)?1:0,it:(S.it||[]).map(o=>o.k+','+Math.round(o.x)+','+Math.round(o.y)).join(';'),   // ground items
     iv:plist().filter(p=>p.sgi&&p.sgi.length).map(p=>p.id+':'+p.sgi.join('.')).join(';')};   // carried items
@@ -194,7 +200,7 @@ function sgBotTarget(p){
     const d=Math.hypot(q.x-p.x,q.y-p.y),dk=k?Math.hypot(q.x-k.x,q.y-k.y):1e9;
     if(d>SGB.defCore+SGB.defSee)continue;
     const vis=d<220||(navOn()&&NAV.s&&!navRay(p.x,p.y,q.x,q.y,true));   // มองเห็น (ไม่มีกำแพงสูงบัง) หรือประชิด
-    const ok=p.team===0||G.sg.lt>0?d<SGB.atkSee&&vis:(d<SGB.defSee&&vis)||dk<SGV.zoneR*2.5;if(!ok)continue;   // loot phase: both sides fight whoever is near
+    const ok=p.team===0||G.sg.lt>0?d<SGB.atkSee&&vis:(d<SGB.defSee&&vis)||dk<SGV.zoneR*2.5||(k&&sgInZone(q,k));if(!ok)continue;   // loot phase: both sides fight whoever is near
     const s=p.team===1?Math.min(d,dk*0.8):d;if(s<bd){bd=s;best=q;}}
   return best;
 }
@@ -254,11 +260,11 @@ function sgBotGoal(p){
   const md=p.ai.sgm=sgBotMode(p),T=S.tp&&S.tp[p.team];
   if(md==='back'&&p.team===1){const h=hashStr(p.id)%628/100;return {x:k.x+Math.cos(h)*SGB.ring*0.5,y:k.y+Math.sin(h)*SGB.ring*0.5};}
   if(p.team===0&&md!=='push'&&T&&T.R){const h=hashStr(p.id)%628/100,r=120;return {x:T.R.x+Math.cos(h)*r,y:T.R.y+Math.sin(h)*r};}
-  if(p.team===0){const h=hashStr(p.id)%628/100,r=SGB.ring*0.6;return {x:k.x+Math.cos(h)*r,y:k.y+Math.sin(h)*r};}
+  if(p.team===0){const A=p.ai;if(!A.zp||A.zp.k!==S.ph||G.time>A.zp.t){const q=sgZonePt(k);A.zp={k:S.ph,t:G.time+rnd(5,9),x:q.x,y:q.y};}return {x:A.zp.x,y:A.zp.y};}   // a spot inside the capture zone
   // ฝ่ายรับ: เดินลาดตระเวนรอบแกน (เปลี่ยนจุดทุก 4–8 วิ) — เดิมยืนนิ่งจุดเดียวจนดูเหมือนค้าง (ผู้ใช้ 2026-11-08)
   const A=p.ai;if(!A.pat||A.pat.k!==S.ph||G.time>A.pat.t){
-    for(let n=0;n<12;n++){const a=Math.random()*6.283,r=rnd(SGB.ring*0.5,SGV.zoneR*1.2),x=k.x+Math.cos(a)*r,y=k.y+Math.sin(a)*r;
-      if(sgInArea(x,y,S.ph)&&(!navOn()||!NAV.w||navWalk(x,y))){A.pat={k:S.ph,t:G.time+rnd(4,8),x,y};break;}}
+    for(let n=0;n<12;n++){const q=sgZonePt(k),x=q.x,y=q.y;   // patrol inside the capture zone: standing in it blocks / pushes back the capture
+      if(sgInArea(x,y,S.ph)){A.pat={k:S.ph,t:G.time+rnd(4,8),x,y};break;}}
     if(!A.pat||A.pat.k!==S.ph)A.pat={k:S.ph,t:G.time+2,x:k.x+SGB.ring,y:k.y};}
   return {x:A.pat.x,y:A.pat.y};
 }
@@ -342,12 +348,6 @@ function sgBotThink(p,dt){
   const N=p.sgn||(p.sgn={});N.st=(N.st||1.5)-dt;
   if(N.st<=0){N.st=1.5;if(!N.br&&Math.hypot(p.x-(N.sx||0),p.y-(N.sy||0))<25&&d>60){N.path=null;N.kick=0.5;N.ka=Math.random()*6.283;}N.sx=p.x;N.sy=p.y;}
   if(N.kick>0){N.kick-=dt;inp.mx=Math.cos(N.ka);inp.my=Math.sin(N.ka);}
-  // ฝ่ายบุกถึงเขตแกน = กด G ร่าย แล้วยืนนิ่ง
   for(const kk of SLOTK.concat(['x']))inp.c[kk]=c0[kk]|0;   // ไม่มีเป้า = ไม่กดสกิลใส่อากาศ
-  if(p.team===0&&S&&S.prep<=0&&!(S.tr>0)&&sgInZone(p)){
-    const k=sgCore();inp.ax=k.x;inp.ay=k.y;
-    if(!p.sgc&&!(p.stun>0)){A.gT=(A.gT||0)-dt;if(A.gT<=0){A.gT=0.6;inp.c.g=(inp.c.g|0)+1;}}
-    if(p.sgc){inp.mx=inp.my=0;}
-  }
   sgUnstick(p,dt);
 }

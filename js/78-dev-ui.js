@@ -183,7 +183,7 @@ function devRender(){
   if(F)cols.push(dvCol('siege','🏰 ปราสาท',[dvCh('ph','',Array.from({length:F.n},(_,i)=>[i+1,'เฟส '+(i+1)]),sg.ph),...(me?[dvB('🔁 สลับฝั่ง ('+(SG_TEAM[me.team]||'-')+')','team')]:[]),
     ...(()=>{const L=[];for(let b=1;b<F.n;b++)if(F.loot&&F.loot[b]&&F.loot[b].length)L.push([b,'🎁 ชิงของหลังแกน '+b]);
       return L.length?[dvCh('loot','',L,sg.lt>0?sg.ph-1:-1),dvB('⏹ จบช่วงชิงของ','lootend'),dvB('💠 รับของ 1 ชิ้น','lootgive','shard')]:[dvSub('🎁 แมพนี้ไม่มีเขตชิงของ')];})(),
-    dvB('⏭ ข้ามเตรียมตัว','skip'),dvB('💥 แกนแตก','core0'),dvB('🔷 แกนเต็ม','corefull'),dvB('⏱ +60 วิ','time',60),dvB('⏱ เหลือ 5 วิ','time',0),
+    dvB('⏭ ข้ามเตรียมตัว','skip'),dvB('🚩 ยึดเกือบได้ (99%)','core0'),dvB('🔷 แถบยึด 0%','corefull'),dvB('⏱ +60 วิ','time',60),dvB('⏱ เหลือ 5 วิ','time',0),
     dvB('🧱 ซ่อมกำแพง','walls',1),dvB('🔨 พังกำแพง','walls',0),dvB('🏆 บุกชนะ','win',0),dvB('🛡️ รับชนะ','win',1)]));
   cols.push(dvCol('dmg','💥 ทำลาย / ซ่อม',[dvSub('ที่เล็ง = จุดที่เมาส์ชี้ก่อนเปิดเมนู'),dvB('🔧 ซ่อมตรงที่เล็ง','dfix','part'),dvB('💥 พังตรงที่เล็ง','dbrk','part'),dvB('🔧 ซ่อมทั้งหลัง','dfix','whole'),
     dvB('💥 พังทั้งหลัง','dbrk','whole'),dvB('🔧 ซ่อมทั้งแมพ','dfix','map'),dvB('💥 พังทั้งแมพ','dbrk','map')]));

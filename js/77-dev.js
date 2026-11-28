@@ -155,7 +155,7 @@ function devTp(x,y,p){
 function devSgPhase(n){
   const S=G.sg,F=sgF();if(!S)return;
   n=clamp(n|0,1,F.n);S.ph=n;SGPH=n;S.tr=0;SGTR=0;S.lt=0;SGLT=0;S.it=(S.it||[]).filter(o=>!o.tmp);S.ot=false;S.otT=0;S.prep=0;S.win=-1;
-  S.hp=S.hp.map((v,i)=>i<n-1?0:SGV.coreHp);
+  S.cp=S.cp.map((v,i)=>i<n-1?1:0);
   AREA=mapArea(G.map,G.mode);sgWallsApply();
   for(const p of plist())sgStop(p);
   let i=0;
@@ -198,8 +198,8 @@ function devAct(a,k,v){
   else if(a==='lootend'&&G.sg&&G.sg.lt>0)G.sg.lt=0.01;
   else if(a==='lootgive'&&G.sg&&me){me.sgi=me.sgi||[];if(me.sgi.length<SG_CARRY)me.sgi.push(v||'shard');}
   else if(a==='skip'&&G.sg){G.sg.prep=0;}
-  else if(a==='core0'&&G.sg){G.sg.prep=0;G.sg.hp[G.sg.ph-1]=0;}
-  else if(a==='corefull'&&G.sg){G.sg.hp[G.sg.ph-1]=SGV.coreHp;}
+  else if(a==='core0'&&G.sg){G.sg.prep=0;G.sg.cp[G.sg.ph-1]=0.999;}
+  else if(a==='corefull'&&G.sg){G.sg.cp[G.sg.ph-1]=0;}
   else if(a==='time'&&G.sg){G.timer=+v>0?G.timer+ +v:5;}
   else if(a==='win'&&G.sg){sgEnd(+v);}
   else if(a==='walls'&&G.sg){G.sg.bw=sgF().bw.map(b=>b.k==='gate'?-1:(+v?SGV.wallHp:0));sgWallsApply();}
@@ -288,7 +288,7 @@ function devOverlay(){
   if(C.zon&&F){
     const ring=(x,y,r,col)=>{const mm=new THREE.Mesh(new THREE.RingGeometry(Math.max(0.1,r*S3-0.18),r*S3,64),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.85,side:THREE.DoubleSide,depthTest:false}));
       mm.rotation.x=-Math.PI/2;mm.position.set(tx(x),GY(x,y)+0.25,tz(y));g.add(mm);};
-    F.cores.forEach(k=>{if(k)ring(k.x,k.y,SGV.zoneR,0x39e6ff);});
+    F.cores.forEach(k=>{if(k)for(const P of sgZone(k)){const L=new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(P.map(q=>new THREE.Vector3(tx(q[0]),GY(q[0],q[1])+0.3,tz(q[1])))),new THREE.LineBasicMaterial({color:0x39e6ff,depthTest:false}));g.add(L);}});   // capture zones (any shape)
     for(const t of ['A','B'])for(const ph in F.sp[t]){const s=F.sp[t][ph];if(s)ring(s.x,s.y,SG_SPR,t==='A'?0xff6a5a:0x5a8aff);}
   }
   scene.add(g);DEV.ov=g;DEV.ovK=key;
@@ -306,8 +306,9 @@ function devMapDraw(){
   c.fillStyle='#3a4258';c.strokeStyle='#3a4258';c.lineCap='round';for(const o of OBS){if(!(o.hgt>0))continue;if(o.hx!==undefined){c.lineWidth=Math.max(2,obsRR(o)*k*2);c.beginPath();c.moveTo((o.x-o.hx)*k,(o.y-o.hy)*k);c.lineTo((o.x+o.hx)*k,(o.y+o.hy)*k);c.stroke();continue;}c.fillRect(o.x*k-1,o.y*k-1,Math.max(2,o.r*k*2),Math.max(2,o.r*k*2));}
   const ring=(x,y,r,col,txt)=>{c.strokeStyle=col;c.fillStyle=col+'33';c.lineWidth=2;c.beginPath();c.arc(x*k,y*k,Math.max(3,r*k),0,7);c.fill();c.stroke();
     if(txt){c.fillStyle='#fff';c.font='10px sans-serif';c.textAlign='center';c.fillText(txt,x*k,y*k+3);}};
-  if(MAPID==='fcs'){const F=sgF();
-    F.cores.forEach((q,i)=>{if(q)ring(q.x,q.y,SGV.zoneR,'#39e6ff','C'+(i+1));});
+  if(MAPS[MAPID]&&MAPS[MAPID].fcs){const F=sgF();
+    F.cores.forEach((q,i)=>{if(!q)return;c.strokeStyle='#39e6ff';c.fillStyle='#39e6ff33';c.lineWidth=2;for(const P of sgZone(q)){c.beginPath();P.forEach((v,j)=>j?c.lineTo(v[0]*k,v[1]*k):c.moveTo(v[0]*k,v[1]*k));c.closePath();c.fill();c.stroke();}
+      c.fillStyle='#fff';c.font='10px sans-serif';c.textAlign='center';c.fillText('C'+(i+1),q.x*k,q.y*k+3);});
     for(const t of ['A','B'])for(const ph in F.sp[t]){const q=F.sp[t][ph];if(q)ring(q.x,q.y,SG_SPR,t==='A'?'#ff6a5a':'#5a8aff',(t==='A'?'⚔':'🛡')+ph);}}
   for(const p of plist()){if(!p.alive)continue;c.fillStyle=p.id===NET.myId?'#fff':(p.team===0?'#4da3ff':p.team===1?'#ff5a5a':'#ffd24d');
     c.beginPath();c.arc(p.x*k,p.y*k,p.id===NET.myId?4:2.5,0,7);c.fill();}

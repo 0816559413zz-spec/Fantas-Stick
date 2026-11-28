@@ -1,5 +1,6 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-28 — **Castle Siege: capture points instead of breaking cores.** Attackers stand inside a capture zone to take each point in order. More attackers capture faster; if only defenders are inside, the bar goes back down; with both teams inside it pauses. Map makers draw zones in Map Builder (rectangle, oval or any shape) and set capture time per point.
 - 2026-11-28 — Storm Dome no longer hurts players behind walls; Thunder Line line is thinner with less glow; Death Sentence charge brings both hands closer together.
 - 2026-11-28 — **Map Builder checks its version against GitHub.** When you open it, Map Builder tells you if GitHub has a newer Map Builder and can update it for you. Only people on the same version can join a room. Before ⬆ Export pushes, it shows which map version goes up and warns if GitHub already has the same or a newer one.
 - 2026-11-28 — **Fix: walking on wall tops.** Small height steps on top of walls and blocks pushed players sideways off the edge. You can now walk freely on tops and only fall when you walk past the edge.

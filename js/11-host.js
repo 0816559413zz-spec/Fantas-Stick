@@ -262,7 +262,6 @@ function updatePlayer(p,dt,acting){
   }
   const cageBusy=waterCageBusy(p);
   if(pr.g&&PROPON&&p.alive&&!p.downed&&!p.gh&&!cageBusy&&!p.lgUlt)useProp(p);
-  if(G.mode==='siege'&&!cageBusy&&!p.lgUlt)sgInput(p,pr,inp);   // G = ร่ายทำลายแกน (js/15-siege)
   for(const k of CDK)p.cd[k]=Math.max(0,p.cd[k]-dt*(p.ovc>0?1.3:1));
   p.stun=Math.max(0,p.stun-dt);p.inv=Math.max(0,p.inv-dt);tickStatus(p,dt);
   if(p.breath>0)p.breath-=dt;

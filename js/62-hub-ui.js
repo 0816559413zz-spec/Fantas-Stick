@@ -12,7 +12,7 @@ const HMODES=[
   {k:'tdm',en:'Team PvP',th:'สองทีมปะทะกัน',d:'ทีมแรกที่ได้ 15 kill ชนะ',n:'2–12'},
   {k:'coop',en:'Dungeon',th:'ร่วมมือฝ่าดันเจียน',d:'ฝ่าทีละชั้น บอสทุก 5 ชั้น',n:'1–6'},
   {k:'train',en:'Training',th:'ห้องฝึกคาถา',d:'หุ่นซ้อม ลองคาถา ปิดคูลดาวน์ได้',n:'1–6'},
-  {k:'siege',en:'Castle Siege',th:'บุกปราสาท',d:'ฟ้าบุก แดงรับ ร่ายทำลายแกน 3 จุด',n:'2–12'}].filter(mode=>hostModeEnabled(mode.k));
+  {k:'siege',en:'Castle Siege',th:'บุกปราสาท',d:'ฟ้าบุก แดงรับ ยืนยึดจุด 3 จุด',n:'2–12'}].filter(mode=>hostModeEnabled(mode.k));
 const HUI={st:'',mode:'ffa',hostT:0,flip:null,pend:false,shown:false,botP:-1,botL:1};   // botP/botL = ธาตุ+ความเก่งที่เลือกไว้สำหรับปุ่ม + บอท
 // ไอคอนเส้นบาง (SVG) — กรอบหกเหลี่ยม + ไอคอนโหมด / ปุ่มเล็ก
 const HICO={

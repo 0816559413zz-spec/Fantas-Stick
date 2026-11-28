@@ -167,7 +167,7 @@ window.WD={SKANIM,shieldFaces,get OBS(){return OBS;},groundH:(x,y,z)=>groundH(x,
 // ดีบักโหมดบุกปราสาท (คอนโซล): WD.sg().S = สถานะ, .V = ค่าตัวเลข (js/15-siege)
 WD.phSet=n=>{SGPH=n|0||1;phTick();return PHL.length;};   // preview phase layers (js/28-maps-build) without a siege match
 WD.wx=k=>{WX.force=k||'';const F=MAPS[MAPID]&&MAPS[MAPID].fm;WX.kind=k||wxPick(F&&F.weather);return WX.kind;};   // weather test (js/76-weather): 'rain' / 'clear' / '' = map pick
-WD.sg=()=>({S:G&&G.sg,V:SGV,B:SGB,F:sgFD(),ph:SGPH,area:AREA,bots:bots()});WD.lobbyBotAdd=(p,l)=>lobbyBotAdd(p,l);WD.spawnBot=(...a)=>spawnBot(...a);WD.devAct=(a,k,v)=>devAct(a,k,v);
+WD.sg=()=>({S:G&&G.sg,V:SGV,B:SGB,F:sgFD(),ph:SGPH,area:AREA,bots:bots()});WD.sgZoneIn=(k,x,y,pad)=>sgZoneIn(k,x,y,pad);WD.sgZone=k=>sgZone(k);WD.lobbyBotAdd=(p,l)=>lobbyBotAdd(p,l);WD.spawnBot=(...a)=>spawnBot(...a);WD.devAct=(a,k,v)=>devAct(a,k,v);
 // ---------- Service Worker (sw.js): เก็บไฟล์เกมไว้ในเครื่อง เปิดครั้งต่อไปเร็วขึ้น — แคชผูกกับ PREFIX, ?nosw = ปิดและล้าง ----------
 const SWK={reg:null,warmed:false};
 async function swSetup(){

@@ -294,7 +294,7 @@ function sgViewBuild(){
     const cm=new THREE.MeshStandardMaterial({color:'#9fd8ff',emissive:'#3a8cff',emissiveIntensity:1.2,roughness:0.2,transparent:true,opacity:0.92});
     const cr=new THREE.Mesh(new THREE.OctahedronGeometry(0.9,0),cm);cr.scale.set(1,2,1);cr.position.y=2.4;o.add(cr);
     const glow=new THREE.Sprite(glowMat('#7fc0ff',1.4));glow.scale.setScalar(4);glow.position.y=2.4;o.add(glow);
-    const ring=new THREE.Mesh(new THREE.RingGeometry(SGVZR()*S3-0.25,SGVZR()*S3,64),new THREE.MeshBasicMaterial({color:'#7fc0ff',transparent:true,opacity:0.5,depthWrite:false,side:THREE.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.y=0.08;o.add(ring);
+    const ring=sgZoneMesh(k);g.add(ring);   // capture zone boundary (any shape, js/15-siege sgZone)
     const rub=new THREE.Group();for(let q=0;q<6;q++){const m=new THREE.Mesh(sGeo(THREE.OctahedronGeometry,0.4,0),cm);m.position.set(Math.cos(q)*0.9,0.7,Math.sin(q*1.7)*0.9);m.rotation.set(q,q*2,0);rub.add(m);}rub.visible=false;o.add(rub);
     for(const ch of [base,cr,glow,rub]){ch.scale.multiplyScalar(1.8);ch.position.y*=1.8;}   // แมพขยาย 3 เท่า → แกนใหญ่ขึ้นให้เห็นจากไกล
     SGV3.cores.push({o,cr,cm,glow,ring,rub});});
@@ -307,7 +307,21 @@ function sgViewBuild(){
       const cr=new THREE.Mesh(sGeo(THREE.BoxGeometry,1,1,1),new THREE.MeshBasicMaterial({color:'#ffcf6a',transparent:true,opacity:0.18,depthWrite:false}));cr.scale.set(b.w*S3+0.08,vh+0.08,b.d*S3+0.08);cr.position.y=vh/2;o.add(cr);}   // ขอบสีทอง = พังได้
     SGV3.bw.push(o);});
 }
-function SGVZR(){return (VIEW.cur&&VIEW.cur.M&&VIEW.cur.M.sg&&VIEW.cur.M.sg.zr)||150;}
+// glowing curtain along the capture zone outline (union: edge pieces inside another shape of the same zone are skipped), follows the ground
+function sgZoneMesh(k){
+  const Z=sgZone(k),pos=[],H=2.2,step=40;
+  const inOther=(P,x,y)=>Z.some(Q=>Q!==P&&sgPolyIn(Q,x,y));
+  for(const P of Z)for(let i=0;i<P.length;i++){const a=P[i],b=P[(i+1)%P.length],L=Math.hypot(b[0]-a[0],b[1]-a[1]),n=Math.max(1,Math.ceil(L/step));
+    for(let j=0;j<n;j++){const x0=a[0]+(b[0]-a[0])*j/n,y0=a[1]+(b[1]-a[1])*j/n,x1=a[0]+(b[0]-a[0])*(j+1)/n,y1=a[1]+(b[1]-a[1])*(j+1)/n;
+      if(inOther(P,(x0+x1)/2,(y0+y1)/2))continue;const b0=GY(x0,y0)+0.05,b1=GY(x1,y1)+0.05;
+      pos.push(tx(x0),b0,tz(y0),tx(x1),b1,tz(y1),tx(x1),b1+H,tz(y1),tx(x0),b0,tz(y0),tx(x1),b1+H,tz(y1),tx(x0),b0+H,tz(y0));}}
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(pos),3));
+  const uv=new Float32Array(pos.length/3*2);for(let i=0;i<pos.length/18;i++)uv.set([0,0,0,0,0,1,0,0,0,1,0,1],i*12);geo.setAttribute('uv',new THREE.BufferAttribute(uv,2));
+  const m=new THREE.Mesh(geo,new THREE.ShaderMaterial({uniforms:{c:{value:new THREE.Color('#7fc0ff')},a:{value:0.5}},transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,
+    vertexShader:'varying float v;void main(){v=uv.y;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+    fragmentShader:'uniform vec3 c;uniform float a;varying float v;void main(){float k=(1.0-v)*(1.0-v)*0.8+smoothstep(0.08,0.0,v)*0.9;gl_FragColor=vec4(c*k*a,1.0);}'}));
+  m.material.color=m.material.uniforms.c.value;m.frustumCulled=false;return m;   // .color alias so sgSync can .set() it like the old ring
+}
 // ขอบพื้นที่เล่นของเฟส: ม่านโปร่งบาง ๆ ตามเส้นขอบรวมของทุกกรอบ
 // mode 'atk' = phase transition seen by an attacker: the old area (where attackers are held) instead of the new one
 function sgBarrier(ph,mode){
@@ -330,11 +344,11 @@ function sgSync(v,P,me,now,dt){
   SGPH=S.ph;SGTR=S.tr||0;
   if(!SGV3.g||SGV3.map!==MAPID){sgViewBuild();SGV3.map=MAPID;}
   sgBarrier(S.ph,S.tr>0&&me&&me.tm===0?'atk':'');if(MAPID==='fcs'){fcsForestTick();fcsCastleTick();}   // fcsPropsView runs in the render loop (all maps)
-  SGV3.cores.forEach((c,i)=>{const n=i+1,dead=S.hp[i]<=0,act=n===S.ph,fut=n>S.ph;
-    c.cr.visible=c.glow.visible=!dead;c.rub.visible=dead;c.ring.visible=act;
+  SGV3.cores.forEach((c,i)=>{const n=i+1,got=(S.cp[i]|0)>=100,act=n===S.ph&&!got,fut=n>S.ph;
+    c.cr.visible=c.glow.visible=true;c.rub.visible=false;c.ring.visible=act;
     c.cr.rotation.y+=dt*(act?1.2:0.3);c.cr.position.y=4.3+Math.sin(now/600+i)*0.25;
-    const hit=act&&S.atk,col=hit?'#ff6a5a':fut?'#5a6a80':'#9fd8ff';c.cm.color.set(col);c.cm.emissive.set(hit?'#ff2a1a':fut?'#1a2030':'#3a8cff');
-    c.ring.material.color.set(hit?'#ff6a5a':S.def?'#ffb060':'#7fc0ff');c.ring.material.opacity=0.35+0.25*Math.sin(now/(hit?120:400));});
+    const cs=act?S.cs|0:0,hit=cs===1,col=got?TEAMC[0]:hit?'#ff6a5a':cs===2?'#ffd24d':fut?'#5a6a80':'#9fd8ff';c.cm.color.set(col);c.cm.emissive.set(got?TEAMC[0]:hit?'#ff2a1a':cs===2?'#a07a10':fut?'#1a2030':'#3a8cff');
+    c.ring.material.color.set(hit?'#ff6a5a':cs===2?'#ffd24d':cs===3?'#ffb060':'#7fc0ff');c.ring.material.uniforms.a.value=0.55+0.3*Math.sin(now/(hit||cs===2?140:450));});   // capture state 0 idle • 1 capturing • 2 contested • 3 pushed back
   if(S.bw!==SGV3.bwK){const old=SGV3.bwK;SGV3.bwK=S.bw;SGV3.bw.forEach((o,i)=>{o.visible=S.bw[i]!=='1';if(old&&old[i]!=='1'&&S.bw[i]==='1')sgDust(o.position);});gl.shadowMap.needsUpdate=true;}
   // ลำแสงร่าย: จากมือคนร่ายไปยอดแกน
   const k=sgFD().cores[S.ph-1],seen=new Set();
@@ -376,8 +390,8 @@ function sgFx(ev){
   else if(ev.k==='sgcore'){for(let i=0;i<40;i++)PARTS.push({x:ev.x+rnd(-20,20),y:ev.y+rnd(-20,20),h:4.3,vx:rnd(-260,260),vy:rnd(-260,260),vh:rnd(1,7),life:1.1,max:1.1,col:'#9fd8ff',size:2.4,g:6});FX.flashLight(ev.x,ev.y,4.3,'#7fc0ff',6,30,0.6);snd('boom',ev);}
 }
 // ---------- HUD ----------
-function sgTop(v){const S=v.M&&v.M.sg;if(!S)return '🏰 บุกปราสาท';const i=S.ph-1,pc=Math.ceil(S.hp[i]/S.mx*100);
-  return `🏰 เฟส ${S.ph}/${S.n}   •   แกน ${S.ph} เหลือ ${pc}%   •   `+(S.pr>0?`เตรียมตัว ${S.pr} วิ`:S.lt>0?`🎁 ชิงของ ${S.lt} วิ`:S.tr>0?(S.lc?`🔁 ชิงของเริ่มใน ${S.tr} วิ`:`🔁 เฟสถัดไปเริ่มใน ${S.tr} วิ`):S.ot?`⏱ ต่อเวลา! (ผ่อนผัน ${S.gr.toFixed(1)} วิ)`:`⏱ ${fmtTime(v.tm)}`);}
+function sgTop(v){const S=v.M&&v.M.sg;if(!S)return '🏰 บุกปราสาท';const i=S.ph-1,pc=S.cp[i]|0;
+  return `🏰 เฟส ${S.ph}/${S.n}   •   จุด ${S.ph} ยึดแล้ว ${pc}%   •   `+(S.pr>0?`เตรียมตัว ${S.pr} วิ`:S.lt>0?`🎁 ชิงของ ${S.lt} วิ`:S.tr>0?(S.lc?`🔁 ชิงของเริ่มใน ${S.tr} วิ`:`🔁 เฟสถัดไปเริ่มใน ${S.tr} วิ`):S.ot?`⏱ ต่อเวลา! (ผ่อนผัน ${S.gr.toFixed(1)} วิ)`:`⏱ ${fmtTime(v.tm)}`);}
 // loot HUD: own bag (S.iv "id:kind.kind;…") + markers on nearby ground items
 function sgLootHud(S,me,big){
   const mine=(S.iv||'').split(';').find(e=>e.slice(0,e.lastIndexOf(':'))===String(me.id)),bag=mine?mine.slice(mine.lastIndexOf(':')+1).split('.'):[];
@@ -390,23 +404,24 @@ function sgLootHud(S,me,big){
 function sgHud(v,me,big){
   const S=v.M&&v.M.sg;if(!S||!me)return;
   const atk=me.tm===0,F=sgFD(),k=F.cores[S.ph-1];
-  // แถบเลือดแกนทั้ง 3 (ใต้แถบบน)
-  const bw=Math.min(110,(SW-80)/S.n-10),x0=SW/2-(bw+10)*S.n/2;
+  // capture bars of every point (under the top bar) • fill = capture progress
+  const bw=Math.min(110,(SW-80)/S.n-10),x0=SW/2-(bw+10)*S.n/2,cs=S.cs|0,stc=c=>c===1?'#ff6a5a':c===2?'#ffd24d':c===3?'#ffb060':'#7fc0ff';
   if(hlBegin('top',SW/2,12))   // follows the HUD Editor 'top' block
-  {for(let i=0;i<S.n;i++){const x=x0+i*(bw+10),r=S.hp[i]/S.mx,act=i===S.ph-1;
-    cx.fillStyle='rgba(8,10,20,0.7)';cx.fillRect(x,52,bw,12);cx.fillStyle=S.hp[i]<=0?'#555':act&&S.atk?'#ff6a5a':act?'#7fc0ff':'#4a5a70';cx.fillRect(x+1,53,(bw-2)*r,10);
+  {for(let i=0;i<S.n;i++){const x=x0+i*(bw+10),r=(S.cp[i]|0)/100,act=i===S.ph-1,got=r>=1;
+    cx.fillStyle='rgba(8,10,20,0.7)';cx.fillRect(x,52,bw,12);cx.fillStyle=got?TEAMC[0]:act?stc(cs):'#4a5a70';cx.fillRect(x+1,53,(bw-2)*r,10);
     if(act){cx.strokeStyle=HG2;cx.lineWidth=1.5;cx.strokeRect(x-1,51,bw+2,14);}
-    cx.font='600 11px Kanit,sans-serif';cx.textAlign='center';cx.fillStyle='#efe6cf';cx.fillText(S.hp[i]<=0?'แตกแล้ว':'แกน '+(i+1),x+bw/2,78);}hlEnd();}
+    cx.font='600 11px Kanit,sans-serif';cx.textAlign='center';cx.fillStyle='#efe6cf';cx.fillText(got?'ยึดแล้ว':'จุด '+(i+1),x+bw/2,78);}hlEnd();}
   cx.textAlign='center';
   if(hlBegin('top',SW/2,12)){big(`คุณเป็น${atk?SG_TEAM[0]:SG_TEAM[1]} (${TEAMN[me.tm]||''})`,96,14,atk?'#8fc8ff':'#ff9a9a');hlEnd();}
-  if(S.atk)big('⚠️ แกนกำลังถูกร่ายทำลาย',SH*0.2,18,'#ff8a7a');
   // เครื่องหมายแกนบนจอ
   if(k&&me.al){const s=toScreen(k.x,(GY(k.x,k.y)||0)+4,k.y),d=Math.round(Math.hypot(k.x-me.x,k.y-me.y)/20);
-    if(s&&s[0]>30&&s[0]<SW-30&&s[1]>30&&s[1]<SH-30){cx.save();cx.translate(s[0],s[1]);cx.rotate(Math.PI/4);cx.strokeStyle=S.atk?'#ff6a5a':'#9fd8ff';cx.lineWidth=2.5;cx.strokeRect(-9,-9,18,18);cx.restore();
-      cx.font='600 13px Kanit,sans-serif';cx.fillStyle='#efe6cf';cx.fillText(`แกน ${S.ph} • ${d} ม.`,s[0],s[1]-18);}}
-  if(atk&&me.al&&S.pr<=0&&!(S.tr>0)&&k){const inz=Math.hypot(me.x-k.x,me.y-k.y)<S.zr+PR;
-    if(me.sc)big('🔮 กำลังร่ายทำลายแกน… (ยิง / โล่ / สกิล / พุ่ง = หยุด • G = หยุด)',SH-170,17,'#9fd8ff');
-    else if(inz)big('กด G เพื่อร่ายทำลายแกน',SH-170,18,'#ffe9a8');}
+    if(s&&s[0]>30&&s[0]<SW-30&&s[1]>30&&s[1]<SH-30){cx.save();cx.translate(s[0],s[1]);cx.rotate(Math.PI/4);cx.strokeStyle=stc(cs);cx.lineWidth=2.5;cx.strokeRect(-9,-9,18,18);cx.restore();
+      cx.font='600 13px Kanit,sans-serif';cx.fillStyle='#efe6cf';cx.fillText(`จุด ${S.ph} • ${d} ม.`,s[0],s[1]-18);}}
+  // standing in the zone: big progress bar + what is happening
+  if(me.al&&S.pr<=0&&!(S.tr>0)&&!(S.lt>0)&&k&&sgZoneIn(k,me.x,me.y,PR)){const pc=S.cp[S.ph-1]|0,W=Math.min(320,SW-60),bx=SW/2-W/2,by=SH-150;
+    cx.fillStyle='rgba(8,10,20,0.72)';cx.fillRect(bx-2,by-2,W+4,16);cx.fillStyle=stc(cs);cx.fillRect(bx,by,W*pc/100,12);cx.strokeStyle='rgba(255,255,255,0.35)';cx.lineWidth=1;cx.strokeRect(bx-2,by-2,W+4,16);
+    const t=cs===1?(atk?`🚩 กำลังยึดจุด ${S.ph}… ${pc}%`:`⚠️ ฝ่ายบุกกำลังยึด ${pc}%`):cs===2?(atk?'⚔️ ฝ่ายรับอยู่ในเขต — หยุดยึด ไล่ออกไปก่อน':'⚔️ ฝ่ายบุกอยู่ในเขต — ไล่ออกไป'):cs===3?(atk?`ฝ่ายรับกำลังดันกลับ ${pc}%`:`🛡 กำลังดันแถบยึดกลับ ${pc}%`):(atk?`เขตยึดจุด ${S.ph} — ${pc}%`:`เขตจุด ${S.ph} — ${pc}%`);
+    big(t,by-14,17,stc(cs));}
   sgLootHud(S,me,big);
   if(S.tr>0&&S.lc)big(`🎁 ไปจุดถอยของทีม — ช่วงชิงของเริ่มใน ${S.tr} วิ (เขตทอง = ที่ของจะเกิด)`,SH*0.36,22,'#ffe9a8');
   else if(S.tr>0){const inNew=me.al&&sgInArea(me.x,me.y,S.ph);

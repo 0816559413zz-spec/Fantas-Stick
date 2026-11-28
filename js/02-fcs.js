@@ -231,7 +231,7 @@ function sgAreaL(ph){
   return C[k];
 }
 function sgInArea(x,y,ph){return sgArea(ph).rects.some(q=>x>=q.x1&&x<=q.x2&&y>=q.y1&&y<=q.y2);}
-MAPS.fcs=Object.assign({name:'🏰 Cliff Side Castle (แบบเก่า)',d:'แผนที่โหมดบุกปราสาท (แบบ Basic) — บุก 3 เฟส ทำลายแกนทีละจุด',build:'fcs',only:'siege',navTerr:1,navC:FCS_C},genFcs());
+MAPS.fcs=Object.assign({name:'🏰 Cliff Side Castle (แบบเก่า)',d:'แผนที่โหมดบุกปราสาท (แบบ Basic) — บุก 3 เฟส ยึดจุดทีละจุด',build:'fcs',only:'siege',navTerr:1,navC:FCS_C},genFcs());
 // play area per phase + spawns of the current phase (teamPts / placeAll / respawn use them through fmap) • t 0 = attackers 1 = defenders
 function sgAttach(M){
   M.areas={get siege(){return SGLT>0&&SGPH>1?sgAreaL(SGPH):SGTR>0&&SGPH>1?sgAreaT(SGPH):sgArea(SGPH);}};
@@ -246,7 +246,9 @@ sgAttach(MAPS.fcs);
 function sgFromFile(M,d,id){
   const S=d.siege,sp={A:{},B:{}},bw=[],obs=M.obs;delete _sgAreaC[id];delete _sgAreaT[id];delete _sgAreaL[id];
   for(const t of ['A','B'])for(const k in S.sp[t])sp[t][+k]={x:S.sp[t][k].x,y:S.sp[t][k].y};
-  const cores=(S.cores||[]).slice().sort((a,b)=>a.n-b.n).map((k,i)=>({n:i+1,x:k.x,y:k.y,s:k.s||80}));
+  const Z=S.zones||[],cores=(S.cores||[]).slice().sort((a,b)=>a.n-b.n).map((k,i)=>Object.assign({n:i+1,x:k.x,y:k.y,s:k.s||80,
+    zone:Z.filter(z=>z.n===k.n&&z.p&&z.p.length>2).map(z=>z.p.map(q=>[q[0],q[1]]))},   // capture zone polygons (Map Builder Capture Zone) • empty = circle (sgZone js/15-siege)
+    k.ct>0?{ct:k.ct}:{},k.cm&&k.cm.length?{cm:k.cm.slice()}:{},k.cb!=null?{cb:k.cb}:{}));   // capture time / speed × by players / push-back ×
   (S.bw||[]).forEach((b,i)=>{bw.push({i,k:b.k==='gate'?'gate':'wall',x:b.x,y:b.y,w:b.w,d:b.d,h:b.k==='gate'?Math.max(5,b.h||5):(b.h||6)});
     const B=bw[i],long=B.w>=B.d,r=Math.max(10,Math.min(B.w,B.d)/2),L=long?B.w:B.d,n=Math.max(1,Math.ceil((L-2*r)/(r*0.9)));   // chain of circles along the long side
     for(let q=0;q<=n;q++){const t=r+(L-2*r)*q/n;obs.push({x:long?B.x+t:B.x+B.w/2,y:long?B.y+B.d/2:B.y+t,r,k:'fcb',sgw:i,hgt:B.h,s:0});}});
