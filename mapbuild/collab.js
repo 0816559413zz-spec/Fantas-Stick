@@ -7,7 +7,8 @@
 // backdrop sync (brush regions + settings; new/resized backdrop = whole backdrop), map resize = whole map. Undo restores only what you changed.
 // Phase 3 (2026-11-28): backdrop undo keeps cells / settings others changed, undo never touches items another person holds (locked),
 // guests reconnect by themselves after a drop (heartbeat, same slot by tab token, unsent edits re-applied on the fresh map).
-// Messages (JSON strings, split into 12 KB chunks): hi, wel, map, full, ops, cur, sel, peers, bye, hb.
+// Messages (JSON strings, split into 12 KB chunks): hi, wel, deny, map, full, ops, cur, sel, peers, bye, hb.
+// hi carries bv = Map Builder version id (tools/serve.py mb_tool_ver); the host sends deny when it differs from its own.
 const PREFIX = 'fsmb-v1-', CH = 12000, SLOTS = 32;
 const COLS = ['walls', 'floors', 'objs', 'parts', 'rooms'], KOF = { walls: 'wall', floors: 'floor', objs: 'obj', parts: 'part', rooms: 'room' };
 const META = ['groups', 'name', 'desc', 'sky', 'style', 'fog', 'music', 'weather', 'fx', 'modes', 'random', 'autoProps', 'skirt', 'look', 'lt'];
@@ -155,6 +156,9 @@ export function initCollab(A) {   // A = app hooks (mapbuild/app.js)
   function peersMsg() { return { t: 'peers', list: [['host', S.name || 'Host', 0], ...[...S.peers].filter(([id]) => id !== 'host').map(([id, p]) => [id, p.name, p.slot])] }; }
   function onMsg(c, m) {
     if (m.t === 'hi' && S.host) {   // a guest joined → slot, map, who is here, current selections
+      const hv = A.toolVer && A.toolVer(); if (hv && m.bv !== hv) {   // different Map Builder versions can't edit together (user 2026-11-28)
+        sendTo(c, { t: 'deny', why: 'Map Builder versions differ — host ' + hv + ', you ' + (m.bv || 'old version') + '. Both update to the GitHub version (Builder label in the top bar), then join again.' });
+        A.stat('👥 ' + String(m.name || 'Guest').slice(0, 20) + ' couldn’t join: their Map Builder is ' + (m.bv || 'an old version') + ', yours ' + hv, 'warn'); setTimeout(() => { try { c.close(); } catch (e) { } }, 1500); return; }
       if (S.peers.has(c.peer)) dropPeer(c.peer);   // same peer reconnecting: free its old entry first
       const used = new Set([0, ...[...S.peers.values()].map(p => p.slot)]), old = m.tok && S.toks.get(m.tok); let slot = old && !used.has(old.slot) ? old.slot : 1;   // same tab again = same slot (its ids stay unique)
       if (!(old && slot === old.slot)) while ([...S.toks.values()].some(q => q.slot === slot) && slot < SLOTS - 1 || used.has(slot) && slot < SLOTS - 1) slot++;
@@ -163,6 +167,7 @@ export function initCollab(A) {   // A = app hooks (mapbuild/app.js)
       broadcast(peersMsg()); sendTo(c, { t: 'sel', from: 'host', refs: A.selAll() }); for (const [id, p] of S.peers) if (id !== c.peer && id !== 'host' && p.sel && p.sel.length) sendTo(c, { t: 'sel', from: id, refs: p.sel });
       A.stat('👥 ' + name + (m.re ? ' is back' : ' joined'), 'ok'); render(); return; }
     if (m.t === 'wel') { S.slot = m.slot; return; }
+    if (m.t === 'deny') { leave(m.why); return; }
     if (m.t === 'map') { const pend = S.pend; S.pend = null; S.applying = true; try { (pend ? A.reloadMap : A.loadMap)(A.MD.unpack(m.m)); } finally { S.applying = false; }
       snapShadow(); lastSeq = A.M.seq || 0; if (pend) replay(pend); A.stat(pend ? '👥 Reconnected' + (pend.n ? ' — ' + pend.n + ' unsent edit(s) sent' : '') : '👥 Joined room ' + S.code, 'ok'); render(); return; }
     if (m.t === 'peers') { const keep = new Set(m.list.map(q => q[0])); for (const id of [...S.peers.keys()]) if (!keep.has(id)) dropPeer(id);
@@ -172,7 +177,7 @@ export function initCollab(A) {   // A = app hooks (mapbuild/app.js)
     if (m.t === 'full') { if (!S.shadow) return; onFull(m); if (S.host) broadcast(m, from); return; }
     if (m.t === 'cur') { const p = S.peers.get(from); if (p) { const g = curNode(p); if (m.p) { g.position.set(m.p[0], m.p[1], m.p[2]); g.visible = true; ringAt(g, m.p, m.r || 0); } else g.visible = false; A.need(); } if (S.host) broadcast(m, from); return; }
     if (m.t === 'sel') { const p = S.peers.get(from); if (p) { p.sel = m.refs || []; drawSels(); onSel(true); } if (S.host) broadcast(m, from); return; }
-    if (m.t === 'bye') { if (S.host) { const p = S.peers.get(c.peer); dropPeer(c.peer); broadcast(peersMsg()); A.stat('👥 ' + ((p && p.name) || 'Guest') + ' left', 'warn'); render(); } else leave('Host closed the room'); }
+    if (m.t === 'bye') { if (S.host) { const p = S.peers.get(c.peer); if (!p) return; dropPeer(c.peer); broadcast(peersMsg()); A.stat('👥 ' + ((p && p.name) || 'Guest') + ' left', 'warn'); render(); } else leave('Host closed the room'); }
   }
   function wire(c) {
     c.on('data', d => recv(c, d));
@@ -195,7 +200,7 @@ export function initCollab(A) {   // A = app hooks (mapbuild/app.js)
     try { S.peer = await newPeer(); } catch (e) { A.stat('Couldn’t connect: ' + (e.message || e.type), 'err'); return; }
     const c = S.peer.connect(PREFIX + code, { reliable: true, serialization: 'json' }); let ok = false;
     const t = setTimeout(() => { if (!ok) { A.stat('Room ' + code + ' not found (check the code / host still open?)', 'err'); try { S.peer.destroy(); } catch (e) { } S.peer = null; } }, 15000);
-    c.on('open', () => { ok = true; clearTimeout(t); S.on = true; S.host = false; S.code = code; S.hostConn = c; c._rx = performance.now(); S.peers.clear(); wire(c); sendTo(c, { t: 'hi', name: S.name, tok: S.tok }); render(); });
+    c.on('open', () => { ok = true; clearTimeout(t); S.on = true; S.host = false; S.code = code; S.hostConn = c; c._rx = performance.now(); S.peers.clear(); wire(c); sendTo(c, { t: 'hi', name: S.name, tok: S.tok, bv: A.toolVer && A.toolVer() }); render(); });
     c.on('error', () => { }); }
   // ---------- guest reconnect: keep editing offline, try the host every 2.5 s for 60 s, then reload its map and re-send what wasn't sent ----------
   function rejoin() {
@@ -205,7 +210,7 @@ export function initCollab(A) {   // A = app hooks (mapbuild/app.js)
       if (!S.peer || S.peer.destroyed) return; if (S.peer.disconnected) { try { S.peer.reconnect(); } catch (e) { } return; }
       if (S.re.try && S.re.try.open) return; const c = S.peer.connect(PREFIX + S.code, { reliable: true, serialization: 'json' }); S.re.try = c;
       c.on('open', () => { if (!S.re) { try { c.close(); } catch (e) { } return; } clearInterval(S.re.iv); S.pend = pending(); S.re = null; S.hostConn = c; c._rx = performance.now(); wire(c);
-        sendTo(c, { t: 'hi', name: S.name, tok: S.tok, re: 1 }); render(); });
+        sendTo(c, { t: 'hi', name: S.name, tok: S.tok, re: 1, bv: A.toolVer && A.toolVer() }); render(); });
       c.on('error', () => { }); };
     S.re.iv = setInterval(tryOnce, 2500); tryOnce(); }
   function pending() {   // what this guest changed since the last thing the host got (shadow = host's view)

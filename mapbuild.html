@@ -27,7 +27,7 @@ body{display:flex;flex-direction:column;font-size:12px}
 .tseg button.on{background:var(--acc);color:#fff}
 .tseg.play button{width:40px;font-size:12px}
 #stat{color:var(--tx2);font-size:12px;white-space:nowrap}
-#ver{font:11.5px var(--fu);color:var(--tx3);white-space:nowrap;padding:2px 7px;border:1px solid var(--bg0);border-radius:4px;cursor:pointer}#ver.ok{color:var(--sok)}#ver.warn{color:var(--swarn)}
+#ver,#tver{font:11.5px var(--fu);color:var(--tx3);white-space:nowrap;padding:2px 7px;border:1px solid var(--bg0);border-radius:4px;cursor:pointer}#ver.ok,#tver.ok{color:var(--sok)}#ver.warn,#tver.warn{color:var(--swarn)}
 #stat.err{color:var(--serr)}#stat.ok{color:var(--sok)}#stat.warn{color:var(--swarn)}
 /* ---------- docks ---------- */
 main{flex:1;display:flex;min-height:0;gap:2px;background:var(--bg0)}
@@ -243,7 +243,7 @@ dialog .btns{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
   <div class="tseg play"><button id="bPlay" title="Play — export to the game, then open the game on this map">▶</button></div>
   <span class="sp"></span>
   <span id="stat"></span>
-  <span id="ver" title="Map version"></span>
+  <span id="ver" title="Map version"></span><span id="tver" title="Map Builder version"></span>
   <a class="tl-btn" href="mapedit.html" title="Map Editor (old): top-down sketch layout for design talks">Sketch ▸</a>
   <button id="bExport" class="tl-btn pri" title="Export — write the map files to assets/maps for the game, then commit + push only this map to GitHub (the online game). Play only exports.">⬆ Export</button>
 </div>

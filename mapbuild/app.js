@@ -1620,10 +1620,29 @@ function setMap(m) {
   for (const o of M.objs) if (isKit(o)) kitTpl(kitId(o)).then(() => { clearTimeout(setMap.t); setMap.t = setTimeout(() => { if (M === m) { syncObjs(); updSel(); colDirty(); } }, 60); });
   $('vmsg').textContent = '';
 }
-function dlg(title, body, okText, onOk) {
-  const d = $('dlg'); d.textContent = ''; const err = el('p', { class: 'note', style: 'color:var(--serr)' });
-  d.append(el('h2', null, title), body, err, el('div', { class: 'btns' }, el('button', { class: 'tl-btn', onclick: () => d.close() }, 'Cancel'), el('button', { class: 'tl-btn pri', onclick: async () => { try { const r = await onOk(); if (r !== false) d.close(); } catch (e) { err.textContent = e.message; } } }, okText)));
+function dlg(title, body, okText, onOk, cancelText, onCancel) {   // okText null = only the cancel button
+  const d = $('dlg'); d.textContent = ''; const err = el('p', { class: 'note', style: 'color:var(--serr);white-space:pre-wrap' });
+  d.append(el('h2', null, title), body, err, el('div', { class: 'btns' }, el('button', { class: 'tl-btn', onclick: () => { d.close(); if (onCancel) onCancel(); } }, cancelText || 'Cancel'),
+    okText ? el('button', { class: 'tl-btn pri', onclick: async () => { try { const r = await onOk(); if (r !== false) d.close(); } catch (e) { err.textContent = e.message; } } }, okText) : ''));
   d.showModal();
+}
+// ---------- Map Builder version vs GitHub (user 2026-11-28: people on different builder versions broke maps when editing together) ----------
+let TV = null;   // this PC's builder id (hash of mapbuild/ etc., tools/serve.py mb_tool_ver) • rooms only accept people with the same id
+const lines = (head, L, n) => L && L.length ? el('div', { class: 'note' }, el('b', null, head), el('ul', { style: 'margin:4px 0 0;padding-left:18px' }, ...L.map(s => el('li', null, s)), n > L.length ? el('li', null, '… +' + (n - L.length)) : '')) : '';
+async function checkTool(show) {   // on open: different from GitHub → ask to update first
+  let r; try { r = await (await fetch('/api/mb-tool-ver')).json(); } catch (e) { return null; } if (!r.ok) return null;
+  TV = r.here; const s = $('tver'); if (s) { s.textContent = 'Builder ' + r.here + (r.same ? '' : r.nBehind ? ' (old)' : ' (edited)'); s.className = r.remote == null ? '' : r.same ? 'ok' : 'warn';
+    s.title = 'Map Builder version on this PC: ' + r.here + '\nOn GitHub: ' + (r.remote || '?') + (r.err ? '\nCouldn’t reach GitHub: ' + r.err : '') + '\nClick to check again'; }
+  if (r.same || r.remote == null || show === false) return r;
+  const body = el('div', { style: 'max-width:460px;display:flex;flex-direction:column;gap:8px' },
+    el('p', { class: 'note' }, 'This PC: ', el('b', null, r.here), ' • GitHub: ', el('b', null, r.remote)),
+    el('p', { class: 'note' }, r.nBehind ? 'GitHub has a newer Map Builder. Update before you edit, or maps made with the old one can break other people’s work. Rooms only let in people on the same version.' : 'Map Builder files on this PC were changed and are not on GitHub yet. Others can’t join your room until both sides match.'),
+    lines('New on GitHub:', r.behind, r.nBehind), lines('Changed on this PC (not pushed):', r.edited, r.edited.length));
+  dlg('Map Builder version differs from GitHub', body, r.nBehind ? 'Update now' : null, async () => {
+    const u = await (await fetch('/api/mb-tool-update', { method: 'POST' })).json(); if (!u.ok) throw new Error(u.err);
+    if (u.restart) { $('dlg').close(); dlg('Updated — restart Tools', el('p', { class: 'note' }, 'The tool server changed too. Close the Tools.bat window, open Tools.bat again, then reload this page.'), null, null, 'OK'); return false; }
+    location.reload(); return false; }, 'Open anyway');
+  return r;
 }
 // New Map: everything the Map panel / Playable Modes / Backdrop set, chosen before the map exists (user 2026-11-25)
 const NEW_SIZES = [['s', 'Small (80 × 50)', 80, 50], ['m', 'Medium (120 × 75)', 120, 75], ['l', 'Large (150 × 90)', 150, 90], ['xl', 'Huge (200 × 130)', 200, 130], ['c', 'Custom', 0, 0]];
@@ -1724,9 +1743,22 @@ async function exportGame() {
   catch (e) { console.error(e); stat('Couldn’t export: ' + e.message, 'err'); return false; }
 }
 
+async function pushAsk() {   // before ⬆ push: say which map version goes up, warn when GitHub already has the same / newer one or the builder differs
+  let v = {}, t = null; try { [v, t] = await Promise.all([fetch('/api/mb-ver?id=' + M.id).then(r => r.json()), checkTool(false)]); } catch (e) { }
+  const loc = v.local || 0, rem = v.remote, warn = [];
+  if (rem != null && rem >= loc) warn.push(`GitHub already has v${rem} of this map (${rem > loc ? 'newer than' : 'same number as'} yours). Pushing replaces it — someone else’s work on GitHub can be lost. Update first if you’re not sure.`);
+  if (t && !t.same && t.remote) warn.push(`Your Map Builder (${t.here}) is not the GitHub version (${t.remote})` + (t.nBehind ? ` — GitHub has ${t.nBehind} newer change(s).` : ' — edited on this PC.'));
+  const body = el('div', { style: 'max-width:460px;display:flex;flex-direction:column;gap:8px' },
+    el('p', null, 'Push ', el('b', null, M.name + ' (' + M.id + ')'), ' version ', el('b', null, 'v' + loc), ' to GitHub?'),
+    el('p', { class: 'note' }, 'GitHub now: ' + (rem == null ? '?' : rem ? 'v' + rem : 'not there yet') + ' • Builder ' + (t ? t.here : '?') + '. The online game loads this right after the push.'),
+    ...warn.map(w => el('p', { class: 'note', style: 'color:var(--swarn)' }, '⚠ ' + w)));
+  return new Promise(res => { dlg('Push to GitHub', body, warn.length ? 'Push anyway' : 'Push v' + loc, () => { res(true); }, 'Cancel', () => res(false)); $('dlg').addEventListener('close', () => res(false), { once: true }); });
+}
 async function exportPublish() {   // ⬆ Export = export + commit/push only this map's files to GitHub (Play / Game View only export)
   if (COL && COL.guest) { stat('👥 Only the host exports (the file lives on the host’s machine)', 'warn'); return; }
-  if (!await exportGame()) return; const st = $('stat').textContent; stat(st + ' • Pushing…');
+  if (!await exportGame()) return; const st = $('stat').textContent;
+  if (!await pushAsk()) { stat(st + ' • Not pushed (cancelled)', 'warn'); refreshVer(); return; }
+  stat(st + ' • Pushing…');
   try { const r = await (await fetch('/api/mb-publish?id=' + M.id, { method: 'POST' })).json(); if (!r.ok) throw new Error(r.err);
     stat(r.same ? st + ' • GitHub already has v' + r.v : st + ' • Pushed v' + r.v + ' (' + r.sha + ')' + (r.local === 'behind' ? ' • this PC not pulled yet' : ''), 'ok'); }
   catch (e) { stat(st + ' • Not pushed: ' + e.message, 'err'); }
@@ -1777,7 +1809,7 @@ async function shotPNG() {
 }
 
 // ================= boot =================
-$('bNew').onclick = () => { if (COL && COL.on) { stat('👥 Leave the room before making a new map', 'warn'); return; } newDlg(); }; $('bSave').onclick = save; $('bUndo').onclick = doUndo; $('bRedo').onclick = doRedo; $('bExport').onclick = exportPublish; $('ver').onclick = refreshVer; setInterval(refreshVer, 120000);
+$('bNew').onclick = () => { if (COL && COL.on) { stat('👥 Leave the room before making a new map', 'warn'); return; } newDlg(); }; $('bSave').onclick = save; $('bUndo').onclick = doUndo; $('bRedo').onclick = doRedo; $('bExport').onclick = exportPublish; $('ver').onclick = refreshVer; $('tver').onclick = () => checkTool(); setInterval(refreshVer, 120000);
 $('bPlay').onclick = async () => { const w = window.open('about:blank', 'mb_play'); if (await exportGame()) w.location = 'index.html?nosw&playmap=' + M.id + (M.modes.length === 1 && M.modes[0] === 'siege' ? '&pm=siege' : '') + '&t=' + Date.now(); else w.close(); };
 $('mapSel').onchange = e => openMap(e.target.value);
 for (const b of document.querySelectorAll('#gbar [data-g]')) b.onclick = () => setGizmo(b.dataset.g);
@@ -1794,8 +1826,8 @@ $('oGrid').onchange = e => { show.grid = e.target.checked; buildGrid(); need(); 
 $('phView').onchange = e => { PV = +e.target.value; phViewNeed(); };
 $('oSky').onchange = e => { show.sky = e.target.checked; applySky(); };
 addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
-window.__mb = { get M() { return M; }, get tool() { return tool; }, makeWater, pnHoleHit, gameView, gameViewClose, get RX() { return RX; }, loadRooms, MD, opt, placePart, syncParts, partNode, gParts, castleProto, cam, camApply, setTool, gameData, buildExport, exportGame, save, setMap, syncAll, need, kitTpl, KIT, get sel() { return sel; }, set sel(v) { sel = v; renderSide(); updSel(); }, pushUndo, changed, colDirty, updTerrain, afterTerrain, applyRamp, makeFloor, placeObj, doUndo };
-COL = initCollab({ THREE, MD, get M() { return M; }, root, scene, el, stat, applySky, updTerrain, syncAll, buildGrid, syncObjs, syncObj, syncWalls, syncFloors, syncParts, syncPart, colDirty, hierSoon,
+window.__mb = { get M() { return M; }, pushAsk, checkTool, get tool() { return tool; }, makeWater, pnHoleHit, gameView, gameViewClose, get RX() { return RX; }, loadRooms, MD, opt, placePart, syncParts, partNode, gParts, castleProto, cam, camApply, setTool, gameData, buildExport, exportGame, save, setMap, syncAll, need, kitTpl, KIT, get sel() { return sel; }, set sel(v) { sel = v; renderSide(); updSel(); }, pushUndo, changed, colDirty, updTerrain, afterTerrain, applyRamp, makeFloor, placeObj, doUndo };
+COL = initCollab({ THREE, MD, get M() { return M; }, toolVer: () => TV, root, scene, el, stat, applySky, updTerrain, syncAll, buildGrid, syncObjs, syncObj, syncWalls, syncFloors, syncParts, syncPart, colDirty, hierSoon,
   markDirty: changed, camDist: () => cam.dist, BD, buildBd, updBd, bdTreesBuild, gh: (x, z) => MD.gh(M, x, z),
   brushR: () => tool === 'bd' ? opt.brad : tool === 'sculpt' || tool === 'paint' || tool === 'scatter' ? opt.rad : 0,
   reloadMap: m => { M = m; sel = null; msel = []; undo = []; redo = []; draft = null; GD = null; buildTerrain(); buildBd(); applySky(); syncAll(); buildGrid(); renderSide(); }, get sel() { return sel; }, renderSide, updSel, need, selAll, loadMap: m => setMap(m), barSlot: $('stat'),
@@ -1809,8 +1841,10 @@ PJ = initProject({ items: cat => OBJ_IN(cat), cur: () => opt.obj, pick: pickAsse
 (async () => {
   renderTools(); $('hint').textContent = HINT[tool];
   await Promise.all([loadKit(), refreshList()]);
+  const tv = checkTool(false);   // version label now; the update dialog opens after the map loads
   const want = new URLSearchParams(location.search).get('id') || localStorage.getItem('mb_last');
   if (want && list.some(m => m.id === want)) await openMap(want); else if (list.length) await openMap(list[0].id);
   if (!M) { setMap(MD.newMap({ id: '', name: 'Untitled' })); $('vmsg').textContent = ''; stat(online ? 'Press "＋ New" to start a map' : 'Offline — open through Tools.bat to save', 'warn'); if (online) newDlg(); }
+  tv.then(r => { if (r && !r.same && r.remote && !$('dlg').open) checkTool(); });   // different from GitHub → ask to update before editing
   requestAnimationFrame(frame);
 })();

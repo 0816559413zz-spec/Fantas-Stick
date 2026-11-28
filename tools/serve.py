@@ -24,6 +24,8 @@
 #   POST /api/mb-export?id=<id>     → ส่งเข้าเกม: {data, glb(base64)} → assets/maps/<id>.json + .glb + เพิ่ม/ขยับเลข v ใน assets/manifest.json
 #   GET  /api/mb-ver?id=<id>       → เลข v ของแผนที่: ในเครื่อง (manifest) / commit ล่าสุด / บน GitHub (origin/main, fetch ทุก 1 นาที)
 #   POST /api/mb-publish?id=<id>    → commit + push เฉพาะไฟล์ของแผนที่นี้ (ต้นฉบับ + ห้อง prefab + assets/maps/<id>.* + รายการใน manifest) บน origin/main ด้วย index ชั่วคราว (&dry=1 = ไม่ push)
+#   GET  /api/mb-tool-ver           → เวอร์ชันของตัว Map Builder (hash ไฟล์ mapbuild/ ฯลฯ ในเครื่อง เทียบ origin/main) + commit ที่ยังไม่ได้ดึง
+#   POST /api/mb-tool-update        → ดึง origin/main แบบ fast-forward เท่านั้น (ไม่ merge ไม่ทับไฟล์ที่แก้ค้าง)
 #   POST /api/mb-unexport?id=<id>   → ถอดแผนที่ออกจากเกม (ลบไฟล์ใน assets/maps + รายการใน manifest) เฉพาะแผนที่ที่มีต้นฉบับใน maps/build/
 #   POST /api/mb-del?id=<id>        → ถอดออกจากเกม + ย้ายต้นฉบับไป maps/build/_deleted/
 #   POST /api/mb-asset?name=<ชื่อ>&label=&cat=<หมวด, ไม่ใส่ = user> → เพิ่ม Asset เอง: เก็บ .glb ลง assets/mapkit/ + ลงทะเบียนใน assets/mapkit/kit.json (user)
@@ -548,6 +550,51 @@ def mb_ver(mid):  # map version: on this machine (manifest file) / last commit (
     r = git('show', 'origin/main:assets/manifest.json'); remote = v_of(r.stdout) if r.returncode == 0 else None
     return {'ok': True, 'local': local, 'head': head, 'remote': remote, 'fetched': _mbv['t'], 'err': err}
 
+# Map Builder tool version: id = hash of the builder's files (this PC's working tree vs origin/main) → two people with different builders can't edit together
+MB_TOOL = ['mapbuild.html', 'mapbuild', 'hub/tool-ui.css', 'assets/mapkit/kit.json', 'tools/serve.py']
+def mb_tool_files():
+    out = []
+    for p in MB_TOOL:
+        fp = os.path.join(ROOT, p)
+        if os.path.isdir(fp):
+            for dp, _, fs in os.walk(fp):
+                out += [os.path.relpath(os.path.join(dp, f), ROOT).replace('\\', '/') for f in fs]
+        elif os.path.exists(fp): out.append(p)
+    return sorted(out)
+def mb_tool_ver(fetch=True):
+    import hashlib
+    err = ''
+    if fetch and time.time() - _mbv['t'] > 60:
+        try:
+            f = subprocess.run(['git', 'fetch', '--quiet', 'origin', 'main'], cwd=ROOT, capture_output=True, text=True, timeout=20)
+            if f.returncode == 0: _mbv['t'] = time.time()
+            else: err = (f.stderr or 'fetch failed').strip()[:120]
+        except Exception as e: err = str(e)[:120]
+    fs = mb_tool_files()
+    h = git('hash-object', '--', *fs).stdout.split()   # same filters as git → same id as the commit when nothing changed
+    here = hashlib.sha1('\n'.join(p + ' ' + b for p, b in zip(fs, h)).encode()).hexdigest()[:7]
+    rt = git('ls-tree', '-r', 'origin/main', '--', *MB_TOOL)
+    rem = sorted((ln.split('\t', 1)[1], ln.split()[2]) for ln in rt.stdout.splitlines() if '\t' in ln)
+    remote = hashlib.sha1('\n'.join(p + ' ' + b for p, b in rem).encode()).hexdigest()[:7] if rt.returncode == 0 and rem else None
+    behind = git('log', '--format=%h %s', 'HEAD..origin/main', '--', *MB_TOOL).stdout.splitlines()
+    edited = git('status', '--porcelain', '--', *MB_TOOL).stdout.splitlines()
+    return {'ok': True, 'here': here, 'remote': remote, 'same': here == remote, 'behind': behind[:12], 'nBehind': len(behind),
+            'edited': [ln[3:] for ln in edited][:12], 'fetched': _mbv['t'], 'err': err}
+
+def mb_tool_update():  # pull origin/main by fast-forward only (never merges or overwrites edits on this PC)
+    f = git('fetch', '--quiet', 'origin', 'main')
+    if f.returncode != 0: return {'ok': False, 'err': 'ต่อ GitHub ไม่ได้: ' + (f.stderr or '').strip()[-200:]}
+    _mbv['t'] = time.time()
+    if git('merge-base', '--is-ancestor', 'HEAD', 'origin/main').returncode != 0:
+        n = git('rev-list', '--count', 'origin/main..HEAD').stdout.strip()
+        return {'ok': False, 'err': 'ในเครื่องมี %s commit ที่ยังไม่ได้ push — ให้ Claude อัปเดตให้' % n}
+    old = git('rev-parse', 'HEAD').stdout.strip()
+    m = git('merge', '--ff-only', '--quiet', 'origin/main')
+    if m.returncode != 0:
+        return {'ok': False, 'err': 'อัปเดตเองไม่ได้ เพราะไฟล์ที่แก้ค้างในเครื่องชนกับของใหม่ — ให้ Claude อัปเดตให้\n' + (m.stderr or '').strip()[-300:]}
+    restart = git('diff', '--quiet', old, 'HEAD', '--', 'tools/serve.py').returncode != 0   # the running server is the old code → close and reopen Tools.bat
+    return dict(mb_tool_ver(fetch=False), restart=restart)
+
 MB_PUB_LOCK = __import__('threading').Lock()
 def mb_publish(mid, dry=False):
     """Export → GitHub: one commit holding only this map (source + room prefabs it uses + assets/maps/<id>.* + its manifest entry),
@@ -954,6 +1001,8 @@ class H(SimpleHTTPRequestHandler):
             return self._json(200, sb_skills())
         if u.path == '/api/mb-ver':
             return self._json(200, mb_ver(q_id(u)))
+        if u.path == '/api/mb-tool-ver':
+            return self._json(200, mb_tool_ver())
         if u.path == '/api/mb-list':
             return self._json(200, {'ok': True, 'maps': mb_list()})
         if u.path == '/api/mb':
@@ -1121,6 +1170,8 @@ class H(SimpleHTTPRequestHandler):
             return pc_post(self, u, q)
         if u.path in ('/api/sketch', '/api/sketch-del', '/api/sketch-img'):
             return sk_post(self, u, q)
+        if u.path == '/api/mb-tool-update':
+            with MB_PUB_LOCK: return self._json(200, mb_tool_update())
         if u.path in ('/api/mb', '/api/mb-export', '/api/mb-publish','/api/mb-unexport', '/api/mb-del', '/api/mb-asset'):
             return mb_post(self, u, q)
         if u.path == '/api/map-del':
