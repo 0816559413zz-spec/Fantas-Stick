@@ -462,10 +462,12 @@ const snapV = v => opt.snap ? Math.round(v / opt.snap) * opt.snap : +v.toFixed(2
 
 // ================= undo =================
 const META = ['walls', 'floors', 'objs', 'parts', 'rooms', 'groups', 'name', 'desc', 'sky', 'style', 'fog', 'music', 'weather', 'fx', 'modes', 'random', 'autoProps', 'skirt', 'seq'];
-function snap(kind) { if (kind === 'b') return { isBd: 1, bd: BD.bdClone(M.bd) }; const e = { t: performance.now() }; if (kind !== 'o') { e.hg = M.hg.slice(); e.sf = M.sf.slice(); e.W = M.W; e.H = M.H; } if (kind !== 't') { const o = {}; for (const k of META) o[k] = M[k]; e.js = JSON.stringify(o); } return e; }
+function snap(kind) { if (kind === 'b') return { isBd: 1, bd: BD.bdClone(M.bd), t: performance.now() }; const e = { t: performance.now() }; if (kind !== 'o') { e.hg = M.hg.slice(); e.sf = M.sf.slice(); e.W = M.W; e.H = M.H; } if (kind !== 't') { const o = {}; for (const k of META) o[k] = M[k]; e.js = JSON.stringify(o); } return e; }
 function pushUndo(kind) { undo.push(snap(kind)); if (undo.length > 40) undo.shift(); redo = []; }
 function restore(e) {
-  if (e.isBd) { const back = snap('b'); M.bd = e.bd; buildBd(); applySky(); renderOpts(); changed(); return back; }
+  if (e.isBd) { const back = snap('b'), mg = COL && COL.on ? COL.mergeBd(e) : undefined;   // room: keep backdrop cells / settings others changed
+    if (mg === 'keep') { stat('👥 Someone replaced the backdrop since — that undo step was skipped', 'warn'); return back; }
+    M.bd = e.bd; if (mg && !mg.meta && M.bd) { if (mg.bb) { updBd(...mg.bb); bdTreesBuild(); } } else buildBd(); applySky(); renderOpts(); changed(); return back; }
   const kind = e.hg && e.js ? 'a' : e.hg ? 't' : 'o', back = snap(kind);
   if (e.hg) { const rs = e.W !== M.W || e.H !== M.H, bb = !rs && COL && COL.on ? COL.mergeTerr(e) : undefined;   // room: keep cells others changed, redraw only what differs
     M.W = e.W; M.H = e.H; M.nx = Math.round(M.W / C) + 1; M.ny = Math.round(M.H / C) + 1; M.hg = e.hg; M.sf = e.sf; if (rs) buildTerrain(); else if (bb !== null) updTerrain(...(bb || [0, 0, M.nx - 1, M.ny - 1])); }

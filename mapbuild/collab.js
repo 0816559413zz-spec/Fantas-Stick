@@ -5,8 +5,9 @@
 // New ids: each person gets a slot (host 0) and only makes ids with id % 32 === slot → no clashes.
 // Phase 2 (2026-11-28): live terrain strokes (throttled, not only at the end), brush rings of the others, terrain undo keeps cells others changed,
 // backdrop sync (brush regions + settings; new/resized backdrop = whole backdrop), map resize = whole map. Undo restores only what you changed.
-// Backdrop undo still restores the whole backdrop.
-// Messages (JSON strings, split into 12 KB chunks): hi, wel, map, full, ops, cur, sel, peers, bye.
+// Phase 3 (2026-11-28): backdrop undo keeps cells / settings others changed, undo never touches items another person holds (locked),
+// guests reconnect by themselves after a drop (heartbeat, same slot by tab token, unsent edits re-applied on the fresh map).
+// Messages (JSON strings, split into 12 KB chunks): hi, wel, map, full, ops, cur, sel, peers, bye, hb.
 const PREFIX = 'fsmb-v1-', CH = 12000, SLOTS = 32;
 const COLS = ['walls', 'floors', 'objs', 'parts', 'rooms'], KOF = { walls: 'wall', floors: 'floor', objs: 'obj', parts: 'part', rooms: 'room' };
 const META = ['groups', 'name', 'desc', 'sky', 'style', 'fog', 'music', 'weather', 'fx', 'modes', 'random', 'autoProps', 'skirt', 'look', 'lt'];
@@ -18,8 +19,11 @@ const genCode = () => { const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s = ''
 export function initCollab(A) {   // A = app hooks (mapbuild/app.js)
   const { THREE } = A;
   const S = { on: false, host: false, code: '', slot: 0, name: '', peer: null, conns: new Map(), hostConn: null, peers: new Map(),   // peers: id → {name, slot, sel, cur}
-    shadow: null, meta: {}, dirty: false, terr: null, bdR: null, bdKey: 'null', dims: '', cellT: null, applying: false, remT: new Map(), inbox: new Map(), lastCur: 0, curKey: '' };
+    shadow: null, meta: {}, dirty: false, terr: null, bdR: null, bdKey: 'null', dims: '', cellT: null, bdCellT: null, bdMetaT: 0, bdFullT: 0, applying: false,
+    re: null, toks: new Map(), remT: new Map(), inbox: new Map(), lastCur: 0, curKey: '' };   // re = guest reconnecting {t0, iv} • toks (host): tab token → {slot, name}
   try { S.name = localStorage.getItem('mb_name') || ''; } catch (e) { }
+  S.tok = (() => { const r = () => Math.random().toString(36).slice(2, 10); try { let t = sessionStorage.getItem('mb_tok'); if (!t) { t = r(); sessionStorage.setItem('mb_tok', t); } return t; } catch (e) { return r(); } })();
+  const linked = () => S.host || !!(S.hostConn && S.hostConn.open && !S.re);   // guest: connected to the host right now
   const colorOf = slot => PAL[slot % PAL.length];
   const me = () => S.host ? 'host' : S.peer && S.peer.id;
 
@@ -27,7 +31,8 @@ export function initCollab(A) {   // A = app hooks (mapbuild/app.js)
   function sendTo(c, m) { if (!c || !c.open) return; const s = JSON.stringify(m); try { if (s.length <= CH) { c.send(s); return; } const k = Math.random().toString(36).slice(2, 8), n = Math.ceil(s.length / CH);
     for (let i = 0; i < n; i++) c.send(JSON.stringify({ t: 'ch', k, i, n, s: s.slice(i * CH, (i + 1) * CH) })); } catch (e) { } }
   function broadcast(m, except) { if (S.host) { for (const [id, c] of S.conns) if (id !== except) sendTo(c, m); } else sendTo(S.hostConn, m); }
-  function recv(c, raw) { let m; try { m = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch (e) { return; }
+  function recv(c, raw) { c._rx = performance.now(); let m; try { m = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch (e) { return; }
+    if (m.t === 'hb') return;
     if (m.t === 'ch') { const key = c.peer + ':' + m.k, b = S.inbox.get(key) || { n: m.n, got: 0, p: [] }; b.p[m.i] = m.s; b.got++; S.inbox.set(key, b);
       if (b.got < b.n) return; S.inbox.delete(key); try { m = JSON.parse(b.p.join('')); } catch (e) { return; } }
     onMsg(c, m); }
@@ -39,7 +44,8 @@ export function initCollab(A) {   // A = app hooks (mapbuild/app.js)
   // ---------- state diff ----------
   function snapShadow() { const M = A.M; S.shadow = {}; for (const c of COLS) { const m = new Map(); for (const it of M[c] || []) m.set(it.id, JSON.stringify(it)); S.shadow[c] = m; }
     S.meta = {}; for (const k of META) S.meta[k] = JSON.stringify(M[k] === undefined ? null : M[k]);
-    S.dims = M.W + 'x' + M.H; S.bdKey = bdMeta(M.bd); S.cellT = new Float64Array(M.nx * M.ny); S.terr = null; S.bdR = null; }
+    S.dims = M.W + 'x' + M.H; S.bdKey = bdMeta(M.bd); S.cellT = new Float64Array(M.nx * M.ny); S.terr = null; S.bdR = null;
+    S.bdCellT = M.bd ? new Float64Array(M.bd.nx * M.bd.ny) : null; S.bdMetaT = S.bdFullT = 0; }
   const BDA = ['hg', 'sf', 'tr'], BDG = ['nx', 'ny', 'c', 'x0', 'z0'];   // backdrop arrays / grid shape
   function bdMeta(B) { if (!B) return 'null'; const o = {}; for (const k in B) if (!BDA.includes(k)) o[k] = B[k]; return JSON.stringify(o); }
   function diff(only) {   // only = [{k,id}] → just those items (live drag)
@@ -64,7 +70,7 @@ export function initCollab(A) {   // A = app hooks (mapbuild/app.js)
       const hg = [], sf = [], tr = []; for (let j = R[1]; j <= R[3]; j++) for (let i = R[0]; i <= R[2]; i++) { const k = j * B.nx + i; hg.push(Math.round(B.hg[k] * 100)); sf.push(B.sf[k]); tr.push(B.tr[k]); }
       (out = out || {}).r = R; Object.assign(out, { hg, sf, tr }); }
     return out; }
-  function flush(only) { if (!S.on || S.applying || !A.M) return; const M = A.M;
+  function flush(only) { if (!S.on || S.applying || !A.M || !linked()) return; const M = A.M;
     if (!only && M.W + 'x' + M.H !== S.dims) { broadcast({ t: 'full', from: me(), m: A.MD.pack(M) }); snapShadow(); return; }   // map resized: everyone reloads the whole map
     const ops = diff(only), meta = only ? null : metaDiff(), terr = only ? null : terrPack(), bd = only ? null : bdPackR();
     if (!ops.length && !meta && !terr && !bd && !(only === undefined && seqBump())) return;
@@ -94,11 +100,12 @@ export function initCollab(A) {   // A = app hooks (mapbuild/app.js)
 
   let bdTreeT = 0;
   function applyBd(M, d) {
-    if (d.full !== undefined) { M.bd = d.full ? A.BD.bdUnpack(d.full) : null; S.bdKey = bdMeta(M.bd); A.buildBd(); A.applySky(); return; }
+    const now = performance.now();
+    if (d.full !== undefined) { M.bd = d.full ? A.BD.bdUnpack(d.full) : null; S.bdKey = bdMeta(M.bd); S.bdFullT = now; S.bdCellT = M.bd ? new Float64Array(M.bd.nx * M.bd.ny) : null; A.buildBd(); A.applySky(); return; }
     const B = M.bd; if (!B) return;
-    if (d.meta) { Object.assign(B, d.meta); S.bdKey = bdMeta(B); if (!d.r) { A.buildBd(); A.applySky(); } }
+    if (d.meta) { Object.assign(B, d.meta); S.bdKey = bdMeta(B); S.bdMetaT = now; if (!d.r) { A.buildBd(); A.applySky(); } }
     if (d.r) { const [i0, j0, i1, j1] = d.r; let n = 0, trees = false;
-      for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) { const k = j * B.nx + i; B.hg[k] = d.hg[n] / 100; B.sf[k] = d.sf[n]; if (B.tr[k] !== d.tr[n]) { B.tr[k] = d.tr[n]; trees = true; } n++; }
+      for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) { const k = j * B.nx + i; B.hg[k] = d.hg[n] / 100; B.sf[k] = d.sf[n]; if (B.tr[k] !== d.tr[n]) { B.tr[k] = d.tr[n]; trees = true; } if (S.bdCellT) S.bdCellT[k] = now; n++; }
       if (d.meta) A.buildBd(); else A.updBd(i0, j0, i1, j1);
       if (trees) { clearTimeout(bdTreeT); bdTreeT = setTimeout(A.bdTreesBuild, 250); } } }
   function onFull(m) { S.applying = true; try { A.reloadMap(A.MD.unpack(m.m)); } finally { S.applying = false; } snapShadow(); lastSeq = A.M.seq || 0; drawSels(); A.stat('👥 Map resized by ' + nameOf(m.from), 'warn'); }
@@ -109,9 +116,16 @@ export function initCollab(A) {   // A = app hooks (mapbuild/app.js)
       if (e.hg[k] !== M.hg[k] || e.sf[k] !== M.sf[k]) { const i = k % M.nx, j = (k - i) / M.nx; if (i < i0) i0 = i; if (i > i1) i1 = i; if (j < j0) j0 = j; if (j > j1) j1 = j; } }
     return i1 < 0 ? null : [i0, j0, i1, j1]; }
 
-  // undo in a room: items others changed after the snapshot keep their current value
+  // backdrop undo in a room: cells / settings others changed after the snapshot keep their value • 'keep' = someone replaced the whole backdrop since → leave it
+  function mergeBd(e) { const M = A.M, B = M.bd, E = e.bd; if (!S.on) return undefined; if (S.bdFullT > e.t) return 'keep';
+    if (!B || !E || BDG.some(k => B[k] !== E[k]) || !S.bdCellT) return undefined;
+    const meta = S.bdMetaT > e.t; if (meta) for (const k in B) if (!BDA.includes(k)) E[k] = B[k];
+    let i0 = 1e9, j0 = 1e9, i1 = -1, j1 = -1; for (let k = 0; k < E.hg.length; k++) { if (S.bdCellT[k] > e.t) { E.hg[k] = B.hg[k]; E.sf[k] = B.sf[k]; E.tr[k] = B.tr[k]; continue; }
+      if (E.hg[k] !== B.hg[k] || E.sf[k] !== B.sf[k] || E.tr[k] !== B.tr[k]) { const i = k % B.nx, j = (k - i) / B.nx; if (i < i0) i0 = i; if (i > i1) i1 = i; if (j < j0) j0 = j; if (j > j1) j1 = j; } }
+    return { bb: i1 < 0 ? null : [i0, j0, i1, j1], meta: bdMeta(E) !== bdMeta(B) }; }
+  // undo in a room: items others changed after the snapshot, or hold right now (locked), keep their current value
   function mergeUndo(parsed, t) { if (!S.on) return parsed; const M = A.M;
-    for (const c of COLS) { if (!parsed[c]) continue; const cur = new Map((M[c] || []).map(v => [v.id, v])), hit = id => (S.remT.get(c + ':' + id) || 0) > t, out = [];
+    for (const c of COLS) { if (!parsed[c]) continue; const cur = new Map((M[c] || []).map(v => [v.id, v])), hit = id => (S.remT.get(c + ':' + id) || 0) > t || !!lockedBy({ k: KOF[c], id }), out = [];
       for (const v of parsed[c]) { if (!hit(v.id)) out.push(v); else if (cur.has(v.id)) out.push(cur.get(v.id)); }
       for (const v of M[c] || []) if (hit(v.id) && !out.some(q => q.id === v.id)) out.push(v);
       parsed[c] = out; }
@@ -141,13 +155,16 @@ export function initCollab(A) {   // A = app hooks (mapbuild/app.js)
   function peersMsg() { return { t: 'peers', list: [['host', S.name || 'Host', 0], ...[...S.peers].filter(([id]) => id !== 'host').map(([id, p]) => [id, p.name, p.slot])] }; }
   function onMsg(c, m) {
     if (m.t === 'hi' && S.host) {   // a guest joined → slot, map, who is here, current selections
-      const used = new Set([0, ...[...S.peers.values()].map(p => p.slot)]); let slot = 1; while (used.has(slot) && slot < SLOTS - 1) slot++;
-      S.peers.set(c.peer, { name: String(m.name || 'Guest').slice(0, 20), slot, sel: [] }); flush();
+      if (S.peers.has(c.peer)) dropPeer(c.peer);   // same peer reconnecting: free its old entry first
+      const used = new Set([0, ...[...S.peers.values()].map(p => p.slot)]), old = m.tok && S.toks.get(m.tok); let slot = old && !used.has(old.slot) ? old.slot : 1;   // same tab again = same slot (its ids stay unique)
+      if (!(old && slot === old.slot)) while ([...S.toks.values()].some(q => q.slot === slot) && slot < SLOTS - 1 || used.has(slot) && slot < SLOTS - 1) slot++;
+      const name = String(m.name || 'Guest').slice(0, 20); if (m.tok) S.toks.set(m.tok, { slot, name }); S.peers.set(c.peer, { name, slot, sel: [] }); flush();
       sendTo(c, { t: 'wel', slot, code: S.code }); sendTo(c, { t: 'map', m: A.MD.pack(A.M) });
       broadcast(peersMsg()); sendTo(c, { t: 'sel', from: 'host', refs: A.selAll() }); for (const [id, p] of S.peers) if (id !== c.peer && id !== 'host' && p.sel && p.sel.length) sendTo(c, { t: 'sel', from: id, refs: p.sel });
-      A.stat('👥 ' + (m.name || 'Guest') + ' joined', 'ok'); render(); return; }
+      A.stat('👥 ' + name + (m.re ? ' is back' : ' joined'), 'ok'); render(); return; }
     if (m.t === 'wel') { S.slot = m.slot; return; }
-    if (m.t === 'map') { S.applying = true; try { A.loadMap(A.MD.unpack(m.m)); } finally { S.applying = false; } snapShadow(); lastSeq = A.M.seq || 0; A.stat('👥 Joined room ' + S.code, 'ok'); render(); return; }
+    if (m.t === 'map') { const pend = S.pend; S.pend = null; S.applying = true; try { (pend ? A.reloadMap : A.loadMap)(A.MD.unpack(m.m)); } finally { S.applying = false; }
+      snapShadow(); lastSeq = A.M.seq || 0; if (pend) replay(pend); A.stat(pend ? '👥 Reconnected' + (pend.n ? ' — ' + pend.n + ' unsent edit(s) sent' : '') : '👥 Joined room ' + S.code, 'ok'); render(); return; }
     if (m.t === 'peers') { const keep = new Set(m.list.map(q => q[0])); for (const id of [...S.peers.keys()]) if (!keep.has(id)) dropPeer(id);
       for (const [id, name, slot] of m.list) { if (id === me()) continue; const p = S.peers.get(id) || { sel: [] }; p.name = name; p.slot = slot; S.peers.set(id, p); } render(); drawSels(); return; }
     const from = S.host && m.from !== 'host' ? c.peer : m.from; if (S.host) m.from = from;   // host stamps the sender (guests can't pretend)
@@ -159,7 +176,8 @@ export function initCollab(A) {   // A = app hooks (mapbuild/app.js)
   }
   function wire(c) {
     c.on('data', d => recv(c, d));
-    c.on('close', () => { if (S.host) { const p = S.peers.get(c.peer); S.conns.delete(c.peer); if (p) { dropPeer(c.peer); broadcast(peersMsg()); A.stat('👥 ' + p.name + ' left', 'warn'); render(); } } else if (S.on) leave('Lost connection to the host'); });
+    c.on('close', () => { if (S.host) { if (S.conns.get(c.peer) !== c) return; const p = S.peers.get(c.peer); S.conns.delete(c.peer); if (p) { dropPeer(c.peer); broadcast(peersMsg()); A.stat('👥 ' + p.name + ' left', 'warn'); render(); } }
+      else if (S.on && c === S.hostConn) rejoin(); });
   }
 
   // ---------- room ----------
@@ -177,10 +195,33 @@ export function initCollab(A) {   // A = app hooks (mapbuild/app.js)
     try { S.peer = await newPeer(); } catch (e) { A.stat('Couldn’t connect: ' + (e.message || e.type), 'err'); return; }
     const c = S.peer.connect(PREFIX + code, { reliable: true, serialization: 'json' }); let ok = false;
     const t = setTimeout(() => { if (!ok) { A.stat('Room ' + code + ' not found (check the code / host still open?)', 'err'); try { S.peer.destroy(); } catch (e) { } S.peer = null; } }, 15000);
-    c.on('open', () => { ok = true; clearTimeout(t); S.on = true; S.host = false; S.code = code; S.hostConn = c; S.peers.clear(); wire(c); sendTo(c, { t: 'hi', name: S.name }); render(); });
+    c.on('open', () => { ok = true; clearTimeout(t); S.on = true; S.host = false; S.code = code; S.hostConn = c; c._rx = performance.now(); S.peers.clear(); wire(c); sendTo(c, { t: 'hi', name: S.name, tok: S.tok }); render(); });
     c.on('error', () => { }); }
+  // ---------- guest reconnect: keep editing offline, try the host every 2.5 s for 60 s, then reload its map and re-send what wasn't sent ----------
+  function rejoin() {
+    if (S.re || !S.on || S.host) return; S.re = { t0: performance.now() }; const old = S.hostConn; S.hostConn = null; try { old && old.close(); } catch (e) { }
+    for (const id of [...S.peers.keys()]) dropPeer(id); A.stat('👥 Connection lost — reconnecting… (you can keep editing)', 'warn'); render();
+    const tryOnce = () => { if (!S.re || !S.on) return; if (performance.now() - S.re.t0 > 60000) { clearInterval(S.re.iv); S.re = null; leave('Couldn’t reconnect to the host (room closed?)'); return; }
+      if (!S.peer || S.peer.destroyed) return; if (S.peer.disconnected) { try { S.peer.reconnect(); } catch (e) { } return; }
+      if (S.re.try && S.re.try.open) return; const c = S.peer.connect(PREFIX + S.code, { reliable: true, serialization: 'json' }); S.re.try = c;
+      c.on('open', () => { if (!S.re) { try { c.close(); } catch (e) { } return; } clearInterval(S.re.iv); S.pend = pending(); S.re = null; S.hostConn = c; c._rx = performance.now(); wire(c);
+        sendTo(c, { t: 'hi', name: S.name, tok: S.tok, re: 1 }); render(); });
+      c.on('error', () => { }); };
+    S.re.iv = setInterval(tryOnce, 2500); tryOnce(); }
+  function pending() {   // what this guest changed since the last thing the host got (shadow = host's view)
+    const M = A.M, ops = diff(), T = S.terr; S.terr = null; let terr = null;
+    if (T) { const hg = [], sf = []; for (let j = T[1]; j <= T[3]; j++) for (let i = T[0]; i <= T[2]; i++) { const k = j * M.nx + i; hg.push(M.hg[k]); sf.push(M.sf[k]); } terr = { r: T, hg, sf, nx: M.nx }; }
+    return { ops, terr, n: ops.length + (terr ? 1 : 0) }; }
+  function replay(P) {   // put the unsent edits onto the fresh map, then send them as my own edits
+    const M = A.M; for (const o of P.ops) { const arr = M[o.c] || (M[o.c] = []), i = arr.findIndex(v => v.id === o.id); if (o.v) { if (i >= 0) arr[i] = o.v; else arr.push(o.v); } else if (i >= 0) arr.splice(i, 1); }
+    if (P.terr && P.terr.nx === M.nx) { const [i0, j0, i1, j1] = P.terr.r; let n = 0; for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) { const k = j * M.nx + i; M.hg[k] = P.terr.hg[n]; M.sf[k] = P.terr.sf[n]; n++; } A.updTerrain(i0, j0, i1, j1); }
+    if (P.n) { A.syncAll(); A.buildGrid(); flush(); } }
+  setInterval(() => {   // heartbeat: 3 s pings; a silent link (75 s guest / 90 s host) counts as dropped — long because a hidden tab's timers can run only once a minute
+    if (!S.on) return; const t = performance.now();
+    if (S.host) { for (const [id, c] of S.conns) { sendTo(c, { t: 'hb' }); if (t - (c._rx || t) > 90000) { try { c.close(); } catch (e) { } S.conns.delete(id); const p = S.peers.get(id); if (p) { dropPeer(id); broadcast(peersMsg()); A.stat('👥 ' + p.name + ' dropped', 'warn'); render(); } } } }
+    else if (S.hostConn && !S.re) { sendTo(S.hostConn, { t: 'hb' }); if (t - (S.hostConn._rx || t) > 75000) rejoin(); } }, 3000);
   function leave(why) {
-    if (!S.on) return; try { broadcast({ t: 'bye' }); } catch (e) { }
+    if (!S.on) return; if (S.re) { clearInterval(S.re.iv); S.re = null; } S.pend = null; try { broadcast({ t: 'bye' }); } catch (e) { }
     const wasGuest = !S.host; setTimeout(() => { try { S.peer && S.peer.destroy(); } catch (e) { } S.peer = null; }, 200);
     for (const id of [...S.peers.keys()]) dropPeer(id); S.on = false; S.host = false; S.conns.clear(); S.hostConn = null; S.shadow = null; S.code = '';
     if (wasGuest) A.guestLeft(); A.stat('👥 ' + (why || 'Left the room'), why ? 'warn' : 'ok'); render(); }
@@ -208,7 +249,7 @@ export function initCollab(A) {   // A = app hooks (mapbuild/app.js)
   btn.onclick = () => { pane.hidden = !pane.hidden; render(); };
   A.barSlot.before(btn);
   function render() {
-    btn.textContent = S.on ? '👥 ' + (S.peers.size + 1) + ' • ' + S.code : '👥'; btn.classList.toggle('on', S.on); if (pane.hidden) return; pane.textContent = '';
+    btn.textContent = S.on ? (S.re ? '👥 ⟳ ' : '👥 ' + (S.peers.size + 1) + ' • ') + S.code : '👥'; btn.classList.toggle('on', S.on); if (pane.hidden) return; pane.textContent = '';
     const r = btn.getBoundingClientRect(); pane.style.top = (r.bottom + 6) + 'px'; pane.style.left = Math.max(8, Math.min(innerWidth - 300, r.left - 120)) + 'px';
     if (!S.on) {
       const nm = A.el('input', { class: 'tl-in', placeholder: 'Your name', value: S.name, maxlength: 20 }), code = A.el('input', { class: 'tl-in', placeholder: 'Room code', maxlength: 6, style: 'text-transform:uppercase;width:90px' });
@@ -220,10 +261,10 @@ export function initCollab(A) {   // A = app hooks (mapbuild/app.js)
       return; }
     const list = A.el('div', { class: 'who' }), row = (n, slot, tag) => list.append(A.el('div', null, A.el('i', { style: 'background:' + colorOf(slot) }), n + (tag ? ' ' + tag : '')));
     row(S.name || (S.host ? 'Host' : 'Me'), S.slot, '(you' + (S.host ? ', host)' : ')')); for (const [id, p] of S.peers) row(p.name, p.slot, id === 'host' ? '(host)' : '');
-    pane.append(A.el('h4', null, 'Room ' + S.code), A.el('p', { class: 'note' }, S.host ? 'Give this code to the others. Keep this tab open: closing it ends the room.' : 'The host saves and exports. Items someone else has selected are locked.'), list,
+    pane.append(A.el('h4', null, 'Room ' + S.code + (S.re ? ' — reconnecting…' : '')), A.el('p', { class: 'note' }, S.host ? 'Give this code to the others. Keep this tab open: closing it ends the room.' : 'The host saves and exports. Items someone else has selected are locked.'), list,
       A.el('button', { class: 'tl-btn', onclick: () => leave() }, S.host ? 'Close the room' : 'Leave the room'));
   }
   addEventListener('beforeunload', () => { if (S.on) try { broadcast({ t: 'bye' }); } catch (e) { } });
 
-  return { get on() { return S.on; }, get guest() { return S.on && !S.host; }, get applying() { return S.applying; }, nid, onChanged, onTerr, onBd, onSel, onHover, mergeUndo, mergeTerr, render, host: hostRoom, join: joinRoom, leave, S };
+  return { get on() { return S.on; }, get guest() { return S.on && !S.host; }, get applying() { return S.applying; }, nid, onChanged, onTerr, onBd, onSel, onHover, mergeUndo, mergeTerr, mergeBd, rejoin, render, host: hostRoom, join: joinRoom, leave, S };
 }
