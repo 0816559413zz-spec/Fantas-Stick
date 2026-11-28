@@ -247,6 +247,10 @@ export function initCollab(A) {   // A = app hooks (mapbuild/app.js)
   const btn = A.el('button', { class: 'tl-btn', id: 'bRoom', title: 'Edit together live: open a room or join one with its code' }, '👥');
   const pane = A.el('div', { class: 'mb-room' }); pane.hidden = true; document.body.append(pane);
   btn.onclick = () => { pane.hidden = !pane.hidden; render(); };
+  const close = () => { pane.hidden = true; };   // ✕, Esc, or a click outside the panel
+  addEventListener('pointerdown', e => { if (!pane.hidden && !pane.contains(e.target) && !btn.contains(e.target)) close(); }, true);
+  addEventListener('keydown', e => { if (e.key === 'Escape' && !pane.hidden) close(); });
+  const head = t => A.el('h4', null, t, A.el('button', { class: 'x', title: 'Close (Esc)', onclick: close }, '✕'));
   A.barSlot.before(btn);
   function render() {
     btn.textContent = S.on ? (S.re ? '👥 ⟳ ' : '👥 ' + (S.peers.size + 1) + ' • ') + S.code : '👥'; btn.classList.toggle('on', S.on); if (pane.hidden) return; pane.textContent = '';
@@ -254,14 +258,14 @@ export function initCollab(A) {   // A = app hooks (mapbuild/app.js)
     if (!S.on) {
       const nm = A.el('input', { class: 'tl-in', placeholder: 'Your name', value: S.name, maxlength: 20 }), code = A.el('input', { class: 'tl-in', placeholder: 'Room code', maxlength: 6, style: 'text-transform:uppercase;width:90px' });
       const nameOf = () => { const v = nm.value.trim(); try { localStorage.setItem('mb_name', v); } catch (e) { } return v; };
-      pane.append(A.el('h4', null, 'Edit together (live)'), nm,
+      pane.append(head('Edit together (live)'), nm,
         A.el('button', { class: 'tl-btn pri', onclick: () => { hostRoom(nameOf()); } }, 'Open a room for this map'),
         A.el('div', { class: 'row' }, code, A.el('button', { class: 'tl-btn', onclick: () => joinRoom(code.value, nameOf()) }, 'Join')),
         A.el('p', { class: 'note' }, 'Host = the file is saved and exported on the host’s machine. Joining replaces the map you have open with the host’s map (your file isn’t touched while in the room). Backdrop sculpt / paint / settings are shared too.'));
       return; }
     const list = A.el('div', { class: 'who' }), row = (n, slot, tag) => list.append(A.el('div', null, A.el('i', { style: 'background:' + colorOf(slot) }), n + (tag ? ' ' + tag : '')));
     row(S.name || (S.host ? 'Host' : 'Me'), S.slot, '(you' + (S.host ? ', host)' : ')')); for (const [id, p] of S.peers) row(p.name, p.slot, id === 'host' ? '(host)' : '');
-    pane.append(A.el('h4', null, 'Room ' + S.code + (S.re ? ' — reconnecting…' : '')), A.el('p', { class: 'note' }, S.host ? 'Give this code to the others. Keep this tab open: closing it ends the room.' : 'The host saves and exports. Items someone else has selected are locked.'), list,
+    pane.append(head('Room ' + S.code + (S.re ? ' — reconnecting…' : '')), A.el('p', { class: 'note' }, S.host ? 'Give this code to the others. Keep this tab open: closing it ends the room.' : 'The host saves and exports. Items someone else has selected are locked.'), list,
       A.el('button', { class: 'tl-btn', onclick: () => leave() }, S.host ? 'Close the room' : 'Leave the room'));
   }
   addEventListener('beforeunload', () => { if (S.on) try { broadcast({ t: 'bye' }); } catch (e) { } });

@@ -221,7 +221,8 @@ dialog h2{margin:0 0 10px;font-size:15px}
 dialog .btns{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
 /* live room panel (mapbuild/collab.js) */
 .mb-room{position:fixed;z-index:60;width:290px;padding:10px 12px;background:var(--bg1);border:1px solid var(--ln2);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:8px}
-.mb-room h4{margin:0;font-size:13px}.mb-room .row{display:flex;gap:6px}.mb-room .row input{flex:1}.mb-room .note{margin:0;color:var(--tx2);font-size:12px}
+.mb-room[hidden]{display:none}
+.mb-room h4{margin:0;font-size:13px;display:flex;align-items:center}.mb-room h4 .x{margin-left:auto;cursor:pointer;color:var(--tx2);background:none;border:0;font:inherit;font-size:15px;padding:0 2px}.mb-room h4 .x:hover{color:var(--tx)}.mb-room .row{display:flex;gap:6px}.mb-room .row input{flex:1}.mb-room .note{margin:0;color:var(--tx2);font-size:12px}
 .mb-room .who div{display:flex;align-items:center;gap:6px;padding:2px 0}.mb-room .who i{width:10px;height:10px;border-radius:50%;display:inline-block}
 </style>
 </head>
