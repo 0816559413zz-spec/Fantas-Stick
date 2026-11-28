@@ -24,6 +24,12 @@ Hand-off for the next chat. Reply in Thai, short. Discuss before building; still
    - Real match (headless, `HL.cam('q34')`, holding fire): both arms stick out sideways like a T while attacking, and the scythe is not visible in the frames (`shots/dk_ba_live.jpg`), although `o.darkWeapon.visible` is true and arm rotations change (armR ≈ [-1.21,.49,-.7], armL ≈ [-1.77,0,.49] after a swing).
    - VFX Studio (`stance/darkness_ba_check`, acts `fire`): after the first swing the scythe disappears and the body plays a wand-shot pose with a light ball. The same happens on the old commit 13e1805d, so it is NOT from the Darkness rework.
    - Next: look at the live BA pose code in `js/68-darkness-view.js` (`ST_DARK_LIVE_BA`, `darkBAPose`, `liveHandPose`) in a real browser (the browser pane) before trusting headless; then fix the arm pose (user: "arm spin") and confirm the scythe swing shows.
+2b. **Full skill sweep 2026-11-28** (`stance/darkness_all`, `stance/storm_all`, sheets `shots/dk_all_sheet.jpg`, `shots/st_all_sheet.jpg`):
+   - Fixed: God Lightning claw attacks were laid flat by the new `bolt` dash pose (js/72: skip bolt while `o.clSw`).
+   - Thunder Line release shows a tall white glow column at the hands (bloom) instead of reading as a line — tone down like the Thunderbomb fix (thin bolts, low `gk`, no big flash).
+   - Night Waltz border B: huge pale grey sheets fill the screen from a close camera — check in a real match.
+   - God Lightning dash echo leaves black branching cracks on the floor (other session's prototype) — looks like dark "tree" decals; ask the user.
+   - Studio limits: `class-stance` keeps the foe at me.x+400 every tick, so marked Nightfall / Storm Dome on the foe can't be judged there; use a real match (HL) for those.
 3. Death Sentence charge: from the front the two hands are not clearly together at the hip.
 4. Storm dash: check direction changes mid-dash and the side-dash roll sign.
 5. Thunderbomb camera pull-back only exists in the real game camera — verify in a match.

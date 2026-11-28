@@ -57,6 +57,7 @@ function dashPose(o,p,dt,now){
   const gp=o.g.position;
   if(p.ds&&(!S||S.ph!=='go'))S=o.dp={ph:'go',t:0,w:S?S.w*0.5:0,px:gp.x,pz:gp.z,py:gp.y,rel:S?S.rel:0,back:-1,st:dpStyle(p),air:0,sp:0,caN:o.caN,aw:1};
   if(!S){dpKnees(o,0,0);return;}
+  if(S.st==='bolt'&&o.clSw){o.dp=null;dpKnees(o,0,0);return;}   // God Lightning claw lunges keep their own swipe pose (the bolt pose laid the body flat mid-attack)
   S.t+=dt;
   // ทิศที่พุ่งจริง (จากการเคลื่อนของตัว) เทียบทิศที่หัน → หันตัวตามทาง • ถอยหลัง (>115°) ล็อกเป็นท่าถอยหลบตั้งแต่เริ่ม
   const dx=gp.x-S.px,dz=gp.z-S.pz,d=Math.hypot(dx,dz);S.px=gp.x;S.pz=gp.z;S.sp+=(d/Math.max(dt,1e-3)-S.sp)*Math.min(1,dt*12);

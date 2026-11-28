@@ -1,0 +1,109 @@
+{
+  "v": 1,
+  "desc": "storm full skill check (2026-11-28)",
+  "tags": [
+    "stance",
+    "preview"
+  ],
+  "dur": 12.5,
+  "layers": [
+    {
+      "id": "anchor",
+      "t": "mesh",
+      "shape": "disc",
+      "mat": "black",
+      "op": 0,
+      "at": 0,
+      "life": 12.5
+    },
+    {
+      "id": "stance",
+      "t": "code",
+      "fn": "studio_class_stance",
+      "at": 0,
+      "life": 12.5,
+      "args": {
+        "layer": "anchor",
+        "cls": "storm",
+        "style": "a",
+        "run": [
+          99,
+          99
+        ],
+        "acts": [
+          {
+            "t": 0.2,
+            "a": "set",
+            "k": "lst",
+            "v": 4
+          },
+          {
+            "t": 0.3,
+            "a": "skill",
+            "id": "thunderline"
+          },
+          {
+            "t": 1.4,
+            "a": "set",
+            "k": "lst",
+            "v": 4
+          },
+          {
+            "t": 1.5,
+            "a": "skill",
+            "id": "triplestrike"
+          },
+          {
+            "t": 3.0,
+            "a": "set",
+            "k": "lst",
+            "v": 4
+          },
+          {
+            "t": 3.1,
+            "a": "skill",
+            "id": "stormdome"
+          },
+          {
+            "t": 4.6,
+            "a": "set",
+            "k": "lst",
+            "v": 4
+          },
+          {
+            "t": 4.7,
+            "a": "skill",
+            "id": "railgun"
+          },
+          {
+            "t": 4.85,
+            "a": "shield",
+            "d": 0.15
+          },
+          {
+            "t": 8.2,
+            "a": "hold",
+            "d": 0.8
+          },
+          {
+            "t": 9.3,
+            "a": "ult",
+            "id": "godlightning"
+          },
+          {
+            "t": 10.6,
+            "a": "fire"
+          },
+          {
+            "t": 11.1,
+            "a": "fire"
+          },
+          {
+            "t": 11.6,
+            "a": "fire"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "v": 1,
+  "desc": "darkness full skill check (2026-11-28)",
+  "tags": [
+    "stance",
+    "preview"
+  ],
+  "dur": 11,
+  "layers": [
+    {
+      "id": "anchor",
+      "t": "mesh",
+      "shape": "disc",
+      "mat": "black",
+      "op": 0,
+      "at": 0,
+      "life": 11
+    },
+    {
+      "id": "stance",
+      "t": "code",
+      "fn": "studio_class_stance",
+      "at": 0,
+      "life": 11,
+      "args": {
+        "layer": "anchor",
+        "cls": "darkness",
+        "style": "b",
+        "run": [
+          99,
+          99
+        ],
+        "acts": [
+          {
+            "t": 0.3,
+            "a": "skill",
+            "id": "darkmark"
+          },
+          {
+            "t": 1.6,
+            "a": "skill",
+            "id": "darkchase"
+          },
+          {
+            "t": 3.0,
+            "a": "skill",
+            "id": "darkwaltz"
+          },
+          {
+            "t": 4.6,
+            "a": "skill",
+            "id": "darkward"
+          },
+          {
+            "t": 5.8,
+            "a": "skill",
+            "id": "darkveil"
+          },
+          {
+            "t": 7.0,
+            "a": "dash"
+          },
+          {
+            "t": 8.0,
+            "a": "ult",
+            "id": "darkrift"
+          }
+        ]
+      }
+    }
+  ]
+}
