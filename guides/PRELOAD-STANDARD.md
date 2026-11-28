@@ -77,6 +77,9 @@ caught on the first test, not by players.
 map; **new programs during the fight must be 0**. Run it before committing skill, VFX or graphics work.
 
 **Step 1 status (built 2026-11-23):**
+- 2026-11-28: F3 counts every new in-match program on the normal path. `?shadertrace` and dev mode add owner, key and GLSL snippets. `?shadercompare` additionally scans previous GLSL sources and is intended for diagnosis, since driver reads are synchronous.
+- Entry preload can hand off to the match before all rehearsals finish. Preserve its pending `evload` and `evr` steps when building or rebuilding the match warm-up queue.
+- In the November 28 Meadow checks, a 1,600-frame all-path TDM gate and a separate 10-player real-time fight after full preload both reported zero new programs. The real-time run still averaged about 610 draw calls and 40 ms in render submission on the test setup. A targeted Storm VFX check reported zero new programs across the five rework events. The focused Sovereign runs reported one unidentified program on initial arrival in one run and zero in the repeat.
 - Detector: `SHW` in `js/71-perfhud.js` — armed in `play` once the warm queue is empty (+1.5 s); each new program → console
   `[shader mid-match]`, F3 row "shader กลางแมตช์", toast with `?dev=1`. Entry: frame ms, recipe diff vs nearest program
   (`index:old>new` of three's cache key), up to 3 object paths using it (`fx:` = fxScene). `WD.SHW.L` holds the last 40.

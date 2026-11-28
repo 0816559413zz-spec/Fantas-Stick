@@ -181,9 +181,12 @@ function warmCharVariants(){
       for(const [n,mk,ok] of V){if(!ok(m))continue;const k=n+'|'+base;if(WARM.cv.has(k))continue;WARM.cv.add(k);
         try{const c=m.clone();c.material=mk(src);c.frustumCulled=false;if(n==='clip'||n==='fade')c.castShadow=false;g.add(c);}catch(e){console.warn('warm char variant',n,e);}}});}
   return g.children.length?g:null;}
-function warmQueue(ps,key){WARM.key=key;WARM.late=false;WARM.q=['common'];
+function warmQueue(ps,key){
+  // A quick join or preload timeout can hand unfinished rehearsals to the match queue.
+  const rehearsals=WARM.q.filter(s=>s==='evload'||s.startsWith('evr:'));
+  WARM.key=key;WARM.late=false;WARM.q=['common'];
   for(const p of ps){if(WARM_FXDIR[p])WARM.q.push('fx:'+p);(WARM.reg[p]||[]).forEach((f,i)=>WARM.q.push('reg:'+p+':'+i));}
-  WARM.q=WARM.q.filter(s=>!WARM.done.has(s));WARM.q.push('brk','chars','compile');}
+  WARM.q=WARM.q.filter(s=>!WARM.done.has(s));WARM.q.push('brk','chars',...rehearsals,'compile');}
 // Same queue while players wait in the lobby (2026-11-22): the 3 s countdown was too short — in a 10-player match the class
 // effects + compile (1.2–2 s) ran into the first seconds of the fight. Starts once the lobby's game-scene warm-up is done; the
 // countdown then finds the same key and only adds the late compile. `?nolobbywarm` = old path.

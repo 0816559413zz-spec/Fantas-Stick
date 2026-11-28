@@ -50,7 +50,7 @@ function frzFrame(gap){
 // Mid-match shader watch (guides/PRELOAD-STANDARD.md §3c): every program three creates after the match is warmed is a freeze
 // that preload missed. Logged with its recipe difference from the nearest older program and the objects using it.
 // Armed in 'play' once the warm queue is empty (+1.5 s). Dev mode (?dev=1) also toasts. WD.SHW.L = list (bench gate reads it).
-const SHW={L:[],seen:new WeakSet(),len:0,play:0,armed:false,n:0};
+const SHW={L:[],seen:new WeakSet(),len:0,play:0,armed:false,n:0,detail:new URLSearchParams(location.search).has('shadertrace'),compare:new URLSearchParams(location.search).has('shadercompare')};
 function shwDiff(pg){const a=pg.cacheKey.split(',');let best=null,bd=1e9;
   for(const q of gl.info.programs){if(q===pg)continue;const b=q.cacheKey.split(',');if(b.length!==a.length)continue;let d=0;for(let i=0;i<a.length&&d<bd;i++)if(a[i]!==b[i])d++;if(d<bd){bd=d;best=b;}}
   if(!best)return 'new shape';
@@ -77,10 +77,12 @@ function shwFrame(gap){
   SHW.len=L.length;
   for(const pg of L){if(SHW.seen.has(pg))continue;SHW.seen.add(pg);
     if(!SHW.armed)continue;
-    const e={t:new Date().toTimeString().slice(0,8),ms:Math.round(gap),name:pg.name||'?',diff:shwDiff(pg),who:shwWho(pg),key:pg.cacheKey,same:shwSame(pg,L),src:/^\d/.test(pg.cacheKey)?shwHead(pg):''};
+    const detail=SHW.detail||SHW.compare||DEV.on;
+    const e={t:new Date().toTimeString().slice(0,8),ms:Math.round(gap),name:pg.name||'?',key:pg.cacheKey,
+      diff:detail?shwDiff(pg):'',who:detail?shwWho(pg):[],same:SHW.compare?shwSame(pg,L):'',src:detail&&/^\d/.test(pg.cacheKey)?shwHead(pg):''};
     if(e.same)e.who[0]+=' ⟨same source as an older program: '+e.same+'⟩';
     SHW.n++;SHW.L.push(e);if(SHW.L.length>40)SHW.L.shift();
-    console.warn('[shader mid-match]',e.ms+'ms',e.name,e.diff,e.who.join(' | '));
+    if(detail)console.warn('[shader mid-match]',e.ms+'ms',e.name,e.diff,e.who.join(' | '));
     if(DEV.on)toast('⚠ shader ใหม่กลางแมตช์ '+e.ms+'ms: '+e.name+' — '+e.who[0]);}}
 function frzRecv(){const n=performance.now();
   if(FRZ.lr&&n-FRZ.lr>FRZ.MIN&&frzOk())frzAdd('r',n-FRZ.lr,`ping ${NET.rtt?Math.round(NET.rtt):'-'}ms`);FRZ.lr=n;}
@@ -153,7 +155,7 @@ function perfRows(){const S=perfStats(),I=gl.info,v=VIEW.cur,mem=performance.mem
     `ส่ง ${net.sent.toFixed(0)} snapshot/วิ • ${net.kb.toFixed(1)} KB/วิ ต่อคน • คิวส่งสูงสุด ${(net.queued/1024).toFixed(1)} KB • ตัดข้อมูล ${net.trimmed} ครั้ง`:
     `รับ ${net.received.toFixed(0)} snapshot/วิ • ช่วงห่างสูงสุด ${net.gap.toFixed(0)} ms • ปิง ${NET.rtt?Math.round(NET.rtt):'-'} ms`]);
   if(FRZ.L.length)rows.push(['ค้างล่าสุด',frzRows()]);
-  if(SHW.n)rows.push(['shader กลางแมตช์',`${SHW.n} ตัว • `+SHW.L.slice(-4).map(e=>`${e.ms}ms ${e.name} (${e.who[0]})`).join(' • ')]);
+  if(SHW.n)rows.push(['shader กลางแมตช์',`${SHW.n} ตัว • `+SHW.L.slice(-4).map(e=>`${e.ms}ms ${e.name}${e.who[0]?' ('+e.who[0]+')':''}`).join(' • ')]);
   return rows;}
 function perfPanel(){PERF.pan.innerHTML=perfRows().map(([k,v])=>`<div><b>${k}</b> ${v}</div>`).join('')+'<button type="button" data-pcopy>📋 คัดลอก</button>';}
 function perfText(){return '[Fantas Stick perf '+new Date().toISOString().slice(0,16).replace('T',' ')+' '+navigator.userAgent.replace(/^.*?\) /,'').slice(0,60)+']\n'+perfRows().map(([k,v])=>k+': '+String(v).replace(/<[^>]+>/g,'')).join('\n');}

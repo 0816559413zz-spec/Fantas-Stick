@@ -675,18 +675,18 @@ GR_NOISE:173 GR_LIVE:178 SNOWU:199 GR_SNOW:200 grLive:202 GR_GLSL_V:212 GR_BEGIN
 §420 สกิลลม → หญ้า (ภาพล้วน เรียกจาก windEfx js/68)
 WIND_GRASS:422 airWind:436
 
-## js/51-warmup.js (442) —
-WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_SLICE:13 WARM_X:14 WARM_Y:14 warmKeep:16 warmStaticModels:22 glReady:31 warmCompile:32 warmDraw:35 WARM_SKIP:45 warmAssets:48 warmFx:58 warmNow:71 warmFxRun:79 warmFxEnd:82 warmGather:84 warmPaths:86 warmFrame:88 warmStep:90 preloadCharMat:158 warmTrCopy:161 warmCharVariants:164 warmQueue:184 WARM_LOBBY:190 warmLobbyTick:191 warmTick:198
-§209 Entry loader (PRELOAD-STANDARD step 3, 2026-11-23)
-PRE:215 preloadReg:216 warmDissolve:218 preProg:234 preFin:235 preStart:237
-§250 Event rehearsal (PRELOAD-STANDARD step 4, 2026-11-23)
-WARM_REC_SKIP:256 warmRec:257 warmRecDump:259 WARM_EVFLAGS:260 WARM_EVX:261 WARM_EVY:261 warmEvShift:262 warmRehearse:267 preTick:274
-§284 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
-warmOutline:295
-§312 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
-GWARM:317 gameWarmTick:318 LMAP:351 lobbyMapTick:352 gameWarmFree:362
-§368 Shader never seen before mid-match: compile in the background, hide t…
-SHR:376 shrLights:380 IMZ:385 imzPre:398 imzPost:400 shrCollect:401 shrPending:407 shReadyPre:411 shReadyPost:437
+## js/51-warmup.js (445) —
+WARM:11 WARM_FXDIR:12 WARM_COMMON:12 WARM_SLICE:13 WARM_X:14 WARM_Y:14 warmKeep:16 warmStaticModels:22 glReady:31 warmCompile:32 warmDraw:35 WARM_SKIP:45 warmAssets:48 warmFx:58 warmNow:71 warmFxRun:79 warmFxEnd:82 warmGather:84 warmPaths:86 warmFrame:88 warmStep:90 preloadCharMat:158 warmTrCopy:161 warmCharVariants:164 warmQueue:184 WARM_LOBBY:193 warmLobbyTick:194 warmTick:201
+§212 Entry loader (PRELOAD-STANDARD step 3, 2026-11-23)
+PRE:218 preloadReg:219 warmDissolve:221 preProg:237 preFin:238 preStart:240
+§253 Event rehearsal (PRELOAD-STANDARD step 4, 2026-11-23)
+WARM_REC_SKIP:259 warmRec:260 warmRecDump:262 WARM_EVFLAGS:263 WARM_EVX:264 WARM_EVY:264 warmEvShift:265 warmRehearse:270 preTick:277
+§287 ภาพจากโค้ดของแต่ละสาย (เฟรมละฟังก์ชัน)
+warmOutline:298
+§315 อุ่นฉากเกมระหว่างรอในห้อง (ผู้ใช้ 2026-10-23: "กระตุกตอนเริ่มแมตช์แรก…
+GWARM:320 gameWarmTick:321 LMAP:354 lobbyMapTick:355 gameWarmFree:365
+§371 Shader never seen before mid-match: compile in the background, hide t…
+SHR:379 shrLights:383 IMZ:388 imzPre:401 imzPost:403 shrCollect:404 shrPending:410 shReadyPre:414 shReadyPost:440
 
 ## js/52-social.js (172) — 
 §6 แชท: Enter = พิมพ์ / Enter อีกที = ส่ง / Esc = ปิด • ข้อความขึ้นมุมซ้…
@@ -918,8 +918,8 @@ dive:199 PA:200 TA:201 DIVE_DOWN:203 DIVE_POUR:203 DIVE_STEP:203 diveDist:204 la
 §471 เล่น
 WDG_YAW:472 wdgGet:473 wdgStart:474 wdgDive:481 wdgKeep:484 wdgEnd:485 wdgTick:486
 
-## js/71-perfhud.js (162) — 
-PERF:9 perfNetSample:11 perfNetSend:14 perfNetReceive:20 perfNetFrame:25 FRZ:40 frzAdd:42 frzOk:45 frzFrame:46 SHW:53 shwDiff:54 shwPath:58 shwSig:60 shwWho:61 shwHead:68 shwSrc:69 shwSame:70 shwFrame:71 frzRecv:85 frzIn:87 frzNote:89 FRZ_NAME:93 frzRows:94 perfFrame:96 perfDom:111 perfStats:119 perfGraph:123 _gpuName:136 gpuIntegrated:137 perfRows:138 perfPanel:158 perfText:159
+## js/71-perfhud.js (164) —
+PERF:9 perfNetSample:11 perfNetSend:14 perfNetReceive:20 perfNetFrame:25 FRZ:40 frzAdd:42 frzOk:45 frzFrame:46 SHW:53 shwDiff:54 shwPath:58 shwSig:60 shwWho:61 shwHead:68 shwSrc:69 shwSame:70 shwFrame:71 frzRecv:87 frzIn:89 frzNote:91 FRZ_NAME:95 frzRows:96 perfFrame:98 perfDom:113 perfStats:121 perfGraph:125 _gpuName:138 gpuIntegrated:139 perfRows:140 perfPanel:160 perfText:161
 
 ## js/72-dash-pose.js (90) — 
 DPOSE:12 DPT:26 _dpQ:27 _dpX:27 _dpP:27 STANCE_STORM_ZAP:28 dpMix:29 dpKnees:31 dpStyle:39 DPDBG:45 dashPose:46 dpApply:80

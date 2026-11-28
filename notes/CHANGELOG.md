@@ -1,5 +1,7 @@
 # Changelog (newest first in the 2026-10-19+ entries, then oldest → newest)
 
+- 2026-11-28 Shader warm-up: carry unfinished event rehearsals into the match queue and keep expensive GLSL inspection opt-in. The shader gate now fails if its detector never armed or a page error occurred.
+
 - 2026-11-28 Performance: deduplicate queued shader subtrees and skip retries for detached objects. Prepare cloth collision capsules once per frame and reject out-of-range points before projection and square root.
 
 - 2026-11-28 Rendering: refresh High shadows every other frame on regular maps, reduce its larger shadow target from 4096 to 3072, and reuse the same PCSS spiral with incremental rotation.
