@@ -434,7 +434,8 @@ differences above 60 fps show. A/B = interleaved 1 s windows in alternating orde
 Fixed:
 - **Matrix update with a change check** (js/01-core `MXC`, `?nomxc` = three's own): three recomposes every object and rebuilds
   every world matrix each render; ~65 % of the 2,500 scene objects never move. A/B 0.66 → 0.37 ms a frame, matrices identical on
-  all 2,361 live objects.
+  all 2,361 live objects. Re-checked after the upstream batching below: 0.54 → 0.26 ms, and 20 live samples in the fight
+  (2,812 objects, scene + fxScene) matched three's own update on every object.
 - **hudSight** (js/35): obstacle height band once per ray, not per obstacle per step.
 - **Minimap** (js/38 `drawMinimap`): obstacles from the spatial grid round the player (`sgNear(sgObs())`), not every OBS entry a
   frame; colour order per map unchanged.
