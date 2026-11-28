@@ -10,6 +10,7 @@ function applySettings(){
   if(AC&&SFXBUS)SFXBUS.gain.setTargetAtTime(SET.sfx/100,AC.currentTime,0.05);
   if(AC&&MUSIC.bus)MUSIC.bus.gain.setTargetAtTime(MUSIC.on?0.8*SET.music/100:0,AC.currentTime,0.1);
   const f=document.getElementById('fps');if(f)f.style.display=SET.fps?'block':'none';
+  document.documentElement.classList.toggle('hudStill',!SET.hudanim);   // HUD animation off: looping HUD decoration stops (css/hud4.css .hudStill)
 }
 const camPos=new THREE.Vector3(0,20,40),camLook=new THREE.Vector3();
 document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===cv;const dvf=DEV.free;DEV.free=0;if(locked){hidePause();trToggle(false);if(bpOpen)bpShow(false);}else if(screen==='game'&&!trOpenF&&!bpOpen&&!crOpen&&!(DEV.open&&dvf))showPause();});   // Dev menu freed the mouse itself = no pause (js/78)

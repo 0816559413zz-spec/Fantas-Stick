@@ -389,3 +389,12 @@
 /* Earth rock ammo pips (2026-11-24): minimal, under the crosshair */
 #h4Ammo{position:fixed;left:50%;top:calc(50% + 26px);transform:translateX(-50%);display:flex;gap:3px;pointer-events:none;z-index:5}
 #h4Ammo i{width:5px;height:5px;border-radius:1px;background:#e9d2a6;box-shadow:0 0 2px rgba(0,0,0,.6);transition:opacity .12s}
+/* HUD animation off (Settings > Screen, SET.hudanim 0 → html.hudStill, 2026-11-28): looping decoration stops and the particles go
+   (they cost ~2.6 ms a frame in a 6v6 fight). State cues keep their static look (low HP red, regen outline, ult ready edge,
+   selected card); one-shot feedback (card pop / draw / use) still plays. */
+.hudStill .h4P,.hudStill .h4UX .pt,.hudStill .h4UX .gb b::after,.hudStill #h4.regen .h4Seg::before,.hudStill .h4RgSp{display:none}
+.hudStill .h4Au,.hudStill .h4Au::before,.hudStill .h4Au *,.hudStill .h4Au *::before,.hudStill .h4Au *::after{animation:none!important}
+.hudStill .h4UX .bk,.hudStill .h4UX .bk .glow::before,.hudStill .h4UX .bk .ic,.hudStill .h4UX .bk .rd,.hudStill .h4UX.full .gb b,
+.hudStill .h4UX .fill .bd::before,.hudStill .h4UX .fill .bd::after,.hudStill .h4UX .fill .top,.hudStill #h4 .hg svg,.hudStill #h4 .hg .fl,
+.hudStill .h4UC.full .edge,.hudStill .h4UC.full .fc,.hudStill .h4Cd.sel .fc,.hudStill #h4.low .h4Seg,.hudStill #h4.regen .h4Seg>b::after,
+.hudStill #rgFx.on{animation:none}

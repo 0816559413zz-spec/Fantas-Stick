@@ -456,6 +456,10 @@ Measured, not changed (changes how the HUD looks: user's choice):
 - **HUD round 4 CSS animations** (embers `h4Rise` ×44, flipbooks `h4FbX/Y`, glows; 90 running). A/B in the fight, running vs
   paused: 17.94 → 15.29 ms a frame (−2.65 ± 0.63 ms). Main-thread style work every frame; `will-change` does not help
   (−0.27 ± 0.23 ms, 63 layers promoted). Options: draw particles / flipbooks on one canvas, cut them in heavy fights, or a switch.
+  **User picked the switch:** Settings > หน้าจอ > แอนิเมชัน HUD (`SET.hudanim`, default on). Off = `html.hudStill`
+  (css/hud4.css end): particles hidden, looping decoration `animation:none`, state cues keep their static look (low HP red,
+  regen outline, ult ready edge + READY, selected card), one-shot feedback (card pop / draw / use) still plays. Running
+  animations 94 → 0. A/B in the fight, on vs off: 16.48 → 12.95 ms a frame (−3.5 ± 1.0 ms; most pairs −2.3 to −3.4 ms).
 - Draws in the fight (before the upstream batching below): players ≈ 240 of ~730 (class-look sprites and ribbons, cloth),
   30 `prop_crate`, 131 unnamed MeshStandard group pieces.
 

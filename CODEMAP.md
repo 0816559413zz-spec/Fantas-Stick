@@ -440,8 +440,8 @@ PBLOB:74 PCEL:75 FLAME_STYLE:76 PTIME:77 NOISETEX:79 FLAMETEX_V1:85 FLAMETEX_V2:
 §249 เอฟเฟกต์รูปทรง: แฟลช / วงแหวน / โดม / รอยไหม้ / สายฟ้า / แสงชั่วคราว
 SHAPES_Q:250 SHAPES:250 FLASHL:250 LINES:250 LREQ:251 ringGeo:252 ringVGeo:253 arcGeo:254 domeGeo:255 fullGeo:256 discGeo:257 decalTex:258 FX:259 jag:279 SHB:293 _sbM:293 _sbQ:293 _sbE:293 _sbS:293 _sbC:293 SHB_GEO:294 _sbDecalMat:295 shbMat:296 shbMake:307 spawnShape:319 updateShapes:329 _cp:359 updateLights:360
 
-## js/31-camera.js (281) — กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy)
-yaw:2 pitch:2 lastPh:2 locked:2 CAMRS:3 SENS:4 saveSet:5 applySettings:6 camPos:14 camLook:14 overlayOpen:17 showPause:18 hidePause:19 MAPCAM:20 PLACE:22 placeKey:23 PLN:32 PLR:32 placeGeos:33 updatePlaceGhost:41 _aimD:65 rayTerr:67 aimFromCrosshair:73 AIMZ:106 WBY:106 CAM_FRAMES:110 CAM_FRAME:127 CAM_TRACK:127 _camFocus:128 _camAnchor:128 _camWant:128 cameraFrame:129 camRoomK:161 _camOB:173 camObsK:174 combatCam:185 combatCameraImpact:186 combatCameraCharge:190 combatCameraFrame:202 updateCamera:215 menuCamera:277
+## js/31-camera.js (282) — กล้องมุมหลังไหล่ (แบบ Hogwarts Legacy)
+yaw:2 pitch:2 lastPh:2 locked:2 CAMRS:3 SENS:4 saveSet:5 applySettings:6 camPos:15 camLook:15 overlayOpen:18 showPause:19 hidePause:20 MAPCAM:21 PLACE:23 placeKey:24 PLN:33 PLR:33 placeGeos:34 updatePlaceGhost:42 _aimD:66 rayTerr:68 aimFromCrosshair:74 AIMZ:107 WBY:107 CAM_FRAMES:111 CAM_FRAME:128 CAM_TRACK:128 _camFocus:129 _camAnchor:129 _camWant:129 cameraFrame:130 camRoomK:162 _camOB:174 camObsK:175 combatCam:186 combatCameraImpact:187 combatCameraCharge:191 combatCameraFrame:203 updateCamera:216 menuCamera:278
 
 ## js/32-stage.js (319) — เวทีเมนู/ล็อบบี้: ห้องโถงมืด แท่นวงเวททอง เทียนลอย (ฉากแยกจากแผนที่)
 stage:2 STAGE:5 STAGE_Y:6 stageSpots:58 stageChar:74 POSES:81 stageIdle:87
@@ -1002,4 +1002,4 @@ dvA:131 dvTg:132 dvB:133 dvCh:134 dvSl:135 dvSub:136 dvCol:137 devKeyOf:138 devR
 ## js/79-photo.js (105) — Photo mode (user 2026-11-23): promo shots of maps
 PH:6 PH_F:8 phStore:13 phBase:15 phShadowSize:18 phOn:19 phOff:20 photoFrame:28 photoPre:43 photoPost:46 phAdd:48 phGo:49 phWait:51 phSave:52 phShoot:57 photoCol:74 photoAct:88 photoSet:103 photoKey:104
 
-(123 files, 38891 lines)
+(123 files, 38892 lines)
