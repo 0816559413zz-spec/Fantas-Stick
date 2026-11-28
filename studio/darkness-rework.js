@@ -12,9 +12,11 @@ const DKR={
 // CANIM keys: [u, armR.x, armR.z, twist(+ = right shoulder leads), lean(+ fwd), armL.x, armL.z, roll, drop, ease]
 Object.assign(CANIM,{
   // Death Sentence: coil right with both hands gathered at the right hip (charge, trembling) -> unwind left, both hands flick out level -> hold -> settle
-  dk_sentence:{d:1.0,st:0,nc:1,tm:[.09,.32],k:[[.09,-.28,.12,-.5,.16,-.62,-.62,.05,-.09,'s'],[.31,-.34,.1,-.62,.2,-.7,-.66,.06,-.11,'s'],
-    [.39,-1.42,.5,.52,.2,-1.3,.6,-.04,-.08,'i'],[.53,-1.48,.66,.64,.18,-1.25,.82,-.05,-.07,'o'],[1,-.5,.15,.1,.04,-.3,.3,0,-.02,'s']],
+  dk_sentence:{d:1.0,st:0,nc:1,tm:[.09,.32],k:[[.09,.1,-.1,-.6,.14,-.5,-.95,.05,-.08,'s'],[.31,.12,-.12,-.7,.16,-.55,-1.05,.06,-.1,'s'],
+    [.39,-1.45,.3,.55,.18,-1.3,1.0,-.04,-.07,'i'],[.53,-1.5,.38,.62,.16,-1.25,1.15,-.05,-.06,'o'],[1,-.5,.15,.1,.04,-.3,.3,0,-.02,'s']],
     j:[[0,.2,.2,.7,-.1,.1,.12,-.12],[.09,.75,.6,.95,-.45,.15,.2,-.2],[.31,.85,.7,1.0,-.5,.18,.22,-.22],[.39,.55,.45,.35,-.3,.1,.2,-.2],[.53,.5,.42,.3,-.28,.1,.2,-.2],[1,.2,.2,.6,-.1,.1,.12,-.12]]},
+  // Flow Death Sentence: no charge, quick flick of both hands (same release shape)
+  dk_sentence_q:{d:.55,st:0,nc:1,k:[[.08,.1,-.1,-.6,.14,-.5,-.95,.05,-.08,'s'],[.2,-1.45,.3,.55,.18,-1.3,1.0,-.04,-.07,'i'],[.4,-1.5,.38,.62,.16,-1.25,1.15,-.05,-.06,'o'],[1,-.5,.15,.1,.04,-.3,.3,0,-.02,'s']]},
   // Nightfall lift: crouch, arms back -> step + plant, deep knees, arms low and out -> torso follows the sweep -> scoop both arms up, lean back -> settle
   dk_lift:{d:1.15,st:0,nc:1,k:[[.07,.45,-.25,-.3,0,.45,.25,0,-.06,'s'],[.17,-.35,-.55,.05,.02,-.35,.55,0,-.09,'i'],[.32,-.5,-1.05,.85,.02,-.45,1.0,-.06,-.08,'s'],
     [.4,-2.75,-.3,.2,-.22,-2.7,.3,0,.02,'o'],[.55,-2.8,-.25,.15,-.2,-2.75,.25,0,.02,'s'],[1,-.6,-.2,0,.05,-.5,.2,0,0,'s']],
@@ -86,7 +88,7 @@ function studioDarkRework(kind,me,home,foe,L){
   const look={...getLook(NET.myId),ws:-1,wn:0};
   const dummy=(name,x,z,v)=>{const k=2+(v%2),tl={...look,h:k,cl:k,hs:k},a=stDarkShiftStudent(root,tl,name,lookTint(tl));
     a.g.position.set(x,0,z);a.g.rotation.y=Math.PI;a.home=new THREE.Vector3(x,0,z);return a;};
-  const scythe=stCreateScythePreview(root,{wrap:'C',manual:true,scale:DKR_SCALE,trailPose:t=>bladeAt(t),trailWidth:1.2});
+  const scythe=stCreateScythePreview(root,{wrap:'C',manual:true,scale:DKR_SCALE,trailPose:t=>bladeAt(t),trailWidth:kind==='mark'?.28:1.2});
   scythe.pivot.name='Rework scythe';
   const sample={pos:new THREE.Vector3(),QB:new THREE.Quaternion(),act:0};
   const P=new THREE.Vector3(),Q=new THREE.Quaternion(),Q2=new THREE.Quaternion(),V=new THREE.Vector3(),V2=new THREE.Vector3();
@@ -102,20 +104,21 @@ function studioDarkRework(kind,me,home,foe,L){
     r.getWorldPosition(out);l.getWorldPosition(V2);out.lerp(V2,.5);return root.worldToLocal(out);};
 
   if(kind==='mark'){
-    const S=DKR.mark,target=live?null:dummy('Death Sentence target',.3,S.targetZ,0),showMark=target&&stDarkTargetMark(target.g),tint=target&&stDarkBodyTint(target);
+    // L.quick = Flow cast (no charge, fast flick) • L.flightOnly = the two side waves of the Flow cast (crescent only)
+    const quick=!!L?.quick,only=!!L?.flightOnly,S=quick||only?{...DKR.mark,wind:0,release:.07}:DKR.mark,target=live?null:dummy('Death Sentence target',.3,S.targetZ,0),showMark=target&&stDarkTargetMark(target.g),tint=target&&stDarkBodyTint(target);
     const strike=S.release-.03,sweepEnd=S.release+.09,over=sweepEnd+.1,back=over+.42;
-    const center=new THREE.Vector3(0,1.25,.15);
+    const center=new THREE.Vector3(0,1.0,0);
     bladeAt=t=>{
       const coil=ease(0,S.wind+.06,t),charge=ease(S.wind,strike,t);
-      let phi,tilt=.28,radius=2.75;
-      if(t<strike){phi=-1.95-.3*charge+.03*Math.sin(t*70)*charge;center.y=1.2+.12*charge;}
+      let phi,tilt=.28,radius=3.55;   // round 2 (user): shaft no longer through the body: pivot sits ~.7 m out
+      if(t<strike){phi=-2.2-.3*charge+.03*Math.sin(t*70)*charge;center.y=.95+.1*charge;}
       else if(t<sweepEnd){const f=(t-strike)/(sweepEnd-strike);phi=-2.25+3.75*f*f*(1.6-.6*f);tilt=.28-.38*f;center.y=1.3-.12*f;}
       else{const f=ease(sweepEnd,over,t);phi=1.5+.25*f;tilt=-.1;center.y=1.18;}
       dkrSweep(center,phi,radius,tilt,1,P,Q);
       if(coil<1){idleAt(0,0,V2,Q2);P.lerp(V2,1-coil);Q.slerp(Q2,1-coil);}
       const ret=ease(over,back,t);
       if(ret>0){idleAt(0,0,V2,Q2);P.lerp(V2,ret);P.y+=.5*Math.sin(Math.PI*ret);Q.slerp(Q2,ret);}
-      finish(P,Q);sample.act=ease(strike+.01,strike+.03,t)*(1-ease(sweepEnd,sweepEnd+.05,t));return sample;
+      finish(P,Q);sample.act=.6*ease(strike+.01,strike+.03,t)*(1-ease(sweepEnd-.02,sweepEnd+.03,t));return sample;
     };
     // charge: ink streaks spiral into the joined hands, a few white sparks late
     const streaks=dkrRibbons(root,'Sentence charge streaks',40,6,10);
@@ -134,11 +137,12 @@ function studioDarkRework(kind,me,home,foe,L){
     const sparks=new THREE.InstancedMesh(new THREE.OctahedronGeometry(1,0),new THREE.MeshBasicMaterial({color:0xf3f1ff,toneMapped:false}),14);
     sparks.frustumCulled=false;sparks.count=0;root.add(sparks);const leaf=new THREE.Object3D();
     const hand=new THREE.Vector3(),seg=new THREE.Vector3();
+    if(only)scythe.pivot.visible=false;
     update=(t,o)=>{
-      trigger(o,'dk_sentence',0,t);
+      if(!only)trigger(o,quick?'dk_sentence_q':'dk_sentence',0,t);
       // charge streaks
       if(o)handMid(o,hand);
-      const gather=ease(.04,S.wind+.05,t)*(1-ease(S.release-.02,S.release+.04,t));
+      const gather=quick||only?0:ease(.04,S.wind+.05,t)*(1-ease(S.release-.02,S.release+.04,t));
       for(let c=0;c<40;c++){
         const ph=dkrRnd(c),born=.06+ph*.26,life=.16+.06*dkrRnd(c+9),u=(t-born)/life;
         if(u<=0||u>=1||gather<=0){streaks.hide(c);continue;}
@@ -153,7 +157,7 @@ function studioDarkRework(kind,me,home,foe,L){
       }
       streaks.flush();
       let sc=0;
-      for(let i=0;i<14&&o;i++){const born=.2+dkrRnd(i+40)*.18,u=(t-born)/.09;if(u<0||u>1)continue;
+      for(let i=0;i<14&&o&&!quick&&!only;i++){const born=.2+dkrRnd(i+40)*.18,u=(t-born)/.09;if(u<0||u>1)continue;
         const a=dkrRnd(i+41)*6.283,r=.32*(1-u)+.05;leaf.position.set(hand.x+Math.cos(a)*r,hand.y+(dkrRnd(i+42)-.5)*.3,hand.z+Math.sin(a)*r);
         leaf.rotation.set(a,a*2,0);leaf.scale.set(.012,.05*(1-u)+.01,.012);leaf.updateMatrix();sparks.setMatrixAt(sc++,leaf.matrix);}
       sparks.count=sc;sparks.instanceMatrix.needsUpdate=true;
@@ -163,7 +167,7 @@ function studioDarkRework(kind,me,home,foe,L){
       if(flight.visible){
         const dz=Math.min(hitZ,start.z+fly*S.speed)+(age>0?1.2*(1-Math.exp(-age*9)):0);
         const pitch=L?.pitch||0;flight.position.set(0,start.y+(dz-start.z)*Math.sin(pitch),start.z+(dz-start.z)*Math.cos(pitch));flight.rotation.x=-pitch;
-        const grow=.45+.55*ease(0,.1,fly),W=S.width*grow,bow=S.bow*grow;
+        const grow=.45+.55*ease(0,.1,fly),W=S.width*.85*grow,bow=S.bow*grow;
         for(let i=0;i<ROWS;i++){
           const u=i/(ROWS-1),v=2*u-1,taper=(1-v*v)**.6,front=bow*(1-v*v);
           const tear=ease(.2,.8,.5+.5*Math.sin(v*23+t*31))*breakUp;
@@ -171,19 +175,20 @@ function studioDarkRework(kind,me,home,foe,L){
           for(let j=0;j<8;j++){
             const s=j/7,k=i*8+j,flick=.12*Math.sin(t*26-s*8+v*5)*s;
             // solid crescent band (first 40%), then thin wisps trailing from the middle
-            const thick=1.05*grow*taper,band=s<.4,q=band?s/.4:(s-.4)/.6;
-            const back=band?q*thick:thick+q*S.tail*grow*taper**1.6;
+            // round 2 (user: sharp and slender like the first wave): thin band with needle tips, short thin wisps
+            const thick=.36*grow*taper**1.7,band=s<.55,q=band?s/.55:(s-.55)/.45;
+            const back=band?q*thick:thick+q*1.1*grow*taper**2.4;
             sheet.positions.setXYZ(k,v*W*(1-.08*s),.05*Math.sin(v*7+t*18)*s+flick+.12*s*s,front-back);
             const tone=band?0:.05*q;
             sheet.colors.setXYZW(k,tone,tone,tone*1.2,op*(band?.97*ease(0,.12,taper):.6*(1-q)**1.3*taper));
           }
           for(let j=0;j<4;j++){
-            const s=j/3,k=i*4+j,h=.42*taper*grow;
+            const s=j/3,k=i*4+j,h=.14*taper**1.5*grow;
             lip.positions.setXYZ(k,v*W,(s*2-1)*h,front+.03-.12*Math.abs(s*2-1));
             lip.colors.setXYZW(k,0,0,0,op*taper*.97);
           }
           for(let j=0;j<2;j++){
-            const k=i*2+j,w=.035*taper;
+            const k=i*2+j,w=.018*taper;
             shine.positions.setXYZ(k,v*W*.94,(j?w:-w)+.01,front+.07);
             shine.colors.setXYZW(k,.93,.93,1,op*ease(.06,.3,taper)*.9);
           }
@@ -423,9 +428,9 @@ function studioDarkRework(kind,me,home,foe,L){
 }
 
 // ---------- live hooks (js/68-darkness-view.js) ----------
-function dkrLiveMarkWind(ev,o){   // Death Sentence charge: follow the caster until the wave leaves
-  if(ev.flow||ev.main===false)return false;
-  const root=darkViewRoot(ev,'Death Sentence (rework)'),L={root,o,pitch:0};
+function dkrLiveMarkWind(ev,o){   // Death Sentence charge: follow the caster until the wave leaves (Flow: quick flick)
+  if(ev.main===false)return false;
+  const root=darkViewRoot(ev,'Death Sentence (rework)'),L={root,o,pitch:0,quick:!!ev.flow};
   const fx=studioDarkRework('mark',null,null,null,L);
   const view={root,L,dkr:fx,live:{scythe:true,launch:false},wave:{blade:fx.blade},elapsed:0};
   if(o)o.darkMarkCast=view;
@@ -440,6 +445,13 @@ function dkrLiveMarkWind(ev,o){   // Death Sentence charge: follow the caster un
   return true;
 }
 function dkrLiveMarkLaunch(ev,o){
+  if(ev.flow&&!ev.main){   // Flow side waves: the same slender horizontal crescent, crescent only
+    const root=darkViewRoot(ev,'Death Sentence side wave');root.position.y-=0;root.rotation.set(0,Math.PI/2-ev.a,0);
+    const L={root,o,pitch:ev.pitch||0,flightOnly:true},fx=studioDarkRework('mark',null,null,null,L);fx.launch(0);
+    const view={root,L,dkr:fx,live:{launch:true},wave:{blade:null},id:ev.wave};darkWaveViews.set(ev.wave,view);
+    darkViewTemp(root,1.2,t=>fx.tick(t),()=>{darkWaveViews.delete(ev.wave);fx.dispose();});
+    return true;
+  }
   const view=o?.darkMarkCast;
   if(!view?.dkr||view.live.launch)return false;
   darkWorldAt(ev,view.root.position);view.root.position.y-=ev.h||0;view.root.rotation.set(0,Math.PI/2-ev.a,0);

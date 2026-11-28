@@ -12,8 +12,8 @@ const DARK_VEIL_PULL_CLEAR=1.8;
 // Nightfall marked rework (user 2026-11-28): orb pass-through slash -> reappear above the far side -> overhead slam. Shared with the view (studio/darkness-rework.js)
 const DARK_NF={launch:.14,hit:.28,appear:.50,raise:.66,slam:.84,end:1.1,top:3.4,back:1.7,passDmg:10,slamDmg:25,orbStart:.14,orbEnd:.50};
 const DARK_CHASE_T=DARK_NF;
-// lift (no mark): step 4 m (80 px) from .08 s, lift everyone within 60 px at .38 s: 4 m high (vz for g 22), stun 1 s (ends before landing)
-const DARK_LIFT={step:80,stepAt:.08,stepT:.12,at:.38,r:60,dmg:10,vz:Math.sqrt(2*22*4),stun:1};
+// lift (no mark): step 1.5 m (30 px, round 2: user said it went too far) from .08 s, lift everyone within 60 px at .38 s: 4 m high (vz for g 22), stun 1 s (ends before landing)
+const DARK_LIFT={step:30,stepAt:.08,stepT:.12,at:.38,r:60,dmg:10,vz:Math.sqrt(2*22*4),stun:1};
 // path in the cast frame (metres, +z toward the target, +x left); y = orb height above 1.1 m before 'appear'
 function darkNFRoute(D){
   const N=DARK_NF,V=(x,y,z)=>new THREE.Vector3(x,y,z);

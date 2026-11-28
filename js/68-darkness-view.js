@@ -821,8 +821,8 @@ function darknessEfx(ev){
     });
     return true;
   }
-  if(z==='darkmarkwind'){if(o)o.darkSwingAt=undefined;if(!dkrLiveMarkWind(ev,o))darkMarkWind(ev,o);return true;}   // rework 2026-11-28 (studio/darkness-rework.js); Flow 3-wave cast keeps the old view
-  if(z==='darkmarkcast'){if(!(ev.main&&!ev.flow&&dkrLiveMarkLaunch(ev,o)))darkMarkLaunch(ev,o);return true;}
+  if(z==='darkmarkwind'){if(o)o.darkSwingAt=undefined;if(!dkrLiveMarkWind(ev,o))darkMarkWind(ev,o);return true;}   // rework 2026-11-28 (studio/darkness-rework.js), Flow too (3 slender horizontal waves)
+  if(z==='darkmarkcast'){if(!dkrLiveMarkLaunch(ev,o))darkMarkLaunch(ev,o);return true;}
   if(z==='darkmarkhit'){darkMarkContact(ev);return true;}
   if(z==='darkdashcancel'){
     if(o?.darkDashFx){
