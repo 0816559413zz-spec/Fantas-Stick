@@ -485,8 +485,8 @@ function stCreateScythePreview(root,args,lifetime){
       if(!caster.fa){const bn=caster.g.getObjectByName('forearm_R'),hd=caster.g.getObjectByName('hand_R');if(bn&&hd){caster.fa={bn,rest:bn.quaternion.clone()};caster.g.updateWorldMatrix(true,true);hd.attach(tipBall);}}   // ปลายคทาติดมือโมเดล (ตามศอกที่งอ)
       if(caster.fa)caster.fa.bn.quaternion.copy(caster.fa.rest).multiply(_qb.setFromAxisAngle(new THREE.Vector3(1,0,0),-H.bd));}
     return H;};
-  let liveModel,forearm,spine,head;
-  const overlays=Array.from({length:3},()=>({bone:null,base:new THREE.Quaternion(),posed:new THREE.Quaternion()}));
+  let liveModel,forearm,spine,head,hips;
+  const overlays=Array.from({length:4},()=>({bone:null,base:new THREE.Quaternion(),posed:new THREE.Quaternion()}));
   const spineTurn=new THREE.Quaternion(),bodyWorld=new THREE.Quaternion(),boneParent=new THREE.Quaternion();
   const headWorld=new THREE.Quaternion(),headRest=new THREE.Quaternion(),aimWorld=new THREE.Quaternion();
   let headRestReady=false;
@@ -525,7 +525,7 @@ function stCreateScythePreview(root,args,lifetime){
     if(liveModel!==actor.fileModel){
       liveModel=actor.fileModel;
       forearm=liveModel?.getObjectByName('forearm_R');
-      spine=liveModel?.getObjectByName('spine');
+      spine=liveModel?.getObjectByName('spine');hips=liveModel?.getObjectByName('hips');
       head=liveModel?.getObjectByName('head');
       headRestReady=false;
     }
@@ -542,17 +542,26 @@ function stCreateScythePreview(root,args,lifetime){
     const turn=lerp(side*(-.83*current.load+.62*current.drive+.29*current.carry),
       old?old.side*(-.83*old.load+.62*old.drive+.29*old.carry):0,handoff);
     actor.armL.rotation.x-=.50*load+.96*drive-.28*carry;
-    actor.armL.rotation.z+=.28*load+.50*carry;
+    actor.armL.rotation.z+=.28*load+.95*carry;   // round 2 (user): both hands fling out wider on the swing
     const H=handState(T,side,old?handState(previous.clock,previous.side):null);
     actor.armR.quaternion.slerp(orientHand(H,actor.b.quaternion,handTurn),weight);
+    actor.armR.rotation.z-=.55*carry*weight;   // right hand flings out wider too
     if(!actor.rig)return;
     actor.b.getWorldQuaternion(bodyWorld);
     if(spine){
       const posed=saveBonePose(0,spine);
       spine.parent.getWorldQuaternion(boneParent).invert().multiply(bodyWorld);
-      spineTurn.setFromEuler(spineEuler.set(mixPose('pitch'),turn,mixPose('roll')));
+      // user 2026-11-28: with the new stance only the upper body leaning looked odd -> half the forward bend, the hips turn with the swing
+      spineTurn.setFromEuler(spineEuler.set(0,.65*turn,0));   // round 2 (user): no forward lean at all, only the twist
       spine.quaternion.premultiply(spineTurn.premultiply(boneParent).multiply(boneParent.invert()));
       posed.copy(spine.quaternion);
+    }
+    if(hips){
+      const posed=saveBonePose(3,hips);
+      hips.parent.getWorldQuaternion(boneParent).invert().multiply(bodyWorld);
+      spineTurn.setFromEuler(spineEuler.set(0,.45*turn*weight,0));
+      hips.quaternion.premultiply(spineTurn.premultiply(boneParent).multiply(boneParent.invert()));
+      posed.copy(hips.quaternion);
     }
     if(head){
       const posed=saveBonePose(1,head);

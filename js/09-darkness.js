@@ -13,7 +13,7 @@ const DARK_VEIL_PULL_CLEAR=1.8;
 const DARK_NF={launch:.14,hit:.28,appear:.50,raise:.66,slam:.84,end:1.1,top:3.4,back:1.7,passDmg:10,slamDmg:25,orbStart:.14,orbEnd:.50};
 const DARK_CHASE_T=DARK_NF;
 // lift (no mark): step 1.5 m (30 px, round 2: user said it went too far) from .08 s, lift everyone within 60 px at .38 s: 4 m high (vz for g 22), stun 1 s (ends before landing)
-const DARK_LIFT={step:30,stepAt:.08,stepT:.12,at:.38,r:60,dmg:10,vz:Math.sqrt(2*22*4),stun:1};
+const DARK_LIFT={step:160,stepAt:.08,stepT:.14,at:.38,r:60,dmg:10,vz:Math.sqrt(2*22*4),stun:.6};
 // path in the cast frame (metres, +z toward the target, +x left); y = orb height above 1.1 m before 'appear'
 function darkNFRoute(D){
   const N=DARK_NF,V=(x,y,z)=>new THREE.Vector3(x,y,z);
@@ -280,7 +280,7 @@ const DARK_CHASE=defSpell(DARKP,{id:'darkchase',n:'Nightfall',ic:'➶',role:'mob
       const L=DARK_LIFT,plain={a:aim.a};
       d.plainDash=null;d.chaseUntil=G.time+L.at+.12;
       darkEvent(p,'darkchaseplain',{range:L.step,duration:L.stepAt+L.stepT});
-      darkQueue(p,L.stepAt,()=>{p.dash=L.stepT;p.dashSp=L.step/L.stepT;p.dashX=Math.cos(aim.a);p.dashY=Math.sin(aim.a);d.plainDash=plain;});
+      if(L.step>0)darkQueue(p,L.stepAt,()=>{p.dash=L.stepT;p.dashSp=L.step/L.stepT;p.dashX=Math.cos(aim.a);p.dashY=Math.sin(aim.a);d.plainDash=plain;});
       darkQueue(p,L.at,()=>{
         const origin=plain.landing??p,oz=origin.z??p.z;
         for(const t of foesOf(p.team)){

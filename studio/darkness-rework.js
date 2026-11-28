@@ -240,7 +240,10 @@ function studioDarkRework(kind,me,home,foe,L){
       if(ret>0){idleAt(z,0,V2,Q2);P.lerp(V2,ret);Q.slerp(Q2,ret);}
       finish(P,Q);sample.act=ease(sweepA,sweepA+.02,t)*(1-ease(sweepB,sweepB+.05,t));return sample;
     };
-    const stepTrail=dkrRibbons(root,'Lift step shadow trail',5,22,7);
+    const stepTrail=dkrRibbons(root,'Lift step shadow trail',7,30,7);
+    // dash impact (user 2026-11-28): ink kick-up at the launch, speed streaks, splinters on arrival
+    const kick=stDarkMatter(root,'Lift dash kick-up',[{at:S.crouch,span:.04,count:46,spread:1.6,lift:1.1,height:.2,back:.8},{at:S.plant-.01,span:.05,count:40,spread:2.2,lift:.8,height:.15}],(at,out)=>out.set(0,0,at<S.plant-.02?0:S.step));
+    const streaks=dkrRibbons(root,'Lift dash speed streaks',10,2,8);
     const ground=new THREE.Group();ground.position.set(0,.06,plantZ);ground.rotation.x=-Math.PI/2;root.add(ground);
     const pressure=stDarkPressure(ground),shockL=new THREE.Group();shockL.position.z=.015;ground.add(shockL);const shock=stDarkPressure(shockL);
     const aura=new THREE.Mesh(new THREE.CircleGeometry(1,64),new THREE.MeshBasicMaterial({map:dkrDiscTex(),color:0x05040a,transparent:true,depthWrite:false,toneMapped:false}));
@@ -254,13 +257,17 @@ function studioDarkRework(kind,me,home,foe,L){
     update=(t,o)=>{
       trigger(o,'dk_lift',0,t);
       // step trail (vertical shadow sheet left along the path)
-      for(let c=0;c<5;c++)for(let i=0;i<22;i++){
-        const u=i/21,z=u*plantZ,born=lerp(S.crouch,S.plant,u),a=t-born,y=.15+c*.38;
-        const on=a>0?ease(0,.03,a)*(1-ease(.06,.42,a)):0,w=.2*(1-u*.4);
-        const sway=.08*Math.sin(u*9+c*2+t*14);
-        stepTrail.set(c,i,sway,y-w*.5,z-.25,sway,y+w*.5+.12*u,z-.25,0,0,0,on*(.55-.07*c)*ease(0,.15,u));
+      for(let c=0;c<7;c++)for(let i=0;i<30;i++){
+        const u=i/29,z=u*plantZ,born=lerp(S.crouch,S.plant,u),a=t-born,y=.1+c*.3;
+        const on=a>0?ease(0,.025,a)*(1-ease(.1,.55,a)):0,w=.34*(1-u*.3);
+        const sway=.1*Math.sin(u*9+c*2+t*14);
+        stepTrail.set(c,i,sway,y-w*.5,z-.25,sway,y+w*.5+.12*u,z-.25,0,0,0,on*(.85-.08*c)*ease(0,.1,u));
       }
       stepTrail.flush();
+      for(let c=0;c<10;c++){const ph=dkrRnd(c+60),born=S.crouch+ph*(S.plant-S.crouch),a=t-born,len=2.5+2*dkrRnd(c+61),x=(dkrRnd(c+62)-.5)*1.6,y=.3+dkrRnd(c+63)*1.6;
+        const head=Math.min(plantZ,(born-S.crouch)/(S.plant-S.crouch)*plantZ),on=a>0?ease(0,.02,a)*(1-ease(.05,.25,a)):0;
+        streaks.set(c,0,x,y,head-len,x,y,head,0,0,0,0);streaks.set(c,1,x,y+.04,head-len,x,y+.04,head,.05,.05,.06,on*.8);}
+      streaks.flush();kick(t);
       // floor impact: dark aura disc + two pressure rings + the circle rim
       const hit=t-S.plant;
       aura.visible=hit>0;aura.scale.setScalar(S.r*(.3+.7*ease(0,.22,hit)));aura.material.opacity=.88*ease(0,.05,hit)*(1-ease(.9,1.6,hit));   // round 2 (user): darker floor area
@@ -362,7 +369,7 @@ function studioDarkRework(kind,me,home,foe,L){
       trigger(o,F?'dk_flowland':'dk_slam',S.appear,t);
       ball(t);
       const orbOn=t>=S.launch&&t<S.appear;
-      if(o){if(!live)hideAvatar(o,orbOn);if(o.cloth&&t>S.appear-.03&&t<(F?S.appear+.05:land+.06))o.cloth.init=false;   // in the air: keep the cloak at its rest drape (sim would fly it up)   // teleport: restart the cloak so it does not fly up
+      if(o){hideAvatar(o,orbOn);   // user 2026-11-28: dark ball the whole way, the body shows only for the overhead slash (live too)if(o.cloth&&t>S.appear-.03&&t<(F?S.appear+.05:land+.06))o.cloth.init=false;   // in the air: keep the cloak at its rest drape (sim would fly it up)   // teleport: restart the cloak so it does not fly up
         bodyTint?.(t<S.appear?ease(.02,S.launch,t):1-ease(S.appear,S.appear+.2,t),1);}   // (strength, opacity)
       scythe.pivot.scale.setScalar(1-.3*ease(.1,S.launch+.05,t)*(1-ease(S.hit+.1,S.appear,t)));
       const old=F?1:1-ease(land+.3,land+.55,t);fadeOld(old);scythe.pivot.visible=old>.003;
