@@ -42,7 +42,8 @@ FXCODE.studio_class_stance=(_x,_y,_h,args,instance)=>{
       else if(a.a==='fire'||a.a==='hold')me.cd.basic=0;
     }
     inp.fire=fire;inp.sh=sh;
-    for(const a of acts)if(a.a==='move'&&t>=a.t&&t<a.t+(a.d||1)){inp.mx=a.mx||0;inp.my=a.my||0;}   // walk any direction (WASD), aim stays at the target
+    for(const a of acts)if(a.a==='move'&&t>=a.t&&t<a.t+(a.d||1)){inp.mx=a.mx||0;inp.my=a.my||0;}
+    for(const a of acts)if(a.a==='aimh'&&t>=a.t){inp.ah=a.h;if(a.dx!==undefined){inp.ax=inp.gx=me.x+a.dx;inp.ay=inp.gy=me.y+(a.dy||0);}}   // aim height (m) / aim point offset, e.g. shoot into the sky or at a wall   // walk any direction (WASD), aim stays at the target
     // during a seek / GIF export the studio does not run the game or pose the players: step the host and pose here
     preview?.pose(t);
     if(FXSTUDIO.seek){try{hostTick(STD);const base=makeSnap(),evl=EVL;EVL=[];onSnap(Object.assign({},base,{ev:evl}));const v=VIEW.cur;if(v)syncPlayers(v.P,v.mode,stVnow,STD);}catch(e){console.warn('stance tick',e);}}

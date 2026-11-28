@@ -27,7 +27,7 @@ function stormBasic(p,inp,dt,setCd){
   if(shP&&!SHIELD_OFF){if(p.stS)stormShieldBlast(p);else if(!(p.stCd>0)){p.stS={t:STORMV.shieldT,abs:0,bash:1};emit({k:'efx',z:'ston',x:p.x,y:p.y,h:p.z,id:p.id});}}
   p.bTg=0;
   if(p.sdome){if(p.sdome.ph===2&&inp.fire&&!prev)stormDomeFire(p);p.beam=0;return;}
-  if(p.slnT>0||p.stPulse>0){p.beam=0;return;}
+  if(p.slnT>0||p.stPulse>0||p.sdW>0){p.beam=0;return;}
   if(p.stStaff>0){p.beam=0;if(p.stWind>0){p.stWind-=dt;if(p.stWind<=0)stormWaveShoot(p);}else if(inp.fire&&p.cd.basic<=0){p.stWind=.13;p.stSide=-(p.stSide||1);emit({k:'efx',z:'sswing',x:Math.round(p.x),y:Math.round(p.y),h:p.z+1.2,n:p.stSide,id:p.id});setCd('basic',SIPH.v.cd);}return;}
   if(p.god>0){
     // อัลติ (ผู้ใช้ 2026-11-11): 1 คลิก = พุ่ง 40 + ข่วน 2 ที 15/15 ห่าง 0.2 วิ แล้วคูล 0.7 • ไม่มี Shock
@@ -117,6 +117,7 @@ function stormTick(p,dt){
     if(!p.alive||p.downed||p.stun>0||p.frz>0)p.stPulse=0;
     else if(p.stPulse<=0)stormPulse(p);
   }
+  if(p.sdW>0){p.sdW-=dt;if(!p.alive||p.downed||p.stun>0||p.frz>0)p.sdW=0;else if(p.sdW<=0){p.sdW=0;stormDomeLaunch(p);}}   // Storm Dome: short aim delay, then fire (user 2026-11-28)
   if(p.stMarkAim&&(G.time>=p.stMarkAim.until||p.stun>0||p.frz>0))p.stMarkAim=null;
   if(p.stStaff>0)p.stStaff-=dt;
   if(p.sorb){p.sorb.t-=dt;if(p.sorb.t<=0||p.sorb.n<=0){p.sorb=null;emit({k:'efx',z:'sorboff',x:p.x,y:p.y,h:p.z+1.8,id:p.id,g:p.god>0?1:0});}}
@@ -173,7 +174,7 @@ function updateStormWaveMarks(){
   }
 }
 // Keep the legacy ID and spell index for saved Storm kits.
-const STPULSE=defSpell(2,{id:'triplestrike',v:{cost:2,r:200,dmg:30,windup:.27,knock:125,shockT:.3},vn:{cost:'ใช้ stack',r:'รัศมี',dmg:'ดาเมจ',windup:'ท่าเตรียม (วิ)',knock:'แรงผลัก',shockT:'Shock (วิ)'},role:'control',n:'Thunderbomb',ic:'🌩️',cd:12,d:'ใช้ 2 stacks • ขดตัวแล้วระเบิดสายฟ้ารอบตัว รัศมี 200',fx:'30 ดาเมจ + Shock และผลักถอยเล็กน้อย',
+const STPULSE=defSpell(2,{id:'triplestrike',v:{cost:2,r:200,dmg:30,windup:.7,knock:125,shockT:.3},vn:{cost:'ใช้ stack',r:'รัศมี',dmg:'ดาเมจ',windup:'ท่าเตรียม (วิ)',knock:'แรงผลัก',shockT:'Shock (วิ)'},role:'control',n:'Thunderbomb',ic:'🌩️',cd:12,d:'ใช้ 2 stacks • ขดตัวแล้วระเบิดสายฟ้ารอบตัว รัศมี 200',fx:'30 ดาเมจ + Shock และผลักถอยเล็กน้อย',
   cast(p,S){if(!stSpend(p,S.v.cost))return false;p.stPulse=S.v.windup;}});
 function stormPulse(p){
   const V=STPULSE.v,g=p.god>0?1:0;

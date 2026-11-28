@@ -1,0 +1,54 @@
+{
+  "v": 1,
+  "desc": "Storm Dome shot into the air (2026-11-28 check)",
+  "tags": [
+    "stance",
+    "preview"
+  ],
+  "dur": 6.5,
+  "layers": [
+    {
+      "id": "anchor",
+      "t": "mesh",
+      "shape": "disc",
+      "mat": "black",
+      "op": 0,
+      "at": 0,
+      "life": 6.5
+    },
+    {
+      "id": "stance",
+      "t": "code",
+      "fn": "studio_class_stance",
+      "at": 0,
+      "life": 6.5,
+      "args": {
+        "layer": "anchor",
+        "cls": "storm",
+        "style": "a",
+        "run": [
+          99,
+          99
+        ],
+        "acts": [
+          {
+            "t": 0,
+            "a": "aimh",
+            "h": 10
+          },
+          {
+            "t": 0.4,
+            "a": "set",
+            "k": "lst",
+            "v": 4
+          },
+          {
+            "t": 0.5,
+            "a": "skill",
+            "id": "stormdome"
+          }
+        ]
+      }
+    }
+  ]
+}

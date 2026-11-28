@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 a = argparse.ArgumentParser()
 a.add_argument('fx'); a.add_argument('--times', required=True)
-a.add_argument('--cam', default='side'); a.add_argument('--dist', default='9'); a.add_argument('--lookh'); a.add_argument('--at', default='self', help='self (follows caster) | front (12 m ahead, fixed) | far')
+a.add_argument('--cam', default='side'); a.add_argument('--dist', default='9'); a.add_argument('--lookh'); a.add_argument('--map'); a.add_argument('--at', default='self', help='self (follows caster) | front (12 m ahead, fixed) | far')
 a.add_argument('--fps', type=float, default=20); a.add_argument('--name'); a.add_argument('--cols', type=int, default=4)
 a.add_argument('--to', type=float, help='GIF end time (default: last --times + 0.05)'); a.add_argument('--scale', type=float, default=.5); a.add_argument('--tries', type=int, default=3)
 A = a.parse_args()
@@ -15,8 +15,9 @@ times = [float(x) for x in A.times.split(',')]
 name = A.name or A.fx.replace('/', '_')
 t0, t1 = 0, A.to or max(times) + .05
 cmd = ['node', os.path.join(ROOT, 'tools', 'headless.js'), '--fx', A.fx, '--cam', A.cam, '--dist', str(A.dist), '--at', A.at,
-       '--gif', name, '--from', str(t0), '--to', str(t1), '--fps', str(A.fps), '--still-at', str(times[len(times)//2]), '--quiet', '--timeout', '120']
+       '--gif', name, '--from', str(t0), '--to', str(t1), '--fps', str(A.fps), '--still-at', str(times[len(times)//2]), '--quiet', '--timeout', str(int(90 + (t1 - t0) * A.fps * 1.2))]   # long clips need more time (8 s at 15 fps timed out at 120)
 if A.lookh: cmd += ['--lookh', str(A.lookh)]
+if A.map: cmd += ['--map', A.map]
 gif = os.path.join(ROOT, 'shots', name + '.gif')
 for i in range(A.tries):
     if os.path.exists(gif): os.remove(gif)

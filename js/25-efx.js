@@ -139,8 +139,9 @@ const an=a+rnd(-1.05,1.05),rr=R*rnd(0.55,1.05);PARTS.push({x:px+Math.cos(an)*rr,
         bolt(x,y,H+rnd(-.45,.45),x+Math.cos(a)*r,y+Math.sin(a)*r,H+rnd(-.85,.62),rnd(.33,.59),i%3===1?'#9fd8ff':0,.085,2);
       }break;}
     case 'stpulse':
-      stormReworkField(ev,true);
-      if(near){snd('zap',ev);shake(2.5);}break;
+      stormPulseBurst(ev);
+      if(near){snd('zap',ev);shake(3.2);}break;
+    case 'stdomeaim':stormDomeAim(ev);break;
     case 'stallymark':{
       const o=PM3.get(ev.id);
       if(o){o.caN=ev.ally?'storm_study_send':'storm_study_self';o.caT=0;o.cpT=0;}
@@ -149,8 +150,9 @@ const an=a+rnd(-1.05,1.05),rr=R*rnd(0.55,1.05);PARTS.push({x:px+Math.cos(an)*rr,
       break;}
     case 'stallyburst':stormAllyBranchFx(ev);if(near){snd('zap',ev);shake(2.2);}break;
     case 'stdomeshot':{
+      stormDomeMuzzle(ev,near);
       const g=new THREE.Group(),core=new THREE.Sprite(glowMat('#ffffff',2.4)),halo=new THREE.Sprite(glowMat('#ffe600',2.3));
-      core.scale.setScalar(.45);halo.scale.setScalar(1.45);g.add(halo,core);g.position.set(tx(x),H+GY(x,y),tz(y));scene.add(g);
+      core.scale.setScalar(.6);halo.scale.setScalar(1.9);g.add(halo,core);g.position.set(tx(x),H+GY(x,y),tz(y));scene.add(g);
       SBV.push({g,x,y,h:H,x2:ev.x2,y2:ev.y2,h2:ev.h2,t:0,max:ev.t,R:13});
       if(near)snd('whoosh',ev);
       break;}

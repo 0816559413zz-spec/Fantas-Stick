@@ -739,10 +739,15 @@ function readyStance(o,v,now,weight,nature,whip,whipWeight){
     const right=natureReadyEuler.set(lerp(-.13,.29,stride)-.025*sway,0,lerp(-.40,-.35,stride)+.034*sway);
     o.armR.quaternion.slerp(natureReadyArm.setFromEuler(right),rightWeight);
     const left=o.armL.rotation;
-    left.set(lerp(left.x,lerp(-.51,.16,stride)-.09*sway-.025*breath+.38*freeOut+.12*freeBack,weight),
-      lerp(left.y,lerp(-.68,.10,stride)+.08*sway+1.22*freeOut-.14*freeBack,weight),
-      lerp(left.z,lerp(.27,.31,stride)+.041*sway+.42*freeOut+.09*freeBack,weight));
-    o.readyElbowL=lerp(1.30+.04*breath,1.24-.095*sway,stride)-.48*freeOut+.06*freeBack;
+    // user 2026-11-28: the free (left) hand should live more, not sit glued: slow drift, bigger run swing, lags behind body turns
+    const ndt=clamp((now-(o.natT??now))/1000,.001,.05);o.natT=now;
+    let dy=o.g.rotation.y-(o.natYP??o.g.rotation.y);dy=Math.atan2(Math.sin(dy),Math.cos(dy));o.natYP=o.g.rotation.y;
+    o.natTurn=lerp(o.natTurn||0,clamp(dy/ndt,-6,6),1-Math.exp(-ndt*6));o.natLag=lerp(o.natLag||0,o.natTurn,1-Math.exp(-ndt*3.5));
+    const drift=Math.sin(now*.0011)*.6+Math.sin(now*.0023+1.3)*.4,drift2=Math.sin(now*.0017+.7),idle=1-stride*.6;
+    left.set(lerp(left.x,lerp(-.51,.16,stride)-.22*sway-.025*breath+.11*drift*idle+.38*freeOut+.12*freeBack,weight),
+      lerp(left.y,lerp(-.68,.10,stride)+.16*sway+.15*drift2*idle-.1*o.natLag+1.22*freeOut-.14*freeBack,weight),
+      lerp(left.z,lerp(.27,.31,stride)+.07*sway+.05*drift*idle-.035*o.natLag+.42*freeOut+.09*freeBack,weight));
+    o.readyElbowL=lerp(1.30+.04*breath+.12*drift2,1.24-.16*sway,stride)-.48*freeOut+.06*freeBack;
     o.readyElbowR=lerp(.28,.20,stride);
   }else if((stS=stanceOf(o))&&!stS.same){classStance(o,stS,v,now,weight,stride,step,forward,rise);return;
   }else{

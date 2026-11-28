@@ -146,10 +146,10 @@ defSpell(5,{id:'legion',role:'ult',n:'กองทัพวิญญาณ',ic:'
     emit({k:'efx',z:'legion',x:p.x,y:p.y,h:p.z+0.5,r:200});
   }});
 // สายฟ้า: ลูกสายฟ้าโดม (ต่อท้ายสุดเพื่อไม่ให้ลำดับ index ของคาถาสายอื่นเลื่อน — kit ที่บันทึกไว้ยังใช้ได้)
-const SDOME=defSpell(2,{id:'stormdome',v:{cost:4,godCost:3,range:600,speed:2000,r:120,time:2,tick:10,shockT:.3},vn:{cost:'ใช้ stack',godCost:'ใช้ stack ในร่างเทพ',range:'ระยะยิง',speed:'ความเร็วลูกสายฟ้า',r:'รัศมีโดม',time:'เวลาโดม (วิ)',tick:'ดาเมจทุก 0.5 วิ',shockT:'Shock ต่อจังหวะ (วิ)'},role:'control',n:'ลูกสายฟ้าโดม',ic:'🔵',cd:16,d:'ใช้ 4 stacks: ยิงลูกสายฟ้าตามที่เล็ง • โดนฉากหรือถึงสุดระยะจะกางโดมรัศมี 120 นาน 2 วิ',fx:'ทุก 0.5 วิ ทำ 10 ดาเมจ + Shock • ร่างเทพใช้ 3 stacks และยังใช้ท่าทุบเดิม',
+const SDOME=defSpell(2,{id:'stormdome',v:{cost:4,godCost:3,range:600,speed:2000,r:120,time:4.5,tick:10,shockT:.3,aim:.6},vn:{cost:'ใช้ stack',godCost:'ใช้ stack ในร่างเทพ',range:'ระยะยิง',speed:'ความเร็วลูกสายฟ้า',r:'รัศมีโดม',time:'เวลาโดม (วิ)',tick:'ดาเมจทุก 0.5 วิ',shockT:'Shock ต่อจังหวะ (วิ)'},role:'control',n:'ลูกสายฟ้าโดม',ic:'🔵',cd:16,d:'ใช้ 4 stacks: ยิงลูกสายฟ้าตามที่เล็ง • โดนฉากหรือถึงสุดระยะจะกางโดมรัศมี 120 นาน 2 วิ',fx:'ทุก 0.5 วิ ทำ 10 ดาเมจ + Shock • ร่างเทพใช้ 3 stacks และยังใช้ท่าทุบเดิม',
   cast(p,S){
     if(p.sdome||p.dfall||!stSpend(p,stormDomeCost(p)))return false;
-    if(!(p.god>0)){stormDomeLaunch(p);return;}
+    if(!(p.god>0)){p.sdW=SDOME.v.aim;emit({k:'efx',z:'stdomeaim',x:p.x,y:p.y,h:p.z,id:p.id,t:SDOME.v.aim});return;}   // aim, short delay, then the shot (user 2026-11-28)
     const g0=groundH(p.x,p.y,p.z),q=aimPoint(p,S.v.range);
     p.sdome={ph:1,t:.35,g0,H:g0+6,tx:q.x,ty:q.y,god:true};
     p.stS=null;p.hover=0;p.vz=0;p.beam=0;
@@ -164,7 +164,7 @@ function castSlot(p,i){
   if(S.toggle&&S.toggle(p)){emit({k:'sk',id:p.id,s:S.id+'_2'});return true;}   // กดครั้งที่ 2 (เช่น Tectonic Crush บีบ) → ท่าร่าย
   if(S.melee&&p.fmode===1)return false;
   if(p.cryo>0&&S.id!=='frostaura')return false;
-  if(p.grT>0||p.dfall||p.sdome||p.stMarkAim||p.slnT>0||p.stPulse>0)return false;
+  if(p.grT>0||p.dfall||p.sdome||p.stMarkAim||p.slnT>0||p.stPulse>0||p.sdW>0)return false;
   if(p.cd[k]>0||p.sil>0)return false;
   if(p.shieldOn&&p.pathIdx===LIGHTP)return false;   // Crystal Aegis: ระหว่างกางโล่ใช้สกิลไม่ได้
   if(G.mode==='br'&&!(p.unl&&p.unl[BRMAP[k]]))return false;

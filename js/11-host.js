@@ -9,7 +9,7 @@ function plist(){return G.order.map(id=>G.players[id]).filter(Boolean);}
 function cleanName(n){n=String(n||'').trim().slice(0,16);return n||'พ่อมด';}
 
 function freshStats(){
-  return {lst:0,emp:0,orbs:0,orbBlk:0,dch:3,stS:null,stCd:0,god:0,sdome:null,stMarkAim:null,stPulse:0,stAllyMark:null,slnT:0,sorb:null,beam:0,hp:PLAY.hp,maxHp:PLAY.hp,alive:true,downed:false,revive:0,respawn:0,vx:0,vy:0,ang:0,z:0,vz:0,jumpAir:false,airPose:0,fly:false,flyCd:0,root:0,
+  return {lst:0,emp:0,orbs:0,orbBlk:0,dch:3,stS:null,stCd:0,god:0,sdome:null,sdW:0,stMarkAim:null,stPulse:0,stAllyMark:null,slnT:0,sorb:null,beam:0,hp:PLAY.hp,maxHp:PLAY.hp,alive:true,downed:false,revive:0,respawn:0,vx:0,vy:0,ang:0,z:0,vz:0,jumpAir:false,airPose:0,fly:false,flyCd:0,root:0,
     cd:{basic:0,q:0,e:0,r:0,f:0,dodge:0},cdMax:{basic:1,q:1,e:1,r:1,f:1,dodge:1},
     shieldOn:false,shieldE:100,shieldT:0,shieldBroken:0,dash:0,dashX:0,dashY:0,inv:0,stun:0,burn:0,bt:0,burnSrc:null,
     ult:0,kills:0,deaths:0,dmgDealt:0,dmgTaken:0,lastHit:null,bo:null,picked:true,taken:[],dfall:null,

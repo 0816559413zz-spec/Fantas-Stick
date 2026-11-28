@@ -522,8 +522,9 @@ function shellPt(x,y,h,R,a,e){return [x+Math.cos(a)*R*Math.cos(e),y+Math.sin(a)*
 function stormReworkField(ev,pulse){
   const {x,y,h,r,g}=ev,life=pulse?.7:ev.t,height=pulse?.49:1;
   const col=g?'#32dfff':'#ffe515',bolt=g?tboltB:tbolt,R=r*S3;
-  const shell=new THREE.Mesh(new THREE.SphereGeometry(R,32,16,0,Math.PI*2,0,pulse||ev.floor?Math.PI/2:Math.PI),
-    new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:pulse?.15:.21,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+  // round 2 (user 2026-11-28): dome must read clearly -> fresnel rim shell (normal blending), thicker bolts, branches burst out on landing
+  const shell=new THREE.Mesh(new THREE.SphereGeometry(R,40,20,0,Math.PI*2,0,pulse||ev.floor?Math.PI/2:Math.PI),stShellMat(col));
+  if(!pulse){stBranches(x,y,.3,r*1.5,g?'#31e0ff':undefined,12,.09,.3);stRing(x,y,h+GY(x,y),r,col,life,.05);FX.flashLight(x,y,h+1,col,2.5,10,.25);}
   shell.position.set(tx(x),h+GY(x,y),tz(y));shell.scale.y=height;
   stFade(shell,pulse?.46:life);
   if(!pulse){
@@ -539,19 +540,19 @@ function stormReworkField(ev,pulse){
       const ph=h+Math.sin(e)*R*height*scale;
       if(outer){
         const q=a+.56,ex=x+Math.cos(q)*r*scale*Math.cos(e+.15),ey=y+Math.sin(q)*r*scale*Math.cos(e+.15);
-        bolt(px,py,ph,ex,ey,h+Math.sin(e+.15)*R*height*scale,.105,i%3===1?'#9fd8ff':0,.105,1);
+        bolt(px,py,ph,ex,ey,h+Math.sin(e+.15)*R*height*scale,.11,i%3===1?'#9fd8ff':0,.085,1);
       }else{
-        bolt(x,y,h+(pulse?1.2:.23),px,py,ph,.12,i%3===1?'#9fd8ff':0,.086,1);
+        bolt(x,y,h+(pulse?1.2:.23),px,py,ph,.12,i%3===1?'#9fd8ff':0,.075,1);
       }
     }
   });
 }
 function stormAllyBranchFx(ev){
   const {x,y,h,r,g}=ev,col=g?'#31e0ff':'#ffe327';
-  ring(x,y,col,r,.45,h+.06);
-  FX.flashSprite(x,y,h+.15,col,.75,4,.21,1.55);
+  stRing(x,y,h+GY(x,y),r,col,.5,.05);   // round 2: thin ring + small flash (the old glow ring + 4 m flash whited out the screen)
+  FX.flashSprite(x,y,h+.15,col,.3,1.2,.12,1.1);
   burst(x,y,col,22,170,.36,2.4,{h:h+.18,vh:[.5,4],g:2});
-  for(let i=0;i<15;i++){
+  for(let i=0;i<20;i++){   // round 2: more, thicker branches
     const a=i*2.39996,reach=r*(.78+.22*Math.cos(i*7.3)**2);
     const path=Array.from({length:17},(_,j)=>{
       const f=j/16, angle=a+Math.sin(j*2.2+i)*.15*f, px=x+Math.cos(angle)*reach*f,py=y+Math.sin(angle)*reach*f;
@@ -560,13 +561,13 @@ function stormAllyBranchFx(ev){
     for(let j=1;j<=9;j++)later(j*.034+i%3*.011,()=>{
       const f=j/9,to=Math.max(1,Math.round(16*f)),width=lerp(.7,.2,clamp((f-.4)/.6,0,1));
       const from=Math.max(0,to-Math.round(16*width));
-      tboltP(path.slice(from,to+1),.061,i%4===1?.09:.125,.035,i%4===1?'#9fd8ff':undefined).gk=.62;
+      tboltP(path.slice(from,to+1),.1,i%4===1?.07:.11,.05,i%4===1?'#9fd8ff':undefined).gk=.22;
     });
   }
 }
 function updateStormV(dt){
   for(let i=LATER.length-1;i>=0;i--){const L=LATER[i];L.t-=dt;if(L.t<=0){LATER.splice(i,1);try{vfxOnce(L.fn);}catch(e){}}}
-  stormWaveBurstTick(dt);updateBolts(dt);updateClaws(dt);updateClawFX(dt);stormMarkTick(dt);
+  stormWaveBurstTick(dt);stShellTick(dt);stRingTick(dt);updateBolts(dt);updateClaws(dt);updateClawFX(dt);stormMarkTick(dt);
   for(let i=STV.length-1;i>=0;i--){const v=STV[i];v.age+=dt;
     const fade=v.reveal?Math.max(0,(v.age-v.reveal)/(v.life-v.reveal)):v.age/v.life;
     v.m.material.opacity=v.op*Math.max(0,1-fade);
@@ -741,11 +742,13 @@ function stormAllyMarkGlyph(o,p,now){
   const glyph=o.stAllyGlyph,left=M[0];
   glyph.material=stormAllyMarkMats[M[1]?1:0];
   glyph.position.set(0,1.35,.39);
+  if(p.br){_tw.setFromMatrixColumn(cam.matrixWorld,0).multiplyScalar(.3);o.g.getWorldPosition(_ev).add(_tw);_ev.y+=1.35;o.g.worldToLocal(glyph.position.copy(_ev));}   // Burning number on the body too: mark moves right of it (the number moves left, js/35)
   glyph.visible=left>.45||Math.sin(now/42)>.05;
-  glyph.scale.setScalar(.8+Math.sin(now/(left<.7?42:105))*.07);
+  glyph.scale.setScalar(1.05+Math.sin(now/(left<.7?42:105))*.08);
 }
+const STBEAM={twist:.4,rz:-.47,pk:1};window.STBEAM=STBEAM;   // Storm beam pose (rz = arm swing that puts the hand on the aim line; tune with a studio probe)
 function stormFX(o,p,pz,now,dt){
-  stormAllyMarkGlyph(o,p,now);
+  stormAllyMarkGlyph(o,p,now);stormMarkArea(o,p,pz,now);
   if(p.stam?.[0]>0&&now>=(o.stAllySpark||0)){
     const [left,cyan]=p.stam,a=rnd(0,Math.PI*2),h=pz+.95;
     o.stAllySpark=now+(left<.45?42:87);
@@ -768,9 +771,11 @@ function stormFX(o,p,pz,now,dt){
   if(f&1&&!god){
     // ท่ายิงลำแสงแบบดวลในหนัง (Priori Incantatem): แขนขวายื่นตรงเกร็ง มือซ้ายจับข้อมือประคอง ตัวเอนหลังต้านแรง ไหล่ขวาออก ขากาง • สั่นตลอด
     {const tr=Math.sin(now/31)*0.06+Math.sin(now/53)*0.035;
-     if(stanceOf(o)?.fx==='stormArc'){o.stBmK=Math.min(1,(o.stBmK||0)+dt*9);const k=_cs(o.stBmK);   // user 2026-11-25: twist left so the right shoulder leads, right hand reaches far forward, held while firing; left arm back-down
-       o.armR.rotation.x=lerp(o.armR.rotation.x,-1.55+tr,k);o.armR.rotation.z=lerp(o.armR.rotation.z,.18+tr*.5,k);o.armL.rotation.x=lerp(o.armL.rotation.x,.7,k);o.armL.rotation.z=lerp(o.armL.rotation.z,.4,k);
-       o.b.rotation.y=lerp(o.b.rotation.y,.95+Math.sin(now/260)*.05,k);o.b.rotation.x-=.04*k;o.b.position.y-=.04*k;o.faW=Math.max(o.faW||0,0);o.readyElbowR=.02;}
+     if(stanceOf(o)?.fx==='stormArc'){o.stBmK=Math.min(1,(o.stBmK||0)+dt*9);const k=_cs(o.stBmK);   // user 2026-11-25: twist so the right shoulder leads, right hand reaches forward, held while firing; left arm back-down
+       // round 2 (user 2026-11-28): the hand points where you aim: smaller twist, arm swung back onto the aim line (STBEAM.rz measured), raised/lowered with the camera pitch
+       const aimP=p.id===NET.myId?clamp(pitch-.3,-.9,.9)*STBEAM.pk:0;
+       o.armR.rotation.x=lerp(o.armR.rotation.x,-1.35+aimP+tr,k);o.armR.rotation.z=lerp(o.armR.rotation.z,STBEAM.rz+tr*.5,k);o.armL.rotation.x=lerp(o.armL.rotation.x,.7,k);o.armL.rotation.z=lerp(o.armL.rotation.z,.4,k);
+       o.b.rotation.y=lerp(o.b.rotation.y,STBEAM.twist+Math.sin(now/260)*.04,k);o.b.rotation.x-=.04*k;o.b.position.y-=.04*k;o.faW=Math.max(o.faW||0,0);o.readyElbowR=.02;}
      else{o.armR.rotation.x=-1.5+tr;o.armR.rotation.z=-0.05+tr*0.5;o.armL.rotation.x=-1.3+tr;o.armL.rotation.z=-0.42;
       o.b.rotation.y=0.28+Math.sin(now/260)*0.08;o.b.rotation.x-=0.1+Math.sin(now/170)*0.03;o.b.position.y-=0.05;}   // ยิงลำค้าง: ตัวโยกต้านแรง ไม่นิ่ง
      if((o.vsp||0)<0.6){o.legs[1].rotation.x=-0.3;o.legs[0].rotation.x=0.25;o.legs[1].rotation.z=0.12;o.legs[0].rotation.z=-0.12;}}
@@ -952,4 +957,90 @@ function drawStormHud(x,y,M){
         for(let j=0;j<2;j++)if(Math.random()<0.45){const q=P[(Math.random()*P.length)|0],o=q[2]+rnd(-0.9,0.9)+(Math.random()<0.5?0:Math.PI);cx.strokeStyle=color('rgba(255,236,120,0.95)','rgba(109,233,255,0.95)');cx.lineWidth=1.4;cx.beginPath();cx.moveTo(q[0],q[1]);cx.lineTo(q[0]+Math.cos(o)*6+rnd(-2,2),q[1]+Math.sin(o)*6+rnd(-2,2));cx.lineTo(q[0]+Math.cos(o)*11+rnd(-2,2),q[1]+Math.sin(o)*11+rnd(-2,2));cx.stroke();}
         if(Math.random()<0.3){const q=P[(Math.random()*P.length)|0];cx.fillStyle='#ffffff';cx.beginPath();cx.arc(q[0]+rnd(-3,3),q[1]+rnd(-3,3),1.3,0,6.283);cx.fill();}}}}
   cx.restore();
+}
+
+// ---------- Storm round 2 (user 2026-11-28): Thunderbomb charge/burst, Storm Dome aim/muzzle/visible dome, Lightning Mark area ----------
+let STORM_BOMB_CAM=0;   // camera pulls back while my Thunderbomb charges + bursts (js/31 cameraFrame)
+function stShellMat(col){   // fresnel shell: bright rim, see-through middle, normal blending so it reads on bright maps (no white-out)
+  return new THREE.ShaderMaterial({uniforms:{col:{value:new THREE.Color(col)},op:{value:1}},transparent:true,depthWrite:false,side:THREE.DoubleSide,
+    vertexShader:'varying float vR;void main(){vec4 mv=modelViewMatrix*vec4(position,1.);vec3 n=normalize(normalMatrix*normal);vR=1.-abs(dot(n,normalize(-mv.xyz)));gl_Position=projectionMatrix*mv;}',
+    fragmentShader:'uniform vec3 col;uniform float op;varying float vR;void main(){float a=pow(vR,2.4)*.95+.05;gl_FragColor=vec4(mix(col*.55,col,vR),a*op);}'});
+}
+// lightning branches from a point (h0 m above the floor) outward to the radius, ending low over the floor; revealed tip-first
+function stBranches(x,y,h0,r,col,n,w,spread=.15){
+  for(let i=0;i<n;i++){
+    const a=i*2.39996+rnd(-.1,.1),reach=r*(.82+.22*Math.cos(i*7.3)**2);
+    const path=Array.from({length:17},(_,j)=>{const f=j/16,ang=a+Math.sin(j*2.2+i)*spread*f,px=x+Math.cos(ang)*reach*f,py=y+Math.sin(ang)*reach*f;
+      return new THREE.Vector3(tx(px),GY(px,py)+lerp(h0,.12,f**.7)+Math.sin(Math.PI*f)*(.25+(i%4)*.22),tz(py));});
+    for(let j=1;j<=8;j++)later(j*.026+i%3*.008,()=>{const f=j/8,to=Math.max(1,Math.round(16*f)),width=lerp(.75,.25,clamp((f-.4)/.6,0,1)),from=Math.max(0,to-Math.round(16*width));
+      tboltP(path.slice(from,to+1),.1,i%4===1?w*.7:w,.06,i%4===1?'#9fd8ff':col).gk=.22;});   // low glow: wide glowing bolts bloomed into white smoke
+  }
+}
+const STRING=[];
+function stRing(x,y,h,r,col,life,w=.09,shrink=0){   // thin floor ring, normal blending (the old ring() glow washed the screen white)
+  const m=new THREE.Mesh(new THREE.RingGeometry(1-w,1,96),new THREE.MeshBasicMaterial({color:col,transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false}));
+  m.rotation.x=-Math.PI/2;m.position.set(tx(x),h+.06,tz(y));m.scale.setScalar(r*S3);scene.add(m);STRING.push({m,life,t:0,r:r*S3,shrink});
+}
+function stRingTick(dt){for(let i=STRING.length-1;i>=0;i--){const R=STRING[i];R.t+=dt;const k=R.t/R.life;
+  if(k>=1){scene.remove(R.m);R.m.geometry.dispose();R.m.material.dispose();STRING.splice(i,1);continue;}
+  R.m.scale.setScalar(R.r*(R.shrink?1-R.shrink*k:.85+.15*Math.min(1,k*4)));R.m.material.opacity=.85*(1-k*k);}}
+const STSHELL=[];
+function stShell(x,y,h,R,col,grow,life,half=true,peak=1){
+  const m=new THREE.Mesh(new THREE.SphereGeometry(1,40,20,0,Math.PI*2,0,half?Math.PI/2:Math.PI),stShellMat(col));
+  m.position.set(tx(x),h+GY(x,y),tz(y));m.scale.setScalar(.01);scene.add(m);
+  STSHELL.push({m,R,grow,life,t:0,peak});
+  return m;
+}
+function stShellTick(dt){
+  for(let i=STSHELL.length-1;i>=0;i--){const s=STSHELL[i];s.t+=dt;
+    if(s.t>=s.life){scene.remove(s.m);s.m.geometry.dispose();s.m.material.dispose();STSHELL.splice(i,1);continue;}
+    s.m.scale.setScalar(s.R*(1-Math.pow(1-Math.min(1,s.t/s.grow),3)));s.m.material.uniforms.op.value=s.peak*(1-Math.max(0,(s.t-s.grow)/(s.life-s.grow))**1.5);}
+}
+function stormPulseCharge(ev){   // Thunderbomb wind-up (0.7 s): arcs pull into the chest, a ring on the floor closes in
+  const o=PM3.get(ev.id);if(!o)return;
+  const W=STPULSE.v.windup,g=!!ev.g,col=g?'#32dfff':'#ffe515',bolt=g?tboltB:tbolt;
+  if(ev.id===NET.myId)STORM_BOMB_CAM=performance.now()+(W+1.1)*1000;
+  for(let j=0;j*.05<W;j++)later(j*.05,()=>{
+    const q=simOf(o.g.getWorldPosition(_tw)),k=j*.05/W,R=lerp(70,22,k),gh=q.h;
+    for(let i=0;i<2+Math.floor(k*3);i++){const a=rnd(0,6.283),e=rnd(-.3,1.1);
+      bolt(q.x+Math.cos(a)*R,q.y+Math.sin(a)*R,gh+1.1+e*1.4,q.x+Math.cos(a)*5,q.y+Math.sin(a)*5,gh+1.15,.07,i%3?0:'#9fd8ff',.07+.05*k,0);}
+    if(j===0)stRing(q.x,q.y,gh+GY(q.x,q.y),STPULSE.v.r,col,W,.035,.85);
+    PARTS.push({x:q.x+rnd(-30,30),y:q.y+rnd(-30,30),h:gh+rnd(.2,2.2),vx:0,vy:0,vh:0,life:.25,max:.25,col:Math.random()<.5?'#fff6b0':col,size:rnd(2,3.5),g:0});
+  });
+}
+function stormPulseBurst(ev){   // Thunderbomb release: big branches out of the body to the edge, fresnel dome flash, floor ring, sparks
+  const {x,y,h,r,g}=ev,col=g?'#32dfff':'#ffe515',lift=Math.max(0,(h||0)-GY(x,y));
+  stBranches(x,y,1.15+lift,r*1.05,g?'#31e0ff':undefined,14,.1,.22);
+  stShell(x,y,h,r*S3,col,.12,.4,true,.55);
+  stRing(x,y,h+GY(x,y),r,col,.55,.05);stRing(x,y,h+GY(x,y),r*.55,'#fff6c0',.35,.06);
+  FX.flashLight(x,y,h+1.2,col,2.5,12,.22);
+  burst(x,y,col,40,r*2.2,.45,2.6,{h:h+1,vh:[.5,5],g:3});
+}
+function stormDomeAim(ev){   // Storm Dome: energy gathers in the right palm during the aim delay
+  const o=PM3.get(ev.id);if(!o)return;const T=ev.t||.32;
+  for(let j=0;j*.04<T;j++)later(j*.04,()=>{const hb=o.fileModel?.getObjectByName('hand_R');if(!hb)return;const q=simOf(hb.getWorldPosition(_tw)),k=j*.04/T;
+    for(let i=0;i<2+Math.floor(k*2);i++){const a=rnd(0,6.283),e=rnd(-1,1),R=lerp(34,8,k);tbolt(q.x+Math.cos(a)*R,q.y+Math.sin(a)*R,q.h+e*.8,q.x,q.y,q.h,.06,i?'#9fd8ff':0,.05+.04*k,0);}
+    FX.flashSprite(q.x,q.y,q.h,'#ffe600',.08,.3+.6*k,.06,1);
+    if(j%2===0)PARTS.push({x:q.x+rnd(-24,24),y:q.y+rnd(-24,24),h:q.h+rnd(-.5,.5),vx:0,vy:0,vh:0,life:.2,max:.2,col:'#fff6b0',size:rnd(1.5,2.5),g:0});});   // longer charge 0.6 s (user 2026-11-28 round 3)
+}
+function stormDomeMuzzle(ev,near){   // Storm Dome shot: hard muzzle blast — bolts fan forward, ring, sparks, light, kick
+  const {x,y,h}=ev,a=Math.atan2(ev.y2-y,ev.x2-x),pitch=Math.atan2(20*((ev.h2??h)-h),Math.hypot(ev.x2-x,ev.y2-y)||1);
+  for(let i=0;i<12;i++){const s=rnd(-.55,.55),L=rnd(30,75),e=pitch+rnd(-.4,.4);
+    tbolt(x+Math.cos(a)*10,y+Math.sin(a)*10,h,x+Math.cos(a+s)*L*Math.cos(e),y+Math.sin(a+s)*L*Math.cos(e),h+Math.sin(e)*L*S3,.11,i%3===1?'#9fd8ff':0,.13,1);}
+  FX.flashSprite(x+Math.cos(a)*14,y+Math.sin(a)*14,h,'#ffe600',.14,.9,.09,1.1);FX.flashLight(x,y,h,'#ffd23a',3,10,.18);
+  burst(x+Math.cos(a)*14,y+Math.sin(a)*14,'#ffe600',26,260,.3,2.4,{h,vh:[-1,2],g:0});
+  if(near&&ev.id===NET.myId)shake(3);
+}
+// Lightning Mark: a lightning ring runs round the marked player (~100 px), the glyph sits on the chest beside a Burning number
+function stormMarkArea(o,p,pz,now){
+  const M=p.stam;
+  if(!M){if(o.stArea)o.stArea.visible=false;return;}
+  const col=M[1]?'#41e9ff':'#ffe700',R=100;
+  if(!o.stArea){const m=new THREE.Mesh(new THREE.RingGeometry(R*S3-.07,R*S3+.07,96),new THREE.MeshBasicMaterial({color:col,transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false}));
+    m.rotation.x=-Math.PI/2;scene.add(m);o.stArea=m;}
+  const A=o.stArea,left=M[0];A.visible=true;A.material.color.set(col);
+  A.position.set(tx(p.x),pz+.07,tz(p.y));A.material.opacity=.45+.25*Math.sin(now/(left<.7?45:120));
+  if(now>=(o.stAreaT||0)){o.stAreaT=now+32;const fn=M[1]?tboltB:tbolt,sp=left<.7?5:3;
+    for(let k=0;k<3;k++){const a1=now/1000*sp+k*2.094,a0=a1-.55;
+      fn(p.x+Math.cos(a0)*R,p.y+Math.sin(a0)*R,pz-GY(p.x,p.y)+.25,p.x+Math.cos(a1)*R,p.y+Math.sin(a1)*R,pz-GY(p.x,p.y)+.25+rnd(0,.5),.08,0,.075,0);}}
 }

@@ -110,7 +110,8 @@ let AIMZ=0,WBY=null;
 // กล้องทุกสายใช้ชุดเดียวกัน; เลือกมุมพิเศษจาก snapshot จึงทำงานกับลูกห้องด้วย
 const CAM_FRAMES={
   base:{dist:4.7,h:2.05,side:0.25},flight:{dist:7,h:2.4,side:0.28},   // base: แบบเกม hero shooter มุมบุคคลที่ 3 (ผู้ใช้ 2026-11-06) ใกล้ขึ้น ตัวอยู่ ~37% จากซ้าย (เดิม 6.2/2.25/0.30)
-  colossus:{dist:14.5,h:4.4,side:0.34},airAim:{dist:6.6,h:2.5,side:0.29},
+  colossus:{dist:14.5,h:4.4,side:0.34},stormBomb:{dist:8.8,h:3.3,side:0.18},   // Thunderbomb charge + burst: pull back to see the whole radius (user 2026-11-28)
+airAim:{dist:6.6,h:2.5,side:0.29},
   kindle:{dist:6.4,h:2.5,side:0.31},   // ซูมออกนิด (เดิม 5)
   rail:{dist:5.4,h:2.2,side:0.3},
   earthBase:{dist:7,h:2.25,side:0,lift:2.4},earthRampage:{dist:9,h:4.1,side:0,lift:3},
@@ -130,6 +131,7 @@ const _camFocus=new THREE.Vector3(),_camAnchor=new THREE.Vector3(),_camWant=new 
 function cameraFrame(me){
   if(me.al){
     if(me.co>0)return CAM_FRAMES.colossus;
+    if(STORM_BOMB_CAM>performance.now())return CAM_FRAMES.stormBomb;
     if(me.lt?.[14]?.[0]>=3)return CAM_FRAMES.radianceStrike;
     if(me.lt?.[14]?.[0]===2)return CAM_FRAMES.radiance;
     if(getKit(me.id).path===DARKP){

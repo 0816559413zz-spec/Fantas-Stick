@@ -2187,6 +2187,17 @@
    "dur": 14.5,
    "n": 2
   },
+  "stance/nature_hand": {
+   "v": "2641a873",
+   "desc": "Nature free hand round 2 (user 2026-11-28): idle drift, bigger run swing",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 6,
+   "n": 2
+  },
   "stance/pyro_a": {
    "v": "0930c710",
    "desc": "Stance preview — pyro style a (idle breathing, short run, idle)",
@@ -2244,6 +2255,17 @@
    "dur": 7,
    "n": 2
   },
+  "stance/storm_check": {
+   "v": "4993d243",
+   "desc": "Storm round 2 check (2026-11-28): beam, Thunderbomb, Lightning Mark on self",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 11.5,
+   "n": 2
+  },
   "stance/storm_dash_echo": {
    "v": "45db24e6",
    "desc": "God Lightning option - Dash trail and delayed lightning echo",
@@ -2253,6 +2275,28 @@
     "preview"
    ],
    "dur": 1.65,
+   "n": 2
+  },
+  "stance/storm_dome_air": {
+   "v": "4921dcb5",
+   "desc": "Storm Dome shot into the air (2026-11-28 check)",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 6.5,
+   "n": 2
+  },
+  "stance/storm_dome_check": {
+   "v": "0f604ccd",
+   "desc": "Storm Dome round 2 check (2026-11-28): aim delay, muzzle blast, visible dome",
+   "pal": "",
+   "tags": [
+    "stance",
+    "preview"
+   ],
+   "dur": 6.5,
    "n": 2
   },
   "stance/storm_dome_rework": {
@@ -2278,14 +2322,14 @@
    "n": 2
   },
   "stance/storm_dome_wall": {
-   "v": "599c4b5d",
-   "desc": "Storm Dome study - lightning orb stops on a wall",
+   "v": "37d8ef2f",
+   "desc": "Storm Dome shot at a wall (2026-11-28 check, map=citytest)",
    "pal": "",
    "tags": [
     "stance",
     "preview"
    ],
-   "dur": 3.65,
+   "dur": 6.5,
    "n": 2
   },
   "stance/storm_g1": {

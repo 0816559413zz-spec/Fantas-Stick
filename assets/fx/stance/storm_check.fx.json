@@ -1,0 +1,70 @@
+{
+  "v": 1,
+  "desc": "Storm round 2 check (2026-11-28): beam, Thunderbomb, Lightning Mark on self",
+  "tags": [
+    "stance",
+    "preview"
+  ],
+  "dur": 11.5,
+  "layers": [
+    {
+      "id": "anchor",
+      "t": "mesh",
+      "shape": "disc",
+      "mat": "black",
+      "op": 0,
+      "at": 0,
+      "life": 11.5
+    },
+    {
+      "id": "stance",
+      "t": "code",
+      "fn": "studio_class_stance",
+      "at": 0,
+      "life": 11.5,
+      "args": {
+        "layer": "anchor",
+        "cls": "storm",
+        "style": "a",
+        "run": [
+          99,
+          99
+        ],
+        "acts": [
+          {
+            "t": 0.3,
+            "a": "hold",
+            "d": 0.8
+          },
+          {
+            "t": 1.4,
+            "a": "set",
+            "k": "lst",
+            "v": 4
+          },
+          {
+            "t": 1.5,
+            "a": "skill",
+            "id": "triplestrike"
+          },
+          {
+            "t": 3.4,
+            "a": "set",
+            "k": "lst",
+            "v": 4
+          },
+          {
+            "t": 3.5,
+            "a": "skill",
+            "id": "railgun"
+          },
+          {
+            "t": 3.65,
+            "a": "shield",
+            "d": 0.15
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -4,6 +4,7 @@
 - 2026-11-28 — **Stand on top of anything solid.** Jump onto walls, crates, towers, arches and other blocking objects and stand there. To keep players off something, map makers add a taller wall collider.
 - 2026-11-28 — **New setting: HUD animation on/off.** Settings > หน้าจอ (Display) > แอนิเมชัน HUD. Off stops the embers, auras and other looping effects on the full HUD, which makes big fights smoother (about 3 ms a frame in a 6v6 test). Low HP, ult ready and selected cards still show. On by default.
 - 2026-11-28 — **Smoother big team fights.** Less work per frame when many players fight at once: object positions, HUD line-of-sight checks, minimap, Nature plant HUD and the paint pass.
+- 2026-11-28 — Storm: beam hand points where you aim; Thunderbomb charges 0.7 s with the camera pulling back and bursts in lightning branches from the body (no white screen); Storm Dome charges 0.6 s, fires with a hard muzzle blast, lasts 4.5 s and reads clearly; Lightning Mark shows a lightning ring round the holder and sits beside Burning numbers. Nature's free hand moves more.
 - 2026-11-28 Performance: batch Wind Sonic Boom wing glints, skip them once the wings start dissolving, and preload the charging wings.
 
 - 2026-11-28 Performance: batch Storm class-look arcs, thin distant Pyro arm detail, reuse class looks across visibility changes, instance crates and barrels by tile and damage state, and reuse HUD text measurements across frames.
