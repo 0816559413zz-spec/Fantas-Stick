@@ -21,9 +21,15 @@ const DPOSE={
   slashF:[0.2,-0.14,-1.35, 0.7,  0.3, 0.6,  0.35,-0.7,  0.6,0.7, 0.08],      // ฟันตามแรงข้ามตัว
   stand:[0.05,-0.04,-0.35,-0.12, 0, 0.15,  0,0,         0.15,0.15, 0],       // ยืนปกติ (ปลายทางคืนท่าหลังถอยหลบ)
   // Storm (user 2026-11-25): dive hand-first - left palm open pointing forward, body low, legs spread wide, right arm back (gold-coated) • [11],[12] = leg spread R/L
-  zap:  [0.62,-0.2, 0.95,-0.5, -2.15,0.05, 0.3, 0.2,   0.35,0.3, 0, -0.55,0.55],
+  zap:  [0.62,-0.2, 0.95,-0.5, -2.15,0.05, 0.3, 0.2,   0.35,0.3, 0, -0.55,0.55],   // (old hand-first dive, kept for reference)
+  // Storm round 2 (user 2026-11-28: no hand forward, backward/side/ult dashes looked wrong): body keeps facing the aim, pose by travel direction
+  zapF: [0.55,-0.12, 0.95,-0.35, 0.9, 0.35,  0.55,-0.7,  0.5,1.1, 0, -0.08,0.08],   // forward: lean in, both arms trail back-down, lead knee up
+  zapB: [-0.22,-0.18,-0.45,-0.75,-0.45,0.75, -0.35,0.45, 0.9,0.4, 0, -0.2,0.2],    // backward: sit back low, arms out in front for balance, rear leg reaches back
+  zapS: [0.28,-0.16, 0.55,-0.95, 0.55,0.95,  0.15,-0.15, 0.6,0.6, 0.28, -0.55,0.55],// sideways: wide legs, arms spread low, lean into the move (roll sign = side)
+  bolt: [0.95, 0.55, 1.0,-0.15, 1.0, 0.15,   0.45,0.32,  0.2,0.3, 0, -0.04,0.04],  // God Lightning dash: stretched like a bolt, floating (y up), arms and legs swept back
+  boltB:[-0.55,0.5,-1.2,-0.35,-1.2,0.35,  -0.5,-0.3,  0.5,0.6, 0, -0.15,0.15],  // God Lightning backward: lean back, arms thrust forward, legs tucked forward
 };
-const DPT={rec:0.32,land:0.62,fallMax:0.9,zapHold:0.3,zapUp:0.38};   // Storm dash: hold the dive pose, then rise back   // เวลา: คืนท่าหลังพุ่ง • ลงท่าฮีโร่ • รอลงพื้นนานสุด
+const DPT={rec:0.32,land:0.62,fallMax:0.9,zapHold:0.12,zapUp:0.3};   // Storm dash: hold the dive pose, then rise back   // เวลา: คืนท่าหลังพุ่ง • ลงท่าฮีโร่ • รอลงพื้นนานสุด
 const _dpQ=new THREE.Quaternion(),_dpX=new THREE.Vector3(1,0,0),_dpP=new Array(11).fill(0);
 let STANCE_STORM_ZAP=true;   // Storm uses the zap dive dash
 function dpMix(A,B,f){const n=Math.max(A.length,B.length);_dpP.length=n;for(let i=0;i<n;i++)_dpP[i]=(A[i]??0)+((B[i]??0)-(A[i]??0))*f;return _dpP;}
@@ -39,7 +45,7 @@ function dpKnees(o,kr,kl){
 function dpStyle(p){
   if(p.wn&&p.wn[6]===2)return 'wind';
   if(p.fr&&(p.fr[3]&16))return 'slash';
-  if(getKit(p.id).path===2&&STANCE_STORM_ZAP)return 'zap';   // สายน้ำแข็งไม่มี Dash แบบพุ่ง (Shift = ไถล) → ds ระหว่าง Mirror Legion = ดาบเปิดอัลติ
+  if(getKit(p.id).path===2&&STANCE_STORM_ZAP)return p.sm&&(p.sm[3]&4)?'bolt':'zap';   // สายน้ำแข็งไม่มี Dash แบบพุ่ง (Shift = ไถล) → ds ระหว่าง Mirror Legion = ดาบเปิดอัลติ
   return 'run';
 }
 const DPDBG={pose:null};   // ดีบัก: WD.DPDBG.pose='hero' = ค้างท่านั้นทุกตัว (ตรวจท่านิ่ง ๆ)
@@ -62,9 +68,10 @@ function dashPose(o,p,dt,now){
   if(S.ph==='go'&&!p.ds){S.ph=S.st==='wind'?(air?'fall':'land'):'rec';S.t=0;}
   if(S.ph==='fall'&&(!air&&vy>-0.5||S.t>DPT.fallMax)){S.ph='land';S.t=0;}
   // ท่าตามช่วง
-  const base=S.back>0?DPOSE.back:DPOSE[S.st]||DPOSE.run;let P,w,legW=1;
+  const zapLike=S.st==='zap'||S.st==='bolt';
+  const base=zapLike?zapMix(S):S.back>0?DPOSE.back:DPOSE[S.st]||DPOSE.run;let P,w,legW=1;
   if(S.ph==='go'){S.w=Math.min(1,S.w+dt/0.05);w=S.w;P=S.st==='run'&&S.air>0.01&&!S.back?dpMix(base,DPOSE.tuck,S.air):base;}
-  else if(S.ph==='rec'&&S.st==='zap'){const H=DPT.zapHold,U=DPT.zapUp;P=base;w=S.w*(S.t<H?1:1-_cs(Math.min(1,(S.t-H)/U)));if(S.t>=H+U){o.dp=null;dpKnees(o,0,0);return;}}
+  else if(S.ph==='rec'&&zapLike){const H=DPT.zapHold,U=DPT.zapUp;P=base;w=S.w*(S.t<H?1:1-_cs(Math.min(1,(S.t-H)/U)));if(S.t>=H+U){o.dp=null;dpKnees(o,0,0);return;}}
   else if(S.ph==='rec'){const f=Math.min(1,S.t/DPT.rec),end=S.back>0?DPOSE.stand:S.st==='slash'?DPOSE.slashF:DPOSE.brake;
     P=dpMix(base,end,_cs(Math.min(1,f/(S.st==='slash'?0.3:0.4))));w=S.w*(f<0.4?1:1-_cs((f-0.4)/0.6));if(f>=1){o.dp=null;dpKnees(o,0,0);return;}}
   else if(S.ph==='fall'){P=dpMix(DPOSE.wind,DPOSE.fall,_cs(Math.min(1,S.t/0.22)));w=1;}
@@ -75,7 +82,16 @@ function dashPose(o,p,dt,now){
     w=f<0.55?1:1-_cs((f-0.55)/0.45);legW=S.sp>3?Math.max(0,1-S.t/0.18):1;}
   // สกิล/ยิงใหม่หลังพุ่งจบ → คืนแขนให้ท่าร่าย
   const newCast=S.ph!=='go'&&(o.cpT>0||o.caN&&o.caN!==S.caN);S.aw+=((newCast?0:1)-S.aw)*Math.min(1,dt*18);
-  dpApply(o,P,w,S.aw,legW,S.rel);
+  dpApply(o,P,w,S.aw,legW,zapLike?0:S.rel);   // Storm: no body turn to the travel direction (the pose shows the direction)
+}
+const _zpP=[];
+function zapMix(S){   // blend forward / backward / side poses by the travel angle (rel 0 = forward, + = to the left)
+  if(S.st==='bolt'){const rel=S.rel||0,c=Math.cos(rel),f=Math.max(0,c),b=Math.max(0,-c),sd=Math.abs(Math.sin(rel)),n=f+b+sd||1;   // god form: stretched bolt forward, leaning back with arms forward going backward; floats (y up)
+    for(let i=0;i<13;i++)_zpP[i]=(DPOSE.bolt[i]*f+DPOSE.boltB[i]*b+DPOSE.zapS[i]*sd)/n;_zpP[10]=.3*Math.sin(rel)/n;return _zpP;}
+  const rel=S.rel||0,c=Math.cos(rel),sn=Math.sin(rel),f=Math.max(0,c),b=Math.max(0,-c),sd=Math.abs(sn),n=f+b+sd||1;
+  for(let i=0;i<13;i++){let v=(DPOSE.zapF[i]*f+DPOSE.zapB[i]*b+DPOSE.zapS[i]*sd)/n;_zpP[i]=v;}
+  _zpP[10]=DPOSE.zapS[10]*sn/n;   // roll toward the side we move
+  return _zpP;
 }
 function dpApply(o,P,w,armW,legW,yaw){
   const R=o.armR.rotation,L=o.armL.rotation,b=o.b,aw=w*armW,lw=w*legW;

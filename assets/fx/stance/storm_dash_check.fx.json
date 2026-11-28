@@ -1,0 +1,93 @@
+{
+  "v": 1,
+  "desc": "Storm dashes round 2 (2026-11-28): forward, back, side, then God Lightning forward/back",
+  "tags": [
+    "stance",
+    "preview"
+  ],
+  "dur": 7.2,
+  "layers": [
+    {
+      "id": "anchor",
+      "t": "mesh",
+      "shape": "disc",
+      "mat": "black",
+      "op": 0,
+      "at": 0,
+      "life": 7.2
+    },
+    {
+      "id": "stance",
+      "t": "code",
+      "fn": "studio_class_stance",
+      "at": 0,
+      "life": 7.2,
+      "args": {
+        "layer": "anchor",
+        "cls": "storm",
+        "style": "a",
+        "run": [
+          99,
+          99
+        ],
+        "acts": [
+          {
+            "t": 0.3,
+            "a": "move",
+            "mx": 1,
+            "d": 0.4
+          },
+          {
+            "t": 0.4,
+            "a": "dash"
+          },
+          {
+            "t": 1.5,
+            "a": "move",
+            "mx": -1,
+            "d": 0.4
+          },
+          {
+            "t": 1.6,
+            "a": "dash"
+          },
+          {
+            "t": 2.7,
+            "a": "move",
+            "my": 1,
+            "d": 0.4
+          },
+          {
+            "t": 2.8,
+            "a": "dash"
+          },
+          {
+            "t": 3.6,
+            "a": "ult",
+            "id": "godlightning"
+          },
+          {
+            "t": 4.8,
+            "a": "move",
+            "mx": 1,
+            "d": 0.4
+          },
+          {
+            "t": 4.9,
+            "a": "dash"
+          },
+          {
+            "t": 6.0,
+            "a": "move",
+            "mx": -1,
+            "d": 0.4
+          },
+          {
+            "t": 6.1,
+            "a": "dash"
+          }
+        ]
+      }
+    }
+  ]
+}
